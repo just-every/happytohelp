@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 2,
+  "composition": {
+    "base": "base",
+    "family": "support",
+    "edition": "happytohelp",
+    "modules": [
+      "sendgrid-email"
+    ]
+  },
+  "repositories": {
+    "family": {
+      "repository": "runeditrun/support",
+      "commit": "7dbf0801c2bea000099e2c0222e57d67dc44de45"
+    },
+    "base": {
+      "repository": "runeditrun/base",
+      "commit": "1d3ce621240460baa029370b7ef001c4ec67930a"
+    }
+  },
+  "assemblyTool": {
+    "repository": "runeditrun/base",
+    "commit": "1d3ce621240460baa029370b7ef001c4ec67930a"
+  },
+  "descriptor": {
+    "schemaVersion": 2,
+    "base": "base",
+    "family": "support",
+    "edition": "happytohelp",
+    "modules": [
+      "sendgrid-email"
+    ],
+    "source": "editions/happytohelp",
+    "copies": [
+      {
+        "repository": "family",
+        "component": "support",
+        "source": "core/src/delivery.ts",
+        "target": "src/family/support/delivery.ts"
+      },
+      {
+        "repository": "base",
+        "component": "sendgrid-email",
+        "source": "modules/sendgrid-email/src",
+        "target": "src/modules/sendgrid-email"
+      },
+      {
+        "repository": "family",
+        "component": "support",
+        "source": "core/README.md",
+        "target": "composition/families/support/README.md"
+      },
+      {
+        "repository": "family",
+        "component": "support",
+        "source": "core/LICENSE",
+        "target": "composition/families/support/LICENSE"
+      },
+      {
+        "repository": "family",
+        "component": "support",
+        "source": "core/tests/delivery.test.ts",
+        "target": "tests/composition/support/delivery.test.ts"
+      },
+      {
+        "repository": "base",
+        "component": "sendgrid-email",
+        "source": "modules/sendgrid-email/README.md",
+        "target": "composition/modules/sendgrid-email/README.md"
+      },
+      {
+        "repository": "base",
+        "component": "sendgrid-email",
+        "source": "modules/sendgrid-email/LICENSE",
+        "target": "composition/modules/sendgrid-email/LICENSE"
+      },
+      {
+        "repository": "base",
+        "component": "sendgrid-email",
+        "source": "modules/sendgrid-email/tests",
+        "target": "tests/composition/sendgrid-email"
+      },
+      {
+        "repository": "family",
+        "component": "support",
+        "source": "core/test-components.mjs",
+        "target": "scripts/test-composition.mjs"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "deployment/health.mjs",
+        "target": "scripts/deployment/health.mjs"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "deployment/secret-json.mjs",
+        "target": "scripts/deployment/base-secret-json.mjs"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "schema/SEED.schema.json",
+        "target": "tools/seed-schema/SEED.schema.json"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "schema/json-schema.mjs",
+        "target": "tools/seed-schema/json-schema.mjs"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "schema/validate.mjs",
+        "target": "tools/seed-schema/validate.mjs"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "schema/RELEASE.schema.json",
+        "target": "tools/seed-schema/RELEASE.schema.json"
+      },
+      {
+        "repository": "family",
+        "component": "happytohelp",
+        "source": "editions/happytohelp/AGENTS.consumer.md",
+        "target": "AGENTS.md"
+      }
+    ]
+  },
+  "descriptorSha256": "402a37c425ea6274db93809c6af0909e0e2f38696eabd09eb17442b4fdddb651",
+  "familyManifestSha256": "0f406022b59d42069cb8bb39ef2e70241c69c32b56e7a8f9d62c57c1fceb2ae1",
+  "files": {
+    ".gitignore": {
+      "sha256": "2da26dfbb1cc878ddda1bd8cc2cca98ba37a8d48f5a2bf84cdcd84a1ad88ce8f",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/.gitignore"
+    },
+    "AGENTS.consumer.md": {
+      "sha256": "b08aba4ff2ac68a44150147546c1f3e4c0a5ab00312f00d4536009113f44f84d",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/AGENTS.consumer.md"
+    },
+    "AGENTS.md": {
+      "sha256": "b08aba4ff2ac68a44150147546c1f3e4c0a5ab00312f00d4536009113f44f84d",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/AGENTS.consumer.md"
+    },
+    "CONTRACT.md": {
+      "sha256": "454b3534229ba2c76490c1d8f4d8ec248111e29d8cf5ff5002db6dfb2896428f",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/CONTRACT.md"
+    },
+    "DESIGN.md": {
+      "sha256": "5f78e1c02e958291fd1b2c112c7a879aab231997772ef782edea0e49dde9c967",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/DESIGN.md"
+    },
+    "EXPERIENCE.md": {
+      "sha256": "aa4cac5beb6f1511fa1697eefeb48f5644391f907e4c863406732b7d0107e021",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/EXPERIENCE.md"
+    },
+    "HANDOVER.md": {
+      "sha256": "babb04bd4e158f1d925af3dd393bde9e9baca48aae2d18abe8d7b313b22bfb10",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/HANDOVER.md"
+    },
+    "PROVENANCE.md": {
+      "sha256": "5307566fb24afe2e3a73019c244927641a9744c36a82d54428570e366df1c177",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/PROVENANCE.md"
+    },
+    "README.md": {
+      "sha256": "16fc650cd4490135bc9c762be375ca19c8062bb188a528518ecb21e2490704e8",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/README.md"
+    },
+    "composition/families/support/LICENSE": {
+      "sha256": "2f5076ef027045b9e0e72df8aa61ca8551e54b1877d531656d6e7985b2c32324",
+      "mode": 420,
+      "component": "support",
+      "repository": "family",
+      "source": "core/LICENSE"
+    },
+    "composition/families/support/README.md": {
+      "sha256": "5218054f4172de38bd24ff803e100c4ce161af63d5edb87d65c05540c7b734e3",
+      "mode": 420,
+      "component": "support",
+      "repository": "family",
+      "source": "core/README.md"
+    },
+    "composition/modules/sendgrid-email/LICENSE": {
+      "sha256": "2f5076ef027045b9e0e72df8aa61ca8551e54b1877d531656d6e7985b2c32324",
+      "mode": 420,
+      "component": "sendgrid-email",
+      "repository": "base",
+      "source": "modules/sendgrid-email/LICENSE"
+    },
+    "composition/modules/sendgrid-email/README.md": {
+      "sha256": "8506c63b64103c761900917ac8011c46e7a54aae6f77fb399709f07cc85bc557",
+      "mode": 420,
+      "component": "sendgrid-email",
+      "repository": "base",
+      "source": "modules/sendgrid-email/README.md"
+    },
+    "migrations/0001_happytohelp.sql": {
+      "sha256": "5d2e9e1a8dc24a65a0e3aa1ef1d78016691303f31e4f02480e43796b4975d356",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/migrations/0001_happytohelp.sql"
+    },
+    "migrations/0002_attachment_chunks.sql": {
+      "sha256": "f5b662be50c5322a6260b6d54de331de07e06d3787830bacd94b4c157b226e80",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/migrations/0002_attachment_chunks.sql"
+    },
+    "migrations/0003_assignment_delivery_guards.sql": {
+      "sha256": "12985ea3dcc1f7e16e57ece5989540dadfe5f5c7d98a3e8e26bd2b9cce0b4bf2",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/migrations/0003_assignment_delivery_guards.sql"
+    },
+    "package.json": {
+      "sha256": "27e0a5ac28ec106d7126b89643418bbebdbb2a75b70eab634a4ebb5bb9c9f4c1",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/package.json"
+    },
+    "pnpm-lock.yaml": {
+      "sha256": "14c45583eb549c8a56ecdba39199c5b9d02e6fef729985e0ef3f46805fe03472",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/pnpm-lock.yaml"
+    },
+    "public/connections.svg": {
+      "sha256": "a6902b3ab6d5192c1e6759aee67c6d28cecd4b332a5266f0df64d4c475bc1ece",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/public/connections.svg"
+    },
+    "public/cutout-2-7d0a1bb755be.png": {
+      "sha256": "7d0a1bb755bef986efbc581ada96b32a48c944d8866dbf5c8265218d34b3b8a8",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/public/cutout-2-7d0a1bb755be.png"
+    },
+    "public/fonts/InterVariable.woff2": {
+      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/public/fonts/InterVariable.woff2"
+    },
+    "public/fonts/LICENSE.txt": {
+      "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/public/fonts/LICENSE.txt"
+    },
+    "public/requests.svg": {
+      "sha256": "2db7142646b68bb203d075e34893b3c31e37cca0de387464a19de215e14ae4bd",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/public/requests.svg"
+    },
+    "scripts/agent-README.md": {
+      "sha256": "ed64180b815034a05d251fb0085c75893f1674dc208c2d2dc954e269ad5c604b",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/agent-README.md"
+    },
+    "scripts/agent.py": {
+      "sha256": "e3fb667a00b7fd412b951651902160c0e51c4f18e78a764095824b5340514758",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/agent.py"
+    },
+    "scripts/agent_state.py": {
+      "sha256": "c3a9964bc2745c95204c7e1808b80a49fa697ebbc2b7b5cd16349117e6920cf2",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/agent_state.py"
+    },
+    "scripts/agent_transport.py": {
+      "sha256": "abc3553bd628ee21b8b85c0581274e8040b1934923531c603c1896ff8a5b74f6",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/agent_transport.py"
+    },
+    "scripts/agent_upload.py": {
+      "sha256": "2d70ecfc7fd7c89f78fe82584b71ee573bd7febddf2ac2f0447593ee3158b5db",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/agent_upload.py"
+    },
+    "scripts/deploy.mjs": {
+      "sha256": "34d1840fa246f7fbc4ea1e85dfe5a2ca249d51312fd0fe5913f08f4a822ce0be",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/deploy.mjs"
+    },
+    "scripts/deployment/base-secret-json.mjs": {
+      "sha256": "0aece11a11fd90ce43e65b7fccb9c4429de126311aa473f528fff059a0cbf343",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "deployment/secret-json.mjs"
+    },
+    "scripts/deployment/health.mjs": {
+      "sha256": "fdbed964e98c21323ac5df575888668e12154038b4e9d6fe6adb97b11f4d24f3",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "deployment/health.mjs"
+    },
+    "scripts/setup-deployment.md": {
+      "sha256": "4126484f58e7059f4ba75bd6271076233d88b9cb375c5e9e81415719693ce7eb",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/setup-deployment.md"
+    },
+    "scripts/setup-deployment.mjs": {
+      "sha256": "55008eb50d052c9fe4892a48b41cf6e1431839033377ee59019ab11f22e80477",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/setup-deployment.mjs"
+    },
+    "scripts/setup-local.mjs": {
+      "sha256": "02e8a95ee1d374b2545d5686b6b8d3819379780f3adcec29daa0c3527a312052",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/setup-local.mjs"
+    },
+    "scripts/setup.mjs": {
+      "sha256": "ac91974ddc01655d02d3437edbd1bc43403eeec504b72190d0919764dc6d7bad",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/setup.mjs"
+    },
+    "scripts/test-composition.mjs": {
+      "sha256": "3baba2295e3ac1e3a3fb3a0dfa6f8da29f4541a6aba7034974a7b9da9807fe0c",
+      "mode": 420,
+      "component": "support",
+      "repository": "family",
+      "source": "core/test-components.mjs"
+    },
+    "seed.json": {
+      "sha256": "ee451aee39282abdd2642ef27e062a072bcd4159eb03df0b4e41e24a796c426f",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/seed.json"
+    },
+    "src/backend/agent-events.ts": {
+      "sha256": "ed98e75b48d3a57b3e37f1e3f918be41dc8065c7d2407151fc8508e575b20e31",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/agent-events.ts"
+    },
+    "src/backend/agent-session.ts": {
+      "sha256": "d090d8d0cdc48832fb5eb7a57121a140604b923f92299ee971de2f858197084a",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/agent-session.ts"
+    },
+    "src/backend/attachments.ts": {
+      "sha256": "f3ea1d175e6c3926b9be36d908b1ff6fce8947147b190f96be52111effb0b78c",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/attachments.ts"
+    },
+    "src/backend/auth.ts": {
+      "sha256": "c49e1ecba22946aa9db6ecb3bf11a7e3e6ac130cf9aa4e4e125fd13083a784af",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/auth.ts"
+    },
+    "src/backend/index.ts": {
+      "sha256": "9e774df5fed6975a22b61f1f955c3760b4214311edb882a69316d814ec999cfc",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/index.ts"
+    },
+    "src/backend/mail.ts": {
+      "sha256": "7a0878dfa5d8f5746340ab388144256a83279e1f99943661d930337ea1106d00",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/mail.ts"
+    },
+    "src/backend/operator-jobs.ts": {
+      "sha256": "324b1ee7c58ca3e1500be79f8c71f78c95ecca00841e784345bc4dbf5a24a28b",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/operator-jobs.ts"
+    },
+    "src/backend/operator-records.ts": {
+      "sha256": "982d361df4ec3bcf8a614c0fec4b8e64057418a727b513721c0bed1ee11d20ef",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/operator-records.ts"
+    },
+    "src/backend/security.ts": {
+      "sha256": "d7ed104b3f8bce294631b186e3688ecbdc45c55e87ea2905ce86375fa8513010",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/security.ts"
+    },
+    "src/backend/types.ts": {
+      "sha256": "6024f7fe74148dfc9689cc8b741772812b16c79f5bbbdcab380ccbe747bce903",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/types.ts"
+    },
+    "src/backend/views.ts": {
+      "sha256": "0c93af3313a5b79da6e14b9be2d922b709819fe7e9841efa9ba64c9af47f5c02",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/backend/views.ts"
+    },
+    "src/family/support/delivery.ts": {
+      "sha256": "18a809d2329da4a5b01c4acb9f195dcad4dfb239a01ee905a0bc32eb2b954fed",
+      "mode": 420,
+      "component": "support",
+      "repository": "family",
+      "source": "core/src/delivery.ts"
+    },
+    "src/modules/sendgrid-email/sender.ts": {
+      "sha256": "b634aeb26863fbd7d41d406fb1d76aa806936f18dfbe5fa75e7759aed734d171",
+      "mode": 420,
+      "component": "sendgrid-email",
+      "repository": "base",
+      "source": "modules/sendgrid-email/src/sender.ts"
+    },
+    "src/routeTree.gen.ts": {
+      "sha256": "f4a843c61899ede2abbc4a7153e6a00557765f737b724b152463c533c4e0ddb0",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/routeTree.gen.ts"
+    },
+    "src/router.tsx": {
+      "sha256": "8e28d274af3e0490efcc0de2537d6808583814cc1f18298f2d9516f30cdc1af4",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/router.tsx"
+    },
+    "src/routes/__root.tsx": {
+      "sha256": "304198248e3d51d1280f2893a4cc8d1eccbdb00ae8aa7b84ad4696a2d04f4b10",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/routes/__root.tsx"
+    },
+    "src/routes/index.tsx": {
+      "sha256": "c373d3ec99da9e4cc9f357680761b2940ce867265f28e18eb8d35bb922975689",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/routes/index.tsx"
+    },
+    "src/server.ts": {
+      "sha256": "653266e955df1b1318bfbb5fa83a73cf7ef62653270f44f32b864beeeb661cf3",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/server.ts"
+    },
+    "src/ui/Auth.tsx": {
+      "sha256": "a201a56f78a0700c5f508d86dc32f02dbc3d93b2689a6614b4a84e0ecb5e377c",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/Auth.tsx"
+    },
+    "src/ui/Connections.tsx": {
+      "sha256": "1897afa34854a62fc72c0273b27893e5e31a5278068911ae30d943428fc82caa",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/Connections.tsx"
+    },
+    "src/ui/CreateRequest.tsx": {
+      "sha256": "1f02886dc1d134dc521a1dad8c8d8466be0cacfee3a6d140c3e97395b6d11f5d",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/CreateRequest.tsx"
+    },
+    "src/ui/Desk.tsx": {
+      "sha256": "cef609a6d1776d14879c02e8b30215ccca53aee1592f2ff630a310431fb5154d",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/Desk.tsx"
+    },
+    "src/ui/ReplyReview.tsx": {
+      "sha256": "6f0e513749235944796fe030ced9b3fc868832cae95301a8c39404fd85c99b6e",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/ReplyReview.tsx"
+    },
+    "src/ui/RequestDetail.tsx": {
+      "sha256": "12b7945b06808b5c2555f266104e30b23578d050bcd13869f6996a1f55039aab",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/RequestDetail.tsx"
+    },
+    "src/ui/api.ts": {
+      "sha256": "40d7846cc3474d616d87e2fbc4d030df1fe6258d0e4483e21e5f9cbd7452e0eb",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/api.ts"
+    },
+    "src/ui/styles.css": {
+      "sha256": "a4506bd82380cea1799f359a4249f59bd92974c0da3d5bb8f4410c3d6aacd1ef",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/styles.css"
+    },
+    "src/ui/types.ts": {
+      "sha256": "75ceef96416c054936b453bb1aa99f9e3d6fb25cad55dfb78a08d7d5e9112608",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/types.ts"
+    },
+    "src/ui/useDesk.ts": {
+      "sha256": "fe19fb9fecdd6b07217f4ca06d9bb0c66307851cafe7b0f64affbb5ae05958b1",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/src/ui/useDesk.ts"
+    },
+    "tests/backend.test.mjs": {
+      "sha256": "617f4a42160d19a23c59431255695eee129ce61041616db6844c0c25d4ddb3f5",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tests/backend.test.mjs"
+    },
+    "tests/browser-runtime.mjs": {
+      "sha256": "ed76c6003b76f653164c456cb0d1a2d9652b57e543692a2bcd7e93faeb916191",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tests/browser-runtime.mjs"
+    },
+    "tests/composition/sendgrid-email/sender.test.ts": {
+      "sha256": "eaeaeb80887503d1d2bb76500baaeeb8b7af81c8ee55318f8c7f6ec48bc4c102",
+      "mode": 420,
+      "component": "sendgrid-email",
+      "repository": "base",
+      "source": "modules/sendgrid-email/tests/sender.test.ts"
+    },
+    "tests/composition/support/delivery.test.ts": {
+      "sha256": "b687a5fee51758dbccf8a3e76efe62c263604f85f4d593a625fae7763125aa4f",
+      "mode": 420,
+      "component": "support",
+      "repository": "family",
+      "source": "core/tests/delivery.test.ts"
+    },
+    "tests/helper.test.mjs": {
+      "sha256": "5472283529e7c7d3c384ff78d0dd641eadf50d2d83f02300058cf251d8598936",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tests/helper.test.mjs"
+    },
+    "tests/helper_deployment.test.mjs": {
+      "sha256": "0b1fe2f0249993808a5ec3fff1361d33bd20389d40aa01e80c48ee3abf49b388",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tests/helper_deployment.test.mjs"
+    },
+    "tests/helper_live.py": {
+      "sha256": "d0ee23338e028542106c8bd8b2c8b88cacaffb19823e2c5a91aaf97852340a3b",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tests/helper_live.py"
+    },
+    "tests/helper_protocol.py": {
+      "sha256": "2681761058e96d0b30b5c0c2d4bd7d313dceb6dbbe45428d6e27fcd909a992d7",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tests/helper_protocol.py"
+    },
+    "tools/seed-schema/RELEASE.schema.json": {
+      "sha256": "04c0bf1dbb4edbcd5b11f332ed860931929126309706975275ee60371281e900",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "schema/RELEASE.schema.json"
+    },
+    "tools/seed-schema/SEED.schema.json": {
+      "sha256": "90acf2cef301c8989b6c02ecc90cd3173225c39a5b19e8fd66ede134097f3861",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "schema/SEED.schema.json"
+    },
+    "tools/seed-schema/json-schema.mjs": {
+      "sha256": "0e6da2cc7cf0f929cec082907ca6b52e05d7eadd3f715181d9f081af37b8f3e7",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "schema/json-schema.mjs"
+    },
+    "tools/seed-schema/validate.mjs": {
+      "sha256": "db84d7671a68f697d6a97c9ae2e28f6b5d93a6c45c8e25c9551064c5dd09f617",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "schema/validate.mjs"
+    },
+    "tsconfig.json": {
+      "sha256": "c4cee1e2c6a9d7dfa99047eddac329319d0efdbb23863621489c65d8f5614f32",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/tsconfig.json"
+    },
+    "verification/pilot-20260912/README.md": {
+      "sha256": "3e8cf51fc162cf9ace049c6c44e11e6a33333ec16c5fbe3bd54c32f12970f038",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/README.md"
+    },
+    "verification/pilot-20260912/deployment-first.json": {
+      "sha256": "319cff289a09448739f67760283994ab9d51ba909f4a8372352ddf6d47dc91f6",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/deployment-first.json"
+    },
+    "verification/pilot-20260912/deployment-second.json": {
+      "sha256": "e746ab60f95b1571a563596202c1c93692ae3ba035c0e88f723c1ccd88da846d",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/deployment-second.json"
+    },
+    "verification/pilot-20260912/desktop-investigation.png": {
+      "sha256": "cc86db793f886fb6755178f38332a31a5b7b3c8ce4d1ad1ebbeab7d183c44cd5",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/desktop-investigation.png"
+    },
+    "verification/pilot-20260912/desktop-reply.png": {
+      "sha256": "10e17e2b40475d446b5a3d852cc01692cb51498e4d3228b02c90d07a8d7ffd4c",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/desktop-reply.png"
+    },
+    "verification/pilot-20260912/mobile.png": {
+      "sha256": "4bfdbbb53c65c8c164492bbfd3a7135b98e911fd761885cdedc376a8ecf9a706",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/mobile.png"
+    },
+    "verification/pilot-20260912/question-and-evidence.png": {
+      "sha256": "af13bf07526374927ac1a804d4c18f94b62ca4e85851504f3fcfc7473c239a03",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/question-and-evidence.png"
+    },
+    "verification/pilot-20260912/receipt.json": {
+      "sha256": "8b3c51f7b52beb8e4080dcf152fc1ca9af46df334339182a178b1af1f518c691",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/receipt.json"
+    },
+    "verification/pilot-20260912/verify.log": {
+      "sha256": "4c20a6b16bea3ddc50a5984669fa6edcff37abee2d901725cc957da11a3525f7",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/verification/pilot-20260912/verify.log"
+    },
+    "vite.config.ts": {
+      "sha256": "9a44b58add2ae6b6f5fd97b63f3b023ab21d6b3d3a681d33411c360c18beec26",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/vite.config.ts"
+    },
+    "wrangler.jsonc": {
+      "sha256": "51d1fa627649e456296d899f99b750c339a1dbbc147ee74c8136d458a51d0bbe",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/wrangler.jsonc"
+    }
+  }
+}

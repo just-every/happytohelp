@@ -1,5 +1,10 @@
 # HappyToHelp
 
+See [OPERATIONS.md](OPERATIONS.md) for command effects and prerequisites; run
+`node scripts/operations.mjs describe` from an exported edition to inspect them.
+
+Read [first-release acceptance](ACCEPTANCE.md) for purpose, unmet release obligations, preserved requirements and the evidence decision rule.
+
 An owner-operated support desk for resolving requests with agents that have real
 access to your workspaces. Delegate a bounded instruction, follow progress,
 answer questions, and review the evidence of what happened.

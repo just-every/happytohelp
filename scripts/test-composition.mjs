@@ -8,6 +8,7 @@ const base = process.env.RER_BASE_REPO;
 if (!consumer && !base) throw new Error('Set RER_BASE_REPO to the Base checkout pinned by family.json.');
 const components = [
   ['support', 'core', 'src/family/support'],
+  ['support-intake', 'modules/support-intake', 'src/modules/support-intake'],
   ['support-email', 'modules/support-email', 'src/modules/support-email'],
   ['sendgrid-email', base ? resolve(base, 'modules/sendgrid-email') : '', 'src/modules/sendgrid-email'],
 ];

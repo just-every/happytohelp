@@ -11,16 +11,16 @@
   "repositories": {
     "family": {
       "repository": "runeditrun/support",
-      "commit": "7dbf0801c2bea000099e2c0222e57d67dc44de45"
+      "commit": "a224851dd8ea5e84b3aed25c1914aab21f968d63"
     },
     "base": {
       "repository": "runeditrun/base",
-      "commit": "1d3ce621240460baa029370b7ef001c4ec67930a"
+      "commit": "bc27ecf55693a68bfa7e8a6aba9fe3ce8883bcfe"
     }
   },
   "assemblyTool": {
     "repository": "runeditrun/base",
-    "commit": "1d3ce621240460baa029370b7ef001c4ec67930a"
+    "commit": "bc27ecf55693a68bfa7e8a6aba9fe3ce8883bcfe"
   },
   "descriptor": {
     "schemaVersion": 2,
@@ -127,11 +127,17 @@
         "component": "happytohelp",
         "source": "editions/happytohelp/AGENTS.consumer.md",
         "target": "AGENTS.md"
+      },
+      {
+        "repository": "base",
+        "component": "base",
+        "source": "operations/operations.mjs",
+        "target": "scripts/operations.mjs"
       }
     ]
   },
-  "descriptorSha256": "402a37c425ea6274db93809c6af0909e0e2f38696eabd09eb17442b4fdddb651",
-  "familyManifestSha256": "0f406022b59d42069cb8bb39ef2e70241c69c32b56e7a8f9d62c57c1fceb2ae1",
+  "descriptorSha256": "bc5e1f5c0f5fadf900ccd4975b1acd975e34b1340b33fadbaf99e274634b4f1e",
+  "familyManifestSha256": "129f1a75122dac0fb9d1aeb6fc20e15d5e6cced02724db4e9a630e048de41690",
   "files": {
     ".gitignore": {
       "sha256": "2da26dfbb1cc878ddda1bd8cc2cca98ba37a8d48f5a2bf84cdcd84a1ad88ce8f",
@@ -139,6 +145,13 @@
       "component": "happytohelp",
       "repository": "family",
       "source": "editions/happytohelp/.gitignore"
+    },
+    "ACCEPTANCE.md": {
+      "sha256": "8a242987d6ac10046300c4e01e821a19a27374520fa1a588eb2f3dd602e12b30",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/ACCEPTANCE.md"
     },
     "AGENTS.consumer.md": {
       "sha256": "b08aba4ff2ac68a44150147546c1f3e4c0a5ab00312f00d4536009113f44f84d",
@@ -176,11 +189,25 @@
       "source": "editions/happytohelp/EXPERIENCE.md"
     },
     "HANDOVER.md": {
-      "sha256": "babb04bd4e158f1d925af3dd393bde9e9baca48aae2d18abe8d7b313b22bfb10",
+      "sha256": "0c0afc6b534a3cdb98af8beea6101bf1d147938c7e3116a5e8b3372d30c66100",
       "mode": 420,
       "component": "happytohelp",
       "repository": "family",
       "source": "editions/happytohelp/HANDOVER.md"
+    },
+    "OPERATIONS.json": {
+      "sha256": "187937bb15f169a3b3a5f7126e7ddcb44aad349e18e761445e92bc09434c1a72",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/OPERATIONS.json"
+    },
+    "OPERATIONS.md": {
+      "sha256": "70e7986b50c8fd8ee07d6c21d451f5eb909a80704b5fbd5755c4375f40d5c9a4",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/OPERATIONS.md"
     },
     "PROVENANCE.md": {
       "sha256": "5307566fb24afe2e3a73019c244927641a9744c36a82d54428570e366df1c177",
@@ -190,7 +217,7 @@
       "source": "editions/happytohelp/PROVENANCE.md"
     },
     "README.md": {
-      "sha256": "16fc650cd4490135bc9c762be375ca19c8062bb188a528518ecb21e2490704e8",
+      "sha256": "ea051df54cada58063123519a59abc56c245a2c1b10d370bceca1f919df126f8",
       "mode": 420,
       "component": "happytohelp",
       "repository": "family",
@@ -204,7 +231,7 @@
       "source": "core/LICENSE"
     },
     "composition/families/support/README.md": {
-      "sha256": "5218054f4172de38bd24ff803e100c4ce161af63d5edb87d65c05540c7b734e3",
+      "sha256": "e759edea52a414ef50e1d3005182693a4317131a5ff857fce8a5d4c2f89ab3ab",
       "mode": 420,
       "component": "support",
       "repository": "family",
@@ -350,6 +377,20 @@
       "repository": "base",
       "source": "deployment/health.mjs"
     },
+    "scripts/operations-config.mjs": {
+      "sha256": "83753e67cc661d3d96c94a9aa8dd0ef804f3fad0e3248cc3fb873901db4490ce",
+      "mode": 420,
+      "component": "happytohelp",
+      "repository": "family",
+      "source": "editions/happytohelp/scripts/operations-config.mjs"
+    },
+    "scripts/operations.mjs": {
+      "sha256": "89b1122e3d3c17d68893c89cd32432922971a17802ae0c59cc4e42882f3ce456",
+      "mode": 420,
+      "component": "base",
+      "repository": "base",
+      "source": "operations/operations.mjs"
+    },
     "scripts/setup-deployment.md": {
       "sha256": "4126484f58e7059f4ba75bd6271076233d88b9cb375c5e9e81415719693ce7eb",
       "mode": 420,
@@ -379,7 +420,7 @@
       "source": "editions/happytohelp/scripts/setup.mjs"
     },
     "scripts/test-composition.mjs": {
-      "sha256": "3baba2295e3ac1e3a3fb3a0dfa6f8da29f4541a6aba7034974a7b9da9807fe0c",
+      "sha256": "8fa82c889cf1ef8bb660d65ae511c11a0fa61e5d1d1a1b006597650a423a1a51",
       "mode": 420,
       "component": "support",
       "repository": "family",

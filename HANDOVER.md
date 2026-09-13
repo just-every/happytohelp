@@ -1,8 +1,12 @@
 # HappyToHelp handover
 
+Read [first-release acceptance](ACCEPTANCE.md) for purpose, unmet release obligations, preserved requirements and the evidence decision rule.
+
 Updated 12 September 2026. Canonical Support edition source for the new
-HappyToHelp product. The owner pilot is deployed and verified; source publication
-remains coordinated separately.
+HappyToHelp product. The bounded owner pilot is deployed and verified. Source publication completed
+from Support `7dbf0801c2bea000099e2c0222e57d67dc44de45` as generated
+HappyToHelp `72588bc59780f9c2e0a7a1e3d5cb567f9ddc65d6`; the deployed pilot
+revision below is a separate receipt.
 
 ## Implemented core journey
 
@@ -74,7 +78,7 @@ See PROVENANCE.md and DESIGN.md for exact source and design accounting.
 
 ## Remaining external evidence and scope
 
-Source publication remains coordinator work. The live pilot exercised the owner
+The live pilot exercised the owner
 account and configured SendGrid transport; workspace verification used only an
 isolated temporary folder. Business workspace mutations, inbox delivery, full
 accessibility and capacity audits remain unverified.

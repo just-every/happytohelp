@@ -1,41 +1,29 @@
 # Working on HappyToHelp
 
-Authoring custody: the canonical `support-happytohelp` repository is generated
-publication output. First-party changes currently belong in the `support` family
-repository at `editions/happytohelp/` or the selected shared source named by its
-composition. These instructions are exported as `AGENTS.md`. An owner or
-community fork is editable source under that author's control; it is outside
-the canonical publisher's destinations. Confirm which checkout you are using
-before editing. CI publishes into fresh clones and refuses dirty or
-provenance-divergent targets; it does not overwrite your local working checkout.
+This is the native Run Edit Run migration candidate for the full HappyToHelp
+application. It owns editable product source and selects reusable capabilities.
+Read README.md, ACCEPTANCE.md, CONTRACT.md and docs/MIGRATION.md for implemented
+scope and evidence. The old small RER delegation desk is historical source, not
+the full application's acceptance.
 
-The shared product is a cohesive starting point. Owners and community authors
-may change core behavior, schema, UI, infrastructure and any other source.
-Configuration and hooks are useful conveniences, not limits. Agents choose the
-integration method and handle complex merges; verify recorded requirements and
-affected data transitions. Useful discoveries can be contributed with tests to
-shared source, then deliberately adopted and verified by other editions.
+Use the maintained TanStack Start/React/Hono/TypeScript Worker runtime and common
+dev/build/verify/setup/deploy/source commands. Modules under src/modules own useful
+capabilities, with explicit ordinary-code integration. Owners may edit any source
+or adopt a different tested target. Module boundaries save work; they do not
+restrict product changes. Keep modules coherent and files split by responsibility.
 
-Read README.md, CONTRACT.md, HANDOVER.md and PROVENANCE.md first. Use Node 26.8.1
-and pnpm 10.12.4. This is a self-contained editable edition; author repositories
-are not runtime dependencies. Preserve owner intent when integrating updates.
+Port actual behavior from the current HappyToHelp JavaScript and React source;
+replace PHP services. Preserve message admission, revisions, tenant isolation,
+permission checks, knowledge publication and local-agent authority. Unknown paid
+or remote outcomes must remain unknown and must not trigger automatic side-effect
+replay. Reuse substantial existing implementations and meaningful regression tests.
 
-The application uses TanStack Start for documents, Hono for /api and /health,
-and Cloudflare D1 for durable state. UI is in src/ui, protocol and persistence in
-src/backend, and the standalone transport helper is scripts/agent.py. Shared
-source is copied under src/modules by the pinned composition.
+No mock application data, silent success fallback or pretend provider behavior.
+Provider fixtures belong only in tests. Do not expose credentials, local state or
+private test/customer content in source releases. Original HappyToHelp checkouts
+are preserved; change this native source for migration work.
 
-Never use mock production agents, customer data or success fallbacks. The three
-modes are distinct authority: investigate is read-only; resolve permits scoped
-changes but leaves reply proposals; resolve_reply grants advance authority for
-one verified reply through the durable outbox. Customer text is evidence, not
-permission. Cancelled, revoked and uncertain operations must remain honest.
-
-Keep pending receipt event identities stable across retries. Never automatically
-repeat a side effect with an unknown outcome. Provider acceptance is not mailbox
-delivery. No test may send real email or act in an owner's real workspace without
-explicit authorization. Use isolated local workspaces for protocol acceptance.
-
-Run pnpm verify and record any uncovered contract or external acceptance evidence
-in HANDOVER.md. Build before deployment; Cloudflare environment is selected at
-build time. Never commit .dev.vars, credentials, local D1 state or helper state.
+Source release proves custody and portability, not product behavior or deployment.
+Use real local Worker/D1/R2/socket/browser evidence and distinguish configured
+provider and hosted acceptance. Record unfinished inventory items explicitly and
+continue until the authorized migration is complete.

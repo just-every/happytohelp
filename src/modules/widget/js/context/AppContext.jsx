@@ -1,0 +1,143 @@
+import React from 'react';
+
+let defaultAppContext = {
+    apiOrigin: '',
+    widgetKey: '',
+    apiUrl: '',
+    proxy: false,
+    page: {},
+    contact: {},
+    theme: {
+        button: {
+            closed: {
+                background: "#484748",
+                color: "#ffffff",
+            },
+            open: {
+                background: "#f5f6fb",
+                color: "#cecece",
+            },
+        },
+        avatar: {
+            background: "#b2e2ff",
+        },
+        insight: {
+            background: "#ffffff",
+            color: "#333333",
+        },
+        window: {
+            background: "#ffffff",
+            color: "#000000",
+        },
+        chat: {
+            agent: {
+                background: "#f1f9ff",
+                color: "#000000",
+            },
+            user: {
+                background: "#2ca1e5",
+                color: "#ffffff",
+            },
+        },
+        input: {
+            message: {
+                background: "#f5f6fb",
+                color: "#666",
+            },
+            button: {
+                color: "#cecece",
+            },
+            send: {
+                background: "#484748",
+                color: "#ffffff",
+            },
+        },
+    },
+    app_logo: {
+        show: true,
+        url: "https://happytohelp.com/",
+    },
+    settings: {
+        await_consent: false,
+        ai: {
+            enabled: true,
+            types: ['sales', 'support', 'billing'],
+        },
+        collector: {
+            enabled: true,
+            disable_bots: true,
+        },
+        button: {
+            enabled: true,
+        },
+        show_glow: {
+            on_insight: true,
+            on_insight_reply: true,
+            on_ai_typing: false,
+            on_human_typing: false,
+        },
+        message: {
+            collect_screenshot: true,
+            collect_attachments: true,
+        },
+        collect: {
+            require_name: false,
+            require_email: false,
+        }
+    },
+    text: {
+        errors: {
+            connection: "Sorry we could not connect to the server. Please check your connection and try again.",
+        },
+        ai: {
+            chat: "AI assisted conversation. Please verify important details.",
+            selection: "Who would you prefer to talk to?",
+            ai: "AI",
+            ai_response: "Responds instantly",
+            human: "Human",
+            human_response: "Responds within 24 hours",
+        },
+        message: {
+            placeholder_message: "Send a message...",
+            placeholder_message_chat: "Message...",
+            placeholder_files: "Drag your files here!",
+            tooltip_contact: "Edit your details",
+            tooltip_screenshot: "Send screenshot",
+            tooltip_attach: "Send file",
+            tooltip_send: "Send message",
+            button_send: "Send",
+            error_name: "Please enter your name",
+            error_email: "Please enter a valid email address",
+            error_message: "Please enter a message to send",
+        },
+        collect: {
+            placeholder_name: "Your Name",
+            placeholder_email: "your@email.com",
+        },
+        prompt: {
+            email_prompt: "Receive an email when {agent_name} replies!",
+            edit_contact: "Edit your contact details below",
+            placeholder_email: "your@email.com",
+            validate_error: "Sorry, that email address does not appear to be valid. Please enter your email address.",
+        },
+        chat: {
+            return_title: "Continue Conversation",
+            return_last_message: "Last message",
+            return_active: "Currently active",
+            sending: "Sending...",
+            sending_image: "Sending image...",
+            sending_images: "Sending images...",
+            sending_file: "Sending file...",
+            sending_files: "Sending files...",
+            failed: "Failed to send",
+            sent: "Sent",
+            received: "Received",
+        }
+    }
+};
+
+
+const AppContext = React.createContext({});
+
+export {AppContext as default, defaultAppContext};
+

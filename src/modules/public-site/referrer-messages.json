@@ -1,0 +1,544 @@
+{
+  "countryContexts": {
+    "US": "US-Based Business",
+    "GB": "UK-Based Company",
+    "CA": "Canadian Business",
+    "AU": "Australian Company",
+    "IN": "Indian Tech Company",
+    "DE": "German Business",
+    "FR": "French Company",
+    "SG": "Singapore Business",
+    "JP": "Japanese Company",
+    "IL": "Israeli Tech Business",
+    "NL": "Dutch Company",
+    "BR": "Brazilian Business",
+    "ES": "Spanish Company",
+    "MX": "Mexican Business",
+    "IT": "Italian Company"
+  },
+  "businessContexts": [
+    "SaaS Company",
+    "Tech Startup",
+    "Small Business",
+    "Digital Business",
+    "AI Implementer",
+    "Efficiency Seeker",
+    "Growth-Focused Business",
+    "Operations Optimizer"
+  ],
+  "industryGoals": {
+    "ecommerce": [
+      "Seeking Personalization Tools",
+      "Needs Inventory Automation",
+      "Wants Customer Insights"
+    ],
+    "SaaS": [
+      "Enhancing Product Features",
+      "Scaling Customer Support",
+      "Automating Development"
+    ],
+    "healthcare": [
+      "Improving Patient Experience",
+      "Optimizing Clinical Workflows",
+      "Enhancing Data Analysis"
+    ],
+    "finance": [
+      "Automating Risk Assessment",
+      "Enhancing Fraud Detection",
+      "Streamlining Compliance"
+    ],
+    "education": [
+      "Personalizing Learning",
+      "Automating Administrative Tasks",
+      "Enhancing Student Engagement"
+    ],
+    "marketing": [
+      "Optimizing Campaigns",
+      "Enhancing Content Creation",
+      "Analyzing Customer Sentiment"
+    ],
+    "legal": [
+      "Automating Document Review",
+      "Streamlining Case Research",
+      "Enhancing Client Communication"
+    ]
+  },
+  "intentMessages": {
+    "evaluating": [
+      [
+        "Evaluating AI Solutions",
+        85
+      ],
+      [
+        "Comparing Options",
+        80
+      ]
+    ],
+    "purchasing": [
+      [
+        "Ready To Purchase",
+        90
+      ],
+      [
+        "Final Decision Stage",
+        85
+      ]
+    ],
+    "implementing": [
+      [
+        "Planning Implementation",
+        85
+      ],
+      [
+        "Integration Research",
+        80
+      ]
+    ],
+    "learning": [
+      [
+        "Learning About AI",
+        75
+      ],
+      [
+        "Exploration Phase",
+        70
+      ]
+    ],
+    "solving": [
+      [
+        "Seeking Solution for Problem",
+        85
+      ],
+      [
+        "Problem-Solving Mission",
+        80
+      ]
+    ],
+    "exploring": [
+      [
+        "Exploring AI Options",
+        70
+      ]
+    ],
+    "comparing": [
+      [
+        "Exploring AI Options",
+        70
+      ]
+    ]
+  },
+  "sizeMessages": {
+    "SMB": [
+      [
+        "SMB Owner",
+        80
+      ],
+      [
+        "Mid-Size Business Leader",
+        75
+      ]
+    ],
+    "Startup": [
+      [
+        "Startup Founder",
+        80
+      ],
+      [
+        "Early-Stage Business",
+        75
+      ]
+    ],
+    "Enterprise": [
+      [
+        "Enterprise Company Leader",
+        80
+      ],
+      [
+        "Large Organization Decision Maker",
+        75
+      ]
+    ]
+  },
+  "trafficMessages": {
+    "paid:google": [
+      [
+        "Clicked on Google Ad",
+        100
+      ],
+      [
+        "Google Ad for AI Solutions",
+        95
+      ]
+    ],
+    "organic:google": [
+      [
+        "From Google Search",
+        80
+      ],
+      [
+        "Organic Search Visitor",
+        75
+      ]
+    ],
+    "paid:facebook": [
+      [
+        "Clicked on Facebook Ad",
+        100
+      ],
+      [
+        "Facebook Campaign Visitor",
+        95
+      ]
+    ],
+    "organic:facebook": [
+      [
+        "From Facebook Post",
+        80
+      ],
+      [
+        "Facebook Content Reader",
+        75
+      ]
+    ],
+    "paid:instagram": [
+      [
+        "Clicked on Instagram Ad",
+        100
+      ],
+      [
+        "Instagram Campaign Visitor",
+        95
+      ]
+    ],
+    "organic:instagram": [
+      [
+        "From __SOURCE_NAME__",
+        70
+      ],
+      [
+        "Organic Traffic Explorer",
+        65
+      ]
+    ],
+    "paid:linkedin": [
+      [
+        "Clicked on LinkedIn Ad",
+        100
+      ],
+      [
+        "LinkedIn Business Campaign",
+        95
+      ]
+    ],
+    "organic:linkedin": [
+      [
+        "From LinkedIn Post",
+        80
+      ],
+      [
+        "Professional Network Member",
+        75
+      ]
+    ],
+    "paid:twitter": [
+      [
+        "Clicked on Twitter Ad",
+        100
+      ],
+      [
+        "Twitter Business Campaign",
+        95
+      ]
+    ],
+    "organic:twitter": [
+      [
+        "From Twitter/X Post",
+        80
+      ],
+      [
+        "Twitter Content Reader",
+        75
+      ]
+    ],
+    "paid:x_ads": [
+      [
+        "Clicked on Twitter Ad",
+        100
+      ],
+      [
+        "Twitter Business Campaign",
+        95
+      ]
+    ],
+    "organic:x_ads": [
+      [
+        "From __SOURCE_NAME__",
+        70
+      ],
+      [
+        "Organic Traffic Explorer",
+        65
+      ]
+    ],
+    "paid:tiktok": [
+      [
+        "Clicked on TikTok Ad",
+        100
+      ],
+      [
+        "TikTok Business Campaign",
+        95
+      ]
+    ],
+    "organic:tiktok": [
+      [
+        "From __SOURCE_NAME__",
+        70
+      ],
+      [
+        "Organic Traffic Explorer",
+        65
+      ]
+    ],
+    "paid:youtube": [
+      [
+        "Clicked on YouTube Ad",
+        100
+      ],
+      [
+        "YouTube Campaign Visitor",
+        95
+      ]
+    ],
+    "organic:youtube": [
+      [
+        "From __SOURCE_NAME__",
+        70
+      ],
+      [
+        "Organic Traffic Explorer",
+        65
+      ]
+    ],
+    "paid:reddit": [
+      [
+        "Clicked on Reddit Ad",
+        100
+      ],
+      [
+        "Reddit Campaign Visitor",
+        95
+      ]
+    ],
+    "organic:reddit": [
+      [
+        "From Reddit Thread",
+        80
+      ],
+      [
+        "Reddit Community Member",
+        75
+      ]
+    ],
+    "paid:email": [
+      [
+        "Clicked Email Campaign Link",
+        100
+      ],
+      [
+        "Email Marketing Recipient",
+        95
+      ]
+    ],
+    "organic:email": [
+      [
+        "From __SOURCE_NAME__",
+        70
+      ],
+      [
+        "Organic Traffic Explorer",
+        65
+      ]
+    ],
+    "paid:other": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:other": [
+      [
+        "From __SOURCE_NAME__",
+        70
+      ],
+      [
+        "Organic Traffic Explorer",
+        65
+      ]
+    ],
+    "paid:producthunt": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:producthunt": [
+      [
+        "From Product Hunt",
+        80
+      ],
+      [
+        "Product Hunt Explorer",
+        75
+      ]
+    ],
+    "paid:hackernews": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:hackernews": [
+      [
+        "From Hacker News",
+        80
+      ],
+      [
+        "HN Tech Community Member",
+        75
+      ]
+    ],
+    "paid:github": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:github": [
+      [
+        "From GitHub Link",
+        80
+      ],
+      [
+        "Technical Developer",
+        75
+      ]
+    ],
+    "paid:g2": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:g2": [
+      [
+        "From G2 Reviews",
+        80
+      ],
+      [
+        "Comparing AI Solutions",
+        75
+      ]
+    ],
+    "paid:capterra": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:capterra": [
+      [
+        "From Capterra Reviews",
+        80
+      ],
+      [
+        "Software Comparison Shopper",
+        75
+      ]
+    ],
+    "paid:indiehackers": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:indiehackers": [
+      [
+        "From IndieHackers",
+        80
+      ],
+      [
+        "Indie Business Builder",
+        75
+      ]
+    ],
+    "paid:discord": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:discord": [
+      [
+        "From Discord Community",
+        80
+      ],
+      [
+        "Community Member",
+        75
+      ]
+    ],
+    "paid:x": [
+      [
+        "Clicked on Paid Ad",
+        90
+      ],
+      [
+        "Paid Campaign Visitor",
+        85
+      ]
+    ],
+    "organic:x": [
+      [
+        "From Twitter/X Post",
+        80
+      ],
+      [
+        "Twitter Content Reader",
+        75
+      ]
+    ]
+  }
+}

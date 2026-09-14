@@ -1,0 +1,155 @@
+/** Native, tenant-scoped browser transport. No dashboard dependency. */
+export class WidgetTransport {
+  constructor({ apiOrigin, widgetKey, onEvent = () => {}, onError = () => {} }) {
+    const origin = new URL(apiOrigin);
+    if (origin.protocol !== 'https:' && !(origin.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname))) throw new Error('Widget API requires HTTPS');
+    if (!widgetKey) throw new Error('A widgetKey is required');
+    this.origin = origin.origin; this.widgetKey = widgetKey;
+    this.onEvent = onEvent; this.onError = onError;
+    this.storageKey = `rer-widget:${this.origin}:${widgetKey}`;
+    this.closed = false; this.eventId = 0; this.revision = 0; this.lastMessageId = null;
+    this.abort = new AbortController();
+    this.pending = new Map(); this.mediaURLs = new Map();
+  }
+  async request(path, options = {}) {
+    const headers = new Headers(options.headers);
+    if (this.session?.token) headers.set('Authorization', `Bearer ${this.session.token}`);
+    if (options.json !== undefined) headers.set('Content-Type', 'application/json');
+    const response = await fetch(`${this.origin}${path}`, {...options, signal: this.abort.signal, headers, body: options.json !== undefined ? JSON.stringify(options.json) : options.body});
+    const contentType = response.headers.get('Content-Type') || '';
+    const result = contentType.includes('application/json') ? await response.json() : {message: await response.text()};
+    if (!response.ok) throw Object.assign(new Error(result.message || result.error || `Request failed (${response.status})`), {status: response.status, detail: result});
+    return result;
+  }
+  async connect(contact = {}) {
+    if (this.connecting) return this.connecting;
+    this.connecting = this.initialize(contact).catch(error => { this.connecting = null; throw error; });
+    return this.connecting;
+  }
+  async initialize(contact) {
+    const configuration = await this.request(`/api/widget/settings?widgetKey=${encodeURIComponent(this.widgetKey)}${contact?.preview_token ? `&previewToken=${encodeURIComponent(contact.preview_token)}` : ""}`);
+    this.configuration = configuration;
+    this.onEvent({type: 'configuration', configuration});
+    try { this.session = JSON.parse(localStorage.getItem(this.storageKey)); } catch { this.session = null; }
+    const signedIdentity = contact.hash ? contact.identifier || contact.email : null;
+    if (!this.session?.token || signedIdentity && this.session.verifiedIdentity !== signedIdentity) {
+      this.session = await this.request('/api/identity/widget/session', {method: 'POST', json: {widgetKey: this.widgetKey, name: contact.name || contact.provided_name, email: contact.email, provided_name: contact.provided_name, provided_email: contact.provided_email, identifier: contact.identifier, contact_hash: contact.hash, metadata: contact.metadata, previewToken: contact.preview_token}});
+      if (this.session.verified && signedIdentity) this.session.verifiedIdentity = signedIdentity;
+      localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+    }
+    if (!this.session.conversationId) {
+      const existing = await this.request('/api/conversations');
+      const conversation = existing.conversations?.[0] || await this.request('/api/conversations', {method: 'POST', json: {projectId: this.session.projectId}});
+      this.session.conversationId = (conversation.conversation || conversation).id;
+      localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+    }
+    this.conversationId = this.session.conversationId;
+    await this.refresh();
+    if (!this.closed) this.openSocket();
+    return this.session;
+  }
+  async refresh() {
+    const result = await this.request(`/api/conversations/${this.conversationId}/messages`);
+    if (result.revision >= this.revision) {this.revision = result.revision; this.lastMessageId = result.lastMessageId;}
+    this.onEvent({type: 'transcript', messages: await Promise.all(result.messages.map(message => this.message(message)))});
+    return result;
+  }
+  async message(message) {
+    const media = await Promise.all((message.media || []).map(async item => {
+      let url = this.mediaURLs.get(item.id);
+      if (!url) {
+        const response = await fetch(`${this.origin}/api/conversations/${this.conversationId}/media/${item.id}`, {signal: this.abort.signal, headers: {Authorization: `Bearer ${this.session.token}`}});
+        if (!response.ok) throw new Error(`Attachment download failed (${response.status})`);
+        url = URL.createObjectURL(new Blob([await response.arrayBuffer()], {type: item.content_type || 'application/octet-stream'})); this.mediaURLs.set(item.id, url);
+      }
+      return {...item, url, preview_url: url, filename_original: item.filename || item.name, aggregate_type: (item.content_type || item.mime_type || '').startsWith('image/') ? 'image' : 'file'};
+    }));
+    const agent = message.actor_role !== 'contact' ? this.configuration?.agents?.find(person => person.id === message.actor_id) : undefined;
+    return {...message, ...(agent ? {agent} : {}), created_at: typeof message.created_at === 'number' ? new Date(message.created_at).toISOString() : message.created_at, local_id: message.local_id || message.localId, contact_id: message.actor_role === 'contact' ? this.session.contactId : message.contact_id, agent_id: message.actor_role && message.actor_role !== 'contact' ? message.actor_id : message.agent_id, media};
+  }
+  openSocket() {
+    if (this.closed) return;
+    const url = new URL(`/api/conversations/${this.conversationId}/socket`, this.origin);
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    url.searchParams.set('token', this.session.token); url.searchParams.set('after', String(this.eventId));
+    const socket = new WebSocket(url); this.socket = socket;
+    socket.onopen = () => { this.retry = 0; this.onEvent({type: 'connected'}); this.refresh().then(() => this.replayPending()).catch(this.onError); };
+    socket.onmessage = event => this.inbound = Promise.resolve(this.inbound).then(async () => {
+      if (this.socket !== socket || this.closed) return;
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.eventId && payload.eventId <= this.eventId) return;
+        if (payload.message) payload.message = await this.message(payload.message);
+        this.onEvent(payload);
+        if (payload.eventId) this.eventId = payload.eventId;
+      } catch(error) { this.onError(error); }
+    });
+    socket.onclose = event => {
+      if (this.socket !== socket || this.closed) return;
+      this.onEvent({type: 'disconnected'});
+      if (event?.code === 1008) { this.onError(new Error('Conversation session was revoked')); return; }
+      this.timer = setTimeout(() => this.openSocket(), Math.min(1000 * 2 ** (this.retry = (this.retry || 0) + 1), 15000));
+    };
+    socket.onerror = () => this.onError(new Error('Conversation connection interrupted'));
+  }
+  async send(data) {
+    await this.connect();
+    if (this.pending.has(data.local_id)) return this.pending.get(data.local_id);
+    const operation = (async () => {
+      this.session.pendingCommands ||= {};
+      let command = this.session.pendingCommands[data.local_id];
+      if (!command) {
+        await this.refresh();
+        command = {localId: data.local_id, content: data.content, expectedRevision: this.revision, expectedLastMessageId: this.lastMessageId, mediaIds: [...(data.media_ids || [])]};
+        this.session.pendingCommands[data.local_id] = command;
+        localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+      } else if (command.content !== data.content || JSON.stringify(command.mediaIds) !== JSON.stringify(data.media_ids || [])) {
+        throw new Error('A pending message identity cannot be reused with different content or attachments');
+      }
+      let result;
+      for (let admissionAttempt = 0; admissionAttempt < 2; admissionAttempt++) {
+        try { result = await this.request(`/api/conversations/${this.conversationId}/messages`, {method: 'POST', json: command}); break; }
+        catch (error) {
+          if (error.status !== 409 || error.detail?.accepted !== false) throw error;
+          delete this.session.pendingCommands[data.local_id];
+          localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+          error.definitiveRejection = true;
+          if (admissionAttempt || error.detail.reason !== 'conversation_changed_or_admission_denied') throw error;
+          const transcript = await this.refresh();
+          if (transcript.messages.some(message => message.local_id === data.local_id)) throw error;
+          command = {...command, expectedRevision: this.revision, expectedLastMessageId: this.lastMessageId};
+          this.session.pendingCommands[data.local_id] = command;
+          localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+        }
+      }
+      delete this.session.pendingCommands[data.local_id];
+      localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+      if (result.message) this.onEvent({type: 'message', message: await this.message(result.message)});
+      await this.refresh();
+      return result;
+    })();
+    this.pending.set(data.local_id, operation);
+    try { return await operation; } finally { this.pending.delete(data.local_id); }
+  }
+  async replayPending() {
+    for (const command of Object.values(this.session.pendingCommands || {})) {
+      if (this.closed) return;
+      try { await this.send({local_id: command.localId, content: command.content, media_ids: command.mediaIds}); }
+      catch(error) { this.onError(error); if (!error.definitiveRejection) throw error; }
+    }
+  }
+  async upload(file) {
+    await this.connect();
+    const media = await this.request(`/api/conversations/${this.conversationId}/media`, {method: 'POST', headers: {'Content-Type': file.type || 'application/octet-stream', 'X-Filename': file.name.replace(/[^\x20-\x7E]/g, '_')}, body: file});
+    return {data: media.media || media};
+  }
+  async action(action, data) {
+    await this.connect();
+    return this.request(`/api/conversations/${this.conversationId}/widget-events`, {method: 'POST', json: {action, data}});
+  }
+  close() {
+    this.closed = true; this.abort.abort(); clearTimeout(this.timer); this.socket?.close();
+    for (const url of this.mediaURLs.values()) URL.revokeObjectURL(url);
+    this.mediaURLs.clear();
+  }
+}

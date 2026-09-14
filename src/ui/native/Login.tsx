@@ -1,0 +1,9 @@
+import { useEffect, useState } from 'react';
+import { nativeRequest } from './transport';
+import '../dashboard/styles/theme.scss';
+export default function Login() {
+ const [ready,setReady]=useState(false); useEffect(()=>setReady(true),[]);
+    const [error,setError]=useState(''),[busy,setBusy]=useState(false);
+    const submit=async(event:any)=>{event.preventDefault();setBusy(true);setError('');const form=new FormData(event.currentTarget);try{const result:any=await nativeRequest('/api/identity/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:form.get('email'),password:form.get('password')})});location.assign(result.accountOnly?'/projects/create':'/conversations');}catch(error:any){setError(error.message);setBusy(false);}};
+    return <main className="d-flex align-items-center py-5"><div className="container"><div className="row justify-content-center"><div className="col-12 col-md-5 col-xl-4"><h1 className="display-4 text-center mb-3">Sign in</h1><p className="text-muted text-center mb-5">Welcome back to HappyToHelp.</p>{error&&<p className="alert alert-danger" role="alert">{error}</p>}<form method="post" onSubmit={submit}><div className="form-group"><label htmlFor="email">Email address</label><input id="email" name="email" type="email" autoComplete="username" required className="form-control"/></div><div className="form-group"><label htmlFor="password">Password</label><input id="password" name="password" type="password" autoComplete="current-password" required className="form-control"/></div><button disabled={busy||!ready} className="btn btn-lg w-100 btn-primary mb-3">{busy?'Signing in…':'Sign in'}</button></form><div className="d-flex justify-content-between"><a href="/forgot-password">Forgot password?</a><a href="/register">Create account</a></div></div></div></div></main>;
+}

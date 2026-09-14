@@ -1,0 +1,3 @@
+import {decryptToken} from './secrets'
+import type {Env} from '../../platform/env'
+export async function githubToken(env:Env,projectId:string):Promise<string|undefined>{const connection=await env.DB.prepare('SELECT token_cipher FROM github_connections WHERE project_id=?').bind(projectId).first<{token_cipher:string}>();if(connection)return decryptToken(env,projectId,connection.token_cipher);if(typeof env.GITHUB_TOKENS==='string'){try{const value=JSON.parse(env.GITHUB_TOKENS)[projectId];if(typeof value==='string'&&value)return value}catch{throw new Error('Invalid GitHub credential map')}}if(env.GITHUB_PROJECT_ID===projectId&&typeof env.GITHUB_TOKEN==='string')return env.GITHUB_TOKEN;return undefined}

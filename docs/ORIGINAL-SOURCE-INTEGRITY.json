@@ -1,0 +1,77 @@
+{
+  "kind": "original-source-integrity-after-native-port",
+  "repositories": [
+    {
+      "name": "happytohelp",
+      "head": "7c733f7b4204c7af7b5422953dea1be67d4fca78",
+      "baselineHeadUnchanged": true,
+      "dirtyPathsUnchanged": true,
+      "workingDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceFileSha256": {
+        "docs/widget-reply-validation.md": "50e8a71cc24e6f4dcd7ae86a61acca8a22570f6cbb2a6faaa6ad20111fff9654"
+      }
+    },
+    {
+      "name": "happytohelp-chat",
+      "head": "bce98c897ec5743dcf243311b6c1886b1057f5e3",
+      "baselineHeadUnchanged": true,
+      "dirtyPathsUnchanged": true,
+      "workingDiffSha256": "eaae6b4b37512c5d08d85684d4f202f7c55fa723525110ec79d87e7fcb6be8ad",
+      "sourceFileSha256": {
+        "serverless.yml": "f7350bc32c368a91465d8f03440ba4cdda4948d84eee57f684fe71aea1fb2f25",
+        "src/config/db.js": "8e54b85e9b09629ff31b1b5f3e5827e16613110a70bd05d73f47d910e4b9da2d",
+        "src/connectionManager.js": "4a91e0c830b9454cf145f17a4eb7387d4a2937b6b12f0705c3cbdf1b6f8de5b0",
+        "src/includes/replyAI.js": "943aa2744d4e8a38611ab077d60a3b712e2ab15c78a434123a5ea96dd5e18357",
+        "src/includes/send.js": "de226963e2d00e3155eb322805af685d7bf6ed6ecaaf341d9103204582764ad2",
+        "src/includes/sendMessage.js": "5c63a8b0805b9835bc8e86695b3aa683e5db77bfaeed79f02ce3174d6720381b",
+        "src/llm/run.js": "1b4a36f8687c52ca615a6c8394ca7374a08bab3476fe03aa3a91a2b466e7c96a",
+        "src/models/event.js": "2e0bd0b360cc9c8466a30f2d9ba50f5ccca0f056fe2d832118ae722583d5bf7f",
+        "src/models/message.js": "369547feb76eff858ca8fb22c0d9ec257c4f0a5acb88fb4c4dee056516d7c7dd",
+        "src/sendEvent.js": "e8e820d5b1c17fe98dc0f85405e402881c211fd66e0b4b8914851e3a5a740d0a",
+        "src/sendMessage.js": "3ac747df2b805962d102ff9c8ec60601affdec7c794d47ca668bfc3beb1faef9",
+        "test/connectionManager.test.js": "39cd28025aec722823167d9924e7cf889785a3441e20627b01a77bcff2d82346",
+        "test/conversationRouteScope.test.js": "dbd8c566f292ef85b881b1fa552885818c33f3d546bfe5ea793ecda8258639c9",
+        "test/delegatedReplyPersistence.test.js": "f239f2eff54b611569b01ca90dd894ecf2e602b13b4f0f8a64019ae4adefe0f9",
+        "test/replyAI.lifecycle.test.js": "28fd3a94c247294f977ee41b922a0a69b6212929be05d5c7dcdad01e4a1b2c13",
+        "test/replyAI.persistence.mysql.integration.test.js": "1ceb2dcbfdda7dab8c18e7179e82868239c383d64bb9d1c3ff148e34c3a33ce9",
+        "test/runRequest.error.test.js": "39d9a70c5f15026eef5b703f8ba501d4432401b9d77b823d257339f492ac4e68",
+        "test/sendGatewayClient.test.js": "5dd77a79962375172485ef25e1df571f8310d2a982cd957fb93570f217cbe996",
+        "test/sendGatewayDelivery.integration.test.js": "5901b04f419c2b8ef4dc67ffed352a2b7e27a431e069e3568219e8ef42472fbf"
+      }
+    },
+    {
+      "name": "happytohelp-widget",
+      "head": "69f6152963d0c89d6495d1adbedb73eab9ce1d62",
+      "baselineHeadUnchanged": true,
+      "dirtyPathsUnchanged": true,
+      "workingDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceFileSha256": {}
+    },
+    {
+      "name": "happytohelp-site",
+      "head": "94863c4557cad8bfc02817a6c5a06a54db0fb3f0",
+      "baselineHeadUnchanged": true,
+      "dirtyPathsUnchanged": true,
+      "workingDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceFileSha256": {
+        "AGENTS.md": "2ed3b52843964d71ab7a1ca50f83253c51c2bb2446f3889f06cba22ee00fe4f0"
+      }
+    },
+    {
+      "name": "happytohelp-completions",
+      "head": "692aff289c1ad65b3ac35180da523494866eea25",
+      "baselineHeadUnchanged": true,
+      "dirtyPathsUnchanged": true,
+      "workingDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceFileSha256": {}
+    },
+    {
+      "name": "happytohelp-plugin-sdk",
+      "head": "c41f761c11ee7b45b1cf48e9a0bb0bd2e48fd2e0",
+      "baselineHeadUnchanged": true,
+      "dirtyPathsUnchanged": true,
+      "workingDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceFileSha256": {}
+    }
+  ]
+}

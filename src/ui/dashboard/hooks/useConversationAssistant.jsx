@@ -1,0 +1,116 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const desktopQuery = '(min-width: 1280px)';
+
+const isDesktop = () => typeof window !== 'undefined' && window.matchMedia(desktopQuery).matches;
+
+export default function useConversationAssistant() {
+    const [ isVisible, setIsVisible ] = useState(isDesktop);
+    const toggleRef = useRef(null);
+    const localToggleRef = useRef(null);
+    const closeRef = useRef(null);
+    const panelRef = useRef(null);
+    const openedFromToggle = useRef(false);
+    const returnFocusRef = useRef(null);
+    const [ requestedTab, setRequestedTab ] = useState('ai');
+    const [ requestedTabVersion, setRequestedTabVersion ] = useState(0);
+
+    const close = useCallback(() => {
+        setIsVisible(false);
+        returnFocusRef.current?.focus();
+    }, []);
+
+    const toggle = useCallback(() => {
+        if (isVisible) {
+            close();
+            return;
+        }
+
+        setRequestedTab('ai');
+        setRequestedTabVersion(version => version + 1);
+        returnFocusRef.current = toggleRef.current;
+        openedFromToggle.current = true;
+        setIsVisible(true);
+    }, [ close, isVisible ]);
+
+    const openLocal = useCallback(() => {
+        setRequestedTab('local');
+        // A header request must select Local even when Local was the last
+        // requested tab and the operator has since selected another panel.
+        setRequestedTabVersion(version => version + 1);
+        returnFocusRef.current = localToggleRef.current;
+        openedFromToggle.current = true;
+        setIsVisible(true);
+    }, []);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia(desktopQuery);
+        const syncViewport = event => {
+            // A wide assistant is a permanent workspace column. Returning to a
+            // compact viewport closes its sheet until the agent explicitly opens it.
+            setIsVisible(event.matches);
+        };
+
+        mediaQuery.addEventListener('change', syncViewport);
+        return () => mediaQuery.removeEventListener('change', syncViewport);
+    }, []);
+
+    useEffect(() => {
+        if (!isVisible) return undefined;
+
+        let focusFrame;
+        if (openedFromToggle.current) {
+            focusFrame = window.requestAnimationFrame(() => {
+                closeRef.current?.focus({ preventScroll: true });
+            });
+        }
+        openedFromToggle.current = false;
+
+        const handleKeyDown = event => {
+            if (!window.matchMedia('(max-width: 1279.98px)').matches) return;
+            if (event.defaultPrevented || document.querySelector('.modal.show, [role="dialog"][aria-modal="true"]')) return;
+
+            if (event.key === 'Escape') {
+                if (!document.querySelector('.dropdown-menu.show')) close();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+
+            const controls = [...(panelRef.current?.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]') || [])]
+                .filter(element => element.tabIndex >= 0 && element.getClientRects().length > 0);
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+
+            if (!panelRef.current?.contains(document.activeElement)) {
+                event.preventDefault();
+                (event.shiftKey ? last : first)?.focus();
+            } else if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first?.focus();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown, true);
+        return () => {
+            if (focusFrame) window.cancelAnimationFrame(focusFrame);
+            window.removeEventListener('keydown', handleKeyDown, true);
+        };
+    }, [ close, isVisible ]);
+
+    return {
+        isVisible,
+        requestedTab,
+        requestedTabVersion,
+        toggle,
+        openLocal,
+        close,
+        toggleRef,
+        localToggleRef,
+        closeRef,
+        panelRef,
+    };
+}

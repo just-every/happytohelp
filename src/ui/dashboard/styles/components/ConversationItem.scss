@@ -1,0 +1,51 @@
+.conversation-item {
+    .show-on-hover {
+        display: none;
+    }
+
+    .action-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 1;
+    }
+
+    &:hover {
+        .show-on-hover {
+            display: block;
+        }
+        .hide-on-hover {
+            display: none;
+        }
+    }
+
+    h4 {
+        line-height: 1.2rem;
+    }
+}
+.tooltip-light {
+    .tooltip-inner {
+        background-color: var(--workspace-surface-subtle, #F9FBFD);
+    }
+    .arrow {
+        &::before {
+            border-left-color: var(--workspace-surface-subtle, #F9FBFD);
+        }
+    }
+}
+
+
+.conversation-item-project {
+    font-weight: 400;
+    max-width: 100%;
+    background-color: var(--workspace-surface-subtle, #EDF2F9); // $gray-200
+    color: var(--workspace-muted, #3B506C); // $gray-800
+    border: 1px solid var(--workspace-line, #E3EBF6); // $gray-300
+}
+
+// The active conversation card is #e2e6ed, near-identical to the badge's default
+// tint, so lift the badge to white and darken its border to keep it readable.
+.conversation-item.active .conversation-item-project {
+    background-color: var(--workspace-surface-raised, #FFF);
+    border-color: var(--workspace-line, #95AAC9); // $gray-600
+}

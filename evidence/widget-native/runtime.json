@@ -1,0 +1,16 @@
+{
+  "runtime": "isolated emitted Worker, real D1/R2/DO; no provider credentials",
+  "migrationCount": 28,
+  "widgetSha256": "a7522b48237fde0d3b58242e22df9aa644a6377266bab89abadf95a28e8eb36d",
+  "workerSha256": "ab00d56db7584e5be11d21636014d61cae67adaf4fe8f074f8ee85607ff14d0f",
+  "results": [
+    {
+      "file": "widget-browser.mjs",
+      "code": 0
+    },
+    {
+      "file": "widget-native-lost-response.mjs",
+      "code": 0
+    }
+  ]
+}

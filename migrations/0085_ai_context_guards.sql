@@ -1,0 +1,11 @@
+CREATE TRIGGER ai_note_added AFTER INSERT ON conversation_notes BEGIN UPDATE context_subjects SET revision=revision+1 WHERE (project_id,subject_id) IN (SELECT project_id,contact_id FROM conversations WHERE id=NEW.conversation_id); END;
+CREATE TRIGGER ai_note_changed AFTER UPDATE ON conversation_notes BEGIN UPDATE context_subjects SET revision=revision+1 WHERE (project_id,subject_id) IN (SELECT project_id,contact_id FROM conversations WHERE id IN (OLD.conversation_id,NEW.conversation_id)); END;
+CREATE TRIGGER ai_note_removed AFTER DELETE ON conversation_notes BEGIN UPDATE context_subjects SET revision=revision+1 WHERE (project_id,subject_id) IN (SELECT project_id,contact_id FROM conversations WHERE id=OLD.conversation_id); END;
+CREATE TRIGGER ai_contact_changed AFTER UPDATE OF name,email ON contacts BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.id; END;
+CREATE TRIGGER ai_profile_configuration_changed AFTER UPDATE ON ai_profiles BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id IN (OLD.project_id,NEW.project_id); END;
+CREATE TRIGGER ai_project_settings_changed AFTER UPDATE ON project_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;
+CREATE TRIGGER ai_repository_settings_changed AFTER UPDATE ON github_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;
+CREATE TRIGGER ai_project_settings_added AFTER INSERT ON project_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;
+CREATE TRIGGER ai_project_settings_removed AFTER DELETE ON project_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id; END;
+CREATE TRIGGER ai_repository_settings_added AFTER INSERT ON github_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;
+CREATE TRIGGER ai_repository_settings_removed AFTER DELETE ON github_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id; END;

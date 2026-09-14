@@ -16,7 +16,11 @@ export async function waitForDeploymentHealth(url, {
       lastResult = 'network error';
     }
     if (response) {
-      if (response.ok) return response;
+      if (response.ok) {
+        let body; try { body = await response.clone().json(); } catch {}
+        if (body?.status === 'ok' && body?.runtime === 'native-rer' && body?.database === 'reachable' && body?.files === 'reachable') return response;
+        throw new Error('Deployment returned an unexpected health document.');
+      }
       lastResult = `HTTP ${response.status}`;
       if (response.status !== 404 && response.status !== 503) {
         throw new Error(`Deployment health check failed at ${url}: ${lastResult}.`);

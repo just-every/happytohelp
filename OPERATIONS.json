@@ -1,50 +1,63 @@
 {
   "version": 1,
   "edition": "happytohelp",
-  "acceptance": {
-    "document": "ACCEPTANCE.md",
-    "meaning": "Passing verify covers executed gates only; first-release acceptance and external evidence are recorded in ACCEPTANCE.md."
-  },
+  "requiredEnvironment": [],
   "commands": {
     "setup": {
-      "argv": ["pnpm", "run", "setup", "--", "--remote"],
-      "effects": "Run remote type and product checks, provision or reuse the named D1, write ignored environment-specific Worker configuration, and apply remote migrations without publishing the Worker or initializing the owner."
+      "argv": [
+        "pnpm",
+        "run",
+        "setup",
+        "--",
+        "--local"
+      ],
+      "effects": "Collect selected migrations and prepare local D1/private owner bootstrap configuration. --remote provisions real D1/R2/Queues and applies remote migrations; no code publication."
     },
     "deploy": {
-      "argv": ["pnpm", "run", "deploy", "--", "--remote"],
-      "effects": "Run remote checks, provision or reuse D1, build and validate the emitted Worker, apply migrations, upload with temporary private secrets, wait for /health, and initialize or verify the existing owner."
+      "argv": [
+        "pnpm",
+        "run",
+        "deploy",
+        "--",
+        "--local"
+      ],
+      "effects": "Build, apply local migrations and run Wrangler packaging dry run. --remote publishes the selected prepared Worker/assets and checks native D1/R2 health."
     },
     "verify": {
-      "argv": ["pnpm", "run", "verify"],
-      "effects": "Run typechecking, Hono and real SQLite tests, isolated helper transport tests, a fresh Worker/D1/Chromium journey, and a production build; this is bounded implementation evidence."
+      "argv": [
+        "pnpm",
+        "run",
+        "verify"
+      ],
+      "effects": "Execute the declared native build/typecheck/runtime verification. Module/browser/provider coverage is recorded separately."
     }
   },
-  "requiredEnvironment": [
-    "CLOUDFLARE_ACCOUNT_ID",
-    "CLOUDFLARE_API_TOKEN",
-    "H2H_DEPLOY_ENV",
-    "APP_ORIGIN",
-    "H2H_BOOTSTRAP_TOKEN",
-    "H2H_OWNER_EMAIL",
-    "H2H_OWNER_PASSWORD",
-    "H2H_OWNER_NAME"
-  ],
-  "authentication": "Remote setup and deployment require CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN for the selected account, plus the owner credentials and first-owner H2H_BOOTSTRAP_TOKEN. Optional SendGrid values must be supplied together and are uploaded through a temporary private secrets file.",
-  "configuration": [
-    {"path": "seed.json", "description": "Declares HappyToHelp's bootstrap, origin, optional mail, and deployment environment inputs."},
-    {"path": "wrangler.jsonc", "description": "Tracked local Worker and D1 configuration; remote setup writes an ignored environment-specific configuration beneath .wrangler/h2h-deployment."},
-    {"path": "scripts/setup-deployment.md", "description": "Remote/local target rules, owner inputs, origin routing, secret handling, and deployment behavior."},
-    {"path": ".wrangler/h2h-deployment/<environment>/wrangler.json", "description": "Ignored generated remote Worker configuration selected by H2H_DEPLOY_ENV."}
-  ],
+  "authentication": "Remote commands require authenticated Wrangler, CLOUDFLARE_ACCOUNT_ID, H2H_RESOURCE_PREFIX and H2H_PUBLIC_ORIGIN. Bootstrap/provider secrets remain private. Local checks do not validate credentials.",
   "health": {
     "path": "/health",
-    "meaning": "Checks that the Worker can execute a D1 SELECT and returns the HappyToHelp service status. It does not verify owner bootstrap, agent workspace effects, mail delivery, or connected tools."
+    "meaning": "Native Worker with reachable D1 and R2; does not prove queues, sockets, providers or product acceptance."
   },
+  "acceptance": {
+    "document": "ACCEPTANCE.md",
+    "meaning": "Full native HappyToHelp contract; final exact-source acceptance remains evidence-owned."
+  },
+  "configuration": [
+    {
+      "path": "wrangler.jsonc",
+      "description": "Native DB/FILES/JOBS/CONVERSATIONS bindings and scheduled recovery; generated migrations are collected before setup."
+    },
+    {
+      "path": "scripts/deployment/environment.mjs",
+      "description": "Selected optional runtime variable and private-secret allowlists; values never appear in describe/plan."
+    },
+    {
+      "path": "OPERATIONS.md",
+      "description": "Clean install, target setup/publication, provider configuration and resumable local legacy import."
+    }
+  ],
   "notes": [
-    "HappyToHelp requires an explicit target: use -- --local or -- --remote. The H2H_DEPLOY_MODE environment value is an equivalent selector for the Base CLI when no command target is supplied.",
-    "Optional SENDGRID_API_KEY and MAIL_FROM must be supplied together. Missing mail transport leaves approved replies pending and visible.",
-    "Deployment initializes or verifies an owner after health; it does not execute customer work or agent instructions.",
-    "verify covers executed local gates only and does not establish business-workspace mutation evidence, mailbox delivery, full accessibility/capacity acceptance, or the obligations in ACCEPTANCE.md.",
-    "The operations check is read-only static local input validation. It does not inspect Cloudflare, generated caches, build output, migration state, or hosted health."
+    "Requires Node >=26.8.1 and locked pnpm installation. Use pnpm run setup, not pnpm setup.",
+    "PHP/Laravel/MySQL/Redis/Lambda are not delivered runtime dependencies.",
+    "No hosted, paid-provider or production-data migration claim follows from describe/check or a local packaging dry run."
   ]
 }

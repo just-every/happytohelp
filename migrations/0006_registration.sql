@@ -1,0 +1,1 @@
+CREATE TABLE registrations(token_hash TEXT PRIMARY KEY,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,project_name TEXT NOT NULL,allowed_origin TEXT NOT NULL,expires_at INTEGER NOT NULL,consumed_at INTEGER);

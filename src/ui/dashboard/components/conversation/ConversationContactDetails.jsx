@@ -1,0 +1,83 @@
+import React, { useRef, useState } from 'react';
+import PropTypes from 'prop-types';
+import TimeAgo from 'react-timeago';
+import useOnclickOutside from 'react-cool-onclickoutside';
+import ReplyIcon from '../reply-icons/ReplyIcon';
+import ConversationDetailField from './ConversationDetailField';
+import ConversationDetailSection from './ConversationDetailSection';
+
+const contactPath = (conversation, contact) => `/projects/${ conversation.project_id }/contacts/${ contact.id }`;
+
+export default function ConversationContactDetails({ conversation, onEdit, onEmailTranscript, onToggleBlock }) {
+    const { contact } = conversation;
+    const name = contact.name || contact.provided_name;
+    const email = contact.email || contact.provided_email;
+    const hasDifferentProvidedName = contact.name && contact.provided_name && contact.name.trim() !== contact.provided_name.trim();
+    const hasDifferentProvidedEmail = contact.email && contact.provided_email && contact.email.trim().toLowerCase() !== contact.provided_email.trim().toLowerCase();
+    const [actionsOpen, setActionsOpen] = useState(false);
+    const actionsButtonRef = useRef(null);
+    const actionsRef = useOnclickOutside(() => setActionsOpen(false));
+    const handleAction = action => {
+        setActionsOpen(false);
+        action();
+    };
+    const handleActionsKeyDown = event => {
+        if (event.key !== 'Escape') return;
+        event.preventDefault();
+        setActionsOpen(false);
+        actionsButtonRef.current?.focus();
+    };
+
+    return <ConversationDetailSection className="conversation-details-contact" title="Contact">
+        { name && <ConversationDetailField className="conversation-detail-field--primary" icon="user" label="Name">
+            <a href={ contactPath(conversation, contact) }>{ name }</a>
+            { hasDifferentProvidedName && <a href={ contactPath(conversation, contact) } className="conversation-detail-field__secondary-value">{ contact.provided_name }</a> }
+        </ConversationDetailField> }
+        { !name && contact.display_name !== contact.id && <ConversationDetailField className="conversation-detail-field--primary" icon="user" label="Generated name">
+            <a href={ contactPath(conversation, contact) }>{ contact.display_name }</a>
+        </ConversationDetailField> }
+        { email && <ConversationDetailField className="conversation-detail-field--primary" icon="mail" label="Email">
+            <a href={ `mailto:${ email }` }>{ email }</a>
+            { hasDifferentProvidedEmail && <a href={ `mailto:${ contact.provided_email }` } className="conversation-detail-field__secondary-value">{ contact.provided_email }</a> }
+        </ConversationDetailField> }
+        <ConversationDetailField
+            className="conversation-detail-field--primary"
+            icon="circle-check"
+            label="Verified"
+            value={ contact.is_verified ? 'Yes' : 'No' }
+        />
+
+        <div className="conversation-details-contact-actions btn-group dropdown" ref={ actionsRef } onKeyDown={ handleActionsKeyDown }>
+            <button type="button" className="btn btn-white" onClick={ onEdit }>
+                <ReplyIcon name="pencil" /> Edit contact
+            </button>
+            <button type="button" className="btn btn-white dropdown-toggle dropdown-toggle-split" ref={ actionsButtonRef } aria-haspopup="menu" aria-expanded={ actionsOpen } onClick={ () => setActionsOpen(open => !open) }>
+                <span className="visually-hidden">Contact actions</span>
+                <ReplyIcon name="chevron-down" />
+            </button>
+            { actionsOpen && <ul className="dropdown-menu show" role="menu">
+                { contact.blocked_at && <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(() => onToggleBlock(false)) }>Unblock contact</button></li> }
+                { !contact.blocked_at && <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(() => onToggleBlock(true)) }>Block contact</button></li> }
+                <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(onEmailTranscript) }>Email conversation</button></li>
+            </ul> }
+        </div>
+
+        <div className="conversation-detail-grid">
+            <ConversationDetailField className="conversation-detail-field--compact" icon="calendar" label="First seen" value={ <TimeAgo date={ contact.created_at } /> } />
+            <ConversationDetailField
+                className="conversation-detail-field--compact"
+                icon="clock"
+                label="Last seen"
+                value={ contact.is_online ? <span className="conversation-detail-field__online">Online</span> : <TimeAgo date={ contact.last_seen_at || new Date() } /> }
+            />
+            { contact.blocked_at && <ConversationDetailField className="conversation-detail-field--compact" icon="ban" label="Blocked" value={ <TimeAgo date={ contact.blocked_at } /> } /> }
+        </div>
+    </ConversationDetailSection>;
+}
+
+ConversationContactDetails.propTypes = {
+    conversation: PropTypes.object.isRequired,
+    onEdit: PropTypes.func.isRequired,
+    onEmailTranscript: PropTypes.func.isRequired,
+    onToggleBlock: PropTypes.func.isRequired,
+};

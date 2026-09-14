@@ -1,0 +1,46 @@
+import {createServer} from 'node:http';
+import {readFile,writeFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const {chromium}=await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const api=process.env.WIDGET_TEST_API, origin=process.env.WIDGET_TEST_ORIGIN, widgetKey=process.env.WIDGET_TEST_KEY, ownerToken=process.env.WIDGET_TEST_OWNER_TOKEN;
+if(!api||!origin||!widgetKey||!ownerToken)throw new Error('WIDGET_TEST_API, WIDGET_TEST_ORIGIN, WIDGET_TEST_KEY, WIDGET_TEST_OWNER_TOKEN required');
+if(!['localhost','127.0.0.1'].includes(new URL(origin).hostname))throw new Error('Browser fixture host must be local');
+const evidence=process.env.WIDGET_TEST_EVIDENCE_DIR||'/tmp';
+const storageKey=`rer-widget:${api}:${widgetKey}`;
+const bundle=await readFile(new URL('../public/widget.js',import.meta.url));
+const server=createServer((req,res)=>{if(req.url==='/widget.js'){res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(bundle);}else {res.setHeader('Content-Type','text/html; charset=utf-8');res.end(`<html><head><meta charset="utf-8"></head><body style="background:#eee"><h1>Independent host page</h1><script src="/widget.js"></script><script>h2h("init",${JSON.stringify({widgetKey,apiOrigin:api,open:true,settings:{collector:{enabled:false}}})})</script></body></html>`);}});
+await new Promise(resolve=>server.listen(Number(new URL(origin).port),new URL(origin).hostname,resolve));
+const browser=await chromium.launch({headless:true}),context=await browser.newContext({viewport:{width:1000,height:800}}),page=await context.newPage();const errors=[],failed=[];
+page.on('pageerror',error=>{errors.push(error.message);console.error('BROWSER ERROR',error.stack)});page.on('response',response=>{if(response.status()>=400)failed.push({url:response.url(),status:response.status()});});
+try{
+ await page.goto(origin);await page.locator('textarea[name=content]').waitFor({state:'visible'});await page.waitForTimeout(600);
+ await page.locator('textarea[name=content]').fill('Native widget browser message');await page.locator('button[name=submit]').click();
+ await page.waitForFunction(key=>JSON.parse(localStorage.getItem(key)||'null')?.conversationId,storageKey);
+ const session=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),storageKey);
+ const headers={Authorization:`Bearer ${ownerToken}`,'Content-Type':'application/json'};
+ let transcript;
+ for(let i=0;i<40;i++){transcript=await(await fetch(`${api}/api/conversations/${session.conversationId}/messages`,{headers})).json();if(transcript.messages?.length)break;await new Promise(r=>setTimeout(r,100));}
+ assert.equal(transcript.messages[0]?.content,'Native widget browser message');
+ const result=await(await fetch(`${api}/api/conversations/${session.conversationId}/messages`,{method:'POST',headers,body:JSON.stringify({localId:'operator-browser-proof',content:'Native operator socket reply',expectedRevision:transcript.revision,expectedLastMessageId:transcript.lastMessageId})})).json();assert.equal(result.accepted,true);
+ await page.getByText('Native operator socket reply',{exact:true}).waitFor();
+ await page.locator('input[type=file]').setInputFiles({name:'widget-proof.txt',mimeType:'text/plain',buffer:Buffer.from('Native attachment bytes')});
+ await page.locator('textarea[name=content]').fill('Attachment from widget');await page.locator('button[name=submit]').click();
+ await page.waitForTimeout(700);
+ const before=await(await fetch(`${api}/api/conversations/${session.conversationId}/messages`,{headers})).json();assert.equal(before.messages.at(-1).media.length,1);
+ const media=before.messages.at(-1).media[0];const downloaded=await fetch(`${api}/api/conversations/${session.conversationId}/media/${media.id}`,{headers});assert.equal(await downloaded.text(),'Native attachment bytes');
+ await page.reload();await page.getByText('Native operator socket reply',{exact:true}).waitFor();await page.getByText('Attachment from widget',{exact:true}).waitFor();
+ const resumed=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),storageKey);assert.equal(resumed.contactId,session.contactId);assert.equal(resumed.conversationId,session.conversationId);
+ await context.setOffline(true);await page.waitForTimeout(200);await context.setOffline(false);await page.waitForTimeout(2500);
+ const after=await(await fetch(`${api}/api/conversations/${session.conversationId}/messages`,{headers})).json();assert.equal(after.messages.length,before.messages.length);
+ assert.equal(await page.locator('h1').textContent(),'Independent host page');
+ const denied=await fetch(`${api}/api/widget/settings?widgetKey=${encodeURIComponent(widgetKey)}`,{headers:{Origin:'https://untrusted.example'}});assert.equal(denied.status,403);
+ const foreign=await fetch(`${api}/api/conversations/${process.env.WIDGET_TEST_FOREIGN_CONVERSATION || 'widget-foreign-conversation'}/messages`,{headers:{Authorization:`Bearer ${session.token}`,Origin:origin}});assert.equal(foreign.status,404);
+ await page.locator('input[name=email]').fill('visitor-updated@example.test');await page.locator('input[name=email]').press('Enter');await page.waitForTimeout(300);
+ const updatedContact=await(await fetch(`${api}/api/management/projects/${session.projectId}/contacts/${session.contactId}`,{headers})).json();assert.equal(updatedContact.data.email,'visitor-updated@example.test');
+ await page.screenshot({path:`${evidence}/desktop.png`});
+ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
+ const panel=await page.locator('.happytohelp-interact').boundingBox();assert.ok(panel.width<=390);await page.screenshot({path:`${evidence}/mobile.png`});
+ assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
+ const proof={checks:['cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
+ await writeFile(`${evidence}/browser.json`,JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));
+}catch(error){console.error(JSON.stringify({error:error.message,errors,failed}));await page.screenshot({path:`${evidence}/failed-attempt.png`});throw error;}finally{await browser.close();server.close();}

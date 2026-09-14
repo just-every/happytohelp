@@ -1,0 +1,38 @@
+// One consistent profile shape for customers, teammates, and AI agents.
+body.conversation-workspace {
+    .avatar .avatar-img { object-fit: cover; }
+
+    .avatar-agent.avatar-fallback .avatar-title {
+        color: #394878 !important;
+        background: #b2e2ff !important;
+        border: 0 !important;
+    }
+}
+
+body.conversation-workspace #chat {
+
+    .avatar.avatar-contact-symbol.avatar-fallback .avatar-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--contact-profile-symbol-ink, #182955) !important;
+        background: var(--contact-profile-symbol-tile, #a5efbb) !important;
+        border: 0 !important;
+        overflow: hidden;
+    }
+
+    .avatar-contact-symbol .contact-profile-symbol {
+        flex: 0 0 75%;
+        width: 75%;
+        height: 75%;
+        display: block;
+        overflow: visible;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transform: rotate(var(--contact-profile-symbol-rotation, 0deg));
+    }
+
+}

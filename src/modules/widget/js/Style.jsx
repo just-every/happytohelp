@@ -1,0 +1,19 @@
+import React from 'react';
+
+/* eslint import/no-webpack-loader-syntax: off */
+import styles from '../css/Root.css?inline';
+
+// If we don't do this, when we load the app in pages with next.js the icons will be too large
+//import { config } from '@fortawesome/fontawesome-svg-core'
+/* eslint import/no-webpack-loader-syntax: off */
+import fontawesome from '@fortawesome/fontawesome-svg-core/styles.css?inline';
+//config.autoAddCss = false;
+
+export default function Style(props) {
+    return (
+        <>
+            <style type="text/css">{styles}</style>
+            <style type="text/css">{fontawesome}</style>
+        </>
+    );
+}

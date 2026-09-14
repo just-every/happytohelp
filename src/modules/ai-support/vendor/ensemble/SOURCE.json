@@ -1,0 +1,9 @@
+{
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/just-every/ensemble.git"
+  },
+  "revision": "24031f61b9a0e0e5c40c21c18e94cd0f224e3afe",
+  "patch_sha256": "96704f7c95d4dd24f0f5b0da104874bd64d16316a604be07f9b246c91955fc75",
+  "version": "0.2.282-happytohelp.96704f7c95d4"
+}

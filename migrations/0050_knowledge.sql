@@ -1,0 +1,7 @@
+CREATE TABLE knowledge_datasets(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,name TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'empty',published_version TEXT,ingest_started_at INTEGER,ingest_cursor INTEGER NOT NULL DEFAULT -1,claim_token TEXT,source_input TEXT,error TEXT,refresh_mode TEXT NOT NULL DEFAULT 'manual',unchanged_count INTEGER NOT NULL DEFAULT 0,next_refresh_at INTEGER,last_refreshed_at INTEGER,created_at INTEGER NOT NULL);
+CREATE INDEX knowledge_datasets_project ON knowledge_datasets(project_id);
+CREATE TABLE knowledge_versions(id TEXT PRIMARY KEY,dataset_id TEXT NOT NULL REFERENCES knowledge_datasets(id) ON DELETE CASCADE, fingerprint TEXT NOT NULL,created_at INTEGER NOT NULL,semantic INTEGER NOT NULL DEFAULT 0,embedding_model TEXT);
+CREATE TABLE knowledge_documents(id TEXT PRIMARY KEY,version_id TEXT NOT NULL REFERENCES knowledge_versions(id) ON DELETE CASCADE,url TEXT NOT NULL,title TEXT NOT NULL,content TEXT NOT NULL);
+CREATE INDEX knowledge_documents_version ON knowledge_documents(version_id);
+CREATE TABLE knowledge_categories(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,parent_id TEXT REFERENCES knowledge_categories(id),name TEXT NOT NULL,slug TEXT NOT NULL,UNIQUE(project_id,slug));
+CREATE TABLE knowledge_articles(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,category_id TEXT REFERENCES knowledge_categories(id),slug TEXT NOT NULL,title TEXT NOT NULL,content TEXT NOT NULL,summary TEXT NOT NULL DEFAULT '',status TEXT NOT NULL CHECK(status IN ('draft','published')),updated_at INTEGER NOT NULL,UNIQUE(project_id,slug));

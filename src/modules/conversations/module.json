@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "runeditrun/conversation",
+  "version": "0.1.0",
+  "sourcePaths": [
+    "src/modules/conversations",
+    "migrations/0002_conversations.sql",
+    "migrations/0004_message_intent.sql",
+    "migrations/0007_conversation_history.sql",
+    "tests/conversation-admission.mjs",
+    "tests/conversation-socket.mjs",
+    "tests/conversation-worker.ts"
+  ],
+  "selectedEditionDependencies": [
+    "runeditrun/base"
+  ],
+  "runtime": "Workers TypeScript/ESM with edition-owned integration",
+  "license": "See docs/SOURCE-PROVENANCE.md; original notices travel with selected source",
+  "selection": "Existing paths are authoritative. Consumers select source and own adapters; no generator rewrites them.",
+  "notices": [
+    "docs/SOURCE-PROVENANCE.md"
+  ]
+}

@@ -2,137 +2,434 @@
   "id": "happytohelp",
   "name": "HappyToHelp",
   "version": "0.1.0",
-  "maturity": "local-worker-d1-delegation-acceptance",
+  "maturity": "native-migration-candidate; final contract acceptance evidence pending",
   "category": "support",
   "spine": {
-    "id": "support",
-    "record": "a customer request with bounded delegation and verified evidence"
+    "id": "happytohelp-conversation",
+    "record": "Project-owned customer conversations with durable messages, evidence and explicitly authorized work."
   },
-  "description": "An owner-operated support desk for accountable agent-delegated resolution across connected workspaces.",
-  "scope": "One installation and owner, multiple scoped workspace connections.",
+  "description": "Native editable HappyToHelp dashboard, widget, AI, knowledge, customer context, integrations and public site on the maintained RER Worker stack.",
   "capabilities": [
     {
-      "id": "delegated-resolution",
-      "description": "Scoped credentials, bounded modes, resumable claims, operator questions, verified evidence and durable reply approval.",
+      "id": "owner-installation",
       "clauses": [
-        "H2H-SCOPE-001",
-        "H2H-AUTHORITY-001",
-        "H2H-CLAIM-001",
-        "H2H-EVIDENCE-001",
-        "H2H-REVIEW-001"
+        "NATIVE-001"
+      ]
+    },
+    {
+      "id": "identity",
+      "clauses": [
+        "IDENTITY-001"
+      ]
+    },
+    {
+      "id": "conversations",
+      "clauses": [
+        "CONVERSATION-001"
+      ]
+    },
+    {
+      "id": "live-delivery",
+      "clauses": [
+        "DELIVERY-001"
+      ]
+    },
+    {
+      "id": "dashboard-widget",
+      "clauses": [
+        "UI-001"
+      ]
+    },
+    {
+      "id": "ai-support",
+      "clauses": [
+        "AI-001"
+      ]
+    },
+    {
+      "id": "knowledge",
+      "clauses": [
+        "KNOWLEDGE-001"
+      ]
+    },
+    {
+      "id": "customer-context",
+      "clauses": [
+        "CONTEXT-001"
+      ]
+    },
+    {
+      "id": "local-computer",
+      "clauses": [
+        "DELEGATION-001"
+      ]
+    },
+    {
+      "id": "training",
+      "clauses": [
+        "TRAINING-001"
+      ]
+    },
+    {
+      "id": "integrations",
+      "clauses": [
+        "INTEGRATION-001"
+      ]
+    },
+    {
+      "id": "public-site",
+      "clauses": [
+        "PUBLIC-001"
+      ]
+    },
+    {
+      "id": "legacy-import",
+      "clauses": [
+        "MIGRATION-001"
+      ]
+    },
+    {
+      "id": "source-authoring",
+      "clauses": [
+        "SOURCE-001"
       ]
     }
   ],
   "nonGoals": [
-    "A hosted agent execution service",
-    "Automatic authority from customer text",
-    "Generic workflow builder",
-    "Inbound email ingestion or knowledge base"
+    "Implicit deployment or provider execution from source inspection",
+    "Reusing legacy passwords or grants as native authority",
+    "Regenerating or erasing original owner checkouts"
   ],
   "externals": [
     {
       "id": "cloudflare",
       "required": true,
-      "why": "Owner-controlled Worker runtime and D1 persistence.",
+      "why": "Selected Worker/D1/R2/Queues/DO deployment target",
       "data": [
-        "requests",
-        "workspace grants",
-        "delegation evidence",
-        "reply receipts"
-      ],
-      "adapters": []
-    },
-    {
-      "id": "sendgrid",
-      "required": false,
-      "requiredWhen": "Outbound customer replies enabled",
-      "why": "Internet email delivery requires a configured sender.",
-      "data": [
-        "customer email",
-        "approved reply"
+        "Application records",
+        "Retained files",
+        "Requests and queued work"
       ],
       "adapters": [
-        "mail.sender.v1"
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "configured-providers",
+      "required": false,
+      "why": "Selected AI, semantic/crawl, email, billing, GitHub and branding capabilities",
+      "data": [
+        "Explicitly scoped provider inputs"
+      ],
+      "adapters": [
+        "scripts/deployment/environment.mjs"
       ]
     }
   ],
   "env": [
     {
-      "name": "H2H_BOOTSTRAP_TOKEN",
-      "secret": true,
-      "required": true,
-      "why": "Protects first owner creation."
-    },
-    {
-      "name": "APP_ORIGIN",
-      "secret": false,
-      "required": false,
-      "why": "Pins the canonical browser request origin."
-    },
-    {
-      "name": "SENDGRID_API_KEY",
+      "name": "BOOTSTRAP_TOKEN",
       "secret": true,
       "required": false,
-      "why": "Enables explicitly authorized outbound replies."
+      "requiredWhen": "Owner bootstrap or configured remote deploy",
+      "why": "Private native binding; see OPERATIONS.md."
     },
     {
-      "name": "MAIL_FROM",
-      "secret": false,
+      "name": "OPENAI_API_KEY",
+      "secret": true,
       "required": false,
-      "why": "Verified sender for outbound replies."
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
     },
     {
-      "name": "H2H_DEPLOY_MODE",
+      "name": "ANTHROPIC_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "GOOGLE_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "GEMINI_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "XAI_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "OPENROUTER_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "APIFY_TOKEN",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "QDRANT_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "EMAIL_API_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "EMAIL_FROM",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "WAITLIST_NOTIFY_EMAIL",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "INBOUND_EMAIL_TOKEN",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "INTEGRATION_ENCRYPTION_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "STRIPE_WEBHOOK_SECRET",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "GITHUB_CLIENT_SECRET",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "GITHUB_TOKEN",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "GITHUB_TOKENS",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "TURNSTILE_SECRET",
+      "secret": true,
+      "required": false,
+      "requiredWhen": "Selecting the corresponding optional capability",
+      "why": "Private native binding; see OPERATIONS.md."
+    },
+    {
+      "name": "REGISTRATION_ENABLED",
       "secret": false,
       "required": false,
-      "why": "Explicit local or remote target when the Base CLI invokes setup/deploy without command arguments."
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "BILLING_CURRENCY",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "LEAD_MODEL",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "CONTEXT_MODEL",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "KNOWLEDGE_EMBEDDING_MODEL",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "QDRANT_URL",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "APIFY_CRAWLER_ACTOR_ID",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "GITHUB_CLIENT_ID",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "GITHUB_PROJECT_ID",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "PREVIEW_ORIGIN",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "PUBLIC_DEMO_ENABLED",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "PUBLIC_WIDGET_PROJECT_ID",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "BRAND_IMAGE_MODEL",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "BRAND_IMAGE_SIZE",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "BRAND_IMAGE_QUALITY",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "TRAINING_PRICE_CEILINGS",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "ENABLE_SYNTHETIC_EVALUATION",
+      "secret": false,
+      "required": false,
+      "why": "Selected native runtime configuration; see OPERATIONS.md."
+    },
+    {
+      "name": "INTERCOM_TOKEN",
+      "secret": true,
+      "required": false,
+      "why": "Private selected provider import credential; see OPERATIONS.md."
+    },
+    {
+      "name": "FRESHDESK_TOKEN",
+      "secret": true,
+      "required": false,
+      "why": "Private selected provider import credential; see OPERATIONS.md."
+    },
+    {
+      "name": "ZENDESK_TOKEN",
+      "secret": true,
+      "required": false,
+      "why": "Private selected provider import credential; see OPERATIONS.md."
+    },
+    {
+      "name": "ZENDESK_EMAIL",
+      "secret": true,
+      "required": false,
+      "why": "Private selected provider import credential; see OPERATIONS.md."
     }
   ],
   "deploy": {
     "healthPath": "/health",
-    "operatorPath": "/",
     "publicPaths": [
       "/",
       "/health",
-      "/api/session",
-      "/api/auth/",
-      "/assets/",
-      "/cutout-2-7d0a1bb755be.png",
-      "/fonts/",
-      "/requests.svg",
-      "/connections.svg"
+      "/waitlist",
+      "/pricing",
+      "/resources/*",
+      "/company/*",
+      "/features/*",
+      "/help/*"
     ],
-    "notes": "The document contains no private data until authenticated API reads. Operator APIs require session and same-origin mutations. Agent APIs require scoped bearer credentials."
+    "notes": "Public knowledge uses active project IDs/claimed slugs and published articles. Private APIs/dashboard require current native identity. See OPERATIONS.md."
   },
   "extensionPoints": {
     "contributions": [],
     "policies": [],
     "events": [],
     "slots": [],
-    "adapters": [
-      "mail.sender.v1"
-    ]
+    "adapters": []
   },
   "limits": {
-    "status": "functional limits enforced; capacity not load tested",
-    "requestListMaximum": 200,
-    "jsonBodyBytes": 65536,
-    "agentWorkspacesMaximum": 30
+    "status": "unmeasured"
   },
   "accessibility": {
     "level": "WCAG 2.2 AA",
-    "status": "Target; keyboard and responsive core journey verification in progress, no full audit claim."
+    "status": "target; unaudited"
   },
   "operatingCost": {
-    "status": "not measured",
-    "notes": "Owner pays Cloudflare runtime/storage, agent tools and optional SendGrid usage."
-  },
-  "composition": {
-    "base": "base",
-    "family": "support",
-    "edition": "happytohelp",
-    "modules": [
-      "sendgrid-email"
-    ]
+    "status": "unmeasured"
   }
 }

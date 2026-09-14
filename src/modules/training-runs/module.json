@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "runeditrun/training-runs",
+  "version": "0.1.0",
+  "sourcePaths": [
+    "src/modules/training-runs",
+    "scripts/eval",
+    "migrations/040_training_runs.sql",
+    "tests/training",
+    "tests/eval-harness",
+    "migrations/041_training_model_usage.sql"
+  ],
+  "selectedEditionDependencies": [
+    "runeditrun/base",
+    "runeditrun/ai-support",
+    "runeditrun/local-computer",
+    "runeditrun/knowledge",
+    "runeditrun/customer-context"
+  ],
+  "runtime": "Workers TypeScript/ESM with edition-owned integration",
+  "license": "See docs/SOURCE-PROVENANCE.md; original notices travel with selected source",
+  "selection": "Existing paths are authoritative. Consumers select source and own adapters; no generator rewrites them.",
+  "notices": [
+    "docs/SOURCE-PROVENANCE.md"
+  ],
+  "dependencyScope": "selectedEditionDependencies describes the full HappyToHelp adapter composition, not imports required by every neutral entry point.",
+  "consumerIntegration": "Select the documented neutral source paths and supply the consumer authorization, storage and execution contracts. Full route/edition adapters additionally import HappyToHelp platform and may import its message-effects or billing integration."
+}

@@ -1,0 +1,273 @@
+#happytohelp-root .happytohelp-return-to-chat {
+  position: relative;
+  z-index: 2;
+  color: #666;
+  border-top-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  padding: 23px 60px 24px 30px;
+  position: relative;
+  font-size: 14px;
+  cursor: pointer;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-return-to-chat:hover {
+    background: rgba(245, 246, 251, 0.4);
+    color: #000;
+  }
+  #happytohelp-root .happytohelp-return-to-chat:hover svg {
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-return-to-chat + .happytohelp-send-message .happytohelp-message-input {
+  border-top-left-radius: 0px;
+}
+#happytohelp-root .happytohelp-return-to-chat svg {
+  position: absolute;
+  top: 26px;
+  right: 28px;
+  font-size: 15px;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 18px;
+  background: rgb(72, 71, 72);
+  color: #fff;
+  opacity: 0.9;
+}
+#happytohelp-root .happytohelp-return-to-chat .happytohelp-return-to-chat-title {
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-return-to-chat .happytohelp-return-to-chat-content {
+  opacity: 0.9;
+  font-size: 12px;
+}
+#happytohelp-root .happytohelp-send-message {
+  position: relative;
+  z-index: 2;
+  outline: none;
+  margin: 0px 30px 30px;
+  transition: margin 0.3s ease-out;
+  border-top-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+#happytohelp-root .happytohelp-send-message a {
+  color: #000;
+}
+#happytohelp-root .happytohelp-send-message.happytohelp-send-message-conversation {
+  border-top-left-radius: 0px;
+  margin: 0px;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-message-input {
+  padding-bottom: 10px;
+  outline: none;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row {
+  position: relative;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-error {
+  color: #cb0000;
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-error svg {
+  color: #cb0000;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-error input {
+  color: #cb0000;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-larger {
+  padding-top: 15px;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons {
+  padding-left: 6px;
+  padding-right: 10px;
+  cursor: text;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container {
+  flex-grow: 1;
+  display: flex;
+  min-width: 0;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact {
+  color: #bbb;
+  letter-spacing: 0.01em;
+  font-size: 12px;
+  line-height: 33px !important;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 0;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact svg {
+  font-size: 14px;
+  color: #cecece;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact:hover {
+    background: #fff;
+    color: #333;
+  }
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact:hover svg {
+    color: #484748;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-drag-files {
+  margin-top: -15px;
+  margin-bottom: 10px;
+  align-items: center;
+  text-align: center;
+  padding: 50px 10px;
+  border-width: 2px;
+  border-radius: 2px;
+  border-color: #eeeeee;
+  border-style: dashed;
+  background-color: #ffffff;
+  color: #bdbdbd;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row label.error {
+  position: absolute;
+  left: 0px;
+  bottom: unset;
+  top: -2px;
+  color: #bd0502;
+  font-size: 12px;
+  z-index: 1;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  letter-spacing: 0.01em;
+  width: 100%;
+  border: none;
+  color: #333;
+  height: unset;
+  background: transparent;
+  border-radius: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea.error {
+  border-color: #bd0502 !important;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea {
+  height: 48px;
+  min-height: 48px;
+  max-height: 300px;
+  resize: none;
+  line-height: 1.5em;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  vertical-align: top;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn {
+  background: transparent;
+  border: none;
+  color: #cecece;
+  padding: 0;
+  height: 33px !important;
+  line-height: 33px;
+  min-width: 40px;
+  display: inline-block;
+  font-size: 20px;
+  float: right;
+  margin-left: 1px;
+  outline: none;
+  transform: scale(1);
+  will-change: transform;
+  transition: transform 0.1s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn:active {
+  transform: scale(0.9);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn:hover {
+    color: #484748;
+    background: #fff;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit] {
+  color: #fff;
+  padding: 0px 27px;
+  float: right;
+  font-size: 15px;
+  margin-left: 10px;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit]:hover {
+    opacity: 0.9;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit]:active {
+  transform: scale(0.97);
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit] svg {
+  font-size: 15px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files {
+  margin: 0;
+  padding: 0;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li {
+  list-style: none;
+  font-size: 14px;
+  color: #484748;
+  padding: 8px 26px 3px 15px;
+  position: relative;
+  word-break: break-word;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li:last-child {
+  margin-bottom: -6px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li img.happytohelp-preview {
+  max-width: 70%;
+  max-height: 110px;
+  cursor: zoom-in;
+  border-radius: 3px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li span.happytohelp-preview {
+  display: inline-block;
+  padding: 3px 15px 9px 0px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li span.happytohelp-preview a {
+  cursor: zoom-in;
+  text-decoration: underline;
+  color: #484748;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message ul.happytohelp-files li span.happytohelp-preview a:hover {
+    color: #000;
+  }
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li .happytohelp-preview-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message ul.happytohelp-files li .happytohelp-preview-close:hover {
+    color: #000;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-clear {
+  clear: both;
+}
+
+/*# sourceMappingURL=SendMessage.css.map */

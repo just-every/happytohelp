@@ -1,0 +1,23 @@
+{
+  "checks": [
+    "all-open shows persisted visitor conversation",
+    "operator send persists and survives reload",
+    "internal note persisted",
+    "saved reply creation",
+    "project settings persist",
+    "brand image upload persists",
+    "insights route opened",
+    "contacts route opened",
+    "ais route opened",
+    "datasets route opened",
+    "articles route opened",
+    "categories route opened",
+    "agents route opened",
+    "email-settings route opened",
+    "local-agent route opened",
+    "billing route opened",
+    "mobile conversation no horizontal overflow"
+  ],
+  "errors": [],
+  "failed": []
+}

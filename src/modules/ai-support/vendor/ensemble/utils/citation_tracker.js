@@ -1,0 +1,19 @@
+export function createCitationTracker() {
+    return {
+        citations: new Map(),
+    };
+}
+export function formatCitation(tracker, citation) {
+    if (!tracker.citations.has(citation.url)) {
+        tracker.citations.set(citation.url, citation);
+    }
+    return ` [${Array.from(tracker.citations.keys()).indexOf(citation.url) + 1}]`;
+}
+export function generateFootnotes(tracker) {
+    if (tracker.citations.size === 0)
+        return '';
+    const footnotes = Array.from(tracker.citations.values())
+        .map((citation, i) => `[${i + 1}] ${citation.title} – ${citation.url}`)
+        .join('\n');
+    return '\n\nReferences:\n' + footnotes;
+}

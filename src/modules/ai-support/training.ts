@@ -1,0 +1,51 @@
+import {recordTrainingEvent} from './training-trace'
+import type { Env } from '../../platform/env'
+import type { TrainingExecution,TrainingResult } from '../training-runs/contracts'
+import {assertModelConfigured} from './configuration'
+import {checkTrainingBudget} from './training-budget'
+import {executeSystemCase} from './training-system'
+// @ts-ignore Retained frozen comparator with explicit native fixture adapter.
+import {buildBaselineTrainingRequest} from '../training-runs/baseline.js'
+// @ts-ignore Retained prompt source.
+import { generateSuggestions,generateReply } from './assist/prompt.js'
+// @ts-ignore Retained scoped runtime.
+import { withWorkerRuntime } from './vendor/ensemble/worker-runtime.js'
+// @ts-ignore Retained evidence source.
+import { evidenceIdsForPacket,imageInputsForPacket } from './assist/packet.js'
+// @ts-ignore Retained customer packet.
+import {customerReplyPacket} from './replies/packet.js'
+// @ts-ignore Retained customer prompt.
+import {customerReplyMessages} from './replies/prompt.js'
+// @ts-ignore Retained neutral engine.
+import {runStream,TASKS} from './llm/orchestrator.js'
+export async function executeTrainingCase(env:Env,input:TrainingExecution):Promise<TrainingResult>{
+ assertModelConfigured(env,input.model)
+ if(input.caseDefinition.insightModel){assertModelConfigured(env,input.caseDefinition.insightModel);checkTrainingBudget(env,{...input,model:input.caseDefinition.insightModel})}
+ checkTrainingBudget(env,input)
+ const definition=input.caseDefinition,toolCalls:any[]=[],usages:any[]=[]
+ const trace={onEvent:(event:any)=>recordTrainingEvent(env,input.projectId,input.attemptId,event),onUsage:(value:any)=>usages.push(value),onToolCall:(event:any)=>toolCalls.push(event)}
+ const runtime={apiKey:env.OPENAI_API_KEY,files:env.FILES,scope:`projects/${input.projectId}/training/${input.attemptId}`,settings:env}
+ const finish=(result:any,imageInputs:any[]=[])=>{
+  // Suggestions emit a running aggregate; other families emit one usage per stage.
+  const selected=definition.family==='monitoring'||definition.family==='profile'?usages:usages.slice(-1)
+  const known=selected.length>0&&selected.every(u=>!u.cost_unknown&&typeof u.cost==='number')
+  return {...result,toolCalls,imageInputs,usage:{cost:known?selected.reduce((s,u)=>s+u.cost,0):null,inputTokens:selected.reduce((s,u)=>s+u.input_tokens,0),outputTokens:selected.reduce((s,u)=>s+u.output_tokens,0)},stageUsage:usages}
+ }
+ if(['baseline','legacy-ui'].includes(input.variant)){
+  const request=buildBaselineTrainingRequest(definition,input.variant)
+  const output=await withWorkerRuntime(runtime,()=>runStream({project_id:input.projectId,task:TASKS.AGENT_SUGGESTIONS,messages:request.messages,schema:request.schema,response_name:'baseline_suggestions',options:{model:input.model,maxToolCalls:0,maxToolCallRoundsPerTurn:1,modelSettings:{max_tokens:input.maxTokens}},trace}))
+  return finish({output,response:output,comparator:request.comparator})
+ }
+ if(['monitoring','profile'].includes(definition.family))return finish(await withWorkerRuntime(runtime,()=>executeSystemCase(input,trace)))
+ if(definition.family==='human_voice'&&definition.context){const context=definition.context;const result=await withWorkerRuntime(runtime,()=>generateReply({...context,project_id:input.projectId,options:{...context.options,model:input.model,modelSettings:{max_tokens:input.maxTokens},maxToolCalls:1,maxToolCallRoundsPerTurn:2,trace}},null,'complete'));return finish({output:result,response:result.response},imageInputsForPacket(context.assist?.packet||{}))}
+ if(!Array.isArray(definition.messages))throw new Error('Training case requires explicit messages')
+ const packet={schema:'happytohelp.assist-context.v1',company:{name:'Training workspace'},customer:definition.contact||null,drafting_identity:{kind:'human-operator',human:definition.agent||null},timeline:definition.messages.map((m:any,i:number)=>({...m,kind:'message',evidence_id:m.evidence_id||`message:${m.id||i}`,visibility:'customer-conversation'})),private_notes:(definition.private_events||[]).map((m:any,i:number)=>({...m,evidence_id:m.evidence_id||`note:${m.id||i}`,visibility:'private-to-operators'})),operator_guidance:{content:definition.request?.instructions||''},draft:{content:definition.request?.draft||''},knowledge:{readiness:'provided',catalog:(definition.knowledge||[]).map((k:any,i:number)=>({...k,evidence_id:k.evidence_id||`knowledge:${k.id||i}`}))},activity:[],summaries:[]}
+ const options={model:input.model,modelSettings:{max_tokens:input.maxTokens},maxToolCalls:1,maxToolCallRoundsPerTurn:2,trace}
+ const context={project_id:input.projectId,assist:{packet,policies:definition.policies||[],evidenceIds:evidenceIdsForPacket(packet)},tools:[],options}
+ const result=await withWorkerRuntime(runtime,async()=>{
+  if(definition.family==='customer_reply'){const result=await runStream({project_id:input.projectId,task:TASKS.USER_REPLY,messages:customerReplyMessages({replies:{packet:customerReplyPacket({assistPacket:packet}),policies:definition.policies||[]}}),options,trace});return {output:result,response:result.response}}
+  if(definition.family==='human_voice'){const result=await generateReply(context,null,'complete');return {output:result,response:result.response}}
+  const result=await generateSuggestions(context);return {output:result,response:result}
+ })
+ return finish(result,imageInputsForPacket(packet))
+}

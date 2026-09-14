@@ -1,0 +1,603 @@
+diff --git a/data/model_data.ts b/data/model_data.ts
+index f47a1b0..52a6fa5 100644
+--- a/data/model_data.ts
++++ b/data/model_data.ts
+@@ -66,7 +66,7 @@ export const MODEL_CLASSES = {
+         models: [
+             // One top pick per provider (prefer stable IDs over dated previews when possible)
+             'gpt-5.5', // OpenAI
+-            'gemini-3.6-flash', // Google
++            'gemini-3.8-flash', // Google
+             'claude-sonnet-5', // Anthropic
+             'grok-4.5', // X.AI
+         ],
+@@ -156,7 +156,7 @@ export const MODEL_CLASSES = {
+     writing: {
+         models: [
+             'gpt-5.5', // OpenAI
+-            'gemini-3.6-flash', // Google
++            'gemini-3.8-flash', // Google
+             'claude-sonnet-5', // Anthropic
+             'grok-4.5', // X.AI
+         ],
+@@ -2626,9 +2626,28 @@ export const MODEL_REGISTRY: ModelEntry[] = [
+         class: 'standard',
+         description: 'Gemini 3 Flash Preview - fast multimodal model with 1M context window.',
+     },
++    // Verified 2026-09-08: https://ai.google.dev/gemini-api/docs/pricing
++    // Introductory pricing ends 2026-12-31; review before January 2027 billing.
++    {
++        id: 'gemini-3.8-flash',
++        aliases: ['gemini-flash-latest', 'models/gemini-3.8-flash', 'models/gemini-flash-latest'],
++        provider: 'google',
++        cost: { input_per_million: 0.75, cached_input_per_million: 0.075, output_per_million: 3.75 },
++        features: {
++            context_length: 1048576,
++            max_output_tokens: 65536,
++            input_modality: ['text', 'image', 'video', 'audio'],
++            output_modality: ['text'],
++            tool_use: true,
++            streaming: true,
++            json_output: true,
++        },
++        class: 'standard',
++        description: 'Gemini 3.8 Flash GA. Low/medium/high thinking. Introductory prices through 2026-12-31.',
++    },
+     {
+         id: 'gemini-3.6-flash',
+-        aliases: ['gemini-flash-latest', 'models/gemini-3.6-flash', 'models/gemini-flash-latest'],
++        aliases: ['models/gemini-3.6-flash'],
+         provider: 'google',
+         cost: {
+             input_per_million: 1.5,
+@@ -3813,6 +3832,7 @@ export const MODEL_REGISTRY: ModelEntry[] = [
+         id: 'deepseek-v4-pro',
+         aliases: ['DeepSeek-V4', 'DeepSeek-V4-Pro', 'deepseek-v4'],
+         provider: 'deepseek',
++        // https://api-docs.deepseek.com/quick_start/pricing/ (2026-08-16 schedule)
+         cost: {
+             input_per_million: deepSeekV4TimeBasedPrice(0.66, 1.32),
+             cached_input_per_million: deepSeekV4TimeBasedPrice(0.022, 0.044),
+@@ -3829,12 +3849,13 @@ export const MODEL_REGISTRY: ModelEntry[] = [
+             reasoning_output: true,
+         },
+         class: 'reasoning',
+-        description: 'DeepSeek V4 Pro direct API model with native tools, JSON output, and high/max reasoning.',
++        description: 'DeepSeek V4 Pro direct API model with native tools, JSON output, and low/high/max reasoning.',
+     },
+     {
+         id: 'deepseek-v4-flash',
+         aliases: ['DeepSeek-V4-Flash'],
+         provider: 'deepseek',
++        // https://api-docs.deepseek.com/quick_start/pricing/ (2026-08-16 schedule)
+         cost: {
+             input_per_million: deepSeekV4TimeBasedPrice(0.22, 0.44),
+             cached_input_per_million: deepSeekV4TimeBasedPrice(0.007, 0.014),
+diff --git a/model_providers/deepseek_v4_contract.ts b/model_providers/deepseek_v4_contract.ts
+index dd7b497..d3ef306 100644
+--- a/model_providers/deepseek_v4_contract.ts
++++ b/model_providers/deepseek_v4_contract.ts
+@@ -2,7 +2,7 @@ import OpenAI from 'openai';
+ 
+ type DeepSeekV4Params = OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming & {
+     reasoning?: { effort?: string };
+-    reasoning_effort?: 'high' | 'max';
++    reasoning_effort?: 'low' | 'high' | 'max';
+     thinking?: { type: 'enabled' | 'disabled' };
+ };
+ 
+@@ -23,6 +23,6 @@ export function applyDeepSeekV4Contract(
+     }
+ 
+     params.thinking = { type: 'enabled' };
+-    params.reasoning_effort = effort === 'xhigh' || effort === 'max' ? 'max' : 'high';
++    params.reasoning_effort = effort === 'max' ? 'max' : effort === 'low' || effort === 'minimal' ? 'low' : 'high';
+     return params;
+ }
+diff --git a/model_providers/gemini.ts b/model_providers/gemini.ts
+index 1d01067..602f7b9 100644
+--- a/model_providers/gemini.ts
++++ b/model_providers/gemini.ts
+@@ -76,6 +76,9 @@ function convertParameterToGeminiFormat(param: any): any {
+         case 'string':
+             type = Type.STRING;
+             break;
++        case 'integer':
++            type = Type.INTEGER;
++            break;
+         case 'number':
+             type = Type.NUMBER;
+             break;
+@@ -897,6 +900,9 @@ function getSupportedThinkingLevels(model: string): Set<GeminiThinkingLevel> | n
+     if (isGemmaModel(model)) {
+         return new Set(['HIGH']);
+     }
++    if (model.includes('gemini-3.8-flash') || model.includes('gemini-3.7-flash')) {
++        return new Set(['LOW', 'MEDIUM', 'HIGH']);
++    }
+     if (model.includes('gemini-3.1-pro-preview') || model.includes('gemini-3-pro-preview')) {
+         return new Set(['LOW', 'MEDIUM', 'HIGH']);
+     }
+diff --git a/model_providers/gemini_model_contract.ts b/model_providers/gemini_model_contract.ts
+index b52112a..9acc49a 100644
+--- a/model_providers/gemini_model_contract.ts
++++ b/model_providers/gemini_model_contract.ts
+@@ -13,5 +13,9 @@ function normalizeModelId(model: string): string {
+ export function usesCurrentGeminiGenerateContentContract(model: string): boolean {
+     const modelId = normalizeModelId(model);
+ 
+-    return modelId === 'gemini-3.6-flash' || modelId === 'gemini-3.5-flash-lite' || CURRENT_FLASH_ALIASES.has(modelId);
++    return (
++        ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash'].includes(modelId) ||
++        modelId === 'gemini-3.5-flash-lite' ||
++        CURRENT_FLASH_ALIASES.has(modelId)
++    );
+ }
+diff --git a/model_providers/openai_chat.ts b/model_providers/openai_chat.ts
+index 16d67f8..3cd5366 100644
+--- a/model_providers/openai_chat.ts
++++ b/model_providers/openai_chat.ts
+@@ -13,6 +13,8 @@ import {
+     ToolCall,
+     ResponseInput,
+     ResponseContent,
++    ResponseInputFunctionCall,
++    ResponseInputFunctionCallOutput,
+     AgentDefinition,
+ } from '../types/types.js';
+ import { BaseModelProvider } from './base_provider.js';
+@@ -253,11 +255,73 @@ async function mapMessagesToOpenAI(
+ 
+     // Check if this is a Mistral model via OpenRouter (which doesn't support tool roles)
+     const isMistralViaOpenRouter = model.includes('mistral') || model.includes('magistral');
+-
+-    for (const msg of messages) {
++    // DeepSeek V4's thinking mode requires the exact reasoning content from an
++    // assistant tool-call turn on the continuation request. MessageHistory
++    // stores calls and results individually so it can schedule tools safely;
++    // reconstruct the provider's one assistant turn here.
++    const replaysReasoningContent = /(?:^|\/)deepseek-v4-/.test(model);
++
++    for (let index = 0; index < messages.length; ++index) {
++        const msg = messages[index];
+         // Create a clean copy without non-standard properties
+         const message = { ...msg };
+ 
++        if (replaysReasoningContent && msg.type === 'function_call') {
++            const reasoningContent = (msg as ResponseInputFunctionCall & { reasoning_content?: unknown })
++                .reasoning_content;
++            if (typeof reasoningContent === 'string' && reasoningContent.length > 0) {
++                const functionCalls: ResponseInputFunctionCall[] = [];
++                const functionOutputs: ResponseInputFunctionCallOutput[] = [];
++                let cursor = index;
++
++                // Calls from one streamed assistant turn can be interleaved
++                // with their completed outputs in MessageHistory. Group only
++                // calls that carry the same reasoning record; a new record
++                // starts the next provider turn.
++                while (cursor < messages.length) {
++                    const candidate = messages[cursor];
++                    if (candidate.type === 'function_call') {
++                        const candidateReasoning = (
++                            candidate as ResponseInputFunctionCall & { reasoning_content?: unknown }
++                        ).reasoning_content;
++                        if (candidateReasoning !== reasoningContent) break;
++                        functionCalls.push(candidate);
++                    } else if (candidate.type === 'function_call_output') {
++                        functionOutputs.push(candidate);
++                    } else {
++                        break;
++                    }
++                    ++cursor;
++                }
++
++                result.push({
++                    role: 'assistant',
++                    content: null,
++                    reasoning_content: reasoningContent,
++                    tool_calls: functionCalls.map(functionCall => ({
++                        id: functionCall.call_id,
++                        type: 'function' as const,
++                        function: {
++                            name: functionCall.name,
++                            arguments: functionCall.arguments,
++                        },
++                    })),
++                } as OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam);
++
++                for (const functionOutput of functionOutputs) {
++                    const toolMessage = {
++                        role: 'tool',
++                        tool_call_id: functionOutput.call_id,
++                        content: functionOutput.output || '',
++                    } as OpenAI.Chat.Completions.ChatCompletionToolMessageParam;
++                    result = await appendMessageWithImage(model, result, toolMessage, 'content', addImagesToInput);
++                }
++
++                index = cursor - 1;
++                continue;
++            }
++        }
++
+         // Handle function call output messages
+         if (msg.type === 'function_call_output') {
+             if (isMistralViaOpenRouter) {
+@@ -1104,6 +1168,13 @@ export class OpenAIChat extends BaseModelProvider {
+                             };
+                         } else {
+                             for (const completedToolCall of validatedToolCalls) {
++                                // DeepSeek V4 requires this verbatim reasoning record
++                                // on the assistant tool-call message that precedes the
++                                // corresponding tool results. Keep it with each call
++                                // so MessageHistory can preserve a multi-call turn.
++                                if (aggregatedThinking) {
++                                    completedToolCall.reasoning_content = aggregatedThinking;
++                                }
+                                 yield {
+                                     type: 'tool_start',
+                                     tool_call: completedToolCall,
+diff --git a/test/gemini_3_6_support.test.ts b/test/gemini_3_6_support.test.ts
+index 9bea0ae..f5f397a 100644
+--- a/test/gemini_3_6_support.test.ts
++++ b/test/gemini_3_6_support.test.ts
+@@ -44,23 +44,23 @@ describe('Gemini July 2026 model support', () => {
+     });
+ 
+     it('resolves current latest aliases and promotes stable class defaults', async () => {
+-        expect(findModel('gemini-flash-latest')?.id).toBe('gemini-3.6-flash');
+-        expect(findModel('models/gemini-3.6-flash')?.id).toBe('gemini-3.6-flash');
++        expect(findModel('gemini-flash-latest')?.id).toBe('gemini-3.8-flash');
++        expect(findModel('models/gemini-3.8-flash')?.id).toBe('gemini-3.8-flash');
+         expect(findModel('gemini-flash-lite-latest')?.id).toBe('gemini-3.5-flash-lite');
+         expect(findModel('models/gemini-3.5-flash-lite')?.id).toBe('gemini-3.5-flash-lite');
+         expect(await getModelFromAgent({ agent_id: 'flash-latest', model: 'gemini-flash-latest' } as any)).toBe(
+-            'gemini-3.6-flash'
++            'gemini-3.8-flash'
+         );
+         expect(
+             await getModelFromAgent({ agent_id: 'flash-lite-latest', model: 'gemini-flash-lite-latest' } as any)
+         ).toBe('gemini-3.5-flash-lite');
+ 
+-        expect(MODEL_CLASSES.standard.models).toContain('gemini-3.6-flash');
++        expect(MODEL_CLASSES.standard.models).toContain('gemini-3.8-flash');
+         expect(MODEL_CLASSES.mini.models).toContain('gemini-3.5-flash-lite');
+         expect(MODEL_CLASSES.reasoning_mini.models).toContain('gemini-3.5-flash-lite');
+     });
+ 
+-    it.each(['gemini-3.6-flash', 'gemini-3.5-flash-lite'])(
++    it.each(['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'])(
+         'uses native thinking levels and omits deprecated sampling parameters for %s',
+         async modelId => {
+             const provider = new GeminiProvider('test-key');
+@@ -96,6 +96,39 @@ describe('Gemini July 2026 model support', () => {
+         }
+     );
+ 
++    it('keeps integer retrieval limits as integer tool parameters', async () => {
++        const provider = new GeminiProvider('test-key');
++        const generateContentStream = vi.fn().mockResolvedValue(makeSingleChunkStream());
++        (provider as any)._client = { models: { generateContentStream } };
++        const tools = [
++            {
++                definition: {
++                    type: 'function',
++                    function: {
++                        name: 'read_history',
++                        description: 'Read a page of history',
++                        parameters: {
++                            type: 'object',
++                            properties: { limit: { type: 'integer', description: 'Entry limit' } },
++                            required: ['limit'],
++                        },
++                    },
++                },
++                function: async () => 'History',
++            },
++        ];
++        for await (const _event of provider.createResponseStream(
++            [{ type: 'message', role: 'user', content: 'Read history' }] as any,
++            'gemini-3.8-flash',
++            { agent_id: 'integer-tool', tools } as any,
++            'integer-tool-request'
++        )) {
++            /* Drain stream. */
++        }
++        const request = generateContentStream.mock.calls.at(0)?.[0] as any;
++        expect(request.config.tools[0].functionDeclarations[0].parameters.properties.limit.type).toBe('INTEGER');
++    });
++
+     it('rejects a prefilled model turn before dispatching a Gemini 3.6 request', async () => {
+         const provider = new GeminiProvider('test-key');
+         const generateContentStream = vi.fn().mockResolvedValue(makeSingleChunkStream());
+diff --git a/test/model_scoring.test.ts b/test/model_scoring.test.ts
+index 53d6c5a..b564c0c 100644
+--- a/test/model_scoring.test.ts
++++ b/test/model_scoring.test.ts
+@@ -38,7 +38,7 @@ describe('Model Scoring and Disabling', () => {
+             modelClass: 'standard',
+             modelScores: {
+                 'gpt-5.5': 90, // Should be selected most often
+-                'gemini-3.6-flash': 10, // Should be selected rarely
++                'gemini-3.8-flash': 10, // Should be selected rarely
+             },
+         };
+ 
+@@ -54,7 +54,7 @@ describe('Model Scoring and Disabling', () => {
+         // With 90:10 weighting, the high-weight model should be selected significantly more often
+         // We'll allow some variance but expect at least 70% for the high-weight model
+         const gptCount = selectionCounts['gpt-5.5'] || 0;
+-        const geminiCount = selectionCounts['gemini-3.6-flash'] || 0;
++        const geminiCount = selectionCounts['gemini-3.8-flash'] || 0;
+ 
+         // Only check if both models were available
+         if (gptCount > 0 && geminiCount > 0) {
+@@ -68,7 +68,7 @@ describe('Model Scoring and Disabling', () => {
+             disabledModels: ['deepseek-v4-flash', 'grok-4'],
+             modelScores: {
+                 'gpt-5.5': 80,
+-                'gemini-3.6-flash': 20,
++                'gemini-3.8-flash': 20,
+                 'claude-sonnet-5': 50,
+             },
+         };
+@@ -80,7 +80,7 @@ describe('Model Scoring and Disabling', () => {
+             expect(model).not.toBe('deepseek-v4-flash');
+             expect(model).not.toBe('grok-4');
+             // Should only select from scored models that aren't disabled
+-            expect(['gemini-3.6-flash', 'gpt-5.5', 'claude-sonnet-5']).toContain(model);
++            expect(['gemini-3.8-flash', 'gpt-5.5', 'claude-sonnet-5']).toContain(model);
+         }
+     });
+ 
+@@ -98,7 +98,7 @@ describe('Model Scoring and Disabling', () => {
+     it('should work with getModelFromClass directly', async () => {
+         const modelScores = {
+             'gpt-5.5': 100,
+-            'gemini-3.6-flash': 0, // Zero weight, should never be selected
++            'gemini-3.8-flash': 0, // Zero weight, should never be selected
+         };
+ 
+         // Run multiple times
+@@ -108,7 +108,7 @@ describe('Model Scoring and Disabling', () => {
+             expect(model).not.toBe('deepseek-v4-flash'); // Should never select disabled
+ 
+             // With a score of 0, the zero-weight model should never be selected when other models have positive weights
+-            if (model === 'gemini-3.6-flash') {
++            if (model === 'gemini-3.8-flash') {
+                 zeroWeightSelected = true;
+             }
+         }
+diff --git a/test/openai_chat_structured_output.test.ts b/test/openai_chat_structured_output.test.ts
+index 842d917..6fa7be7 100644
+--- a/test/openai_chat_structured_output.test.ts
++++ b/test/openai_chat_structured_output.test.ts
+@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
+ import { DeepSeekProvider } from '../model_providers/deepseek.js';
+ import { OpenAIChat } from '../model_providers/openai_chat.js';
+ import { OpenRouterProvider } from '../model_providers/openrouter.js';
++import { convertToFunctionCall, convertToFunctionCallOutput } from '../utils/message_converter.js';
+ 
+ async function drain(stream: AsyncIterable<unknown>): Promise<void> {
+     for await (const _event of stream) {
+@@ -26,6 +27,43 @@ function completionStream(content = '{}') {
+     };
+ }
+ 
++function reasoningToolCallStream() {
++    return {
++        async *[Symbol.asyncIterator]() {
++            yield {
++                choices: [
++                    {
++                        delta: { reasoning_content: 'I need the scoped knowledge before answering.' },
++                    },
++                ],
++            };
++            yield {
++                choices: [
++                    {
++                        delta: {
++                            tool_calls: [
++                                {
++                                    index: 0,
++                                    id: 'call_knowledge',
++                                    type: 'function',
++                                    function: { name: 'search_knowledge', arguments: '{"query":"refund"}' },
++                                },
++                                {
++                                    index: 1,
++                                    id: 'call_history',
++                                    type: 'function',
++                                    function: { name: 'read_conversation_history', arguments: '{"limit":10}' },
++                                },
++                            ],
++                        },
++                        finish_reason: 'tool_calls',
++                    },
++                ],
++            };
++        },
++    };
++}
++
+ function attachMockChatClient(provider: unknown) {
+     const create = vi.fn().mockResolvedValue(completionStream());
+     (provider as any)._client = {
+@@ -253,4 +291,67 @@ describe('OpenAI chat structured output request formatting', () => {
+         expect(requestParams.messages.at(-1).role).toBe('system');
+         expect(requestParams.messages.at(-1).content).toContain('Respond only with valid JSON.');
+     });
++
++    it('replays DeepSeek reasoning with a grouped native tool turn', async () => {
++        const provider = new DeepSeekProvider();
++        const create = vi
++            .fn()
++            .mockResolvedValueOnce(reasoningToolCallStream())
++            .mockResolvedValueOnce(completionStream('Done.'));
++        (provider as any)._client = { chat: { completions: { create } } };
++
++        const firstRoundEvents: any[] = [];
++        for await (const event of provider.createResponseStream(
++            [{ type: 'message', role: 'user', content: 'Check the refund status.' }] as any,
++            'deepseek-v4-flash',
++            { agent_id: 'test-deepseek-reasoning-tool-replay' } as any
++        )) {
++            firstRoundEvents.push(event);
++        }
++
++        const toolCalls = firstRoundEvents.filter(event => event.type === 'tool_start').map(event => event.tool_call);
++        expect(toolCalls).toHaveLength(2);
++        expect(toolCalls.map(call => call.reasoning_content)).toEqual([
++            'I need the scoped knowledge before answering.',
++            'I need the scoped knowledge before answering.',
++        ]);
++
++        const resumedHistory: any[] = [{ type: 'message', role: 'user', content: 'Check the refund status.' }];
++        for (const toolCall of toolCalls) {
++            resumedHistory.push(convertToFunctionCall(toolCall, 'deepseek-v4-flash'));
++            resumedHistory.push(
++                convertToFunctionCallOutput(
++                    {
++                        id: toolCall.id,
++                        call_id: toolCall.id,
++                        toolCall,
++                        output: JSON.stringify({ source: toolCall.function.name }),
++                    },
++                    'deepseek-v4-flash'
++                )
++            );
++        }
++
++        await drain(
++            provider.createResponseStream(resumedHistory as any, 'deepseek-v4-flash', {
++                agent_id: 'test-deepseek-reasoning-tool-replay',
++            } as any)
++        );
++
++        const resumedRequest = create.mock.calls.at(1)?.[0];
++        expect(resumedRequest.messages).toHaveLength(4);
++        expect(resumedRequest.messages[1]).toMatchObject({
++            role: 'assistant',
++            content: null,
++            reasoning_content: 'I need the scoped knowledge before answering.',
++            tool_calls: [
++                { id: 'call_knowledge', function: { name: 'search_knowledge', arguments: '{"query":"refund"}' } },
++                { id: 'call_history', function: { name: 'read_conversation_history', arguments: '{"limit":10}' } },
++            ],
++        });
++        expect(resumedRequest.messages.slice(2)).toEqual([
++            { role: 'tool', tool_call_id: 'call_knowledge', content: '{"source":"search_knowledge"}' },
++            { role: 'tool', tool_call_id: 'call_history', content: '{"source":"read_conversation_history"}' },
++        ]);
++    });
+ });
+diff --git a/test/provider_model_refresh_july_2026.test.ts b/test/provider_model_refresh_july_2026.test.ts
+index b1d50b8..67ff7dc 100644
+--- a/test/provider_model_refresh_july_2026.test.ts
++++ b/test/provider_model_refresh_july_2026.test.ts
+@@ -26,7 +26,7 @@ describe('July 2026 provider model refresh', () => {
+         } as any) as any;
+         expect(max.reasoning).toBeUndefined();
+         expect(max.thinking).toEqual({ type: 'enabled' });
+-        expect(max.reasoning_effort).toBe('max');
++        expect(max.reasoning_effort).toBe('high');
+ 
+         const disabled = provider.prepareParameters({
+             model: 'deepseek-v4-flash',
+diff --git a/types/types.ts b/types/types.ts
+index e8ccc67..f904628 100644
+--- a/types/types.ts
++++ b/types/types.ts
+@@ -137,6 +137,12 @@ export interface ToolCall {
+     type: 'function';
+     call_id?: string;
+     thought_signature?: string;
++    /**
++     * Provider reasoning that accompanied this native tool-call turn. Some
++     * OpenAI-compatible reasoning APIs require it to be replayed verbatim
++     * with the assistant tool-call message before they accept tool results.
++     */
++    reasoning_content?: string;
+     function: {
+         name: string;
+         arguments: string;
+@@ -273,6 +279,8 @@ export interface ResponseInputFunctionCall extends ResponseBaseMessage {
+     name: string;
+     arguments: string;
+     thought_signature?: string;
++    /** Provider reasoning retained from the assistant tool-call turn. */
++    reasoning_content?: string;
+     id?: string;
+     status?: 'in_progress' | 'completed' | 'incomplete';
+ }
+diff --git a/utils/message_converter.ts b/utils/message_converter.ts
+index ca7b7b3..6f463fe 100644
+--- a/utils/message_converter.ts
++++ b/utils/message_converter.ts
+@@ -61,6 +61,7 @@ export function convertToFunctionCall(
+         name: toolCall.function.name,
+         arguments: toolCall.function.arguments,
+         ...(toolCall.thought_signature ? { thought_signature: toolCall.thought_signature } : {}),
++        ...(toolCall.reasoning_content ? { reasoning_content: toolCall.reasoning_content } : {}),
+         model,
+         status,
+         timestamp: Date.now(),
+diff --git a/test/flash_models_september_2026.test.ts b/test/flash_models_september_2026.test.ts
+new file mode 100644
+index 0000000..a7eff34
+--- /dev/null
++++ b/test/flash_models_september_2026.test.ts
+@@ -0,0 +1,53 @@
++import { describe, expect, it } from 'vitest';
++import { findModel } from '../data/model_data.js';
++import { costTracker } from '../utils/cost_tracker.js';
++import { applyDeepSeekV4Contract } from '../model_providers/deepseek_v4_contract.js';
++import { usesCurrentGeminiGenerateContentContract } from '../model_providers/gemini_model_contract.js';
++
++describe('September 2026 economical model contracts', () => {
++    it('registers Gemini 3.8 Flash and applies its current API contract', () => {
++        expect(findModel('gemini-flash-latest')?.id).toBe('gemini-3.8-flash');
++        expect(findModel('gemini-3.8-flash')?.cost?.input_per_million).toBe(0.75);
++        expect(usesCurrentGeminiGenerateContentContract('models/gemini-3.8-flash')).toBe(true);
++    });
++    it.each([
++        ['none', undefined],
++        ['low', 'low'],
++        ['medium', 'high'],
++        ['xhigh', 'high'],
++        ['max', 'max'],
++    ])('maps DeepSeek reasoning %s to %s', (effort, expected) => {
++        const params = applyDeepSeekV4Contract({
++            model: 'deepseek-v4-flash',
++            stream: true,
++            messages: [],
++            reasoning: { effort },
++        } as any) as any;
++        expect(params.reasoning_effort).toBe(expected);
++        expect(params.thinking.type).toBe(effort === 'none' ? 'disabled' : 'enabled');
++    });
++    it.each([
++        ['2026-09-08T00:59:59Z', 0.22],
++        ['2026-09-08T01:00:00Z', 0.44],
++        ['2026-09-08T04:00:00Z', 0.22],
++        ['2026-09-08T06:00:00Z', 0.44],
++        ['2026-09-08T10:00:00Z', 0.22],
++        ['2026-09-12T02:00:00Z', 0.22],
++    ])('charges the correct DeepSeek rate at %s', (timestamp, expected) => {
++        expect(
++            costTracker.calculateCost({ model: 'deepseek-v4-flash', input_tokens: 1e6, timestamp: new Date(timestamp) })
++                .cost
++        ).toBeCloseTo(expected);
++    });
++    it('discounts cached tokens without counting them twice', () => {
++        expect(
++            costTracker.calculateCost({
++                model: 'deepseek-v4-flash',
++                input_tokens: 1e6,
++                cached_tokens: 1e6,
++                output_tokens: 1e6,
++                timestamp: new Date('2026-09-08T05:00:00Z'),
++            }).cost
++        ).toBeCloseTo(0.667);
++    });
++});

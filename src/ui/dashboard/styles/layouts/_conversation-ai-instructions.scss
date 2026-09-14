@@ -1,0 +1,95 @@
+body.conversation-workspace #chat {
+    .conversation-assistant__body {
+        padding-bottom: 1rem;
+    }
+
+    .conversation-ai-instructions {
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 116px;
+        margin-top: 1rem;
+        padding: .75rem;
+        background: var(--workspace-field-bg, #fff);
+        border: 1px solid var(--conversation-line);
+        border-radius: .55rem;
+        box-shadow: 0 1px 3px rgba(32, 53, 87, .04);
+        cursor: text;
+        transition: border-color .15s ease, box-shadow .15s ease;
+
+        &:focus-within {
+            border-color: var(--conversation-accent);
+            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), .12);
+        }
+
+        textarea {
+            display: block;
+            width: 100%;
+            min-height: 0;
+            max-height: min(18rem, 32dvh) !important;
+            padding: 0;
+            color: var(--conversation-ink);
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            font-size: .8125rem;
+            line-height: 1.45;
+            overflow-y: auto !important;
+            overflow-wrap: break-word;
+            resize: none;
+            outline: 0;
+            box-shadow: none !important;
+
+            &::placeholder {
+                color: var(--conversation-quiet);
+                font-size: .8125rem;
+            }
+        }
+    }
+
+    .conversation-ai-instructions__footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 2.5rem;
+        margin-top: auto;
+        padding-top: .75rem;
+        gap: .5rem;
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.5rem;
+            gap: .4rem;
+            padding: .5rem .75rem;
+            font-size: .8125rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .conversation-assistant__body { padding-bottom: .5rem; }
+        .conversation-ai-instructions {
+            padding: .75rem;
+            textarea { max-height: min(12rem, 28dvh) !important; }
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .conversation-ai-instructions textarea,
+        .conversation-ai-instructions textarea::placeholder {
+            font-size: .875rem;
+        }
+    }
+
+    @media (min-width: 1600px) {
+        .conversation-ai-instructions textarea,
+        .conversation-ai-instructions textarea::placeholder {
+            font-size: .9375rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .conversation-ai-instructions { transition: none; }
+    }
+}

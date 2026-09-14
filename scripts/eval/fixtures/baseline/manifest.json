@@ -1,0 +1,12 @@
+{
+  "purpose": "Frozen committed legacy comparator for evaluation only; never runtime fallback.",
+  "capture_status": "Recovered from repository HEAD after the intended dirty-worktree snapshot was found absent. It must not be described as the lost current baseline.",
+  "commit": "d68dfeb156fe0db3d6af8d4c65a6fa0ec677cdfd",
+  "source": "git show HEAD",
+  "sha256": {
+    "src/llm/prompt/request.js": "3f4b8efe062e13c4c54e11e784e36bda7ac0e851b8f9e766e1b0c8aeefa49e83",
+    "src/llm/schemas/schemas.js": "f19070955d5891f95bd297c0633f4b418e76da42b6692717237e90f0999129e9",
+    "src/includes/getContext.js": "521ac51cdee2fcdda027249dd70fbb01ee67b183a8d357b1cab1fbe0f494850f",
+    "src/includes/agentAssist.js": "0fdb85b608d8e0992d35e5ef2d2ad4f62985ce2a2b23b15ceaab3525ce246180"
+  }
+}

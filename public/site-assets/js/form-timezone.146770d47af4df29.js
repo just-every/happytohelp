@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[343],{6095(e,t,n){n.r(t),n.d(t,{default:()=>o});var i={init:function(){document.querySelectorAll('input[name="timezone"]').forEach((function(e){e.value=Intl.DateTimeFormat().resolvedOptions().timeZone.replace("Kiev","Kyiv")}))}};i.init();const o=i}}]);

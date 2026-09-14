@@ -1,0 +1,175 @@
+// Suggested replies share the inbox list's borderless rows and type hierarchy.
+body.conversation-workspace {
+    #chat .conversation-suggestion-card {
+        position: relative;
+        min-width: 0;
+    }
+
+    #chat .conversation-suggestions__option {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: .75rem;
+        width: 100%;
+        padding: .75rem;
+        color: var(--conversation-ink);
+        text-align: left;
+        background: transparent;
+        border: 0;
+        border-radius: 11px;
+        transition: background .15s ease;
+
+        &:hover:not(:disabled):not(.is-selected) {
+            background: var(--conversation-hover);
+        }
+
+        &:focus-visible {
+            outline-offset: -3px;
+        }
+
+        &.is-selected {
+            background: var(--conversation-accent-soft);
+
+            .conversation-suggestion-card__heading,
+            .conversation-suggestions__preview { color: var(--conversation-accent); }
+        }
+    }
+
+    #chat .conversation-suggestion-card__content {
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    #chat .conversation-suggestion-card__header {
+        display: block;
+        margin-bottom: .25rem;
+        padding-right: 1.75rem;
+    }
+
+    #chat .conversation-suggestion-card__icon {
+        display: grid;
+        flex: 0 0 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        padding-top: .1875rem;
+        place-items: start center;
+        color: var(--conversation-ink);
+
+        svg { width: 1.5rem; height: 1.5rem; }
+    }
+
+    #chat .conversation-suggestion-card__heading {
+        min-width: 0;
+        color: var(--conversation-ink);
+        font-size: 14px;
+        font-weight: 650;
+        line-height: 1.2rem;
+        letter-spacing: -.02em;
+        overflow-wrap: anywhere;
+    }
+
+    #chat .conversation-suggestions__preview {
+        display: block;
+        min-width: 0;
+        color: var(--conversation-muted);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.55;
+        letter-spacing: normal;
+        overflow-wrap: anywhere;
+
+        &:not(.is-expanded) {
+            display: -webkit-box;
+            overflow: hidden;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+        }
+
+        > span { display: block; }
+    }
+
+    #chat .conversation-suggestion-card__condition {
+        display: block;
+        margin-bottom: .375rem;
+        color: var(--conversation-ink);
+        font-size: 11px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    #chat .conversation-suggestion-card__toggle {
+        position: absolute;
+        top: .5rem;
+        right: .5rem;
+        display: grid;
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: .25rem;
+        place-items: center;
+        color: var(--conversation-muted);
+        background: transparent;
+        border: 0;
+        border-radius: .375rem;
+
+        svg { width: 1.125rem; height: 1.125rem; }
+
+        &:hover,
+        &:focus-visible {
+            color: var(--conversation-accent);
+            background: var(--conversation-accent-soft);
+        }
+    }
+
+    #chat .conversation-suggestions__preview-paragraph + .conversation-suggestions__preview-paragraph,
+    #chat .conversation-suggestions__preview-list + .conversation-suggestions__preview-paragraph,
+    #chat .conversation-suggestions__preview-paragraph + .conversation-suggestions__preview-list,
+    #chat .conversation-suggestions__preview-heading + .conversation-suggestions__preview-paragraph {
+        margin-top: 0.45rem;
+    }
+
+    #chat .conversation-suggestions__preview-heading {
+        font-weight: 600;
+    }
+
+    #chat .conversation-suggestions__preview-list {
+        display: block;
+        padding-left: 1.1rem;
+    }
+
+    #chat .conversation-suggestions__preview-list-item {
+        display: list-item;
+        padding-left: 0.1rem;
+
+        .is-ordered & {
+            list-style-type: decimal;
+        }
+    }
+
+    #chat .conversation-suggestions__preview-link {
+        color: inherit;
+        text-decoration: underline;
+    }
+
+    #chat .conversation-suggestions__preview-quote {
+        display: block;
+        padding-left: 0.625rem;
+        color: var(--conversation-muted);
+        border-left: 2px solid var(--workspace-line, #d9e3e5);
+    }
+
+    #chat .conversation-suggestions__preview-image-alt {
+        color: var(--conversation-muted);
+        font-style: italic;
+    }
+
+
+    @media (min-width: 1200px) and (max-width: 1439.98px) {
+        #chat .conversation-suggestion-card__heading { font-size: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #chat .conversation-suggestions__option { transition: none; }
+    }
+}

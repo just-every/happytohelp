@@ -1,0 +1,136 @@
+// Include functions first (so you can manipulate colors, SVGs, calc, etc)
+@import "bootstrap/scss/functions";
+
+// Include any default variable overrides here
+@import './user-variables';
+@import './theme/variables';
+@import './theme/variables-dark';
+
+// Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+
+// Include any default map overrides here
+// @import './theme/maps';
+
+// Include remainder of required parts
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+
+// Optionally include any other parts as needed
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/accordion";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/toasts";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/carousel";
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/offcanvas";
+@import "bootstrap/scss/placeholders";
+@import "bootstrap/scss/utilities";
+@import "bootstrap/scss/helpers";
+
+// Include custom functions and mixins here
+@import "./theme/mixins";
+
+// Include any default utilities overrides here
+@import "./theme/utilities";
+
+// Optionally include utilities API last to generate classes based on the Sass map in `_utilities.scss`
+@import "bootstrap/scss/utilities/api";
+
+// Add additional custom code here
+@import "./theme/root";
+@import "./theme/reboot";
+@import "./theme/type";
+@import "./theme/tables";
+@import "./theme/forms";
+@import "./theme/buttons";
+@import "./theme/dropdown";
+@import "./theme/nav";
+@import "./theme/navbar";
+@import "./theme/card";
+@import "./theme/accordion";
+@import "./theme/breadcrumb";
+@import "./theme/pagination";
+@import "./theme/badge";
+@import "./theme/alert";
+@import "./theme/progress";
+@import "./theme/list-group";
+@import "./theme/close";
+@import "./theme/toasts";
+@import "./theme/modal";
+@import "./theme/tooltip";
+@import "./theme/popover";
+@import "./theme/offcanvas";
+@import './theme/avatar';
+@import './theme/chart';
+@import './theme/comment';
+@import './theme/checklist';
+@import './theme/header';
+@import './theme/icon';
+@import './theme/kanban';
+@import './theme/main-content';
+@import './theme/vendor';
+@import "./theme/helpers";
+
+// Vendor: bundled rather than loaded per page from a CDN. Before ./user so the
+// app's own .bootstrap-select overrides still win.
+
+
+@import "./user";
+@import "./layouts/conversation-fonts";
+@import "./layouts/conversation-palette";
+@import "./layouts/workspace-color-settings";
+@import "./layouts/global-inbox-appearance";
+@import "./layouts/conversation-navigation";
+@import "./layouts/conversation-views";
+@import "./layouts/conversation-inbox";
+@import "./layouts/conversation-workspace";
+@import "./layouts/conversation-header";
+@import "./layouts/conversation-transcript";
+@import "./layouts/conversation-assistant";
+@import "./layouts/conversation-delegation";
+@import "./layouts/conversation-suggestion-card";
+@import "./layouts/conversation-details";
+@import "./layouts/conversation-composer";
+@import "./layouts/conversation-avatars";
+@import "./layouts/conversation-profile-symbols";
+@import "./layouts/shared-avatars";
+@import "./layouts/workspace-pages";
+@import "./layouts/workspace-surfaces";
+@import "./layouts/workspace-notifications";
+@import "./layouts/workspace-controls";
+@import "./layouts/workspace-contact-profile";
+@import "./layouts/workspace-insights";
+@import "./layouts/workspace-insight-detail";
+@import "./layouts/workspace-settings";
+@import "./layouts/workspace-brand";
+@import "./layouts/workspace-training";
+@import "./layouts/workspace-widget-settings";
+@import "./layouts/workspace-widget-code";
+@import "layouts/conversation-ai-instructions";
+@import "./layouts/conversation-composer-tools";
+@import "./layouts/workspace-modes";

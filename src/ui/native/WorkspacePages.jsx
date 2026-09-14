@@ -1,0 +1,37 @@
+import React from 'react';
+import GitHubSettings from './pages/GitHubSettings';
+import ArticleImport from './pages/ArticleImport';
+import ProjectsPage from './pages/ProjectsPage';
+import AdminPage from './pages/AdminPage';
+import KnowledgePage from './pages/KnowledgePage';
+import ManagementPage from './pages/ManagementPage';
+import ProjectSettings from './pages/ProjectSettings';
+import WidgetSettingsPage from './pages/WidgetSettingsPage';
+import ComputersPage from './pages/ComputersPage';
+import TrainingRuns from './pages/TrainingRuns';
+import BillingPage from './pages/BillingPage';
+import AccountPage from './pages/AccountPage';
+import InsightsPage from './pages/InsightsPage';
+const titles={edit:'Project',settings:'Project',billing:'Billing',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Training runs'};
+export default function WorkspacePages({ settings }) {
+    const segments=location.pathname.split('/').filter(Boolean);
+    const projectId=segments[0]==='projects'?segments[1]:settings.project?.id||Object.keys(settings.projects||{})[0];
+    const section=segments[0]==='projects'&&(!segments[1]||segments[1]==='create')?'projects':segments[0]==='projects'?segments[2]||'edit':segments[0];
+    const recordId=segments[0]==='projects'?segments[3]:segments[1];
+    let page;
+    if(section==='projects')page=<ProjectsPage/>;
+    else if(section==='articles'&&recordId==='import')page=<ArticleImport {...{projectId}}/>;
+    else if(['datasets','articles','categories'].includes(section))page=<KnowledgePage {...{projectId,section,recordId}}/>;
+    else if(['ais','macros','contacts','plugins','agents'].includes(section))page=<ManagementPage {...{projectId,section,recordId}}/>;
+    else if(['edit','settings','email-settings'].includes(section))page=<ProjectSettings {...{projectId,section}}/>;
+    else if(section==='github-settings')page=<GitHubSettings {...{projectId}}/>;
+    else if(section==='widget-settings')page=<WidgetSettingsPage {...{projectId}}/>;
+    else if(section==='local-agent')page=<ComputersPage {...{projectId}} projectName={settings.projects[projectId]?.name}/>;
+    else if(section==='training-runs')page=<TrainingRuns {...{projectId}}/>;
+    else if(section==='billing')page=<BillingPage {...{projectId}}/>;
+    else if(section==='users')page=<AccountPage {...{projectId,section}}/>;
+    else if(section==='admin')page=<AdminPage/>;
+    else if(section==='insights')page=<InsightsPage {...{projectId}}/>;
+    else page=<p role="alert">This page was not found.</p>;
+    return <div className="main-content"><div className="container-fluid workspace-page-container"><div className="header workspace-page-header"><div className="header-body"><h1 className="header-title display-4">{titles[section]||'HappyToHelp'}</h1>{['ais','datasets','training-runs'].includes(section)&&<ul className="nav nav-tabs header-tabs">{[['ais','AI'],['datasets','Training'],['training-runs','Evaluation runs']].map(([path,title])=><li className="nav-item" key={path}><a className={`nav-link ${section===path?'active':''}`} href={`/projects/${projectId}/${path}`}>{title}</a></li>)}</ul>}</div></div><div className="workspace-page-content">{page}</div></div></div>;
+}

@@ -1,0 +1,44 @@
+name: Verify
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      H2H_EVIDENCE_DIR: ${{ runner.temp }}/happytohelp-evidence
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.8.1
+      - run: npm install --global pnpm@10.12.4
+      - id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: node scripts/operations.mjs describe
+      - run: node scripts/edition-authoring/cli.mjs check
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm verify
+      - run: pnpm test:ui-browser
+      - run: pnpm test:widget-browser
+      - name: Confirm verification preserves source
+        run: git diff --exit-code && test -z "$(git ls-files --others --exclude-standard)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: ${{ runner.temp }}/happytohelp-evidence
+          if-no-files-found: ignore

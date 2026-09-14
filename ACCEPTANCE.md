@@ -1,48 +1,50 @@
-# HappyToHelp first-release acceptance
+# HappyToHelp native acceptance
 
-Recorded 13 September 2026. **Status: incomplete.** This defines the useful
-first-release outcome; it is not a new test registry or a certificate of release.
+The useful outcome is the full native HappyToHelp product described in CONTRACT.md,
+with the existing dashboard/widget and public content, durable conversations,
+configured AI/knowledge/context, explicit local delegation, training/evaluation,
+management/integrations and an owned operating/source workflow. The old small
+RER delegation desk does not satisfy this acceptance.
 
-## Purpose and minimum outcome
+Acceptance binds to the final exact source/build under test. The root acceptance
+record owns the final verdict and must identify source revision, emitted bundle,
+clean installation, browser/runtime evidence, excluded provider tests and material
+remaining gaps. This document defines the gate; it does not declare that every
+clause has passed.
 
-One owner delegates bounded support investigation or resolution to an agent with actual access to a selected workspace, reviews evidence, and controls customer replies.
+## Required evidence
 
-- All ten clauses of the existing minimal CONTRACT apply: authenticated owner/bootstrap; workspace credential scope/revocation; durable requests; explicit authority; one durable claim; cancellation/input; verified evidence; review; recovery; and the private standalone helper.
-- investigate remains read-only; resolve leaves a reply proposal; resolve_reply gives advance authority for one verified reply without a second mandatory approval. Neither customer text nor attachment contents widen authority. Unknown workspace or mail effects require reconciliation before repetition.
+| Clauses | Required acceptance evidence |
+| --- | --- |
+| NATIVE-001, SOURCE-001 | Clean owner source release, locked install, operating describe/check, selected source locks, build/typecheck, generated migrations and local packaging dry run. Distinguish remotely provisioned resources from published code. |
+| IDENTITY-001, UI-001 | Real native Worker/session and browser flows for setup/login, project selection, current membership, revoked/deleted denial, dashboard navigation and responsive widget; original content/control continuity. |
+| CONVERSATION-001, DELIVERY-001 | Real D1/DO/R2 contention, duplicate/lost-response, reconnect/replay, attachments, new-message supersession and operator takeover; no incompatible final answers. |
+| AI-001, CONTEXT-001 | Retained source regressions, configured execution graph, context/evidence/schema bounds, usage and uncertain-attempt behavior. Test fixtures and live provider execution reported separately. |
+| KNOWLEDGE-001, PUBLIC-001 | Published corpus survives failed refresh, scoped retrieval/citations, article/category publication, original help URLs/search, original page/assets and referrer behavior, real waitlist write/denial and separate notification outcome. |
+| DELEGATION-001, TRAINING-001 | Real persisted pairing/grant/work/run state, revocation, resolve/reply authority, recovery/cancellation, budget and ambiguous provider fences; separately packaged local connector. |
+| INTEGRATION-001 | Provider-boundary fixtures for email/Stripe/GitHub/branding, idempotency and no ambiguous replay; real separate-origin preview/network denial. Live account/provider effects require their own evidence. |
+| MIGRATION-001 | Explicit representative legacy IDs, permissions, exact amounts, content/media hashes and pending holds through real local D1/R2; deterministic resume, conflict refusal and no hidden provider work. |
 
-A complete first release also requires an honest empty installation, owner-controlled
-setup and repeat deployment preserving data, authenticated and authorized access,
-input/privacy boundaries, recoverable failures and data export/restore appropriate
-to its stored data. Verify these in the real runtime with the selected providers,
-including desktop/mobile use. Applicable guarantees in the explicit security and recovery requirements in its product contract (this edition has no separate baseline document)
-remain obligations. A missing proof is open, not passing or automatically waived.
+`pnpm run verify` is the common verification command. The current package script,
+`scripts/verify-modules.mjs`, `tests/runtime.mjs` and named module/browser suites
+are executable evidence inventories; their presence alone is not a passing result.
+Do not claim aggregate clause coverage from a smaller test count.
 
-## Unmet release obligations
+## Bounded public-source evidence from this port
 
-The native-helper pilot covers an isolated read-only folder, question/resume, screenshot evidence, revocation and one advance-authorized provider-accepted reply. Business workspace mutations and recovery after uncertain real workspace effects remain unverified; mailbox delivery and full accessibility/capacity evidence are absent. No first-release completion is inferred from the green bounded verify.
+- `tests/public-referrer.mjs`: 100 original PHP-source input/output cases plus
+  message-priority and injection-safety checks passed against the native port.
+- `tests/public-waitlist.mjs`: real local D1 validation, CSRF, duplicate admission,
+  configured notification and uncertain no-replay passed with provider fixtures.
+- `tests/public-help-center.mjs`: real local D1 canonical and `/help` aliases,
+  Markdown/search, draft/tenant/deleted-project denial and alias auth passed.
+- `tests/public-site-runtime.mjs`: the earlier integrated Worker returned all 16
+  original pages and referenced assets successfully; its valid waitlist insert
+  failed before migration 0095 was applied. That earlier failure is preserved,
+  and the final emitted-build run must supersede it before full acceptance.
 
-## Preserved wider requirements
-
-The HappyToHelp protocol and relevant Relay decision/evidence/preflight/idempotency/reconciliation/customer-notification intent remain in PROVENANCE.md and DESIGN.md. Wider Relay knowledge, reporting and operations are reference lineage, not falsely completed HappyToHelp features. The ten current product clauses are not reduced.
-
-[CONTRACT.md](CONTRACT.md) remains unchanged and authoritative for its declared
-guarantees, including any full-1.0 release conditions. This narrower first-release
-profile prioritizes a useful outcome; it does not reclassify clauses, waive an
-owner requirement, or authorize a full-1.0 label. A conflict with an existing release
-condition remains explicit and unresolved until its scope is deliberately settled.
-All unmapped clauses remain in the original contract with their existing status.
-
-## Evidence and decision rule
-
-Read [the handover](HANDOVER.md) and [dated pilot evidence](verification/pilot-20260912/README.md) for exact
-source versions, executed checks and limitations. These are historical receipts,
-not a fresh verification of this document's candidate. Publication is independent
-of deployment and product acceptance; a published tree is not a release verdict.
-
-Report four separate results: executed gates (including failures and skips), unmet
-first-release obligations, preserved wider backlog, and external unknowns. A green
-`verify` proves only its executed gates. Mark this first release complete only when
-its minimum outcome and applicable guarantees have evidence on the exact candidate,
-remaining scope conflicts are resolved, and every external claim names what was
-actually observed. Provider acceptance alone never proves mailbox delivery or a
-confirmed business effect. Retain test-session and test-mode limitations.
+These are bounded local results, not hosted/provider/production-import acceptance.
+Source asset rights need the review recorded in
+`docs/PUBLIC-SOURCE-PROVENANCE.md`; removing identified Pro SVGs is not universal
+redistribution clearance. Accessibility and operating costs remain unmeasured
+unless an exact final evidence record establishes them.

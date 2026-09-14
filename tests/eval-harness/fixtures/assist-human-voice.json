@@ -1,0 +1,269 @@
+{
+  "schema_version": "happytohelp.assist-human-voice.v1",
+  "namespace": "happytohelp.synthetic-assist-human-voice.v1",
+  "description": "Synthetic, database-free evaluations for a human operator drafting after an AI handoff. All facts needed for a reply are inline and no case permits tool use.",
+  "cases": [
+    {
+      "id": "handoff_thanks",
+      "title": "Human operator owns the unresolved next step after a bot requested a representative",
+      "human": {
+        "name": "Casey Rowan"
+      },
+      "selected_ai": {
+        "name": "Aster",
+        "role": "Automated support",
+        "prompt": "You are Aster, the automated assistant for Synthetic Support Workspace. Speak in first person as Aster. You can explain published policies but cannot investigate customer order records or act as a human operator. If a customer asks for a person or needs a record review, say that you have requested a human representative to take over and that a representative will follow up. Company policy: only a human operator may review a delivery record, and no delivery outcome can be promised before that review. Never imply that Aster is human or has completed an account action. Keep replies concise."
+      },
+      "customer": {
+        "name": "Riley Chen",
+        "email": "riley.handoff@example.test",
+        "language": "en"
+      },
+      "messages": [
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Riley Chen"
+          },
+          "content": "My synthetic order SV-HANDOFF-41 still has no delivery update. I need a person to help.",
+          "timestamp": "2026-09-08T09:00:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "ai",
+            "name": "Aster"
+          },
+          "content": "I have requested a human representative to take over.",
+          "timestamp": "2026-09-08T09:01:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Riley Chen"
+          },
+          "content": "Thanks.",
+          "timestamp": "2026-09-08T09:02:00.000Z"
+        }
+      ],
+      "draft": "",
+      "mode": "suggestions",
+      "expected": {
+        "requires_operator_ownership": true,
+        "forbids_bot_rehandoff": true,
+        "forbidden_sender_names": [
+          "Aster"
+        ]
+      }
+    },
+    {
+      "id": "no_human_name",
+      "title": "The operator owns the next step without inventing a name",
+      "human": null,
+      "selected_ai": {
+        "name": "Aster",
+        "role": "Automated support",
+        "prompt": "You are Aster, the automated assistant for Synthetic Support Workspace. Speak in first person as Aster. You can explain published policies but cannot investigate customer account records or act as a human operator. If a customer asks for a person or needs a record review, say that you have requested a human representative to take over and that a representative will follow up. Company policy: only a human operator may review a duplicate renewal before any outcome is given. Never imply that Aster is human or has completed an account action. Keep replies concise."
+      },
+      "customer": {
+        "name": "Quinn Park",
+        "email": "quinn.noname@example.test",
+        "language": "en"
+      },
+      "messages": [
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Quinn Park"
+          },
+          "content": "The synthetic account INV-NAMELESS-7 still shows a duplicate renewal. Please connect me with a person.",
+          "timestamp": "2026-09-08T10:00:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "ai",
+            "name": "Aster"
+          },
+          "content": "I have requested a human representative to take over.",
+          "timestamp": "2026-09-08T10:01:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Quinn Park"
+          },
+          "content": "Thank you.",
+          "timestamp": "2026-09-08T10:02:00.000Z"
+        }
+      ],
+      "draft": "",
+      "mode": "suggestions",
+      "expected": {
+        "requires_operator_ownership": true,
+        "forbids_bot_rehandoff": true,
+        "forbids_assumed_human_name": true,
+        "forbidden_sender_names": [
+          "Aster"
+        ]
+      }
+    },
+    {
+      "id": "downstream_specialist",
+      "title": "A human operator can own a real downstream specialist escalation",
+      "human": {
+        "name": "Casey Rowan"
+      },
+      "selected_ai": {
+        "name": "Aster",
+        "role": "Automated support",
+        "prompt": "You are Aster, the automated assistant for Synthetic Support Workspace. Speak in first person as Aster. You can explain published policies but cannot investigate customer invoice records or act as a human operator. If a customer asks for a person or needs a record review, say that you have requested a human representative to take over and that a representative will follow up. Company policy: a human operator reviews a tax exemption mismatch first and may coordinate with the billing specialist when that review requires it; no invoice outcome can be promised before confirmation. Never imply that Aster is human or has completed an account action. Keep replies concise."
+      },
+      "customer": {
+        "name": "Morgan Lee",
+        "email": "morgan.specialist@example.test",
+        "language": "en"
+      },
+      "messages": [
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Morgan Lee"
+          },
+          "content": "The synthetic invoice SV-SPECIALIST-19 has a tax exemption mismatch. I need a person to review it.",
+          "timestamp": "2026-09-08T11:00:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "ai",
+            "name": "Aster"
+          },
+          "content": "I have requested a human representative to take over.",
+          "timestamp": "2026-09-08T11:01:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Morgan Lee"
+          },
+          "content": "Thanks. This may need the billing specialist.",
+          "timestamp": "2026-09-08T11:02:00.000Z"
+        }
+      ],
+      "draft": "",
+      "mode": "suggestions",
+      "expected": {
+        "requires_operator_ownership": true,
+        "forbids_bot_rehandoff": true,
+        "requires_downstream_specialist": [
+          "billing specialist",
+          "billing team"
+        ],
+        "forbidden_sender_names": [
+          "Aster"
+        ]
+      }
+    },
+    {
+      "id": "draft_edit_handoff",
+      "title": "Draft editing removes a bot-style rehandoff while retaining the human operator's intent",
+      "human": {
+        "name": "Casey Rowan"
+      },
+      "selected_ai": {
+        "name": "Aster",
+        "role": "Automated support",
+        "prompt": "You are Aster, the automated assistant for Synthetic Support Workspace. Speak in first person as Aster. You can explain published policies but cannot investigate customer delivery records or act as a human operator. If a customer asks for a person or needs a record review, say that you have requested a human representative to take over and that a representative will follow up. Company policy: only a human operator may review a delivery record, and no delivery outcome can be promised before that review. Never imply that Aster is human or has completed an account action. Keep replies concise."
+      },
+      "customer": {
+        "name": "Avery Kim",
+        "email": "avery.draft@example.test",
+        "language": "en"
+      },
+      "messages": [
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Avery Kim"
+          },
+          "content": "My synthetic delivery SV-DRAFT-63 is still missing and I asked to speak with a person.",
+          "timestamp": "2026-09-08T12:00:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "ai",
+            "name": "Aster"
+          },
+          "content": "I have requested a human representative to take over.",
+          "timestamp": "2026-09-08T12:01:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Avery Kim"
+          },
+          "content": "Thanks.",
+          "timestamp": "2026-09-08T12:02:00.000Z"
+        }
+      ],
+      "draft": "Aster has asked another human representative to contact you about SV-DRAFT-63.",
+      "mode": "complete",
+      "expected": {
+        "requires_operator_ownership": true,
+        "forbids_bot_rehandoff": true,
+        "forbidden_sender_names": [
+          "Aster"
+        ]
+      }
+    },
+    {
+      "id": "handoff_alternatives",
+      "title": "Primary and conditional cancellation alternatives are drafted by the human",
+      "human": {
+        "name": "Casey Rowan"
+      },
+      "selected_ai": {
+        "name": "Aster",
+        "role": "Automated support",
+        "prompt": "You are Aster, the automated assistant for Synthetic Support Workspace. Speak in first person as Aster. If a customer asks for a person, request a human representative and say the representative will follow up. Aster cannot change subscriptions. Company policy: a human operator can disable an annual renewal before its renewal invoice is issued. Disabling renewal preserves access through the current paid term and creates no refund. The operator must verify the invoice has not been issued before changing the renewal and verify successful cancellation before confirming it. Keep replies concise."
+      },
+      "customer": {
+        "name": "Drew Carter",
+        "email": "drew.alternatives@example.test",
+        "language": "en"
+      },
+      "messages": [
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Drew Carter"
+          },
+          "content": "Can I cancel the annual renewal on subscription SV-RENEWAL-12 before the renewal invoice is issued? I would like a person to help me with this.",
+          "timestamp": "2026-09-08T13:00:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "ai",
+            "name": "Aster"
+          },
+          "content": "I have requested a human representative to take over. They will help with your annual renewal question.",
+          "timestamp": "2026-09-08T13:01:00.000Z"
+        },
+        {
+          "author": {
+            "kind": "contact",
+            "name": "Drew Carter"
+          },
+          "content": "Thanks. I do want to stop the renewal.",
+          "timestamp": "2026-09-08T13:02:00.000Z"
+        }
+      ],
+      "draft": "",
+      "mode": "suggestions",
+      "expected": {
+        "forbids_bot_rehandoff": true,
+        "forbidden_sender_names": [
+          "Aster"
+        ]
+      }
+    }
+  ]
+}

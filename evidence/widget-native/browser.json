@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "cross-origin settings/session CORS",
+    "Shadow DOM host isolation",
+    "widget message durable",
+    "operator socket delivery",
+    "attachment upload/authenticated download",
+    "reload identity/transcript resume",
+    "offline reconnect no duplicate",
+    "untrusted origin denied",
+    "cross-project transcript denied",
+    "contact form update",
+    "mobile panel within viewport"
+  ],
+  "errors": [],
+  "failed": [],
+  "conversationId": "3dc074d2-1c96-4929-aa79-00e0150ba176",
+  "messages": 3
+}

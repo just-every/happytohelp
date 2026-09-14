@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "id": "runeditrun/happytohelp",
+  "toolchain": {
+    "id": "runeditrun/edition-authoring",
+    "version": "1.1.0"
+  },
+  "parent": {
+    "repository": "https://github.com/runeditrun/base.git",
+    "revision": "d840a75b4c41ddc1feae99695d6632c8b0a451d2",
+    "path": "foundation/template"
+  },
+  "components": [
+    {
+      "id": "runeditrun/base",
+      "role": "foundation",
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/base",
+          "scripts/edition-authoring",
+          "scripts/operations.mjs"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "d840a75b4c41ddc1feae99695d6632c8b0a451d2",
+          "path": ".",
+          "paths": [
+            "foundation/runtime",
+            "edition-authoring",
+            "operations/operations.mjs"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/base",
+            "originPath": "foundation/runtime"
+          },
+          {
+            "path": "scripts/edition-authoring",
+            "originPath": "edition-authoring"
+          },
+          {
+            "path": "scripts/operations.mjs",
+            "originPath": "operations/operations.mjs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/conversation",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/conversations",
+          "migrations/0002_conversations.sql",
+          "migrations/0004_message_intent.sql",
+          "migrations/0007_conversation_history.sql",
+          "tests/conversation-admission.mjs",
+          "tests/conversation-socket.mjs",
+          "tests/conversation-worker.ts"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/widget",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/conversation"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/widget",
+          "scripts/build-widget.mjs",
+          "tests/widget-transport.mjs",
+          "tests/widget-native-lost-response.mjs",
+          "tests/widget-browser.mjs",
+          "tests/widget-browser-runtime.mjs"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/ai-support",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/conversation",
+        "runeditrun/knowledge",
+        "runeditrun/customer-context",
+        "runeditrun/training-runs"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/ai-support",
+          "migrations/020_ai_support.sql",
+          "tests/ai-support"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/knowledge",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/knowledge",
+          "migrations/0050_knowledge.sql",
+          "migrations/0051_knowledge_authoring.sql",
+          "migrations/0052_knowledge_imports.sql",
+          "tests/knowledge-context.mjs",
+          "tests/knowledge-worker.ts",
+          "tests/knowledge-workerd.mjs",
+          "migrations/0053_knowledge_recovery.sql",
+          "tests/knowledge-recovery.ts"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/customer-context",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/ai-support"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/customer-context",
+          "migrations/0060_customer_context.sql",
+          "migrations/0060_customer_context_engine.sql",
+          "tests/customer-context",
+          "tests/customer-context-routes.mjs"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/local-computer",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/conversation"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/local-computer",
+          "local-agent",
+          "scripts/build-local-agent.cjs",
+          "migrations/030_local_computer.sql",
+          "tests/local-computer-worker.ts",
+          "tests/local-computer-runtime.mjs"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/training-runs",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/ai-support",
+        "runeditrun/local-computer",
+        "runeditrun/knowledge",
+        "runeditrun/customer-context"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/training-runs",
+          "scripts/eval",
+          "migrations/040_training_runs.sql",
+          "tests/training",
+          "tests/eval-harness",
+          "migrations/041_training_model_usage.sql"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/plugin-sdk",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/plugin-sdk",
+          "tests/plugin-sdk.mjs"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/site-preview",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/site-preview",
+          "migrations/0096_site_preview.sql",
+          "tests/site-preview.mjs",
+          "tests/site-preview-worker.ts"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/happytohelp",
+      "role": "edition",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/conversation",
+        "runeditrun/widget",
+        "runeditrun/ai-support",
+        "runeditrun/knowledge",
+        "runeditrun/customer-context",
+        "runeditrun/local-computer",
+        "runeditrun/training-runs",
+        "runeditrun/plugin-sdk",
+        "runeditrun/site-preview"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/platform",
+          "src/ui",
+          "src/routes",
+          "src/server.ts",
+          "src/router.tsx",
+          "src/modules/identity",
+          "src/modules/management",
+          "src/modules/integrations",
+          "src/modules/legacy-import",
+          "src/modules/public-site",
+          "migrations/0001_identity.sql",
+          "migrations/0003_identity_credentials.sql",
+          "migrations/0005_widget_identity.sql",
+          "migrations/0006_registration.sql",
+          "migrations/0070_management.sql",
+          "migrations/0071_management_preferences.sql",
+          "migrations/0080_integrations.sql",
+          "migrations/0081_billing_receipts.sql",
+          "migrations/0082_github_oauth.sql",
+          "migrations/0083_lead_operations.sql",
+          "migrations/0085_ai_context_guards.sql",
+          "migrations/0095_public_site.sql",
+          "migrations/090_legacy_import.sql",
+          "tests/billing-worker.ts",
+          "tests/billing-workerd.mjs",
+          "tests/billing.mjs",
+          "tests/email-provider.mjs",
+          "tests/email-worker.mjs",
+          "tests/github-integration.mjs",
+          "tests/helpers",
+          "tests/identity.mjs",
+          "tests/lead-operations.mjs",
+          "tests/legacy-import.mjs",
+          "tests/management.mjs",
+          "tests/prepare-browser-fixture.mjs",
+          "tests/public-help-center.mjs",
+          "tests/public-referrer-cases.json",
+          "tests/public-referrer.mjs",
+          "tests/public-site-runtime.mjs",
+          "tests/public-waitlist.mjs",
+          "tests/runtime.mjs",
+          "tests/ui-transport.mjs",
+          "scripts/deploy.mjs",
+          "scripts/deployment",
+          "scripts/import-legacy.mjs",
+          "scripts/migrations.mjs",
+          "scripts/operations-config.mjs",
+          "scripts/setup.mjs",
+          "scripts/verify-modules.mjs",
+          "src/app.ts",
+          "src/jobs.ts",
+          "src/message-effects.ts",
+          "migrations/0008_account_sessions.sql",
+          "tests/billing-parity-cases.ts",
+          "tests/operating-environment.mjs",
+          "tests/ui-browser.mjs"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "runeditrun/widget",
+  "version": "0.1.0",
+  "sourcePaths": [
+    "src/modules/widget",
+    "scripts/build-widget.mjs",
+    "tests/widget-transport.mjs",
+    "tests/widget-native-lost-response.mjs",
+    "tests/widget-browser.mjs"
+  ],
+  "selectedEditionDependencies": [
+    "runeditrun/base",
+    "runeditrun/conversation"
+  ],
+  "runtime": "browser",
+  "license": "See docs/SOURCE-PROVENANCE.md; original notices travel with selected source",
+  "selection": "Existing paths are authoritative. Consumers select source and own adapters; no generator rewrites them.",
+  "notices": [
+    "docs/SOURCE-PROVENANCE.md"
+  ],
+  "dependencyScope": "selectedEditionDependencies describes the full HappyToHelp adapter composition, not imports required by every neutral entry point.",
+  "consumerIntegration": "Select the documented neutral source paths and supply the consumer authorization, storage and execution contracts. Full route/edition adapters additionally import HappyToHelp platform and may import its message-effects or billing integration."
+}

@@ -1,0 +1,184 @@
+// Details uses the same unboxed groups, ink, and icon family as the inbox.
+body.conversation-workspace #chat {
+    .conversation-details {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+        min-height: 100%;
+        padding-bottom: .5rem;
+        color: var(--conversation-ink);
+        font-size: .8125rem;
+        line-height: 1.5;
+    }
+
+    .conversation-details-section { min-width: 0; }
+
+    .conversation-details-section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        margin-bottom: .75rem;
+
+        h3 {
+            margin: 0;
+            color: var(--conversation-ink);
+            font-size: .8125rem;
+            font-weight: 650;
+            line-height: 1.5;
+            letter-spacing: -.01em;
+        }
+    }
+
+    .conversation-details .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .5rem .75rem;
+        border-radius: .5rem;
+        font-size: .8125rem;
+        line-height: 1.5;
+        box-shadow: none;
+
+        > svg { flex-shrink: 0; width: 1rem; height: 1rem; }
+    }
+
+    .conversation-details .btn-white {
+        color: var(--conversation-ink);
+        border-color: var(--conversation-line);
+        background: var(--workspace-surface-raised, #fff);
+
+        &:hover, &[aria-expanded=true] {
+            color: var(--conversation-accent);
+            background: var(--conversation-accent-soft);
+        }
+    }
+
+    .conversation-details .btn-link {
+        color: var(--conversation-accent);
+        text-decoration: none;
+
+        &:hover { background: var(--conversation-accent-soft); }
+    }
+
+    .conversation-details-section-heading .btn-link {
+        min-height: 1.75rem;
+        margin: -.25rem 0;
+        padding: .25rem;
+        gap: .25rem;
+        font-size: .75rem;
+    }
+
+    .conversation-details-assignment .dropdown-toggle {
+        width: 100%;
+        justify-content: flex-start;
+        min-height: 2.5rem;
+
+        span { overflow: hidden; text-overflow: ellipsis; }
+        &::after { content: none; }
+        .conversation-details-assignment__chevron { margin-left: auto; }
+    }
+
+    .conversation-details .dropdown-menu {
+        min-width: min(15rem, 100%);
+        max-width: 100%;
+        padding: .375rem;
+        border: 1px solid var(--conversation-line);
+        border-radius: .625rem;
+        box-shadow: 0 8px 24px rgba(24, 33, 61, .1);
+
+        .btn, .dropdown-item {
+            width: 100%;
+            min-height: 2.25rem;
+            justify-content: flex-start;
+            padding: .5rem;
+            color: var(--conversation-ink);
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            font-size: .8125rem;
+            border: 0;
+            border-radius: .375rem;
+            background: transparent;
+        }
+
+        .is-selected, .btn:hover, .dropdown-item:hover {
+            color: var(--conversation-accent);
+            background: var(--conversation-accent-soft);
+        }
+    }
+
+    .conversation-details-participant-list {
+        display: grid;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        gap: .5rem;
+
+        li { display: flex; align-items: center; min-width: 0; gap: .5rem; }
+        li > svg { flex-shrink: 0; width: 1rem; height: 1rem; color: var(--conversation-muted); }
+        li > span { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+        .btn { flex: 0 0 auto; padding: .25rem; color: var(--conversation-muted); }
+        .btn:hover { color: #b42338; background: #fff1f2; }
+    }
+
+    .conversation-details-empty { margin: 0; color: var(--conversation-muted); font-size: .75rem; }
+    .conversation-details-fields { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+    .conversation-detail-field { display: flex; align-items: flex-start; gap: .75rem; min-width: 0; }
+    .conversation-detail-field__icon {
+        display: grid;
+        flex: 0 0 2.25rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        padding-top: .125rem;
+        place-items: start center;
+        color: var(--conversation-ink);
+
+        svg { width: 1.125rem; height: 1.125rem; }
+    }
+
+    .conversation-detail-field__body { min-width: 0; flex: 1; }
+    .conversation-detail-field__label { display: block; margin: 0 0 .125rem; color: var(--conversation-muted); font-size: .75rem; }
+    .conversation-detail-field__value {
+        display: block;
+        margin: 0;
+        color: var(--conversation-ink);
+        font-size: .8125rem;
+        overflow-wrap: anywhere;
+
+        p { margin: 0; }
+        a { color: var(--conversation-accent); }
+        a:hover { text-decoration: underline; }
+        .text-muted { color: var(--conversation-muted) !important; }
+    }
+
+    .conversation-detail-field__value .conversation-detail-field__secondary-value { display: block; color: var(--conversation-muted); }
+    .conversation-detail-field__online { color: #087e5a; }
+    .conversation-detail-field__timezone { display: block; color: var(--conversation-muted); font-size: .75rem; white-space: nowrap; }
+    .conversation-detail-field--metadata .conversation-detail-field__label { text-transform: capitalize; }
+
+    .conversation-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .conversation-details-contact-actions {
+        display: flex;
+        margin: 0;
+
+        > .btn:first-child { flex: 1; border-radius: .5rem 0 0 .5rem; }
+        > .dropdown-toggle-split {
+            flex: 0 0 2.25rem;
+            width: 2.25rem;
+            padding: .5rem;
+            border-radius: 0 .5rem .5rem 0;
+
+            &::after { content: none; }
+        }
+        > .dropdown-menu { top: calc(100% + .25rem); right: 0; left: auto; }
+    }
+
+    .conversation-details-plugin__frame { display: block; width: 100%; border: 0; }
+}

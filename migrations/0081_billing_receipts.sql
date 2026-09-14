@@ -1,0 +1,15 @@
+ALTER TABLE billing_operations ADD COLUMN intent_hash TEXT;
+ALTER TABLE billing_operations ADD COLUMN request_json TEXT;
+ALTER TABLE billing_operations ADD COLUMN provider_id TEXT;
+ALTER TABLE billing_accounts ADD COLUMN default_payment_method TEXT;
+ALTER TABLE billing_accounts ADD COLUMN auto_state TEXT NOT NULL DEFAULT 'idle';
+CREATE TABLE billing_webhook_receipts(id TEXT PRIMARY KEY,event_type TEXT NOT NULL,payload_hash TEXT NOT NULL,created_at INTEGER NOT NULL);
+ALTER TABLE billing_accounts ADD COLUMN usd_conversion_rate REAL;
+UPDATE billing_accounts SET usd_conversion_rate=1 WHERE currency='usd';
+ALTER TABLE billing_ledger ADD COLUMN amount_micros INTEGER;
+UPDATE billing_ledger SET amount_micros=amount_minor*10000;
+ALTER TABLE billing_ledger ADD COLUMN receipt_url TEXT;
+ALTER TABLE billing_ledger ADD COLUMN invoice_url TEXT;
+ALTER TABLE billing_ledger ADD COLUMN provider_charge_id TEXT;
+CREATE TABLE billing_usage_receipts(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),attempt_id TEXT NOT NULL,request_id TEXT NOT NULL,state TEXT NOT NULL,provider_cost_micros INTEGER,currency TEXT NOT NULL,conversion_rate REAL,amount_micros INTEGER,usage_json TEXT,created_at INTEGER NOT NULL,UNIQUE(attempt_id,request_id));
+CREATE INDEX billing_usage_project_time ON billing_usage_receipts(project_id,created_at);

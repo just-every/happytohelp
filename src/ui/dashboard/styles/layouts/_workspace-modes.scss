@@ -1,0 +1,92 @@
+// Mode overrides use the same workspace tokens; Balanced retains the original rules.
+body.workspace-themed[data-workspace-mode=light] .navbar-refined {
+    .navbar-workspace-toggle > img { filter: none; }
+    .navbar-workspace-toggle > .navbar-workspace-brand--transparent { filter: brightness(0); }
+    .navbar-toggler-icon { filter: none; }
+    .navbar-unread-count { background: var(--conversation-nav-active-badge); }
+    .navbar-nav-primary > .nav-item > .nav-link.active,
+    .navbar-nav-utility > .nav-item > .nav-link.active,
+    .navbar-nav-utility > .nav-item > .nav-link[aria-expanded=true],
+    .inbox-view-link.is-active,
+    #sidebarSettings .nav-link.active {
+        color: var(--conversation-nav-active-ink) !important;
+        > .fe { color: inherit !important; }
+    }
+}
+
+body.workspace-themed[data-workspace-mode=dark] {
+    --conversation-ink: var(--workspace-ink);
+    --conversation-muted: var(--workspace-muted);
+    --conversation-quiet: var(--workspace-quiet);
+    --conversation-line: var(--workspace-line);
+    --bs-body-bg: var(--workspace-surface);
+    --bs-body-color: var(--workspace-ink);
+    --bs-heading-color: var(--workspace-ink);
+    --bs-secondary-color: var(--workspace-muted);
+    --bs-tertiary-color: var(--workspace-quiet);
+    --bs-emphasis-color: var(--workspace-ink);
+    --bs-secondary-bg: var(--workspace-surface-raised);
+    --bs-tertiary-bg: var(--workspace-surface-subtle);
+    --bs-border-color: var(--workspace-line);
+    --bs-border-color-translucent: var(--workspace-line);
+    --workspace-status-ink: #87daca;
+    --workspace-status-bg: #18332f;
+    color: var(--workspace-ink);
+    background: var(--workspace-surface);
+    color-scheme: dark;
+
+    .dropdown-menu, .modal-content, .popover, .offcanvas {
+        --bs-dropdown-bg: var(--workspace-surface-raised);
+        --bs-dropdown-color: var(--workspace-ink);
+        --bs-dropdown-link-color: var(--workspace-ink);
+        --bs-dropdown-link-hover-bg: var(--workspace-primary-soft);
+        --bs-dropdown-link-hover-color: var(--bs-primary);
+        --bs-modal-bg: var(--workspace-surface-raised);
+        --bs-modal-color: var(--workspace-ink);
+        --bs-popover-bg: var(--workspace-surface-raised);
+        --bs-popover-body-color: var(--workspace-ink);
+        --bs-offcanvas-bg: var(--workspace-surface-raised);
+    }
+
+    .form-control, .form-select, .input-group-text { background-color: var(--workspace-field-bg); color: var(--workspace-ink); }
+    .form-control:focus, .form-select:focus { background-color: var(--workspace-field-bg); color: var(--workspace-ink); }
+    .text-dark { color: var(--workspace-ink) !important; }
+    .bg-white { background-color: var(--workspace-surface-raised) !important; }
+    .text-bg-light { color: var(--workspace-muted) !important; }
+    .badge.text-bg-secondary-subtle { color: var(--workspace-muted) !important; background-color: var(--workspace-surface-subtle) !important; }
+    .card { --bs-card-bg: var(--workspace-surface-raised); --bs-card-color: var(--workspace-ink); }
+    .workspace-page-content .card { --bs-card-bg: transparent; }
+    .workspace-page-header { --bs-header-bg: transparent; }
+    .nav-tabs { --bs-nav-tabs-link-active-bg: transparent; }
+    .list-group { --bs-list-group-bg: var(--workspace-surface); --bs-list-group-color: var(--workspace-ink); }
+    #chat .search-query .form-control, #chat .search-query .btn { color: var(--workspace-muted); background-color: var(--workspace-field-bg); }
+    .footer-sticky, .onboarding-progress h4 { background: var(--workspace-surface-raised); border-color: var(--workspace-line); }
+    .btn-group .focus { background: var(--workspace-primary-soft); border-color: var(--workspace-primary-border); }
+
+    // Buttons retain a strong, readable workspace fill while text links brighten.
+    .btn-primary, #chat .btn-primary, .main-content .btn-primary, .modal .btn-primary {
+        --bs-btn-color: #fff;
+        --bs-btn-bg: var(--workspace-button-bg);
+        --bs-btn-border-color: var(--workspace-button-bg);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: var(--workspace-button-hover-bg);
+        --bs-btn-hover-border-color: var(--workspace-button-hover-bg);
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: var(--workspace-button-hover-bg);
+        --bs-btn-active-border-color: var(--workspace-button-hover-bg);
+        --bs-btn-disabled-color: #fff;
+        --bs-btn-disabled-bg: var(--workspace-button-bg);
+        --bs-btn-disabled-border-color: var(--workspace-button-bg);
+    }
+    .btn-outline-primary:hover, .btn-outline-primary:active { color: #fff; background-color: var(--workspace-button-bg); border-color: var(--workspace-button-bg); }
+    .btn-white { --bs-btn-bg: var(--workspace-surface-raised); --bs-btn-color: var(--workspace-muted); --bs-btn-border-color: var(--workspace-line); --bs-btn-disabled-bg: var(--workspace-surface-raised); }
+    .page-link.active, .active > .page-link { background: var(--workspace-button-bg); border-color: var(--workspace-button-bg); color: #fff; }
+    .badge.bg-primary, .badge.text-bg-primary { background: var(--workspace-button-bg) !important; color: #fff !important; }
+    .form-check-input:checked { background-color: var(--workspace-button-bg); border-color: var(--workspace-button-bg); }
+
+    #chat .transcript-note-label { color: #edb16c; }
+    #chat .conversation-composer__error { color: #f3a3ae; }
+    #chat .conversation-detail-field__online { color: #81d9b9; }
+    #chat .conversation-suggestions__error { color: #edc38d; background: #32291f; border-color: #594832; }
+    #chat .conversation-detail-field__edit .btn:hover { color: #f3a3ae; background: #3b222b; }
+}

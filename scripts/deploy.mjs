@@ -1,57 +1,39 @@
 import { readFile } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
-import { deploymentSettings, prepareRemote, validateEmitted, initializeOwner } from './setup-deployment.mjs';
+import { root, collectMigrations } from './migrations.mjs';
+import { run } from './deployment/run.mjs';
+import { settings } from './deployment/config.mjs';
+import { withSecretJsonFile } from './deployment/secret-json.mjs';
+import { waitForDeploymentHealth } from './deployment/health.mjs';
+import { runtimeSecrets, runtimeVariables } from './deployment/environment.mjs';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
-const received = process.argv.slice(2).filter(arg => arg !== '--');
-const setupOnly = received.includes('--setup-only');
-const args = received.filter(arg => arg !== '--setup-only');
-if (!args.length && process.env.H2H_DEPLOY_MODE) args.push(`--${process.env.H2H_DEPLOY_MODE}`);
-if (args.length !== 1 || !['--local', '--remote'].includes(args[0])) throw new Error('Choose exactly one target: pnpm run deploy -- --local or --remote, or set H2H_DEPLOY_MODE=local|remote.');
+const args = process.argv.slice(2).filter(x => x !== '--');
+if (args.length !== 1 || !['--local', '--remote'].includes(args[0])) throw new Error('Usage: pnpm run deploy -- --local|--remote');
+await collectMigrations();
 const local = args[0] === '--local';
-const env = { ...process.env, CI: 'true' };
-// Generated config represents one explicit environment; inherited selection
-// must never redirect the build to another environment.
+const plan = local ? null : settings();
+const env = { ...process.env };
 delete env.CLOUDFLARE_ENV;
 delete env.H2H_WRANGLER_CONFIG;
-function run(argv, capture = false) {
-  return new Promise((done, fail) => {
-    const child = spawn('pnpm', argv, { cwd: root, env, stdio: capture ? ['ignore', 'pipe', 'pipe'] : 'inherit' });
-    let output = '';
-    if (capture) { child.stdout.on('data', chunk => { output += chunk; }); child.stderr.resume(); }
-    child.once('error', () => fail(new Error('Could not start pnpm.')));
-    child.once('exit', code => code === 0 ? done(output) : fail(new Error(`Deployment step ${argv.slice(0, 3).join(' ')} failed (${code}); no later step ran.`)));
-  });
+if (plan) {
+  runtimeVariables({ ...env, APP_ORIGIN: plan.origin });
+  env.H2H_WRANGLER_CONFIG = resolve(root, '.seed/deployment', plan.prefix, 'wrangler.json');
+  const config = JSON.parse(await readFile(env.H2H_WRANGLER_CONFIG, 'utf8'));
+  for (const [key,value] of Object.entries(runtimeVariables(env))) if (config.vars?.[key] !== value) throw new Error('Runtime variables changed since setup. Run setup for this target.');
+  if (config.name !== plan.prefix || config.account_id !== plan.account || config.vars.APP_ORIGIN !== plan.origin) throw new Error('Setup configuration differs from deployment target. Run setup for this target.');
 }
-
-const settings = local ? null : deploymentSettings(env);
-await run(['typecheck']);
-await run(['test']);
+await run(['build'], { env, cwd: root });
+const configPath = resolve(root, 'dist/server/wrangler.json');
+const emitted = JSON.parse(await readFile(configPath, 'utf8'));
+if (plan && (emitted.name !== plan.prefix || emitted.account_id !== plan.account || emitted.vars?.APP_ORIGIN !== plan.origin || !emitted.assets?.directory)) throw new Error('Built Worker does not match selected deployment.');
+await run(['exec', 'wrangler', 'd1', 'migrations', 'apply', 'DB', local ? '--local' : '--remote', '--config', configPath, ...(local ? ['--persist-to', resolve(root, '.wrangler/state')] : [])], { env, cwd: root });
 if (local) {
-  await run(['setup:local']);
-  await run(['exec', 'wrangler', 'd1', 'migrations', 'apply', 'happytohelp', '--local', '--config', 'wrangler.jsonc']);
-  if (setupOnly) { console.log('Local private configuration and D1 migrations prepared.'); process.exit(0); }
-  await run(['build']);
-  await run(['exec', 'wrangler', 'deploy', '--dry-run', '--config', 'dist/server/wrangler.json']);
-  console.log('Local migrations and built Worker packaging verified. No cloud resources were changed.');
+  await run(['exec', 'wrangler', 'deploy', '--dry-run', '--config', configPath], { env, cwd: root });
+  console.log('Local Worker packaging verified; no cloud resources changed.');
 } else {
-  const { withSecretJsonFile } = await import('./deployment/base-secret-json.mjs');
-  const { waitForDeploymentHealth } = await import('./deployment/health.mjs');
-  const resource = await prepareRemote(root, settings, run);
-  env.H2H_WRANGLER_CONFIG = resource.path;
-  if (setupOnly) {
-    await run(['exec', 'wrangler', 'd1', 'migrations', 'apply', settings.database, '--remote', '--config', resource.path]);
-    console.log(`Prepared ${settings.name}: owner-controlled D1 resource, ignored config and migrations. Run deploy to publish and initialize the owner.`);
-    process.exit(0);
-  }
-  await run(['build']);
-  const emitted = resolve(root, 'dist/server/wrangler.json');
-  validateEmitted(JSON.parse(await readFile(emitted, 'utf8')), settings, resource.id);
-  await run(['exec', 'wrangler', 'd1', 'migrations', 'apply', settings.database, '--remote', '--config', emitted]);
-  await withSecretJsonFile(settings.secrets, path => run(['exec', 'wrangler', 'deploy', '--config', emitted, '--secrets-file', path]));
-  await waitForDeploymentHealth(settings.origin + '/health');
-  await initializeOwner(settings);
-  console.log(`Deployed ${settings.name}; health and configured owner verified at ${settings.origin}.`);
+  const secrets = runtimeSecrets(env);
+  if (!secrets.BOOTSTRAP_TOKEN) throw new Error('BOOTSTRAP_TOKEN required for configured owner setup.');
+  await withSecretJsonFile(secrets, path => run(['exec', 'wrangler', 'deploy', '--config', configPath, '--secrets-file', path], { env, cwd: root }));
+  await waitForDeploymentHealth(plan.origin + '/health');
+  console.log(`Deployed ${plan.prefix}; resource health responds at ${plan.origin}. Provider behavior remains separately verifiable.`);
 }

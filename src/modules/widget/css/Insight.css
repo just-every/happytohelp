@@ -1,0 +1,309 @@
+#happytohelp-root .happytohelp-insight-container {
+  position: fixed;
+  bottom: 100px;
+  right: 60px;
+  width: 365px;
+  z-index: 2147483605;
+  box-sizing: border-box;
+  max-height: calc(100vh - 114px);
+  max-height: calc(var(--vh) * 100 - 114px);
+  text-align: left;
+  line-height: 1.45em;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  font-size: 1em;
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-insight-container {
+    bottom: 90px;
+    right: 50px;
+  }
+}
+@media (max-width: 800px) {
+  #happytohelp-root .happytohelp-insight-container {
+    right: 25px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-insight-container {
+    bottom: 75px;
+    right: 15px;
+  }
+}
+@media (max-width: 415px) {
+  #happytohelp-root .happytohelp-insight-container {
+    left: 0px;
+    right: unset;
+    width: 100%;
+    padding: 0 0.5rem;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-content {
+    padding: 0.8rem 1.3rem !important;
+    border-radius: 0.5rem !important;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-button-container:first-child {
+    margin-top: 1.2rem !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-close {
+  position: absolute;
+  top: -0.6em;
+  right: -0.6em;
+  cursor: pointer;
+  font-size: 1em;
+  transform: scale(1);
+  transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  will-change: opacity, color, box-shadow, transform;
+  border-radius: 50%;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+  z-index: 1;
+  padding: 0.2em;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 5px 0px;
+  color: rgba(0, 0, 0, 0.15) !important;
+}
+@media (max-width: 415px) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-close {
+    right: 0.5em;
+    top: -1.8em;
+    color: rgba(0, 0, 0, 0.2) !important;
+  }
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-close:hover {
+    color: rgba(0, 0, 0, 0.8) !important;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 5px 0px;
+    transform: scale(1.25) !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-close svg {
+  vertical-align: revert;
+}
+#happytohelp-root .happytohelp-insight-container.happytohelp-insight-container-hover .happytohelp-insight-close {
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight {
+  position: relative;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight a {
+  color: #333;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight strong {
+  font-weight: 700;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content {
+  padding: 1rem 2rem;
+  border-radius: 0.5rem 0.5rem 2px 0.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-y: scroll;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 10px 0px;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content::after {
+  border-radius: 0.5rem 0.5rem 2px 0.5rem;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content.happytohelp-insight-no-glow {
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 10px 0px, rgba(0, 0, 0, 0.3) 0px 0px 2px 0px;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3);
+  background-size: 200%;
+  animation: happytohelp-border 8s linear infinite;
+  opacity: 0.4;
+  filter: blur(3px);
+  transition: opacity 2s, filter 2s;
+  animation-play-state: paused;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow.happytohelp-insight-glow-hover::after {
+  transition: opacity 1s, filter 1s;
+  filter: blur(0px);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow.happytohelp-insight-glow-hover:hover::after {
+    transition: opacity 0.3s, filter 0.3s 0.1s;
+    opacity: 0.8 !important;
+    filter: blur(6px) !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow.happytohelp-insight-glow-hover:active::after {
+  transition: opacity 0.05s, filter 0.1s;
+  opacity: 1 !important;
+  filter: blur(10px) !important;
+  animation-play-state: running;
+}
+#happytohelp-root .happytohelp-insight-container.happytohelp-insight-show-glow .happytohelp-insight-content.happytohelp-insight-has-glow::after {
+  transition: opacity 0.3s, filter 0.3s;
+  opacity: 1 !important;
+}
+#happytohelp-root .happytohelp-insight-container.happytohelp-insight-move-glow .happytohelp-insight-content.happytohelp-insight-has-glow::after {
+  filter: blur(8px);
+  animation-play-state: running;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container {
+  width: 100%;
+  box-sizing: content-box;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease-in-out 1s;
+  will-change: grid-template-rows;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons {
+  display: flex;
+  overflow-y: hidden;
+  gap: 1.2rem;
+  box-sizing: border-box;
+  width: calc(100% + 4rem);
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 2rem;
+  margin: 0 -2rem;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container {
+  position: relative;
+  transform: scale(1);
+  transition: transform 0.1s ease-in-out;
+  will-change: transform;
+  user-select: none;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:first-child {
+  margin-top: 2.4rem;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:last-child {
+  margin-bottom: 0.6rem;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:hover {
+    transition: transform 0.2s ease-in-out 0.05s;
+    transform: scale(1.02);
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:active {
+  transition: transform 0.1s ease-in-out 0s;
+  transform: scale(1) !important;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container .happytohelp-insight-button {
+  margin: 0;
+  font-size: 1em;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 2px 0px;
+  cursor: pointer;
+  font-weight: 400;
+  transition: color 0.2s ease-in-out;
+  will-change: color;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container .happytohelp-insight-button.happytohelp-insight-button-close {
+  font-weight: 400;
+  transition: opacity 0.2s ease-in-out;
+  will-change: opacity;
+  opacity: 0.7;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container .happytohelp-insight-button.happytohelp-insight-button-close:hover {
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-insight-footer {
+  position: fixed;
+  bottom: 0px;
+  width: 300px;
+  right: 108px;
+  height: 70px;
+  width: 300px;
+  z-index: 2147483603;
+  box-sizing: border-box;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-insight-footer {
+    right: 98px;
+    height: 63px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-insight-footer {
+    right: 88px;
+    height: 56px;
+  }
+}
+@media (max-width: 415px) {
+  #happytohelp-root .happytohelp-insight-footer {
+    display: none !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-footer .happytohelp-insight-agent {
+  opacity: 0.3;
+  font-size: 12px;
+  line-height: 19px;
+  display: inline-block;
+  margin: 0;
+  cursor: pointer;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
+  font-variation-settings: "wdth" 100;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  transition: opacity 0.4s ease 0.1s, color 0.6s ease 0.1s;
+  will-change: opacity, background-color;
+  float: right;
+}
+#happytohelp-root .happytohelp-insight-footer .happytohelp-insight-agent strong {
+  font-weight: 600;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-footer .happytohelp-insight-agent:hover {
+    opacity: 1;
+  }
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-insight, #happytohelp-root.happytohelp-insight-opened .happytohelp-insight-footer, #happytohelp-root.happytohelp-insight-opened .happytohelp-insight-close {
+  display: block;
+  animation: happytohelp-in-slide 3s cubic-bezier(0.05, 0.99, 0.05, 0.99);
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-insight.happytohelp-in-complete .happytohelp-content, #happytohelp-root.happytohelp-insight-opened .happytohelp-insight-footer.happytohelp-in-complete .happytohelp-content, #happytohelp-root.happytohelp-insight-opened .happytohelp-insight-close.happytohelp-in-complete .happytohelp-content {
+  transform: translateY(0px);
+}
+#happytohelp-root.happytohelp-insight-closed .happytohelp-insight.happytohelp-in-complete, #happytohelp-root.happytohelp-insight-closed .happytohelp-insight-footer.happytohelp-in-complete, #happytohelp-root.happytohelp-insight-closed .happytohelp-insight-close.happytohelp-in-complete {
+  display: block;
+  animation: happytohelp-out-slide 2s cubic-bezier(0.15, 0.99, 0.15, 1);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-events:hover .happytohelp-insight-buttons-container {
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.4s ease-in-out 0.01s;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-events:hover .happytohelp-insight-close {
+    opacity: 0 !important;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-events:hover .happytohelp-insight-content.happytohelp-insight-has-glow::after {
+    transition: opacity 0.3s, filter 0.1s;
+    opacity: 1 !important;
+    filter: blur(1px) !important;
+    animation-play-state: running !important;
+  }
+}
+
+/*# sourceMappingURL=Insight.css.map */

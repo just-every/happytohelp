@@ -1,0 +1,2 @@
+CREATE TABLE github_oauth_states(state_hash TEXT PRIMARY KEY,project_id TEXT NOT NULL,user_id TEXT NOT NULL,redirect_uri TEXT NOT NULL,expires_at INTEGER NOT NULL,consumed_at INTEGER);
+CREATE TABLE github_connections(project_id TEXT PRIMARY KEY REFERENCES projects(id),github_user_id TEXT NOT NULL,github_login TEXT NOT NULL,token_cipher TEXT NOT NULL,scopes TEXT NOT NULL,connected_at INTEGER NOT NULL);

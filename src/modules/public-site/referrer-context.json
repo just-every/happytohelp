@@ -1,0 +1,153 @@
+{
+  "industries": {
+    "ecommerce": [
+      "ecommerce",
+      "e-commerce",
+      "online store",
+      "online shop",
+      "retail"
+    ],
+    "SaaS": [
+      "saas",
+      "software",
+      "cloud",
+      "platform"
+    ],
+    "healthcare": [
+      "health",
+      "medical",
+      "healthcare",
+      "hospital",
+      "clinic",
+      "pharma"
+    ],
+    "finance": [
+      "finance",
+      "financial",
+      "banking",
+      "insurance",
+      "fintech",
+      "bank"
+    ],
+    "education": [
+      "education",
+      "school",
+      "university",
+      "college",
+      "learning",
+      "edtech"
+    ],
+    "marketing": [
+      "marketing",
+      "agency",
+      "advertis",
+      "brand",
+      "market"
+    ],
+    "real estate": [
+      "real estate",
+      "property",
+      "realtor",
+      "housing",
+      "realty"
+    ],
+    "legal": [
+      "legal",
+      "law firm",
+      "attorney",
+      "lawyer",
+      "compliance"
+    ],
+    "manufacturing": [
+      "manufacturing",
+      "factory",
+      "production",
+      "industrial"
+    ],
+    "hospitality": [
+      "hotel",
+      "restaurant",
+      "hospitality",
+      "tourism",
+      "travel"
+    ],
+    "tech": [
+      "tech",
+      "technology",
+      "it ",
+      "software"
+    ],
+    "media": [
+      "media",
+      "publishing",
+      "content",
+      "news",
+      "entertainment"
+    ],
+    "logistics": [
+      "logistics",
+      "supply chain",
+      "shipping",
+      "transport"
+    ],
+    "consulting": [
+      "consulting",
+      "consultant",
+      "advisor"
+    ],
+    "nonprofit": [
+      "nonprofit",
+      "non-profit",
+      "ngo",
+      "charity"
+    ]
+  },
+  "intentPatterns": {
+    "evaluating": [
+      "compare",
+      "vs",
+      "versus",
+      "review",
+      "best",
+      "top",
+      "rating",
+      "alternative"
+    ],
+    "purchasing": [
+      "buy",
+      "purchase",
+      "pricing",
+      "cost",
+      "subscribe",
+      "plan",
+      "deal",
+      "discount"
+    ],
+    "implementing": [
+      "implement",
+      "install",
+      "setup",
+      "deploy",
+      "integrate",
+      "migration"
+    ],
+    "learning": [
+      "how to",
+      "guide",
+      "tutorial",
+      "learn",
+      "example",
+      "documentation",
+      "help"
+    ],
+    "solving": [
+      "solve",
+      "fix",
+      "issue",
+      "problem",
+      "challenge",
+      "trouble",
+      "error"
+    ]
+  }
+}

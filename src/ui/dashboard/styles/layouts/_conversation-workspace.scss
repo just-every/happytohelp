@@ -1,0 +1,95 @@
+// The inbox owns one viewport: only the list, transcript, and assistant scroll.
+body.conversation-workspace {
+    --conversation-inbox-width: 372px;
+    --conversation-assistant-width: 344px;
+    --conversation-mobile-nav-height: 73px;
+    --conversation-top-height: 72px;
+    --conversation-content-width: 46rem;
+    --conversation-content-gutter: 1.5rem;
+    color: var(--conversation-ink);
+    background: var(--workspace-surface, #fff);
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+
+    .main-content, #chat, #chat > .layout, #chat .main, #chat .chat, #chat .chat-content {
+        min-width: 0;
+        min-height: 0;
+    }
+
+    #chat > .layout { overflow: hidden; }
+    #chat .chat { position: relative; background: var(--workspace-surface, #fff); }
+
+    #chat .chat > .chat-body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-flow: column nowrap;
+        width: 0;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    #chat .chat > .chat-body > .chat-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        background: var(--workspace-surface, #fff);
+        overscroll-behavior: contain;
+    }
+
+    #chat .sidebar {
+        min-width: 0;
+        overscroll-behavior: contain;
+        padding: 0 !important;
+    }
+
+    #chat .btn-primary {
+        --bs-btn-bg: var(--conversation-accent);
+        --bs-btn-border-color: var(--conversation-accent);
+        --bs-btn-hover-bg: var(--conversation-accent-strong);
+        --bs-btn-hover-border-color: var(--conversation-accent-strong);
+        --bs-btn-active-bg: var(--conversation-accent-strong);
+        --bs-btn-active-border-color: var(--conversation-accent-strong);
+        --bs-btn-disabled-bg: var(--conversation-accent);
+        --bs-btn-disabled-border-color: var(--conversation-accent);
+    }
+
+    #chat :is(button, a, input, textarea, select):focus-visible {
+        outline: 2px solid var(--conversation-accent);
+        outline-offset: 3px;
+    }
+
+    @media (min-width: 1200px) {
+        & { overflow: hidden; }
+        .main-content, #chat, #chat > .layout, #chat .main, #chat .main > .chat { height: 100dvh; }
+        #chat > .layout { flex-direction: row; }
+        #chat .sidebar { flex: 0 0 var(--conversation-inbox-width); width: var(--conversation-inbox-width); height: 100dvh; }
+        #chat .main { flex: 1 1 auto; overflow: hidden; }
+    }
+
+    @media (min-width: 1440px) and (max-width: 1519.98px) {
+        --conversation-inbox-width: 344px;
+        --conversation-assistant-width: 320px;
+    }
+
+    @media (min-width: 1280px) and (max-width: 1439.98px) {
+        --conversation-rail-width: 200px;
+        --conversation-inbox-width: 280px;
+        --conversation-assistant-width: 300px;
+    }
+
+    @media (max-width: 1199.98px) {
+        & { padding-top: var(--conversation-mobile-nav-height); }
+        #chat .main { left: 0; top: var(--conversation-mobile-nav-height); bottom: 0; height: auto; overflow: hidden; }
+        #chat .main > .chat { height: 100%; min-height: 0; }
+        #chat .sidebar { height: calc(100dvh - var(--conversation-mobile-nav-height)); }
+    }
+
+    @media (max-width: 575.98px) {
+        --conversation-content-gutter: .5rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #chat .main { transition: none; }
+    }
+}

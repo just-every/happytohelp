@@ -1,0 +1,23 @@
+.chat-header {
+  position: relative;
+}
+.chat-header > .row {
+  position: relative;
+  z-index: 2;
+}
+.chat-header .chat-header-title {
+  font-size: 1.4em;
+  letter-spacing: 0em;
+  font-weight: 600;
+  color: #12263F;
+}
+
+.chat-line-bg {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  height: 50%;
+  left: 0;
+}
+
+/*# sourceMappingURL=ConversationHeader.css.map */

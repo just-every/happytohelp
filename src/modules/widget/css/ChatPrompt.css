@@ -1,0 +1,94 @@
+#happytohelp-root .happytohelp-chat-prompt {
+  margin: 0;
+  padding: 0;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-chat-box-prompt {
+  border: none;
+  border-radius: 0px;
+  margin: 20px 0px 0px 0px;
+  padding: 0px 0px 2px 1%;
+  background: #fff;
+  max-width: unset;
+  width: 98%;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-chat-box-prompt.happytohelp-chat-box-prompt-error {
+  color: #cb0000;
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-chat-box-prompt.happytohelp-chat-box-prompt-error input {
+  border: 1px solid #cb0000;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon {
+  position: relative;
+  margin-top: 10px;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon input {
+  padding-left: 48px !important;
+  border-radius: 4px;
+  width: 100%;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon svg {
+  position: absolute;
+  top: 12px;
+  left: 17px;
+  font-size: 14px;
+  color: #c7c8ce;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon svg.happytohelp-loading {
+  animation: happytohelp-spin 1s linear infinite;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt svg {
+  color: #cecece;
+  font-size: 16px;
+  left: 14px;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div {
+  position: absolute;
+  top: 15px;
+  left: 10px;
+  background: #cecece;
+  width: 5px;
+  height: 1px;
+  border-radius: 1px;
+  transform: rotate(30deg);
+  display: none;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash2 {
+  top: 24px;
+  transform: rotate(-30deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash3 {
+  left: 33px;
+  transform: rotate(-30deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash4 {
+  left: 33px;
+  top: 24px;
+  transform: rotate(30deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash5 {
+  width: 4px;
+  left: 18px;
+  top: 9px;
+  transform: rotate(70deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash6 {
+  width: 4px;
+  left: 26px;
+  top: 9px;
+  transform: rotate(-70deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash7 {
+  width: 4px;
+  left: 18px;
+  top: 28px;
+  transform: rotate(-70deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash8 {
+  width: 4px;
+  left: 26px;
+  top: 28px;
+  transform: rotate(70deg);
+}
+
+/*# sourceMappingURL=ChatPrompt.css.map */

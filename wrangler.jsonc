@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "support-happytohelp",
+  "name": "happytohelp-native",
   "main": "src/server.ts",
   "compatibility_date": "2026-09-08",
   "compatibility_flags": [
@@ -9,9 +9,51 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "happytohelp",
-      "database_id": "local-happytohelp",
-      "migrations_dir": "migrations"
+      "database_name": "happytohelp-native",
+      "database_id": "local-only-requires-setup",
+      "migrations_dir": ".generated/migrations"
     }
-  ]
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "happytohelp-native-files"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CONVERSATIONS",
+        "class_name": "ConversationSocket"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "ConversationSocket"
+      ]
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "JOBS",
+        "queue": "happytohelp-native-jobs"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "happytohelp-native-jobs",
+        "max_batch_size": 1,
+        "max_retries": 0
+      }
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  }
 }

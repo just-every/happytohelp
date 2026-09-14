@@ -1,0 +1,57 @@
+{
+  "kind": "happytohelp-neutral-assistance-second-consumer-proof",
+  "observed_at": "2026-09-14",
+  "consumer": "runeditrun/beacon",
+  "consumer_baseline_commit": "1d2f583c164b6fec359ccdbd72dee922ec68fa95",
+  "isolated_checkout": "/tmp/h2h-beacon-source-proof-tUqPO6/beacon",
+  "canonical_checkout_changed": false,
+  "selection": [
+    {
+      "source": "src/modules/ai-support/assist/packet.js",
+      "destination": "src/modules/happytohelp-assistance/packet.js",
+      "sha256": "9f35962a10449bb07f8c3c1809ba1545f309fd611a0d59d86a326d88c227d614",
+      "bytes": 3900
+    },
+    {
+      "source": "src/modules/ai-support/assist/packetBounds.js",
+      "destination": "src/modules/happytohelp-assistance/packetBounds.js",
+      "sha256": "e6f63ea6188a59006985970dcf392b5811bda921145f01ddf4a39808435742e7",
+      "bytes": 3340
+    },
+    {
+      "source": "src/modules/ai-support/assist/passEvidence.js",
+      "destination": "src/modules/happytohelp-assistance/passEvidence.js",
+      "sha256": "8ac50a64ab2e79e51f46bd7f452ef435161b391cddf57e6a5133c7a0ce72dcf0",
+      "bytes": 1594
+    },
+    {
+      "source": "src/modules/ai-support/assist/historyCursor.js",
+      "destination": "src/modules/happytohelp-assistance/historyCursor.js",
+      "sha256": "72a6c42b8f211223ef90fdcb77267e4938d522732b4eeb097aa9d1a0a915350c",
+      "bytes": 1928
+    },
+    {
+      "source": "src/modules/ai-support/assist/historyOutput.js",
+      "destination": "src/modules/happytohelp-assistance/historyOutput.js",
+      "sha256": "12b287e217000a044f3c605515f14cb47bebef7f30a6135bccb0e1c5b352bbca",
+      "bytes": 6514
+    }
+  ],
+  "integration": "Beacon buildAiPreparationRequest uses source budget/recovery metadata before its actual provider interface; mandatory reviewed-send instruction and source/citation identity remain.",
+  "verification": {
+    "dependency_install": "pnpm install --frozen-lockfile --offline;188 packages from local cache",
+    "node": "v26.8.1",
+    "engine_note": "Repeated adoption/contracts, existing D1 workflow, build and typecheck with declared Node26.8.1. Earlier Node26.0.0 attempt retained separately.",
+    "source_recipe_inspect": "passed",
+    "adoption_and_contract_tests": "4/4",
+    "existing_ai_preparation_workflow": "7/7 against actual local D1 with test-only provider boundary",
+    "build": "passed",
+    "typecheck": "passed",
+    "logs_suffix": "-node26.8.1.log"
+  },
+  "source_lock_status": "Not run; parent freeze required. Local module selection remains unstaged in isolated checkout, preserving no-lock/no-commit instruction.",
+  "provider_calls": false,
+  "deployment": false,
+  "canonical_contract_sha256": "0774fbe491c50376c1839b8e49ac99ef2867c2750b613c49431aa9e261e6b9d5",
+  "integration_patch_sha256": "dcdbe7d652d1785dcb34a921b681280bf5e1bcab509db82ffc593cb7062ffb73"
+}

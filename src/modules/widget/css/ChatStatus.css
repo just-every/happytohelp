@@ -1,0 +1,55 @@
+#happytohelp-root .happytohelp-chat-box-status {
+  display: block;
+  font-size: 0.7em;
+  padding-top: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  opacity: 0;
+  will-change: opacity;
+  transition: none;
+}
+#happytohelp-root .happytohelp-chat-box-status:first-letter {
+  text-transform: capitalize;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-agent {
+  padding-left: 46px;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-local {
+  text-align: right;
+  padding-right: 2px;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-failed {
+  color: #b70000;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-animate {
+  transition: opacity 600ms ease;
+  opacity: 0.4;
+}
+#happytohelp-root .happytohelp-chat-box-status .happytohelp-chat-box-status-progress {
+  height: 4px;
+  background-color: #f1f9ff;
+  width: 94%;
+  overflow: hidden;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 1px;
+}
+#happytohelp-root .happytohelp-chat-box-status .happytohelp-chat-box-status-progress div {
+  width: 50%;
+  height: 100%;
+  border-radius: 4px;
+  background-color: #2ca1e5;
+  animation: happytohelp-indeterminate-progress 2s infinite linear;
+  transform-origin: 0% 50%;
+}
+
+@keyframes happytohelp-indeterminate-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/*# sourceMappingURL=ChatStatus.css.map */

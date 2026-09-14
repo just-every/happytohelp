@@ -1,3 +1,4 @@
+import {requireActiveProject,isProjectActive} from '../../platform/project-status'
 import type {Env,Job} from '../../platform/env'
 import {analysisInterval} from './collector'
 import {readContextSource,profilePacket,monitoringPacket} from './packets'
@@ -7,6 +8,7 @@ import * as profileCooldown from './profiles/cooldown.js'
 import * as version from './profiles/version.js'
 export const PROFILE_TASKS=['project','agent','contact','optimize','optimizeContact'] as const
 export async function enqueueContextJob(env:Env,projectId:string,subjectId:string,kind:string,model:string){
+ await requireActiveProject(env,projectId)
  if(![...PROFILE_TASKS,'monitoring'].includes(kind as any))throw new Error('Unknown context task')
  if(typeof model!=='string'||!model.trim()||model.length>120)throw new Error('Explicit context model required')
  const source=await readContextSource(env,projectId,subjectId),now=Date.now(),id=crypto.randomUUID()
@@ -16,7 +18,7 @@ export async function enqueueContextJob(env:Env,projectId:string,subjectId:strin
  if(kind==='optimizeContact'&&!packet.approved_broad_personalization.length)return {reason:'no_public_signals'}
  if(kind!=='monitoring'&&kind!=='optimizeContact'&&!packet.evidence.length&&!packet.trusted_evidence.length)return {reason:'no_eligible_evidence'}
  const payload=JSON.stringify({packet,summaryPacket:source.summaryPacket,context:{project:source.context.project,contact:source.context.contact,agent:source.context.agent,projectOptimize:source.context.projectOptimize},existing:source.saved[kind]||{}})
- const insert=env.DB.prepare(`INSERT INTO context_jobs(id,project_id,subject_id,kind,state,source_revision,packet_json,model,created_at) SELECT ?,?,?,?,'queued',?,?,?,? WHERE EXISTS(SELECT 1 FROM context_subjects WHERE project_id=? AND subject_id=? AND revision=?) AND NOT EXISTS(SELECT 1 FROM context_jobs WHERE project_id=? AND subject_id=? AND kind=? AND state IN ('queued','running','uncertain'))`).bind(id,projectId,subjectId,kind,source.subject.revision,payload,model,now,projectId,subjectId,source.subject.revision,projectId,subjectId,kind)
+ const insert=env.DB.prepare(`INSERT INTO context_jobs(id,project_id,subject_id,kind,state,source_revision,packet_json,model,created_at) SELECT ?,?,?,?,'queued',?,?,?,? WHERE EXISTS(SELECT 1 FROM projects p WHERE p.id=? AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=p.id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)) AND EXISTS(SELECT 1 FROM context_subjects WHERE project_id=? AND subject_id=? AND revision=?) AND NOT EXISTS(SELECT 1 FROM context_jobs WHERE project_id=? AND subject_id=? AND kind=? AND state IN ('queued','running','uncertain'))`).bind(id,projectId,subjectId,kind,source.subject.revision,payload,model,now,projectId,projectId,subjectId,source.subject.revision,projectId,subjectId,kind)
  let admitted=false
  if(kind==='monitoring'){
   await env.DB.prepare('INSERT INTO context_collectors(project_id,subject_id) VALUES(?,?) ON CONFLICT DO NOTHING').bind(projectId,subjectId).run()
@@ -34,12 +36,12 @@ export async function enqueueContextJob(env:Env,projectId:string,subjectId:strin
  }
  if(!admitted)return {reason:'already_running_or_source_changed'}
  // If queue delivery fails, the durable queued record remains recoverable without repeating provider work.
- await env.JOBS.send({type:'context.run',id,projectId})
+ if(await isProjectActive(env,projectId))await env.JOBS.send({type:'context.run',id,projectId})
  return {id,reason:'queued'}
 }
 export async function recoverContextJobs(env:Env){
- const queued=await env.DB.prepare("SELECT id,project_id FROM context_jobs WHERE state='queued' ORDER BY created_at LIMIT 100").all<any>()
- for(const row of queued.results)await env.JOBS.send({type:'context.run',id:row.id,projectId:row.project_id} satisfies Job)
+ const queued=await env.DB.prepare("SELECT id,project_id FROM context_jobs WHERE state='queued' AND EXISTS(SELECT 1 FROM projects p WHERE p.id=context_jobs.project_id) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=context_jobs.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL) ORDER BY created_at LIMIT 100").all<any>()
+ for(const row of queued.results)if(await isProjectActive(env,row.project_id))await env.JOBS.send({type:'context.run',id:row.id,projectId:row.project_id} satisfies Job)
  // An expired running attempt is uncertain. Never automatically replay it.
  await env.DB.prepare("UPDATE context_jobs SET state='uncertain',error='Interrupted provider attempt; explicit review required',finished_at=? WHERE state='running' AND started_at<?").bind(Date.now(),Date.now()-360000).run()
 }

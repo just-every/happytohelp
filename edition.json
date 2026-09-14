@@ -121,7 +121,8 @@
           "tests/knowledge-worker.ts",
           "tests/knowledge-workerd.mjs",
           "migrations/0053_knowledge_recovery.sql",
-          "tests/knowledge-recovery.ts"
+          "tests/knowledge-recovery.ts",
+          "tests/knowledge-deleted-projects.ts"
         ]
       }
     },
@@ -266,6 +267,8 @@
           "tests/lead-operations.mjs",
           "tests/legacy-import.mjs",
           "tests/management.mjs",
+          "tests/deleted-background.mjs",
+          "tests/deleted-background-worker.ts",
           "tests/prepare-browser-fixture.mjs",
           "tests/public-help-center.mjs",
           "tests/public-referrer-cases.json",
@@ -287,7 +290,10 @@
           "migrations/0008_account_sessions.sql",
           "tests/billing-parity-cases.ts",
           "tests/operating-environment.mjs",
-          "tests/ui-browser.mjs"
+          "tests/ui-browser.mjs",
+          "migrations/0084_billing_project_usage.sql",
+          "tests/billing-project-usage-cases.ts",
+          "tests/billing-migrations.ts"
         ]
       }
     }

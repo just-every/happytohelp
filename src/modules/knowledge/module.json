@@ -11,7 +11,8 @@
     "tests/knowledge-worker.ts",
     "tests/knowledge-workerd.mjs",
     "migrations/0053_knowledge_recovery.sql",
-    "tests/knowledge-recovery.ts"
+    "tests/knowledge-recovery.ts",
+    "tests/knowledge-deleted-projects.ts"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

@@ -1,3 +1,4 @@
+import {requireActiveProject,isProjectActive} from '../../platform/project-status'
 import type {Env,Job} from '../../platform/env'
 import {z} from 'zod'
 import {requestContextModel} from './provider'
@@ -17,7 +18,9 @@ export async function consumeContextJob(message:Job,env:Env,request:ContextReque
  if(message.type!=='context.run')return false
  const job=await env.DB.prepare('SELECT * FROM context_jobs WHERE id=? AND project_id=?').bind(message.id,message.projectId).first<any>()
  if(!job||job.state!=='queued')return true
- const claim=await env.DB.prepare("UPDATE context_jobs SET state='running',started_at=? WHERE id=? AND state='queued'").bind(Date.now(),job.id).run()
+ if(!await isProjectActive(env,job.project_id)){await env.DB.prepare("UPDATE context_jobs SET state='failed',error='Project deleted before provider dispatch',finished_at=? WHERE id=? AND state='queued'").bind(Date.now(),job.id).run();return true}
+ const requestProvider=request;request=async(env,current,task,input)=>{await requireActiveProject(env,current.project_id);const result=await requestProvider(env,current,task,input);await requireActiveProject(env,current.project_id);return result}
+ const claim=await env.DB.prepare("UPDATE context_jobs SET state='running',started_at=? WHERE id=? AND state='queued' AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=context_jobs.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)").bind(Date.now(),job.id).run()
  if(!claim.meta.changes)return true
  try{
   const current=await env.DB.prepare('SELECT revision,consent,bot_enabled FROM context_subjects WHERE project_id=? AND subject_id=?').bind(job.project_id,job.subject_id).first<any>()

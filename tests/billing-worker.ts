@@ -1,3 +1,10 @@
+import checkpointSQL from '../migrations/0084_billing_project_usage.sql'
+import {billingStatements} from './billing-migrations'
+import {projectUsageCases} from './billing-project-usage-cases'
+import extra0 from '../migrations/0050_knowledge.sql'
+import extra1 from '../migrations/0060_customer_context.sql'
+import extra2 from '../migrations/0060_customer_context_engine.sql'
+import extra3 from '../migrations/0096_site_preview.sql'
 import {billingParityCases} from './billing-parity-cases.ts'
 import {Buffer} from 'node:buffer'
 import assert from 'node:assert/strict'
@@ -14,7 +21,7 @@ import sql7 from '../migrations/0080_integrations.sql'
 import sql8 from '../migrations/0081_billing_receipts.sql'
 export default {async fetch(request:Request,bindings:any){if(new URL(request.url).pathname!='/test')return new Response('ready');try{
  const env={...bindings,STRIPE_SECRET_KEY:'test-only',STRIPE_WEBHOOK_SECRET:'test-only'},DB=env.DB
- for(const source of [sql0,sql1,sql2,sql3,sql4,sql5,sql6,sql7,sql8])for(const sql of source.split(';').filter(s=>s.trim()))await DB.prepare(sql).run()
+ for(const source of [sql0,sql1,sql2,sql3,sql4,sql5,sql6,sql7,sql8,extra0,extra1,extra2,extra3,checkpointSQL])for(const sql of billingStatements(source))await DB.prepare(sql).run()
  await DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)").run()
  await billingParityCases(env)
  const realFetch=globalThis.fetch;let calls=0
@@ -53,4 +60,4 @@ export default {async fetch(request:Request,bindings:any){if(new URL(request.url
  await assert.rejects(verifyStripeEvent(env,raw+' ',`t=${timestamp},v1=${digest}`),/Invalid/)
  await assert.rejects(verifyStripeEvent(env,raw,`t=1,v1=${digest}`),/Expired/)
  console.log('Billing real local D1: customer idempotency; exact credit; duplicate A preserves B and method; conflicting receipt; amount/customer/currency/unknown intent rejection; matching reviewed claim completion; uncertain no replay; signed webhook checks passed')
-return Response.json({passed:true})}catch(error){return Response.json({error:String(error),stack:(error as Error).stack},{status:500})}}}
+await projectUsageCases(env);return Response.json({passed:true})}catch(error){return Response.json({error:String(error),stack:(error as Error).stack},{status:500})}}}

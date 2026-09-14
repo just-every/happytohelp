@@ -1,3 +1,4 @@
+import {testDeletedKnowledgeProjects} from './knowledge-deleted-projects'
 import identitySchema from '../migrations/0001_identity.sql'
 import widgetIdentitySchema from '../migrations/0005_widget_identity.sql'
 import {hashToken} from '../src/platform/auth'
@@ -17,6 +18,8 @@ export default {async fetch(request:Request,env:Env){
  let checks=0;const check=(condition:unknown,message:string)=>{if(!condition)throw new Error(message);checks++};
  try{
  for(const sql of `${identitySchema}\n${widgetIdentitySchema}\n${schema}\n${authoring}\n${importsSchema}\n${recoverySchema}\n${managementSchema}`.split(';').map(s=>s.trim()).filter(Boolean))await env.DB.prepare(sql).run();
+ await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://example.com',0); ").run();
+ await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('other','Other','other-widget','https://other.example.com',0)").run();
  await env.DB.prepare("INSERT INTO knowledge_datasets(id,project_id,name,created_at) VALUES('dataset','p','Corpus',?)").bind(Date.now()).run();
  const jobs:Job[]=[];const testing={...env,JOBS:{send:async(job:Job)=>{jobs.push(job)}}} as unknown as Env;
  const documents=Array.from({length:138},(_,i)=>({url:`https://example.com/${i}`,title:`Page ${i}`,content:`Corpus article ${i} `+'body '.repeat(230)}));
@@ -28,7 +31,7 @@ export default {async fetch(request:Request,env:Env){
  check((await searchKnowledge(env,'p','Corpus')).length===3,'failed refresh retains published corpus');
  let semanticError='';try{await searchKnowledge(env,'p','Corpus','semantic')}catch(e){semanticError=String(e)}check(semanticError.includes('SEMANTIC_INDEX_UNAVAILABLE'),'semantic cannot silently fall back');
  await env.DB.prepare("INSERT INTO knowledge_articles(id,project_id,slug,title,content,status,updated_at) VALUES('draft','p','draft','Private','Draft body','draft',0),('pub','p','published','Public','Published body','published',0)").run();
- await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://example.com',0); ").run();await env.DB.prepare("INSERT INTO users(id,email,name,created_at) VALUES('owner','owner@example.com','Owner',0)").run();await env.DB.prepare("INSERT INTO memberships(project_id,user_id,role) VALUES('p','owner','owner')").run();await env.DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,'owner','p','owner',?)").bind(await hashToken('owner-test'),Date.now()+60000).run();
+ await env.DB.prepare("INSERT INTO users(id,email,name,created_at) VALUES('owner','owner@example.com','Owner',0)").run();await env.DB.prepare("INSERT INTO memberships(project_id,user_id,role) VALUES('p','owner','owner')").run();await env.DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,'owner','p','owner',?)").bind(await hashToken('owner-test'),Date.now()+60000).run();
  const send=async(path:string,method:string,body:unknown)=>routes.request(path,{method,headers:{Authorization:'Bearer owner-test','Content-Type':'application/json'},body:JSON.stringify(body)},env);
  const categoryResponse=await send('/p/categories','POST',{title:'Category',summary:'Summary'});check(categoryResponse.status===201,'original category fields and automatic slug');const category=await categoryResponse.json<any>();
  const articleResponse=await send('/p/articles','POST',{title:'Authored',content:'Content',categories:[category.id],is_published:true});check(articleResponse.status===201,'article multicategory authoring');const authored=await articleResponse.json<any>();
@@ -64,6 +67,7 @@ export default {async fetch(request:Request,env:Env){
  await testKnowledgeRecovery(env,check)
  await env.DB.prepare("INSERT INTO project_settings VALUES('p',json_object('deleted_at',123),123) ON CONFLICT(project_id) DO UPDATE SET settings_json=excluded.settings_json").run()
  for(const path of ['/public/p/articles','/public/p/categories','/public/p/search?q=Imported','/public/p/articles/published'])check((await routes.request(path,{},env)).status===404,'deleted project public knowledge denied')
+ await testDeletedKnowledgeProjects(env,check);
  return Response.json({passed:checks,runtime:'workerd',database:'real local D1',storage:'real local R2',providerCalls:0})
  }catch(error){return Response.json({error:String(error),checks},{status:500})}
 }}

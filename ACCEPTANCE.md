@@ -38,10 +38,10 @@ Do not claim aggregate clause coverage from a smaller test count.
   configured notification and uncertain no-replay passed with provider fixtures.
 - `tests/public-help-center.mjs`: real local D1 canonical and `/help` aliases,
   Markdown/search, draft/tenant/deleted-project denial and alias auth passed.
-- `tests/public-site-runtime.mjs`: the earlier integrated Worker returned all 16
-  original pages and referenced assets successfully; its valid waitlist insert
-  failed before migration 0095 was applied. That earlier failure is preserved,
-  and the final emitted-build run must supersede it before full acceptance.
+- `tests/public-site-runtime.mjs`: runs within the fresh emitted-Worker suite,
+  covering 16 original pages/assets and real waitlist admission, validation,
+  CSRF and duplicate handling. This passed from the first clean native source
+  release; the earlier missing-migration attempt remains in external evidence.
 
 These are bounded local results, not hosted/provider/production-import acceptance.
 Source asset rights need the review recorded in

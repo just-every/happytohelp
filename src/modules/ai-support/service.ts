@@ -1,3 +1,4 @@
+import {reconcileTerminalAttempt} from './recovery'
 import {settleGenerationUsage} from '../integrations/billing-usage'
 import {assistanceProfileSql,replyProfileSql} from './selection'
 import type { Actor,Env,Job } from '../../platform/env'
@@ -19,7 +20,7 @@ export async function handleGeneration(env:Env,job:Job){
  if(job.type!=='ai.generate')return false
  const row=await env.DB.prepare('SELECT * FROM ai_generations WHERE id=? AND project_id=?').bind(job.id,job.projectId).first<Generation>()
  if(!row)return true
- if(['completed','cancelled','superseded','failed','uncertain'].includes(row.state)){await settleGenerationUsage(env,row.id);return true}
+ if(['completed','cancelled','superseded','failed','uncertain'].includes(row.state)){await reconcileTerminalAttempt(env,row.id);return true}
  if(row.state==='running'){
   // A previous delivery may have reached the provider. Never replay it.
   await transition(env,row.id,'uncertain','Interrupted attempt; provider outcome requires review')
@@ -79,9 +80,11 @@ export async function handleGeneration(env:Env,job:Job){
  return true
 }
 export async function recoverQueuedGenerations(env:Env){
+ const interrupted=await env.DB.prepare("SELECT DISTINCT g.id FROM ai_generations g JOIN ai_attempts a ON a.generation_id=g.id WHERE g.state NOT IN ('queued','running') AND a.state='running' AND (g.state='completed' OR g.updated_at<?) LIMIT 100").bind(new Date(Date.now()-240000).toISOString()).all<{id:string}>()
+ for(const row of interrupted.results)await reconcileTerminalAttempt(env,row.id)
  const stale=await env.DB.prepare("SELECT id,project_id,conversation_id,kind FROM ai_generations WHERE state='running' AND updated_at<?").bind(new Date(Date.now()-240000).toISOString()).all<any>()
  for(const row of stale.results){await transition(env,row.id,'uncertain','Execution deadline passed without a durable terminal outcome');await env.DB.prepare("UPDATE ai_attempts SET state='uncertain',finished_at=? WHERE generation_id=? AND state='running'").bind(new Date().toISOString(),row.id).run();await settleGenerationUsage(env,row.id);if(row.kind==='suggestions')await publishSuggestions(env,row.project_id,row.conversation_id)}
- const jobs=await env.DB.prepare("SELECT id,project_id FROM ai_generations WHERE state='queued' ORDER BY created_at LIMIT 100").all<{id:string;project_id:string}>()
+ const jobs=await env.DB.prepare("SELECT g.id,g.project_id FROM ai_generations g JOIN projects p ON p.id=g.project_id WHERE g.state='queued' AND NOT EXISTS(SELECT 1 FROM project_settings s WHERE s.project_id=g.project_id AND json_extract(s.settings_json,'$.deleted_at') IS NOT NULL) ORDER BY g.created_at LIMIT 100").all<{id:string;project_id:string}>()
  for(const job of jobs.results)await env.JOBS.send({type:'ai.generate',id:job.id,projectId:job.project_id})
 }
 

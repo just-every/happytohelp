@@ -1,3 +1,4 @@
+import {isProjectActive} from './platform/project-status'
 import type { Env,Job } from './platform/env'
 import { handleGeneration,recoverQueuedGenerations } from './modules/ai-support/service'
 import { executeTrainingCase } from './modules/ai-support/training'
@@ -11,13 +12,14 @@ import { consumeJob as consumeBrand,recoverBrandJobs } from './modules/site-prev
 import { handleLeadJob,recoverLeadJobs } from './modules/integrations/leads'
 import { applyMessageEffects } from './message-effects'
 import type { Actor } from './platform/env'
-import { settleTrainingUsage,reconcileUsageBilling } from './modules/integrations/billing-usage'
+import { settleTrainingUsage,settleContextUsage,settleBrandUsage,reconcileUsageBilling } from './modules/integrations/billing-usage'
 
 export async function consumeJob(job:Job,env:Env) {
+ if(job.type!=='lead.process'&&!await isProjectActive(env,job.projectId))return
  if(await handleGeneration(env,job))return
  if(await consumeKnowledge(job,env))return
- if(await consumeContextJob(job,env))return
- if(await consumeBrand(job,env))return
+ if(await consumeContextJob(job,env)){await settleContextUsage(env,job.id);return}
+ if(await consumeBrand(job,env)){await settleBrandUsage(env,job.id);return}
  if(await handleLeadJob(env,job))return
  if(job.type==='training'){
   await executeTrainingRun(env,job.id,executeTrainingCase)
@@ -28,8 +30,9 @@ export async function consumeJob(job:Job,env:Env) {
  throw new Error(`Unknown persisted job type: ${job.type}`)
 }
 export async function runScheduled(env:Env) {
- const pending=await env.DB.prepare('SELECT project_id,conversation_id,MAX(id) last_id FROM conversation_outbox WHERE delivered_at IS NULL GROUP BY project_id,conversation_id LIMIT 100').all<{project_id:string;conversation_id:string;last_id:number}>()
+ const pending=await env.DB.prepare("SELECT project_id,conversation_id,MAX(id) last_id FROM conversation_outbox WHERE delivered_at IS NULL AND EXISTS(SELECT 1 FROM projects p WHERE p.id=conversation_outbox.project_id) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=conversation_outbox.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL) GROUP BY project_id,conversation_id LIMIT 100").all<{project_id:string;conversation_id:string;last_id:number}>()
  for(const row of pending.results){
+  if(!await isProjectActive(env,row.project_id))continue
   const messages=await env.DB.prepare('SELECT o.id outbox_id,m.* FROM conversation_outbox o JOIN messages m ON m.id=o.message_id WHERE o.conversation_id=? AND o.id<=? AND o.delivered_at IS NULL ORDER BY o.id LIMIT 100').bind(row.conversation_id,row.last_id).all<Record<string,unknown>>()
   let through:number|undefined
   for(const message of messages.results){

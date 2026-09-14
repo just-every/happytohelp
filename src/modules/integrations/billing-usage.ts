@@ -1,3 +1,5 @@
+import {reconcileProjectUsage} from './billing-project-usage'
+export {settleContextUsage,settleBrandUsage} from './billing-project-usage'
 import {HTTPException} from 'hono/http-exception'
 import type {Env} from '../../platform/env'
 import {billingCurrency} from './stripe'
@@ -62,6 +64,7 @@ export async function settleTrainingUsage(env:Env,attemptId:string){
 
 /** Recover accounting after a crash without resubmitting any provider request. */
 export async function reconcileUsageBilling(env:Env){
+ await reconcileProjectUsage(env)
  const generations=await env.DB.prepare("SELECT DISTINCT g.id FROM ai_generations g JOIN ai_attempts a ON a.generation_id=g.id JOIN ai_round_usage r ON r.attempt_id=a.id LEFT JOIN billing_usage_receipts b ON b.attempt_id=a.id AND b.request_id=r.request_id WHERE g.state NOT IN ('queued','running') AND a.state NOT IN ('queued','running') AND (b.id IS NULL OR b.state!='settled') LIMIT 100").all<{id:string}>()
  for(const row of generations.results)await settleGenerationUsage(env,row.id)
  const training=await env.DB.prepare("SELECT DISTINCT r.attempt_id FROM training_model_rounds r JOIN training_cases c ON c.attempt_id=r.attempt_id LEFT JOIN billing_usage_receipts b ON b.attempt_id='training:'||r.attempt_id AND b.request_id=r.request_id WHERE c.status NOT IN ('queued','running') AND (b.id IS NULL OR b.state!='settled') LIMIT 100").all<{attempt_id:string}>()

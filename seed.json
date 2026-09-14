@@ -2,7 +2,7 @@
   "id": "happytohelp",
   "name": "HappyToHelp",
   "version": "0.1.0",
-  "maturity": "native-migration-candidate; final contract acceptance evidence pending",
+  "maturity": "native edition; local verification only, not deployed",
   "category": "support",
   "spine": {
     "id": "happytohelp-conversation",

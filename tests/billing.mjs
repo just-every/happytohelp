@@ -4,13 +4,15 @@ import {readFile,readdir} from 'node:fs/promises'
 import assert from 'node:assert/strict'
 registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&context.parentURL){const url=new URL(specifier+'.ts',context.parentURL);if(existsSync(url))return next(url.href,context)}return next(specifier,context)}})
 const {billingParityCases}=await import('./billing-parity-cases.ts')
+const {billingStatements}=await import('./billing-migrations.ts')
+const {projectUsageCases}=await import('./billing-project-usage-cases.ts')
 const {recordStripePayment,automatedTopUps}=await import('../src/modules/integrations/billing.ts')
 const {stripeOperation,stripe,customer,verifyStripeEvent}=await import('../src/modules/integrations/stripe.ts')
 const {getPlatformProxy}=await import('wrangler')
 const proxy=await getPlatformProxy({persist:false})
 try {
  const env={...proxy.env,STRIPE_SECRET_KEY:'test-only',STRIPE_WEBHOOK_SECRET:'test-only'},DB=env.DB
- for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0080_integrations.sql','0081_billing_receipts.sql'])for(const sql of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).split(';').filter(s=>s.trim()))await DB.prepare(sql).run()
+ for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0080_integrations.sql','0081_billing_receipts.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','0096_site_preview.sql','0084_billing_project_usage.sql'])for(const sql of billingStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
  await DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)").run()
  await billingParityCases(env)
  const realFetch=globalThis.fetch;let calls=0
@@ -48,5 +50,6 @@ try {
  assert.equal((await verifyStripeEvent(env,raw,`t=${timestamp},v1=${digest}`)).id,'evt_test')
  await assert.rejects(verifyStripeEvent(env,raw+' ',`t=${timestamp},v1=${digest}`),/Invalid/)
  await assert.rejects(verifyStripeEvent(env,raw,`t=1,v1=${digest}`),/Expired/)
+ await projectUsageCases(env)
  console.log('Billing real local D1: customer idempotency; exact credit; duplicate A preserves B and method; conflicting receipt; amount/customer/currency/unknown intent rejection; matching reviewed claim completion; uncertain no replay; signed webhook checks passed')
 }finally{await proxy.dispose()}

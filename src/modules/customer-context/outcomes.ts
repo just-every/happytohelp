@@ -3,7 +3,7 @@ import type {Env} from '../../platform/env'
 import * as version from './profiles/version.js'
 // @ts-ignore Retained evidence validation.
 import * as validation from './profiles/validation.js'
-export function currentGuard(env:Env,job:any){return env.DB.prepare(`INSERT INTO context_write_guards(id,result) VALUES(?,CASE WHEN EXISTS(SELECT 1 FROM context_jobs j JOIN context_subjects s ON s.project_id=j.project_id AND s.subject_id=j.subject_id WHERE j.id=? AND j.state='running' AND s.revision=j.source_revision AND (j.kind NOT IN ('contact','monitoring','optimizeContact') OR (s.consent=1 AND s.bot_enabled=1))) THEN 'ok' ELSE 'stale' END)`).bind(job.id,job.id)}
+export function currentGuard(env:Env,job:any){return env.DB.prepare(`INSERT INTO context_write_guards(id,result) VALUES(?,CASE WHEN EXISTS(SELECT 1 FROM context_jobs j JOIN context_subjects s ON s.project_id=j.project_id AND s.subject_id=j.subject_id WHERE j.id=? AND j.state='running' AND EXISTS(SELECT 1 FROM projects p WHERE p.id=j.project_id) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=j.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL) AND s.revision=j.source_revision AND (j.kind NOT IN ('contact','monitoring','optimizeContact') OR (s.consent=1 AND s.bot_enabled=1))) THEN 'ok' ELSE 'stale' END)`).bind(job.id,job.id)}
 export async function publishProfile(env:Env,job:any,candidate:any){
  const {packet,existing}=JSON.parse(job.packet_json)
  const valid=job.kind==='optimize'?validation.isOptimizationCandidate(candidate,packet):job.kind==='optimizeContact'?validation.isContactOptimizationCandidate(candidate,packet):validation.isProfileCandidate(job.kind,candidate,packet)

@@ -1,5 +1,21 @@
 # Working on HappyToHelp
 
+Authoring custody: the canonical `support-happytohelp` repository is generated
+publication output. First-party changes currently belong in the `support` family
+repository at `editions/happytohelp/` or the selected shared source named by its
+composition. These instructions are exported as `AGENTS.md`. An owner or
+community fork is editable source under that author's control; it is outside
+the canonical publisher's destinations. Confirm which checkout you are using
+before editing. CI publishes into fresh clones and refuses dirty or
+provenance-divergent targets; it does not overwrite your local working checkout.
+
+The shared product is a cohesive starting point. Owners and community authors
+may change core behavior, schema, UI, infrastructure and any other source.
+Configuration and hooks are useful conveniences, not limits. Agents choose the
+integration method and handle complex merges; verify recorded requirements and
+affected data transitions. Useful discoveries can be contributed with tests to
+shared source, then deliberately adopted and verified by other editions.
+
 Read README.md, CONTRACT.md, HANDOVER.md and PROVENANCE.md first. Use Node 26.8.1
 and pnpm 10.12.4. This is a self-contained editable edition; author repositories
 are not runtime dependencies. Preserve owner intent when integrating updates.

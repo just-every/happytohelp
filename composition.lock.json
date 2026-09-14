@@ -11,7 +11,7 @@
   "repositories": {
     "family": {
       "repository": "runeditrun/support",
-      "commit": "a224851dd8ea5e84b3aed25c1914aab21f968d63"
+      "commit": "71dea496cd4e2862295b1a1e82afa6838df8f598"
     },
     "base": {
       "repository": "runeditrun/base",
@@ -154,14 +154,14 @@
       "source": "editions/happytohelp/ACCEPTANCE.md"
     },
     "AGENTS.consumer.md": {
-      "sha256": "b08aba4ff2ac68a44150147546c1f3e4c0a5ab00312f00d4536009113f44f84d",
+      "sha256": "82dfa6c1f931e91bd9f37b626378be484dfa7f19d5ff7d26eed7b2e861678e31",
       "mode": 420,
       "component": "happytohelp",
       "repository": "family",
       "source": "editions/happytohelp/AGENTS.consumer.md"
     },
     "AGENTS.md": {
-      "sha256": "b08aba4ff2ac68a44150147546c1f3e4c0a5ab00312f00d4536009113f44f84d",
+      "sha256": "82dfa6c1f931e91bd9f37b626378be484dfa7f19d5ff7d26eed7b2e861678e31",
       "mode": 420,
       "component": "happytohelp",
       "repository": "family",

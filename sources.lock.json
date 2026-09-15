@@ -581,11 +581,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "8d043300dfc2b09cdab11e94aca901c11045c0782dcc35b3d1013fd804fa355d",
+      "sha256": "caa50b5b36666f521ded7c8b8a9139234aed996251870c8ff4dbb7ef2947916b",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "d09345b4dd04f3a27a5a23fe07e23eff487db5ef5b96ec418aa02a2851128590",
+      "sha256": "28c816527a31fa52abd755b0e57f83fe318b2b47637552df1947896b8ebc0607",
       "executable": false
     },
     "public/fonts/feather/feather.css": {
@@ -4129,7 +4129,7 @@
       "executable": false
     },
     "tests/navigation-browser.mjs": {
-      "sha256": "b54d7ec4751e6fc62bf481023a056a8a7bc5c7970afc84f1432d7bac2e019230",
+      "sha256": "25f0881b267a938ce3215c4dea2ece986814a4f4ae09a124e48883f0fbb28e63",
       "executable": false
     },
     "tests/operating-environment.mjs": {
@@ -4225,7 +4225,7 @@
       "executable": false
     },
     "vite.config.ts": {
-      "sha256": "08717da5b93cc81e3e54664bb04c3dafa0ce1648e8af5cef77a1d9e5ddfc95fe",
+      "sha256": "7758d1351a7fec940c5d7a2c287a4e809fe6ab10a87a805c66ccc40a6788a286",
       "executable": false
     },
     "wrangler.jsonc": {

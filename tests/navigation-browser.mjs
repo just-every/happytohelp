@@ -167,11 +167,18 @@ try {
   await link('Inbox').click();await page.locator('.conversation-inbox').waitFor();
   await nav.getByRole('link',{name:/All open/}).click();await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
   await page.getByPlaceholder('Type your reply…').waitFor();await page.getByRole('button',{name:'Reply tools',exact:true}).click();
-  await page.context().clearCookies();
-  const unauthorized=page.waitForResponse(response=>response.url().includes('/api/dashboard/')&&response.status()===401);
+  // Expire only this request: clearing all cookies lets unrelated inbox refreshes
+  // remove the menu before the click. Forward to the real Worker without auth.
+  const macrosPath=`/api/dashboard/projects/${alpha.id}/macros`;
+  await page.route(runtime.origin+macrosPath,async route=>{
+    const headers=await route.request().allHeaders();headers.cookie='';delete headers.authorization;
+    const response=await route.fetch({headers});
+    await route.fulfill({response});
+  });
+  const unauthorized=page.waitForResponse(response=>new URL(response.url()).pathname===macrosPath&&response.status()===401);
   await page.getByRole('menuitem',{name:'Saved replies',exact:true}).click();await unauthorized;
   await page.getByRole('button',{name:'Login',exact:true}).waitFor();assert.equal(await page.locator('#sidebar').count(),0);
-  checks.push('saved-replies inbox API 401 clears stale session without route navigation');
+  checks.push('real saved-replies request without authentication returns 401 and clears stale shell without route navigation');
   assert.deepEqual(errors,[]);success=true;
 } catch(error) {
   errors.push(error.stack);await page.screenshot({path:join(evidence,'failure.png'),fullPage:true}).catch(()=>{});throw error;

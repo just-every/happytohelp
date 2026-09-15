@@ -33,6 +33,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm verify
+      - run: pnpm test:mobile-inbox-browser
       - run: pnpm test:setup-browser
       - run: pnpm test:ui-browser
       - run: pnpm test:navigation-browser

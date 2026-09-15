@@ -252,7 +252,7 @@
   ],
   "files": {
     ".github/workflows/delivery.yml": {
-      "sha256": "75721149763f52eed779de8a792168a96db5ae77b55d5368603a7e761cdf7144",
+      "sha256": "a9cea78b192875b641d6074febf887e66a5749037914f2a03ac829f59ea3bf7d",
       "executable": false
     },
     ".github/workflows/rer-managed.yml": {
@@ -260,7 +260,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "6a8716954caad6cee620bff3ca0677e3a64ab16314c9079dc80bba63db33d916",
+      "sha256": "276fe2315d8de4a8c1db49edb4df1d4f1ea2a5571b82f1cc85d5be2ecbf4ab06",
       "executable": false
     },
     ".gitignore": {
@@ -580,7 +580,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "f2e1a3eaaac1e339a8429b5c06f90d3304816ca9ffb00a32966e763bb1a5657c",
+      "sha256": "7c9b646ff08da676f3e3f30815df7f61c3e3350b1afac35c736d5f3bc34c2731",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -2544,7 +2544,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/InboxViews.jsx": {
-      "sha256": "5cd7706373f06c2f829526f8db93068b01809709b8254de592ca031ea9075ddf",
+      "sha256": "a7587b29cb01cfef44df8334a0cb37c55538c359168bd3f9f18df2d4e9232b79",
       "executable": false
     },
     "src/ui/dashboard/components/includes/CountryName.jsx": {
@@ -3436,7 +3436,7 @@
       "executable": false
     },
     "src/ui/native/DashboardClient.jsx": {
-      "sha256": "99d38cfc92d7da5c7151b84522faff8da27541af99906941df0f1d12688e1741",
+      "sha256": "9d0569cb178bad14a872650d20a6cc51fabf51a3807273fdcc40743d2860c3b1",
       "executable": false
     },
     "src/ui/native/IdentityPage.tsx": {
@@ -3447,12 +3447,16 @@
       "sha256": "8c97755cb056314c3e2353520f8266fc743c6201f612a04b640a6b3279662fef",
       "executable": false
     },
+    "src/ui/native/MobileNavigation.tsx": {
+      "sha256": "aced0556b2fc7fa1d8167b8318a0eaeae764c5f5acfe11be4faf8f6ffa6b23e7",
+      "executable": false
+    },
     "src/ui/native/Moment.jsx": {
       "sha256": "6ceb19580ed459e1ac83d5f4d73323af94b940e35d7744603f4635bcd85cb10b",
       "executable": false
     },
     "src/ui/native/Navigation.jsx": {
-      "sha256": "46d8f896ab91bae3e455bab385255f7ceaf89e7e8e5555a1b80f3ddb7622f68b",
+      "sha256": "44e31f8ba57d08a5ef2cd2abcb86cc7845c54ffde029012b68821f67060c6eae",
       "executable": false
     },
     "src/ui/native/NavigationGuard.tsx": {
@@ -3825,6 +3829,10 @@
     },
     "tests/management.mjs": {
       "sha256": "8fc5148fbefa910c20fce75627942f471566974d20590432c7fdc062b9e78c22",
+      "executable": false
+    },
+    "tests/mobile-inbox-browser.mjs": {
+      "sha256": "eb04f90df3ee589727e122bd58a7469d118c3bf5f3c6d5c5bf1a6966f8f50602",
       "executable": false
     },
     "tests/navigation-browser.mjs": {

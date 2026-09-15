@@ -7,6 +7,7 @@ import { Provider } from '../dashboard/contexts/ChatContext';
 import WorkspacePages from './WorkspacePages';
 import Navigation from './Navigation';
 import { NavigationGuard } from './NavigationGuard';
+import { MobileNavigationProvider } from './MobileNavigation';
 export default function DashboardClient({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
@@ -30,9 +31,9 @@ export default function DashboardClient({ settings }) {
         return () => { window.removeEventListener('workspace-appearance',update); properties.forEach(key=>document.body.style.removeProperty(key)); delete document.body.dataset.workspaceMode; document.documentElement.dataset.bsTheme='light'; };
     }, [settings]);
     const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
-    return <NavigationGuard><Navigation settings={settings} /><Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
+    return <NavigationGuard><MobileNavigationProvider><Navigation settings={settings} /><Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
         <Outlet />
-    </Provider></NavigationGuard>;
+    </Provider></MobileNavigationProvider></NavigationGuard>;
 }
 
 export function DashboardContent() {

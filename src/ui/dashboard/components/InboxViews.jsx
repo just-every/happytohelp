@@ -2,24 +2,15 @@ import React, { useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from '@tanstack/react-router';
 import { useDashboardLocation } from '../../native/dashboard-state';
+import { useMobileNavigation } from '../../native/MobileNavigation';
 import { ChatContext } from '../contexts/ChatContext';
 import formatCompactCount from '../utils/formatCompactCount';
 import { INBOX_VIEWS, normalizeInboxView } from './inboxViewDefinitions';
 
-function closeMobileNavigation(element) {
-    const collapse = element.currentTarget.closest('.navbar-collapse');
-    if (!collapse || !collapse.classList.contains('show')) {
-        return;
-    }
-
-    // The shared layout loads Bootstrap before the inbox bundle. Reuse that
-    // instance so a second data API cannot toggle navigation controls twice.
-    window.Collapse.getOrCreateInstance(collapse).hide();
-}
-
 export default function InboxViews() {
     const target = document.getElementById('navigation-inbox-views');
     const location = useDashboardLocation();
+    const {setOpen} = useMobileNavigation();
     const searchParams = location.search;
     const { inboxViewCounts, setIsMainVisible } = useContext(ChatContext);
     const selectedView = normalizeInboxView(searchParams.view);
@@ -27,13 +18,13 @@ export default function InboxViews() {
         return null;
     }
 
-    const onSelect = event => {
+    const onSelect = () => {
         const isCompactWorkspace = window.matchMedia('(max-width: 1199.98px)').matches;
 
         if (isCompactWorkspace) {
             setIsMainVisible(false);
+            setOpen(false);
         }
-        closeMobileNavigation(event);
     };
 
     return createPortal(

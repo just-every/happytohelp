@@ -1,4 +1,5 @@
 import { useNavigationGuard } from './NavigationGuard';
+import { useMobileNavigation } from './MobileNavigation';
 import { invalidateDashboardSession, useDashboardLocation } from './dashboard-state';
 import { Link, useNavigate, useRouter } from '@tanstack/react-router';
 import { nativeRequest } from './transport';
@@ -27,7 +28,7 @@ export default function Navigation({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const navigate=useNavigate();
     const [switchError,setSwitchError]=useState(''),[switching,setSwitching]=useState(false);
-    const [open, setOpen] = useState(false);
+    const {open, setOpen} = useMobileNavigation();
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
     const [settingsOpen,setSettingsOpen] = useState(!pathname.includes('conversations'));
     const nav = useRef(null);

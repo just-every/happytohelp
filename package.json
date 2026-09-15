@@ -26,7 +26,8 @@
     "test:widget-browser": "node tests/widget-browser-runtime.mjs",
     "test:ui-browser": "node tests/ui-browser.mjs",
     "test:navigation-browser": "node tests/navigation-browser.mjs",
-    "test:setup-browser": "node tests/setup-browser.mjs"
+    "test:setup-browser": "node tests/setup-browser.mjs",
+    "test:mobile-inbox-browser": "node tests/mobile-inbox-browser.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

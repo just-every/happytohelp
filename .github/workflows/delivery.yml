@@ -29,6 +29,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm verify
+      - run: pnpm test:mobile-inbox-browser
       - run: node scripts/build-delivery-artifact.mjs
       - uses: actions/upload-artifact@v4
         with:

@@ -16,7 +16,8 @@ export async function deploymentSpec(root, {publicVariableNames=[],secretNames=[
  for(const directory of directories){
   let path;try{path=await realpath(directory.path)}catch(error){if(error.code==='ENOENT'&&directory.optional)continue;throw error}
   const within=relative(rootPath,path);if(within==='..'||within.startsWith('..'+sep)||within.startsWith(sep))throw new Error('Migration directory escapes candidate source');
-  for(const file of (await readdir(path,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){
+  // Match the source migration collector: locale collation can reverse CREATE/ALTER order.
+  for(const file of (await readdir(path,{withFileTypes:true})).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)){
    if(!file.name.endsWith('.sql'))continue;
    if(!file.isFile()||!/^[\w.-]+\.sql$/.test(file.name))throw new Error('Migration must be a regular SQL file');
    const sql=await readFile(resolve(path,file.name),'utf8');

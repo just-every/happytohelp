@@ -696,7 +696,7 @@
       "executable": false
     },
     "scripts/delivery/deployment-spec.mjs": {
-      "sha256": "9f00d6a0db3e20be65037bcdf4b4231bf54e780e6f215fbc11560acc486e987f",
+      "sha256": "82c7dbe0af9af5cc1a3af890db7514da20ee1137f7ebf53c0df37afcc8270c2b",
       "executable": false
     },
     "scripts/delivery/README.md": {
@@ -896,7 +896,7 @@
       "executable": false
     },
     "scripts/verify-modules.mjs": {
-      "sha256": "289b795f6650492b04ef0d283e2f41346249bdf44aae123e7c5d3b9255c19814",
+      "sha256": "fbadbcc4d52128fbe61fa0e7b27e76397b28077f6482fec5d0da2ebc6b02ef36",
       "executable": false
     },
     "seed.json": {
@@ -3729,6 +3729,10 @@
     },
     "tests/delivery-deployment-spec.mjs": {
       "sha256": "10efd9fc9bd9920ce57611856b8adc58bcb497a77041d248d2ba4e518636fa2c",
+      "executable": false
+    },
+    "tests/delivery-migration-order.mjs": {
+      "sha256": "c942ddcc6077110ae69d75dd455380c7c11a890edbc0c86335c490e8873ab520",
       "executable": false
     },
     "tests/email-provider.mjs": {

@@ -10,7 +10,7 @@ const evidence = join(process.env.H2H_EVIDENCE_DIR ? resolve(process.env.H2H_EVI
 await mkdir(evidence, {recursive:true});
 // This helper deliberately supplies no management/provider configuration.
 const runtime = await createRuntime();
-let browser, success = false;
+let browser, page, success = false;
 const checks = [], errors = [], events = [];
 let phase = 'setup';
 try {
@@ -19,7 +19,7 @@ try {
   const fixture = await navigationFixture(runtime.origin);
   browser = await chromium.launch({headless:true});
   const context = await browser.newContext({viewport:{width:1440,height:1000}});
-  const page = await context.newPage();
+  page = await context.newPage();
   page.setDefaultTimeout(15000);
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => {
@@ -49,7 +49,14 @@ try {
 
   const switchWorkspace = async name => {
     await nav.getByRole('button', {name:/Switch workspace:/}).click();
-    await nav.getByRole('button', {name,exact:true}).click();
+    const choice = nav.getByRole('button', {name,exact:true});
+    const switched = page.waitForResponse(response => response.url() === runtime.origin + '/api/identity/switch-project' && response.request().method() === 'POST');
+    await choice.click();
+    assert.equal((await switched).status(), 200);
+    // Reselecting the current workspace leaves its label and inbox visible while
+    // the POST is pending. Wait for switchWorkspace's finally state before the
+    // next navigation, or its delayed navigate can overwrite the Contacts route.
+    await page.waitForFunction(() => !document.querySelector('.navbar-workspace-menu button:disabled'));
     await nav.getByRole('button', {name:`Switch workspace: ${name}`,exact:true}).waitFor();
     await page.locator('.conversation-inbox').waitFor();
   };
@@ -98,6 +105,12 @@ try {
   assert.equal((await context.request.get(endpoint)).status(), 401, 'expired session cannot read editor config');
   assert.deepEqual(errors, []);
   success = true;
+} catch (error) {
+  if (page) {
+    await page.screenshot({path:join(evidence, 'failure.png'),fullPage:true}).catch(() => {});
+    await writeFile(join(evidence, 'failure-state.json'), JSON.stringify(await page.evaluate(() => ({url:location.href,title:document.title,text:document.body.innerText,html:document.documentElement.outerHTML})).catch(failure => ({error:failure.message})), null, 2) + '\n');
+  }
+  throw error;
 } finally {
   await writeFile(join(evidence, 'result.json'), JSON.stringify({success,phase,checks,errors,events}, null, 2) + '\n');
   await browser?.close();

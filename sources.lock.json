@@ -3848,7 +3848,7 @@
       "executable": false
     },
     "tests/mobile-inbox-browser.mjs": {
-      "sha256": "eb04f90df3ee589727e122bd58a7469d118c3bf5f3c6d5c5bf1a6966f8f50602",
+      "sha256": "61482695738c6b8b461231b19947b7e59f2c2757aa69333619a17e5b9f94e2fc",
       "executable": false
     },
     "tests/navigation-browser.mjs": {

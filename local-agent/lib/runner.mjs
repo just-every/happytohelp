@@ -786,7 +786,9 @@ export class LocalRunner {
             const before = activeJobIds(this.config).length;
             const job = await claimNext(this.config, this.api, () => this.save());
             if (!job || activeJobIds(this.config).length === before) break;
-            const active = activeFor(this.config, job.id);
+            // A concurrent monitor may reconcile this claim while its save awaits.
+            const active = activeJobs(this.config)[job.id];
+            if (!active) continue;
             launch(active).catch((error) => this.log(`Job ${active.jobId} stopped: ${userMessage(error)}`));
           }
         } else if (!started) {

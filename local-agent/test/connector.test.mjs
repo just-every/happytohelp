@@ -590,9 +590,11 @@ test('concurrent monitors stop every omitted membership-loss job', async () => {
     { id: 'job-b', run_id: 'run-b', mode: 'investigate', instructions: 'Inspect account B.', context: {}, workspace_folders: [] },
     null,
   ];
+  let started = 0;
   const fixture = await testServer({
     claimResponse: () => claims.shift(),
-    heartbeatResponse: { device: { id: 'device-1' }, active_jobs: [] },
+    heartbeatResponse: (requests) => ({ device: { id: 'device-1' }, active_jobs: started < 2
+      ? (requests.at(-1).body.active_job_ids || []).map(id => ({id, cancel_requested:false,input_messages:[]})) : [] }),
   });
   const path = join(await mkdtemp(join(tmpdir(), 'h2h-concurrent-membership-loss-')), 'local-agent.json');
   try {
@@ -600,7 +602,6 @@ test('concurrent monitors stop every omitted membership-loss job', async () => {
       server: fixture.url, token: 'device-token', device: { id: 'device-1' },
       provider: 'codex', name: 'test', workingDirectory: process.cwd(),
     });
-    let started = 0;
     let terminalAborts = 0;
     const runner = new LocalRunner(config, {
       configPath: path,
@@ -623,6 +624,46 @@ test('concurrent monitors stop every omitted membership-loss job', async () => {
     assert.equal(terminalAborts, 2);
     assert.deepEqual(config.activeJobs, {});
     assert.equal(fixture.requests.some((request) => request.path.endsWith('/result')), false);
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('a claim reconciled during persistence is not launched or looked up as active', async () => {
+  const stop = new AbortController();
+  const claims = ['job-a', 'job-b'].map(id => ({id,run_id:`run-${id}`,mode:'investigate',instructions:'Inspect.',context:{},workspace_folders:[]}));
+  const fixture = await testServer({
+    claimResponse: () => claims.shift() || null,
+    heartbeatResponse: {device:{id:'device-1'},active_jobs:[{id:'job-a',cancel_requested:false,input_messages:[]}]},
+  });
+  try {
+    const config = newConfig({server:fixture.url,token:'device-token',device:{id:'device-1'},provider:'codex',name:'test',workingDirectory:process.cwd()});
+    const launched = [];
+    const runner = new LocalRunner(config, {
+      configPath:join(await mkdtemp(join(tmpdir(),'h2h-reconciled-claim-')),'config.json'),
+      runtimeCapabilitiesFn:availableDirectRuntime,
+      providerRunner:async (provider,{signal}) => new Promise(resolve => {
+        launched.push('job-a');
+        signal.addEventListener('abort',()=>resolve({cancelled:true,rawText:''}),{once:true});
+      }),
+    });
+    const save = runner.save.bind(runner);
+    let reconciled = false;
+    runner.save = async () => {
+      if (!reconciled && config.activeJobs?.['job-b']) {
+        reconciled = true;
+        // Model the monitor's terminal reconciliation at the persistence boundary.
+        config.activeJobs = {};
+        config.active = null;
+        stop.abort();
+      }
+      await save();
+    };
+    await runner.run({signal:stop.signal});
+    assert.equal(reconciled,true);
+    assert.deepEqual(launched,['job-a']);
+    assert.equal(config.activeJobs?.['job-b'],undefined);
+    assert.equal(fixture.requests.some(request=>request.path.includes('/job-b/result')),false);
   } finally {
     await fixture.close();
   }

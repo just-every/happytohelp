@@ -424,7 +424,7 @@
       "executable": false
     },
     "local-agent/lib/runner.mjs": {
-      "sha256": "b0e6e14fc4f5425d1ab92d81b9870c5c966c01e4fc1da4221164cb0d6266743e",
+      "sha256": "35c06ed1299384556105ff67faa76ef00790ff86e4f046e21af954899f8fb6ef",
       "executable": false
     },
     "local-agent/lib/setup.mjs": {
@@ -448,7 +448,7 @@
       "executable": false
     },
     "local-agent/test/connector.test.mjs": {
-      "sha256": "2de5866b5dfee6d9cbe46993f143e6333bb4f1aed23f872740d01a05020066b9",
+      "sha256": "cc0cd8a75642b8fada6b255cb66e3980a33fe11889c05b885f082975cac6fe61",
       "executable": false
     },
     "migrations/0001_identity.sql": {

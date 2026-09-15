@@ -104,39 +104,33 @@
     {
       "id": "cloudflare",
       "required": true,
-      "why": "Selected Worker/D1/R2/Queues/DO deployment target",
+      "why": "Selected Worker/D1/R2/Queues/DO deployment target. Implementation/configuration source: wrangler.jsonc. No versioned replacement adapter is declared.",
       "data": [
         "Application records",
         "Retained files",
         "Requests and queued work"
       ],
-      "adapters": [
-        "wrangler.jsonc"
-      ]
+      "adapters": []
     },
     {
       "id": "configured-providers",
       "required": false,
-      "why": "Selected AI, semantic/crawl, email, GitHub and branding capabilities",
+      "why": "Selected AI, semantic/crawl, email, GitHub and branding capabilities. Implementation/configuration source: scripts/deployment/environment.mjs. No versioned replacement adapter is declared.",
       "data": [
         "Explicitly scoped provider inputs"
       ],
-      "adapters": [
-        "scripts/deployment/environment.mjs"
-      ]
+      "adapters": []
     },
     {
       "id": "run-edit-run-editor",
       "required": false,
-      "why": "Optional owner-enabled editor frame; separate Run Edit Run authentication and installation authority are required. Disabled by default.",
+      "why": "Optional owner-enabled editor frame; separate Run Edit Run authentication and installation authority are required. Disabled by default. Implementation/configuration source: src/editor/EditorLauncher.tsx. No versioned replacement adapter is declared.",
       "data": [
         "Installation ID and edition origin",
         "User-selected element structure",
         "Explicitly reviewed text limited to 240 characters"
       ],
-      "adapters": [
-        "src/editor/EditorLauncher.tsx"
-      ]
+      "adapters": []
     }
   ],
   "env": [
@@ -375,10 +369,10 @@
       "/health",
       "/setup",
       "/login",
-      "/help/*",
+      "/help/",
       "/widget.js"
     ],
-    "notes": "Public knowledge uses active project IDs/claimed slugs and published articles. Setup admits only the first owner. Private APIs/dashboard require current native identity. See OPERATIONS.md."
+    "notes": "The /help/ entry denotes the existing public help-center route prefix, including nested article and search routes. Public knowledge uses active project IDs/claimed slugs and published articles. Setup admits only the first owner. Private APIs/dashboard require current native identity. See OPERATIONS.md."
   },
   "extensionPoints": {
     "contributions": [],

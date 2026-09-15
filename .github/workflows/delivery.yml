@@ -36,3 +36,11 @@ jobs:
           path: delivery-artifact/happytohelp-worker-artifact.json
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve failed native runtime diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-runtime-failure-${{ github.sha }}
+          path: /tmp/h2h-native-runtime-*/runtime.log
+          if-no-files-found: ignore
+          retention-days: 7

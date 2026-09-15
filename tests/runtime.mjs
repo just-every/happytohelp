@@ -16,6 +16,13 @@ try{
  const retiredBilling=`/api/management/projects/${first.projectId}/billing`
  for(const [path,method] of [[retiredBilling,'GET'],[retiredBilling+'/top-up','POST'],[retiredBilling+'/setup','POST'],[retiredBilling+'/portal','POST'],[retiredBilling+'/automated','PUT'],[retiredBilling+'/toggle','POST'],['/api/management/webhooks/stripe','POST']])assert.equal((await call(path,method==='GET'?undefined:{},login.token,method)).status,404,`${method} ${path}`)
  const publicProof=await promisify(execFile)(process.execPath,['tests/public-site-runtime.mjs'],{env:{...process.env,H2H_TEST_ORIGIN:origin,H2H_TEST_PROJECT_ID:first.projectId}});console.log(publicProof.stdout.trim())
+ // Repeated unknown uploads exercise the workerd proxy/body-discard race. Each
+ // response must itself be 404; this loop never retries a failed request.
+ for (const method of ['POST','PUT']) for (const body of [undefined,{}]) for(let index=0;index<32;index++) {
+  const response=await call('/api/unknown-upload-route',body,undefined,method)
+  const text=await response.text()
+  assert.equal(response.status,404,`${method} unknown upload ${index}: ${text}`)
+ }
  for(const path of ['/this-document-does-not-exist','/health/extra','/api','/api/this-route-does-not-exist'])assert.equal((await call(path)).status,404,path)
  assert.equal((await call('/api/management/projects/'+first.projectId,undefined,login.token,'DELETE')).status,200);assert.equal((await call('/api/management/projects/'+second.id,undefined,switched.token,'DELETE')).status,200);const accountResponse=await call('/api/identity/login',{email:'runtime-owner@example.com',password:'runtime-fixture-password-123'});assert.equal(accountResponse.status,200);const account=await accountResponse.json();assert.equal(account.accountOnly,true);const restoredResponse=await call('/api/management/projects',{name:'Recreated project',allowedOrigin:origin},account.token);assert.equal(restoredResponse.status,201);const restored=await restoredResponse.json();assert.equal((await call('/api/identity/switch-project',{projectId:restored.id},account.token)).status,200)
  console.log(`Native emitted runtime passed: ${runtime.migrationCount} fresh isolated migrations; D1/R2 health; self-hosted landing; bootstrap/password/login/cookie/revocation; project switching and last-project deletion/recreation; tenant/private denial; durable duplicate-safe message; API/document 404s. No provider configuration or shared state used.`);success=true

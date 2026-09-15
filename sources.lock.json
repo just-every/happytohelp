@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "d808b3e0031cc2b862b8cb12749d974cee9ae556107a1bda77d06e46df77dfcb",
+  "manifest": "d978d4a4fda61cc7c122ec6a3872b5b0051b2c74d0178e772698a44a7506299d",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -24,7 +24,7 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "d840a75b4c41ddc1feae99695d6632c8b0a451d2",
+          "revision": "ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1",
           "path": ".",
           "paths": [
             "foundation/runtime",
@@ -48,9 +48,9 @@
         ]
       },
       "baseline": {
-        "key": "986dcacd41ce74a593296034daef2042b4da9723f76fb9dfe15793f4d59c7208",
-        "digest": "93e436cae6a9fa02399f669af30cb61502bf5680e1388d8dfdfa0df795aac0af",
-        "sha256": "c2e4cf7964e60c5420827d6be2b2f66fb23aecafb19d93d5f123115d629c815c"
+        "key": "d21e484252db2a87f8dae9d477c9d8d70e99644ad370e3d64773e6376fd766eb",
+        "digest": "546300325e981648ce03718102ad7dfd21fbbcf5217e401c6156aba4c62ee118",
+        "sha256": "8849e85e2a9443b5662f97c75a4cdcf7f087814e2d2ac2f7f3e072f4123ea639"
       }
     },
     {
@@ -252,15 +252,15 @@
   ],
   "files": {
     ".github/workflows/delivery.yml": {
-      "sha256": "e6c5c138a9e27f87d4199ebd267ce6889f333dec53149c67de9740f13a5991df",
+      "sha256": "75721149763f52eed779de8a792168a96db5ae77b55d5368603a7e761cdf7144",
       "executable": false
     },
     ".github/workflows/rer-managed.yml": {
-      "sha256": "422756eb608393b22e25ead51e2353afd7d2d88604fe8271b08b695acc8108a8",
+      "sha256": "39ba0a3cb82bee5c3c1f374743ecbaf585b9fa8a7757fb9c5fce8cc41f6744c8",
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "da3a96c825fcbacfadc8ff27dec78a8e1c522e6f607efe6b6942f45ae5f91ae1",
+      "sha256": "6a8716954caad6cee620bff3ca0677e3a64ab16314c9079dc80bba63db33d916",
       "executable": false
     },
     ".gitignore": {
@@ -316,7 +316,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "d808b3e0031cc2b862b8cb12749d974cee9ae556107a1bda77d06e46df77dfcb",
+      "sha256": "d978d4a4fda61cc7c122ec6a3872b5b0051b2c74d0178e772698a44a7506299d",
       "executable": false
     },
     "evidence/ui-native/inbox.png": {
@@ -580,7 +580,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "caa50b5b36666f521ded7c8b8a9139234aed996251870c8ff4dbb7ef2947916b",
+      "sha256": "f2e1a3eaaac1e339a8429b5c06f90d3304816ca9ffb00a32966e763bb1a5657c",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -884,7 +884,7 @@
       "executable": false
     },
     "scripts/verify-modules.mjs": {
-      "sha256": "2fad3b7b0ca9de6e0a617d171ad012ab69aaf49a036e4c7704a2da2a200a5ec7",
+      "sha256": "1080f6c36d6afd45f11511c3cb5e29f643610549eb072d340b22c7c419b685af",
       "executable": false
     },
     "seed.json": {
@@ -892,11 +892,15 @@
       "executable": false
     },
     "src/app.ts": {
-      "sha256": "c2fb6e22db5c20b8668cb7421c55af0bb9ca761ab022fbe2e7e230b20c6775c5",
+      "sha256": "f00b58657226f1d7654119427969c267bd46511b653216ab823faebf2706c645",
       "executable": false
     },
     "src/base/dispatch.ts": {
       "sha256": "695ff1bf5bdcf65a429e3853eb80bcb477297c29e55221f6cad08dcff6ba610c",
+      "executable": false
+    },
+    "src/base/rejected-response.ts": {
+      "sha256": "5fe6ea3ac3d113f727431d898b56d4194fad39832c01d0e3cc5cd6d75eafe671",
       "executable": false
     },
     "src/editor/editor-widget.ts": {
@@ -3827,6 +3831,10 @@
       "sha256": "0023cb52cff18b9251a5c389b080eff95444644c11e41662b3b9de739a914ef2",
       "executable": false
     },
+    "tests/not-found-response.mjs": {
+      "sha256": "a575f87ae2343088527677c7c1ed4641447d976c2a257135e91da7a9156101ff",
+      "executable": false
+    },
     "tests/operating-environment.mjs": {
       "sha256": "16879780622fe61d928cafedcfcc95af9f4b5ab5cdca9ef2e34bf89a58aab0d6",
       "executable": false
@@ -3848,7 +3856,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "0a426b199ffd2cd266002b51acda29e1723fb3ad587513a3701673f2646a1a31",
+      "sha256": "f0b3b6d55e54c4cdd0a7d4e8a7f4bab98052efeaa8691449102124aeed5ade69",
       "executable": false
     },
     "tests/setup-browser.mjs": {

@@ -1,3 +1,4 @@
+import { notFoundResponse } from './base/rejected-response'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from './platform/env'
@@ -44,3 +45,6 @@ app.route('/api/integrations',inboundEmail)
 app.route('/api/dashboard',dashboardRoutes)
 app.route('/api/widget',publicWidget)
 registerLocalComputerRoutes(app,localComputerIntegration)
+
+// Drain small rejected uploads so the Worker proxy preserves the HTTP response.
+app.notFound(c => notFoundResponse(c.req.raw))

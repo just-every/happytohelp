@@ -22,9 +22,10 @@ permissions:
   id-token: write
 jobs:
   release:
-    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@21c610b74e09ddf4b2062433bb47bcb6bfe6584a
+    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@0cf164a93b20803294fd3a568508cdf23e65f7de
     with:
       installation_id: ${{ inputs.installation_id }}
       broker_url: ${{ inputs.broker_url }}
       environment: ${{ inputs.environment }}
+      pnpm_version: '10.12.4'
       artifact_file: happytohelp-worker-artifact.json

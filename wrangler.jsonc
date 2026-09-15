@@ -41,13 +41,18 @@
       {
         "binding": "JOBS",
         "queue": "happytohelp-native-jobs"
+      },
+      {
+        "binding": "JOBS_DEAD_LETTER",
+        "queue": "happytohelp-native-jobs-dead"
       }
     ],
     "consumers": [
       {
         "queue": "happytohelp-native-jobs",
         "max_batch_size": 1,
-        "max_retries": 0
+        "max_retries": 0,
+        "dead_letter_queue": "happytohelp-native-jobs-dead"
       }
     ]
   },

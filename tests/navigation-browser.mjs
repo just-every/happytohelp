@@ -17,7 +17,9 @@ const checks=[],errors=[],requests=[];let success=false;
 page.on('pageerror',error=>errors.push(error.message));
 page.on('request',request=>requests.push({method:request.method(),url:request.url(),type:request.resourceType()}));
 const nav=page.getByRole('navigation',{name:'Main navigation'});
-const link=name=>nav.getByRole('link',{name,exact:true});
+// The real unread badge contributes '<count> unread conversations' to Inbox's
+// accessible name after its asynchronous count arrives. Keep other names exact.
+const link=name=>nav.getByRole('link',{name:name==='Inbox'?/^Inbox(?:\s+\d+ unread conversations)?$/:name,exact:true});
 const sameDocument=async(stamp,label)=>assert.equal(await page.evaluate(()=>performance.timeOrigin),stamp,label);
 const ready=()=>nav.getByRole('button',{name:/Switch workspace:/}).waitFor();
 const settings=async()=>{const button=nav.getByRole('button',{name:'Settings',exact:true});if(await button.getAttribute('aria-expanded')!=='true')await button.click();};
@@ -27,6 +29,11 @@ try {
   const login=async()=>{await page.goto(runtime.origin+'/login');await page.getByLabel('Email',{exact:true}).fill(fixture.email);await page.getByLabel('Password',{exact:true}).fill(fixture.password);await page.getByRole('button',{name:'Login',exact:true}).click();await ready();};
   await login();
   await switchProject('Navigation Alpha');
+  // Reproduce the CI condition with real server counts before testing navigation.
+  await page.locator('#navigation-inbox-unread:not([hidden])').waitFor();
+  assert.match(await page.locator('#navigation-inbox-unread .navbar-unread-count').getAttribute('aria-label'),/^\d+ unread conversations$/);
+  assert.equal(await link('Inbox').count(),1,'Inbox remains addressable with its populated unread badge');
+  checks.push('real unread count is present and Inbox remains addressable by its complete accessible name');
   await nav.getByRole('link',{name:/All open/}).click();
   await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
   await page.getByText(alpha.message,{exact:true}).waitFor();

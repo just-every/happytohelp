@@ -1,3 +1,5 @@
+import {deploymentSpec} from './delivery/deployment-spec.mjs';
+import {specInputs} from './delivery/spec-inputs.mjs';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { resolve, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -30,7 +32,7 @@ export async function produceArtifact({ root = process.cwd(), output = 'delivery
   const modules = (await collectFiles(join(root, 'dist/server'))).filter(file => file.path !== 'wrangler.json' && !file.path.endsWith('.map'));
   if (!modules.some(file => file.path === 'index.js')) throw new Error('Build did not emit dist/server/index.js.');
   if (modules.some(file => file.path === 'rer-entry.js')) throw new Error('Build uses reserved rer-entry.js module name.');
-  const artifact = { schema: 1, mainModule: 'index.js',
+  const artifact = { schema: 1, deploymentSpec: await deploymentSpec(root,specInputs), mainModule: 'index.js',
     modules: modules.map(file => ({ name: file.path, contentBase64: file.contentBase64, type: file.path.endsWith('.wasm') ? 'compiled-wasm' : file.path.endsWith('.js') ? 'esm' : 'text' })),
     assets: (await collectFiles(join(root, 'dist/client'))).map(file => ({ path: '/' + file.path, contentBase64: file.contentBase64, contentType: mimeType(file.path) })) };
   const destination = resolve(root, output);

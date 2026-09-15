@@ -684,7 +684,7 @@
       "executable": false
     },
     "scripts/build-delivery-artifact.mjs": {
-      "sha256": "f445fefcf5f18e4b94d4c8d94fdf704eebd0f80f0dec3f8f072e8c9c6224f96e",
+      "sha256": "0b5e1044db3a9c6c0e72b0afb501cb800cd547edb2d2dc6ef6993912b49d1e83",
       "executable": false
     },
     "scripts/build-local-agent.cjs": {
@@ -693,6 +693,18 @@
     },
     "scripts/build-widget.mjs": {
       "sha256": "6115a6b3ad1df40b99c73a7e2a733c63dcb69e5a97d70f9df91236598ceca523",
+      "executable": false
+    },
+    "scripts/delivery/deployment-spec.mjs": {
+      "sha256": "9f00d6a0db3e20be65037bcdf4b4231bf54e780e6f215fbc11560acc486e987f",
+      "executable": false
+    },
+    "scripts/delivery/README.md": {
+      "sha256": "25811c42cc1e0a41522acdd5208cfa3dd03a58595c965504ed0434dd426b17de",
+      "executable": false
+    },
+    "scripts/delivery/spec-inputs.mjs": {
+      "sha256": "7d7af3b811e4dda984dfd725814204c3fa006cbe5d333c4b3db344273f58cf52",
       "executable": false
     },
     "scripts/deploy.mjs": {
@@ -884,7 +896,7 @@
       "executable": false
     },
     "scripts/verify-modules.mjs": {
-      "sha256": "1080f6c36d6afd45f11511c3cb5e29f643610549eb072d340b22c7c419b685af",
+      "sha256": "289b795f6650492b04ef0d283e2f41346249bdf44aae123e7c5d3b9255c19814",
       "executable": false
     },
     "seed.json": {
@@ -3715,6 +3727,10 @@
       "sha256": "8f3a75f604630c6858d84fb47054c8333961b45a02fcffadc0e859c5a3dacd93",
       "executable": false
     },
+    "tests/delivery-deployment-spec.mjs": {
+      "sha256": "10efd9fc9bd9920ce57611856b8adc58bcb497a77041d248d2ba4e518636fa2c",
+      "executable": false
+    },
     "tests/email-provider.mjs": {
       "sha256": "1a309e515e6a8e81de911ec6da7568b5b0b9d6eb282b71cc9b753ae08e7a2c55",
       "executable": false
@@ -3836,7 +3852,7 @@
       "executable": false
     },
     "tests/navigation-browser.mjs": {
-      "sha256": "0023cb52cff18b9251a5c389b080eff95444644c11e41662b3b9de739a914ef2",
+      "sha256": "d42e976a4081230bfceb400e5e44caedff45b3a7f3e276827d7dc50f0d4671ab",
       "executable": false
     },
     "tests/not-found-response.mjs": {
@@ -3928,7 +3944,7 @@
       "executable": false
     },
     "wrangler.jsonc": {
-      "sha256": "003698714eae63d43e85e87aca7230e70b583c7364f864e04276db304c356244",
+      "sha256": "3ac5ab273114ee26824c8040482e04a5838c26aafc6d644fbcc1f8fcf8103566",
       "executable": false
     }
   }

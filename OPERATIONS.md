@@ -17,12 +17,12 @@ Use Node 26.8.1 or newer and the lockfile's pnpm workflow. Use `pnpm run setup`:
 
 1. Run `pnpm install --frozen-lockfile` in the edition/released source directory.
 2. Run `pnpm run setup -- --local`. This collects edition and module migrations
-   into `.generated/migrations`, creates a mode-0600 `.dev.vars` containing a
-   random `BOOTSTRAP_TOKEN` if the file does not exist, and applies local D1
-   migrations. It does not provision remote resources or publish code.
-3. Keep `.dev.vars` private; add selected runtime configuration there. Run
-   `pnpm run dev`, open `/setup`, and use the local bootstrap token to establish
-   the owner. Dashboard routes include `/projects` and `/conversations`; `/` is
+   into `.generated/migrations` and applies local D1 migrations. It does not
+   provision remote resources or publish code.
+3. If optional runtime configuration is needed, create a private `.dev.vars`
+   file for those values. Run `pnpm run dev`, open `/setup`, and choose an email and password to establish
+   the first owner. Setup closes once an owner exists; subsequent access uses
+   `/login`. Dashboard routes include `/projects` and `/conversations`; `/` is
    the original public marketing site. Configure the project's exact widget
    allowed origin, then install its native widget key/API-origin snippet.
 4. `pnpm run verify` executes the repository's declared verification command.
@@ -70,7 +70,7 @@ boundaries; the application never invents answers or reports fake delivery.
 
 | Capability | Public/runtime configuration | Private secret bindings |
 | --- | --- | --- |
-| Owner access and registration | `APP_ORIGIN` (remote setup derives it), `REGISTRATION_ENABLED` | `BOOTSTRAP_TOKEN`, optional `TURNSTILE_SECRET`; registration/recovery need the email configuration |
+| Owner access and registration | `APP_ORIGIN` (remote setup derives it), `REGISTRATION_ENABLED` | Optional `TURNSTILE_SECRET`; registration/recovery need the email configuration |
 | Ensemble reply, assist, profiles and monitoring | Models selected in project/AI configuration; `CONTEXT_MODEL` for widget-triggered context work | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`; supplied-content lexical retrieval does not require these providers |
 | Help-center provider import | Explicit platform/subdomain and destination project per import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |

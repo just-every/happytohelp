@@ -293,7 +293,10 @@
           "tests/ui-browser.mjs",
           "migrations/0084_billing_project_usage.sql",
           "tests/billing-project-usage-cases.ts",
-          "tests/billing-migrations.ts"
+          "tests/billing-migrations.ts",
+          "migrations/0097_owner_setup.sql",
+          "tests/identity-setup.mjs",
+          "tests/setup-browser.mjs"
         ]
       }
     }

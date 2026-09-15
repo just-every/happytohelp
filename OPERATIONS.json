@@ -11,7 +11,7 @@
         "--",
         "--local"
       ],
-      "effects": "Collect selected migrations and prepare local D1/private owner bootstrap configuration. --remote provisions real D1/R2/Queues and applies remote migrations; no code publication."
+      "effects": "Collect selected migrations and prepare local D1 for first-owner setup. --remote provisions real D1/R2/Queues and applies remote migrations; no code publication."
     },
     "deploy": {
       "argv": [
@@ -32,7 +32,7 @@
       "effects": "Execute the declared native build/typecheck/runtime verification. Module/browser/provider coverage is recorded separately."
     }
   },
-  "authentication": "Remote commands require authenticated Wrangler, CLOUDFLARE_ACCOUNT_ID, H2H_RESOURCE_PREFIX and H2H_PUBLIC_ORIGIN. Bootstrap/provider secrets remain private. Local checks do not validate credentials.",
+  "authentication": "Remote commands require authenticated Wrangler, CLOUDFLARE_ACCOUNT_ID, H2H_RESOURCE_PREFIX and H2H_PUBLIC_ORIGIN. Provider secrets remain private. Local checks do not validate credentials.",
   "health": {
     "path": "/health",
     "meaning": "Native Worker with reachable D1 and R2; does not prove queues, sockets, providers or product acceptance."

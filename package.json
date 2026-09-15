@@ -23,7 +23,8 @@
     "migrations:prepare": "node scripts/migrations.mjs",
     "test:modules": "node scripts/verify-modules.mjs",
     "test:widget-browser": "node tests/widget-browser-runtime.mjs",
-    "test:ui-browser": "node tests/ui-browser.mjs"
+    "test:ui-browser": "node tests/ui-browser.mjs",
+    "test:setup-browser": "node tests/setup-browser.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

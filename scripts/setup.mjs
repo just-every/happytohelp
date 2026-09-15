@@ -1,6 +1,3 @@
-import { access, writeFile } from 'node:fs/promises';
-import { randomBytes } from 'node:crypto';
-import { resolve } from 'node:path';
 import { collectMigrations, root } from './migrations.mjs';
 import { run } from './deployment/run.mjs';
 import { prepareRemote, settings } from './deployment/config.mjs';
@@ -10,10 +7,8 @@ if (args.length !== 1 || !['--local', '--remote', '--plan'].includes(args[0])) t
 if (args[0] === '--plan') { console.log(JSON.stringify(settings(), null, 2)); process.exit(0); }
 await collectMigrations();
 if (args[0] === '--local') {
-  const vars = resolve(root, '.dev.vars');
-  try { await access(vars); } catch { await writeFile(vars, `BOOTSTRAP_TOKEN=${randomBytes(32).toString('hex')}\n`, { mode: 0o600, flag: 'wx' }); }
   await run(['exec', 'wrangler', 'd1', 'migrations', 'apply', 'DB', '--local', '--config', 'wrangler.jsonc'], { cwd: root });
-  console.log('Local D1 is ready. Private bootstrap token is in .dev.vars. Run pnpm dev, then /setup.');
+  console.log('Local D1 is ready. Run pnpm dev, then open /setup to create the first owner with an email and password.');
 } else {
   const prepared = await prepareRemote();
   await run(['exec', 'wrangler', 'd1', 'migrations', 'apply', 'DB', '--remote', '--config', prepared.path], { cwd: root });

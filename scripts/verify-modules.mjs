@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const standalone = [
   'billing.mjs', 'billing-workerd.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
   'conversation-socket.mjs', 'customer-context-routes.mjs', 'email-provider.mjs', 'email-worker.mjs',
-  'github-integration.mjs', 'identity.mjs', 'knowledge-context.mjs',
+  'github-integration.mjs', 'identity.mjs', 'identity-setup.mjs', 'knowledge-context.mjs',
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs',
   'operating-environment.mjs', 'management.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
   'public-referrer.mjs', 'public-waitlist.mjs', 'site-preview.mjs',

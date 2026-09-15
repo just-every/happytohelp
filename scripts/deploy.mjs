@@ -32,7 +32,6 @@ if (local) {
   console.log('Local Worker packaging verified; no cloud resources changed.');
 } else {
   const secrets = runtimeSecrets(env);
-  if (!secrets.BOOTSTRAP_TOKEN) throw new Error('BOOTSTRAP_TOKEN required for configured owner setup.');
   await withSecretJsonFile(secrets, path => run(['exec', 'wrangler', 'deploy', '--config', configPath, '--secrets-file', path], { env, cwd: root }));
   await waitForDeploymentHealth(plan.origin + '/health');
   console.log(`Deployed ${plan.prefix}; resource health responds at ${plan.origin}. Provider behavior remains separately verifiable.`);

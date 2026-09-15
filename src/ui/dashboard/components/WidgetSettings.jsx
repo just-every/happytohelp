@@ -19,18 +19,27 @@ export default function WidgetSettings({ projectId }) {
     const [previewOpen, setPreviewOpen] = useState(true);
 
     useEffect(() => {
-        window.h2h('preview', {
-            ...settings,
-            inline: true,
-            inlineSettings: true,
-            preview: {
-                enabled: true,
-                open: true,
-                onOpenChange: setPreviewOpen,
-                agent: previewAgent,
-                workspace_brand: previewBrand,
-            },
-        });
+        let preview;
+        // Wait until React finishes committing before creating the separate widget root.
+        const mount = setTimeout(() => {
+            preview = window.h2h('preview', {
+                ...settings,
+                targetElementId: 'happytohelp',
+                inline: true,
+                inlineSettings: true,
+                preview: {
+                    enabled: true,
+                    open: true,
+                    onOpenChange: setPreviewOpen,
+                    agent: previewAgent,
+                    workspace_brand: previewBrand,
+                },
+            });
+        }, 0);
+        return () => {
+            clearTimeout(mount);
+            if (preview) setTimeout(() => preview.destroy(), 0);
+        };
     }, []);
 
     const changePreviewState = open => {

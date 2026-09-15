@@ -18,6 +18,9 @@ pnpm run setup -- --local
 pnpm run dev
 ```
 
+Open `/setup` after starting the local app to create the first owner with an
+email and password. Setup then closes; use `/login` for subsequent access.
+
 `pnpm run setup`, `pnpm run build`, `pnpm run verify`, `pnpm run deploy` and `pnpm run source:release`
 are the common edition commands. Setup/deploy have external effects described in
 OPERATIONS.md. Configure only the providers/bindings the selected product needs;

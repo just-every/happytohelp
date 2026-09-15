@@ -13,7 +13,14 @@ export default function Dashboard() {
             if (cancelled) return;
             (window as any).chatSettings = { ...settings, apiUrl: '/api/dashboard', projectId, isGlobalInbox: !projectId };
             const module = settings.accountOnly ? await import('./pages/ProjectsPage') : await import('./DashboardClient');
-            if (!cancelled) setView(() => module.default);
+            if (!cancelled) {
+                // BrowserRouter adds its history index on first render. Initialize it here
+                // so the outer TanStack router receives that update outside React render.
+                if (!settings.accountOnly && window.history.state?.idx == null) {
+                    window.history.replaceState({ ...window.history.state, idx: 0 }, '');
+                }
+                setView(() => module.default);
+            }
         }).catch((failure: Error) => { if (!cancelled) setError(failure.message); });
         return () => { cancelled = true; };
     }, []);

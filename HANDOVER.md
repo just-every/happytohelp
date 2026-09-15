@@ -16,15 +16,21 @@ adoption without changing canonical Beacon.
 
 Use Node 26.8.1 and pnpm 10.12.4. Run `node scripts/operations.mjs describe` before
 installation, then `pnpm install --frozen-lockfile`, `pnpm run setup -- --local`
-and `pnpm run dev`. Open `/setup` with the local bootstrap token from `.dev.vars`
-to create an owner and set a password. Subsequent access uses `/login`.
+and `pnpm run dev`. Open `/setup` to create the first owner with an email and password. Subsequent access uses `/login`.
 
 `pnpm run verify` checks operations, build, types, module tests, a fresh emitted
 Worker and source integrity. It includes native public pages and waitlist checks.
-After `pnpm exec playwright install chromium`, run `pnpm run test:ui-browser` and
-`pnpm run test:widget-browser`. Each starts isolated local data and writes evidence
-to a temporary directory, or under `H2H_EVIDENCE_DIR`. CI runs all three commands.
+After `pnpm exec playwright install chromium`, run `pnpm run test:setup-browser`,
+`pnpm run test:ui-browser` and `pnpm run test:widget-browser`.
+Each starts isolated local data and writes evidence
+to a temporary directory, or under `H2H_EVIDENCE_DIR`. CI runs these checks.
 `pnpm run deploy -- --local` verifies packaging without deploying a Worker.
+
+The 15 September setup repair replaces the former three-request flow with an
+atomic first-owner transaction. No bootstrap token is required. Invalid inputs
+leave setup available; existing, imported or deleted installations cannot reopen
+first-owner setup. The setup browser check submits the actual form, verifies
+password validation, dashboard reload, subsequent login and completed setup.
 
 The tests use actual local D1, R2, Durable Objects and Worker execution. Provider
 fixtures intercept real SDK/HTTP boundaries in test harnesses. The optional live

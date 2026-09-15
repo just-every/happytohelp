@@ -22,7 +22,7 @@ permissions:
   id-token: write
 jobs:
   release:
-    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@0cf164a93b20803294fd3a568508cdf23e65f7de
+    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@af14daf797494599c76b22a1017e3deb8a7f31da
     with:
       installation_id: ${{ inputs.installation_id }}
       broker_url: ${{ inputs.broker_url }}

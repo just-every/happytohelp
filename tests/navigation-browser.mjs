@@ -170,7 +170,7 @@ try {
   // Expire only this request: clearing all cookies lets unrelated inbox refreshes
   // remove the menu before the click. Forward to the real Worker without auth.
   const macrosPath=`/api/dashboard/projects/${alpha.id}/macros`;
-  await page.route(runtime.origin+macrosPath,async route=>{
+  await page.route(url=>url.origin===runtime.origin&&url.pathname===macrosPath,async route=>{
     const headers=await route.request().allHeaders();headers.cookie='';delete headers.authorization;
     const response=await route.fetch({headers});
     await route.fulfill({response});

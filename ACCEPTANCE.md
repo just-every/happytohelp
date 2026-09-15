@@ -1,10 +1,13 @@
 # HappyToHelp native acceptance
 
-The useful outcome is the full native HappyToHelp product described in CONTRACT.md,
-with the existing dashboard/widget and public content, durable conversations,
+The useful outcome is the native HappyToHelp owner workspace described in
+CONTRACT.md: durable conversations, the operator dashboard and customer widget,
 configured AI/knowledge/context, explicit local delegation, training/evaluation,
-management/integrations and an owned operating/source workflow. The old small
-RER delegation desk does not satisfy this acceptance.
+management/integrations and an owned operating/source workflow. The public
+surface is a simple local-owner landing page plus dynamic published help centers.
+The former marketing, pricing, waitlist, referrer and public homepage-widget
+surface is outside the active edition scope. The old small RER delegation desk
+does not satisfy this acceptance.
 
 Acceptance binds to the final exact source/build under test. The root acceptance
 record owns the final verdict and must identify source revision, emitted bundle,
@@ -17,34 +20,23 @@ clause has passed.
 | Clauses | Required acceptance evidence |
 | --- | --- |
 | NATIVE-001, SOURCE-001 | Clean owner source release, locked install, operating describe/check, selected source locks, build/typecheck, generated migrations and local packaging dry run. Distinguish remotely provisioned resources from published code. |
-| IDENTITY-001, UI-001 | Real native Worker/session and browser flows for setup/login, project selection, current membership, revoked/deleted denial, dashboard navigation and responsive widget; original content/control continuity. |
+| IDENTITY-001, UI-001 | Real native Worker/session and browser flows for setup/login, project selection, current membership, revoked/deleted denial, owner landing, dashboard navigation and responsive customer widget. |
 | CONVERSATION-001, DELIVERY-001 | Real D1/DO/R2 contention, duplicate/lost-response, reconnect/replay, attachments, new-message supersession and operator takeover; no incompatible final answers. |
-| AI-001, CONTEXT-001 | Retained source regressions, configured execution graph, context/evidence/schema bounds, usage and uncertain-attempt behavior. Test fixtures and live provider execution reported separately. |
-| KNOWLEDGE-001, PUBLIC-001 | Published corpus survives failed refresh, scoped retrieval/citations, article/category publication, original help URLs/search, original page/assets and referrer behavior, real waitlist write/denial and separate notification outcome. |
+| AI-001, CONTEXT-001 | Retained source regressions, configured execution graph, context/evidence/schema bounds, raw per-round provider usage, bounded budgets and uncertain-attempt behavior. Test fixtures and live provider execution reported separately. |
+| KNOWLEDGE-001, PUBLIC-001 | Published corpus survives failed refresh, scoped retrieval/citations, article/category publication, dynamic help URLs/search and owner landing behavior. Customer widget remains a separately installed product surface; marketing, waitlist and referrer behavior are not active acceptance. |
 | DELEGATION-001, TRAINING-001 | Real persisted pairing/grant/work/run state, revocation, resolve/reply authority, recovery/cancellation, budget and ambiguous provider fences; separately packaged local connector. |
-| INTEGRATION-001 | Provider-boundary fixtures for email/Stripe/GitHub/branding, idempotency and no ambiguous replay; real separate-origin preview/network denial. Live account/provider effects require their own evidence. |
-| MIGRATION-001 | Explicit representative legacy IDs, permissions, exact amounts, content/media hashes and pending holds through real local D1/R2; deterministic resume, conflict refusal and no hidden provider work. |
+| INTEGRATION-001 | Provider-boundary fixtures for email/GitHub/branding and knowledge imports, idempotency and no ambiguous replay; real separate-origin preview/network denial. Live account/provider effects require their own evidence. |
+| MIGRATION-001 | Explicit representative legacy IDs, permissions, exact historical financial values, content/media hashes and pending holds through real local D1/R2; deterministic resume, conflict refusal and no hidden provider work. Historical financial SQL/imported records remain immutable custody and do not activate payment or balance behavior. |
 
 `pnpm run verify` is the common verification command. The current package script,
 `scripts/verify-modules.mjs`, `tests/runtime.mjs` and named module/browser suites
 are executable evidence inventories; their presence alone is not a passing result.
 Do not claim aggregate clause coverage from a smaller test count.
 
-## Bounded public-source evidence from this port
-
-- `tests/public-referrer.mjs`: 100 original PHP-source input/output cases plus
-  message-priority and injection-safety checks passed against the native port.
-- `tests/public-waitlist.mjs`: real local D1 validation, CSRF, duplicate admission,
-  configured notification and uncertain no-replay passed with provider fixtures.
-- `tests/public-help-center.mjs`: real local D1 canonical and `/help` aliases,
-  Markdown/search, draft/tenant/deleted-project denial and alias auth passed.
-- `tests/public-site-runtime.mjs`: runs within the fresh emitted-Worker suite,
-  covering 16 original pages/assets and real waitlist admission, validation,
-  CSRF and duplicate handling. This passed from the first clean native source
-  release; the earlier missing-migration attempt remains in external evidence.
-
-These are bounded local results, not hosted/provider/production-import acceptance.
-Source asset rights need the review recorded in
+The former public-site checks and their receipts remain historical evidence in
+Git; they are not current acceptance claims after the 15 September scope change.
+Current local results are not hosted/provider/production-import acceptance.
+Any retained or pruned source assets still require the review recorded in
 `docs/PUBLIC-SOURCE-PROVENANCE.md`; removing identified Pro SVGs is not universal
 redistribution clearance. Accessibility and operating costs remain unmeasured
 unless an exact final evidence record establishes them.

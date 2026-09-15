@@ -22,10 +22,13 @@ an explicit unavailable state. Provider boundary fixtures exist only in tests.
   preparation from bounded public website text. A reviewed draft is required before
   email delivery. Queued jobs recover; interrupted provider attempts become
   uncertain and require inspection. Per-attempt observed usage is recorded.
-- Stripe billing is implemented in `billing.ts`/`stripe.ts`; its provider setup and
-  accounting are documented by the billing lane.
+
+Payment, checkout, Stripe, balance and active billing behavior are outside this
+edition. AI and training retain raw provider usage plus explicit run budgets for
+diagnostics and bounded execution; those records do not create charges or debit a
+customer balance.
 
 `tests/email-provider.mjs`, `tests/email-worker.mjs`,
 `tests/github-integration.mjs`, and `tests/lead-operations.mjs` exercise local storage
 and test-only external boundaries. They do not establish live provider delivery,
-OAuth acceptance, paid cost or deployment.
+OAuth acceptance, provider cost or deployment.

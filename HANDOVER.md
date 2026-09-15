@@ -1,9 +1,13 @@
 # HappyToHelp native edition handover
 
-The edition now owns the native HappyToHelp application and its selected source.
-The PHP application has been replaced by TanStack Start/React, Hono and the RER
-Worker runtime. Existing dashboard, widget, prompts, evaluation and local-agent
-source were retained or ported with their behavior and provenance recorded.
+The edition now owns the native HappyToHelp owner workspace and its selected
+source. The PHP application has been replaced by TanStack Start/React, Hono and
+the RER Worker runtime. Existing dashboard, customer widget, prompts, evaluation
+and local-agent source were retained or ported with their behavior and provenance
+recorded. As of 15 September, the public root is a simple local-owner landing
+page with dynamic published help centers; the former marketing, pricing,
+waitlist, referrer and public homepage-widget surface is retired from the active
+edition.
 
 `docs/MODULES.md` identifies conversation, widget, AI support, knowledge, customer
 context, local computer, training, plugin SDK and site preview capabilities.
@@ -15,7 +19,9 @@ adoption without changing canonical Beacon.
 The 15 September [UI restoration record](docs/UI-PARITY.md) covers comparison
 against a running original Laravel instance, the restored workspace/forms and
 remaining legacy differences. Desktop/mobile screenshots and real save/reload
-checks accompany this pass; it does not claim full legacy feature equality.
+checks accompany this pass; it does not claim full legacy feature equality. Its
+public marketing and billing observations are historical comparison evidence,
+not active scope.
 The native route and shell contract is recorded in
 [`docs/NAVIGATION.md`](docs/NAVIGATION.md), including the focused browser check.
 
@@ -41,7 +47,9 @@ installation, then `pnpm install --frozen-lockfile`, `pnpm run setup -- --local`
 and `pnpm run dev`. Open `/setup` to create the first owner with an email and password. Subsequent access uses `/login`.
 
 `pnpm run verify` checks operations, build, types, module tests, a fresh emitted
-Worker and source integrity. It includes native public pages and waitlist checks.
+Worker and source integrity. It includes the current owner landing/help-center
+checks; the retained customer-widget browser checks remain a separate product
+surface and evidence lane.
 After `pnpm exec playwright install chromium`, run `pnpm run test:setup-browser`,
 `pnpm run test:ui-browser` and `pnpm run test:widget-browser`.
 Run `pnpm run test:navigation-browser` for the native shell, loader, project
@@ -68,7 +76,10 @@ final verification must identify the exact source revision and resulting bundle.
 `scripts/import-legacy.mjs` plans and applies an explicit local export with
 resumable row and object custody. Read the importer README before running it.
 Tests preserve original IDs, blocked contacts, AI versus human assignments,
-publication privacy, object hashes, exact amounts and uncertain operations.
+publication privacy, object hashes and historical financial values. Historical
+financial SQL and imported financial rows remain immutable custody only; removing
+active payment, Stripe and balance behavior does not permit deleting that prior-
+data evidence.
 All input rows are archived; unsupported encrypted or provider-only data remains
 explicitly archive-only until supplied in the documented normalized form.
 This is a tested migration mechanism, not a claim that production data was moved.
@@ -77,10 +88,10 @@ Original HappyToHelp repositories remain unchanged. The native commit retains
 the earlier RER desk's Git ancestry; that historical implementation can be read
 in Git and is no longer an alternative runtime in this edition.
 
-Provider setup, real email/model/payment acceptance, deployments, production-data
+Provider setup, real email/model acceptance, deployments, production-data
 imports and public publication have not been performed. Missing configured
-providers return an explicit unavailable state. Unknown paid outcomes retain
-their receipts and do not automatically replay. Public asset rights and licence
+providers return an explicit unavailable state. Unknown provider outcomes retain
+their historical receipts and do not automatically replay provider work. Public asset rights and licence
 decisions are documented in `docs/SOURCE-PROVENANCE.md` and
 `docs/PUBLIC-SOURCE-PROVENANCE.md`; this migration does not assert universal
 redistribution clearance.

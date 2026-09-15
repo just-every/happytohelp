@@ -20,16 +20,15 @@ export default {async fetch(request:Request,env:Env){
  await env.DB.prepare('INSERT INTO users(id,email,name,created_at) VALUES(?,?,?,?)').bind('owner','owner@example.com','Owner',now).run();
  await env.DB.prepare("INSERT INTO memberships(project_id,user_id,role) VALUES(?,?,'owner')").bind(projectId,'owner').run();
  await env.DB.prepare('INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES(?,?,?)').bind(projectId,'{}',now).run();
- await env.DB.prepare('INSERT INTO billing_accounts(project_id,auto_top_up,top_up_minor,threshold_minor) VALUES(?,1,1000,100)').bind(projectId).run();
  await env.DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,'owner',?,'owner',?)").bind(await hashToken('test-owner'),projectId,now+60000).run();
  check(await isProjectActive(env,projectId),'canonical live project active');check(!await isProjectActive(env,'missing-project'),'missing canonical project inactive');
- await env.DB.prepare("CREATE TRIGGER reject_test_topup BEFORE UPDATE ON billing_accounts WHEN NEW.auto_top_up=0 BEGIN SELECT RAISE(ABORT,'test billing failure'); END").run();
+ await env.DB.prepare("CREATE TRIGGER reject_test_revocation BEFORE DELETE ON memberships BEGIN SELECT RAISE(ABORT,'test membership failure'); END").run();
  const failedDelete=await projects.request(`/projects/${projectId}`,{method:'DELETE',headers:{Authorization:'Bearer test-owner'}},env);
- check(failedDelete.status===500,'injected billing update failure rejects deletion');
- check(await isProjectActive(env,projectId)&&!!await env.DB.prepare('SELECT role FROM memberships WHERE project_id=?').bind(projectId).first()&&(await env.DB.prepare('SELECT auto_top_up FROM billing_accounts WHERE project_id=?').bind(projectId).first<any>()).auto_top_up===1,'billing failure rolls back deletion and membership revocation atomically');
- await env.DB.prepare('DROP TRIGGER reject_test_topup').run();
+ check(failedDelete.status===500,'injected membership revocation failure rejects deletion');
+ check(await isProjectActive(env,projectId)&&!!await env.DB.prepare('SELECT role FROM memberships WHERE project_id=?').bind(projectId).first(),'membership failure rolls back deletion and membership revocation atomically');
+ await env.DB.prepare('DROP TRIGGER reject_test_revocation').run();
  const deleted=await projects.request(`/projects/${projectId}`,{method:'DELETE',headers:{Authorization:'Bearer test-owner'}},env);check(deleted.status===200,`management DELETE succeeds: ${await deleted.text()}`);
- check(!await isProjectActive(env,projectId),'management deletion makes project inactive');check((await env.DB.prepare('SELECT auto_top_up FROM billing_accounts WHERE project_id=?').bind(projectId).first<any>()).auto_top_up===0,'management deletion disables billing auto top up');
+ check(!await isProjectActive(env,projectId),'management deletion makes project inactive');
  let denied=false;try{await requireActiveProject(env,projectId)}catch{denied=true}check(denied,'required active project rejects deletion');
  for(const [id,status,reserved] of [['queued','queued',0],['running','running',4]] as const){
  await env.DB.prepare('INSERT INTO training_runs(id,project_id,operator_id,request_id,kind,status,config,case_count,max_cost,max_tokens,reserved_cost,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,projectId,'owner',id,'evaluation',status,'{}',1,10,100,reserved,now).run();

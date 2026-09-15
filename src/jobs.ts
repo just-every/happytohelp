@@ -4,7 +4,6 @@ import { handleGeneration,recoverQueuedGenerations } from './modules/ai-support/
 import { executeTrainingCase } from './modules/ai-support/training'
 import { consumeJob as consumeKnowledge,refreshDueDatasets } from './modules/knowledge'
 import { executeTrainingRun,recoverTrainingRuns } from './modules/training-runs'
-import { automatedTopUps } from './modules/integrations/billing'
 import { consumeContextJob,recoverContextJobs } from './modules/customer-context'
 import { recoverLocalResultEffects } from './modules/local-computer'
 import { localComputerIntegration } from './modules/local-computer/edition'
@@ -12,19 +11,16 @@ import { consumeJob as consumeBrand,recoverBrandJobs } from './modules/site-prev
 import { handleLeadJob,recoverLeadJobs } from './modules/integrations/leads'
 import { applyMessageEffects } from './message-effects'
 import type { Actor } from './platform/env'
-import { settleTrainingUsage,settleContextUsage,settleBrandUsage,reconcileUsageBilling } from './modules/integrations/billing-usage'
 
 export async function consumeJob(job:Job,env:Env) {
  if(job.type!=='lead.process'&&!await isProjectActive(env,job.projectId))return
  if(await handleGeneration(env,job))return
  if(await consumeKnowledge(job,env))return
- if(await consumeContextJob(job,env)){await settleContextUsage(env,job.id);return}
- if(await consumeBrand(job,env)){await settleBrandUsage(env,job.id);return}
+ if(await consumeContextJob(job,env))return
+ if(await consumeBrand(job,env))return
  if(await handleLeadJob(env,job))return
  if(job.type==='training'){
   await executeTrainingRun(env,job.id,executeTrainingCase)
-  const attempts=await env.DB.prepare("SELECT attempt_id FROM training_cases WHERE run_id=? AND attempt_id IS NOT NULL AND status NOT IN ('queued','running')").bind(job.id).all<{attempt_id:string}>()
-  for(const attempt of attempts.results)await settleTrainingUsage(env,attempt.attempt_id)
   return
  }
  throw new Error(`Unknown persisted job type: ${job.type}`)
@@ -51,6 +47,4 @@ export async function runScheduled(env:Env) {
  await recoverLocalResultEffects(env,localComputerIntegration)
  await recoverBrandJobs(env)
  await recoverLeadJobs(env)
- await reconcileUsageBilling(env)
- await automatedTopUps(env)
 }

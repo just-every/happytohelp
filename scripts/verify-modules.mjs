@@ -5,12 +5,12 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 // Browser and emitted-Worker checks need a built application and run separately.
 const standalone = [
-  'billing.mjs', 'billing-workerd.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
+  'deleted-background.mjs', 'conversation-admission.mjs',
   'conversation-socket.mjs', 'customer-context-routes.mjs', 'email-provider.mjs', 'email-worker.mjs',
   'github-integration.mjs', 'identity.mjs', 'identity-setup.mjs', 'knowledge-context.mjs',
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs',
   'operating-environment.mjs', 'management.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
-  'public-referrer.mjs', 'public-waitlist.mjs', 'site-preview.mjs',
+  'site-preview.mjs',
   'ui-transport.mjs', 'login-return.mjs', 'widget-transport.mjs',
 ].map(name => `tests/${name}`);
 const groups = ['tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test'];

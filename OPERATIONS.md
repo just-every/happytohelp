@@ -23,8 +23,10 @@ Use Node 26.8.1 or newer and the lockfile's pnpm workflow. Use `pnpm run setup`:
    file for those values. Run `pnpm run dev`, open `/setup`, and choose an email and password to establish
    the first owner. Setup closes once an owner exists; subsequent access uses
    `/login`. Dashboard routes include `/projects` and `/conversations`; `/` is
-   the original public marketing site. Configure the project's exact widget
-   allowed origin, then install its native widget key/API-origin snippet.
+   the simple local-owner landing page. Published help centers remain dynamic
+   project-scoped routes. Configure the project's exact widget allowed origin,
+   then install its native widget key/API-origin snippet; the root landing page
+   does not boot a public widget.
 4. `pnpm run verify` executes the repository's declared verification command.
    `scripts/verify-modules.mjs` and individual `tests/` suites provide the
    capability evidence listed in ACCEPTANCE.md. Provider fixture tests never
@@ -57,7 +59,7 @@ intended. No deployment was performed by these documentation/configuration chang
 
 `GET /health` returns native runtime plus D1 and R2 reachability, or HTTP 503.
 It does not establish Queue delivery, sockets, tenant behavior, provider budgets,
-email receipt, commercial billing, GitHub access or live model quality. Verify the
+email receipt, GitHub access or live model quality. Verify the
 actual deployed digest/route and those selected journeys separately.
 
 ## Optional native capabilities
@@ -74,19 +76,22 @@ boundaries; the application never invents answers or reports fake delivery.
 | Ensemble reply, assist, profiles and monitoring | Models selected in project/AI configuration; `CONTEXT_MODEL` for widget-triggered context work | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`; supplied-content lexical retrieval does not require these providers |
 | Help-center provider import | Explicit platform/subdomain and destination project per import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |
-| Email and waitlist | Project email settings; native inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM`, `WAITLIST_NOTIFY_EMAIL`, `INBOUND_EMAIL_TOKEN` |
-| Billing | Project billing settings, `BILLING_CURRENCY` and explicit amounts/costs | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| Email and inbound mail | Project email settings; native inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM`, `INBOUND_EMAIL_TOKEN` |
 | Lead research and reviewed outreach | `LEAD_MODEL`; persisted lead review before sending | `OPENAI_API_KEY`, selected email configuration |
 | GitHub | `GITHUB_CLIENT_ID`, optionally `GITHUB_PROJECT_ID` for one fixed credential | `GITHUB_CLIENT_SECRET`, `INTEGRATION_ENCRYPTION_KEY`; optional `GITHUB_TOKEN` or JSON `GITHUB_TOKENS` map keyed by project ID |
 | Brand image generation | Explicit `BRAND_IMAGE_MODEL`, `BRAND_IMAGE_SIZE`, `BRAND_IMAGE_QUALITY` | `OPENAI_API_KEY` |
-| Public website preview | `PREVIEW_ORIGIN` distinct from `APP_ORIGIN`, opt-in `PUBLIC_DEMO_ENABLED=true` | None; preview grants enforce scope, expiry and request limits |
-| Public marketing widget | `PUBLIC_WIDGET_PROJECT_ID` resolving an active native project | None; only its public widget key reaches the browser |
-| Training/evaluation | Explicit model/budget per run; `TRAINING_PRICE_CEILINGS` JSON model map of positive `inputPerMillion`/`outputPerMillion`; local-only `ENABLE_SYNTHETIC_EVALUATION=true` for synthetic test admission | Selected model provider credential |
+| Authenticated website preview | `PREVIEW_ORIGIN` distinct from `APP_ORIGIN`; owner/admin creates a scoped grant for a project | None; preview grants enforce scope, expiry and request limits |
+| Customer widget | Project widget key and exact allowed origin; installed on the owner's selected website | None; never expose an operator token |
+| Training/evaluation | Explicit model/budget per run; `TRAINING_PRICE_CEILINGS` bounds raw provider usage; local-only `ENABLE_SYNTHETIC_EVALUATION=true` for synthetic test admission | Selected model provider credential |
+
+To import a help center, open Settings → More settings → Knowledge → Import. The
+form chooses the provider and subdomain where needed; credentials come from the
+server bindings above. This is not a live-account verification.
 
 Preview uses a separate custom hostname mapped to this Worker during remote
 setup; it cannot share the application's origin. Do not run untrusted proxied
 pages under the owner-session origin. `INTEGRATION_ENCRYPTION_KEY` is base64 encoding of 32 random bytes; do not
-rotate it without migrating encrypted stored connections. GitHub OAuth redirects and Stripe/inbound
+rotate it without migrating encrypted stored connections. GitHub OAuth redirects and inbound
 webhooks must be configured with the actual deployed native URLs. Local computer
 work additionally requires the separately packaged connector, fresh device
 pairing and the exact delegated grant; it is not a Worker subprocess.
@@ -103,13 +108,16 @@ Import batches are incrementally resumable by artifact SHA and per-row receipts,
 not whole-database atomic. Re-running the same artifact skips committed rows;
 conflicting canonical rows/objects stop without overwriting. Inspect
 `legacy_import_rows`, run records and `legacy_import_holds`: archive-only rows do
-not imply normalized live behavior, and ambiguous generation/training/billing
-requires reconciliation before any new provider attempt. No imported old session,
+not imply normalized live behavior. Historical financial SQL and imported
+financial rows remain immutable custody, and ambiguous generation/training or
+provider work requires reconciliation before any new provider attempt. No imported old session,
 password token or device grant becomes trusted native authority.
 
 Use the edition's `source:inspect`, `source:check`, `source:lock` and
 `source:release` commands for source authoring/release custody. No original
-HappyToHelp checkout is regenerated or erased. Marketing HTML/assets are owned
-editable source; review `docs/PUBLIC-SOURCE-PROVENANCE.md` before redistribution.
+HappyToHelp checkout is regenerated or erased. Retained public
+help-center/landing assets are owned editable source; review
+`docs/PUBLIC-SOURCE-PROVENANCE.md` before redistribution. Pruning former
+marketing assets does not establish blanket rights clearance.
 A portable source release, local checks and importer fixtures do not themselves
 establish a deployed product, production-data migration or asset licence clearance.

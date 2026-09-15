@@ -1,139 +1,7 @@
 [
   {
-    "source": "img/avatars/female-1-move.webp",
-    "sha256": "3dda0ef20eb0eda0e3e065d8c6ae257291a86caa9b5d5eaefe1d53fe35f1ef3a"
-  },
-  {
-    "source": "img/features/pricing-header.jpg",
-    "sha256": "d892182e89796464b439f4f72a852d6befdef6d547a0e13d11845c0757c2e50f"
-  },
-  {
-    "source": "css/bootstrap-icons.css",
-    "sha256": "3d407eace2292cc327fabb17d04f0a2ec34a1cb14057cf61cb71a08c8302cdf8"
-  },
-  {
-    "source": "css/fonts/bootstrap-icons.woff",
-    "sha256": "f55513b7b591cb84a3b87ff0e34ea24d4831d6fedc22e54b911ca64b5b544a15"
-  },
-  {
-    "source": "css/fonts/bootstrap-icons.woff2",
-    "sha256": "6c75710364a1ca5604267716f6d28997b26319fdb078cf11e0b42ab66ff2ea61"
-  },
-  {
-    "source": "pdf/Happy_to_Help_-_Enhancing_Sales_and_Support_with_User_Context.pdf",
-    "sha256": "11f4906f8bf4e9dd4898ad7f5144b0259da0ae76ab09693c26f0d07cb6e8aed8"
-  },
-  {
-    "source": "img/features/future-grow.jpg",
-    "sha256": "19d58ddf42a6b23141bc0cdcc76fdb3e7da777f89e520f8499bc87a49f9c149b"
-  },
-  {
-    "source": "js/form-timezone.146770d47af4df29.js",
-    "sha256": "31add62c28dbf9b966912dc2510eca610b5a93b939e9a53cfa5bae98a7641f38"
-  },
-  {
-    "source": "img/features/support-agent-reply.png",
-    "sha256": "ece29d3d957911634c0e55c8e0a66b55414167a5f75850150c3f0c26f69296db"
-  },
-  {
-    "source": "img/features/pricing-choose.jpg",
-    "sha256": "1fb0a5d10ab0bf01c4b4d83edbc7439138cbacd1bb541277c3f62a2de2a4eac9"
-  },
-  {
-    "source": "img/features/support-ai-reply.png",
-    "sha256": "1bc5e967238eafe831fb3298906b109b168a73d70947fae69dcd0d2a9bdf8724"
-  },
-  {
-    "source": "img/avatars/male-1-move.webp",
-    "sha256": "b2da88da96e1e8d39b08062e8fc29c6efa0a9774bd92699fd99259cb63fcacfa"
-  },
-  {
-    "source": "img/features/support-agent-choice.png",
-    "sha256": "605b9bf75f4dbeb894f9dd47b5a871355709712b322d2ddc95d194250115a826"
-  },
-  {
-    "source": "js/optimize-svg.03e5f6dc8edc5444.js",
-    "sha256": "e75eb732478c8d8d8dd643cf4d62c3f7ce533891ff15cf268e5de8083caf5830"
-  },
-  {
-    "source": "js/scrollcue.9c0148da6c12198c.js",
-    "sha256": "e2b70300fe297965b96888d818dd80e20440f39315bff503d965f9afbff1356b"
-  },
-  {
-    "source": "js/hero-h2h.964bcaed9dcc1dd0.js",
-    "sha256": "38a05e28240d79343d5f6e0fc1dab949faf82cfccaf07acab7f8ad7873781ca8"
-  },
-  {
-    "source": "video/support-screen.mp4",
-    "sha256": "457949955483ceb0b6f7f43eaf2009b28213e77f950416ee825cc763b6803e34"
-  },
-  {
-    "source": "js/app.js",
-    "sha256": "1b2a955fc9a45328f54394d2f19484942d360452bbabdc5b47b4f1ed7e08e8dd"
-  },
-  {
-    "source": "img/features/sales-assistant.jpg",
-    "sha256": "0a1b97f8d057eec0f0372bdb492d930d3b77262a5b31521350553e1da20ceef1"
-  },
-  {
-    "source": "img/features/future-guide.jpg",
-    "sha256": "bb2d4050c233b2892b491441eccb66fe1b8e82bf0c4c8ae982c7f9ba623594b3"
-  },
-  {
-    "source": "img/features/security-header.jpg",
-    "sha256": "f268666b486e6f0d005956a40b580a902cb1a96cbdb1638f6d10ed6b818bbcf9"
-  },
-  {
-    "source": "img/features/future-header.jpg",
-    "sha256": "6ec7e2049938e98a0ca8e38ad5329b0eafdb2a4b3952a340607cc6b841f79d4c"
-  },
-  {
-    "source": "img/home/feature-context.gif",
-    "sha256": "3f2c984ac1613044fd6e6c6bdfcc07034fd195988710e55423909200e3286096"
-  },
-  {
-    "source": "img/home/feature-future.webp",
-    "sha256": "7d5aac628f226e2e757e4dfdba5f9262a47aa291756515c8b55685b4fcbf3207"
-  },
-  {
-    "source": "css/theme-happytohelp.css",
-    "sha256": "92c54316a8bae834b49997533f15ce99efde07b5ca7f20a219c7a2161a78a3f9"
-  },
-  {
-    "source": "img/home/home-future-tablet.png",
-    "sha256": "51ff28ffe75693df175b830c4e159faefe42d55a383fbb4dfd25ab6d8c1d9a35"
-  },
-  {
-    "source": "js/card-trigger.b2d46519fd5efaff.js",
-    "sha256": "bbd06442b97c06632f92d09b42e98f0bc4d43ae8a70c869fd8268f4aa1928d5b"
-  },
-  {
-    "source": "img/features/testimonal-chargedesk-logo.svg",
-    "sha256": "c4176e798943d4baa6a5769753f5b57635358814d8c560e486497fade97ac060"
-  },
-  {
-    "source": "video/support-screen.webm",
-    "sha256": "b316ddd8fc3bbd55e2c71698f022583620753f0bf16e3d950368db0d9eb7e7ef"
-  },
-  {
-    "source": "img/logo/brand-icon.svg",
-    "sha256": "0cbd31566803af7a825416fad5e2affca55832daf92f354c5b2d77daf1fa96ab"
-  },
-  {
-    "source": "video/support-screen-2x.webm",
-    "sha256": "dfa153f9c7a79e2f2fc9e5a67c68d768d956a1a3ef4e9671fde2009481fdf053"
-  },
-  {
     "source": "help_center/css/app.css",
     "sha256": "3ea2e6433c83de2fe69d4c16cdde5e35e9090be9f717a60eb2935e431f70d32e"
-  },
-  {
-    "source": "img/features/optimize-personal.jpg",
-    "sha256": "496ce1bbd3fa41f71188e94e358963a809366dc727956de8c73d20e786391590"
-  },
-  {
-    "source": "img/features/sales-header.jpg",
-    "sha256": "09082a126b81e26527c7de497c543f33de940dbfbb7efbd32b90126ebc127965"
   },
   {
     "source": "css/theme.css",
@@ -172,63 +40,16 @@
     "sha256": "bd69f7c021b4a2468c84d2f6e7e57ad25514f3d8a242ac6714d3ae21b4867644"
   },
   {
-    "source": "js/form-url.b966c7bd32afb31e.js",
-    "sha256": "a735c190ad3e384710ca9f4c40235e949aac4da450aa006402614b69854eb997"
+    "source": "landing/home.css",
+    "sha256": "9323725a26e40f1d5ca06f30fd05846b1525bc010ac0ec69af3f11b98f922d67",
+    "origin": "12ui native conversion of selected draft B, 2026-09-15",
+    "designRun": "crt-075f276cc9f38ddbd45eb0e7453302ddcd945ba7",
+    "processing": "Landing typography and spacing refined against selected target, 2026-09-15; existing artwork retained."
   },
   {
-    "source": "img/features/optimize-header.jpg",
-    "sha256": "01bb82230f25f3231ffdf553b8ed6e45a4112953f11cf720a15cffa18154aed5"
-  },
-  {
-    "source": "img/features/values-header.jpg",
-    "sha256": "ff686d7b5634c18e8f9f7dde55b46602abb3deacde51033ab97711ac9e2018f3"
-  },
-  {
-    "source": "img/features/sales-laptop-imagine.jpg",
-    "sha256": "ecc40d3669ba8f20b8417b3d707c308befc492f850c0c76c0731944cf7976f3d"
-  },
-  {
-    "source": "js/hljs.6065d8f1358cf1e2.js",
-    "sha256": "023e7af6fa53d0671ac347d9e7f5228fb064640e01763398206474bfe218ba7c"
-  },
-  {
-    "source": "js/video.f16ee76b51752b55.js",
-    "sha256": "0c79e5dc576d8d5eb6f20a6d7672fbc1dcc68ef6ea786e4f1566dba5777052d4"
-  },
-  {
-    "source": "js/type-text.762aa6df0a8f9972.js",
-    "sha256": "79ed810b9856341d59462289ee7ef7dddce683b49cee765a8a2f299077f49e83"
-  },
-  {
-    "source": "img/features/security-code.gif",
-    "sha256": "4d2c9df7a387c24e79917dda9ebeef0363e3bcfbf0c54bde6c6dd8dddc3a15d6"
-  },
-  {
-    "source": "img/features/support-header.jpg",
-    "sha256": "34995af970cba7ce4d6b12d33317cf6f755538a53cce070421d1ef0fc96a6072"
-  },
-  {
-    "source": "img/features/testimonal-profile-zara.png",
-    "sha256": "be8a9667427c5a0c583ce579c3da451bc07ff9dd973721ee87ec0b697b0fd177"
-  },
-  {
-    "source": "video/support-screen.jpg",
-    "sha256": "0d60f88276ef576e9521a82baf586df39f2c8c6eefb1f3e192dbd27f8f5a1e62"
-  },
-  {
-    "source": "js/hero-context.995da754015ef8c6.js",
-    "sha256": "dbe12a15489299543220e2fddc9cbffe9b42cec5ec710882de8c39cb8966ebd1"
-  },
-  {
-    "source": "img/icon.svg",
-    "sha256": "ea5ee026f2873046933bb5faeb0aa783824c5f73977721cea1286d2526c3137a"
-  },
-  {
-    "source": "js/hero-h2h.964bcaed9dcc1dd0.js.LICENSE.txt",
-    "sha256": "8c9946dfc859a2bfb26cc541125631cd96e7110fa20a702eb19275c9d1658805"
-  },
-  {
-    "source": "js/app.js.LICENSE.txt",
-    "sha256": "c4664ca4f9c74352ae48ad0d43c287ad30650b27fa052ab01aa71f2921716446"
+    "source": "landing/purple-art.png",
+    "sha256": "f92298ee3558a0ec60a7b140ef5ed73747c9632aa39c7e26ef25fc2340c110c9",
+    "origin": "12ui native conversion of selected draft B, 2026-09-15",
+    "designRun": "crt-075f276cc9f38ddbd45eb0e7453302ddcd945ba7"
   }
 ]

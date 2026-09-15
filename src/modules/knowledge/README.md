@@ -17,7 +17,7 @@ at most 20 documents and each embedding request at most 32 chunks. There is no
 100-document/256-chunk product ceiling. Duplicate completed page delivery does
 not repeat provider requests. An interrupted processing attempt is marked failed
 after 20 minutes and requires an explicit refresh; it is never automatically
-replayed as a paid request. Sources and embedding-model identity are retained by
+replayed as a provider request. Sources and embedding-model identity are retained by
 version. Lexical ranking is the existing title-weighted token policy, explicitly
 separate from semantic retrieval. Semantic retrieval uses Qdrant MMR with one
 selection per collection, matching the Python source; no missing-index lexical

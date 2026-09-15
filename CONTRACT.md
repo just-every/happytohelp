@@ -1,8 +1,9 @@
 # HappyToHelp native product contract
 
-The edition preserves the useful full HappyToHelp application: public acquisition
-and help content, customer widget, operator dashboard, AI assistance and reply,
-knowledge, customer context, delegated local work, training and integrations.
+The edition preserves the useful HappyToHelp owner workspace: customer widget,
+operator dashboard, AI assistance and reply, knowledge, customer context,
+delegated local work, training and integrations. Its public surface is a simple
+local-owner landing page and dynamic published help centers.
 It owns editable source and replaces the original PHP/AWS application runtime
 with the maintained RER Worker stack. These clauses state required behavior;
 implementation and acceptance evidence are tracked separately in ACCEPTANCE.md.
@@ -30,9 +31,11 @@ implementation and acceptance evidence are tracked separately in ACCEPTANCE.md.
   desktop/mobile flows, attachment display, collector/privacy controls and errors.
   Native routing/transport replaces baked origins and Laravel bootstrapping.
 - **AI-001 — Configured model execution.** Retain Ensemble model selection,
-  context/tools, streamed events, normalization, per-round usage, attribution,
-  bounded suggestions and reply lifecycle. Missing providers fail explicitly;
-  uncertain paid attempts remain uncertain and are not replayed automatically.
+  context/tools, streamed events, normalization, raw per-round provider usage,
+  attribution, bounded suggestions and reply lifecycle. Missing providers fail
+  explicitly; uncertain provider attempts remain uncertain and are not replayed
+  automatically. Usage is diagnostic/provider accounting data, not an active
+  payment, balance or debit system.
 - **KNOWLEDGE-001 — Published knowledge.** Dataset ingestion/crawl, retained
   corpus, lexical/selected semantic retrieval, citations and article/category
   authoring maintain project scope and publication state. A failed refresh cannot
@@ -47,22 +50,26 @@ implementation and acceptance evidence are tracked separately in ACCEPTANCE.md.
   and advance-authorized resolve-and-reply distinctions. Local processes remain
   in the optional connector, never an implicit Worker capability.
 - **TRAINING-001 — Durable evaluation.** Training and evaluation preserve run/case
-  state, model/budget selection, usage and cancellation/recovery. Synthetic data
-  admission is explicitly local/test-only. Historical pending attempts require
-  reconciliation; a fixture pass is not live-provider quality acceptance.
-- **INTEGRATION-001 — Honest external effects.** Email/inbound mail, Stripe,
-  GitHub and branding use configured native adapters, tenant-scoped credentials,
-  durable identity and ambiguous-outcome handling. Website previews use a
-  separate origin, scoped expiring grants and public-network restrictions.
-- **PUBLIC-001 — Public product source.** Retain original marketing, resources,
-  pricing/legal copy, referrer-aware hero and public widget integration as native
-  editable source. Waitlist validation persists a real entry; optional email
-  notification reports its own state. No mock application response replaces an
-  unavailable demo or provider.
+  state, model/budget selection, raw provider usage and cancellation/recovery.
+  Synthetic data admission is explicitly local/test-only. Historical pending
+  attempts require reconciliation; a fixture pass is not live-provider quality
+  acceptance.
+- **INTEGRATION-001 — Honest external effects.** Email/inbound mail, GitHub,
+  branding and knowledge imports use configured native adapters, tenant-scoped
+  credentials, durable identity and ambiguous-outcome handling. Website previews
+  use a separate origin, scoped expiring grants and public-network restrictions.
+  Payment, checkout, Stripe and balance behavior are outside this edition.
+- **PUBLIC-001 — Public product source.** The public root is a simple local-owner
+  landing page. Dynamic published help centers retain project scope, canonical
+  links, search and draft/deleted denial. The customer widget remains available
+  through owner-configured installation; marketing, pricing, legal, referrer,
+  waitlist and public homepage-widget behavior are outside this edition.
 - **MIGRATION-001 — Prior-data custody.** Explicit legacy artifacts preserve IDs,
-  exact money, transcripts, object hashes, publication and permissions through
-  resumable guarded D1/R2 import. Archive-only records and reconciliation holds
-  remain visible. Old credentials do not become trusted native authority.
+  exact historical financial values, transcripts, object hashes, publication and
+  permissions through resumable guarded D1/R2 import. Historical financial SQL,
+  imported rows and reconciliation holds remain immutable archive custody; they
+  never become active payments, balances or provider work. Old credentials do not
+  become trusted native authority.
 - **SOURCE-001 — Author-owned capability graph.** The edition selects maintained
   source with inspect/check/lock/release commands. Shared capabilities include
   substantial implementation, migrations and meaningful tests; a second consumer

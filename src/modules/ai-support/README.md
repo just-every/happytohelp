@@ -16,5 +16,7 @@ integrations and are not enabled by importing context helpers.
 
 Full edition integration also selects conversation, knowledge/customer-context and
 training adapter paths. The root package lock supplies runtime dependencies.
-Apply migration020 for durable generation state; tests/ai-support exercises the
+Apply migration020 for durable generation state; per-round provider usage and
+execution metadata remain raw diagnostic records. No payment, balance, debit or
+Stripe behavior is part of this capability. Tests/ai-support exercises the
 retained behavior and real Worker provider boundaries with test-only fixtures.

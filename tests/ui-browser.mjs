@@ -24,6 +24,9 @@ const browser=await chromium.launch({headless:true});const page=await browser.ne
 try{
  await page.goto(origin+'/login');await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
  await page.goto(`${origin}/projects/${f.projectId}/conversations/${f.conversationId}`);await page.getByText('Can you help me update my account?',{exact:true}).waitFor();
+ assert.equal(await page.getByRole('link',{name:'Billing',exact:true}).count(),0);
+ assert.equal((await page.request.get(`${origin}/projects/${f.projectId}/billing`)).status(),404);
+ checks.push('billing navigation and document route removed');
  await page.getByRole('link',{name:/All open/}).click();await page.getByRole('link').filter({hasText:'Browser Visitor'}).first().waitFor();checks.push('all-open shows persisted visitor conversation');
  // Keep the frontier read pending long enough to expose premature acknowledgement.
  // A text-only locator also matches React's controlled textarea before Send.
@@ -49,6 +52,6 @@ try{
  await verifyManagementParity(page,{origin,projectId:f.projectId,checks});
  await verifyAssistantParity(page,{origin,projectId:f.projectId,checks});
  await verifyKnowledgeParity(page,{origin,projectId:f.projectId,checks});
- for(const section of ['insights','contacts','ais','datasets','articles','categories','agents','email-settings','local-agent','billing']){await page.goto(`${origin}/projects/${f.projectId}/${section}`);await page.waitForTimeout(250);checks.push(section+' route opened');}
+ for(const section of ['insights','contacts','ais','datasets','articles','categories','agents','email-settings','local-agent']){await page.goto(`${origin}/projects/${f.projectId}/${section}`);await page.waitForTimeout(250);checks.push(section+' route opened');}
  await page.setViewportSize({width:390,height:844});await page.goto(`${origin}/projects/${f.projectId}/conversations/${f.conversationId}`);await page.getByPlaceholder('Type your reply…').waitFor();await page.waitForTimeout(600);const composer=await page.getByPlaceholder('Type your reply…').boundingBox();assert.ok(composer.x>=0&&composer.x+composer.width<=391);await page.screenshot({path:join(evidenceDir,'mobile.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks.push('mobile conversation no horizontal overflow');await verifyMobileNavigation(page,{origin,projectId:f.projectId,checks});assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);success=true;
 }finally{await writeFile(join(evidenceDir,'result.json'),JSON.stringify({checks,errors,failed},null,2));console.log(JSON.stringify({checks,errors,failed}));await browser.close();await runtime.close(success);}

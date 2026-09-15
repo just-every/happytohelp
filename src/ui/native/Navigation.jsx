@@ -38,7 +38,7 @@ export default function Navigation({ settings }) {
     const base = project ? `/projects/${project}` : '';
     const workspaceName = settings.isGlobalInbox ? 'Global Inbox' : settings.project?.name;
     const brand = !settings.isGlobalInbox && (settings.project?.brand_image_url || settings.project?.avatar_url);
-    const links = [['Project','edit'],['Billing','billing'],['AI','ais'],['Training','datasets'],['Agents','agents'],['Email','email-settings'],['Widget','widget-settings'],['Saved Replies','macros']];
+    const links = [['Project','edit'],['AI','ais'],['Training','datasets'],['Agents','agents'],['Email','email-settings'],['Widget','widget-settings'],['Saved Replies','macros']];
     const extraLinks = [['Knowledge','articles'],['Categories','categories'],['Local computers','local-agent'],['Integrations','plugins'],['GitHub','github-settings']];
     const active = path => pathname === path || pathname.startsWith(`${path}/`);
     const switchWorkspace = async id=>{if(switching||!await confirmNavigation())return;setSwitching(true);setSwitchError('');try{if(id)await nativeRequest('/api/identity/switch-project',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projectId:id})});await navigate({to:id?`/projects/${id}/conversations`:'/conversations',ignoreBlocker:true});}catch(error){setSwitchError(error.message);}finally{setSwitching(false);}};

@@ -8,7 +8,7 @@
     "id": "happytohelp-conversation",
     "record": "Project-owned customer conversations with durable messages, evidence and explicitly authorized work."
   },
-  "description": "Native editable HappyToHelp dashboard, widget, AI, knowledge, customer context, integrations and public site on the maintained RER Worker stack.",
+  "description": "Native editable HappyToHelp dashboard, customer widget, AI, knowledge, customer context, integrations and owner landing page on the maintained RER Worker stack.",
   "capabilities": [
     {
       "id": "owner-installation",
@@ -117,7 +117,7 @@
     {
       "id": "configured-providers",
       "required": false,
-      "why": "Selected AI, semantic/crawl, email, billing, GitHub and branding capabilities",
+      "why": "Selected AI, semantic/crawl, email, GitHub and branding capabilities",
       "data": [
         "Explicitly scoped provider inputs"
       ],
@@ -127,13 +127,6 @@
     }
   ],
   "env": [
-    {
-      "name": "BOOTSTRAP_TOKEN",
-      "secret": true,
-      "required": false,
-      "requiredWhen": "Owner bootstrap or configured remote deploy",
-      "why": "Private native binding; see OPERATIONS.md."
-    },
     {
       "name": "OPENAI_API_KEY",
       "secret": true,
@@ -212,13 +205,6 @@
       "why": "Private native binding; see OPERATIONS.md."
     },
     {
-      "name": "WAITLIST_NOTIFY_EMAIL",
-      "secret": true,
-      "required": false,
-      "requiredWhen": "Selecting the corresponding optional capability",
-      "why": "Private native binding; see OPERATIONS.md."
-    },
-    {
       "name": "INBOUND_EMAIL_TOKEN",
       "secret": true,
       "required": false,
@@ -227,20 +213,6 @@
     },
     {
       "name": "INTEGRATION_ENCRYPTION_KEY",
-      "secret": true,
-      "required": false,
-      "requiredWhen": "Selecting the corresponding optional capability",
-      "why": "Private native binding; see OPERATIONS.md."
-    },
-    {
-      "name": "STRIPE_SECRET_KEY",
-      "secret": true,
-      "required": false,
-      "requiredWhen": "Selecting the corresponding optional capability",
-      "why": "Private native binding; see OPERATIONS.md."
-    },
-    {
-      "name": "STRIPE_WEBHOOK_SECRET",
       "secret": true,
       "required": false,
       "requiredWhen": "Selecting the corresponding optional capability",
@@ -276,12 +248,6 @@
     },
     {
       "name": "REGISTRATION_ENABLED",
-      "secret": false,
-      "required": false,
-      "why": "Selected native runtime configuration; see OPERATIONS.md."
-    },
-    {
-      "name": "BILLING_CURRENCY",
       "secret": false,
       "required": false,
       "why": "Selected native runtime configuration; see OPERATIONS.md."
@@ -330,18 +296,6 @@
     },
     {
       "name": "PREVIEW_ORIGIN",
-      "secret": false,
-      "required": false,
-      "why": "Selected native runtime configuration; see OPERATIONS.md."
-    },
-    {
-      "name": "PUBLIC_DEMO_ENABLED",
-      "secret": false,
-      "required": false,
-      "why": "Selected native runtime configuration; see OPERATIONS.md."
-    },
-    {
-      "name": "PUBLIC_WIDGET_PROJECT_ID",
       "secret": false,
       "required": false,
       "why": "Selected native runtime configuration; see OPERATIONS.md."
@@ -406,14 +360,12 @@
     "publicPaths": [
       "/",
       "/health",
-      "/waitlist",
-      "/pricing",
-      "/resources/*",
-      "/company/*",
-      "/features/*",
-      "/help/*"
+      "/setup",
+      "/login",
+      "/help/*",
+      "/widget.js"
     ],
-    "notes": "Public knowledge uses active project IDs/claimed slugs and published articles. Private APIs/dashboard require current native identity. See OPERATIONS.md."
+    "notes": "Public knowledge uses active project IDs/claimed slugs and published articles. Setup admits only the first owner. Private APIs/dashboard require current native identity. See OPERATIONS.md."
   },
   "extensionPoints": {
     "contributions": [],

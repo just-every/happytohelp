@@ -14,15 +14,19 @@ routes additionally use `src/platform` identity, environment and D1 contracts.
 | `runeditrun/knowledge` | ingestion/publication, search, citations and refresh; project identity plus D1/R2 and configured crawler/embedding/vector adapters | 0050–0053 migrations and knowledge tests; published corpus survives failed refresh |
 | `runeditrun/customer-context` | monitoring and attributed profile builders/validation, durable contextual work and personalization; consumer chooses identities/consent | both 0060 migration files and customer-context tests; configured neutral AI execution |
 | `runeditrun/local-computer` | explicit Integration interface for authorization/context/reply admission; paired real Node connector and existing-session MCP | 030 migration, local-agent tests, native lifecycle test; actual process execution stays on paired host |
-| `runeditrun/training-runs` | durable bounded matrix, artifacts/checks, recovery, explicit TrainingExecutor; original evaluation harnesses | 040–041 migrations, training/eval-harness tests; paid attempt uncertainty is retained |
+| `runeditrun/training-runs` | durable bounded matrix, artifacts/checks, recovery, explicit TrainingExecutor; original evaluation harnesses | 040–041 migrations, training/eval-harness tests; uncertain provider attempts are retained |
 | `runeditrun/plugin-sdk` | plugin UI message contract, host bridge and policy; consumer owns allowed plugin origins | standalone SDK tests; no provider or conversation database dependency |
 | `runeditrun/site-preview` | isolated preview proxy, project-scoped temporary grant, asset handling and request bounds; consumer supplies auth/origin policy | 0096 migration and preview tests; separate preview origin required |
 
-The remaining identity, management, commerce/email/integration, public-site,
+The remaining identity, management, email/integration, public-site,
 legacy-import, dashboard and bootstrapping paths are edition integration. They
-remain editable source and can be extracted later when a real second use establishes
-a useful boundary. An implementation's directory name alone is not an independent
-component contract.
+remain editable source and can be extracted later when a real second use
+establishes a useful boundary. The public-site integration is limited to the
+simple local-owner landing page and dynamic published help centers; its former
+marketing, pricing, waitlist, referrer and homepage-widget paths are retired.
+The customer widget module remains an independently installable support surface.
+An implementation's directory name alone is not an independent component
+contract.
 
 `requires` in this edition's recipe describes the complete selected integration.
 AI assistance, customer context and training reference each other's optional entry
@@ -45,6 +49,7 @@ engine dependency cycle. For example, AI `training.ts` is the edition executor
 for the training runner; it is unnecessary for standalone packet construction.
 The local-computer `contracts.ts` Integration interface separates delivery from
 its `edition.ts` conversation adapter. Training `contracts.ts` defines the
-TrainingExecutor; this edition additionally settles observed rounds through its
-integration billing ledger (0080/0081). Selecting full routes carries these
-edition dependencies; selecting neutral builders does not silently include them.
+TrainingExecutor; this edition retains raw observed provider rounds and bounded
+run budgets without an active payment, balance or Stripe ledger. Selecting full
+routes carries these edition dependencies; selecting neutral builders does not
+silently include them.

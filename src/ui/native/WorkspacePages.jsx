@@ -11,10 +11,9 @@ import ProjectSettings from './pages/ProjectSettings';
 import WidgetSettingsPage from './pages/WidgetSettingsPage';
 import ComputersPage from './pages/ComputersPage';
 import TrainingRuns from './pages/TrainingRuns';
-import BillingPage from './pages/BillingPage';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
-const titles={edit:'Project',settings:'Project',billing:'Billing',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Training runs'};
+const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Training runs'};
 export default function WorkspacePages({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const segments=pathname.split('/').filter(Boolean);
@@ -31,7 +30,6 @@ export default function WorkspacePages({ settings }) {
     else if(section==='widget-settings')page=<WidgetSettingsPage {...{projectId}}/>;
     else if(section==='local-agent')page=<ComputersPage {...{projectId}} projectName={settings.projects[projectId]?.name}/>;
     else if(section==='training-runs')page=<TrainingRuns {...{projectId}}/>;
-    else if(section==='billing')page=<BillingPage {...{projectId}}/>;
     else if(section==='users')page=<AccountPage {...{projectId,section}}/>;
     else if(section==='admin')page=<AdminPage/>;
     else if(section==='insights')page=<InsightsPage {...{projectId}}/>;

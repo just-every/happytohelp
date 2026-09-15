@@ -1,5 +1,4 @@
 import type {Env} from '../../platform/env'
-import {settleGenerationUsage} from '../integrations/billing-usage'
 
 /** A terminal generation is never executed again. Recover the attempt record
  * separately: reply completion requires the message committed by admission. */
@@ -11,5 +10,4 @@ export async function reconcileTerminalAttempt(env:Env,generationId:string){
   ) THEN 'completed' ELSE 'uncertain' END FROM ai_generations g WHERE g.id=ai_attempts.generation_id
  ),finished_at=COALESCE(finished_at,?)
  WHERE generation_id=? AND state='running' AND EXISTS(SELECT 1 FROM ai_generations g WHERE g.id=ai_attempts.generation_id AND g.state NOT IN ('queued','running'))`).bind(new Date().toISOString(),generationId).run()
- await settleGenerationUsage(env,generationId)
 }

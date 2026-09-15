@@ -35,5 +35,5 @@
     "src/modules/ai-support/vendor/ensemble/SOURCE.patch"
   ],
   "dependencyScope": "selectedEditionDependencies describes the full HappyToHelp adapter composition, not imports required by every neutral entry point.",
-  "consumerIntegration": "Select the documented neutral source paths and supply the consumer authorization, storage and execution contracts. Full route/edition adapters additionally import HappyToHelp platform and may import its message-effects or billing integration."
+  "consumerIntegration": "Select the documented neutral source paths and supply the consumer authorization, storage and execution contracts. Full route/edition adapters additionally import HappyToHelp platform and may import its message-effects integration."
 }

@@ -2,9 +2,12 @@
 
 This repository owns the HappyToHelp application on the maintained RER runtime:
 TanStack Start/React documents, Hono HTTP, Cloudflare Workers, D1, R2, Queues and
-conversation Durable Objects. It ports the existing HappyToHelp dashboard, widget,
-chat, delegation and knowledge architecture into native source. The earlier small
-RER delegation desk remains in Git history; its family publisher is retired.
+conversation Durable Objects. It ports the existing HappyToHelp dashboard,
+customer widget, chat, delegation and knowledge architecture into native source.
+The public root is a simple local-owner landing page with dynamic published help
+centers; the former marketing, pricing, waitlist and public homepage-widget
+surface is not active. The earlier small RER delegation desk remains in Git
+history; its family publisher is retired.
 
 Read ACCEPTANCE.md, CONTRACT.md and OPERATIONS.md for the product and operating
 requirements. The current implementation/verification boundary belongs in the
@@ -20,7 +23,7 @@ pnpm run dev
 
 Open `/setup` after starting the local app to create the first owner with an
 email and password. Setup then closes; use `/login` for subsequent access.
-The dev command builds the widget and local-connector download before starting
+The dev command builds the customer widget and local-connector download before starting
 Vite, so a fresh checkout serves these assets too.
 
 `pnpm run setup`, `pnpm run build`, `pnpm run verify`, `pnpm run deploy` and `pnpm run source:release`

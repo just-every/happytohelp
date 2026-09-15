@@ -52,7 +52,7 @@
     },
     {
       "path": "OPERATIONS.md",
-      "description": "Clean install, target setup/publication, provider configuration and resumable local legacy import."
+      "description": "Clean install, target setup/publication, selected provider configuration and resumable local legacy import."
     }
   ],
   "notes": [

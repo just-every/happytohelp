@@ -1,3 +1,4 @@
+import { EditorLauncher } from '../../editor/EditorLauncher';
 import { lazy, Suspense, useEffect } from 'react';
 import { Link, useMatches, useRouter } from '@tanstack/react-router';
 import { DashboardSettingsContext, useDashboardSessionVersion, invalidateDashboardSession } from './dashboard-state';
@@ -35,6 +36,7 @@ export default function Dashboard() {
     // Embedded widgets still consume this compatibility object. Routing uses loader context.
     (window as any).chatSettings = settings;
     return <DashboardSettingsContext.Provider value={settings}>
+        <EditorLauncher authorized={!!settings.project && ['owner', 'admin'].includes(settings.project.role)} />
         <Suspense fallback={<DashboardPending />}><DashboardClient settings={settings} /></Suspense>
     </DashboardSettingsContext.Provider>;
 }

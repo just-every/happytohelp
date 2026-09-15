@@ -9,13 +9,22 @@ export default function Setup() {
     const [state, setState] = useState<SetupState>('loading');
     const [origin, setOrigin] = useState('');
     const [error, setError] = useState('');
+    const [setupToken, setSetupToken] = useState('');
+    const [tokenRequired, setTokenRequired] = useState(false);
     const [busy, setBusy] = useState(false);
 
     useEffect(() => {
         let active = true;
         setOrigin(location.origin);
+        const fragment = new URLSearchParams(location.hash.slice(1));
+        const transferredToken = fragment.get('setupToken');
+        if (transferredToken) {
+            setSetupToken(transferredToken);
+            fragment.delete('setupToken');
+            history.replaceState(history.state, '', location.pathname + location.search + (fragment.size ? '#' + fragment.toString() : ''));
+        }
         nativeRequest('/api/identity/setup').then(result => {
-            if (active) setState(result.available ? 'available' : 'complete');
+            if (active) { setState(result.available ? 'available' : 'complete'); setTokenRequired(Boolean(result.tokenRequired)); }
         }).catch(error => {
             if (active) { setError(error.message); setState('unavailable'); }
         });
@@ -54,6 +63,11 @@ export default function Setup() {
             {state === 'available' && <form method="post" className="workspace-settings" onSubmit={submit}>
                 <section className="settings-section">
                     <div className="settings-section__heading"><h2>Workspace and owner</h2></div>
+                    {(tokenRequired || setupToken) && <div className="form-group">
+                        <label className="form-label" htmlFor="setupToken">Owner setup token</label>
+                        <input className="form-control" id="setupToken" name="setupToken" type="password" required value={setupToken} onChange={event => setSetupToken(event.target.value)} autoComplete="off" />
+                        <p className="form-text">Use the private token provided with your installation.</p>
+                    </div>}
                     <div className="form-group">
                         <label className="form-label" htmlFor="name">Workspace name</label>
                         <input className="form-control" id="name" name="name" required maxLength={200} autoComplete="organization" />

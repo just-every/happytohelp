@@ -11,7 +11,7 @@ const available = 'NOT EXISTS(SELECT 1 FROM owner_setup) AND NOT EXISTS(SELECT 1
 setup.get('/setup', async c => {
  const state = await c.env.DB.prepare(`SELECT (${available}) AS available`).first<{available: number}>()
  c.header('Cache-Control', 'no-store')
- return c.json({available: state?.available === 1})
+ return c.json({available: state?.available === 1, ...(c.env.RER_INSTALLATION_ID || c.env.H2H_SETUP_TOKEN ? {tokenRequired: true} : {})})
 })
 setup.post('/bootstrap', async c => {
  const origin = c.req.header('Origin')
@@ -23,9 +23,24 @@ setup.post('/bootstrap', async c => {
   body = await c.req.json()
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error()
  } catch { throw new HTTPException(400, {message: 'Submit a JSON object with name, email, password and allowedOrigin'}) }
+ const managed = Boolean(c.env.RER_INSTALLATION_ID)
+ const expectedToken = c.env.H2H_SETUP_TOKEN
+ if (managed && (typeof expectedToken !== 'string' || !expectedToken.trim())) {
+  throw new HTTPException(503, {message: 'Owner setup is awaiting its installation credential'})
+ }
+ if (expectedToken) {
+  if (typeof body.setupToken !== 'string' || body.setupToken.length > 1024) throw new HTTPException(403, {message: 'A valid owner setup token is required'})
+  const expected = await hashToken(expectedToken), supplied = await hashToken(body.setupToken)
+  let difference = 0
+  for (let index = 0; index < expected.length; index++) difference |= expected.charCodeAt(index) ^ supplied.charCodeAt(index)
+  if (difference) throw new HTTPException(403, {message: 'A valid owner setup token is required'})
+ }
  const name = requiredString(body.name, 'name', 200).trim()
  const email = requiredString(body.email, 'email', 320).trim().toLowerCase()
  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HTTPException(400, {message: 'Enter a valid email address'})
+ if (c.env.H2H_SETUP_OWNER_EMAIL && email !== c.env.H2H_SETUP_OWNER_EMAIL.trim().toLowerCase()) {
+  throw new HTTPException(403, {message: 'Use the owner email selected for this installation'})
+ }
  let allowedOrigin: string
  try {
   const url = new URL(requiredString(body.allowedOrigin, 'allowedOrigin'))

@@ -1,0 +1,30 @@
+name: Managed release
+on:
+  workflow_dispatch:
+    inputs:
+      installation_id:
+        description: RER installation identifier
+        required: true
+        type: string
+      broker_url:
+        description: RER management origin
+        required: true
+        type: string
+      environment:
+        description: Target environment
+        required: true
+        default: preview
+        type: choice
+        options: [preview, production]
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+jobs:
+  release:
+    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@21c610b74e09ddf4b2062433bb47bcb6bfe6584a
+    with:
+      installation_id: ${{ inputs.installation_id }}
+      broker_url: ${{ inputs.broker_url }}
+      environment: ${{ inputs.environment }}
+      artifact_file: happytohelp-worker-artifact.json

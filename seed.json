@@ -124,6 +124,19 @@
       "adapters": [
         "scripts/deployment/environment.mjs"
       ]
+    },
+    {
+      "id": "run-edit-run-editor",
+      "required": false,
+      "why": "Optional owner-enabled editor frame; separate Run Edit Run authentication and installation authority are required. Disabled by default.",
+      "data": [
+        "Installation ID and edition origin",
+        "User-selected element structure",
+        "Explicitly reviewed text limited to 240 characters"
+      ],
+      "adapters": [
+        "src/editor/EditorLauncher.tsx"
+      ]
     }
   ],
   "env": [

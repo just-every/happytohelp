@@ -17,3 +17,5 @@ local-agent/.state/
 /public/widget.js
 /public/downloads/happytohelp-local-agent.tar.gz
 /src/routeTree.gen.ts
+
+/delivery-artifact/

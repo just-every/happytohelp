@@ -18,6 +18,16 @@ try {
  assert.equal((await submit(entry,{origin:'https://hostile.invalid'})).status,403)
  assert.equal((await submit(entry,{'sec-fetch-site':'cross-site'})).status,403)
  for(const table of ['owner_setup','users','projects','memberships','credentials','sessions'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0)
+ env.RER_INSTALLATION_ID='managed-fixture'
+ assert.deepEqual(await state(),{available:true,tokenRequired:true})
+ assert.equal((await submit()).status,503)
+ env.H2H_SETUP_TOKEN='private-owner-setup-fixture'
+ env.H2H_SETUP_OWNER_EMAIL='owner@example.invalid'
+ assert.equal((await submit()).status,403)
+ assert.equal((await submit({...entry,setupToken:'incorrect'})).status,403)
+ assert.equal((await submit({...entry,email:'attacker@example.invalid',setupToken:env.H2H_SETUP_TOKEN})).status,403)
+ for(const table of ['owner_setup','users','projects','memberships','credentials','sessions'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0)
+ delete env.RER_INSTALLATION_ID;delete env.H2H_SETUP_TOKEN;delete env.H2H_SETUP_OWNER_EMAIL
  // A database failure after claiming setup rolls back every write, including its marker.
  await db.prepare("CREATE TRIGGER reject_setup_credentials BEFORE INSERT ON credentials BEGIN SELECT RAISE(ABORT,'fixture failure'); END").run()
  assert.equal((await submit()).status,500)
@@ -50,5 +60,13 @@ try {
  // Future import also durably consumes first-owner setup.
  await db.prepare('DELETE FROM owner_setup').run();await db.prepare("INSERT INTO users VALUES('imported','import@example.invalid','Imported',1)").run();await db.prepare('DELETE FROM users').run()
  assert.deepEqual(await state(),{available:false})
+ // The managed credential shares the permanent atomic claim, even after owner deletion.
+ await db.prepare('DELETE FROM owner_setup').run()
+ env.RER_INSTALLATION_ID='managed-fixture';env.H2H_SETUP_TOKEN='private-owner-setup-fixture';env.H2H_SETUP_OWNER_EMAIL='OWNER@example.invalid'
+ const managedEntry={...entry,setupToken:env.H2H_SETUP_TOKEN}
+ const managedResponses=await Promise.all([submit(managedEntry),submit(managedEntry)])
+ assert.deepEqual(managedResponses.map(r=>r.status).sort(),[201,409])
+ for(const table of ['sessions','credentials','memberships','users','projects'])await db.prepare(`DELETE FROM ${table}`).run()
+ assert.equal((await submit(managedEntry)).status,409)
  console.log('Real D1 owner setup passed: validation, CSRF, rollback, concurrent first owner, password/login/cookies, permanent closure, legacy partial state and import closure.')
 } finally {await proxy.dispose()}

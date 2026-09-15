@@ -15,3 +15,6 @@ assert.throws(()=>validateRuntimeEnvironment({...fixture,PREVIEW_ORIGIN:fixture.
 let secretPath;await withSecretJsonFile(runtimeSecrets(fixture),async path=>{secretPath=path;assert.equal((await stat(path)).mode&0o777,0o600);assert.equal(JSON.parse(await readFile(path,'utf8')).EMAIL_API_KEY,'private-fixture')});await assert.rejects(stat(secretPath))
 await waitForDeploymentHealth('https://example.invalid/health',{fetchImpl:async()=>Response.json({status:'ok',runtime:'native-rer',database:'reachable',files:'reachable'})});await assert.rejects(waitForDeploymentHealth('https://example.invalid/health',{fetchImpl:async()=>Response.json({status:'ok'})}),/unexpected/)
 console.log('Operating configuration: source binding inventory, secret separation/cleanup, invalid capability configuration and native health identity passed; no network calls')
+
+assert.equal(runtimeVariables({RER_MANAGEMENT_ORIGIN:'https://manage.example.invalid'}).RER_MANAGEMENT_ORIGIN,'https://manage.example.invalid')
+for(const origin of ['http://manage.example.invalid','https://manage.example.invalid/path','https://user:password@manage.example.invalid','https://manage.example.invalid?token=x'])assert.throws(()=>validateRuntimeEnvironment({RER_MANAGEMENT_ORIGIN:origin}))

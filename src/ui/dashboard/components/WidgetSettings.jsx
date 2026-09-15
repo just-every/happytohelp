@@ -8,13 +8,15 @@ import WidgetTextFields from './widget-settings/WidgetTextFields';
 import WidgetInstallationCode from './widget-settings/WidgetInstallationCode';
 import { nativeRequest } from '../../native/transport';
 import WidgetPreview from './widget-settings/WidgetPreview';
+import { useUnsavedChanges } from '../../native/NavigationGuard';
 
 export default function WidgetSettings({ projectId }) {
+    const { markDirty, markSaved } = useUnsavedChanges();
     const { settings, csrfToken, previewAgent, previewBrand } = useContext(WidgetSettingsContext);
     const { register, getValues } = useForm({ defaultValues: settings });
     const [saveError, setSaveError] = useState('');
     const [saved, setSaved] = useState(false);
-    const save = async event => { event.preventDefault(); setSaveError(''); setSaved(false); try { await nativeRequest(`/api/management/projects/${projectId}/widget-settings`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(getValues()) }); setSaved(true); } catch(error) { setSaveError(error.message); } };
+    const save = async event => { event.preventDefault(); setSaveError(''); setSaved(false); try { await nativeRequest(`/api/management/projects/${projectId}/widget-settings`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(getValues()) }); markSaved(); setSaved(true); } catch(error) { setSaveError(error.message); } };
     const [activeTab, setActiveTab] = useState('code');
     const [previewOpen, setPreviewOpen] = useState(true);
 
@@ -49,7 +51,7 @@ export default function WidgetSettings({ projectId }) {
 
     return (
         <div className={`widget-settings-layout${activeTab === 'code' ? ' widget-settings-layout--code' : ''}`}>
-            <form onChange={() => window.h2h('settings', getValues())} onSubmit={save}>
+            <form onChange={() => { markDirty(); setSaved(false); window.h2h('settings', getValues()); }} onSubmit={save}>
                 {saveError && <p role="alert">{saveError}</p>}{saved && <p role="status">Saved.</p>}
                 <Tabs activeKey={activeTab} onSelect={setActiveTab} id="widget-settings-tabs">
                     <Tab eventKey="code" title="Code"><WidgetInstallationCode /></Tab>

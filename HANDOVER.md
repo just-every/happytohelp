@@ -16,6 +16,8 @@ The 15 September [UI restoration record](docs/UI-PARITY.md) covers comparison
 against a running original Laravel instance, the restored workspace/forms and
 remaining legacy differences. Desktop/mobile screenshots and real save/reload
 checks accompany this pass; it does not claim full legacy feature equality.
+The native route and shell contract is recorded in
+[`docs/NAVIGATION.md`](docs/NAVIGATION.md), including the focused browser check.
 
 ## Run and verify
 
@@ -27,6 +29,9 @@ and `pnpm run dev`. Open `/setup` to create the first owner with an email and pa
 Worker and source integrity. It includes native public pages and waitlist checks.
 After `pnpm exec playwright install chromium`, run `pnpm run test:setup-browser`,
 `pnpm run test:ui-browser` and `pnpm run test:widget-browser`.
+Run `pnpm run test:navigation-browser` for the native shell, loader, project
+provider and dirty-navigation coverage; it starts its own isolated emitted
+Worker runtime.
 Each starts isolated local data and writes evidence
 to a temporary directory, or under `H2H_EVIDENCE_DIR`. CI runs these checks.
 `pnpm run deploy -- --local` verifies packaging without deploying a Worker.

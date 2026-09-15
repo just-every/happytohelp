@@ -15,6 +15,7 @@ import ConversationBody from "./ConversationBody";
 
 import '../styles/components/Conversation.css';
 import NoteModal from "./NoteModal";
+import { useUnsavedChanges } from '../../native/NavigationGuard';
 
 function Conversation({ projectId, conversationId, conversation, buckets }) {
     const {
@@ -39,6 +40,10 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
     const [ loadingContent, setLoadingContent ] = useState('');
     const [ isAssistantDisabled, setIsAssistantDisabled ] = useState(false);
     const [ isNoteModalVisible, setIsNoteModalVisible ] = useState(false);
+    const { setDirty } = useUnsavedChanges();
+    useEffect(() => {
+        setDirty(Boolean(content.trim() || files.length || loadingContent || isSending));
+    }, [content, files.length, loadingContent, isSending, setDirty]);
     const draftConversationIdRef = useRef(conversationId);
     const activeConversationIdRef = useRef(conversationId);
 

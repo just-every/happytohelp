@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
+import { useDashboardLocation } from '../../native/dashboard-state';
+import useInboxRoute from '../hooks/useInboxRoute';
 import moment from 'moment';
 import Moment from '../../native/Moment';
 import { ChatContext } from "../contexts/ChatContext";
@@ -19,8 +21,8 @@ function ConversationItem({ conversation, setConversation }) {
         isGlobalInbox,
         getProject,
     } = useContext(ChatContext)
-    const { urlProjectId, urlConversationId } = useParams();
-    const { search } = useLocation();
+    const { urlProjectId, urlConversationId } = useInboxRoute();
+    const { search } = useDashboardLocation();
 
     // The global inbox has no project in its URL - conversations live under /conversations
     const conversationUrl = isGlobalInbox
@@ -41,7 +43,7 @@ function ConversationItem({ conversation, setConversation }) {
     }
 
     return (
-        <Link to={{ pathname: conversationUrl, search }}
+        <Link to={conversationUrl} search={search}
               onClick={handleClick}
               className={ 'conversation-item text-reset nav-link p-0 ' + (urlConversationId === conversation.id ? 'active' : '') }>
             <div className="card">

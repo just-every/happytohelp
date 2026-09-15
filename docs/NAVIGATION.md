@@ -1,0 +1,97 @@
+# Native navigation
+
+HappyToHelp has one authenticated TanStack Router layout. The pathless
+`src/routes/_dashboard.tsx` validates implemented paths on the server so unknown
+documents return HTTP 404. Its nested pathless
+`src/routes/_dashboard._workspace.tsx` is the client-only boundary with
+pending/error handling and the persistent shell. The workspace's index and splat
+leaves render `DashboardContent` and attach the bootstrap loader;
+`dashboard-path.js` admits only the dashboard paths this edition implements.
+Underscore layout names contribute no URL segment. Login, setup and the other
+identity pages remain document routes outside this layout.
+
+## Loader context and shell lifetime
+
+`dashboardLoaderOptions` is applied to both leaf routes. The native match is
+identified by the current pathname, while `loaderDeps` explicitly includes
+search values; `shouldReload: true`, zero stale/cache times and
+`staleReloadMode: 'blocking'` keep the last committed workspace visible while a
+new read settles. `loadDashboard` derives the project from the URL and reads
+the committed `/api/management/bootstrap` response. It returns the
+project/global-inbox scope, normalized search location, `apiUrl` and a session
+version. `Dashboard` reads `matches.at(-1)` with `useMatches` and takes that
+committed leaf match's `loaderData` into `DashboardSettingsContext`; routing
+does not use `window.chatSettings` (which remains only a compatibility input
+for embedded legacy components). A 401 redirects to `/login` with a validated
+`returnTo`; a session-version change invalidates the old router cache before a
+new workspace is accepted.
+
+`DashboardClient` keeps `Navigation`, `NavigationGuard` and the shell around the
+child outlet while the pathless workspace parent remains mounted. The
+conversation `ChatContext` provider is keyed by session, agent and
+project/global scope. A workspace switch first changes the server-side project
+identity, then routes to that project's inbox; the changed key remounts the
+provider and prevents the previous project's conversation state from leaking.
+The widget settings page has its own route-scoped provider and removes its
+preview script on unmount.
+
+## Which navigation is intentional
+
+Use TanStack `Link` for ordinary in-app navigation: sidebar items, settings
+tabs, list/detail links and page actions. These update the URL and outlet while
+preserving the document, sidebar and shell. Inbox `q` and `view` values are
+router search state, so Back/Forward restores the corresponding controls.
+
+Some transitions deliberately replace or leave the document:
+
+- Login and first-owner setup use `location.assign` after the identity request
+  so the new session starts from a fresh document. Login sanitizes `returnTo`
+  and accepts only an in-origin dashboard path.
+- GitHub Connect posts for a short-lived OAuth state, then assigns the returned
+  GitHub authorization URL. GitHub redirects back to the API callback, which
+  redirects to the project settings document route.
+- Downloads, retained artifacts, help-center previews, media, mail links and
+  external provider/docs links use ordinary anchors (usually a new tab). They
+  are document or external-resource transitions by design and should not be
+  converted to router links.
+
+## Unsaved editing
+
+`NavigationGuard` is mounted once inside the persistent shell. Editors call
+`useUnsavedChanges` to register a per-component dirty marker and clear it after
+save or unmount. A path change that would replace the editor asks whether to
+discard; inbox search/filter changes keep the same conversation path and do not
+block the draft. The guard also protects explicit session-changing commands:
+workspace switching and sign-out ask before their request. A cancelled or
+failed request leaves the dirty marker and draft in place. Browser unloads are
+covered while any marker remains, and confirmed navigation can intentionally
+discard the draft without writing it.
+
+## Browser coverage
+
+Run the focused browser check after producing the current build:
+
+```sh
+pnpm run build
+pnpm run test:navigation-browser
+```
+
+`tests/navigation-browser.mjs` starts an isolated local D1/R2/Durable Object
+runtime from the emitted Worker (`dist/server/wrangler.json` and its emitted
+server bundle), seeds real tenants through the Worker APIs, and drives the
+actual browser UI. It exercises delayed loader reads, shell/document identity,
+header portals, search and Back/Forward, project isolation and theme changes,
+dirty conversation and settings edits, widget mount/unmount, mobile navigation,
+direct refresh/not-found recovery, sign-out and expired-session recovery. The
+test writes its result and request evidence under `H2H_EVIDENCE_DIR` (or a
+temporary directory). This document records the contract and command; a test
+run must report its own result and exact source revision.
+
+## Relationship to UI parity
+
+`docs/UI-PARITY.md` is the historical 15 September comparison record against a
+running Laravel reference. It describes restored presentation surfaces,
+screenshots and known legacy feature gaps; it explicitly does not claim full
+legacy equality. This document describes the current native route and state
+lifecycle. The parity record is comparison evidence, not a second router or a
+requirement to reproduce legacy document transitions.

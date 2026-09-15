@@ -291,6 +291,8 @@
           "tests/billing-parity-cases.ts",
           "tests/operating-environment.mjs",
           "tests/ui-browser.mjs",
+          "tests/navigation-browser.mjs",
+          "tests/login-return.mjs",
           "migrations/0084_billing_project_usage.sql",
           "tests/billing-project-usage-cases.ts",
           "tests/billing-migrations.ts",

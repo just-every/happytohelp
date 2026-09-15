@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import { createWorkspaceTheme, normalizeWorkspaceMode } from './workspaceModes';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Outlet } from '@tanstack/react-router';
+import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
 import Chat from '../dashboard/components/Chat';
 import { Provider } from '../dashboard/contexts/ChatContext';
 import WorkspacePages from './WorkspacePages';
 import Navigation from './Navigation';
-export default function DashboardClient() {
-    const settings = window.chatSettings;
-    const isInbox = location.pathname === '/' || location.pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(location.pathname);
+import { NavigationGuard } from './NavigationGuard';
+export default function DashboardClient({ settings }) {
+    const pathname = useDashboardLocation().pathname;
+    const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
     useEffect(() => {
         document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed theme-happytohelp`;
     }, [isInbox]);
@@ -27,14 +29,17 @@ export default function DashboardClient() {
         window.addEventListener('workspace-appearance',update);
         return () => { window.removeEventListener('workspace-appearance',update); properties.forEach(key=>document.body.style.removeProperty(key)); delete document.body.dataset.workspaceMode; document.documentElement.dataset.bsTheme='light'; };
     }, [settings]);
-    return <BrowserRouter><Navigation settings={settings} /><Provider {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
-        <Routes>
-            <Route path="/" element={<div className="main-content"><div id="chat"><Chat /></div></div>} />
-            <Route path="/conversations" element={<div className="main-content"><div id="chat"><Chat /></div></div>} />
-            <Route path="/conversations/:urlConversationId" element={<div className="main-content"><div id="chat"><Chat /></div></div>} />
-            <Route path="/projects/:urlProjectId/conversations" element={<div className="main-content"><div id="chat"><Chat /></div></div>} />
-            <Route path="/projects/:urlProjectId/conversations/:urlConversationId" element={<div className="main-content"><div id="chat"><Chat /></div></div>} />
-            <Route path="*" element={<WorkspacePages settings={settings} />} />
-        </Routes>
-    </Provider></BrowserRouter>;
+    const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
+    return <NavigationGuard><Navigation settings={settings} /><Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
+        <Outlet />
+    </Provider></NavigationGuard>;
+}
+
+export function DashboardContent() {
+    const settings = useDashboardSettings();
+    const pathname = useDashboardLocation().pathname;
+    const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
+    return !settings.accountOnly && isInbox
+        ? <div className="main-content"><div id="chat"><Chat /></div></div>
+        : <WorkspacePages settings={settings} />;
 }

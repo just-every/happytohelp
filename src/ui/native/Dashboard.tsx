@@ -1,30 +1,40 @@
-import { useEffect, useState } from 'react';
-import { nativeRequest } from './transport';
+import { lazy, Suspense, useEffect } from 'react';
+import { Link, useMatches, useRouter } from '@tanstack/react-router';
+import { DashboardSettingsContext, useDashboardSessionVersion, invalidateDashboardSession } from './dashboard-state';
 import '../dashboard/styles/theme.scss';
 import '../dashboard/styles/layouts/_native-shell.scss';
 
+const DashboardClient = lazy(() => import('./DashboardClient'));
+const Content = lazy(() => import('./DashboardClient').then(module => ({ default: module.DashboardContent })));
+
+export function DashboardPending() {
+    return <main className="container py-5" aria-busy="true">Loading your workspace…</main>;
+}
+export function DashboardError({ error }: { error: unknown }) {
+    useEffect(() => { delete (window as any).chatSettings; }, []);
+    return <main className="container py-5"><h1>HappyToHelp</h1><p role="alert">{error instanceof Error ? error.message : 'The workspace could not be loaded.'}</p><Link to="/login">Sign in</Link></main>;
+}
+export function DashboardContent() {
+    return <Suspense fallback={<DashboardPending />}><Content /></Suspense>;
+}
 export default function Dashboard() {
-    const [View, setView] = useState<any>(null);
-    const [error, setError] = useState('');
+    const match = useMatches({ select: matches => matches.at(-1) });
+    const settings = match?.loaderData as any;
+    const router = useRouter();
     useEffect(() => {
-        let cancelled = false;
-        const matchedProject = location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
-        const projectId = matchedProject === 'create' ? undefined : matchedProject;
-        nativeRequest('/api/management/bootstrap' + (projectId ? `?projectId=${encodeURIComponent(projectId)}` : '')).then(async (settings: any) => {
-            if (cancelled) return;
-            (window as any).chatSettings = { ...settings, apiUrl: '/api/dashboard', projectId, isGlobalInbox: !projectId };
-            const module = settings.accountOnly ? await import('./pages/ProjectsPage') : await import('./DashboardClient');
-            if (!cancelled) {
-                // BrowserRouter adds its history index on first render. Initialize it here
-                // so the outer TanStack router receives that update outside React render.
-                if (!settings.accountOnly && window.history.state?.idx == null) {
-                    window.history.replaceState({ ...window.history.state, idx: 0 }, '');
-                }
-                setView(() => module.default);
-            }
-        }).catch((failure: Error) => { if (!cancelled) setError(failure.message); });
-        return () => { cancelled = true; };
-    }, []);
-    if (error) return <main className="container py-5"><h1>HappyToHelp</h1><p role="alert">{error}</p><a href="/login">Sign in</a></main>;
-    return View ? <View /> : <main className="container py-5" aria-busy="true">Loading your workspace…</main>;
+        const expired = () => {
+            invalidateDashboardSession(router);
+            void router.navigate({ to: '/login', search: { returnTo: router.state.location.href }, replace: true, ignoreBlocker: true });
+        };
+        window.addEventListener('h2h:session-expired', expired);
+        return () => window.removeEventListener('h2h:session-expired', expired);
+    }, [router]);
+    const sessionVersion = useDashboardSessionVersion();
+    if (match?.status === 'error') return <DashboardError error={match.error} />;
+    if (!settings || settings.sessionVersion !== sessionVersion) return <DashboardPending />;
+    // Embedded widgets still consume this compatibility object. Routing uses loader context.
+    (window as any).chatSettings = settings;
+    return <DashboardSettingsContext.Provider value={settings}>
+        <Suspense fallback={<DashboardPending />}><DashboardClient settings={settings} /></Suspense>
+    </DashboardSettingsContext.Provider>;
 }

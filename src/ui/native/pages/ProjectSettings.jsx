@@ -1,3 +1,4 @@
+import { useUnsavedChanges } from '../NavigationGuard';
 import React, { useEffect, useState } from 'react';
 import BrandImage from './BrandImage';
 import GitHubSettings from './GitHubSettings';
@@ -5,12 +6,14 @@ import { nativeRequest } from '../transport';
 import { Field, Section, Feedback } from './forms';
 import {TimezoneField,SettingsTabs,SettingsIcon} from './ProjectControls';
 export default function ProjectSettings({ projectId, section }) {
+ const {markDirty,markSaved}=useUnsavedChanges();
+
  const kind=section==='edit'?'settings':section,path=`/api/management/projects/${projectId}/${kind}`;
  const [data,setData]=useState(null),[tab,setTab]=useState('general'),[error,setError]=useState(''),[saved,setSaved]=useState(false),[busy,setBusy]=useState(false);
  useEffect(()=>{nativeRequest(path).then(r=>setData(r.data||r)).catch(e=>setError(e.message));},[path]);
- const change=(key,value)=>{setSaved(false);setData(d=>({...d,[key]:value}));};
+ const change=(key,value)=>{markDirty();setSaved(false);setData(d=>({...d,[key]:value}));};
  const field=(name,label,type,options)=><Field key={name} {...{name,label,type,options}} value={data[name]} onChange={change}/>;
- const submit=async e=>{e.preventDefault();setBusy(true);setError('');try{const target=tab==='availability'?`/api/management/projects/${projectId}/availability`:path;await nativeRequest(target,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(tab==='availability')await nativeRequest(path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_available:data.is_available!==false,unavailable_message:data.unavailable_message||''})});setSaved(true);if(tab==='appearance')window.dispatchEvent(new CustomEvent('workspace-appearance',{detail:{primary_color:data.primary_color||'#713ee0',display_mode:data.display_mode||'balanced'}}));}catch(e){setError(e.message);}finally{setBusy(false);}};
+ const submit=async e=>{e.preventDefault();setBusy(true);setError('');try{const target=tab==='availability'?`/api/management/projects/${projectId}/availability`:path;await nativeRequest(target,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(tab==='availability')await nativeRequest(path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_available:data.is_available!==false,unavailable_message:data.unavailable_message||''})});markSaved();setSaved(true);if(tab==='appearance')window.dispatchEvent(new CustomEvent('workspace-appearance',{detail:{primary_color:data.primary_color||'#713ee0',display_mode:data.display_mode||'balanced'}}));}catch(e){setError(e.message);}finally{setBusy(false);}};
  if(!data)return <Feedback error={error}/>;
  const schedule=data.availability_schedule||{},scheduleChange=(key,value)=>change('availability_schedule',{...schedule,[key]:value});
  const title=(label,kind)=><><SettingsIcon kind={kind}/>{label}</>;

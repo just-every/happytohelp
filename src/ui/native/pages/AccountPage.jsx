@@ -1,18 +1,25 @@
+import { useUnsavedChanges } from '../NavigationGuard';
+import { useNavigate, useRouter } from '@tanstack/react-router';
+import { invalidateDashboardSession } from '../dashboard-state';
 import React, { useEffect, useState } from 'react';
 import {TimezoneField,SettingsTabs} from './ProjectControls';
 import AvatarUpload from './AvatarUpload';
 import { nativeRequest } from '../transport';
 import { Field, Section, Feedback } from './forms';
 export default function AccountPage({projectId}) {
+ const {markDirty,markSaved}=useUnsavedChanges();
+
+    const router=useRouter(),navigate=useNavigate();
+
     const path='/api/management/profile';
     const [data,setData]=useState(null),[tab,setTab]=useState('general'),[error,setError]=useState(''),[saved,setSaved]=useState(false);
     useEffect(()=>{nativeRequest(path).then(r=>setData(r.data||r)).catch(e=>setError(e.message));},[]);
-    const change=(key,value)=>{setSaved(false);setData(d=>({...d,[key]:value}));};
+    const change=(key,value)=>{markDirty();setSaved(false);setData(d=>({...d,[key]:value}));};
     const field=(name,label,type)=><Field key={name} {...{name,label,type}} value={data[name]} onChange={change}/>;
     const submit=async e=>{e.preventDefault();setError('');try{
         if(tab==='security'&&data.password!==data.password_confirmation)throw new Error('Passwords do not match.');
         await nativeRequest(tab==='security'?'/api/identity/password':path,{method:tab==='security'?'POST':'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(tab==='security'?{currentPassword:data.current_password,password:data.password}:data)});
-        if(tab==='security'){location.assign('/login');return;}setSaved(true);
+        markSaved();if(tab==='security'){await invalidateDashboardSession(router);await navigate({to:'/login',replace:true});return;}setSaved(true);
     }catch(e){setError(e.message);}};
     if(!data)return <Feedback error={error}/>;
     return <div className="workspace-settings project-account"><Feedback {...{error,saved}}/><SettingsTabs tab={tab} onChange={setTab} tabs={[["general","General"],["notifications","Notification"],["security","Security"]]}/><form onSubmit={submit}>

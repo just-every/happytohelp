@@ -2,6 +2,10 @@
 export async function nativeRequest(path, init = {}) {
     const response = await fetch(path, { credentials: 'same-origin', ...init });
     const body = await response.json();
+    if (response.status === 401 && typeof window !== 'undefined' && window.chatSettings
+        && path !== '/api/identity/login' && path !== '/api/identity/password') {
+        window.dispatchEvent(new CustomEvent('h2h:session-expired'));
+    }
     if (!response.ok) throw Object.assign(new Error(body.error?.message || body.error || `Request failed (${response.status})`), { status: response.status, data: body });
     return body;
 }

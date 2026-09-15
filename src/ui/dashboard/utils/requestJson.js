@@ -17,6 +17,12 @@ async function requestJson(url, options = {}, { signal, timeoutMs = DEFAULT_READ
         if (response.status === 204) return {};
 
         if (!response.ok) {
+            if (response.status === 401 && typeof window !== 'undefined' && window.chatSettings) {
+                const requestUrl = new URL(url, window.location.origin);
+                if (requestUrl.origin === window.location.origin && requestUrl.pathname.startsWith('/api/dashboard/')) {
+                    window.dispatchEvent(new CustomEvent('h2h:session-expired'));
+                }
+            }
             const payload = await response.json().catch(() => null);
             const error = new Error(payload?.message || (typeof payload?.error === 'string' ? payload.error : payload?.error?.message) || `Request failed (${response.status}). Please try again.`);
             error.status = response.status;

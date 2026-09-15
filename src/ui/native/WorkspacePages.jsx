@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDashboardLocation } from './dashboard-state';
 import GitHubSettings from './pages/GitHubSettings';
 import ArticleImport from './pages/ArticleImport';
 import ProjectsPage from './pages/ProjectsPage';
@@ -15,9 +16,10 @@ import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
 const titles={edit:'Project',settings:'Project',billing:'Billing',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Training runs'};
 export default function WorkspacePages({ settings }) {
-    const segments=location.pathname.split('/').filter(Boolean);
+    const pathname = useDashboardLocation().pathname;
+    const segments=pathname.split('/').filter(Boolean);
     const projectId=segments[0]==='projects'?segments[1]:settings.project?.id||Object.keys(settings.projects||{})[0];
-    const section=segments[0]==='projects'&&(!segments[1]||segments[1]==='create')?'projects':segments[0]==='projects'?segments[2]||'edit':segments[0];
+    const section=settings.accountOnly?'projects':segments[0]==='projects'&&(!segments[1]||segments[1]==='create')?'projects':segments[0]==='projects'?segments[2]||'edit':segments[0];
     const recordId=segments[0]==='projects'?segments[3]:segments[1];
     let page;
     if(section==='projects')page=<ProjectsPage/>;
@@ -50,6 +52,6 @@ export default function WorkspacePages({ settings }) {
             </div><div className="col-auto" id="workspace-header-actions"/></div>
             <div id="workspace-header-tabs"/>
         </div></div>
-        <div className="workspace-page-content">{page}</div>
+        <div className="workspace-page-content" key={pathname}>{page}</div>
     </div></div>;
 }

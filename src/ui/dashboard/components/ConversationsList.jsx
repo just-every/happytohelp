@@ -2,7 +2,8 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import ConversationItem from "./ConversationItem";
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { ChatContext } from "../contexts/ChatContext";
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
+import { useDashboardLocation } from '../../native/dashboard-state';
 import InboxSearch from './InboxSearch';
 import { getInboxView, inboxViewFilter, normalizeInboxView } from './inboxViewDefinitions';
 import useConversationList from '../hooks/useConversationList';
@@ -15,9 +16,10 @@ function ConversationsList() {
         fetchConversationList,
         inboxDataVersion,
     } = useContext(ChatContext);
-    const [ searchParams, setSearchParams ] = useSearchParams();
-    const selectedView = normalizeInboxView(searchParams.get('view'));
-    const searchQuery = searchParams.get('q') || '';
+    const searchParams = useDashboardLocation().search;
+    const navigate = useNavigate();
+    const selectedView = normalizeInboxView(searchParams.view);
+    const searchQuery = searchParams.q == null ? '' : String(searchParams.q);
     const filter = useMemo(() => inboxViewFilter(selectedView, searchQuery), [ selectedView, searchQuery ]);
     const listKey = JSON.stringify(filter);
     const view = getInboxView(selectedView);
@@ -51,12 +53,7 @@ function ConversationsList() {
     }, [ rootRef, scrollEdgeRef ]);
 
     const handleSearch = query => {
-        const params = new URLSearchParams();
-        params.set('view', selectedView);
-        if (query.trim()) {
-            params.set('q', query.trim());
-        }
-        setSearchParams(params);
+        navigate({ search: { view: selectedView, ...(query.trim() ? { q: query.trim() } : {}) } });
     };
 
     return (

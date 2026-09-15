@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 
 const save = async page => {
+  const creating=new URL(page.url()).pathname.endsWith('/create')&&!new URL(page.url()).pathname.includes('/agents/');
   const response=page.waitForResponse(r=>new URL(r.url()).pathname.startsWith('/api/')&&['POST','PUT','PATCH'].includes(r.request().method()));
   await page.getByRole('button', {name: /^(Save|Update|Create|Add|Invite)$/}).click();
   assert.equal((await response).ok(),true,'form mutation accepted');
-  await page.getByText('Saved.', {exact:true}).waitFor();
+  if(creating)await page.waitForURL(url=>!url.pathname.endsWith('/create'));
+  else await page.getByText('Saved.', {exact:true}).waitFor();
 };
 
 export async function verifySettingsParity(page, {origin,projectId,checks}) {

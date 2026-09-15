@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
+import { useDashboardLocation } from '../../native/dashboard-state';
 import { ChatContext } from '../contexts/ChatContext';
 import formatCompactCount from '../utils/formatCompactCount';
 import { INBOX_VIEWS, normalizeInboxView } from './inboxViewDefinitions';
@@ -18,28 +19,16 @@ function closeMobileNavigation(element) {
 
 export default function InboxViews() {
     const target = document.getElementById('navigation-inbox-views');
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [ searchParams ] = useSearchParams();
+    const location = useDashboardLocation();
+    const searchParams = location.search;
     const { inboxViewCounts, setIsMainVisible } = useContext(ChatContext);
-    const selectedView = normalizeInboxView(searchParams.get('view'));
+    const selectedView = normalizeInboxView(searchParams.view);
     if (!target) {
         return null;
     }
 
-    const onSelect = (event, viewId) => {
-        event.preventDefault();
+    const onSelect = event => {
         const isCompactWorkspace = window.matchMedia('(max-width: 1199.98px)').matches;
-        const params = new URLSearchParams();
-        params.set('view', viewId);
-        if (searchParams.get('q')) {
-            params.set('q', searchParams.get('q'));
-        }
-
-        navigate({
-            pathname: location.pathname,
-            search: `?${ params.toString() }`,
-        });
 
         if (isCompactWorkspace) {
             setIsMainVisible(false);
@@ -51,16 +40,12 @@ export default function InboxViews() {
         <nav className="inbox-views" aria-label="Inbox views">
             { INBOX_VIEWS.map(view => {
                 const count = inboxViewCounts[view.id];
-                const hrefParams = new URLSearchParams();
-                hrefParams.set('view', view.id);
-                if (searchParams.get('q')) {
-                    hrefParams.set('q', searchParams.get('q'));
-                }
 
                 return <Link
                     key={ view.id }
-                    to={{ pathname: location.pathname, search: `?${ hrefParams.toString() }` }}
-                    onClick={ event => onSelect(event, view.id) }
+                    to={location.pathname}
+                    search={{ view: view.id, ...(searchParams.q ? { q: searchParams.q } : {}) }}
+                    onClick={onSelect}
                     className={ `inbox-view-link${ selectedView === view.id ? ' is-active' : '' }` }
                     aria-current={ selectedView === view.id ? 'page' : undefined }>
                     <span className="inbox-view-label">{ view.label }</span>

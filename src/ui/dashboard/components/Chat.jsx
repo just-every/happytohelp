@@ -4,10 +4,10 @@ import Conversation from "./Conversation";
 import InboxViews from './InboxViews';
 import { updateNavigationUnreadBadge } from './navigationInboxBadge';
 import { ChatContext } from "../contexts/ChatContext";
-import { useParams } from "react-router-dom";
+import useInboxRoute from "../hooks/useInboxRoute";
 
 export default function Chat() {
-    const { urlConversationId } = useParams();
+    const { urlConversationId } = useInboxRoute();
     const {
         currentAgent,
         isMainVisible,
@@ -21,7 +21,8 @@ export default function Chat() {
 
     useEffect(() => {
         setActiveConversationId(urlConversationId);
-    }, [ urlConversationId ]);
+        return () => setActiveConversationId(null);
+    }, [ urlConversationId, setActiveConversationId ]);
 
     useEffect(() => {
         updateNavigationUnreadBadge(inboxViewCounts.unread);

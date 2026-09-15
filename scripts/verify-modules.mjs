@@ -11,7 +11,7 @@ const standalone = [
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs',
   'operating-environment.mjs', 'management.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
   'public-referrer.mjs', 'public-waitlist.mjs', 'site-preview.mjs',
-  'ui-transport.mjs', 'widget-transport.mjs',
+  'ui-transport.mjs', 'login-return.mjs', 'widget-transport.mjs',
 ].map(name => `tests/${name}`);
 const groups = ['tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test'];
 for (const group of groups) {

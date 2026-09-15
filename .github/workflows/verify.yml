@@ -34,6 +34,7 @@ jobs:
       - run: pnpm verify
       - run: pnpm test:setup-browser
       - run: pnpm test:ui-browser
+      - run: pnpm test:navigation-browser
       - run: pnpm test:widget-browser
       - name: Confirm verification preserves source
         run: git diff --exit-code && test -z "$(git ls-files --others --exclude-standard)"

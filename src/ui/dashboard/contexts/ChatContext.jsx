@@ -20,14 +20,12 @@ export const Provider = (props) => {
         activeConversationId: initialActiveConversationId,
         conversationLists: initialConversationLists,
         conversationData: initialConversationData,
-        agents: initialAgents,
-        ais: initialAis,
+        agents,
+        ais,
         plugins: initialPlugins,
-        currentAgent: initialCurrentAgent,
-        apiUrl: initialApiUrl,
-        agentToken: initialAgentToken,
+        currentAgent,
+        apiUrl,
         publicKey,
-        wsUrl: initialWsUrl,
         projectId,
         projects,
         isGlobalInbox,
@@ -39,12 +37,6 @@ export const Provider = (props) => {
     const [ conversationLists, setConversationLists ] = useState(initialConversationLists);
     const [ conversationData, setConversationData ] = useState(initialConversationData);
     const [ buckets, setBuckets ] = useState([]);
-    const [ agents ] = useState(initialAgents);
-    const [ ais ] = useState(initialAis);
-    const [ currentAgent ] = useState(initialCurrentAgent);
-    const [ apiUrl ] = useState(initialApiUrl);
-    const [ agentToken ] = useState(initialAgentToken);
-    const [ wsUrl ] = useState(initialWsUrl);
     // Websocket state is kept per project: the global inbox holds one connection per
     // project, since connections (and their encryption keys) are project scoped.
     // conversation id -> project id, so callbacks can address the right connection
@@ -567,15 +559,10 @@ Provider.defaultProps = {
     conversationLists: {},
     activeConversationId: null,
     conversationData: {},
-    agents: window.chatSettings.agents,
-    ais: window.chatSettings.ais,
-    plugins: window.chatSettings.plugins,
-    currentAgent: window.chatSettings.currentAgent,
-    apiUrl: window.chatSettings.apiUrl,
-    agentToken: window.chatSettings.agentToken,
-    publicKey: window.chatSettings.publicKey,
-    wsUrl: window.chatSettings.wsUrl,
-    projectId: window.chatSettings.project ? window.chatSettings.project.id : null,
-    projects: window.chatSettings.projects || {},
-    isGlobalInbox: !!window.chatSettings.isGlobalInbox,
+    agents: [],
+    ais: [],
+    plugins: [],
+    projectId: null,
+    projects: {},
+    isGlobalInbox: false,
 };

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { useParams } from "react-router-dom";
+import { Link } from '@tanstack/react-router';
+import useInboxRoute from "../hooks/useInboxRoute";
 import Api from "../api";
 import useOnclickOutside from "react-cool-onclickoutside";
 import { ChatContext } from "../contexts/ChatContext";
@@ -11,11 +12,12 @@ MacrosPicker.propTypes = {
 };
 
 export default function MacrosPicker({ onPicked, projectId }) {
-    const { urlProjectId } = useParams();
+    const { urlProjectId } = useInboxRoute();
     // The global inbox has no project in the URL - the conversation supplies it
     const macrosProjectId = projectId || urlProjectId;
     const [ macros, setMacros ] = useState([]);
     const [ hasLoaded, setHasLoaded ] = useState(false);
+    const [ loadError, setLoadError ] = useState(null);
     const [ preview, setPreview ] = useState('');
     const {
         currentAgent,
@@ -24,10 +26,6 @@ export default function MacrosPicker({ onPicked, projectId }) {
     } = useContext(ChatContext);
 
     const conversation = conversationData[activeConversationId];
-
-    const loadMacros = (projectId,  params) => {
-        return Api.get(`/projects/${ projectId }/macros`, params);
-    }
 
     const handleClick = (macro) => {
         const contactName = conversation.contact.provided_name ? conversation.contact.provided_name : conversation.contact.name;
@@ -38,7 +36,6 @@ export default function MacrosPicker({ onPicked, projectId }) {
             'agent.name': agentName,
             'contact.name': contactName,
         }
-        console.log(map);
         let content = macro.content;
         [...macro.content.matchAll(regexp)].forEach(match => {
             const placeholder = match[0];
@@ -56,11 +53,22 @@ export default function MacrosPicker({ onPicked, projectId }) {
     }
 
     useEffect(() => {
-        loadMacros(macrosProjectId, {}).then(result => {
+        const controller = new AbortController();
+        setMacros([]);
+        setHasLoaded(false);
+        setLoadError(null);
+        if (!macrosProjectId) return;
+        Api.get(`/projects/${ macrosProjectId }/macros`, {}, { signal: controller.signal }).then(result => {
+            if (controller.signal.aborted) return;
             setMacros(result.data);
             setHasLoaded(true);
+        }).catch(error => {
+            if (!controller.signal.aborted) setLoadError(error);
         });
+        return () => controller.abort();
     }, [ macrosProjectId ]);
+
+    if (loadError) return <p role="alert">Couldn’t load saved replies.</p>;
 
     if(!hasLoaded) {
         return null;
@@ -70,9 +78,9 @@ export default function MacrosPicker({ onPicked, projectId }) {
         <div className="w-100 mt-2">
             <ul className="nav nav-tabs nav-tabs-sm border-0 gap-1">
                 <li className="nav-item"><span className="nav-link active">Saved Replies</span></li>
-                {macros.length > 0 && <li className="nav-item"><a href={`/projects/${macrosProjectId}/macros`} className="nav-link">Edit
-                    Replies <i className="fe fe-external-link" /></a></li> }
-                <li className="nav-item"><a href={`/projects/${macrosProjectId}/macros/create`} className="nav-link">Save a Reply <i className="fe fe-external-link" /></a></li>
+                {macros.length > 0 && <li className="nav-item"><Link to={`/projects/${macrosProjectId}/macros`} className="nav-link">Edit
+                    Replies <i className="fe fe-external-link" /></Link></li> }
+                <li className="nav-item"><Link to={`/projects/${macrosProjectId}/macros/create`} className="nav-link">Save a Reply <i className="fe fe-external-link" /></Link></li>
             </ul>
             <div className="mt-3 pt-1 d-flex flex-column">
                 <div className="row">
@@ -82,7 +90,7 @@ export default function MacrosPicker({ onPicked, projectId }) {
                                 href="#"
                                 className="btn btn-sm btn-white me-2 mt-2"
                                 onMouseOver={ () => setPreview(macro.content) }
-                                onClick={ () => handleClick(macro) }
+                                onClick={ event => { event.preventDefault(); handleClick(macro); } }
                                 key={ `macro-${macro.id}` }>{ macro.title }</a>
                         ))}
                         {macros.length === 0 && <div className="text-muted">No replies saved</div>}

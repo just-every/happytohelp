@@ -19,6 +19,21 @@ checks accompany this pass; it does not claim full legacy feature equality.
 The native route and shell contract is recorded in
 [`docs/NAVIGATION.md`](docs/NAVIGATION.md), including the focused browser check.
 
+## Source and review state
+
+All selected components are edition-local, including `src/base` and
+`scripts/edition-authoring`. Base and original HappyToHelp repositories are
+comparison/porting origins, not sibling runtime dependencies. See
+[AUTHORING.md](docs/AUTHORING.md) for source updates and portable releases.
+
+The clean-release migration acceptance applies to `510f62d`; the subsequent
+UI restoration (`0cc5dab`) and navigation (`a97a500`) have their own linked
+records above. Do not apply the earlier aggregate counts to later source.
+Owner review and any new consolidated verification should identify their exact
+source revision and evidence separately.
+The 15 September consolidated local review is indexed at
+`/Users/zemaj/.orchestrator/evidence/runeditrun/happytohelp-local-review-20260915/FINAL-REVIEW.md`.
+
 ## Run and verify
 
 Use Node 26.8.1 and pnpm 10.12.4. Run `node scripts/operations.mjs describe` before

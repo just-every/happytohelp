@@ -7,8 +7,9 @@
     "node": ">=26.8.1"
   },
   "scripts": {
-    "build": "node scripts/migrations.mjs && node scripts/build-local-agent.cjs && pnpm run build:widget && vite build",
-    "dev": "vite dev",
+    "build": "node scripts/migrations.mjs && pnpm run build:assets && vite build",
+    "build:assets": "node scripts/build-local-agent.cjs && pnpm run build:widget",
+    "dev": "pnpm run build:assets && vite dev",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "verify": "node scripts/operations.mjs describe && pnpm run build && pnpm run typecheck && pnpm run test:modules && pnpm run test:runtime && pnpm run source:check",

@@ -4,7 +4,7 @@ This repository owns the HappyToHelp application on the maintained RER runtime:
 TanStack Start/React documents, Hono HTTP, Cloudflare Workers, D1, R2, Queues and
 conversation Durable Objects. It ports the existing HappyToHelp dashboard, widget,
 chat, delegation and knowledge architecture into native source. The earlier small
-RER delegation desk is a separate legacy product input, not this application.
+RER delegation desk remains in Git history; its family publisher is retired.
 
 Read ACCEPTANCE.md, CONTRACT.md and OPERATIONS.md for the product and operating
 requirements. The current implementation/verification boundary belongs in the
@@ -20,6 +20,8 @@ pnpm run dev
 
 Open `/setup` after starting the local app to create the first owner with an
 email and password. Setup then closes; use `/login` for subsequent access.
+The dev command builds the widget and local-connector download before starting
+Vite, so a fresh checkout serves these assets too.
 
 `pnpm run setup`, `pnpm run build`, `pnpm run verify`, `pnpm run deploy` and `pnpm run source:release`
 are the common edition commands. Setup/deploy have external effects described in
@@ -27,8 +29,11 @@ OPERATIONS.md. Configure only the providers/bindings the selected product needs;
 missing provider configuration is an explicit unavailable result, never fabricated
 success. Local build/test results do not establish deployed or paid-provider proof.
 
-All files remain editable authoring inputs. `edition.json` identifies selected
-components without moving them or regenerating product code. See
+All files remain editable authoring inputs. Every selected component, including
+Base runtime and authoring tooling, is retained locally in this edition. Normal
+installation and development need no sibling Base, family or original HappyToHelp
+checkout. External origins record comparison ancestry. `edition.json` identifies
+selected components without regenerating product code. See
 [MODULES.md](docs/MODULES.md) for reusable capabilities, dependencies and concrete
 entry points, [AUTHORING.md](docs/AUTHORING.md) for the common source lifecycle,
 and [SOURCE-PROVENANCE.md](docs/SOURCE-PROVENANCE.md) for origins and retained notices.

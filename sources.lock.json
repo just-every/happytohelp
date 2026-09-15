@@ -365,7 +365,7 @@
       "executable": false
     },
     "HANDOVER.md": {
-      "sha256": "565f0f1dee1ca2061a821986ca16e202c9cb13da513a8a74c625be57c0568357",
+      "sha256": "5f5119989d8e98b83ffafffe35c323dcbec598f6a04694fa9b5ea68c69e1b2bb",
       "executable": false
     },
     "local-agent/bin/h2h-local.mjs": {
@@ -581,7 +581,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "a1f3789bf3d224c0e2c63b1cf675067ec6651df957a7823053e020e09dac187f",
+      "sha256": "8d043300dfc2b09cdab11e94aca901c11045c0782dcc35b3d1013fd804fa355d",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -865,7 +865,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "3550793ef43b712c533ec00dd6f95ecd6b1e49bbf7abfa587d44f3efc993fc89",
+      "sha256": "7569f82c02ab6542dd315870dc6f59e3e29cfd8993454bf742a0d34383162356",
       "executable": false
     },
     "scripts/build-local-agent.cjs": {

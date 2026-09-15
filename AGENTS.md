@@ -1,8 +1,8 @@
 # Working on HappyToHelp
 
-This is the native Run Edit Run migration candidate for the full HappyToHelp
+This is the native Run Edit Run edition for the full HappyToHelp
 application. It owns editable product source and selects reusable capabilities.
-Read README.md, ACCEPTANCE.md, CONTRACT.md and docs/MIGRATION.md for implemented
+Read README.md, ACCEPTANCE.md, CONTRACT.md, HANDOVER.md and docs/UI-PARITY.md for implemented
 scope and evidence. The old small RER delegation desk is historical source, not
 the full application's acceptance.
 

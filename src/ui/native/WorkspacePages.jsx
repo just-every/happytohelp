@@ -3,6 +3,7 @@ import GitHubSettings from './pages/GitHubSettings';
 import ArticleImport from './pages/ArticleImport';
 import ProjectsPage from './pages/ProjectsPage';
 import AdminPage from './pages/AdminPage';
+import { adminTitles } from './pages/AdminRecords';
 import KnowledgePage from './pages/KnowledgePage';
 import ManagementPage from './pages/ManagementPage';
 import ProjectSettings from './pages/ProjectSettings';
@@ -21,7 +22,7 @@ export default function WorkspacePages({ settings }) {
     let page;
     if(section==='projects')page=<ProjectsPage/>;
     else if(section==='articles'&&recordId==='import')page=<ArticleImport {...{projectId}}/>;
-    else if(['datasets','articles','categories'].includes(section))page=<KnowledgePage {...{projectId,section,recordId}}/>;
+    else if(['datasets','articles','categories'].includes(section))page=<KnowledgePage {...{projectId,section,recordId}} project={settings.projects?.[projectId]||settings.project}/>;
     else if(['ais','macros','contacts','plugins','agents'].includes(section))page=<ManagementPage {...{projectId,section,recordId}}/>;
     else if(['edit','settings','email-settings'].includes(section))page=<ProjectSettings {...{projectId,section}}/>;
     else if(section==='github-settings')page=<GitHubSettings {...{projectId}}/>;
@@ -33,5 +34,22 @@ export default function WorkspacePages({ settings }) {
     else if(section==='admin')page=<AdminPage/>;
     else if(section==='insights')page=<InsightsPage {...{projectId}}/>;
     else page=<p role="alert">This page was not found.</p>;
-    return <div className="main-content"><div className="container-fluid workspace-page-container"><div className="header workspace-page-header"><div className="header-body"><h1 className="header-title display-4">{titles[section]||'HappyToHelp'}</h1>{['ais','datasets','training-runs'].includes(section)&&<ul className="nav nav-tabs header-tabs">{[['ais','AI'],['datasets','Training'],['training-runs','Evaluation runs']].map(([path,title])=><li className="nav-item" key={path}><a className={`nav-link ${section===path?'active':''}`} href={`/projects/${projectId}/${path}`}>{title}</a></li>)}</ul>}</div></div><div className="workspace-page-content">{page}</div></div></div>;
+    let title=titles[section]||'HappyToHelp';
+    if(section==='projects')title=segments[1]==='create'?'Create Project':'Projects';
+    if(section==='articles')title=recordId==='import'?'Import Articles':recordId?'Articles':'Help Center';
+    if(section==='macros'&&recordId==='create')title='Save a Reply';
+    if(section==='agents'&&recordId==='create')title='Invite Agent';
+    if(section==='plugins')title='Plugins';
+    if(section==='github-settings')title='Project';
+    if(section==='admin')title=adminTitles[segments[1]||'projects']||'Admin';
+    return <div className="main-content"><div className="container-fluid workspace-page-container">
+        <div className="header workspace-page-header"><div className="header-body">
+            <div className="row align-items-end"><div className="col">
+                {section==='users'&&<h6 className="header-pretitle">Overview</h6>}
+                <h1 className="header-title display-4">{title}</h1>
+            </div><div className="col-auto" id="workspace-header-actions"/></div>
+            <div id="workspace-header-tabs"/>
+        </div></div>
+        <div className="workspace-page-content">{page}</div>
+    </div></div>;
 }

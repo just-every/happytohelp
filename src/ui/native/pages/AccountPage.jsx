@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import {TimezoneField,SettingsTabs} from './ProjectControls';
 import AvatarUpload from './AvatarUpload';
 import { nativeRequest } from '../transport';
 import { Field, Section, Feedback } from './forms';
@@ -14,8 +15,8 @@ export default function AccountPage({projectId}) {
         if(tab==='security'){location.assign('/login');return;}setSaved(true);
     }catch(e){setError(e.message);}};
     if(!data)return <Feedback error={error}/>;
-    return <div className="workspace-settings"><Feedback {...{error,saved}}/><ul className="nav nav-tabs nav-overflow header-tabs">{[['general','General'],['notifications','Notification'],['security','Security']].map(([id,label])=><li className="nav-item" key={id}><button className={`nav-link ${tab===id?'active':''}`} onClick={()=>setTab(id)}>{label}</button></li>)}</ul><form onSubmit={submit}>
-        {tab==='general'&&<Section title="Profile"><AvatarUpload projectId={projectId} value={data.avatar_url} onChange={value=>change('avatar_url',value)}/>{field('name','Name')}{field('email','Email','email')}{field('timezone','Timezone')}</Section>}
+    return <div className="workspace-settings project-account"><Feedback {...{error,saved}}/><SettingsTabs tab={tab} onChange={setTab} tabs={[["general","General"],["notifications","Notification"],["security","Security"]]}/><form onSubmit={submit}>
+        {tab==='general'&&<Section title="Profile"><div className="project-avatar">{!data.avatar_url&&<span className="project-avatar-placeholder">{data.name?.slice(0,1)}</span>}<AvatarUpload projectId={projectId} value={data.avatar_url} onChange={value=>change('avatar_url',value)}/></div>{field('name','Name')}{field('email','Email','email')}<TimezoneField value={data.timezone} onChange={change}/></Section>}
         {tab==='notifications'&&<Section title="Notifications">{field('is_notifiable_on_conversation_assignment','On conversation assigned','checkbox')}</Section>}
         {tab==='security'&&<Section title="Change your password">{field('current_password','Current password','password')}{field('password','New password','password')}{field('password_confirmation','Confirm password','password')}</Section>}
         <div className="settings-actions"><button className="btn btn-primary">Update</button></div>

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { nativeRequest } from './transport';
+import AuthFrame from './AuthFrame';
 import '../dashboard/styles/theme.scss';
 
 type SetupState = 'loading' | 'available' | 'complete' | 'unavailable';
@@ -40,7 +41,7 @@ export default function Setup() {
         }
     };
 
-    return <main className="container py-5"><div className="row justify-content-center"><div className="col-md-7">
+    return <AuthFrame wide>
         <h1 className="display-4">Set up HappyToHelp</h1>
         {state === 'complete' ? <>
             <p>This HappyToHelp instance already has an owner. Sign in to continue.</p>
@@ -74,5 +75,5 @@ export default function Setup() {
                 <button className="btn btn-primary" disabled={busy}>{busy ? 'Creating…' : 'Create workspace'}</button>
             </form>}
         </>}
-    </div></div></main>;
+    </AuthFrame>;
 }

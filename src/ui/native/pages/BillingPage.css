@@ -1,0 +1,16 @@
+.billing-page .billing-heading { display: flex; align-items: center; gap: 8px; }
+.billing-page > .settings-section { padding-bottom: 24px; margin-bottom: 28px; border-bottom: 1px solid #e4e6ef; }
+.billing-page > .settings-section:nth-of-type(2) { border-bottom: 0; margin-bottom: 16px; }
+.billing-page .billing-status-actions { margin-top: 24px; }
+.billing-page .billing-payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.billing-page .billing-payment-options > div + div { padding-left: 32px; border-left: 1px solid #e4e6ef; }
+.billing-page .billing-payment-options h3 { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
+.billing-page .billing-payment-options p { margin-bottom: 20px; }
+.billing-page .billing-expanded { margin-top: 20px; }
+.billing-page .billing-provider-note { margin: 20px 0 0; }
+.billing-page .billing-details > summary { cursor: pointer; color: #455780; font-size: 13px; }
+.billing-page .billing-history { overflow-x: auto; }
+@media (max-width: 700px) {
+ .billing-page .billing-payment-options { grid-template-columns: 1fr; gap: 24px; }
+ .billing-page .billing-payment-options > div + div { padding: 24px 0 0; border-left: 0; border-top: 1px solid #e4e6ef; }
+}

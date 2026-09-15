@@ -12,6 +12,11 @@ can be selected independently; full HappyToHelp route adapters carry the actual
 edition dependencies. `docs/SECOND-CONSUMER-PROOF.json` records an isolated Beacon
 adoption without changing canonical Beacon.
 
+The 15 September [UI restoration record](docs/UI-PARITY.md) covers comparison
+against a running original Laravel instance, the restored workspace/forms and
+remaining legacy differences. Desktop/mobile screenshots and real save/reload
+checks accompany this pass; it does not claim full legacy feature equality.
+
 ## Run and verify
 
 Use Node 26.8.1 and pnpm 10.12.4. Run `node scripts/operations.mjs describe` before

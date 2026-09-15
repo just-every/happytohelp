@@ -57,9 +57,9 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         await page.screenshot({ path: join(evidenceDir, 'created-workspace.png'), fullPage: true });
         assert.equal(await page.evaluate(async () => (await fetch('/api/identity/session', { method: 'DELETE' })).status), 200);
         await page.goto(origin + '/login');
-        await page.getByLabel('Email address').fill(email);
+        await page.getByLabel('Email',{exact:true}).fill(email);
         await page.getByLabel('Password', { exact: true }).fill(password);
-        await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+        await page.getByRole('button', { name: 'Login', exact: true }).click();
         await page.waitForURL('**/conversations');
         checks.push('chosen password signs in after session revocation');
         await page.goto(origin + '/setup');

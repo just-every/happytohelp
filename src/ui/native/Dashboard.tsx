@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { nativeRequest } from './transport';
 import '../dashboard/styles/theme.scss';
+import '../dashboard/styles/layouts/_native-shell.scss';
 
 export default function Dashboard() {
     const [View, setView] = useState<any>(null);

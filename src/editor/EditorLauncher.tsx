@@ -1,4 +1,10 @@
 import { useEffect } from 'react';
+import { installCompiledLiveEdits } from './live-edit-runtime';
+import visualEdits from './visual-edits.json';
+export function CompiledVisualEdits() {
+  useEffect(() => { installCompiledLiveEdits(visualEdits); }, []);
+  return null;
+}
 import { mountEditor, type EditorConfig } from './editor-widget';
 // Optional server configuration. An authenticated local request reveals no credentials.
 export function EditorLauncher({ authorized }: { authorized: boolean }) {

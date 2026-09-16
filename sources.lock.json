@@ -916,15 +916,31 @@
       "executable": false
     },
     "src/editor/editor-widget.ts": {
-      "sha256": "a982b056c45408ba5e9199349944b95efd4369589a577278b8588dc6edd0c95a",
+      "sha256": "ec1ec288dc0dda05b3a73018e014f7f40d3d9c7ee2f6c980ec8453cae2492ecd",
       "executable": false
     },
     "src/editor/EditorLauncher.tsx": {
-      "sha256": "8488e0d617c534b78ede8b1b8db6ba360b84df29706613a45adeb5d04ca2142a",
+      "sha256": "ed706562ac8ea480d6f227a8f053011326167395f2cdc8466dab283af890ce3f",
       "executable": false
     },
-    "src/editor/preview.ts": {
-      "sha256": "3ac33076a0e69693ce49a3873b566fb168b3cb2389e359974df0110651b1105b",
+    "src/editor/live-edit-contracts.ts": {
+      "sha256": "2577ccb77819532e18776174b8997fdb3da4b3e6ef20051081b8371694dd1358",
+      "executable": false
+    },
+    "src/editor/live-edit-dom.ts": {
+      "sha256": "6c1b455d1fdadf989ea3fb104e666f78c896e568c13bd007adbe55fcae7b30b4",
+      "executable": false
+    },
+    "src/editor/live-edit-runtime.ts": {
+      "sha256": "b1ebaf34d6340643a324f665ab331519462f08bda78bc3dc37ddcb07967a19d7",
+      "executable": false
+    },
+    "src/editor/visual-edits.json": {
+      "sha256": "ea22cbab26d5d294b50f1f878e58f265224bd62f81d9db2f2e413323eed84bbb",
+      "executable": false
+    },
+    "src/editor/visual-style.ts": {
+      "sha256": "29f8f23c5347e699a0ff207b9d62cc80032562e7b8831bb4e0accb3eba052c10",
       "executable": false
     },
     "src/jobs.ts": {
@@ -2276,7 +2292,7 @@
       "executable": false
     },
     "src/routes/__root.tsx": {
-      "sha256": "7bfdc39fbb944d2706aeae32c9ffa34a304a0eae52f2b45c2e29bef0bc86ad1d",
+      "sha256": "d0b0f002119f716aeb004336f35d30e1e029bbc4b7bbd5bf219312b95b51de57",
       "executable": false
     },
     "src/routes/_dashboard._workspace.$.tsx": {

@@ -7,7 +7,7 @@ export function createLiveEditRuntime(doc: Document, location: () => {origin:str
   const overlays = new Map<string,LiveEditSnapshot>(), navigation = new Map<string,LiveEditSnapshot>(), observed = new Map<string,Element>(), captured = new Map<string,Element>();
   const targetKey = (edit:Pick<CompiledLiveEdit,'path'|'target'>) => JSON.stringify([edit.target.navigation ? 'navigation' : edit.path,edit.target.tag,edit.target.role,edit.target.navigation?.href || edit.target.selector]);
   const results = new Map<string,string>(), pendingUndo = new Set<string>();
-  let handles: Handle[] = [], scheduled = false, disposed = false;
+  let handles: Handle[] = [], scheduled = false, disposed = false, ready = true;
   const key = () => `${location().origin}${location().pathname}`;
   const publish = (result: LiveEditResult) => { const signature = JSON.stringify(result); if (results.get(result.id) !== signature) { results.set(result.id,signature); report(result); } };
   const observer = new MutationObserver(() => {
@@ -29,6 +29,7 @@ export function createLiveEditRuntime(doc: Document, location: () => {origin:str
     return [...effective.values()];
   }
   function reconcile() {
+    if (!ready) return;
     observer.disconnect();
     const desired = desiredEdits(), nextIds = new Set(desired.map(e => e.id));
     for (const handle of [...handles].reverse()) handle.undo();
@@ -67,6 +68,7 @@ export function createLiveEditRuntime(doc: Document, location: () => {origin:str
     compiled(snapshot: CompiledLiveEditSnapshot) { if (!validCompiledLiveEditSnapshot(snapshot)) throw new Error('Invalid compiled visual edits.'); compiled = structuredClone(snapshot); reconcile(); },
     undo(id:string,revision:number) { const edit = desiredEdits().find(e => e.id === id && e.revision === revision); if (!edit) throw new Error('This edit is no longer current.'); pendingUndo.add(id); reconcile(); },
     reconcile,
+    setReady(value:boolean) { ready = value; if (ready) reconcile(); },
     remember(path:string,target:LiveEditTarget,element:Element) { captured.set(targetKey({path,target}),element); },
     clearCapture() { captured.clear(); },
     clearOverlays() { overlays.clear(); navigation.clear(); pendingUndo.clear(); captured.clear(); reconcile(); },
@@ -90,3 +92,6 @@ export function connectLiveEdits(report: (result: LiveEditResult) => void) {
   const entry = pageRuntime(); entry.listeners.add(report);
   return {hydrate(snapshot:LiveEditSnapshot){entry.runtime.hydrate(snapshot); for (const result of entry.results.values()) report(result);},undo(id:string,revision:number){entry.runtime.undo(id,revision);},reconcile(){entry.runtime.reconcile();},remember(path:string,target:LiveEditTarget,element:Element){entry.runtime.remember(path,target,element);},clearCapture(){entry.runtime.clearCapture();},disconnect(){entry.listeners.delete(report); if (!entry.listeners.size) entry.runtime.clearOverlays();}};
 }
+
+/** Edition router lifecycle pauses mutation until the destination has rendered. */
+export function setLiveEditsReady(ready: boolean) { pageRuntime().runtime.setReady(ready); }

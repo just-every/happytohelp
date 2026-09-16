@@ -16,16 +16,23 @@ on:
         default: preview
         type: choice
         options: [preview, production]
+      verification_profile:
+        description: Verification scope for this release
+        required: true
+        default: full
+        type: choice
+        options: [full, visual]
 permissions:
   contents: read
   actions: read
   id-token: write
 jobs:
   release:
-    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@ec8d8573a99a99a05c8f60597fe2006e14851ced
+    uses: runeditrun/delivery/.github/workflows/trusted-build.yml@95af0b97057b99679ef9814b51f6be5039ba9a57
     with:
       installation_id: ${{ inputs.installation_id }}
       broker_url: ${{ inputs.broker_url }}
       environment: ${{ inputs.environment }}
+      verification_profile: ${{ inputs.verification_profile }}
       pnpm_version: '10.12.4'
       artifact_file: happytohelp-worker-artifact.json

@@ -95,3 +95,18 @@ screenshots and known legacy feature gaps; it explicitly does not claim full
 legacy equality. This document describes the current native route and state
 lifecycle. The parity record is comparison evidence, not a second router or a
 requirement to reproduce legacy document transitions.
+
+## Compiled visual edits and hydration
+
+The root installs compiled visual edits while paused and pauses them before each
+navigation. Every actual leaf must resume them after its React commit through
+`withVisualEdits`. Wrap the resolved component inside a lazy import, not an
+intermediate layout or a component surrounding `Suspense`/`Outlet`: those may
+commit before the rendered leaf hydrates. The wrapper adds no DOM and observes
+the route href so reused wildcard and query-only navigation resume correctly.
+Keep this boundary when adding routes. `pnpm run verify:visual` checks the saved
+snapshot, source integrity, types, build and an isolated local browser journey.
+The focused profile also compiles a test-only login-heading edit and checks SSR
+hydration, reload and return navigation for browser errors. Run it in a dedicated
+checkout: this regression temporarily replaces `visual-edits.json`, then restores
+its exact bytes and rebuilds the original snapshot in `finally`.

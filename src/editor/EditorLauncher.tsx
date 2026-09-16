@@ -1,8 +1,15 @@
-import { useEffect } from 'react';
-import { installCompiledLiveEdits } from './live-edit-runtime';
+import { useEffect, useLayoutEffect } from 'react';
+import { useRouter } from '@tanstack/react-router';
+import { installCompiledLiveEdits, setLiveEditsReady } from './live-edit-runtime';
 import visualEdits from './visual-edits.json';
 export function CompiledVisualEdits() {
-  useEffect(() => { installCompiledLiveEdits(visualEdits); }, []);
+  const router = useRouter();
+  useLayoutEffect(() => {
+    setLiveEditsReady(false);
+    installCompiledLiveEdits(visualEdits);
+    const unsubscribe = router.subscribe('onBeforeNavigate', () => setLiveEditsReady(false));
+    return () => { unsubscribe(); setLiveEditsReady(false); };
+  }, [router]);
   return null;
 }
 import { mountEditor, type EditorConfig } from './editor-widget';

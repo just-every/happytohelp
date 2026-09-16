@@ -1,3 +1,4 @@
+import { withVisualEdits } from '../../editor/VisualEditBoundary';
 import { EditorLauncher } from '../../editor/EditorLauncher';
 import { lazy, Suspense, useEffect } from 'react';
 import { Link, useMatches, useRouter } from '@tanstack/react-router';
@@ -6,7 +7,7 @@ import '../dashboard/styles/theme.scss';
 import '../dashboard/styles/layouts/_native-shell.scss';
 
 const DashboardClient = lazy(() => import('./DashboardClient'));
-const Content = lazy(() => import('./DashboardClient').then(module => ({ default: module.DashboardContent })));
+const Content = lazy(() => import('./DashboardClient').then(module => ({ default: withVisualEdits(module.DashboardContent) })));
 
 export function DashboardPending() {
     return <main className="container py-5" aria-busy="true">Loading your workspace…</main>;

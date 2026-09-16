@@ -50,8 +50,10 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
   let frame: HTMLIFrameElement | null = null;
   let selecting = false;
   const consentKey = `rer-page-context:${config.managementOrigin}:${config.installationId}`;
-  let sharing: boolean | null = null;
-  try { const stored = localStorage.getItem(consentKey); sharing = stored === null ? null : stored === 'true'; } catch {}
+  const openKey = `rer-editor-open:${config.managementOrigin}:${config.installationId}`;
+  let sharing = true, initiallyOpen = true;
+  try { sharing = localStorage.getItem(consentKey) !== 'false'; initiallyOpen = localStorage.getItem(openKey) !== 'false'; } catch {}
+  const saveOpen = (open: boolean) => { try { localStorage.setItem(openKey,String(open)); } catch {} };
   const saveSharing = (enabled: boolean) => { sharing = enabled; try { localStorage.setItem(consentKey,String(enabled)); } catch {} };
   const observed = new Map<string,Element>();
   const remember = (element: Element, text: string) => { const selection = selectedElement(element,text); observed.set(selection.selector,element); return selection; };
@@ -65,7 +67,7 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
   });
   observer.observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
   const stopSelection = () => { selecting = false; document.removeEventListener('click', select, true); };
-  const close = () => { for (const preview of previews.values()) preview.undo(); previews.clear(); observed.clear(); stopSelection(); frame?.remove(); frame = null; launcher.hidden = false; dismiss.hidden = true; };
+  const close = (rememberChoice = true) => { if (rememberChoice) saveOpen(false); for (const preview of previews.values()) preview.undo(); previews.clear(); observed.clear(); stopSelection(); frame?.remove(); frame = null; launcher.hidden = false; dismiss.hidden = true; };
   const select = (event: MouseEvent) => {
     if (!selecting || event.composedPath().includes(host) || !(event.target instanceof Element)) return;
     event.preventDefault(); event.stopImmediatePropagation(); stopSelection();
@@ -79,7 +81,6 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
     if (d.type === 'set-context-sharing') { saveSharing(d.enabled); if (!d.enabled) observed.clear(); send('context-sharing',{enabled:sharing}); }
     if (d.type === 'ready') send('context-sharing',{enabled:sharing === true});
     if (d.type === 'capture-context') {
-      if (sharing === null) saveSharing(window.confirm('Share visible page text and element structure with your Run Edit Run assistant? Input values, hidden content, links, query strings and elements marked private are excluded. Visible customer data may still appear. This is DOM context, not a screenshot. Your choice is remembered for this installation; change it in editor settings.'));
       send('context-sharing',{enabled:sharing === true});
       if (!sharing) return;
       observed.clear();
@@ -105,7 +106,9 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
     if (event.data.type === 'close') close();
     if (event.data.type === 'select-element') { selecting = true; document.addEventListener('click', select, true); }
   };
-  launcher.onclick = () => {
+  const open = () => {
+    if (frame) return;
+    saveOpen(true);
     frame = document.createElement('iframe'); frame.title = 'Run Edit Run editor';
     frame.src = `${config.managementOrigin}/editor?${new URLSearchParams({installation:config.installationId,parentOrigin:window.location.origin})}`;
     frame.referrerPolicy = 'no-referrer'; frame.allow = `microphone ${config.managementOrigin}; autoplay ${config.managementOrigin}`; frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox');
@@ -114,7 +117,9 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
   };
   const dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.textContent = '×'; dismiss.setAttribute('aria-label','Close editor'); dismiss.title = 'Close editor'; dismiss.hidden = true;
   Object.assign(dismiss.style,{position:'absolute',right:'-8px',top:'-12px',width:'28px',height:'28px',padding:'0',borderRadius:'50%',border:'1px solid #d8dedb',background:'#fff',color:'#37443e',fontSize:'20px',lineHeight:'24px',cursor:'pointer',boxShadow:'0 1px 4px #0002'});
-  dismiss.onclick = close; root.append(dismiss);
+  launcher.onclick = open;
+  dismiss.onclick = () => close(); root.append(dismiss);
   window.addEventListener('message',receive);
-  return () => { close(); observer.disconnect(); window.removeEventListener('message',receive); host.remove(); };
+  if (initiallyOpen) open();
+  return () => { close(false); observer.disconnect(); window.removeEventListener('message',receive); host.remove(); };
 }

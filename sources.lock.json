@@ -916,7 +916,7 @@
       "executable": false
     },
     "src/editor/editor-widget.ts": {
-      "sha256": "e77f605bf34165cc971beaefc5398c15ea281b625515c15fc0eded2d1ea04d92",
+      "sha256": "a982b056c45408ba5e9199349944b95efd4369589a577278b8588dc6edd0c95a",
       "executable": false
     },
     "src/editor/EditorLauncher.tsx": {

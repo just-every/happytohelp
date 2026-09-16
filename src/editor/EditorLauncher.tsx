@@ -1,4 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
+import { useRouter } from '@tanstack/react-router';
+import { installCompiledLiveEdits, setLiveEditsReady } from './live-edit-runtime';
+import visualEdits from './visual-edits.json';
+export function CompiledVisualEdits() {
+  const router = useRouter();
+  useLayoutEffect(() => {
+    setLiveEditsReady(false);
+    installCompiledLiveEdits(visualEdits);
+    const unsubscribe = router.subscribe('onBeforeNavigate', () => setLiveEditsReady(false));
+    return () => { unsubscribe(); setLiveEditsReady(false); };
+  }, [router]);
+  return null;
+}
 import { mountEditor, type EditorConfig } from './editor-widget';
 // Optional server configuration. An authenticated local request reveals no credentials.
 export function EditorLauncher({ authorized }: { authorized: boolean }) {

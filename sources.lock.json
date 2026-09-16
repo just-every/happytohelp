@@ -916,11 +916,15 @@
       "executable": false
     },
     "src/editor/editor-widget.ts": {
-      "sha256": "5361254556c627d0925cd5fcb9320f15aacfdcd9cc982b10eda1bd080a25352f",
+      "sha256": "e77f605bf34165cc971beaefc5398c15ea281b625515c15fc0eded2d1ea04d92",
       "executable": false
     },
     "src/editor/EditorLauncher.tsx": {
       "sha256": "8488e0d617c534b78ede8b1b8db6ba360b84df29706613a45adeb5d04ca2142a",
+      "executable": false
+    },
+    "src/editor/preview.ts": {
+      "sha256": "3ac33076a0e69693ce49a3873b566fb168b3cb2389e359974df0110651b1105b",
       "executable": false
     },
     "src/jobs.ts": {

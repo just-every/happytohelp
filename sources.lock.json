@@ -915,12 +915,32 @@
       "sha256": "5fe6ea3ac3d113f727431d898b56d4194fad39832c01d0e3cc5cd6d75eafe671",
       "executable": false
     },
+    "src/editor/editor-surface.ts": {
+      "sha256": "f0d692922abe6f9fe341eca3cc0872b1a0a52f0a9b87d0ad0829fd3fb6359efc",
+      "executable": false
+    },
     "src/editor/editor-widget.ts": {
-      "sha256": "5361254556c627d0925cd5fcb9320f15aacfdcd9cc982b10eda1bd080a25352f",
+      "sha256": "0a0f451d6da64e8978c8f4c7b983d19d0d5260af2d14d39199c2703d89d1962e",
       "executable": false
     },
     "src/editor/EditorLauncher.tsx": {
       "sha256": "8488e0d617c534b78ede8b1b8db6ba360b84df29706613a45adeb5d04ca2142a",
+      "executable": false
+    },
+    "src/editor/live-edit-contracts.ts": {
+      "sha256": "2577ccb77819532e18776174b8997fdb3da4b3e6ef20051081b8371694dd1358",
+      "executable": false
+    },
+    "src/editor/live-edit-dom.ts": {
+      "sha256": "6c1b455d1fdadf989ea3fb104e666f78c896e568c13bd007adbe55fcae7b30b4",
+      "executable": false
+    },
+    "src/editor/live-edit-runtime.ts": {
+      "sha256": "a81877df469ceb007b378f822c26785b87fe7bb62c25624546da50730beaaf39",
+      "executable": false
+    },
+    "src/editor/visual-style.ts": {
+      "sha256": "29f8f23c5347e699a0ff207b9d62cc80032562e7b8831bb4e0accb3eba052c10",
       "executable": false
     },
     "src/jobs.ts": {

@@ -1,13 +1,26 @@
 # Public-source custody review — 2026-09-14
 
 Source: `/Users/zemaj/www/happytohelp-site`, read-only. The original route and
-asset inventory remains a historical comparison record. The active edition keeps
-only the new simple local-owner landing and dynamic published help-center source;
-former marketing/resource/legal/pricing/waitlist/referrer documents are retired
-from the active public surface. No original checkout, database, credentials,
-customer content or history was copied. Native documents are editable HTML,
-not Blade or retained PHP runtime wrappers. Asset original byte hashes and paths
-are in `src/modules/public-site/asset-provenance.json` where retained.
+asset inventory remains a historical comparison record. As of 17 September 2026,
+the active edition includes the owner-approved designed journey homepage at the
+public root and dynamic published help-center source. Pricing, legal, waitlist,
+referrer and public auto-widget behavior remain outside the active public
+surface; broader retired marketing/resource routes remain historical. No original
+checkout, database, credentials, customer content or history was copied. Native
+documents are editable React and Help Center HTML, without retained PHP runtime wrappers. Asset
+original byte hashes and paths are in `src/modules/public-site/asset-provenance.json`
+where retained.
+
+## Current approved homepage scope — 17 September 2026
+
+The owner approved integrating the existing designed prototype at
+`/Users/zemaj/.orchestrator/evidence/runeditrun/happytohelp-type-mask-conversion-20260916/prototype`
+as the real public root homepage. The selected art comprises original generated
+assets: a sculpted beacon hero loop, horse-and-spear rider, crossing/lookout/
+helping-hand/well sculptures and journey map backgrounds, together with official/
+app brand icons. This describes the source categories only and makes no universal
+ownership, licence or redistribution claim. The implementation and local browser outcome are recorded in HANDOVER.md;
+`src/ui/homepage/asset-provenance.json` records the 15 selected homepage assets.
 
 The historical source contained Font Awesome Pro SVGs inline in marketing and
 sidebar markup. Any removed or retained replacement must be reviewed against the
@@ -15,9 +28,9 @@ current asset manifest; this record does not provide a universal ownership or
 redistribution attestation. Free SVG license notices remain where their source is
 retained.
 
-The current 12-entry asset manifest retains Help Center/theme CSS and pattern
-assets with their source notices, plus generated landing CSS and art carrying
-their 15 September design-run provenance. Public Google Fonts CSS imports remain
+The public-site asset manifest retains Help Center/theme CSS and pattern
+assets with their source notices. The retired 15 September landing CSS and art
+have been removed; the journey homepage has its own asset manifest. Public Google Fonts CSS imports remain
 external font requests. The original checkout does not provide a complete
 provenance/licence declaration for every retained source asset. Public
 redistribution must resolve those rights and retain dependency licence notices

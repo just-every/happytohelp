@@ -11,7 +11,7 @@ body.conversation-workspace #chat {
         min-height: 116px;
         margin-top: 1rem;
         padding: .75rem;
-        background: var(--workspace-field-bg, #fff);
+        background: var(--workspace-surface-raised, #fff);
         border: 1px solid var(--conversation-line);
         border-radius: .55rem;
         box-shadow: 0 1px 3px rgba(32, 53, 87, .04);
@@ -60,10 +60,9 @@ body.conversation-workspace #chat {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 2.5rem;
+            min-height: 2.25rem;
             gap: .4rem;
-            padding: .5rem .75rem;
-            font-size: .8125rem;
+            padding: .5rem .875rem;
         }
     }
 
@@ -72,6 +71,11 @@ body.conversation-workspace #chat {
         .conversation-ai-instructions {
             padding: .75rem;
             textarea { max-height: min(12rem, 28dvh) !important; }
+        }
+        .conversation-ai-instructions__footer .btn {
+            padding-right: .625rem;
+            padding-left: .625rem;
+            font-size: .75rem;
         }
     }
 

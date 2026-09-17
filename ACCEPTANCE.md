@@ -4,10 +4,19 @@ The useful outcome is the native HappyToHelp owner workspace described in
 CONTRACT.md: durable conversations, the operator dashboard and customer widget,
 configured AI/knowledge/context, explicit local delegation, training/evaluation,
 management/integrations and an owned operating/source workflow. The public
-surface is a simple local-owner landing page plus dynamic published help centers.
-The former marketing, pricing, waitlist, referrer and public homepage-widget
-surface is outside the active edition scope. The old small RER delegation desk
-does not satisfy this acceptance.
+surface is the approved designed journey homepage plus dynamic published help
+centers. Its homepage art includes the sculpted beacon hero loop, horse-and-spear
+rider, crossing/lookout/helping-hand/well sculptures, journey map backgrounds and
+official/app brand icons. Pricing, legal, waitlist, referrer and public
+auto-widget behavior remain outside the active edition scope. The old small
+RER delegation desk does not satisfy this acceptance.
+
+## Current public-root scope — 17 September 2026
+
+The owner approved integrating the existing designed prototype as the real public
+root homepage. This supersedes the earlier simple-landing wording; it does not
+close the acceptance gate. Implementation, build and local browser evidence are linked in HANDOVER.md.
+Those results do not close hosted or configured-provider acceptance.
 
 Acceptance binds to the final exact source/build under test. The root acceptance
 record owns the final verdict and must identify source revision, emitted bundle,
@@ -20,10 +29,10 @@ clause has passed.
 | Clauses | Required acceptance evidence |
 | --- | --- |
 | NATIVE-001, SOURCE-001 | Clean owner source release, locked install, operating describe/check, selected source locks, build/typecheck, generated migrations and local packaging dry run. Distinguish remotely provisioned resources from published code. |
-| IDENTITY-001, UI-001 | Real native Worker/session and browser flows for setup/login, project selection, current membership, revoked/deleted denial, owner landing, dashboard navigation and responsive customer widget. |
+| IDENTITY-001, UI-001 | Real native Worker/session and browser flows for setup/login, project selection, current membership, revoked/deleted denial, approved journey homepage, dashboard navigation and responsive customer widget. |
 | CONVERSATION-001, DELIVERY-001 | Real D1/DO/R2 contention, duplicate/lost-response, reconnect/replay, attachments, new-message supersession and operator takeover; no incompatible final answers. |
 | AI-001, CONTEXT-001 | Retained source regressions, configured execution graph, context/evidence/schema bounds, raw per-round provider usage, bounded budgets and uncertain-attempt behavior. Test fixtures and live provider execution reported separately. |
-| KNOWLEDGE-001, PUBLIC-001 | Published corpus survives failed refresh, scoped retrieval/citations, article/category publication, dynamic help URLs/search and owner landing behavior. Customer widget remains a separately installed product surface; marketing, waitlist and referrer behavior are not active acceptance. |
+| KNOWLEDGE-001, PUBLIC-001 | Published corpus survives failed refresh, scoped retrieval/citations, article/category publication, dynamic help URLs/search and approved journey homepage behavior, including its selected art. Customer widget remains a separately installed product surface; pricing, legal, waitlist, referrer and public auto-widget behavior are not active acceptance. |
 | DELEGATION-001, TRAINING-001 | Real persisted pairing/grant/work/run state, revocation, resolve/reply authority, recovery/cancellation, budget and ambiguous provider fences; separately packaged local connector. |
 | INTEGRATION-001 | Provider-boundary fixtures for email/GitHub/branding and knowledge imports, idempotency and no ambiguous replay; real separate-origin preview/network denial. Live account/provider effects require their own evidence. |
 | MIGRATION-001 | Explicit representative legacy IDs, permissions, exact historical financial values, content/media hashes and pending holds through real local D1/R2; deterministic resume, conflict refusal and no hidden provider work. Historical financial SQL/imported records remain immutable custody and do not activate payment or balance behavior. |

@@ -1,0 +1,92 @@
+[
+  {
+    "source": "homepage/media/beacon-positions/beacon-sculpted-toy-start.png",
+    "sha256": "aa7d0fe3555185816217e265a26873b867e7b3eda9e8940eaf10e1009eeba5c3",
+    "bytes": 2044504,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/beacon-positions/beacon-toy-loop.mp4",
+    "sha256": "1111b9105bf6d95f49923ab98f91630b063b07add89389d1392a1cd9d94798ac",
+    "bytes": 10821055,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/brands/claude-asterisk.svg",
+    "sha256": "b150888bc7257af83e3b85d3c2be4294f88986026f8168f6c12fc1fde6697350",
+    "bytes": 2558,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/brands/codex-monochrome.svg",
+    "sha256": "3aedaffda5fe5a44e4938adae95dfdde8f0bbb93df2dce887ebeb4826e10097a",
+    "bytes": 2121,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/graphics/rider-sculpted-toy.png",
+    "sha256": "29166e08b58df420b7e2edda53a15c1fcb42953c1b851c3d5203104106219329",
+    "bytes": 1626664,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/human-story-options/anticipation-c-sculpted.png",
+    "sha256": "128b676e1ed34194675ec5df5ba38bd6e86c1180c5d30dec6282be7266fdeded",
+    "bytes": 2608071,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/human-story-options/open-c-sculpted.png",
+    "sha256": "179095e5fbcd67de3c7e4182955c63f83a0c02bad0ddb84c5727a03d9090fccb",
+    "bytes": 2012102,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/human-story-options/team-c-sculpted.png",
+    "sha256": "2f17c759a95fe0de0842cd12252d691444f142ddf243be3a24e7cc5c4a814912",
+    "bytes": 2203673,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/human-story-options/watch-a-sculpted.png",
+    "sha256": "cb717149ea7e720115ef16fd9406d692e2d3c3b726c50628dd4b32e95eab28de",
+    "bytes": 2005389,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/journey-maps/agents-b.png",
+    "sha256": "8cadd9f07da2f3f2fb4bb5a37b0b3534e971e8b47ad25e35c6e68fec8ee9126d",
+    "bytes": 496529,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/journey-maps/crossing-b-lines.png",
+    "sha256": "23981d7bce274547a4addf22ac606652aa00c7dac380c0ae3eb9d50aab7d17d7",
+    "bytes": 358080,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/journey-maps/hero-b.png",
+    "sha256": "0d65fd42e881fed800a01f6b939e2e0725e7030dd01cd30a64577809d19a1521",
+    "bytes": 383043,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/journey-maps/ownership-a-lines.png",
+    "sha256": "755d66ebc3488c20ab706e8e4e4e5294acb22530133ce4ea31ae193510b1ac6c",
+    "bytes": 507526,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/media/journey-maps/watch-b.png",
+    "sha256": "db6e2a635d2cb1f7ebb11e630ee4945ab89d691421ef255bc2a210bbd1f8cb96",
+    "bytes": 535628,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  },
+  {
+    "source": "homepage/paper.png",
+    "sha256": "8a7315dd4d537dffd61e89f2712232a4bf54c9b364f1ef4ba1669540c6c3794d",
+    "bytes": 79927,
+    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+  }
+]

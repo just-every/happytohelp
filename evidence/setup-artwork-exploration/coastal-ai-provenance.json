@@ -1,0 +1,17 @@
+{
+  "created": "2026-09-17",
+  "mode": "built-in image_gen",
+  "purpose": "Exploratory reusable visual references; not evidence of an onboarding-triggered request.",
+  "assets": [
+    {
+      "file": "coastal-ai-background.png",
+      "prompt": "Use case: stylized-concept\nAsset type: full-bleed onboarding background, wide landscape 16:9.\nPrimary request: A breathtaking but calm science-fiction coastal landscape: a winding clear river through dark coastal cliffs opens onto a long pale beach and expansive ocean. Elegant restrained futuristic architecture integrated into the left cliff, with fine warm ivory and very subtle cyan AI-inspired light details. Technology belongs quietly in the landscape.\nStyle/medium: premium cinematic environment art with realistic natural textures, atmospheric depth, sophisticated restraint.\nComposition/framing: wide scenic view, river curves from lower left toward central ocean, architecture on left third. The right half must remain visually calm, subdued deep blue ocean and misty sky with broad low-detail tonal areas so a light onboarding form can sit there. Full image edge to edge, no inset panels.\nLighting/mood: blue hour after sunset, soft apricot light on distant horizon, dramatic coastal scale yet peaceful and inviting.\nColor palette: deep ink navy, muted teal river and sea, pale sand, soft warm horizon and discreet cyan light.\nConstraints: no UI, no typography, no text, no logos, no watermarks, no people, no mascot, no floating holographic symbols, no planets, no busy cityscape.",
+      "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-c2880564-ea10-43bd-aa68-5f43c206e6bb.png"
+    },
+    {
+      "file": "coastal-ai-navigation-accent.png",
+      "prompt": "Use case: stylized-concept\nAsset type: compact illustrated navigation accent for an application sidebar, square canvas, genuinely transparent background.\nPrimary request: A small beautifully crafted coastal riverscape vignette: a clear teal river curls between dark navy coastal rocks and pale sand into a tiny ocean inlet, with one elegant slender ivory futuristic tower integrated into the left cliff. Fine warm ivory windows and a very restrained cyan technology accent. Gentle science-fiction atmosphere, no characters.\nStyle/medium: sophisticated softly rendered 3D editorial miniature landscape illustration, simplified broad readable shapes with just enough detail to feel premium at 140 pixels wide. Clean contained irregular silhouette, entire subject visible with generous transparent margin.\nComposition/framing: compact low island-like diorama, river S-curve central, slender cliff architecture on left, open water right, no square backdrop or frame, no ground shadow beyond the vignette.\nLighting/mood: quiet blue hour, soft apricot rim light, inviting and calm.\nColor palette: deep ink navy rocks, muted teal river, pale sand, ivory architecture, tiny warm apricot lights, coordinated with a cinematic blue-hour coastal onboarding background.\nConstraints: actual transparent alpha background. No UI, no text, no logos, no watermark, no mascot, no robots, no people, no floating holographic symbols, no planets, no extra decorative objects, no checkerboard drawn into the artwork.",
+      "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-2dc1d3b9-6d82-4d0b-91d5-1c1bd2ba2210.png"
+    }
+  ]
+}

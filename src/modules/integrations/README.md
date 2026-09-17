@@ -3,7 +3,17 @@
 No provider is silently simulated. Requests that need missing configuration return
 an explicit unavailable state. Provider boundary fixtures exist only in tests.
 
-- Email uses Resend (`EMAIL_API_KEY`, `EMAIL_FROM`) and project email settings.
+- Email supports Resend (default) or Cloudflare Email Sending via `EMAIL_PROVIDER=cloudflare`,
+  `EMAIL_ACCOUNT_ID`, `EMAIL_API_KEY` and `EMAIL_FROM`, plus project email settings.
+  Cloudflare uses its REST API with a dedicated Email Sending: Edit token, never
+  the installer provisioning token. Workers Paid and an onboarded sender domain
+  using Cloudflare DNS are prerequisites for general customer delivery. Inbound
+  Routing and free verified-destination sending are separate capabilities.
+  Installer configuration is not a domain-verification or delivery receipt.
+  `sent` records provider acceptance (including queued mail), not inbox receipt;
+  Cloudflare REST returns recipient outcomes without a message ID, so its retained
+  provider ID is null. Password recovery, verification and invitations use the
+  selected provider; passwordless magic-link login is not implemented.
   Delivery identity binds recipient, content and sender. Sending/failed/uncertain
   receipts are retained; uncertain delivery never automatically repeats. The
   native Cloudflare Email Worker parses MIME and HTML, stores attachments in R2,
@@ -28,7 +38,10 @@ edition. AI and training retain raw provider usage plus explicit run budgets for
 diagnostics and bounded execution; those records do not create charges or debit a
 customer balance.
 
-`tests/email-provider.mjs`, `tests/email-worker.mjs`,
+`tests/email-provider.mjs`, `tests/cloudflare-email.mjs`, `tests/email-worker.mjs`,
 `tests/github-integration.mjs`, and `tests/lead-operations.mjs` exercise local storage
 and test-only external boundaries. They do not establish live provider delivery,
 OAuth acceptance, provider cost or deployment.
+
+Cloudflare contracts checked 17 September 2026: [sending guide](https://developers.cloudflare.com/email-service/get-started/send-emails/),
+[REST response and errors](https://developers.cloudflare.com/email-service/api/send-emails/rest-api/).

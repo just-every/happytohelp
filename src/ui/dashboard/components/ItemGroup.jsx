@@ -7,7 +7,7 @@ import { resolveTranscriptActorTile } from './transcriptActorPalette';
 
 import '../styles/components/MessageItem.scss';
 
-function ItemGroup({ actor, content, continuesFromPrevious, continuesToNext, conversation }) {
+function ItemGroup({ actor, content, continuesFromPrevious, continuesToNext, conversation, heading }) {
     const contact = actor?.kind === 'contact'
         ? (actor.entity || (conversation?.contact?.id != null && String(conversation.contact.id) === String(actor.id) ? conversation.contact : null))
         : null;
@@ -24,13 +24,14 @@ function ItemGroup({ actor, content, continuesFromPrevious, continuesToNext, con
     } : undefined;
 
     return <div className={ `message message-${position}` }>
-        <div className={ `message-body transcript-group-body transcript-actor-group${continuesFromPrevious ? ' transcript-actor-group-continues' : ''}${continuesToNext ? ' transcript-actor-group-continues-to-next' : ''}` } style={ actorStyle }>
+        <div className={ `message-body transcript-group-body transcript-actor-group${continuesFromPrevious ? ' transcript-actor-group-continues' : ''}${continuesToNext ? ' transcript-actor-group-continues-to-next' : ''}` } style={ actorStyle } data-transcript-side={ actor?.position }>
             <div className="transcript-group-rail">
                 { !continuesFromPrevious && canRenderContactAvatar && <ContactAvatar className="transcript-message-avatar avatar-sm" contact={ contact } presentation="conversation-profile" /> }
                 { !continuesFromPrevious && canRenderAgentAvatar && <AgentAvatar className="transcript-message-avatar avatar-sm" agent={ agent } /> }
                 { !continuesFromPrevious && actor?.kind === 'local_agent' && <LocalAgentAvatar className="transcript-message-avatar avatar-sm" agent={ actor.entity } /> }
             </div>
             <div className="transcript-group-main">
+                { heading }
                 { content }
             </div>
         </div>
@@ -40,6 +41,7 @@ function ItemGroup({ actor, content, continuesFromPrevious, continuesToNext, con
 ItemGroup.propTypes = {
     actor: PropTypes.object,
     content: PropTypes.array,
+    heading: PropTypes.node,
     continuesFromPrevious: PropTypes.bool,
     continuesToNext: PropTypes.bool,
     conversation: PropTypes.object,

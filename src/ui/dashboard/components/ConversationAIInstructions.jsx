@@ -1,10 +1,12 @@
 import React, { useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { useReplySuggestions } from '../contexts/ConversationSuggestionsContext';
+import { submitInstructionsOnEnter } from '../utils/submitInstructionsOnEnter';
 
 export default function ConversationAIInstructions() {
     const { currentAI, disabled, instructions, regenerate, setInstructions, suggestions } = useReplySuggestions();
     const textareaRef = useRef(null);
+    const composingRef = useRef(false);
     const isBusy = disabled || suggestions.loading;
     const instructionLabel = `Tell ${currentAI ? currentAI.name : 'the AI'} how to reply`;
 
@@ -27,7 +29,10 @@ export default function ConversationAIInstructions() {
             className="form-control form-control-flush"
             value={ instructions }
             onChange={ event => setInstructions(event.target.value) }
-            placeholder={ `${instructionLabel}…` }
+            onCompositionStart={ () => { composingRef.current = true; } }
+            onCompositionEnd={ () => { composingRef.current = false; } }
+            onKeyDown={ event => submitInstructionsOnEnter(event, { busy: isBusy, composing: composingRef.current }) }
+            placeholder="Reply instructions…"
             aria-label={ instructionLabel }
             maxLength={ 2000 }
             minRows={ 1 }

@@ -1,6 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import ConversationsList from "./ConversationsList";
 import Conversation from "./Conversation";
+import DemoInboxInvitation from './DemoInboxInvitation';
+import { useDashboardSettings } from '../../native/dashboard-state';
 import InboxViews from './InboxViews';
 import { updateNavigationUnreadBadge } from './navigationInboxBadge';
 import { ChatContext } from "../contexts/ChatContext";
@@ -8,6 +10,7 @@ import useInboxRoute from "../hooks/useInboxRoute";
 
 export default function Chat() {
     const { urlConversationId } = useInboxRoute();
+    const settings = useDashboardSettings();
     const {
         currentAgent,
         isMainVisible,
@@ -18,6 +21,9 @@ export default function Chat() {
         buckets,
         inboxViewCounts,
     } = useContext(ChatContext);
+
+    const canTryDemo = !settings.isGlobalInbox && settings.project?.role === 'owner'
+        && !settings.project?.is_demo && inboxViewCounts.open === 0 && inboxViewCounts.closed === 0;
 
     useEffect(() => {
         setActiveConversationId(urlConversationId);
@@ -33,7 +39,7 @@ export default function Chat() {
             <InboxViews />
 
             <div className="layout">
-                <ConversationsList />
+                <ConversationsList canTryDemo={canTryDemo} />
 
                 <div className={ isMainVisible ? 'main main-visible' : 'main' }>
                     {activeConversationId && <Conversation
@@ -44,7 +50,7 @@ export default function Chat() {
                     {!activeConversationId && <div className="chat flex-column justify-content-center text-center">
                         <div className="container-xxl">
                             <h4>{ `Hey, ${currentAgent.name}!` }</h4>
-                            <p>Please select a chat to start messaging.</p>
+                            {canTryDemo ? <div className="d-none d-xl-block"><DemoInboxInvitation /></div> : <p>Please select a chat to start messaging.</p>}
                         </div>
                     </div>}
                 </div>

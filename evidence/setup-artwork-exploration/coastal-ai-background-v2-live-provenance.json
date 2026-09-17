@@ -1,0 +1,10 @@
+{
+  "created": "2026-09-17",
+  "mode": "built-in image_gen",
+  "purpose": "Fresh generation after user clicked Create my background in visible onboarding walkthrough.",
+  "job": "39737744ad70eb33bb1252690d1b1750",
+  "revision": 1,
+  "file": "coastal-ai-background-v2-live.png",
+  "prompt": "Use case: stylized-concept\nAsset type: real full-bleed onboarding background, wide cinematic landscape 16:9.\nUser inspiration: Sci-fi, technology and AI; rivers and beaches.\nPrimary request: A dramatic vast coastal landscape at warm dusk, a winding clear river flowing through beautifully detailed natural rock and coastal plants into a turquoise ocean beside a luminous sandy beach. Thoughtful elegant futuristic architecture in the distance, discreet AI-inspired illuminated details embedded in architectural surfaces, integrated with the land.\nStyle/medium: premium cinematic environmental art, realistic natural textures, believable light, atmospheric depth, richly composed, peaceful sense of discovery.\nComposition/framing: left and outer edges visually rich, foreground coastal grasses and rocks framing the winding river, distant futuristic architecture on left. Right center contains calm broad ocean and soft misty sky, low detail, suitable behind a white onboarding form. Wide continuous scenic photograph-like environment, full bleed.\nLighting/mood: dramatic coastal scale with calm inviting atmosphere, warm apricot beach light meeting teal ocean and deep indigo shadows, softly illuminated distant architecture.\nConstraints: no text, no logos, no UI, no frames, no people, no robots, no mascot, no floating holographic symbols, no giant planet. This is the landscape asset itself, not a screenshot or mockup.",
+  "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-e0671e65-c4c9-4fac-8928-4e99149355c8.png"
+}

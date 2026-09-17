@@ -4,10 +4,10 @@ import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
 import { requiredString,id } from '../../platform/db'
 import { passwordHash } from './credentials'
-import { sendEmail } from '../integrations/email'
+import { sendEmail, emailConfigured } from '../integrations/email'
 export const registration=new Hono<AppEnv>()
 registration.post('/register',async c=>{
- if(c.env.REGISTRATION_ENABLED!=='true'||!c.env.EMAIL_API_KEY||!c.env.EMAIL_FROM||!c.env.APP_ORIGIN)throw new HTTPException(503,{message:'Registration email is not configured'})
+ if(c.env.REGISTRATION_ENABLED!=='true'||!emailConfigured(c.env)||!c.env.APP_ORIGIN)throw new HTTPException(503,{message:'Registration email is not configured'})
  const b=await c.req.json(),email=requiredString(b.email,'email',320).toLowerCase(),name=requiredString(b.name,'name',200),projectName=requiredString(b.projectName,'projectName',200),origin=new URL(requiredString(b.allowedOrigin,'allowedOrigin')).origin
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HTTPException(400,{message:'Invalid email'})
  if(c.env.TURNSTILE_SECRET){const response=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:new URLSearchParams({secret:String(c.env.TURNSTILE_SECRET),response:requiredString(b.turnstileToken,'turnstileToken')})});const result=await response.json() as {success:boolean};if(!result.success)throw new HTTPException(403,{message:'Challenge verification failed'})}

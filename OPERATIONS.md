@@ -121,3 +121,24 @@ help-center/landing assets are owned editable source; review
 marketing assets does not establish blanket rights clearance.
 A portable source release, local checks and importer fixtures do not themselves
 establish a deployed product, production-data migration or asset licence clearance.
+
+## Optional local owner sign-in
+
+For trusted local development with exactly one existing owner, run:
+
+```sh
+H2H_LOCAL_OWNER_LOGIN=1 pnpm run dev --port 5174 --strictPort
+```
+
+Opening `/projects` or `/login` automatically creates an ordinary owner session
+for the existing local account. It does not create an owner or change passwords.
+With zero or multiple active owners, use normal login or first-owner setup.
+The opt-in binds Vite to loopback, disables remote Cloudflare bindings, and accepts
+only same-origin browser POSTs from loopback. Anyone using that local development
+server can enter the owner's workspace; use it only on your trusted machine.
+
+Without the environment flag, normal password login remains active. The automatic
+sign-in endpoint and client behavior are excluded from production builds, even
+when the flag is present during `pnpm run build`. Deployed authentication and
+normal tenant/permission checks are unchanged. Signing out while this opt-in is
+active returns to automatic local sign-in; restart without the flag to test logout.

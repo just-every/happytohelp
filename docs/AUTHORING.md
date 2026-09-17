@@ -6,11 +6,13 @@ existing paths; it does not generate application files or restrict owner changes
 to configuration. First-party work, owner forks and other publishers use the same
 Base edition-authoring 1.1.0 commands.
 
-The retained tool is selected independently of runtime Base. Base origin is
-`d840a75b4c41ddc1feae99695d6632c8b0a451d2`. `src/base` maps to
+The retained tool is selected independently of runtime Base. Base runtime/tool origin is
+`ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1`. `src/base` maps to
 `foundation/runtime`; `scripts/edition-authoring` maps to `edition-authoring`;
 `scripts/operations.mjs` maps to `operations/operations.mjs`. The parent comparison
-is the committed `foundation/template`. Local changes are effective source; origin
+is the committed `foundation/template`. The independently selected onboarding source retains Base comparison commit
+`5e8146003eba71d862c1856165fa7cf16724b71c`, path `onboarding`.
+Local changes are effective source; origin
 mappings never claim current bytes are equal to old bytes.
 
 Inspect with `pnpm source:inspect`. After the owner freezes the intended tree,

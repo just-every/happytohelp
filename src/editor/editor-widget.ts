@@ -2,6 +2,7 @@
 import { validLiveEditSnapshot, normalizeLiveText, validLiveEditPath } from './live-edit-contracts';
 import { connectLiveEdits } from './live-edit-runtime';
 import { validSurface, surfaceClip } from './editor-surface';
+import { editorIconPaths, editorIconViewBox, editorIconStrokeWidth } from './editor-icons';
 import { renderedText } from './live-edit-dom';
 export type EditorConfig = { enabled: boolean; managementOrigin: string; installationId: string };
 export const protocol = 'rer-editor-v1';
@@ -42,8 +43,8 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
   host.dataset.rerEditor = 'v1';
   Object.assign(host.style, {position:'fixed',bottom:'20px',right:'20px',zIndex:'2147483647'});
   const root = host.attachShadow({mode:'open'});
-  const launcher = document.createElement('button'); launcher.textContent = '✦'; launcher.setAttribute('aria-label','Open Run Edit Run'); launcher.title = 'Open Run Edit Run'; launcher.type = 'button';
-  Object.assign(launcher.style,{width:'48px',height:'48px',padding:'0',fontSize:'26px',borderRadius:'50%',background:'#18392e',color:'white',border:'1px solid white',cursor:'pointer'});
+  const launcher = document.createElement('button'); launcher.setAttribute('aria-label','Open Run Edit Run'); launcher.title = 'Open Run Edit Run — send a draft with Cmd/Ctrl+Shift+Enter'; launcher.type = 'button';
+  Object.assign(launcher.style,{position:'relative',zIndex:'1',width:'48px',height:'48px',padding:'0',display:'grid',placeItems:'center',borderRadius:'50%',background:'#3979ed',color:'white',border:'1px solid white',cursor:'pointer'});
   root.append(launcher); document.body.appendChild(host);
   let frame: HTMLIFrameElement | null = null;
   let isOpen = false;
@@ -55,7 +56,15 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
   const observer = new MutationObserver(locationChanged);
   observer.observe(document.body,{subtree:true,childList:true});
   window.addEventListener('popstate',locationChanged);
-  const close = () => { isOpen = false; send('editor-visibility',{open:false}); if (frame) frame.hidden = true; launcher.hidden = false; };
+  const toggleIcon = (open: boolean) => {
+    const well = document.createElement('span'); Object.assign(well.style,{display:'grid',placeItems:'center',width:'36px',height:'36px',borderRadius:'50%',background:open?'#edf3ff':'transparent'});
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    for(const [key,value] of Object.entries({viewBox:editorIconViewBox,width:'20',height:'20','aria-hidden':'true',fill:'none',stroke:'currentColor','stroke-width':String(editorIconStrokeWidth),'stroke-linecap':'round','stroke-linejoin':'round'})) svg.setAttribute(key,value);
+    for(const d of editorIconPaths[open?'close':'open']) { const path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('d',d); svg.appendChild(path); }
+    well.appendChild(svg); launcher.replaceChildren(well);
+  };
+  const updateToggle = () => { Object.assign(launcher.style,{background:isOpen?'transparent':'#3979ed',color:isOpen?'#324a7d':'white',border:isOpen?'1px solid transparent':'1px solid white',boxShadow:'none'}); toggleIcon(isOpen); launcher.setAttribute('aria-label',isOpen ? 'Close Run Edit Run' : 'Open Run Edit Run'); launcher.setAttribute('aria-expanded',String(isOpen)); launcher.title = isOpen ? 'Close Run Edit Run' : 'Open Run Edit Run — send a draft with Cmd/Ctrl+Shift+Enter'; };
+  const close = () => { isOpen = false; updateToggle(); send('editor-visibility',{open:false}); if (frame) frame.hidden = true; launcher.hidden = false; };
   const receive = (event: MessageEvent) => {
     if (!acceptsMessage(event,config.managementOrigin,frame?.contentWindow || null,config.installationId)) return;
     const d = event.data;
@@ -78,18 +87,23 @@ export function mountEditor(config: EditorConfig, authorized: boolean): () => vo
     if (event.data.type === 'close') close();
   };
   const open = (visible = true) => {
-    isOpen = visible;
-    if (frame) { frame.hidden = !visible; launcher.hidden = visible; send('editor-visibility',{open:visible}); return; }
+    isOpen = visible; updateToggle();
+    if (frame) { frame.hidden = !visible; launcher.hidden = false; send('editor-visibility',{open:visible}); return; }
     frame = document.createElement('iframe'); frame.title = 'Run Edit Run editor';
     frame.src = `${config.managementOrigin}/editor?${new URLSearchParams({installation:config.installationId,parentOrigin:window.location.origin,surface:'floating'})}`;
     frame.referrerPolicy = 'no-referrer'; frame.allow = `microphone ${config.managementOrigin}; autoplay ${config.managementOrigin}; fullscreen ${config.managementOrigin}`; frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox');
-    Object.assign(frame.style,{position:'fixed',inset:'0',width:'100vw',height:'100dvh',border:'0',background:'transparent',clipPath:'inset(100%)'});
-    frame.hidden = !visible; root.append(frame); launcher.hidden = visible;
+    Object.assign(frame.style,{position:'fixed',zIndex:'0',inset:'0',width:'100vw',height:'100dvh',border:'0',background:'transparent',clipPath:'inset(100%)'});
+    frame.hidden = !visible; root.append(frame); launcher.hidden = false;
   };
-  launcher.onclick = () => open();
+  launcher.onclick = () => { if (isOpen) close(); else open(); };
+  const submitShortcut = (event: KeyboardEvent) => {
+    if (!isOpen || event.repeat || event.isComposing || event.key !== 'Enter' || !(event.ctrlKey || event.metaKey) || event.altKey || !event.shiftKey) return;
+    event.preventDefault(); event.stopPropagation(); send('submit-draft',{});
+  };
+  window.addEventListener('keydown',submitShortcut,true);
   const resize = () => { if (frame) frame.style.clipPath = 'inset(100%)'; send('editor-visibility',{open:isOpen}); };
   window.addEventListener('resize',resize);
   window.addEventListener('message',receive);
   open(false);
-  return () => { close(); frame?.remove(); live.disconnect(); observer.disconnect(); window.removeEventListener('popstate',locationChanged); window.removeEventListener('message',receive); window.removeEventListener('resize',resize); host.remove(); };
+  return () => { close(); frame?.remove(); live.disconnect(); observer.disconnect(); window.removeEventListener('popstate',locationChanged); window.removeEventListener('message',receive); window.removeEventListener('resize',resize); window.removeEventListener('keydown',submitShortcut,true); host.remove(); };
 }

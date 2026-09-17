@@ -36,6 +36,11 @@ setup.post('/bootstrap', async c => {
   if (difference) throw new HTTPException(403, {message: 'A valid owner setup token is required'})
  }
  const name = requiredString(body.name, 'name', 200).trim()
+ const ownerName = body.ownerName === undefined ? name : requiredString(body.ownerName, 'ownerName', 200).trim()
+ const primaryColor = body.primaryColor
+ if (primaryColor !== undefined && (typeof primaryColor !== 'string' || !/^#[0-9a-f]{6}$/i.test(primaryColor))) {
+  throw new HTTPException(400, {message: 'Choose a six-digit brand colour'})
+ }
  const email = requiredString(body.email, 'email', 320).trim().toLowerCase()
  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HTTPException(400, {message: 'Enter a valid email address'})
  if (c.env.H2H_SETUP_OWNER_EMAIL && email !== c.env.H2H_SETUP_OWNER_EMAIL.trim().toLowerCase()) {
@@ -53,7 +58,8 @@ setup.post('/bootstrap', async c => {
  const results = await c.env.DB.batch([
   c.env.DB.prepare(`INSERT INTO owner_setup SELECT 1,? WHERE ${available} ON CONFLICT(singleton) DO NOTHING`).bind(userId),
   c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) SELECT ?,?,?,?,? WHERE ${guard}`).bind(projectId,name,id(),allowedOrigin,now,userId),
-  c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,?,?,? WHERE ${guard}`).bind(userId,email,name,now,userId),
+  ...(primaryColor === undefined ? [] : [c.env.DB.prepare(`INSERT INTO project_settings(project_id,settings_json,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(projectId,JSON.stringify({primary_color: primaryColor.toLowerCase()}),now,userId)]),
+  c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,?,?,? WHERE ${guard}`).bind(userId,email,ownerName,now,userId),
   c.env.DB.prepare(`INSERT INTO credentials(user_id,password_hash,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(userId,password,now,userId),
   c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' WHERE ${guard}`).bind(projectId,userId,userId),
   c.env.DB.prepare(`INSERT INTO sessions SELECT ?,?,?,'owner',NULL,?,NULL WHERE ${guard}`).bind(await hashToken(token),userId,projectId,now+86400000,userId),

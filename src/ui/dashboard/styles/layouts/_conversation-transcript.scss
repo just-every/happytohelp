@@ -1,6 +1,8 @@
-// 12ui open-transcript treatment. ConversationBody owns the scroll surface; these rules
+// Approved 12ui A conversation geometry; sender palettes remain edition-owned. These rules
 // only change the rows inside it so paging and follow-to-bottom behavior remain intact.
 body.conversation-workspace #chat {
+    --transcript-message-tint: 65%;
+
     .conversation-transcript {
         width: min(calc(100% - 2 * var(--conversation-content-gutter)), var(--conversation-content-width));
         margin: 0 auto;
@@ -41,7 +43,7 @@ body.conversation-workspace #chat {
         .transcript-message-row {
             position: relative;
             width: 100%;
-            margin-top: 1.35rem;
+            margin-top: 1.75rem;
         }
 
         .transcript-actor-group {
@@ -53,12 +55,31 @@ body.conversation-workspace #chat {
             align-items: start;
         }
 
+        // Keep actorless activity neutral. Known customer and support groups use
+        // A's mirrored avatar positions with the owner's wider reading measure.
+        .transcript-actor-group[data-transcript-side] {
+            width: min(85%, 40rem);
+        }
+
+        .transcript-actor-group[data-transcript-side="right"] {
+            grid-template-columns: minmax(0, 1fr) 2.75rem;
+            margin-left: auto;
+
+            > .transcript-group-main { grid-column: 1; grid-row: 1; }
+            > .transcript-group-rail { grid-column: 2; grid-row: 1; }
+
+            .transcript-event::before {
+                right: calc(-2.25rem - .23rem);
+                left: auto;
+            }
+        }
+
         .transcript-group-rail {
             position: relative;
             z-index: 2;
             min-width: 0;
             min-height: 2.5rem;
-            padding-top: 1.35rem;
+            padding-top: 1.75rem;
         }
 
         .transcript-actor-group:has(> .transcript-group-main > .transcript-event:first-child) .transcript-group-rail {
@@ -76,7 +97,7 @@ body.conversation-workspace #chat {
             border: 0;
             border-radius: .8rem;
             background: var(--workspace-surface-raised, #fff);
-            background: color-mix(in srgb, var(--workspace-surface-raised, #fff), var(--transcript-actor-tile, var(--conversation-accent)) var(--transcript-actor-tint, 12%));
+            background: color-mix(in srgb, var(--workspace-surface-raised, #fff), var(--transcript-actor-tile, var(--conversation-accent)) var(--transcript-actor-tint, var(--transcript-message-tint)));
             box-shadow: none;
             color: var(--conversation-ink);
         }
@@ -84,57 +105,44 @@ body.conversation-workspace #chat {
         .transcript-message-main,
         .transcript-note-main { min-width: 0; }
 
+        [data-transcript-side="left"] .transcript-message-card {
+            background: #f5f6f8;
+        }
+
         .transcript-message-section + .transcript-message-section {
             margin-top: .625rem;
         }
-
-        .transcript-run-byline { margin-bottom: .625rem; }
 
         .transcript-message-run .transcript-message-content > .mb-1 {
             margin-bottom: 0 !important;
         }
 
-        .transcript-message-run-with-visits .transcript-run-entries {
-            display: flex;
-            flex-direction: column;
-            gap: .625rem;
-
-            > .transcript-message-section,
-            > .transcript-event {
-                margin-top: 0;
-            }
-
-            > .transcript-event {
-                padding: 0;
-                border-radius: 0;
-
-                &::before { display: none; }
-            }
-
-            > .transcript-event-page-view-group > .transcript-event-content {
-                padding: 0;
-            }
+        .transcript-message-header {
+            margin-bottom: .375rem;
         }
 
-        .transcript-message-section-body {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) max-content;
-            column-gap: .75rem;
-            align-items: baseline;
+        .transcript-actor-heading { margin-top: 1.75rem; }
 
-            > .transcript-message-time { margin-left: 0; }
-            > .message-content.transcript-message-content { margin-top: 0; }
-        }
 
-        .transcript-message-header,
         .transcript-note-header {
             display: flex;
             align-items: center;
             min-height: 2.5rem;
         }
 
-        .transcript-message-card .transcript-message-header {
-            min-height: 1.5rem;
+        .transcript-message-header .transcript-message-byline {
+            flex-wrap: wrap;
+            gap: .25rem .5rem;
+        }
+
+        .transcript-message-header .transcript-message-time {
+            margin-left: 0;
+        }
+
+        [data-transcript-side="right"] .transcript-message-byline {
+            justify-content: flex-end;
+
+            > .transcript-message-time { order: -1; }
         }
 
         .transcript-message-avatar {
@@ -250,43 +258,14 @@ body.conversation-workspace #chat {
             position: relative;
         }
 
-        // Draw connectors only when another visible avatar follows. Activity
-        // or additional messages beneath the final avatar do not extend it.
-        .message:has(~ .message .transcript-message-avatar) .transcript-group-main > .message-row::after,
-        .bucket:has(~ .bucket .transcript-message-avatar) .transcript-group-main > .message-row::after,
-        .bucket-group:has(~ .bucket-group .transcript-message-avatar) .transcript-group-main > .message-row::after {
-            position: absolute;
-            z-index: 0;
-            top: var(--transcript-connector-top, 3rem);
-            bottom: -1.35rem;
-            left: var(--transcript-connector-left, calc(-2.25rem - .5px));
-            width: 1px;
-            background: var(--workspace-line, #eceff5);
-            content: "";
-            pointer-events: none;
-        }
-
-        .transcript-event {
-            --transcript-connector-top: 1.4rem;
-        }
-
-        .transcript-event-note {
-            --transcript-connector-top: 0;
-        }
-
-        .transcript-group-main > .message-row:not(:first-child),
-        .transcript-actor-group-continues .transcript-group-main > .message-row:first-child {
-            --transcript-connector-top: 0;
-        }
-
         .transcript-group-main > .transcript-message-row:not(:first-child) {
             margin-top: .75rem;
         }
 
-        .transcript-group-main > .transcript-message-row:not(:first-child) .transcript-message-header,
-        .transcript-actor-group-continues .transcript-message-header {
-            min-height: 1.25rem;
+        .transcript-group-main > .transcript-actor-heading + .message-row {
+            margin-top: 0;
         }
+
 
         .transcript-event {
             position: relative;
@@ -382,7 +361,7 @@ body.conversation-workspace #chat {
             width: 100%;
             box-sizing: border-box;
             padding: .75rem 1rem .875rem;
-            border: 1px solid #d99b60;
+            border: 1px solid color-mix(in srgb, #d99b60 40%, transparent);
             border-radius: .8rem;
             background: var(--workspace-surface-raised, #fff);
             background: color-mix(in srgb, var(--workspace-surface-raised, #fff), var(--transcript-actor-tile, var(--conversation-accent)) var(--transcript-actor-tint, 12%));
@@ -428,17 +407,22 @@ body.conversation-workspace #chat {
 
         .transcript-event-page_view,
         .transcript-event-page-view-group {
+            margin-top: .375rem;
             background: transparent;
         }
 
-        .transcript-event-page_view { padding: .5rem 1rem; }
+        .transcript-group-main > :is(.transcript-event-page_view, .transcript-event-page-view-group) + .transcript-message-row {
+            margin-top: .375rem;
+        }
+
+        .transcript-event-page_view { padding: .25rem 0; }
 
         .transcript-event-page-view-group a {
             color: var(--conversation-muted);
         }
 
         .transcript-event-page-view-group > .transcript-event-content {
-            padding: .5rem 1rem;
+            padding: .25rem 0;
         }
 
         .transcript-event-page-view-group .transcript-event-group-toggle {
@@ -459,15 +443,15 @@ body.conversation-workspace #chat {
         }
 
         .transcript-event-page-view-list {
-            margin-top: .375rem;
-            padding-left: .75rem;
-            border-left: 1px solid var(--conversation-line);
+            margin-top: .1875rem;
+            padding-left: 0;
+            border-left: 0;
         }
 
         .transcript-event-page-view-row {
             min-height: 0;
             margin-top: 0;
-            padding: .25rem 0;
+            padding: .125rem 0;
             border: 0;
             border-radius: 0;
             background: transparent;
@@ -519,11 +503,43 @@ body.conversation-workspace #chat {
     }
 }
 
-@media (max-width: 575.98px) {
+@media (max-width: 600px) {
     body.conversation-workspace #chat .conversation-transcript {
         .transcript-actor-group {
-            grid-template-columns: 2.5rem minmax(0, 1fr);
+            grid-template-columns: 1.75rem minmax(0, 1fr);
             column-gap: .5rem;
+        }
+
+        .transcript-actor-group[data-transcript-side] {
+            width: 96%;
+        }
+
+        .transcript-actor-group[data-transcript-side="right"] {
+            grid-template-columns: minmax(0, 1fr) 1.75rem;
+
+            .transcript-event:not(.transcript-event-page-view-row)::before {
+                right: calc(-1.375rem - .23rem);
+                left: auto;
+            }
+        }
+
+        .transcript-message-row { margin-top: 1.25rem; }
+        .transcript-actor-heading { margin-top: 1.25rem; }
+        .transcript-group-rail { padding-top: 1.25rem; }
+
+        .transcript-message-avatar,
+        .transcript-message-avatar img,
+        .transcript-message-avatar .avatar-title {
+            width: 28px;
+            min-width: 28px;
+            height: 28px;
+            min-height: 28px;
+            font-size: .75rem;
+        }
+
+        .transcript-message-card,
+        .transcript-note-card {
+            padding: .625rem .75rem .75rem;
         }
 
         .transcript-message-byline,
@@ -536,12 +552,17 @@ body.conversation-workspace #chat {
             gap: .35rem;
         }
 
-        .transcript-group-main {
-            --transcript-connector-left: calc(-1.75rem - .5px);
-        }
-
         .transcript-event:not(.transcript-event-page-view-row)::before {
-            left: calc(-1.75rem - .23rem);
+            left: calc(-1.375rem - .23rem);
         }
+    }
+}
+
+// Bright sender fills need the original subtler mix behind dark-mode white ink.
+body.conversation-workspace[data-workspace-mode="dark"] #chat {
+    --transcript-message-tint: 12%;
+
+    .conversation-transcript [data-transcript-side="left"] .transcript-message-card {
+        background: var(--workspace-surface-raised, #202332);
     }
 }

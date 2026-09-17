@@ -1,0 +1,20 @@
+{
+  "created": "2026-09-17",
+  "mode": "built-in image_gen",
+  "purpose": "Fresh two-output real onboarding job from agent-supplied actual user inspiration; automatic bootstrap bridge owns sidebar transfer.",
+  "job": "957774c0ddbfc3eb7db1de644edbfb6e",
+  "revision": 1,
+  "assets": [
+    {
+      "file": "coastal-ai-background-v4-typed-live.png",
+      "prompt": "Use case: stylized-concept. Asset: wide 16:9 cinematic full-bleed onboarding background. User inspiration: Sci-fi, technology and AI; rivers and beaches. Create a magnificent calm coastal landscape: a winding turquoise river crosses rugged natural foreground and opens into a pale sandy beach and vast ocean. Elegant futuristic research architecture with restrained AI-inspired light details nestled into distant left cliffs. Photoreal natural textures, cinematic atmosphere, warm apricot sunset meeting blue teal ocean, peaceful grandeur. Rich left side and outer foreground edges; calm low-detail right center ocean and sky suitable behind a white form. Actual landscape only. No text, UI, logos, people, robots, mascots, giant planets, frames or floating holograms.",
+      "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-9a3b2089-7150-40ef-a108-4b750049be44.png"
+    },
+    {
+      "file": "sidebar-coastal-lineart-v3-typed-live.png",
+      "prompt": "Use case: stylized-concept. Asset: transparent personal app sidebar PNG, tall portrait 2:3, displayed at 200px width on a dark teal panel. User inspiration: Sci-fi, technology and AI; rivers and beaches. Draw a graceful winding river meeting a coast, with three delicate distant futuristic architectural spires integrated into cliff contours. Only sparse fine continuous warm off-white contour strokes, like an engraved architectural sketch printed in ivory ink on transparent glass. Concentrate landscape in bottom half and lower edges, upper half almost entirely empty transparent space. Understated legible linework, clean smooth curves, few lines, generous gaps. TRANSPARENCY: alpha must be zero absolutely everywhere except actual narrow contour strokes. No haze, no glow, no shading, no filled shapes, no opaque rectangle, no gradient, no background, no black backdrop or checkerboard. No text, UI, logos, border, people, robot or mascot. Pure quiet line drawing only, not a full scene rendering.",
+      "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-4c7fe47b-b1f8-419a-8cfd-c4da0c061917.png",
+      "verification": "RGBA 1024x1536, 84.80% fully transparent, 1.84% pixels alpha >128. RGB preview has hidden glow; alpha-aware compositing required."
+    }
+  ]
+}

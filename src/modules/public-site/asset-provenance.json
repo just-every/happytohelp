@@ -38,18 +38,5 @@
   {
     "source": "img/pattern/pattern-square.svg",
     "sha256": "bd69f7c021b4a2468c84d2f6e7e57ad25514f3d8a242ac6714d3ae21b4867644"
-  },
-  {
-    "source": "landing/home.css",
-    "sha256": "9323725a26e40f1d5ca06f30fd05846b1525bc010ac0ec69af3f11b98f922d67",
-    "origin": "12ui native conversion of selected draft B, 2026-09-15",
-    "designRun": "crt-075f276cc9f38ddbd45eb0e7453302ddcd945ba7",
-    "processing": "Landing typography and spacing refined against selected target, 2026-09-15; existing artwork retained."
-  },
-  {
-    "source": "landing/purple-art.png",
-    "sha256": "f92298ee3558a0ec60a7b140ef5ed73747c9632aa39c7e26ef25fc2340c110c9",
-    "origin": "12ui native conversion of selected draft B, 2026-09-15",
-    "designRun": "crt-075f276cc9f38ddbd45eb0e7453302ddcd945ba7"
   }
 ]

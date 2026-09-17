@@ -1,12 +1,9 @@
-// Called within an actor group. Customer visits share their messages' card;
-// notes and other activity always break a run.
-function transcriptMessageRuns(items, { includePageViews = false } = {}) {
+// Called within an actor group. Activity stays between message runs so only
+// consecutive messages share a colored card, preserving transcript order.
+function transcriptMessageRuns(items) {
     const rows = [];
     for (const item of items) {
-        const isPageView = Array.isArray(item)
-            ? item.length > 0 && item.every(event => event.type === 'PAGE_VIEW')
-            : item.type === 'PAGE_VIEW';
-        if ((Array.isArray(item) || item.type) && !(includePageViews && isPageView)) {
+        if (Array.isArray(item) || item.type) {
             rows.push({ item });
         } else {
             const previous = rows[rows.length - 1];

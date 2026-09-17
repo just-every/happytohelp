@@ -16,8 +16,23 @@ export async function handleContextWidgetAction(env:Env,actor:Actor,conversation
   return {...result,job}
  }
  if(action==='saveEvents'){
-  if(!Array.isArray(data))throw new Error('Invalid event batch')
-  const events=await Promise.all(data.map(async(event:any)=>({...event,localId:event.localId||await hashToken(JSON.stringify(event))})))
+  if(!Array.isArray(data)||data.length>100)throw new Error('Invalid event batch')
+  const bucket=await env.DB.prepare(`SELECT id FROM (
+   SELECT coalesce(bucket_id,conversation_id) AS id,created_at FROM messages WHERE conversation_id=?
+   UNION ALL SELECT id,created_at FROM conversation_buckets WHERE conversation_id=?
+  ) ORDER BY created_at DESC,id DESC LIMIT 1`).bind(conversationId,conversationId).first<{id:string}>()
+  // Public telemetry reports visits only. Assignment and insight usage require a
+  // trusted server writer; accepting their display fields would forge history.
+  const events=await Promise.all(data.filter((event:any)=>event?.type==='PAGE_VIEW').map(async(event:any)=>{
+   const url=typeof event.payload==='string'?event.payload:event.payload?.url
+   if(typeof url!=='string'||!url.trim()||url.length>10000||(!/^https?:\/\//i.test(url)&&!/^\/(?!\/)/.test(url)))throw new Error('Invalid page visit')
+   if(event.localId!==undefined&&(typeof event.localId!=='string'||!event.localId||event.localId.length>200))throw new Error('Invalid tracked event identity')
+   const payload={url,conversation_id:conversationId,bucket_id:bucket?.id||conversationId}
+   // Both supplied identities and content identities belong to the trusted
+   // conversation/bucket. Ignored client context cannot perturb deduplication.
+   const localId=await hashToken(JSON.stringify({type:'PAGE_VIEW',conversation_id:conversationId,bucket_id:payload.bucket_id,identity:event.localId??payload}))
+   return {type:'PAGE_VIEW',localId,payload}
+  }))
   return {counts:await trackEvents(env,actor.projectId,subject,events)}
  }
  if(action==='insights')return {insights:(await env.DB.prepare('SELECT id,help_type,content,buttons FROM context_insights WHERE project_id=? AND subject_id=? AND dismissed_at IS NULL ORDER BY created_at DESC LIMIT 3').bind(actor.projectId,subject).all()).results}

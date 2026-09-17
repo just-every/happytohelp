@@ -264,7 +264,7 @@ export const Provider = (props) => {
                 if (options.signal?.aborted || activeConversationIdRef.current !== conversationId) return result;
                 const newBuckets = result.data;
                 newBuckets.forEach(bucket => markUnreadMessagesAsRead(bucket.messages ?? [], bucketProject));
-                setBuckets(buckets => filterUniqueItems([ ...newBuckets.reverse(), ...buckets ]));
+                setBuckets(buckets => filterUniqueItems([ ...[...newBuckets].reverse(), ...buckets ]));
 
                 return result;
             });

@@ -155,6 +155,14 @@ body.conversation-workspace {
         }
     }
 
+    // The optional editor launcher occupies the bottom-right corner. Keep the
+    // mobile send controls beside it without shrinking the reply text field.
+    @media (max-width: 600px) {
+        &:has(> [data-rer-editor]) #chat .chat-footer .chat-buttons {
+            padding-inline-end: 60px;
+        }
+    }
+
     @media (min-width: 1200px) {
         #chat .chat-footer .chat-entry-form textarea,
         #chat .chat-footer .chat-entry-form .loading-content {

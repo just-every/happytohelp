@@ -39,6 +39,13 @@ body.conversation-workspace #chat .conversation-inbox {
         padding: 0 14px 20px;
     }
 
+    .conversation-demo-label {
+        padding: 0 14px;
+        color: var(--conversation-quiet);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
     .conversation-empty-state {
         margin: 1.5rem 0;
         padding: 0 1rem;

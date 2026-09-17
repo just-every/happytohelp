@@ -1,13 +1,15 @@
 # Public landing and Help Center
 
-The active public surface is a small local-owner landing page plus dynamic,
-project-scoped published help centers. The former marketing, pricing, resources,
-legal, waitlist, referrer-personalized homepage and public homepage-widget
-surface is retired from this edition. The customer support widget remains an
-independent owner-configured product surface and is served from its own
-`/widget.js` build.
+The public homepage is a native TanStack Start/React route in `src/routes/index.tsx`,
+composed from `src/ui/homepage` and the approved assets in `public/homepage`.
+It retains links to native workspace, setup and login. This module serves dynamic,
+project-scoped published help centers. Former pricing, resources, legal, waitlist,
+referrer-personalized and public homepage-widget behavior remains retired. The
+customer support widget remains an independent owner-configured product surface
+served from its own `/widget.js` build.
 
-`index.ts` serves the owner landing page and the canonical help-center routes.
+`index.ts` dispatches the canonical help-center routes; `/` belongs to the native
+React router.
 `help-center.tsx` preserves `/{project}/search?keyword=...`,
 `/{project}/{article_slug}` and `/help/{project}` aliases. Only persisted project
 IDs or explicitly granted slugs resolve. Project owners/admins can claim an

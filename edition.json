@@ -48,6 +48,24 @@
       }
     },
     {
+      "id": "runeditrun/onboarding",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "scripts/base-onboarding"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "5e8146003eba71d862c1856165fa7cf16724b71c",
+          "path": "onboarding"
+        }
+      }
+    },
+    {
       "id": "runeditrun/conversation",
       "role": "module",
       "requires": [
@@ -228,12 +246,14 @@
         "runeditrun/local-computer",
         "runeditrun/training-runs",
         "runeditrun/plugin-sdk",
-        "runeditrun/site-preview"
+        "runeditrun/site-preview",
+        "runeditrun/onboarding"
       ],
       "source": {
         "kind": "local",
         "paths": [
           "src/platform",
+          "src/development",
           "src/ui",
           "src/routes",
           "src/server.ts",
@@ -289,7 +309,40 @@
           "migrations/0084_billing_project_usage.sql",
           "migrations/0097_owner_setup.sql",
           "tests/identity-setup.mjs",
-          "tests/setup-browser.mjs"
+          "tests/setup-browser.mjs",
+          "scripts/install.mjs",
+          "scripts/installer-fill.mjs",
+          "scripts/installer-artwork.mjs",
+          "scripts/installer",
+          "public/setup",
+          "docs/INSTALLER.md",
+          "src/editor",
+          "public/homepage",
+          "migrations/0098_personal_visual_inspiration.sql",
+          "migrations/0099_personal_sidebar_artwork.sql",
+          "scripts/setup-link.mjs",
+          "tests/demo-inbox.mjs",
+          "tests/demo-inbox-browser.mjs",
+          "tests/demo-transcript-events.mjs",
+          "tests/workspace-artwork.mjs",
+          "tests/local-owner-login.mjs",
+          "tests/cloudflare-email.mjs",
+          "tests/ai-instructions-keyboard.mjs",
+          "tests/installer-address.mjs",
+          "tests/installer-artwork-bridge.mjs",
+          "tests/installer-blank.mjs",
+          "tests/installer-collision.mjs",
+          "tests/installer-prefill.mjs",
+          "tests/installer-presentation.mjs",
+          "tests/installer-providers.mjs",
+          "tests/installer-resume.mjs",
+          "tests/installer-secret-scopes.mjs",
+          "tests/installer-security.mjs",
+          "tests/installer-summary.mjs",
+          "tests/installer-ui-fixtures.mjs",
+          "tests/installer-workspace-art.mjs",
+          "tests/installer-wrangler-auth.mjs",
+          "tests/installer.mjs"
         ]
       }
     }

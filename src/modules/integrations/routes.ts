@@ -3,9 +3,9 @@ import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
 import {scope,text} from '../management/common'
 import {githubToken} from './github'
-import {sendEmail} from './email'
+import {sendEmail,emailConfigured} from './email'
 export const integrations=new Hono<AppEnv>()
-integrations.get('/projects/:projectId/email-settings',async c=>{const a=await scope(c,true);return c.json({data:await c.env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(a.projectId).first(),configured:Boolean(c.env.EMAIL_API_KEY&&c.env.EMAIL_FROM)})})
+integrations.get('/projects/:projectId/email-settings',async c=>{const a=await scope(c,true);return c.json({data:await c.env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(a.projectId).first(),configured:Boolean(emailConfigured(c.env))})})
 integrations.put('/projects/:projectId/email-settings',async c=>{const a=await scope(c,true),b=await c.req.json(),address=text(b.email_from_address||b.from_address,320);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))throw new HTTPException(400);await c.env.DB.prepare('INSERT INTO email_settings VALUES(?,?,?,?,?,?) ON CONFLICT(project_id) DO UPDATE SET from_name=excluded.from_name,from_address=excluded.from_address,inbound_address=excluded.inbound_address,is_enabled=excluded.is_enabled,updated_at=excluded.updated_at').bind(a.projectId,text(b.email_from_name||b.from_name||'',200),address,b.inbound_address?text(b.inbound_address,320):null,b.is_enabled?1:0,Date.now()).run();return c.json({updated:true})})
 integrations.post('/projects/:projectId/email-settings/test',async c=>{const a=await scope(c,true),b=await c.req.json(),user=await c.env.DB.prepare('SELECT email FROM users WHERE id=?').bind(a.id).first<{email:string}>();return c.json(await sendEmail(c.env,{to:user!.email,subject:'HappyToHelp email verification',text:'Your configured HappyToHelp email provider delivered this verification message.',projectId:a.projectId,idempotencyKey:text(b.idempotencyKey,200)}))})
 integrations.get('/projects/:projectId/github',async c=>{const a=await scope(c,true),row=await c.env.DB.prepare('SELECT * FROM github_settings WHERE project_id=?').bind(a.projectId).first<any>();return c.json({data:row?{...row,repositories:JSON.parse(row.repositories_json)}:null,configured:Boolean(await githubToken(c.env,a.projectId))})})

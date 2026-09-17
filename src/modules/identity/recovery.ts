@@ -3,10 +3,10 @@ import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
 import { requiredString,id } from '../../platform/db'
-import { sendEmail } from '../integrations/email'
+import { sendEmail, emailConfigured } from '../integrations/email'
 export const recovery=new Hono<AppEnv>()
 recovery.post('/forgot-password',async c=>{
- if(!c.env.EMAIL_API_KEY||!c.env.EMAIL_FROM||!c.env.APP_ORIGIN)throw new HTTPException(503,{message:'Password recovery email is not configured'})
+ if(!emailConfigured(c.env)||!c.env.APP_ORIGIN)throw new HTTPException(503,{message:'Password recovery email is not configured'})
  const body=await c.req.json(),email=requiredString(body.email,'email',320).toLowerCase(),now=Date.now(),key=await hashToken(`reset:${email}`)
  const recent=await c.env.DB.prepare('SELECT window_start FROM login_attempts WHERE key=?').bind(key).first<{window_start:number}>();if(recent&&recent.window_start>now-60000)throw new HTTPException(429,{message:'Please wait before requesting another reset'})
  await c.env.DB.prepare('INSERT INTO login_attempts VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET window_start=excluded.window_start').bind(key,now).run()

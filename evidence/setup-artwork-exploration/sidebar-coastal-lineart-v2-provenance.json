@@ -1,0 +1,9 @@
+{
+  "created": "2026-09-17",
+  "mode": "built-in image_gen edit",
+  "file": "sidebar-coastal-lineart-v2.png",
+  "prompt": "Edit target: provided sidebar coastal contour artwork. Keep exactly its portrait composition and river/coast/futuristic spire contours, position and scale. CORRECTION: REMOVE ALL luminous haze, glow, mist, blur, shading and filled areas COMPLETELY. Replace every pixel that is not a thin contour stroke with genuinely transparent alpha. Final asset must consist ONLY of crisp fine continuous warm off-white engraved contour strokes on pure transparency. Single uniform off-white line ink, no cyan aura. No opaque background, no gradient background, no fill inside any shape, no solid surfaces. Think an etched line drawing printed in ivory ink on clear glass: between the lines there is absolutely nothing. Upper area entirely transparent. Do not add objects, text or borders. Preserve 1024 by 1536 portrait aspect.",
+  "input": "sidebar-coastal-lineart-v1.png",
+  "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-f0f6b7b4-e46c-4d41-aeeb-20b271685f92.png",
+  "inspection": "RGBA 1024x1536. RGB preview contains broad haze but sampled haze pixels have alpha 0; alpha-aware compositing is necessary to assess."
+}

@@ -2,8 +2,8 @@
 
 The edition preserves the useful HappyToHelp owner workspace: customer widget,
 operator dashboard, AI assistance and reply, knowledge, customer context,
-delegated local work, training and integrations. Its public surface is a simple
-local-owner landing page and dynamic published help centers.
+delegated local work, training and integrations. Its public surface is the approved
+designed journey homepage and dynamic published help centers.
 It owns editable source and replaces the original PHP/AWS application runtime
 with the maintained RER Worker stack. These clauses state required behavior;
 implementation and acceptance evidence are tracked separately in ACCEPTANCE.md.
@@ -59,11 +59,14 @@ implementation and acceptance evidence are tracked separately in ACCEPTANCE.md.
   credentials, durable identity and ambiguous-outcome handling. Website previews
   use a separate origin, scoped expiring grants and public-network restrictions.
   Payment, checkout, Stripe and balance behavior are outside this edition.
-- **PUBLIC-001 — Public product source.** The public root is a simple local-owner
-  landing page. Dynamic published help centers retain project scope, canonical
-  links, search and draft/deleted denial. The customer widget remains available
-  through owner-configured installation; marketing, pricing, legal, referrer,
-  waitlist and public homepage-widget behavior are outside this edition.
+- **PUBLIC-001 — Public product source.** The approved journey homepage is the
+  real public `/` experience, with its sculpted beacon hero loop, horse-and-spear
+  rider, crossing/lookout/helping-hand/well sculptures, journey map backgrounds
+  and official/app brand icons. Dynamic published help centers retain project
+  scope, canonical links, search and draft/deleted denial. The customer widget
+  remains available through owner-configured installation; broader marketing
+  routes, pricing, legal, referrer, waitlist and public auto-widget behavior
+  are outside this edition.
 - **MIGRATION-001 — Prior-data custody.** Explicit legacy artifacts preserve IDs,
   exact historical financial values, transcripts, object hashes, publication and
   permissions through resumable guarded D1/R2 import. Historical financial SQL,

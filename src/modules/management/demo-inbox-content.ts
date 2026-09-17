@@ -1,0 +1,82 @@
+/** Deliberately fictional onboarding stories, never customer or provider output. */
+export const demoInboxContentVersion = 2
+/** Original transcript lengths; upgrades may append only after this unchanged prefix. */
+export const demoStoryBaselineMessageCounts = {
+  'first-hike': 2, delivery: 3, import: 2, feature: 3, receipt: 3, care: 3,
+} as const
+
+export const demoInboxName = 'Demo inbox · Northstar Outfitters'
+export const demoStories = [
+  { key: 'first-hike', name: 'Maya Chen', subject: 'Choosing a daypack', messages: [
+    ['contact', 'Hi! I’m planning my first day hike. Would the Ridge 18 fit a rain jacket, lunch and two water bottles?'],
+    ['contact', 'I’m 160 cm tall, so I’m also wondering whether the shoulder straps will adjust enough.'],
+    ['operator', 'Welcome, Maya. In this Northstar demo, the Ridge 18 is our compact daypack. That load sounds reasonable, but how long is the walk and what size are the bottles?'],
+    ['contact', 'About four hours on an easy trail. The bottles are 750 ml each, and the jacket packs down quite small.'],
+    ['operator', 'That helps. Are you planning to carry any extra layers or equipment for someone else? Those can change how much room you need.'],
+    ['contact', 'Just my own things, plus a small first-aid kit. I might bring a fleece if the forecast is cool.'],
+    ['operator', 'For this example, I’d pack the fleece inside and put the bottles in the side pockets. Height alone won’t tell us whether the straps fit comfortably; torso length and how the pack sits matter too.'],
+    ['contact', 'Is there a way to check the fit at home without measuring my whole back?'],
+    ['operator', 'Try it with your planned load: snug the shoulder straps, then check that they follow your shoulders without a gap or pinching. Could you also tell me whether the pack tends to sit low or pull away from your shoulders?'],
+    ['contact', 'I haven’t tried one yet. I’ll check with a loaded pack this evening and let you know how it sits.'],
+  ] },
+  { key: 'delivery', name: 'Jordan Ellis', assigned: true, subject: 'Delivery address follow-up', messages: [
+    ['contact', 'I just placed order DEMO-1042 and noticed the apartment number is missing. Could you add Apartment 4?'],
+    ['operator', 'Thanks for catching that, Jordan. I’m checking whether the fictional warehouse has packed it yet. Please keep the rest of your address out of this demo conversation.'],
+    ['contact', 'Thank you! It’s a birthday gift for Saturday, so I’d appreciate an update.'],
+    ['operator', 'The sample order is still marked as awaiting packing. To clarify, is Apartment 4 the only change, with the street and postcode staying the same?'],
+    ['contact', 'Yes, only the apartment number. Everything else on the sample order is correct.'],
+    ['operator', 'Understood. In this demo scenario, the address correction is ready for a warehouse review. This conversation doesn’t change an order or contact a carrier.'],
+    ['contact', 'If it has already been packed when they review it, could the parcel still get the apartment number added?'],
+    ['operator', 'That would depend on whether the shipping label can still be changed. Packing and carrier handoff are separate steps, so I would check the handoff status before promising a correction.'],
+    ['contact', 'That makes sense. I’m more worried about it going to the wrong door than arriving a day late.'],
+    ['operator', 'Thanks, that’s helpful context. The next update in this example should confirm whether the label can be corrected; Saturday delivery is still unconfirmed.'],
+  ] },
+  { key: 'import', name: 'Sam Rivera', subject: 'Packing list import', messages: [
+    ['contact', 'I’m importing my camping checklist into your trip planner. My CSV has 24 items, but only 20 appear.'],
+    ['contact', 'The missing items all have a comma in the name, like “Stove, compact”. Does the file need quotation marks?'],
+    ['operator', 'Hi Sam — let’s check a small example in this demo conversation. Please paste a made-up header and one affected row, without any personal trip details.'],
+    ['contact', 'The header is Item,Quantity,Category and the row is Stove, compact,1,Cooking.'],
+    ['operator', 'That row contains four comma-separated fields while the header has three. Put double quotation marks around the item name: "Stove, compact",1,Cooking.'],
+    ['contact', 'I tried that with just the stove row and it appeared. Do I need to quote every item, or only the ones with commas?'],
+    ['operator', 'Quoting every text field is fine. Fields containing commas, double quotes or line breaks need quoting; a double quote inside a quoted field is written twice. A spreadsheet’s CSV export usually handles that formatting.'],
+    ['contact', 'I exported the sample sheet again rather than editing the file by hand. Now I can see 24 items, but I’m not sure whether the old 20 are still there too.'],
+    ['operator', 'Before another import, check the total number of rows in the list and look for a repeated item. Did you import into a new empty list or back into the original one?'],
+    ['contact', 'Back into the original list. I’ll check the row count and the stove entry, then come back with what I find.'],
+  ] },
+  { key: 'feature', name: 'Alex Morgan', assigned: true, subject: 'Request: shared packing lists', messages: [
+    ['contact', 'Could you add shared packing lists? Our hiking group keeps bringing three stoves and no coffee.'],
+    ['operator', 'That’s a useful example. Would you want everyone to edit the list, or just claim the equipment they’re bringing?'],
+    ['contact', 'Claiming an item would be perfect. A link I can send to the group would be enough.'],
+    ['operator', 'For this demo request, could you walk me through what happens when two people both try to claim the same stove? Should the first claim reserve it?'],
+    ['contact', 'Yes, but we should be able to switch who brings it. Someone always changes their plans the night before.'],
+    ['operator', 'Would each person need an account, or would entering a name from the shared link be enough for your group?'],
+    ['contact', 'A name would be enough. I’d rather not ask six friends to sign up just for a weekend away.'],
+    ['operator', 'That makes sense. A shared link also raises a choice about who can change the list: would you want to keep item editing with the organiser while everyone can manage their own claims?'],
+    ['contact', 'Exactly. I’d add the equipment, and they could claim or unclaim it. It would also help to see what nobody has claimed yet.'],
+    ['operator', 'That gives us a clear example: organiser-owned items, named claims, easy reassignment and a view of unclaimed equipment. This stays an open demo feature request; it isn’t a release commitment or a submitted product ticket.'],
+  ] },
+  { key: 'receipt', name: 'Priya Shah', resolved: true, assigned: true, subject: 'Understanding a receipt', messages: [
+    ['contact', 'My demo receipt shows a $12 delivery charge. I thought orders over $100 shipped free?'],
+    ['operator', 'In this fictional store, the free-delivery threshold is calculated after discounts. Your $110 basket became $88 with the welcome code, so the example receipt includes delivery.'],
+    ['contact', 'Got it — I was looking at the original total. Thanks for explaining!'],
+    ['operator', 'You’re welcome, Priya. Would it help to separate the sample item total, discount and delivery so the final amount is easier to follow?'],
+    ['contact', 'Yes please. I’m comparing it with the amount at the bottom of the receipt.'],
+    ['operator', 'The example starts at $110, takes off a $22 welcome discount, then adds $12 delivery: $110 − $22 + $12 = $100.'],
+    ['contact', 'So the final total is $100, but that doesn’t make the delivery free because delivery itself doesn’t count toward the threshold?'],
+    ['operator', 'Exactly. The fictional policy checks the $88 item subtotal after the discount, before adding delivery.'],
+    ['contact', 'Perfect, the arithmetic matches now. No changes needed — I just wanted to understand it.'],
+    ['operator', 'Glad that clears it up. This demo receipt question is resolved; no charge, refund or order adjustment was made.'],
+  ] },
+  { key: 'care', name: 'Theo Brooks', resolved: true, assigned: true, subject: 'Cleaning a trail bottle', messages: [
+    ['contact', 'What’s the best way to clean the lid on my trail bottle?'],
+    ['operator', 'For this example bottle, remove the silicone seal, wash the lid and seal with warm soapy water, and let both dry before reassembling. The care leaflet has a diagram of the seal position.'],
+    ['contact', 'Found the diagram and got it back together. All sorted.'],
+    ['operator', 'Glad you found it, Theo. Before we close the demo question, did the seal sit flat all the way around when you put it back?'],
+    ['contact', 'Mostly, but one small section was twisted. I’ve taken it out again rather than forcing the lid shut.'],
+    ['operator', 'Good catch. Following the example leaflet, seat the clean, dry seal evenly in its groove and check that it isn’t folded. If it looks damaged, stop using it and check the actual manufacturer’s replacement guidance.'],
+    ['contact', 'It isn’t split or stretched. I’ve fitted it evenly now, and the lid closes without needing extra force.'],
+    ['operator', 'For a simple check, put a little cool water in the bottle, close it normally and tilt it over the sink. Do you see any drips around the lid?'],
+    ['contact', 'No drips. That was the problem — thanks for checking the seal rather than just leaving me with the washing instructions.'],
+    ['operator', 'You’re welcome. We’ll leave this fictional care conversation resolved. For a real bottle, its own care instructions take priority over this sample advice.'],
+  ] },
+] as const

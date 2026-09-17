@@ -1,0 +1,10 @@
+{
+  "created": "2026-09-17",
+  "mode": "built-in image_gen",
+  "purpose": "Fresh generation following actual agent prefill and automatic browser queue in visible onboarding.",
+  "job": "42306d9d6beee28f01710626695e97c1",
+  "revision": 1,
+  "file": "coastal-ai-background-v3-agent-live.png",
+  "prompt": "Use case: stylized-concept\nAsset type: cinematic wide full-bleed onboarding background, 16:9 landscape.\nUser inspiration: Sci-fi, technology and AI; rivers and beaches.\nPrimary request: A magnificent peaceful science-fiction coast with a winding crystal-clear river entering turquoise ocean along a warm pale-sand beach. A graceful futuristic research settlement integrated into distant left-hand coastal cliffs, subtle architectural illumination suggesting advanced thoughtful technology and AI. Lush natural coastal rocks, grasses and river detail in foreground.\nStyle/medium: premium cinematic environment art, photoreal natural textures, beautiful realistic light and atmospheric depth, imaginative architecture grounded in the terrain.\nComposition/framing: dramatic vast scale. Left third and outer edges richly detailed, river leads from lower left through center to the sea. Right-center broad calm ocean and hazy sky with minimal visual clutter behind a white onboarding form. Edge-to-edge environment, not a mockup.\nLighting/mood: calm luminous dusk, warm apricot horizon and beach light, deep blue and teal shadows, quiet optimism and discovery.\nConstraints: no text, no logos, no UI, no frames, no people, no mascot, no robots, no floating interface or holographic symbols, no giant planet.",
+  "original": "/Users/zemaj/.codex_12ui_james/generated_images/01a0af62-3fff-7343-b13e-a3fef55b4652/exec-24d2b2d8-26c5-4b8b-8d89-086c2315c39e.png"
+}

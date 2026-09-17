@@ -1,10 +1,10 @@
 import {isProjectActive} from '../../platform/project-status'
 import type {Actor,Env} from '../../platform/env'
-import {sendEmail,type EmailInput} from './email'
+import {sendEmail,emailConfigured,type EmailInput} from './email'
 async function deliver(env:Env,input:EmailInput){const prior=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<any>();if(prior)return {state:prior.state,id:prior.provider_id,recipient:prior.recipient};try{return await sendEmail(env,input)}catch(error){const recorded=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<any>();if(recorded)return {state:recorded.state,id:recorded.provider_id,recipient:recorded.recipient};throw error}}
 /** Called after message commit. Provider failures remain visible in email_deliveries. */
 export async function notifyMessage(env:Env,message:any,actor:Actor){
- const deliveryId=`message:${message.id}:notification`,prior=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(deliveryId).first<any>();if(prior)return {state:prior.state,id:prior.provider_id,recipient:prior.recipient};if(!await isProjectActive(env,actor.projectId))return {state:'project_deleted'};if(!env.EMAIL_API_KEY||!env.EMAIL_FROM)return {state:'not_configured'}
+ const deliveryId=`message:${message.id}:notification`,prior=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(deliveryId).first<any>();if(prior)return {state:prior.state,id:prior.provider_id,recipient:prior.recipient};if(!await isProjectActive(env,actor.projectId))return {state:'project_deleted'};if(!emailConfigured(env))return {state:'not_configured'}
  const conversation=await env.DB.prepare('SELECT c.*,ct.email,ct.metadata_json FROM conversations c JOIN contacts ct ON ct.id=c.contact_id AND ct.project_id=c.project_id WHERE c.id=? AND c.project_id=?').bind(message.conversation_id,actor.projectId).first<any>();if(!conversation)return {state:'not_found'}
  const settings=await env.DB.prepare('SELECT * FROM email_settings WHERE project_id=? AND is_enabled=1').bind(actor.projectId).first<any>();if(!settings)return {state:'disabled'};const replyTo=settings.inbound_address?settings.inbound_address.replace('@',`+${conversation.id}@`):undefined
  if(message.actor_role==='contact'){

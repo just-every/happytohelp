@@ -1,47 +1,40 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { nativeRequest } from './transport';
-import AuthFrame from './AuthFrame';
-import '../dashboard/styles/theme.scss';
+import SetupFields from './setup/SetupFields';
+import { clearDraft, emptyDraft, loadDraft, saveDraft, type SetupDraft } from './setup/draft';
+import './setup/setup.css';
 
 type SetupState = 'loading' | 'available' | 'complete' | 'unavailable';
-
+const steps = ['Your details', 'Workspace', 'Review'];
 export default function Setup() {
     const [state, setState] = useState<SetupState>('loading');
-    const [origin, setOrigin] = useState('');
+    const [draft, setDraft] = useState(emptyDraft);
+    const [step, setStep] = useState(0);
     const [error, setError] = useState('');
-    const [setupToken, setSetupToken] = useState('');
     const [tokenRequired, setTokenRequired] = useState(false);
     const [busy, setBusy] = useState(false);
-
+    const [saved, setSaved] = useState(false);
+    const loaded = useRef(false);
     useEffect(() => {
         let active = true;
-        setOrigin(location.origin);
-        const fragment = new URLSearchParams(location.hash.slice(1));
-        const transferredToken = fragment.get('setupToken');
-        if (transferredToken) {
-            setSetupToken(transferredToken);
-            fragment.delete('setupToken');
-            history.replaceState(history.state, '', location.pathname + location.search + (fragment.size ? '#' + fragment.toString() : ''));
-        }
+        if (!loaded.current) { setDraft(loadDraft()); loaded.current = true; }
         nativeRequest('/api/identity/setup').then(result => {
             if (active) { setState(result.available ? 'available' : 'complete'); setTokenRequired(Boolean(result.tokenRequired)); }
-        }).catch(error => {
-            if (active) { setError(error.message); setState('unavailable'); }
-        });
+        }).catch(error => { if (active) { setError(error.message); setState('unavailable'); } });
         return () => { active = false; };
     }, []);
-
+    const update = (key: keyof SetupDraft, value: string) => { setDraft(current => ({ ...current, [key]: value })); setSaved(false); };
     const submit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (busy || state !== 'available') return;
-        const values = Object.fromEntries(new FormData(event.currentTarget));
-        setError('');
+        setError(''); saveDraft(draft);
+        if (step < 2) { setStep(step + 1); return; }
+        if (!draft.ownerName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email) || draft.password.length < 12 || (tokenRequired && !draft.setupToken)) { setStep(0); setError('Complete your owner details before creating the workspace.'); return; }
+        if (!draft.name.trim() || !/^#[0-9a-f]{6}$/i.test(draft.primaryColor)) { setStep(1); setError('Complete your workspace details before creating it.'); return; }
         setBusy(true);
         try {
-            const created = await nativeRequest('/api/identity/bootstrap', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(values),
-            });
+            const created = await nativeRequest('/api/identity/bootstrap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft) });
+            clearDraft();
             location.assign(`/projects/${encodeURIComponent(created.projectId)}/widget-settings`);
         } catch (error: any) {
             setError(error.message);
@@ -49,45 +42,26 @@ export default function Setup() {
             setBusy(false);
         }
     };
-
-    return <AuthFrame wide>
-        <h1 className="display-4">Set up HappyToHelp</h1>
-        {state === 'complete' ? <>
-            <p>This HappyToHelp instance already has an owner. Sign in to continue.</p>
-            <a className="btn btn-primary" href="/login">Sign in</a>
-        </> : <>
-            <p>Create the first workspace and its owner account.</p>
-            {error && <p className="alert alert-danger" role="alert">{error}</p>}
+    return <main className="setup-scene"><div className="setup-layout"><aside className="setup-sidebar">
+        <a className="setup-brand" href="/">HappyToHelp</a>
+        <h1>A new home for <span>helpful conversations.</span></h1>
+        <p>Let’s make this workspace yours. Review what’s already known, then add the few details we still need.</p>
+        <section className="setup-known" aria-label="Known details"><header><h2>Known details</h2>{state === 'available' && <button type="button" onClick={() => setStep(1)}>Edit</button>}</header><dl>
+            <div><dt>Product</dt><dd>HappyToHelp</dd></div><div><dt>Workspace</dt><dd>{draft.name || 'Not set yet'}</dd></div>
+            <div><dt>Runtime</dt><dd>Cloudflare Worker</dd></div><div><dt>Installation</dt><dd>{draft.allowedOrigin ? new URL(location.href).origin : 'Checking…'}</dd></div>
+        </dl><small>The app is running here. Hosting and repository access are managed by your installation tools.</small></section>
+    </aside><section className="setup-panel" aria-label="Set up HappyToHelp">
+        {state === 'complete' ? <><h2>You’re already set up.</h2><p>This installation already has an owner. Sign in to continue to your workspace.</p><a className="setup-primary" href="/login">Sign in</a></> : <>
+            <nav aria-label="Setup progress"><ol className="setup-steps">{steps.map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined}><span>{index + 1}</span>{label}</li>)}</ol></nav>
+            <h2>{['A little about you', 'Make it your workspace', 'Ready when you are'][step]}</h2>
+            <p>{['Your account will own this installation.', 'Choose your workspace name, website and colour.', 'Check your details before we create your workspace.'][step]}</p>
+            {error && <p className="setup-error" role="alert">{error}</p>}
             {state === 'loading' && <p role="status">Checking setup availability…</p>}
-            {state === 'unavailable' && <button className="btn btn-primary" onClick={() => location.reload()}>Retry</button>}
-            {state === 'available' && <form method="post" className="workspace-settings" onSubmit={submit}>
-                <section className="settings-section">
-                    <div className="settings-section__heading"><h2>Workspace and owner</h2></div>
-                    {(tokenRequired || setupToken) && <div className="form-group">
-                        <label className="form-label" htmlFor="setupToken">Owner setup token</label>
-                        <input className="form-control" id="setupToken" name="setupToken" type="password" required value={setupToken} onChange={event => setSetupToken(event.target.value)} autoComplete="off" />
-                        <p className="form-text">Use the private token provided with your installation.</p>
-                    </div>}
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="name">Workspace name</label>
-                        <input className="form-control" id="name" name="name" required maxLength={200} autoComplete="organization" />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="email">Owner email</label>
-                        <input className="form-control" id="email" name="email" type="email" required maxLength={320} autoComplete="username" />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="password">Owner password</label>
-                        <input className="form-control" id="password" name="password" type="password" required minLength={12} maxLength={1024} autoComplete="new-password" aria-describedby="password-help" />
-                        <p className="form-text" id="password-help">Use at least 12 characters.</p>
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="allowedOrigin">Widget website origin</label>
-                        <input className="form-control" id="allowedOrigin" name="allowedOrigin" type="url" required defaultValue={origin} />
-                    </div>
-                </section>
-                <button className="btn btn-primary" disabled={busy}>{busy ? 'Creating…' : 'Create workspace'}</button>
+            {state === 'unavailable' && <button className="setup-primary" onClick={() => location.reload()}>Retry</button>}
+            {state === 'available' && <form onSubmit={submit}><SetupFields draft={draft} update={update} tokenRequired={tokenRequired} step={step} />
+                <footer className="setup-actions"><button className="setup-secondary" type="button" disabled={busy} onClick={() => { if (step) setStep(step - 1); else { saveDraft(draft); setSaved(true); } }}>{step ? 'Back' : 'Save for later'}</button><button className="setup-primary" disabled={busy}>{busy ? 'Creating…' : step === 2 ? 'Create workspace' : step === 1 ? 'Review setup' : 'Continue'}</button></footer>
+                {saved && <p role="status" className="setup-note">Details saved in this browser tab. Passwords and setup tokens are never saved.</p>}
             </form>}
         </>}
-    </AuthFrame>;
+    </section></div></main>;
 }

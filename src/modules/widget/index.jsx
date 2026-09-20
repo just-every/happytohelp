@@ -19,25 +19,33 @@ export function mountWidget(options) {
   if (!target.id) target.id = options.targetElementId || 'happytohelp';
   const ref = createRef();
   let root;
+  let destroyed = false;
+  const owner = {};
   let revoked = !!config.settings.await_consent;
   const initialize = () => {
-    if (root) return;
+    if (root || destroyed) return;
     Collector.setCollectorEnabled(false); Collector.excludeElement(target);
     root = createRoot(target); root.render(<App ref={ref} config={config} Collector={Collector}/>);
   };
   if (!revoked) initialize();
-  activeWidget = {};
+  activeWidget = owner;
   return {
     open: () => ref.current?.open(),
     close: () => ref.current?.close(),
     update: value => ref.current?.update(value),
     request: value => ref.current?.request(value),
     consent: provided => {
+      if (destroyed) return;
       revoked = !provided;
-      if (revoked) {root?.unmount(); root = null; Collector.setCollectorEnabled(false); Collector.setMessageHandler(null);}
+      if (revoked) {root?.unmount(); root = null; Collector.destroy();}
       else initialize();
     },
-    destroy: () => {root?.unmount(); root = null; activeWidget = null; Collector.setCollectorEnabled(false); Collector.setMessageHandler(null);},
+    destroy: () => {
+      if (destroyed) return;
+      destroyed = true;
+      root?.unmount(); root = null;
+      if (activeWidget === owner) { activeWidget = null; Collector.destroy(); }
+    },
   };
 }
 
@@ -48,5 +56,10 @@ export function mountPreview(options) {
   const config = mergeAdvanced(defaultAppContext, {...options, inline: true, inlineSettings: true, preview: {...options.preview, enabled: true}}, {hardMergeEverything: true});
   const root = createRoot(target), ref = createRef();
   root.render(<App ref={ref} config={config} Collector={Collector}/>);
-  return {open: () => ref.current?.open(), close: () => ref.current?.close(), update: value => ref.current?.update(value), destroy: () => root.unmount()};
+  let destroyed = false;
+  return {open: () => ref.current?.open(), close: () => ref.current?.close(), update: value => ref.current?.update(value), destroy: () => {
+    if (destroyed) return;
+    destroyed = true;
+    root.unmount();
+  }};
 }

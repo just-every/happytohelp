@@ -1,5 +1,5 @@
 /* The homepage owns its reset; no marketing selectors affect the workspace. */
-body:has(.h2h-homepage){margin:0}
+body:has(.h2h-homepage){margin:0;padding:0}
 .h2h-homepage #headline-video-frame[data-playing="true"]{display:block}
 .h2h-homepage .home-footer nav{flex-wrap:wrap}
 html:has(.h2h-homepage){scroll-behavior:smooth;scroll-padding-top:24px}

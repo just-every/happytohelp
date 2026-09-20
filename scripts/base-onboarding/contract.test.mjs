@@ -73,8 +73,15 @@ test('custom credential stays private, follows its scope, and agent activity ref
 });
 
 test('adapter rejection produces a safe failed state without exposing provider errors', async t => {
- const { call } = await session(t, { install: async () => { throw Error('SECRET_SENTINEL'); } });
+ let signalFailure;
+ const failed = new Promise(resolve => { signalFailure = resolve; });
+ const { call } = await session(t, { install: async (_root, _input, store) => {
+  const phase = store.phase;
+  store.phase = async value => { const result = await phase(value); if (value === 'failed') signalFailure(); return result; };
+  throw Error('SECRET_SENTINEL');
+ } });
  assert.equal((await call('/api/start', { serviceName: 'API' })).status, 202);
+ await new Promise((resolve, reject) => { const timer = setTimeout(() => reject(Error('Installer failure did not settle.')), 1000); failed.then(() => { clearTimeout(timer); resolve(); }); });
  const state = (await call('/api/state')).body;
  assert.equal(state.phase, 'failed');
  assert.ok(!JSON.stringify(state).includes('SECRET_SENTINEL'));
@@ -93,14 +100,21 @@ test('agent inference preserves owner overrides and their provenance', async t =
 });
 
 test('only explicit start invokes the seed adapter with its custom credential', async t => {
- let installs = 0, received;
- const { call } = await session(t, { install: async (_root, input, store) => { installs++; received = { ...input }; await store.phase('complete'); } });
+ let installs = 0, received, signalComplete;
+ const completed = new Promise(resolve => { signalComplete = resolve; });
+ const { call } = await session(t, { install: async (_root, input, store) => {
+  installs++; received = { ...input };
+  const phase = store.phase;
+  store.phase = async value => { const result = await phase(value); if (value === 'complete') signalComplete(); return result; };
+  await store.phase('complete');
+ } });
  await call('/api/prefill', { serviceName: 'API' });
  let state = (await call('/api/state')).body;
  await call('/api/secrets', { revision: state.lastUpdate.revision, secrets: { monitorToken: 'SECRET_SENTINEL' } });
  await call('/api/activity', { phase: 'complete', topic: 'setup' });
  assert.equal(installs, 0);
  assert.equal((await call('/api/start', { serviceName: 'API' })).status, 202);
+ await new Promise((resolve, reject) => { const timer = setTimeout(() => reject(Error('Installer completion did not settle.')), 1000); completed.then(() => { clearTimeout(timer); resolve(); }); });
  state = (await call('/api/state')).body;
  assert.equal(installs, 1);
  assert.deepEqual(received, { serviceName: 'API', monitorToken: 'SECRET_SENTINEL' });

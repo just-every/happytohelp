@@ -44,3 +44,19 @@ A known complete draft opens review rather than asking for its values again.
 
 Run `node --test onboarding/*.test.mjs onboarding/ui/*.test.mjs` in Base.
 Edition integration tests must separately prove actual install and running output.
+
+Private installer directories are tightened to owner-only access on resume;
+credential, local environment and state files are tightened before reading or
+updating them. Storage must belong to the current user, and files must be regular
+files. Permissive hard-linked files are refused before changing their shared
+inode; already-private links can be read and atomically replaced without
+changing their other links. Symlinked private paths are refused before touching
+their targets. Receipt updates preserve the original token and additional saved
+fields; only the explicit deployment acknowledgement marks a receipt deployed.
+This protects ordinary owner checkouts, not concurrent hostile replacement of
+ancestor directories. POSIX mode assertions run on the supported local filesystem.
+
+HappyToHelp adopted this private-storage implementation and regression tests
+byte-for-byte on 20 September 2026. Both shared and copied onboarding suites were
+run locally; this is working-tree adoption evidence, not publication or hosted
+installation acceptance.

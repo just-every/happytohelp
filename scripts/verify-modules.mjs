@@ -5,13 +5,13 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 // Browser and emitted-Worker checks need a built application and run separately.
 const standalone = [
-  'deleted-background.mjs', 'conversation-admission.mjs',
-  'conversation-socket.mjs', 'customer-context-routes.mjs', 'email-provider.mjs', 'cloudflare-email.mjs', 'email-worker.mjs',
+  'module-boundaries.mjs', 'widget-events.mjs', 'deployment-config-private.mjs', 'email-recovery.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
+  'conversation-socket.mjs', 'customer-context-routes.mjs', 'email-provider.mjs', 'sendgrid-email.mjs', 'sendgrid-inbound.mjs', 'cloudflare-email.mjs', 'email-worker.mjs',
   'github-integration.mjs', 'identity.mjs', 'identity-setup.mjs', 'knowledge-context.mjs',
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs',
   'operating-environment.mjs', 'management.mjs', 'demo-inbox.mjs', 'demo-transcript-events.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
   'site-preview.mjs', 'workspace-artwork.mjs', 'not-found-response.mjs', 'delivery-deployment-spec.mjs', 'delivery-migration-order.mjs',
-  'ui-transport.mjs', 'login-return.mjs', 'local-owner-login.mjs', 'widget-transport.mjs',
+  'ui-transport.mjs', 'login-return.mjs', 'local-owner-login.mjs', 'widget-transport.mjs', 'installer-secret-scopes.mjs',
 ].map(name => `tests/${name}`);
 const groups = ['tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test'];
 for (const group of groups) {

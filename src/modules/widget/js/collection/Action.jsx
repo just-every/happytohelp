@@ -82,6 +82,7 @@ function writeAction(action, immediate = false, clean = false) {
 }
 
 function recordAction(action, immediate = false, clean = false) {
+    if (!collectorEnabled) return;
     action = action.charAt(0).toUpperCase() + action.slice(1);
     if(action === lastAction) return;
     lastAction = action;
@@ -119,6 +120,7 @@ function setCollectorEnabled(newEnabled) {
 
 function onAction(fn) {
     actionCallback.push(fn);
+    return () => { actionCallback = actionCallback.filter(callback => callback !== fn); };
 }
 
 function onReady(fn) {
@@ -127,9 +129,25 @@ function onReady(fn) {
         return;
     }
     readyCallback.push(fn);
+    return () => { readyCallback = readyCallback.filter(callback => callback !== fn); };
+}
+
+function resetCollectorState() {
+    setMessageHandler(null);
+    lastAction = null;
+    lastActionWriteTime = null;
+    pendingTimer = pingTimer = pingTimerAction = false;
+    sentActionPing = false;
+    sentActions = 0;
+    widgetState = 'closed';
+    collectorEnabled = false;
+    actionCallback = [];
+    readyCallback = [];
+    isReady = false;
 }
 
 export {
+    resetCollectorState,
     lastAction,
     writeAction,
     recordAction,

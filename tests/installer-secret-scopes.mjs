@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { normalizeEmail } from '../scripts/installer/email.mjs';
+import { normalizeEmail, emailEnvironment } from '../scripts/installer/email.mjs';
 import { createSecretVault } from '../scripts/installer/secrets.mjs';
 import { mergeAgentDraft, secretReady } from '../scripts/installer/ui/model.mjs';
 import { startInstaller } from '../scripts/installer/server.mjs';
@@ -14,6 +14,10 @@ assert.throws(() => normalizeEmail({provider:'cloudflare',accountId:accountA}, {
 assert.throws(() => normalizeEmail({provider:'cloudflare',accountId:accountB}, cloudflare), /API token/);
 assert.equal(normalizeEmail({provider:'cloudflare',accountId:accountA}, cloudflare).apiKey, fixtureKey);
 assert.equal(normalizeEmail({provider:'resend',apiKey:'explicit-test-key'}, cloudflare).apiKey, 'explicit-test-key');
+const sendgrid = { EMAIL_PROVIDER:'sendgrid', EMAIL_FROM:'help@justevery.com', EMAIL_API_KEY:'sendgrid-fixture-key' };
+assert.deepEqual(normalizeEmail({}, sendgrid), { provider:'sendgrid', from:'help@justevery.com', accountId:'', apiKey:'sendgrid-fixture-key' });
+assert.deepEqual(emailEnvironment(normalizeEmail({}, sendgrid)), sendgrid);
+assert.throws(() => normalizeEmail({provider:'sendgrid'}, { EMAIL_PROVIDER:'resend', EMAIL_API_KEY:'resend-fixture-key', EMAIL_FROM:'help@justevery.com' }), /API token/);
 
 const vault=createSecretVault(), draft={emailProvider:'cloudflare',emailAccountId:accountA};
 vault.set({emailApiKey:fixtureKey},draft);

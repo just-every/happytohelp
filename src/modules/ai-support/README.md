@@ -14,9 +14,22 @@ The isolated Beacon proof connects that source to Beacon's real reviewed AI
 preparation request. Provider execution and autonomous message sending are distinct
 integrations and are not enabled by importing context helpers.
 
-Full edition integration also selects conversation, knowledge/customer-context and
-training adapter paths. The root package lock supplies runtime dependencies.
+The generation service selects conversation and knowledge/customer-context.
+Training is optional edition integration in `src/edition/ai/training.ts`; importing
+AI assistance does not select the training runner. The service also uses edition
+platform and notification/repository adapters; it is not an isolated deployable
+folder. The root package lock supplies runtime dependencies.
 Apply migration020 for durable generation state; per-round provider usage and
 execution metadata remain raw diagnostic records. No payment, balance, debit or
 Stripe behavior is part of this capability. Tests/ai-support exercises the
 retained behavior and real Worker provider boundaries with test-only fixtures.
+
+Generation work requires the edition's `GenerationEffects` adapter before it can
+claim an attempt. `generation-provider.ts` owns context/provider execution,
+`generation-currentness.ts` checks the captured source frontier, and
+`generation-finalization.ts` retains conditional suggestion publication and atomic
+reply admission. `service.ts` owns the claim and uncertain-outcome lifecycle;
+`generation-queue.ts` recovers persisted work. Socket and notification effects live
+in `src/edition/ai/generation-effects.ts` and never authorize provider replay.
+Automatic replies with missing provider credentials persist an actionable failed
+generation in AI logs without rejecting the already-saved customer message.

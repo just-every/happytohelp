@@ -24,6 +24,24 @@
     "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
   },
   {
+    "source": "homepage/media/brands/happytohelp-logo.svg",
+    "sha256": "81d8bd9254cffb0d860ef4927dcef6aa7e9ebed73a5551d597246b647c94c9f8",
+    "bytes": 10052,
+    "origin": "Owner-supplied HappyToHelp brand artwork; copied unchanged 2026-09-19"
+  },
+  {
+    "source": "homepage/media/brands/happytohelp-icon.svg",
+    "sha256": "fd5221d0699b0289eb4d457af9a35bd047f0b6a57e6246eb859ade0627ab1d30",
+    "bytes": 6172,
+    "origin": "Derived 2026-09-19 from owner-supplied happytohelp-logo.svg; original rider path geometry retained and both path fills recolored #33344a per owner; rider-only viewBox 0 0 419 547"
+  },
+  {
+    "source": "homepage/media/brands/happytohelp-favicon.png",
+    "sha256": "a10803603a265e99bb3706d2e0f2c8cb562baee30c705dca2cf48d56abd3d60b",
+    "bytes": 82657,
+    "origin": "Owner-supplied happytohelp-favicon.png; copied unchanged 2026-09-19 with no conversion or color changes"
+  },
+  {
     "source": "homepage/media/graphics/rider-sculpted-toy.png",
     "sha256": "29166e08b58df420b7e2edda53a15c1fcb42953c1b851c3d5203104106219329",
     "bytes": 1626664,

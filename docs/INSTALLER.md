@@ -42,7 +42,8 @@ will be allowed, not the team workspace address. The installer never invents it.
 Hosting and account connections stay together. Local running means the machine
 running the installer, with its terminal process kept alive; Cloudflare publishes
 the application online. Email offers an explicit now/later choice, then the
-sending service, sender and required credentials together. Hosting sign-in alone
+the sending service (Cloudflare Email Sending, Resend or SendGrid), sender and
+required credentials together. Hosting sign-in alone
 does not configure outbound email.
 Local hosting and brand colour are labelled suggestions when not explicitly set.
 Known values are not forced through another review sequence. When everything is
@@ -129,10 +130,12 @@ cannot silently become attached to a different owner or account.
 
 Email is part of setup. Configured sending is distinct from verified domain or
 successful delivery. Cloudflare Email Sending needs its actual service access,
-verified sending domain and a dedicated sending token. Local email configuration
-is kept in ignored `.dev.vars`; remote configuration uses the existing secret
-publication path. Choosing to defer email is explicit. Magic links are not offered
-without a real implementation.
+verified sending domain and a dedicated sending token; Resend and SendGrid need
+their provider API key and verified sender. SendGrid inbound replies require a
+separate Inbound Parse route and token after installation. Local email
+configuration is kept in ignored `.dev.vars`; remote configuration uses the
+existing secret publication path. Choosing to defer email is explicit. Magic
+links are not offered without a real implementation.
 
 ## Verification
 
@@ -251,7 +254,7 @@ branding, fields, operations and supported capabilities; `ui/seed.mjs` owns its
 browser schema. HappyToHelp retains the real setup/deploy/bootstrap and private
 artwork transfer adapters. The original ocean background remains edition-owned.
 The editable local selection retains Base comparison commit
-`5e8146003eba71d862c1856165fa7cf16724b71c` in `edition.json` and its source lock.
+`27ff80c586236927c644130dadd01a20893fd8d4` in `edition.json` and its source lock.
 No push, upstream publication or deployment is claimed. Artwork exploration and
 its provenance are retained under `evidence/setup-artwork-exploration/`, outside
 the publicly served assets.

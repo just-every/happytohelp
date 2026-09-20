@@ -1,23 +1,23 @@
 import {recordTrainingEvent} from './training-trace'
 import type { Env } from '../../platform/env'
-import type { TrainingExecution,TrainingResult } from '../training-runs/contracts'
-import {assertModelConfigured} from './configuration'
+import type { TrainingExecution,TrainingResult } from '../../modules/training-runs/contracts'
+import {assertModelConfigured} from '../../modules/ai-support/configuration'
 import {checkTrainingBudget} from './training-budget'
 import {executeSystemCase} from './training-system'
 // @ts-ignore Retained frozen comparator with explicit native fixture adapter.
-import {buildBaselineTrainingRequest} from '../training-runs/baseline.js'
+import {buildBaselineTrainingRequest} from '../../modules/training-runs/baseline.js'
 // @ts-ignore Retained prompt source.
-import { generateSuggestions,generateReply } from './assist/prompt.js'
+import { generateSuggestions,generateReply } from '../../modules/ai-support/assist/prompt.js'
 // @ts-ignore Retained scoped runtime.
-import { withWorkerRuntime } from './vendor/ensemble/worker-runtime.js'
+import { withWorkerRuntime } from '../../modules/ai-support/vendor/ensemble/worker-runtime.js'
 // @ts-ignore Retained evidence source.
-import { evidenceIdsForPacket,imageInputsForPacket } from './assist/packet.js'
+import { evidenceIdsForPacket,imageInputsForPacket } from '../../modules/ai-support/assist/packet.js'
 // @ts-ignore Retained customer packet.
-import {customerReplyPacket} from './replies/packet.js'
+import {customerReplyPacket} from '../../modules/ai-support/replies/packet.js'
 // @ts-ignore Retained customer prompt.
-import {customerReplyMessages} from './replies/prompt.js'
+import {customerReplyMessages} from '../../modules/ai-support/replies/prompt.js'
 // @ts-ignore Retained neutral engine.
-import {runStream,TASKS} from './llm/orchestrator.js'
+import {runStream,TASKS} from '../../modules/ai-support/llm/orchestrator.js'
 export async function executeTrainingCase(env:Env,input:TrainingExecution):Promise<TrainingResult>{
  assertModelConfigured(env,input.model)
  if(input.caseDefinition.insightModel){assertModelConfigured(env,input.caseDefinition.insightModel);checkTrainingBudget(env,{...input,model:input.caseDefinition.insightModel})}

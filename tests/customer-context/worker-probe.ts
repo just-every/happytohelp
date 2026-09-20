@@ -3,7 +3,7 @@ import {collectActions,trackEvents} from '../../src/modules/customer-context/col
 import {enqueueContextJob,recoverContextJobs} from '../../src/modules/customer-context/jobs'
 import {consumeContextJob} from '../../src/modules/customer-context/engine'
 import {readContextSource,monitoringPacket} from '../../src/modules/customer-context/packets'
-import {requestContextModel} from '../../src/modules/customer-context/provider'
+import {requestContextModel} from '../../src/edition/ai/customer-context-provider'
 const assert=(value:any,message:string)=>{if(!value)throw new Error(message)}
 export default {async fetch(request:Request,env:any){try{
  const queued:any[]=[];env={...env,JOBS:{send:async(job:any)=>{queued.push(job)}}}

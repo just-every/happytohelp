@@ -45,7 +45,7 @@ function setupModel(draft, known = {}) {
     if (!known.providers?.cloudflare?.authenticated && !fields.apiToken.valid(draft.apiToken) && !secretReady('apiToken', draft, known)) connections.push('cloudflare');
   }
   if (features.email) keys.push('emailProvider');
-  if (features.email && ['cloudflare', 'resend'].includes(draft.emailProvider)) {
+  if (features.email && ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider)) {
     keys.push('emailFrom');
     if (draft.emailProvider === 'cloudflare') keys.push('emailAccountId');
     if (!configuredEmailReady(draft, known) && !secretReady('emailApiKey', draft, known)) keys.push('emailApiKey');
@@ -90,7 +90,7 @@ function normalizeAutomaticDraft(value) {
 function emailModel(draft, known = {}) {
   if (!features.email) return { keys: [], complete: true };
   const keys = ['emailProvider'];
-  if (features.email && ['cloudflare', 'resend'].includes(draft.emailProvider)) {
+  if (features.email && ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider)) {
     keys.push('emailFrom');
     if (draft.emailProvider === 'cloudflare') keys.push('emailAccountId');
     if (!configuredEmailReady(draft, known) && !secretReady('emailApiKey', draft, known)) keys.push('emailApiKey');

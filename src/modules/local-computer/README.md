@@ -9,7 +9,7 @@ The connector tests use isolated temporary fixtures and provider boundaries.
 Select this directory, migrations/030_local_computer.sql and local-agent as source.
 Register `registerLocalComputerRoutes(app, integration)`. Integration explicitly
 supplies operator authorization, current membership, a bounded scoped context, and
-conditional reply delivery. `edition.ts` binds those contracts to HappyToHelp's
+conditional reply delivery. `src/edition/local-computer.ts` binds those contracts to HappyToHelp's
 native conversation admission. Consumers may supply another domain's adapters.
 
 Pairing and grants store only secret hashes. Claims preserve run/claim identity;

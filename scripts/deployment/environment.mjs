@@ -18,7 +18,7 @@ const configured=(env,name)=>typeof env[name]==='string'&&env[name].trim()!==''
 export function runtimeVariables(env){validateRuntimeEnvironment(env);return Object.fromEntries(variableNames.filter(name=>configured(env,name)).map(name=>[name,env[name]]))}
 export function runtimeSecrets(env){return Object.fromEntries(secretNames.filter(name=>configured(env,name)).map(name=>[name,env[name]]))}
 export function validateRuntimeEnvironment(env){
- if(configured(env,'EMAIL_PROVIDER')&&!['resend','cloudflare'].includes(env.EMAIL_PROVIDER))throw new Error('EMAIL_PROVIDER must be resend or cloudflare')
+ if(configured(env,'EMAIL_PROVIDER')&&!['resend','cloudflare','sendgrid'].includes(env.EMAIL_PROVIDER))throw new Error('EMAIL_PROVIDER must be resend, cloudflare or sendgrid')
  if(env.EMAIL_PROVIDER==='cloudflare'&&!/^[a-f0-9]{32}$/i.test(env.EMAIL_ACCOUNT_ID||''))throw new Error('Cloudflare email requires EMAIL_ACCOUNT_ID')
  for(const name of ['REGISTRATION_ENABLED','ENABLE_SYNTHETIC_EVALUATION'])if(configured(env,name)&&!['true','false'].includes(env[name]))throw new Error(`${name} must be true or false`)
  for(const name of ['APP_ORIGIN','PREVIEW_ORIGIN','RER_MANAGEMENT_ORIGIN','QDRANT_URL'])if(configured(env,name)){const url=new URL(env[name]);if(url.protocol!=='https:'||url.username||url.password||url.hash)throw new Error(`${name} must be HTTPS without embedded credentials`);if(name!=='QDRANT_URL'&&(url.pathname!=='/'||url.search||url.port))throw new Error(`${name} must be an origin`)}

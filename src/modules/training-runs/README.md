@@ -4,7 +4,8 @@ Select this directory and migrations/040_training_runs.sql. Mount trainingRoutes
 at /api/training and dispatch persisted `training` queue jobs through
 `executeTrainingRun(env,id,executor)`. The executor contract is independent of a
 conversation schema and receives the selected model, case, output-token limit,
-cost reservation and stable attempt identity. The edition supplies real AI execution.
+cost reservation and stable attempt identity. The edition supplies real AI execution through `src/edition/ai/training.ts`.
+The runner has no dependency on AI support, customer context or local-computer.
 
 The checker is the existing HappyToHelp Chat scripts/eval/checks.js, converted to ESM without
 changing its evidence IDs, per-card checks, private-note leakage, language, tool,

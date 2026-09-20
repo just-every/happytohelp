@@ -1,7 +1,8 @@
+import { HomepageBrand } from './HomepageBrand';
 export function HomepageFooter() {
   return (
     <footer className="home-footer">
-      <a className="brand" href="#top">HappyToHelp</a>
+      <HomepageBrand />
       <nav aria-label="Footer navigation">
         <a href="#features">Features</a>
         <a href="https://github.com/runeditrun/support-happytohelp/blob/main/README.md">Documentation</a>

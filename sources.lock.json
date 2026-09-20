@@ -409,7 +409,7 @@
       "executable": false
     },
     "docs/PUBLIC-SOURCE-PROVENANCE.md": {
-      "sha256": "18439f772b8022db17ffe0f427b74cfbce4fd2d7e96a5e772362310813515f6a",
+      "sha256": "6fac2403a560fcd943c3f10e5d2b2c1c3aefe3fb0cd616480123706277adc973",
       "executable": false
     },
     "docs/SECOND-CONSUMER-PROOF.json": {
@@ -421,7 +421,7 @@
       "executable": false
     },
     "docs/SOURCE-PROVENANCE.md": {
-      "sha256": "45e47f4d7572646915e52c425d769fc58e531ee96e9e81b839657f6fba93ccec",
+      "sha256": "a56f6e40273f03e5ad2463cb6997596cb0ed5b0f8973208fd287724e719b990d",
       "executable": false
     },
     "docs/UI-PARITY.md": {

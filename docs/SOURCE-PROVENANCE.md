@@ -24,7 +24,7 @@ historical database runtime is unchanged.
 
 The public source boundary is the edition root `LICENSE` plus the notices under
 `docs/licenses/`. The root notice covers first-party Run Edit Run source. The
-owner-approved/generated homepage and installer art and the owner-supplied
+owner-approved/generated homepage art and the owner-supplied
 HappyToHelp branding are recorded in the edition asset manifests and are not
 relicensed as MIT code. Claude and Codex marks are nominative references to
 supported tools, not Run Edit Run property or vendor endorsement. Third-party
@@ -36,8 +36,10 @@ under ai-support/vendor/ensemble. Preserve them together. Preserve all package
 licences and notices from the frozen dependency graph; installation/download
 verification is separate from legal redistribution review. The ported H2H Site
 CSS/patterns and dashboard icon/masks retain source attribution in
-`docs/PUBLIC-SOURCE-PROVENANCE.md`; no unidentified retained local asset path
-remains in the current asset audit. The unused Feather fallback files and
+`docs/PUBLIC-SOURCE-PROVENANCE.md`. The current asset audit accounts for retained
+paths. The installer background has a retained owner-selection and generation
+receipt; exact upstream attribution for the ported theme/pattern assets is being
+verified separately. Source custody alone is not a licence claim. The unused Feather fallback files and
 historical Font Awesome Pro assets are not release inputs. External Google Fonts
 imports remain runtime dependencies rather than bundled assets.
 

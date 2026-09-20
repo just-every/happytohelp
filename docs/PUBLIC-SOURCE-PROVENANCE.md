@@ -70,15 +70,21 @@ first-party source. The retained public paths are classified as follows:
   dashboard avatar masks. The archive is generated from the first-party local
   agent allowlist and contains no credentials or runtime state.
 - Owner-approved or owner-supplied edition assets include the selected
-  `public/homepage/**` art and branding, `public/setup/ocean.png`, and the
-  HappyToHelp dashboard mark at `public/img/icon.svg`. Their hashes and origins
-  are recorded in the two asset manifests; they are not presented as MIT code.
+  `public/homepage/**` art and branding and the HappyToHelp dashboard mark at
+  `public/img/icon.svg`. The homepage manifest records the selected homepage
+  hashes and origins; these assets are not presented as MIT code. The installer
+  background `public/setup/ocean.png` is also owner-selected generated art:
+  `setup-ocean-cliffs-conversion/SELECTION.md` and `ocean-delivery.json` in the
+  retained design evidence record the approved crop and unchanged delivery. Its
+  SHA-256 is `9e76eb5c98d25004c5993171f83c2ed0ea069397a5456e7f09bbde0363f4b983`.
 - The Claude and Codex SVGs under `public/homepage/media/brands/` are official
   product marks used only as nominative support references. They are not claimed
   as Run Edit Run property or vendor endorsement.
 - Ported public-site CSS and pattern assets under `public/site-assets/` come from
   the owner-controlled H2H Site baseline recorded above. Their paths, hashes and
   source history remain in `src/modules/public-site/asset-provenance.json`.
+  That establishes custody, not the licence of any upstream theme or pattern;
+  attribution for these exact retained paths is being reconciled separately.
 - Third-party assets retain their own notices: Inter is covered by the bundled
   SIL OFL license, Feather WOFF by `docs/licenses/FEATHER-ICONS.md`, and the
   selected Font Awesome Free packages by `docs/licenses/FONT-AWESOME-FREE.md`.
@@ -86,7 +92,8 @@ first-party source. The retained public paths are classified as follows:
 
 The active Feather-derived WOFF remains because the dashboard imports it directly;
 the unused generated CSS, SVG and TTF fallback paths were removed. The asset audit
-found no unidentified retained local asset path. `public/site-assets/css/theme.css`
+accounts for the retained local paths; this inventory alone does not establish
+redistribution rights. `public/site-assets/css/theme.css`
 and the homepage route still request Google Fonts at runtime; those external
 requests are recorded as runtime dependencies, not bundled assets.
 

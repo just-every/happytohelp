@@ -32,9 +32,12 @@ notices identify retained Base, Ensemble, Inter, Lucide, the active
 Feather-derived WOFF and Font Awesome Free material.
 
 The retained Ensemble source has its own LICENSE, SOURCE.json and SOURCE.patch
-under ai-support/vendor/ensemble. Preserve them together. Preserve all package
-licences and notices from the frozen dependency graph; installation/download
-verification is separate from legal redistribution review. The native Help
+under ai-support/vendor/ensemble. Preserve them together. `SOURCE.json` also
+records the edition-owned `utils/json_schema.js` override that preserves
+`minItems` and `maxItems` for grounded `evidence_ids`; this correction is not
+claimed as part of the recorded upstream patch. Preserve all package licences
+and notices from the frozen dependency graph; installation/download verification
+is separate from legal redistribution review. The native Help
 Center stylesheet and its exact removal record are documented in
 `docs/PUBLIC-SOURCE-PROVENANCE.md`. The current asset audit accounts for
 retained paths. The installer background has a retained owner-selection and

@@ -386,8 +386,10 @@ export function processSchemaForOpenAI(schema, originalProperties, mode = 'tool_
             'maximum',
             'exclusiveMinimum',
             'exclusiveMaximum',
-            'minItems',
-            'maxItems',
+            // OpenAI Structured Outputs supports array cardinality for the
+            // base models used by this edition. Keep these constraints in the
+            // provider schema so grounded response requirements are enforced
+            // before the application-level validation runs.
             'minLength',
             'maxLength',
             'pattern',

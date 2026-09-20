@@ -422,7 +422,7 @@
       "executable": false
     },
     "docs/SOURCE-PROVENANCE.md": {
-      "sha256": "ff282dbf340966c91a14ac4e18ee69688ccf489945b9c2402f141a95f3175bc1",
+      "sha256": "ffe9e50c0730a31f5a656534175e17e5874b64243ca1c4fd4fcf91c289ba3aaa",
       "executable": false
     },
     "docs/UI-PARITY.md": {
@@ -1470,7 +1470,7 @@
       "executable": false
     },
     "src/modules/ai-support/assist/prompt.js": {
-      "sha256": "b0879976386d366924000333f43b18db0f19dc7cbfb8a7a49d4585924e5d174e",
+      "sha256": "2bd682c4ee77dc4813efe489169017b7e4e4dc53c85b87c4c69fba6b840a4289",
       "executable": false
     },
     "src/modules/ai-support/assist/providerContract.js": {
@@ -1574,7 +1574,7 @@
       "executable": false
     },
     "src/modules/ai-support/repository-tools.ts": {
-      "sha256": "ac0dd9630ed73350c75a6021b68a5fc10c45b11a1ae935062290164838302818",
+      "sha256": "f7b8dd7b5e4bc62445a708947719c46e321574339a92903bd8e09f7ab34bc75c",
       "executable": false
     },
     "src/modules/ai-support/repository.ts": {
@@ -1678,7 +1678,7 @@
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/SOURCE.json": {
-      "sha256": "0367faf31b679ca11d478e3f6c40590ece5d42af71f73dffb008b1a6ffde97dc",
+      "sha256": "20f628470d5f846c1860f0d746e065cd5f528f01168c5abe351fc5af0ac7f3c2",
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/SOURCE.patch": {
@@ -1750,7 +1750,7 @@
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/utils/json_schema.js": {
-      "sha256": "7e91787198445e7e17191e52bd69ca66b2b34dd5a263cc847b7449e291f04ffc",
+      "sha256": "2057e1cfa954dce2500d49a68e480959123d4e83bd4a4fdcc0f890eafd5e1553",
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/utils/llm_logger.js": {
@@ -4369,12 +4369,20 @@
       "sha256": "3dc90bb5a87f484a7ec34536f67306e58bbf73afb1c8ed3ba5ae018f69ef1e67",
       "executable": false
     },
+    "tests/ai-support/openaiSchema.test.js": {
+      "sha256": "6e69fc0794436d51b9e98b7be913791103733cfe29024e8531a31d783f69dddb",
+      "executable": false
+    },
     "tests/ai-support/provider-fixtures.mjs": {
       "sha256": "2ea81b6f8c59ba3a18a909aafe8fdd1f7d7e0250dff7fa4f629e381cc6ef2583",
       "executable": false
     },
+    "tests/ai-support/repositoryEvidenceContract.test.js": {
+      "sha256": "5b492e10faea82669c825eedc54e71615c777c1121908fdbc073abd199e72175",
+      "executable": false
+    },
     "tests/ai-support/repositoryTools.test.js": {
-      "sha256": "f90a303171b65e4b50b125d37f351642cf4b73d8c79f492048f92f4c2ffc1b02",
+      "sha256": "33227b1907e20edf96f2dbe5964d165af590cff9f707fd0385b5caedf4848ba8",
       "executable": false
     },
     "tests/ai-support/taskModels.test.js": {

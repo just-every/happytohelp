@@ -5,5 +5,16 @@
   },
   "revision": "24031f61b9a0e0e5c40c21c18e94cd0f224e3afe",
   "patch_sha256": "96704f7c95d4dd24f0f5b0da104874bd64d16316a604be07f9b246c91955fc75",
-  "version": "0.2.282-happytohelp.96704f7c95d4"
+  "version": "0.2.282-happytohelp.96704f7c95d4",
+  "edition_overrides": [
+    {
+      "path": "utils/json_schema.js",
+      "description": "HappyToHelp edition-owned OpenAI structured-output correction: preserve minItems and maxItems so grounded evidence_ids cardinality reaches provider validation.",
+      "tests": [
+        "tests/ai-support/openaiSchema.test.js",
+        "tests/ai-support/repositoryEvidenceContract.test.js"
+      ],
+      "upstream_patch_includes_override": false
+    }
+  ]
 }

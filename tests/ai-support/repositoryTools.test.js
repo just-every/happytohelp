@@ -41,12 +41,14 @@ test('repository read tool returns attributed bounded content and records its ev
         assert.ok(read);
         assert.deepEqual(Object.keys(read.definition.function.parameters.properties), ['repository', 'path', 'ref', 'start_offset', 'expected_sha']);
         assert.match(read.definition.function.description, /sha is a blob identity, not a ref/);
+        assert.match(read.definition.function.description, /evidence_ids/);
         const output = await read.function('org/repo', 'README.md', 'main', 0);
         assert.equal(output.repository, 'org/repo');
         assert.equal(output.path, 'README.md');
         assert.equal(output.ref, 'main');
         assert.equal(output.content, 'Product README evidence.\n');
         assert.equal(output.evidence_id, 'repo:org/repo:sha-readme:README.md');
+        assert.deepEqual(output.evidence_ids, ['repo:org/repo:sha-readme:README.md']);
         assert.deepEqual([...evidenceIds], ['repo:org/repo:sha-readme:README.md']);
         assert.deepEqual(calls, ['https://api.github.com/repos/org/repo/contents/README.md?ref=main']);
     } finally {

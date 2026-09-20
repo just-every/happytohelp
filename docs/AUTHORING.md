@@ -11,7 +11,7 @@ The retained tool is selected independently of runtime Base. Base runtime/tool o
 `foundation/runtime`; `scripts/edition-authoring` maps to `edition-authoring`;
 `scripts/operations.mjs` maps to `operations/operations.mjs`. The parent comparison
 is the committed `foundation/template`. The independently selected onboarding source retains Base comparison commit
-`27ff80c586236927c644130dadd01a20893fd8d4`, path `onboarding`.
+`cb9a22d3a8a5e894c1b7b8b48b24beca3379f576`, path `onboarding`.
 Local changes are effective source; origin
 mappings never claim current bytes are equal to old bytes.
 

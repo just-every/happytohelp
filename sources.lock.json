@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "f54857c0f82861f3c22edabcb0647b07f82991a76f5f7e81ee1af120c61833de",
+  "manifest": "1af9cdbdf60bff6269468fb0016ac866b930df7caed4f83094fe412a7633ed10",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -62,14 +62,14 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "27ff80c586236927c644130dadd01a20893fd8d4",
+          "revision": "cb9a22d3a8a5e894c1b7b8b48b24beca3379f576",
           "path": "onboarding"
         }
       },
       "baseline": {
-        "key": "81ce6b93675f3f72ac004ef0846a1632d9bbed5c846ec26948514cdd9597b062",
-        "digest": "f2100620c8a4010270e04b7d03821ce330e239a63c2206afa3febef858d78da9",
-        "sha256": "efbdce9f74928f599a914627e9a1ff5e92423866122441e7e972449434fa5f0a"
+        "key": "443540ce6ff210cbd0ab3ee2a08dfc6c0b1789f9aa4dd48469c8b9311f56be91",
+        "digest": "4ace5999f8590f8979eef63d4c6302bd3c800957016e851cbddc1c4fbbd3929e",
+        "sha256": "8e88649740ad9f99b8c503c4273c2613a524e7fdba94a7b032e4a7b9965a9945"
       }
     },
     {
@@ -370,7 +370,7 @@
       "executable": false
     },
     "docs/AUTHORING.md": {
-      "sha256": "836f5c593e2c94a536df5b2066c52d78785c39fca2d089da9f739048752e98c8",
+      "sha256": "33a61c9dae9c90a27682fe517026b1ed5a0cb6cc6d99d37ea1734addbb91911c",
       "executable": false
     },
     "docs/INBOUND-EMAIL-RECOVERY.md": {
@@ -378,7 +378,7 @@
       "executable": false
     },
     "docs/INSTALLER.md": {
-      "sha256": "d601339be1f3bc49a84ddbb207b12ab99dbbf92915df540e937922f986a133f6",
+      "sha256": "06c216a16a2f90c084c64e937caf751b5bf17c1be1eec7064e224230114f38c9",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -426,7 +426,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "f54857c0f82861f3c22edabcb0647b07f82991a76f5f7e81ee1af120c61833de",
+      "sha256": "1af9cdbdf60bff6269468fb0016ac866b930df7caed4f83094fe412a7633ed10",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -4546,7 +4546,7 @@
       "executable": false
     },
     "tests/helpers/emitted-runtime.mjs": {
-      "sha256": "86047f24b93bd4caf10b840646f25c9d6d8fcd783ee4e93285e47d4a7e928f2b",
+      "sha256": "44a26ed0e9d1ad33b2a33f70aea04c9e3a92d3ab4e8c9e8115fb2e3abda2172c",
       "executable": false
     },
     "tests/helpers/installer-step-regressions.mjs": {

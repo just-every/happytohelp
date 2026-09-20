@@ -254,7 +254,7 @@ branding, fields, operations and supported capabilities; `ui/seed.mjs` owns its
 browser schema. HappyToHelp retains the real setup/deploy/bootstrap and private
 artwork transfer adapters. The original ocean background remains edition-owned.
 The editable local selection retains Base comparison commit
-`27ff80c586236927c644130dadd01a20893fd8d4` in `edition.json` and its source lock.
+`cb9a22d3a8a5e894c1b7b8b48b24beca3379f576` in `edition.json` and its source lock.
 No push, upstream publication or deployment is claimed. Artwork exploration and
 its provenance are retained under `evidence/setup-artwork-exploration/`, outside
 the publicly served assets.

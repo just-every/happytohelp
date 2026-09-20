@@ -312,6 +312,7 @@
           "tests/deleted-background-worker.ts",
           "tests/prepare-browser-fixture.mjs",
           "tests/public-help-center.mjs",
+          "tests/public-help-center-browser.mjs",
           "tests/public-site-runtime.mjs",
           "tests/runtime.mjs",
           "tests/ui-transport.mjs",

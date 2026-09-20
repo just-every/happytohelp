@@ -1,42 +1,56 @@
-[
-  {
-    "source": "help_center/css/app.css",
-    "sha256": "3ea2e6433c83de2fe69d4c16cdde5e35e9090be9f717a60eb2935e431f70d32e"
-  },
-  {
-    "source": "css/theme.css",
-    "sha256": "4b07b3936f06520e10d54c607042b3fed71093ddbd7845c6797d7bbe34825cba"
-  },
-  {
-    "source": "img/pattern/liquid-cheese.svg",
-    "sha256": "2029fdef6829c8c2c6fcefe97563be6511e11cb2030f4a50e40a8d0dbf45d948"
-  },
-  {
-    "source": "img/pattern/endless-constellation.svg",
-    "sha256": "2e3ad4b06a8a1f2c92d57289775b23e035355ca4bcdd8d80032c0f93df69dc30"
-  },
-  {
-    "source": "img/pattern/wavey-fingerprint.svg",
-    "sha256": "701ef65983d2368a486e0a8c43d111919a6fb61561f441aedad06e1b1c650ab5"
-  },
-  {
-    "source": "img/pattern/large-triangles.svg",
-    "sha256": "b74b724e2a118c1ff086cd9486044c3f87ae75f6f4312be94070965cbcc9bb52"
-  },
-  {
-    "source": "img/pattern/line-pattern.svg",
-    "sha256": "923d18c106da099d45480d394d7faf31ee6493b543d5186befae9f788f0f4354"
-  },
-  {
-    "source": "img/pattern/pattern-white.svg",
-    "sha256": "84139e59db9ffd35978e9a179ed81005ccd6c87623c4f8863af8aa7e9786c7d4"
-  },
-  {
-    "source": "img/pattern/curve.svg",
-    "sha256": "fac425916e50990ca83d40c989eaba8ab35cea07bb32d72e2de96d00100bee1c"
-  },
-  {
-    "source": "img/pattern/pattern-square.svg",
-    "sha256": "bd69f7c021b4a2468c84d2f6e7e57ad25514f3d8a242ac6714d3ae21b4867644"
-  }
-]
+{
+  "retained": [
+    {
+      "source": "help_center/css/app.css",
+      "sha256": "da827d063f66ced655f7ce7b206ae743f208e829bfd07a90405eae29685de3e7",
+      "origin": "First-party native Help Center shell stylesheet, replacing the retired public-site theme on 2026-09-20"
+    }
+  ],
+  "removed": [
+    {
+      "source": "css/theme.css",
+      "sha256": "4b07b3936f06520e10d54c607042b3fed71093ddbd7845c6797d7bbe34825cba",
+      "reason": "Retired copied public-site theme; no active Help Center or application reference remains."
+    },
+    {
+      "source": "img/pattern/liquid-cheese.svg",
+      "sha256": "2029fdef6829c8c2c6fcefe97563be6511e11cb2030f4a50e40a8d0dbf45d948",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/endless-constellation.svg",
+      "sha256": "2e3ad4b06a8a1f2c92d57289775b23e035355ca4bcdd8d80032c0f93df69dc30",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/wavey-fingerprint.svg",
+      "sha256": "701ef65983d2368a486e0a8c43d111919a6fb61561f441aedad06e1b1c650ab5",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/large-triangles.svg",
+      "sha256": "b74b724e2a118c1ff086cd9486044c3f87ae75f6f4312be94070965cbcc9bb52",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/line-pattern.svg",
+      "sha256": "923d18c106da099d45480d394d7faf31ee6493b543d5186befae9f788f0f4354",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/pattern-white.svg",
+      "sha256": "84139e59db9ffd35978e9a179ed81005ccd6c87623c4f8863af8aa7e9786c7d4",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/curve.svg",
+      "sha256": "fac425916e50990ca83d40c989eaba8ab35cea07bb32d72e2de96d00100bee1c",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    },
+    {
+      "source": "img/pattern/pattern-square.svg",
+      "sha256": "bd69f7c021b4a2468c84d2f6e7e57ad25514f3d8a242ac6714d3ae21b4867644",
+      "reason": "Unused by the native Help Center after the theme removal; source licence was not established."
+    }
+  ]
+}

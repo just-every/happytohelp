@@ -26,6 +26,7 @@
     "test:widget-browser": "node tests/widget-browser-runtime.mjs",
     "test:ui-browser": "node tests/ui-browser.mjs",
     "test:navigation-browser": "node tests/navigation-browser.mjs",
+    "test:public-help-center-browser": "node tests/public-help-center-browser.mjs",
     "test:setup-browser": "node tests/setup-browser.mjs",
     "test:demo-inbox-browser": "node tests/demo-inbox-browser.mjs",
     "test:mobile-inbox-browser": "node tests/mobile-inbox-browser.mjs",

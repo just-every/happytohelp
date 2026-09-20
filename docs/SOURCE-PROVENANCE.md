@@ -23,20 +23,23 @@ historical test inputs; their explicit native context adapter does not claim the
 historical database runtime is unchanged.
 
 The public source boundary is the edition root `LICENSE` plus the notices under
-`docs/licenses/`. The root notice covers first-party Run Edit Run source; the
-third-party notices identify retained Base, Ensemble, Inter, Lucide, the active
-Feather-derived WOFF and Font Awesome Free material without asserting blanket rights over owner-supplied
-artwork or unresolved historical assets.
+`docs/licenses/`. The root notice covers first-party Run Edit Run source. The
+owner-approved/generated homepage and installer art and the owner-supplied
+HappyToHelp branding are recorded in the edition asset manifests and are not
+relicensed as MIT code. Claude and Codex marks are nominative references to
+supported tools, not Run Edit Run property or vendor endorsement. Third-party
+notices identify retained Base, Ensemble, Inter, Lucide, the active
+Feather-derived WOFF and Font Awesome Free material.
 
 The retained Ensemble source has its own LICENSE, SOURCE.json and SOURCE.patch
 under ai-support/vendor/ensemble. Preserve them together. Preserve all package
 licences and notices from the frozen dependency graph; installation/download
-verification is separate from legal redistribution review. The public-site asset
-review records removed Pro icons and remaining asset-rights questions. No broad
-licence declaration here overrides those records or certifies unknown rights.
-Module metadata therefore points to this document instead of inventing a licence
-for all inherited source. Publication requires the owner's final repository/licence
-and asset-rights decision; local source authoring and proof can proceed independently.
+verification is separate from legal redistribution review. The ported H2H Site
+CSS/patterns and dashboard icon/masks retain source attribution in
+`docs/PUBLIC-SOURCE-PROVENANCE.md`; no unidentified retained local asset path
+remains in the current asset audit. The unused Feather fallback files and
+historical Font Awesome Pro assets are not release inputs. External Google Fonts
+imports remain runtime dependencies rather than bundled assets.
 
 Do not include .env files, device credentials, local browser profiles, production
 customer data, private provider outputs or runtime state in a source release.

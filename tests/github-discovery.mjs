@@ -41,17 +41,12 @@ try {
     DB.prepare("INSERT INTO github_settings VALUES('p',?,1,0,1)").bind(JSON.stringify(['org/repo'])),
   ])
 
-  const nativeAbortTimeout = AbortSignal.timeout
-  try {
-    Object.defineProperty(AbortSignal, 'timeout', { value: undefined, configurable: true, writable: true })
-    globalThis.fetch = async (_url, init) => {
-      assert.ok(init?.signal instanceof AbortSignal)
-      return Response.json({ ok: true })
-    }
-    assert.equal((await githubApiRequest('health', 'scoped-token')).status, 200)
-  } finally {
-    Object.defineProperty(AbortSignal, 'timeout', { value: nativeAbortTimeout, configurable: true, writable: true })
+  globalThis.fetch = async (_url, init) => {
+    assert.equal(init?.redirect, 'manual')
+    assert.ok(init?.signal instanceof AbortSignal)
+    return Response.json({ ok: true })
   }
+  assert.equal((await githubApiRequest('health', 'scoped-token')).status, 200)
 
   assert.deepEqual(await githubCredential(env, 'p'), { mode: 'mapped', token: 'mapped-installation-token' })
   env.GITHUB_TOKENS = undefined
@@ -129,6 +124,12 @@ try {
   const failureBody = await providerFailure.text()
   assert.equal(providerFailure.status, 502, failureBody)
   assert.match(failureBody, /GitHub HTTP 403/)
+
+  globalThis.fetch = async () => new Response(null, { status: 302, headers: { Location: 'https://github.com/elsewhere' } })
+  const redirectResponse = await integrations.request('https://app.example/projects/p/github/repositories', {
+    headers: { Authorization: 'Bearer token' },
+  }, env)
+  assert.equal(redirectResponse.status, 502)
 
   const callsBeforeContact = calls.length
   const contactDenied = await integrations.request('https://app.example/projects/p/github/repositories', {

@@ -302,6 +302,7 @@
           "tests/email-worker.mjs",
           "tests/github-integration.mjs",
           "tests/github-discovery.mjs",
+          "tests/github-workerd-runtime.mjs",
           "tests/helpers",
           "tests/identity.mjs",
           "tests/lead-operations.mjs",

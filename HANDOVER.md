@@ -11,6 +11,21 @@ well sculptures, journey map backgrounds and official/app brand icons. Pricing,
 legal, waitlist, referrer and public auto-widget behavior remain outside the
 active edition. The earlier 15 September simple-landing description is historical.
 
+## Current launch status — 20 September 2026
+
+The core standalone replacement is recorded as qualified on the exact native
+source commit `f09c68194ce8212a122a44433cdcd69a4d93d8df`, with 34 migrations and
+the deployed artifact and Worker recorded in
+`/Users/zemaj/.orchestrator/evidence/happytohelp/launch-20260920-v3/launch-status.json`.
+The public `help.justevery.com` root and `/health` endpoint are live and readable,
+and the source release is public at
+`https://github.com/runeditrun/support-happytohelp`. The later native GitHub
+adapter repair in the current source working line remains under qualification
+against the deployed artifact. RER Assisted and Managed paid workflows remain
+separate launch gates; the current evidence and open gates are listed in
+`reports/happytohelp-launch-plan-2026-09-20.md`. The dated preparation sections
+below retain their historical evidence boundaries.
+
 ## 20 September launch-preparation checkpoint
 
 The owner selected HappyToHelp as the first launch lane. The current native
@@ -25,7 +40,7 @@ Base and HappyToHelp share the private installer state implementation byte for
 byte, with 17 shared onboarding tests and 17 private-state tests passing in each
 tree. The standalone installer and deployment
 path now derives the full queue topology and performs custom-zone preflight
-before remote mutations. The managed service retains a 33-migration
+before remote mutations. The managed service retains a 34-migration
 HappyToHelp plan with shared mail environment inputs and artifact qualification
 checks. User homepage and service scene edits that
 predated this checkpoint remain preserved.
@@ -131,7 +146,7 @@ human-voice evaluation remains explicitly skipped without provider authorization
 The repository's `evidence/` directory preserves integration-stage results;
 final verification must identify the exact source revision and resulting bundle.
 
-## Migration and external operation
+## Migration and external operation — historical migration checkpoint
 
 `scripts/import-legacy.mjs` plans and applies an explicit local export with
 resumable row and object custody. Read the importer README before running it.
@@ -148,13 +163,15 @@ Original HappyToHelp repositories remain unchanged. The native commit retains
 the earlier RER desk's Git ancestry; that historical implementation can be read
 in Git and is no longer an alternative runtime in this edition.
 
-Provider setup, real email/model acceptance, deployments, production-data
-imports and public publication have not been performed. Missing configured
-providers return an explicit unavailable state. Unknown provider outcomes retain
-their historical receipts and do not automatically replay provider work. Public asset rights and licence
-decisions are documented in `docs/SOURCE-PROVENANCE.md` and
-`docs/PUBLIC-SOURCE-PROVENANCE.md`; this migration does not assert universal
-redistribution clearance.
+At the migration checkpoint represented by this section, provider setup, real
+email/model acceptance, deployments, production-data imports and public
+publication had not been performed. Current hosted and public evidence is in
+the launch-status section above and the launch plan; this historical paragraph
+must not be read as the current deployment state. Missing configured providers
+return an explicit unavailable state. Unknown provider outcomes retain their
+historical receipts and do not automatically replay provider work. The active
+source and asset attribution boundary is recorded in
+`docs/SOURCE-PROVENANCE.md` and `docs/PUBLIC-SOURCE-PROVENANCE.md`.
 
 ## 17 September fictional demo inbox onboarding
 

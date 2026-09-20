@@ -18,8 +18,11 @@ The owner approved integrating the existing designed prototype at
 as the real public root homepage. The selected art comprises original generated
 assets: a sculpted beacon hero loop, horse-and-spear rider, crossing/lookout/
 helping-hand/well sculptures and journey map backgrounds, together with official/
-app brand icons. This describes the source categories only and makes no universal
-ownership, licence or redistribution claim. The implementation and local browser outcome are recorded in HANDOVER.md;
+app brand icons. This record distinguishes attribution and use from source
+licensing: the selected art is retained under owner approval for this edition and
+is not relicensed as MIT source. The Claude and Codex marks are nominative
+references to supported local tools; Run Edit Run makes no ownership or
+endorsement claim. The implementation and local browser outcome are recorded in HANDOVER.md;
 `src/ui/homepage/asset-provenance.json` records the selected homepage assets,
 including the owner-supplied HappyToHelp SVG brand artwork added unchanged on
 19 September 2026, and the standalone rider icon extracted from its original
@@ -29,19 +32,15 @@ complete supplied logo remains available as the source artwork. The owner-suppli
 conversion, re-encoding, or color changes.
 
 The historical source contained Font Awesome Pro SVGs inline in marketing and
-sidebar markup. Any removed or retained replacement must be reviewed against the
-current asset manifest; this record does not provide a universal ownership or
-redistribution attestation. Free SVG license notices remain where their source is
-retained.
+sidebar markup. None of those Pro assets is retained. The selected Free SVG
+packages remain covered by the notice in `docs/licenses/FONT-AWESOME-FREE.md`.
 
 The public-site asset manifest retains Help Center/theme CSS and pattern
-assets with their source notices. The retired 15 September landing CSS and art
-have been removed; the journey homepage has its own asset manifest. Public Google Fonts CSS imports remain
-external font requests. The original checkout does not provide a complete
-provenance/licence declaration for every retained source asset. Public
-redistribution must resolve those rights and retain dependency licence notices
-before release; this local source port does not assert blanket clearance. No
-identified Pro asset package or paid provider request was used.
+assets from the owner-controlled H2H Site source baseline, with their source
+history and hashes retained in the manifest. The retired 15 September landing
+CSS and art have been removed; the journey homepage has its own asset manifest.
+Google Fonts imports remain external runtime requests rather than bundled source
+assets. No identified Pro asset package or paid provider request was used.
 
 Public landing-page analytics and homepage widget bootstrapping are removed. No
 original service project ID, verification secret, session token or Google tracking
@@ -64,22 +63,32 @@ delivery or provider behavior after the landing-page scope change.
 ## Public release asset boundary — 20 September 2026
 
 The edition root `LICENSE` carries the maintained Run Edit Run MIT notice for
-first-party source. Third-party notices retained with the public source are
-listed under `docs/licenses/`, including the Base notice, Ensemble notice and
-patch/source receipt, Inter, Lucide, Feather-derived dashboard glyphs and
-Font Awesome Free. These notices describe the retained source categories; they
-do not assert rights over owner-supplied artwork, trademarks or any asset whose
-licence is not stated there.
+first-party source. The retained public paths are classified as follows:
 
-The approved homepage art, HappyToHelp logo, icon and favicon remain unchanged
-and are listed with byte hashes in `src/ui/homepage/asset-provenance.json`. The
-active non-homepage assets are limited to the installer's `public/setup/ocean.png`,
-the dashboard `public/img/icon.svg` and avatar masks, Inter, the active
-Feather-derived WOFF font, and the Help Center CSS/pattern assets listed in
-`src/modules/public-site/asset-provenance.json`. The active Feather-derived WOFF
-remains because the dashboard imports it directly; the unused generated CSS, SVG and
-TTF fallback paths were removed. A fresh tracked-source scan found no other
-unreferenced public asset.
+- First-party MIT source and generated outputs include `public/widget.js`, the
+  allowlisted `public/downloads/happytohelp-local-agent.tar.gz`, and the
+  dashboard avatar masks. The archive is generated from the first-party local
+  agent allowlist and contains no credentials or runtime state.
+- Owner-approved or owner-supplied edition assets include the selected
+  `public/homepage/**` art and branding, `public/setup/ocean.png`, and the
+  HappyToHelp dashboard mark at `public/img/icon.svg`. Their hashes and origins
+  are recorded in the two asset manifests; they are not presented as MIT code.
+- The Claude and Codex SVGs under `public/homepage/media/brands/` are official
+  product marks used only as nominative support references. They are not claimed
+  as Run Edit Run property or vendor endorsement.
+- Ported public-site CSS and pattern assets under `public/site-assets/` come from
+  the owner-controlled H2H Site baseline recorded above. Their paths, hashes and
+  source history remain in `src/modules/public-site/asset-provenance.json`.
+- Third-party assets retain their own notices: Inter is covered by the bundled
+  SIL OFL license, Feather WOFF by `docs/licenses/FEATHER-ICONS.md`, and the
+  selected Font Awesome Free packages by `docs/licenses/FONT-AWESOME-FREE.md`.
+  Base, Ensemble and other retained source notices remain under `docs/licenses/`.
+
+The active Feather-derived WOFF remains because the dashboard imports it directly;
+the unused generated CSS, SVG and TTF fallback paths were removed. The asset audit
+found no unidentified retained local asset path. `public/site-assets/css/theme.css`
+and the homepage route still request Google Fonts at runtime; those external
+requests are recorded as runtime dependencies, not bundled assets.
 
 Font Awesome Pro marketing/source assets were not retained. The widget's selected
 Font Awesome Free packages and licence boundary are recorded in

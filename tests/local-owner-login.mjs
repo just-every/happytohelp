@@ -19,6 +19,12 @@ try {
   const origin = 'http://localhost:5174';
   const login = (headers = {}, url = origin) => runtime.dispatchFetch(url + '/api/identity/local-owner-session', {method: 'POST', headers: {Origin: origin, 'Sec-Fetch-Site': 'same-origin', ...headers}});
   assert.equal((await login()).status, 409, 'No owner means no automatic setup');
+  for (const host of ['localhost', '127.0.0.1', '[::1]']) {
+    const authority = host + ':5174';
+    const response = await login({Host: authority, Origin: 'http://' + authority}, 'http://' + authority);
+    assert.equal(response.status, 409, `Loopback owner login should remain guarded for ${host}`);
+    assert.equal(response.headers.get('Set-Cookie'), null);
+  }
   await db.batch([
     db.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Review','widget','http://localhost',1)"),
     db.prepare("INSERT INTO users VALUES('owner','owner@example.test','Owner',1)"),
@@ -49,7 +55,7 @@ try {
   await db.prepare("DELETE FROM memberships WHERE user_id='second'").run();
   await db.prepare("INSERT INTO project_settings VALUES('p','{\"deleted_at\":1}',1)").run();
   assert.equal((await login()).status, 409, 'Deleted workspaces cannot confer authority');
-  console.log('Local owner login passed: real D1/workerd, browser origin fences, existing owner and credential preservation, ordinary session/revocation, ambiguous/deleted owner denial.');
+  console.log('Local owner login passed: real D1/workerd, browser origin fences, loopback Host/Origin matrix, existing owner and credential preservation, ordinary session/revocation, ambiguous/deleted owner denial.');
 } finally {
   await runtime.dispose();
 }

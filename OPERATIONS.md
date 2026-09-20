@@ -23,7 +23,7 @@ Use Node 26.8.1 or newer and the lockfile's pnpm workflow. Use `pnpm run setup`:
    file for those values. Run `pnpm run dev`, open `/setup`, and choose an email and password to establish
    the first owner. Setup closes once an owner exists; subsequent access uses
    `/login`. Dashboard routes include `/projects` and `/conversations`; `/` is
-   the simple local-owner landing page. Published help centers remain dynamic
+   the approved public journey homepage. Published help centers remain dynamic
    project-scoped routes. Configure the project's exact widget allowed origin,
    then install its native widget key/API-origin snippet; the root landing page
    does not boot a public widget.

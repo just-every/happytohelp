@@ -14,7 +14,7 @@ registerHooks({
 })
 
 const { integrations } = await import('../src/modules/integrations/routes.ts')
-const { githubCredential } = await import('../src/modules/integrations/github.ts')
+const { githubApiRequest, githubCredential } = await import('../src/modules/integrations/github.ts')
 const { encryptToken } = await import('../src/modules/integrations/secrets.ts')
 const { getPlatformProxy } = await import('wrangler')
 const { hashToken } = await import('../src/platform/auth.ts')
@@ -40,6 +40,18 @@ try {
     DB.prepare("INSERT INTO sessions VALUES(?,'c','p','contact','ct',?,NULL)").bind(await hashToken('contact-token'), Date.now() + 999999),
     DB.prepare("INSERT INTO github_settings VALUES('p',?,1,0,1)").bind(JSON.stringify(['org/repo'])),
   ])
+
+  const nativeAbortTimeout = AbortSignal.timeout
+  try {
+    Object.defineProperty(AbortSignal, 'timeout', { value: undefined, configurable: true, writable: true })
+    globalThis.fetch = async (_url, init) => {
+      assert.ok(init?.signal instanceof AbortSignal)
+      return Response.json({ ok: true })
+    }
+    assert.equal((await githubApiRequest('health', 'scoped-token')).status, 200)
+  } finally {
+    Object.defineProperty(AbortSignal, 'timeout', { value: nativeAbortTimeout, configurable: true, writable: true })
+  }
 
   assert.deepEqual(await githubCredential(env, 'p'), { mode: 'mapped', token: 'mapped-installation-token' })
   env.GITHUB_TOKENS = undefined

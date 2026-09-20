@@ -21,4 +21,9 @@ export async function githubToken(env:Env,projectId:string):Promise<string|undef
 
 export function githubApiHeaders(token:string){return {Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','User-Agent':'HappyToHelp-native','X-GitHub-Api-Version':'2022-11-28'}}
 
-export function githubApiRequest(path:string,token:string){return fetch(`https://api.github.com/${path}`,{headers:githubApiHeaders(token),redirect:'error',signal:AbortSignal.timeout(15000)})}
+export async function githubApiRequest(path:string,token:string){
+ const controller=new AbortController()
+ const timeout=setTimeout(()=>controller.abort(),15000)
+ try{return await fetch(`https://api.github.com/${path}`,{headers:githubApiHeaders(token),redirect:'error',signal:controller.signal})}
+ finally{clearTimeout(timeout)}
+}

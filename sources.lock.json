@@ -2056,7 +2056,7 @@
       "executable": false
     },
     "src/modules/integrations/github.ts": {
-      "sha256": "1685728297cc051bd24f14858cf4e0d8f1f24bb47d1b0e05e2a272ef3f13fe7c",
+      "sha256": "14b998beef8e72ee16fb204de282d92e82d9666987713ab73382e4d880d3824d",
       "executable": false
     },
     "src/modules/integrations/inbound-effects.ts": {
@@ -2108,7 +2108,7 @@
       "executable": false
     },
     "src/modules/integrations/repository.ts": {
-      "sha256": "6de33229a1952275bfe3fbee55b2e43a67425258362d180bab19e2679a2f105b",
+      "sha256": "76708a68f506e85ae37f37fe6e08d9075b5cfd0c4d9ab6dced2f6ba959d5f7ea",
       "executable": false
     },
     "src/modules/integrations/routes.ts": {
@@ -4572,7 +4572,7 @@
       "executable": false
     },
     "tests/github-discovery.mjs": {
-      "sha256": "35907c74fb2be9b385bc9c11ed4097c89d3f271c9b28b8b89db58e63cb0e4161",
+      "sha256": "bd8e5d253747e0fbaca78310e182c4a59fd46d5904201a5121b78bc581b7d7dc",
       "executable": false
     },
     "tests/github-integration.mjs": {

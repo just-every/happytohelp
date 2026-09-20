@@ -1,5 +1,16 @@
 export function coerceValue(value, paramSpec, paramName) {
     const expectedType = paramSpec.type || 'string';
+    // Nullable JSON Schema unions are still required properties: null is an
+    // explicit value, not an omitted argument. The repository read tool uses
+    // this representation for its default ref and continuation hash.
+    const allowsNullType = Array.isArray(expectedType)
+        ? expectedType.includes('null')
+        : expectedType === 'null';
+    const allowsNull = allowsNullType
+        && (!Array.isArray(paramSpec.enum) || paramSpec.enum.includes(null));
+    if (value === null && allowsNull) {
+        return [null, null];
+    }
     if (value === undefined || value === null) {
         if (paramSpec.default) {
             return [paramSpec.default, null];

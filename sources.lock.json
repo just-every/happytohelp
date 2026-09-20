@@ -422,7 +422,7 @@
       "executable": false
     },
     "docs/SOURCE-PROVENANCE.md": {
-      "sha256": "ffe9e50c0730a31f5a656534175e17e5874b64243ca1c4fd4fcf91c289ba3aaa",
+      "sha256": "b33d7fa2455705e2b7bc3fd33bfdc8519391d5710ed8502d4ca48da363946e8d",
       "executable": false
     },
     "docs/UI-PARITY.md": {
@@ -1678,7 +1678,7 @@
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/SOURCE.json": {
-      "sha256": "20f628470d5f846c1860f0d746e065cd5f528f01168c5abe351fc5af0ac7f3c2",
+      "sha256": "d7fad913cc8d6a793df307e2e4b2d46a3c0b6b7638ba5e27fc70b593523828e9",
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/SOURCE.patch": {
@@ -1810,7 +1810,7 @@
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/utils/tool_parameter_utils.js": {
-      "sha256": "4a212a796ea15a281f2cace83046276880cca27b33a6cdcf1a581484a49e42cf",
+      "sha256": "243d7b68921c1067b7b7ffbe7fd4a7f5c37753e9345f1132f0a351aa81311c2b",
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/utils/tool_result_processor.js": {
@@ -4379,6 +4379,10 @@
     },
     "tests/ai-support/repositoryEvidenceContract.test.js": {
       "sha256": "5b492e10faea82669c825eedc54e71615c777c1121908fdbc073abd199e72175",
+      "executable": false
+    },
+    "tests/ai-support/repositoryToolDispatch.test.js": {
+      "sha256": "67fd3dd7eacfdd506817fe11ef9e3469558584f12548605509d0ca9f8a6b88bf",
       "executable": false
     },
     "tests/ai-support/repositoryTools.test.js": {

@@ -15,6 +15,14 @@
         "tests/ai-support/repositoryEvidenceContract.test.js"
       ],
       "upstream_patch_includes_override": false
+    },
+    {
+      "path": "utils/tool_parameter_utils.js",
+      "description": "HappyToHelp edition-owned tool-dispatch correction: accept explicit null values for required nullable JSON Schema unions while retaining missing-argument and non-null validation.",
+      "tests": [
+        "tests/ai-support/repositoryToolDispatch.test.js"
+      ],
+      "upstream_patch_includes_override": false
     }
   ]
 }

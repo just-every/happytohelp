@@ -11,48 +11,41 @@ well sculptures, journey map backgrounds and official/app brand icons. Pricing,
 legal, waitlist, referrer and public auto-widget behavior remain outside the
 active edition. The earlier 15 September simple-landing description is historical.
 
-## Current launch status — 20 September 2026
+## Current launch status — 21 September 2026
 
-The core standalone replacement is recorded as qualified on the exact native
-source commit `f09c68194ce8212a122a44433cdcd69a4d93d8df`, with 34 migrations and
-the deployed artifact and Worker recorded in
+The core standalone replacement is qualified on exact native source commit
+`79382a0706062c21bca620e4302a4caab32c48e8`, with 34 migrations, the deployed
+artifact and Worker recorded in
 `/Users/zemaj/.orchestrator/evidence/happytohelp/launch-20260920-v3/launch-status.json`.
 The public `help.justevery.com` root and `/health` endpoint are live and readable,
 and the source release is public at
-`https://github.com/runeditrun/support-happytohelp`. The later native GitHub
-adapter repair in the current source working line remains under qualification
-against the deployed artifact. RER Assisted and Managed paid workflows remain
-separate launch gates; the current evidence and open gates are listed in
-`reports/happytohelp-launch-plan-2026-09-20.md`. The dated preparation sections
-below retain their historical evidence boundaries.
+`https://github.com/runeditrun/support-happytohelp`. The final acceptance record
+qualifies one bounded owner-approved GitHub repository README read. Its
+temporary GitHub credential was removed; the permanent company project remains
+GitHub-unconfigured. Mail, knowledge and application AI retain their separately
+qualified configuration.
 
-## 20 September launch-preparation checkpoint
+RER Assisted and Managed paid workflows remain separate launch gates. Current
+cross-repository evidence and remaining work are listed in
+`/Users/zemaj/www/runeditrun/reports/happytohelp-launch-plan-2026-09-20.md`.
 
-The owner selected HappyToHelp as the first launch lane. The current native
-source now has an acyclic edition graph: AI lifecycle and required effects,
-training, customer-context and local-delegation adapters are edition-owned;
-failed model attempts record their generation state. Widget collection cleanup
-and typed event dispatch are in place. Inbound email has caught local retry
-failures and exposes explicit administrator reconciliation with claim tokens
-(`migrations/0100_inbound_email_claims.sql`).
+## Current RER service checkpoint — 21 September 2026
 
-Base and HappyToHelp share the private installer state implementation byte for
-byte, with 17 shared onboarding tests and 17 private-state tests passing in each
-tree. The standalone installer and deployment
-path now derives the full queue topology and performs custom-zone preflight
-before remote mutations. The managed service retains a 34-migration
-HappyToHelp plan with shared mail environment inputs and artifact qualification
-checks. User homepage and service scene edits that
-predated this checkpoint remain preserved.
+The staged RER source is `5e588d33b2060ceecfaadd3e0fd3a9fccd7afb5c`, published
+on service `main` after fresh frozen installation, build, source checks and full
+verification. Worker version `032ddf7f-bbfb-4fe5-bc3a-2e5bbed122ed` serves the
+same 17 compiled server modules, independently matched against the frozen build.
+Production RER remains unchanged while launch workflow qualification finishes.
 
-The latest exact verification record is
-`/Users/zemaj/.orchestrator/evidence/happytohelp/launch-20260920`:
-service build, typecheck, 623 tests and runtime checks pass, and the prebuilt
-native runtime passes after the IPv6 authority and current homepage assertions
-were repaired. Provider checks use local fixtures. The production service pin
-`446c1ce` is unchanged. Clean installation and aggregate results are recorded
-there separately; this checkpoint itself does not qualify hosted/provider/public
-execution or declare a complete launch.
+The first Managed installation has passed owner/member checks, export,
+independent restore and a follow-up deployment preserving the owner, data,
+attachment metadata and all 34 migrations. Its restored browser renders the
+retained conversation without contacting RER management. This qualifies the
+initial `c3d381a` Managed source, separately from the native `79382a0` release.
+Local Codex execution passed with no management-credit debit; publication, the
+hosted upstream update and final updated-source restore remain open. Assisted
+Cloudflare authorization, the GitHub Actions spending cap and the restricted
+live Stripe key are the pending owner account actions.
 
 ## 17 September homepage integration — local verification
 

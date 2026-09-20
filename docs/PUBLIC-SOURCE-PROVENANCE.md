@@ -35,12 +35,13 @@ The historical source contained Font Awesome Pro SVGs inline in marketing and
 sidebar markup. None of those Pro assets is retained. The selected Free SVG
 packages remain covered by the notice in `docs/licenses/FONT-AWESOME-FREE.md`.
 
-The public-site asset manifest retains Help Center/theme CSS and pattern
-assets from the owner-controlled H2H Site source baseline, with their source
-history and hashes retained in the manifest. The retired 15 September landing
-CSS and art have been removed; the journey homepage has its own asset manifest.
-Google Fonts imports remain external runtime requests rather than bundled source
-assets. No identified Pro asset package or paid provider request was used.
+The public-site asset manifest retains the first-party Help Center shell
+stylesheet. The former copied theme and its eight transitive pattern SVGs were
+removed on 20 September 2026 after confirming that no active markup or runtime
+source referenced them; their exact hashes and removal reasons remain in the
+manifest. The retired 15 September landing CSS and art have been removed; the
+journey homepage has its own asset manifest. No identified Pro asset package or
+paid provider request was used.
 
 Public landing-page analytics and homepage widget bootstrapping are removed. No
 original service project ID, verification secret, session token or Google tracking
@@ -80,11 +81,12 @@ first-party source. The retained public paths are classified as follows:
 - The Claude and Codex SVGs under `public/homepage/media/brands/` are official
   product marks used only as nominative support references. They are not claimed
   as Run Edit Run property or vendor endorsement.
-- Ported public-site CSS and pattern assets under `public/site-assets/` come from
-  the owner-controlled H2H Site baseline recorded above. Their paths, hashes and
-  source history remain in `src/modules/public-site/asset-provenance.json`.
-  That establishes custody, not the licence of any upstream theme or pattern;
-  attribution for these exact retained paths is being reconciled separately.
+- The native Help Center stylesheet at
+  `public/site-assets/help_center/css/app.css` is first-party source. Its
+  replacement of the copied H2H Site theme is recorded in
+  `src/modules/public-site/asset-provenance.json`, together with the exact
+  hashes and removal reasons for the former theme and pattern inputs. No
+  unverified pattern asset remains in the public release.
 - Third-party assets retain their own notices: Inter is covered by the bundled
   SIL OFL license, Feather WOFF by `docs/licenses/FEATHER-ICONS.md`, and the
   selected Font Awesome Free packages by `docs/licenses/FONT-AWESOME-FREE.md`.
@@ -93,9 +95,9 @@ first-party source. The retained public paths are classified as follows:
 The active Feather-derived WOFF remains because the dashboard imports it directly;
 the unused generated CSS, SVG and TTF fallback paths were removed. The asset audit
 accounts for the retained local paths; this inventory alone does not establish
-redistribution rights. `public/site-assets/css/theme.css`
-and the homepage route still request Google Fonts at runtime; those external
-requests are recorded as runtime dependencies, not bundled assets.
+redistribution rights. The Help Center stylesheet has no external font or image
+request; the homepage and widget retain their own separately recorded runtime
+font dependencies.
 
 Font Awesome Pro marketing/source assets were not retained. The widget's selected
 Font Awesome Free packages and licence boundary are recorded in

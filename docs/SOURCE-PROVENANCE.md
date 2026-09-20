@@ -34,14 +34,14 @@ Feather-derived WOFF and Font Awesome Free material.
 The retained Ensemble source has its own LICENSE, SOURCE.json and SOURCE.patch
 under ai-support/vendor/ensemble. Preserve them together. Preserve all package
 licences and notices from the frozen dependency graph; installation/download
-verification is separate from legal redistribution review. The ported H2H Site
-CSS/patterns and dashboard icon/masks retain source attribution in
-`docs/PUBLIC-SOURCE-PROVENANCE.md`. The current asset audit accounts for retained
-paths. The installer background has a retained owner-selection and generation
-receipt; exact upstream attribution for the ported theme/pattern assets is being
-verified separately. Source custody alone is not a licence claim. The unused Feather fallback files and
-historical Font Awesome Pro assets are not release inputs. External Google Fonts
-imports remain runtime dependencies rather than bundled assets.
+verification is separate from legal redistribution review. The native Help
+Center stylesheet and its exact removal record are documented in
+`docs/PUBLIC-SOURCE-PROVENANCE.md`. The current asset audit accounts for
+retained paths. The installer background has a retained owner-selection and
+generation receipt. Source custody alone is not a licence claim. The unused
+Feather fallback files, retired Help Center theme/pattern inputs and historical
+Font Awesome Pro assets are not release inputs. External Google Fonts imports
+remain dependencies only for the homepage/widget surfaces that request them.
 
 Do not include .env files, device credentials, local browser profiles, production
 customer data, private provider outputs or runtime state in a source release.

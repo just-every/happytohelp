@@ -4,7 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { buildLocalAgentCommands, isWorkerReady, pairedDevice, shellQuote } = require('./localAgentSetup');
 
 const options = {
-    origin: 'https://app.happytohelp.com',
+    origin: 'https://help.justevery.com',
     projectId: '254787b6-301d-45ec-9f8c-b617ce311aae',
     code: 'PAIR-123',
     name: "James's computer",

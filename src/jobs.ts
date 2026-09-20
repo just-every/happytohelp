@@ -10,7 +10,7 @@ import { consumeContextJob,recoverContextJobs } from './modules/customer-context
 import { recoverLocalResultEffects } from './modules/local-computer'
 import { localComputerIntegration } from './edition/local-computer'
 import { consumeJob as consumeBrand,recoverBrandJobs } from './modules/site-preview/brand'
-import { handleLeadJob,recoverLeadJobs } from './modules/integrations/leads'
+import { handleLeadJob,recoverLeadJobs } from './modules/integrations'
 import { applyMessageEffects } from './message-effects'
 import type { Actor } from './platform/env'
 

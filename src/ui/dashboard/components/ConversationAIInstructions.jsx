@@ -4,10 +4,11 @@ import { useReplySuggestions } from '../contexts/ConversationSuggestionsContext'
 import { submitInstructionsOnEnter } from '../utils/submitInstructionsOnEnter';
 
 export default function ConversationAIInstructions() {
-    const { currentAI, disabled, instructions, regenerate, setInstructions, suggestions } = useReplySuggestions();
+    const { canGenerateSuggestions, currentAI, disabled, instructions, regenerate, setInstructions, suggestions } = useReplySuggestions();
     const textareaRef = useRef(null);
     const composingRef = useRef(false);
     const isBusy = disabled || suggestions.loading;
+    const isUnavailable = !canGenerateSuggestions;
     const instructionLabel = `Tell ${currentAI ? currentAI.name : 'the AI'} how to reply`;
 
     const generate = event => {
@@ -37,12 +38,13 @@ export default function ConversationAIInstructions() {
             maxLength={ 2000 }
             minRows={ 1 }
             maxRows={ 10 }
-            disabled={ isBusy }
+            disabled={ isBusy || isUnavailable }
         />
         <div className="conversation-ai-instructions__footer">
-            <button type="submit" className="btn btn-primary" disabled={ isBusy }>
+            <button type="submit" className="btn btn-primary" disabled={ isBusy || isUnavailable } aria-describedby={ isUnavailable ? 'conversation-ai-instructions-message-required' : undefined }>
                 <i className="fe fe-star" aria-hidden="true" /> Generate
             </button>
+            { isUnavailable && <span id="conversation-ai-instructions-message-required" className="conversation-ai-instructions__hint" role="status">Add a customer message first.</span> }
         </div>
     </form>;
 }

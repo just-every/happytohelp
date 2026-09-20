@@ -19,9 +19,4 @@ export const dashboardRoutes=new Hono<AppEnv>()
 dashboardRoutes.route('/',demoInbox).route('/',dashboard).route('/',dashboardActions).route('/',dashboardMedia).route('/',resources)
 export {publicWidget} from './widget-settings'
 
-export {inboundEmail} from '../integrations/inbound'
 export {widgetEvents} from './widget-events'
-export {handleEmail} from '../integrations/email-worker'
-export {notifyMessage} from '../integrations/notifications'
-
-export {handleLeadJob,recoverLeadJobs} from '../integrations/leads'

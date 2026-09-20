@@ -1,6 +1,6 @@
 import type { GenerationEffects } from '../../modules/ai-support/generation-effects';
 import { publishSuggestions } from '../../modules/ai-support/presentation';
-import { notifyMessage } from '../../modules/integrations/notifications';
+import { notifyMessage } from '../../modules/integrations';
 
 export const generationEffects: GenerationEffects = {
   publishSuggestions,

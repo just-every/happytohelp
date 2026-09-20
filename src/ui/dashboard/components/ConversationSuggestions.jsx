@@ -6,9 +6,12 @@ import ConversationAIInstructions from './ConversationAIInstructions';
 
 export default function ConversationSuggestions({ hasHiddenAbove, hasHiddenBelow, scrollRef }) {
     const {
-        currentAI, disabled, regenerate, selectSuggestion, selectedSuggestion, suggestions,
+        canGenerateSuggestions, currentAI, disabled, lastRequestKind, regenerate, selectSuggestion, selectedSuggestion, suggestions,
     } = useReplySuggestions();
     const hasReplyOptions = suggestions.responses.some(suggestion => suggestion?.response);
+    const canRetrySuggestions = canGenerateSuggestions || lastRequestKind === 'tool';
+    const showMessageRequiredHint = !suggestions.loading && !suggestions.error && !hasReplyOptions && !canGenerateSuggestions;
+    const showRetryMessageRequiredHint = Boolean(suggestions.error) && !canRetrySuggestions;
 
     return (
         <div className="conversation-suggestions">
@@ -21,7 +24,8 @@ export default function ConversationSuggestions({ hasHiddenAbove, hasHiddenBelow
                 <div className="conversation-suggestions__options" ref={ scrollRef } aria-live="polite">
                     { suggestions.error && <div className="conversation-suggestions__error" role="alert">
                         <span>{ suggestions.error }</span>
-                        <button type="button" className="btn btn-link" onClick={ regenerate } disabled={ disabled }>Try again</button>
+                        <button type="button" className="btn btn-link" onClick={ regenerate } disabled={ disabled || !canRetrySuggestions }>Try again</button>
+                        { showRetryMessageRequiredHint && <span className="conversation-suggestions__hint" role="status">Add a customer message first.</span> }
                     </div> }
                     { suggestions.loading && <div className="conversation-suggestions__loading" role="status">
                         <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
@@ -32,11 +36,19 @@ export default function ConversationSuggestions({ hasHiddenAbove, hasHiddenBelow
                         type="button"
                         className="btn btn-white conversation-suggestions__empty"
                         onClick={ regenerate }
-                        disabled={ disabled }
+                        disabled={ disabled || !canGenerateSuggestions }
+                        aria-describedby={ showMessageRequiredHint ? 'conversation-suggestions-message-required' : undefined }
                     >
                         <i className="fe fe-star" aria-hidden="true" />
                         Generate replies
                     </button> }
+                    { showMessageRequiredHint && <p
+                        id="conversation-suggestions-message-required"
+                        className="conversation-suggestions__hint"
+                        role="status"
+                    >
+                        Add a customer message first.
+                    </p> }
 
                     { suggestions.responses.map((suggestion, index) => {
                         if (!suggestion?.response) return null;

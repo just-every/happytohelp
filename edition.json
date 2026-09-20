@@ -372,6 +372,7 @@
           "tests/deployment-config-private.mjs",
           "tests/email-recovery.mjs",
           "migrations/0100_inbound_email_claims.sql",
+          "migrations/0101_email_mailbox_lifecycle.sql",
           "docs/INBOUND-EMAIL-RECOVERY.md"
         ]
       }

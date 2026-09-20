@@ -18,6 +18,10 @@ export async function requestGeneration(env:Env,input:{projectId:string;conversa
  const id=input.id||crypto.randomUUID(),now=new Date().toISOString()
  const existing=await env.DB.prepare('SELECT * FROM ai_generations WHERE id=?').bind(id).first<Generation>()
  if(existing){if(existing.project_id!==input.projectId||existing.conversation_id!==input.conversationId||existing.source_revision!==input.expectedRevision||existing.actor_json!==JSON.stringify(input.actor)||existing.kind!==(input.kind||'reply')||existing.instruction!==(input.instruction||'')||existing.options_json!==optionsJson)throw new Error('Generation command conflict');return {id,state:existing.state}}
+ if(input.kind==='suggestions'&&!input.options?.tool){
+  const conversation=await env.DB.prepare('SELECT last_message_id FROM conversations WHERE id=? AND project_id=?').bind(input.conversationId,input.projectId).first<{last_message_id:string|null}>()
+  if(!conversation?.last_message_id)throw new Error('CONVERSATION_MESSAGE_REQUIRED: Add a customer message first')
+ }
  await env.DB.prepare('INSERT OR IGNORE INTO context_subjects(project_id,subject_id) SELECT project_id,contact_id FROM conversations WHERE id=? AND project_id=?').bind(input.conversationId,input.projectId).run()
  const result=await env.DB.prepare(`INSERT OR IGNORE INTO ai_generations(id,project_id,conversation_id,state,source_revision,source_context_revision,source_last_message_id,actor_json,model,ai_id,ai_profile_json,kind,instruction,options_json,created_at,updated_at,error)
  SELECT ?,c.project_id,c.id,?,c.revision,(SELECT revision FROM context_subjects WHERE project_id=c.project_id AND subject_id=c.contact_id),c.last_message_id,?,a.model,a.id,json_object('id',a.id,'model',a.model,'prompt',a.prompt),?,?,?,?,?,?

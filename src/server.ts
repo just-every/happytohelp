@@ -4,7 +4,7 @@ import { app } from './app'
 import { consumeJob, runScheduled } from './jobs'
 import { dispatch } from './base/dispatch'
 import { publicSiteRoutes,isPublicSitePath } from './modules/public-site'
-import { handleEmail } from './modules/integrations/email-worker'
+import { handleEmail } from './modules/integrations'
 export { ConversationSocket } from './modules/conversations/socket'
 export default {
  async fetch(request:Request,env:Env,execution:ExecutionContext){const path=new URL(request.url).pathname;

@@ -1,7 +1,7 @@
 import {isProjectActive} from './platform/project-status'
 import type { Actor, Env } from './platform/env'
 import { onCustomerMessage } from './modules/ai-support/service'
-import { notifyMessage } from './modules/integrations/notifications'
+import { notifyMessage } from './modules/integrations'
 
 // Admission persists its outbox in the same transaction as the message. HTTP
 // handlers make effects prompt; the scheduler recovers a crash before this call.

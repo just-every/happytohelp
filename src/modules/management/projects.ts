@@ -14,4 +14,38 @@ projects.get('/projects/:projectId/settings',async c=>{const a=await scope(c);re
 projects.put('/projects/:projectId/settings',async c=>{const a=await scope(c,true),b=await c.req.json(),existing=await c.env.DB.prepare('SELECT settings_json FROM project_settings WHERE project_id=?').bind(a.projectId).first<{settings_json:string}>(),settings=JSON.parse(existing?.settings_json||'{}');if('display_mode' in b){if(!['balanced','light','dark'].includes(b.display_mode))throw new HTTPException(400,{message:'Invalid display mode'});settings.display_mode=b.display_mode}for(const key of ['brand_name','welcome_message','color','language','timezone','widget_position','avatar_url','default_responder','website','notification_email','help_center_domain','primary_color','logo_url','brand_image_url','unavailable_message'])if(key in b)settings[key]=text(b[key]);for(const key of ['sidebar_artwork_enabled','is_enabled','collect_email','collector_enabled','disable_bots','is_contact_tracking_enabled','is_human_response_enabled','is_available'])if(key in b)settings[key]=Boolean(b[key]);const statements=[c.env.DB.prepare('INSERT INTO project_settings VALUES(?,?,?) ON CONFLICT(project_id) DO UPDATE SET settings_json=excluded.settings_json,updated_at=excluded.updated_at').bind(a.projectId,JSON.stringify(settings),Date.now())];if(b.name)statements.push(c.env.DB.prepare('UPDATE projects SET name=? WHERE id=?').bind(requiredString(b.name,'name',200),a.projectId));if(b.allowed_origin)statements.push(c.env.DB.prepare('UPDATE projects SET allowed_origin=? WHERE id=?').bind(new URL(url(b.allowed_origin)).origin,a.projectId));await c.env.DB.batch(statements);return c.json({data:settings})})
 projects.get('/profile',async c=>{const a=await scope(c);return c.json({data:await c.env.DB.prepare('SELECT u.id,u.name,u.email,u.created_at,s.timezone,s.avatar_url,s.is_notifiable_on_conversation_assignment FROM users u LEFT JOIN user_settings s ON s.user_id=u.id WHERE u.id=?').bind(a.id).first()})})
 projects.put('/profile',async c=>{const a=await scope(c),b=await c.req.json(),old=await c.env.DB.prepare('SELECT * FROM user_settings WHERE user_id=?').bind(a.id).first<any>();const name=requiredString(b.name,'name',200),timezone=b.timezone?text(b.timezone,100):old?.timezone||'UTC';try{new Intl.DateTimeFormat('en',{timeZone:timezone})}catch{throw new HTTPException(400,{message:'Invalid timezone'})}const email=b.email?requiredString(b.email,'email',320).toLowerCase():null;if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HTTPException(400,{message:'Invalid email'});if(email&&await c.env.DB.prepare('SELECT id FROM users WHERE lower(email)=? AND id<>?').bind(email,a.id).first())throw new HTTPException(409,{message:'Email is already registered'});const statements=[c.env.DB.prepare('UPDATE users SET name=?,email=coalesce(?,email) WHERE id=?').bind(name,email,a.id),c.env.DB.prepare('INSERT INTO user_settings(user_id,timezone,avatar_url,is_notifiable_on_conversation_assignment) VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET timezone=excluded.timezone,avatar_url=excluded.avatar_url,is_notifiable_on_conversation_assignment=excluded.is_notifiable_on_conversation_assignment').bind(a.id,timezone,b.avatar_url?url(b.avatar_url):old?.avatar_url||null,'is_notifiable_on_conversation_assignment' in b?(b.is_notifiable_on_conversation_assignment?1:0):old?.is_notifiable_on_conversation_assignment??1)];await c.env.DB.batch(statements);return c.json({data:{id:a.id,name,timezone}})})
-projects.delete('/projects/:projectId',async c=>{const a=await scope(c,true);if(a.role!=='owner')throw new HTTPException(403);const now=Date.now(),row=await c.env.DB.prepare('SELECT settings_json FROM project_settings WHERE project_id=?').bind(a.projectId).first<{settings_json:string}>(),settings={...JSON.parse(row?.settings_json||'{}'),deleted_at:now};await c.env.DB.batch([c.env.DB.prepare('INSERT INTO project_settings VALUES(?,?,?) ON CONFLICT(project_id) DO UPDATE SET settings_json=excluded.settings_json,updated_at=excluded.updated_at').bind(a.projectId,JSON.stringify(settings),now),c.env.DB.prepare('UPDATE sessions SET revoked_at=? WHERE project_id=?').bind(now,a.projectId),c.env.DB.prepare('DELETE FROM memberships WHERE project_id=?').bind(a.projectId),c.env.DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_blocked',1) WHERE project_id=?").bind(a.projectId),c.env.DB.prepare('UPDATE projects SET widget_key=?,allowed_origin=? WHERE id=?').bind(id(),'https://deleted.invalid',a.projectId),c.env.DB.prepare("UPDATE ai_profiles SET is_enabled=0 WHERE project_id=?").bind(a.projectId),c.env.DB.prepare("UPDATE ai_generations SET state='cancelled',updated_at=? WHERE project_id=? AND state='queued'").bind(new Date().toISOString(),a.projectId)]);return c.json({deleted:true,retainedHistory:true})})
+projects.delete('/projects/:projectId',async c=>{
+ const a=await scope(c,true)
+ if(a.role!=='owner')throw new HTTPException(403)
+ const now=Date.now()
+ const archiveSettings=c.env.DB.prepare(`
+   INSERT INTO project_settings(project_id,settings_json,updated_at)
+   SELECT
+     ?,
+     json_set(
+       coalesce((SELECT settings_json FROM project_settings WHERE project_id=?),'{}'),
+       '$.retired_inbound_address',
+       coalesce(
+         (SELECT inbound_address FROM email_settings WHERE project_id=?),
+         json_extract(coalesce((SELECT settings_json FROM project_settings WHERE project_id=?),'{}'),'$.retired_inbound_address')
+       ),
+       '$.mailbox_archived_at',?,
+       '$.deleted_at',?
+     ),
+     ?
+   ON CONFLICT(project_id) DO UPDATE SET
+     settings_json=excluded.settings_json,
+     updated_at=excluded.updated_at
+ `).bind(a.projectId,a.projectId,a.projectId,a.projectId,now,now,now)
+ await c.env.DB.batch([
+  archiveSettings,
+  c.env.DB.prepare('UPDATE email_settings SET inbound_address=NULL,is_enabled=0,updated_at=? WHERE project_id=?').bind(now,a.projectId),
+  c.env.DB.prepare('UPDATE sessions SET revoked_at=? WHERE project_id=?').bind(now,a.projectId),
+  c.env.DB.prepare('DELETE FROM memberships WHERE project_id=?').bind(a.projectId),
+  c.env.DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_blocked',1) WHERE project_id=?").bind(a.projectId),
+  c.env.DB.prepare('UPDATE projects SET widget_key=?,allowed_origin=? WHERE id=?').bind(id(),'https://deleted.invalid',a.projectId),
+  c.env.DB.prepare("UPDATE ai_profiles SET is_enabled=0 WHERE project_id=?").bind(a.projectId),
+  c.env.DB.prepare("UPDATE ai_generations SET state='cancelled',updated_at=? WHERE project_id=? AND state='queued'").bind(new Date().toISOString(),a.projectId)
+ ])
+ return c.json({deleted:true,retainedHistory:true})
+})

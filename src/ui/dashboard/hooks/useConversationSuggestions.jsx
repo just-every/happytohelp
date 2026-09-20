@@ -76,6 +76,7 @@ export default function useConversationSuggestions({
         () => normaliseSuggestions(conversation?.metadata?.suggestions),
         [ conversation?.metadata?.suggestions ],
     );
+    const canGenerateSuggestions = Boolean(conversation?.last_message_id);
 
     let aiId = null;
     if (conversation?.ai_id) {
@@ -121,7 +122,7 @@ export default function useConversationSuggestions({
     }, [ clearReplySuggestionSelection, onMessageChange, rememberDraft ]);
 
     const requestAssist = useCallback((options = {}) => {
-        if (disabled || suggestions.loading || !conversationId || !projectId) return;
+        if (disabled || suggestions.loading || !conversationId || !projectId || (!options.tool && !canGenerateSuggestions)) return;
 
         const requestId = ++assistRequest.current;
         const clientRequestId = uuidv4();
@@ -168,7 +169,7 @@ export default function useConversationSuggestions({
                 onLoadingMessageChange('');
             }
         });
-    }, [ conversationId, disabled, message, onLoadingMessageChange, persistSuggestions, projectId, sendAction, suggestions ]);
+    }, [ canGenerateSuggestions, conversationId, disabled, message, onLoadingMessageChange, persistSuggestions, projectId, sendAction, suggestions ]);
 
     // Recover locally if the connection drops or a worker exits before broadcasting
     // a terminal state. The server's acknowledged deadline replaces the local one.
@@ -193,9 +194,10 @@ export default function useConversationSuggestions({
     }, [ onLoadingMessageChange, persistSuggestions, suggestions ]);
 
     const regenerate = useCallback(() => {
+        if (!canGenerateSuggestions) return;
         clearReplySuggestionSelection();
         requestAssist({ instructions: instructions.trim() });
-    }, [ clearReplySuggestionSelection, instructions, requestAssist ]);
+    }, [ canGenerateSuggestions, clearReplySuggestionSelection, instructions, requestAssist ]);
 
     const selectSuggestion = useCallback((suggestion, index) => {
         if (disabled || suggestions.loading || !suggestion?.response) return;
@@ -331,6 +333,7 @@ export default function useConversationSuggestions({
 
     return {
         activeTool,
+        canGenerateSuggestions,
         disabled,
         canRunTools: !disabled && !suggestions.loading && Boolean(message?.trim()),
         canRedo: redoStack.length > 0,

@@ -7,6 +7,7 @@ import {
     customerReplyPacket,
     customerReplyPacketMessageContent,
 } from '../../src/modules/ai-support/replies/packet.js';
+import { customerReplyMessages } from '../../src/modules/ai-support/replies/prompt.js';
 
 test('customer reply packet preserves provenance while excluding human-only draft material', () => {
     const packet = customerReplyPacket({
@@ -74,4 +75,21 @@ test('customer reply packet preserves provenance while excluding human-only draf
 
     const serialized = customerReplyPacketMessageContent(packet);
     assert.match(typeof serialized === 'string' ? serialized : serialized[0].text, /Scoped customer-reply context/);
+});
+
+test('customer reply prompt gives enabled repository reads an exact path contract', () => {
+    const messages = customerReplyMessages({
+        replies: {
+            policies: [],
+            packet: {
+                capabilities: { repository_retrieval: ['repo_read_file'] },
+                evidence: { conversation: [] },
+            },
+        },
+    });
+    assert.match(messages[1].content, /call repo_read_file directly/);
+    assert.match(messages[1].content, /ref null/);
+    assert.match(messages[1].content, /start_offset 0/);
+    assert.match(messages[1].content, /expected_sha null/);
+    assert.match(messages[1].content, /blob identity, not a ref/);
 });

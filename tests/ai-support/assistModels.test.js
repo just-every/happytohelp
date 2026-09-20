@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyProviderContract, assistProvider } from '../../src/modules/ai-support/assist/providerContract.js';
 import { calculateAssistCost, getAssistModelSettings } from '../../src/modules/ai-support/assist/models.js';
+import { buildAssistMessages } from '../../src/modules/ai-support/assist/prompt.js';
 import { COMMON_REPLY_ICONS, replyIconTool } from '../../src/modules/ai-support/assist/icons.js';
 import { replyIconNames } from '../../src/modules/ai-support/llm/schemas/reply-icons.js';
 
@@ -86,4 +87,19 @@ test('Claude tool arguments use a native strict contract without mutating other 
     assert.equal(result.tools[0].input_schema.properties.limit.maximum, undefined);
     assert.equal(tool.strict, undefined);
     assert.equal(applyProviderContract(params, 'gemini-3.8-flash'), params);
+});
+
+test('agent assist prompt exposes repository retrieval capabilities from the scoped packet', () => {
+    const messages = buildAssistMessages({
+        assist: {
+            packet: {
+                capabilities: { repository_retrieval: ['repo_search', 'repo_read_file'] },
+                timeline: [],
+            },
+            policies: [],
+        },
+    });
+    const content = messages.map(message => message.content).join('\n');
+    assert.match(content, /call repo_read_file directly/);
+    assert.match(content, /evidence_ids/);
 });

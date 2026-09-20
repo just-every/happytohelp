@@ -34,6 +34,13 @@ const buildAssistMessages = (context, mode = 'suggestions', pass = { stage: 'pri
             JSON.stringify(context.assist.policies),
         ].join('\n') },
     ];
+    const repositoryRetrieval = context.assist.packet.capabilities?.repository_retrieval || [];
+    if (repositoryRetrieval.includes('repo_read_file')) {
+        messages.push({
+            role: 'developer',
+            content: 'Repository retrieval is enabled for this project. When a material code or product-behavior fact is absent from the packet, call repo_read_file directly for the exact selected repository path (use ref null, start_offset 0, and expected_sha null for the default branch) before drafting. Use returned evidence_ids in the response; do not claim that repository evidence is unavailable until the tool returns a failure. For later chunks keep ref unchanged and pass the prior sha as expected_sha; sha is a blob identity, not a ref.',
+        });
+    }
     if (mode === 'suggestions') {
         messages.push({ role: 'developer', content: [
             pass.stage === 'alternatives'

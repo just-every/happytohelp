@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "c60d687f781e37565f9e2550800488ebfe15ecc3b0cb841f4084b482f94e8512",
+  "manifest": "7a0eac4ef8bff2e9f62ec0a329fa4976e96255411c39a18a4ee750b742aa0438",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -263,6 +263,7 @@
           "tests/email-provider.mjs",
           "tests/email-worker.mjs",
           "tests/github-integration.mjs",
+          "tests/github-discovery.mjs",
           "tests/helpers",
           "tests/identity.mjs",
           "tests/lead-operations.mjs",
@@ -427,7 +428,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "c60d687f781e37565f9e2550800488ebfe15ecc3b0cb841f4084b482f94e8512",
+      "sha256": "7a0eac4ef8bff2e9f62ec0a329fa4976e96255411c39a18a4ee750b742aa0438",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -1367,7 +1368,7 @@
       "executable": false
     },
     "scripts/verify-modules.mjs": {
-      "sha256": "2c1a6331ac17f1c55442214fcf965656592eef4f2031bf6c46bbcdc39b92ae93",
+      "sha256": "b07371d2020df043f3d009f7b129bea43953a1c42e604b30c4af07523d7604dd",
       "executable": false
     },
     "scripts/verify-visual-edit.mjs": {
@@ -1503,7 +1504,7 @@
       "executable": false
     },
     "src/modules/ai-support/assist/prompt.js": {
-      "sha256": "73c4b7ea74f40aa398259bcab35f2da85d22fc4e5d4314fbf7be54f808585e10",
+      "sha256": "b0879976386d366924000333f43b18db0f19dc7cbfb8a7a49d4585924e5d174e",
       "executable": false
     },
     "src/modules/ai-support/assist/providerContract.js": {
@@ -1523,7 +1524,7 @@
       "executable": false
     },
     "src/modules/ai-support/context.ts": {
-      "sha256": "d559704766623a627851f57622f89ce6cb6a3b76af5985018403c1f8de208cae",
+      "sha256": "3798d1488cd344d6e62469d88ecdcfcb8d962c0cb16f1db8fb7183004831603d",
       "executable": false
     },
     "src/modules/ai-support/customer-message.ts": {
@@ -1599,7 +1600,7 @@
       "executable": false
     },
     "src/modules/ai-support/replies/prompt.js": {
-      "sha256": "cfed7baf924591f863950af2b6adbd7d142a197fb196b4b2009cde97f81dc7a1",
+      "sha256": "ac7e6a9cbc82d6064c44df8f3e1d5e001151b52bb4c987251d1270c4864bb626",
       "executable": false
     },
     "src/modules/ai-support/replies/triggers.js": {
@@ -1607,7 +1608,7 @@
       "executable": false
     },
     "src/modules/ai-support/repository-tools.ts": {
-      "sha256": "1c318bd5f2ec1618e19a4675bb798e973b9bc622108525db53ff955c5a2dddfb",
+      "sha256": "ac0dd9630ed73350c75a6021b68a5fc10c45b11a1ae935062290164838302818",
       "executable": false
     },
     "src/modules/ai-support/repository.ts": {
@@ -2046,12 +2047,16 @@
       "sha256": "16306bfa1b100e5b4ed4ef8fc4c25f7a1a899c303fcc6bf522907b7cdab0bda6",
       "executable": false
     },
+    "src/modules/integrations/github-discovery.ts": {
+      "sha256": "107e5b26225465d3d801298bc045938bd2de253e756fab89a11e8885e56d99f8",
+      "executable": false
+    },
     "src/modules/integrations/github-oauth.ts": {
       "sha256": "c039e5d5be85feca9a3d48659dbb9e44e1b1748b1ec35c0618dc4a8e359d71c6",
       "executable": false
     },
     "src/modules/integrations/github.ts": {
-      "sha256": "fc006b5e09721f2da5485bc458133951004892b959b0eed422e9caa355816ffd",
+      "sha256": "1685728297cc051bd24f14858cf4e0d8f1f24bb47d1b0e05e2a272ef3f13fe7c",
       "executable": false
     },
     "src/modules/integrations/inbound-effects.ts": {
@@ -2099,15 +2104,15 @@
       "executable": false
     },
     "src/modules/integrations/README.md": {
-      "sha256": "22e734e015a3c38810c052a7bca6841a310c7bfa9d7b869794b6380183434bc7",
+      "sha256": "c5903a776f27f4d7fb44da6c108c94e6891c01e88cbb9b24a921e6db8c2c99fd",
       "executable": false
     },
     "src/modules/integrations/repository.ts": {
-      "sha256": "e174053f379a44837e7a4f776d6793c603182bb839da9bb0ae23dca6da90bd3a",
+      "sha256": "6de33229a1952275bfe3fbee55b2e43a67425258362d180bab19e2679a2f105b",
       "executable": false
     },
     "src/modules/integrations/routes.ts": {
-      "sha256": "dffb325ba12172bb64868ce23cef7aa3420054eba5f1134fd5772f965cc438a5",
+      "sha256": "33c66315a55e95d03ed825f71eab61888a6c5509b0787090a049972c63d95c82",
       "executable": false
     },
     "src/modules/integrations/secrets.ts": {
@@ -4371,11 +4376,11 @@
       "executable": false
     },
     "tests/ai-support/assistModels.test.js": {
-      "sha256": "b4aaf32c7b90eeed8c0f28ccd797f740c7e900f788deb8f78a368cd06a64627b",
+      "sha256": "0c364514db4bf63cf056974aacdaca5b564247e2af9bf1e90dbe530b77945e8c",
       "executable": false
     },
     "tests/ai-support/customerReplyPacket.test.js": {
-      "sha256": "62bda984b40e8746ab8d9717810a80216c3d37112d6d2673741fca857c07838f",
+      "sha256": "5ba3e7955018476454eec004c9b306aead90e12c021cce20d63f50d4927064e7",
       "executable": false
     },
     "tests/ai-support/empty-suggestions-worker.ts": {
@@ -4400,6 +4405,10 @@
     },
     "tests/ai-support/provider-fixtures.mjs": {
       "sha256": "2ea81b6f8c59ba3a18a909aafe8fdd1f7d7e0250dff7fa4f629e381cc6ef2583",
+      "executable": false
+    },
+    "tests/ai-support/repositoryTools.test.js": {
+      "sha256": "f90a303171b65e4b50b125d37f351642cf4b73d8c79f492048f92f4c2ffc1b02",
       "executable": false
     },
     "tests/ai-support/taskModels.test.js": {
@@ -4560,6 +4569,10 @@
     },
     "tests/eval-harness/systemCases.test.js": {
       "sha256": "b214ae3ab902b0898f30ce099fcd54f80d10248c78957c0b7ec4190d3e8c2203",
+      "executable": false
+    },
+    "tests/github-discovery.mjs": {
+      "sha256": "35907c74fb2be9b385bc9c11ed4097c89d3f271c9b28b8b89db58e63cb0e4161",
       "executable": false
     },
     "tests/github-integration.mjs": {

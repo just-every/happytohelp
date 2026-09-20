@@ -28,6 +28,6 @@ export async function replyContext(env:Env,projectId:string,conversationId:strin
  const repoTools=await repositoryTools(env,projectId,audience,evidenceIds)
  const tools=[...contextTools(env,projectId,conversationId,evidenceIds),...repoTools]
  packet.capabilities.repository_retrieval=repoTools.map(tool=>tool.definition.function.name)
- const assistPacket={company:project,customer,conversation,timeline:boundTimeline(timeline),private_notes:boundTimeline(privateNotes),activity:boundActivity(activity),summaries:[],knowledge:{readiness:'search-required',catalog:[]},drafting_identity:{kind:'human-operator'},history_window:{entries:timeline.length,has_earlier:timeline.length===100}}
+ const assistPacket={company:project,customer,conversation,timeline:boundTimeline(timeline),private_notes:boundTimeline(privateNotes),activity:boundActivity(activity),summaries:[],knowledge:{readiness:'search-required',catalog:[]},capabilities:{account_mutations:[],retrieval:['search_knowledge','read_knowledge_source','read_conversation_entry','read_conversation_history','search_conversation_history'],repository_retrieval:repoTools.map(tool=>tool.definition.function.name)},drafting_identity:{kind:'human-operator'},history_window:{entries:timeline.length,has_earlier:timeline.length===100}}
  return {conversation,packet,tools,assistPacket,evidenceIds,policies,agent:{id:profile.id,is_ai:true,name:profile.name,ai:{id:profile.id,name:profile.name,avatar_url:profile?.avatar_url||null}}}
 }

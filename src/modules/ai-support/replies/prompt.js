@@ -18,8 +18,13 @@ const customerReplyMessages = context => {
         throw new Error('Customer reply requires a scoped reply packet.');
     }
 
+    const repositoryRetrieval = context.replies.packet.capabilities?.repository_retrieval || [];
+    const repositoryInstruction = repositoryRetrieval.includes('repo_read_file')
+        ? 'Repository retrieval is enabled for this project. If the customer asks about a repository file or product behavior that is not established in the packet, call repo_read_file directly with the selected repository, the exact path, ref null for the default branch, start_offset 0, and expected_sha null before drafting. Use the returned evidence; do not claim that the file is unavailable until the tool returns a failure. For later chunks keep ref unchanged and pass the prior sha as expected_sha; sha is a blob identity, not a ref.'
+        : null;
     return [
         { role: 'developer', content: CUSTOMER_REPLY_INSTRUCTIONS },
+        ...(repositoryInstruction ? [{ role: 'developer', content: repositoryInstruction }] : []),
         { role: 'developer', content: `Server-selected policies:\n${JSON.stringify(context.replies.policies || [])}` },
         { role: 'user', content: customerReplyPacketMessageContent(context.replies.packet) },
     ];

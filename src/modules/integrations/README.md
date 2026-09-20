@@ -28,11 +28,17 @@ an explicit unavailable state. Provider boundary fixtures exist only in tests.
   mail on a dedicated subdomain so the root domain's existing MX records are unchanged.
 - GitHub uses OAuth (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`) with expiring,
   user/project-bound one-use state. `INTEGRATION_ENCRYPTION_KEY` is a base64-encoded
-  32-byte AES key; stored tokens use project-bound AES-GCM. An alternative
-  `GITHUB_TOKENS` secret maps project IDs to tokens; single `GITHUB_TOKEN` requires
-  matching `GITHUB_PROJECT_ID`. Repository tools enforce exact repository selection,
-  separate operator/customer permission, bounded text, denied secret paths and
-  credential redaction. Disconnect removes OAuth credentials and clears access.
+  32-byte AES key; stored tokens use project-bound AES-GCM. Alternative
+  `GITHUB_TOKENS` and project-matched `GITHUB_TOKEN` modes accept a project-scoped
+  token without assuming its provider type. OAuth repository discovery lists the
+  connected user’s repositories; mapped and single-token modes validate the exact
+  project allowlist through repository reads, which also supports GitHub App
+  installation tokens that cannot use `/user/repos`. Repository tools enforce exact
+  repository selection, separate operator/customer permission, bounded text, denied
+  secret paths and credential redaction. Repository file chunks keep their selected
+  ref and validate the previous blob `sha` as `expected_sha`; a blob SHA is not a
+  Git ref, and a changed file fails the continuation so the caller restarts at
+  offset zero. Disconnect removes OAuth credentials and clears access.
 - Leads use `OPENAI_API_KEY` and explicit `LEAD_MODEL` for queued, grounded draft
   preparation from bounded public website text. A reviewed draft is required before
   email delivery. Queued jobs recover; interrupted provider attempts become

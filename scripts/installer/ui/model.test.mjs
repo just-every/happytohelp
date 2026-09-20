@@ -54,6 +54,11 @@ test('email model keeps provider, sender, account and credential requirements to
   assert.equal(emailModel({ ...resend, emailApiKey: 'resend-key' }).complete, true);
   assert.equal(emailModel(resend, { secretReadiness: { emailApiKey: true, emailProvider: 'resend' } }).complete, true);
 
+  const sendgrid = { emailProvider: 'sendgrid', emailFrom: 'help@justevery.com' };
+  assert.deepEqual(emailModel(sendgrid), { keys: ['emailProvider', 'emailFrom', 'emailApiKey'], complete: false });
+  assert.equal(emailModel({ ...sendgrid, emailApiKey: 'sendgrid-key' }).complete, true);
+  assert.equal(emailModel(sendgrid, { secretReadiness: { emailApiKey: true, emailProvider: 'sendgrid' } }).complete, true);
+
   const cloudflare = { emailProvider: 'cloudflare', emailFrom: 'help@example.test', emailAccountId: 'a'.repeat(32) };
   assert.deepEqual(emailModel(cloudflare), { keys: ['emailProvider', 'emailFrom', 'emailAccountId', 'emailApiKey'], complete: false });
   assert.equal(emailModel(cloudflare, { email: { provider: 'cloudflare', credentialPresent: true, accountId: cloudflare.emailAccountId } }).complete, true);

@@ -1,7 +1,7 @@
 import {Hono} from 'hono';
 import type {AppEnv} from '../../platform/env';
 import {requireActor,requireProject} from '../../platform/auth';
-import {hash,requireValue} from '../local-computer/contracts';
+import {hash,requireValue} from './validation';
 import {seededId,fixtureEvidenceId} from './checks/index.mjs';
 const namespace='happytohelp.synthetic-eval.v1';
 export const trainingSeedRoutes=new Hono<AppEnv>();

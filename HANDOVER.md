@@ -11,6 +11,34 @@ well sculptures, journey map backgrounds and official/app brand icons. Pricing,
 legal, waitlist, referrer and public auto-widget behavior remain outside the
 active edition. The earlier 15 September simple-landing description is historical.
 
+## 20 September launch-preparation checkpoint
+
+The owner selected HappyToHelp as the first launch lane. The current native
+source now has an acyclic edition graph: AI lifecycle and required effects,
+training, customer-context and local-delegation adapters are edition-owned;
+failed model attempts record their generation state. Widget collection cleanup
+and typed event dispatch are in place. Inbound email has caught local retry
+failures and exposes explicit administrator reconciliation with claim tokens
+(`migrations/0100_inbound_email_claims.sql`).
+
+Base and HappyToHelp share the private installer state implementation byte for
+byte, with 17 shared onboarding tests and 17 private-state tests passing in each
+tree. The standalone installer and deployment
+path now derives the full queue topology and performs custom-zone preflight
+before remote mutations. The managed service retains a 33-migration
+HappyToHelp plan with shared mail environment inputs and artifact qualification
+checks. User homepage and service scene edits that
+predated this checkpoint remain preserved.
+
+The latest exact verification record is
+`/Users/zemaj/.orchestrator/evidence/happytohelp/launch-20260920`:
+service build, typecheck, 623 tests and runtime checks pass, and the prebuilt
+native runtime passes after the IPv6 authority and current homepage assertions
+were repaired. Provider checks use local fixtures. The production service pin
+`446c1ce` is unchanged. Clean installation and aggregate results are recorded
+there separately; this checkpoint itself does not qualify hosted/provider/public
+execution or declare a complete launch.
+
 ## 17 September homepage integration — local verification
 
 The approved journey homepage is now the native React/TanStack root route, with

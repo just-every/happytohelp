@@ -1,10 +1,10 @@
 import {requireActiveProject} from '../../platform/project-status'
-import {assertModelConfigured} from '../ai-support/configuration'
+import {assertModelConfigured} from '../../modules/ai-support/configuration'
 import type { Env } from '../../platform/env'
 // @ts-ignore Retained Worker-compatible orchestration module.
-import { runStream } from '../ai-support/llm/orchestrator.js'
+import { runStream } from '../../modules/ai-support/llm/orchestrator.js'
 // @ts-ignore Request-local provider/storage context.
-import { withWorkerRuntime } from '../ai-support/vendor/ensemble/worker-runtime.js'
+import { withWorkerRuntime } from '../../modules/ai-support/vendor/ensemble/worker-runtime.js'
 export async function requestContextModel(env:Env,job:any,task:string,request:any){
  await requireActiveProject(env,job.project_id)
  assertModelConfigured(env,job.model)

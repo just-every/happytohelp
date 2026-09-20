@@ -22,6 +22,12 @@ identifies the actual selected bytes. Frozen evaluation comparator files are
 historical test inputs; their explicit native context adapter does not claim the
 historical database runtime is unchanged.
 
+The public source boundary is the edition root `LICENSE` plus the notices under
+`docs/licenses/`. The root notice covers first-party Run Edit Run source; the
+third-party notices identify retained Base, Ensemble, Inter, Lucide, the active
+Feather-derived WOFF and Font Awesome Free material without asserting blanket rights over owner-supplied
+artwork or unresolved historical assets.
+
 The retained Ensemble source has its own LICENSE, SOURCE.json and SOURCE.patch
 under ai-support/vendor/ensemble. Preserve them together. Preserve all package
 licences and notices from the frozen dependency graph; installation/download

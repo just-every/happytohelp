@@ -1,12 +1,14 @@
+import {generationEffects} from './edition/ai/generation-effects'
+import {requestContextModel} from './edition/ai/customer-context-provider'
 import {isProjectActive} from './platform/project-status'
 import type { Env,Job } from './platform/env'
 import { handleGeneration,recoverQueuedGenerations } from './modules/ai-support/service'
-import { executeTrainingCase } from './modules/ai-support/training'
+import { executeTrainingCase } from './edition/ai/training'
 import { consumeJob as consumeKnowledge,refreshDueDatasets } from './modules/knowledge'
 import { executeTrainingRun,recoverTrainingRuns } from './modules/training-runs'
 import { consumeContextJob,recoverContextJobs } from './modules/customer-context'
 import { recoverLocalResultEffects } from './modules/local-computer'
-import { localComputerIntegration } from './modules/local-computer/edition'
+import { localComputerIntegration } from './edition/local-computer'
 import { consumeJob as consumeBrand,recoverBrandJobs } from './modules/site-preview/brand'
 import { handleLeadJob,recoverLeadJobs } from './modules/integrations/leads'
 import { applyMessageEffects } from './message-effects'
@@ -14,9 +16,9 @@ import type { Actor } from './platform/env'
 
 export async function consumeJob(job:Job,env:Env) {
  if(job.type!=='lead.process'&&!await isProjectActive(env,job.projectId))return
- if(await handleGeneration(env,job))return
+ if(await handleGeneration(env,job,generationEffects))return
  if(await consumeKnowledge(job,env))return
- if(await consumeContextJob(job,env))return
+ if(await consumeContextJob(job,env,requestContextModel))return
  if(await consumeBrand(job,env))return
  if(await handleLeadJob(env,job))return
  if(job.type==='training'){
@@ -40,7 +42,7 @@ export async function runScheduled(env:Env) {
   const projectSent=await env.CONVERSATIONS.get(env.CONVERSATIONS.idFromName(`project:${row.project_id}`)).fetch('https://conversation.internal/broadcast',{method:'POST'})
   if(sent.ok&&projectSent.ok&&through!==undefined)await env.DB.prepare('UPDATE conversation_outbox SET delivered_at=? WHERE conversation_id=? AND id<=? AND delivered_at IS NULL').bind(Date.now(),row.conversation_id,through).run()
  }
- await recoverQueuedGenerations(env)
+ await recoverQueuedGenerations(env,generationEffects)
  await refreshDueDatasets(env)
  await recoverContextJobs(env)
  await recoverTrainingRuns(env)

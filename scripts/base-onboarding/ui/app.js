@@ -113,7 +113,7 @@ function targetChoices(container) {
 }
 function openGroup(id) {
   if (activeGroup !== id) history.push({ id: activeGroup, editing: editingGroup });
-  selectGroup(id, true); emailNow = ['cloudflare', 'resend'].includes(draft.emailProvider); tokenEditing = false;
+  selectGroup(id, true); emailNow = ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider); tokenEditing = false;
   render(); focusGroup();
 }
 function focusGroup() { $('#heading').focus(); }
@@ -208,11 +208,11 @@ function choiceGroup(container, legend, options, selected, onChange) {
 }
 function renderEmail() {
   const unit = node('section', 'email-unit'); unit.setAttribute('aria-label', `Email from ${product.name}`); $('#fields').append(unit);
-  choiceGroup(unit, `Email from ${product.name}`, [['now', 'Set up email now'], ['later', 'Set up later']], draft.emailProvider === 'later' && !emailNow ? 'later' : emailNow || ['cloudflare', 'resend'].includes(draft.emailProvider) ? 'now' : '', value => { emailNow = value === 'now'; setAnswer('emailProvider', value === 'later' ? 'later' : ['cloudflare', 'resend'].includes(draft.emailProvider) ? draft.emailProvider : ''); });
+  choiceGroup(unit, `Email from ${product.name}`, [['now', 'Set up email now'], ['later', 'Set up later']], draft.emailProvider === 'later' && !emailNow ? 'later' : emailNow || ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider) ? 'now' : '', value => { emailNow = value === 'now'; setAnswer('emailProvider', value === 'later' ? 'later' : ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider) ? draft.emailProvider : ''); });
   unit.append(node('p', 'help', `Choose how ${product.name} sends email. Hosting sign-in does not set up email sending.`));
-  if (emailNow || ['cloudflare', 'resend'].includes(draft.emailProvider)) {
-    choiceGroup(unit, 'Email service', [['cloudflare', 'Cloudflare Email Sending'], ['resend', 'Resend']], draft.emailProvider, value => setAnswer('emailProvider', value));
-    if (['cloudflare', 'resend'].includes(draft.emailProvider)) {
+  if (emailNow || ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider)) {
+    choiceGroup(unit, 'Email service', [['cloudflare', 'Cloudflare Email Sending'], ['resend', 'Resend'], ['sendgrid', 'SendGrid']], draft.emailProvider, value => setAnswer('emailProvider', value));
+    if (['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider)) {
       const scope = draft.emailProvider + ':' + (draft.emailAccountId || '');
       if (scope !== emailFieldsScope) { emailVisibleKeys.clear(); emailFieldsScope = scope; }
       for (const key of emailModel(draft, state.known).keys) if (key !== 'emailProvider') emailVisibleKeys.add(key);

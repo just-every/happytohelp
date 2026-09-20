@@ -13,8 +13,13 @@ try{
  // Development auto-login must not exist in the emitted Worker, even when
  // every request header claims a same-origin loopback browser.
  assert.equal((await call('/api/identity/local-owner-session',{},undefined,'POST',{Origin:origin,'Sec-Fetch-Site':'same-origin'})).status,404)
+ const runtimePort=new URL(origin).port
  for (const host of ['localhost', '127.0.0.1', '[::1]']) {
-  const response=await call('/api/identity/local-owner-session',{},undefined,'POST',{Host:host,Origin:`http://${host}`,'Sec-Fetch-Site':'same-origin'})
+  // An IPv6 Host authority must include brackets and the runtime port. An
+  // missing-port authority makes Wrangler's local proxy fail
+  // before the emitted Worker can return its production denial.
+  const authority=`${host}:${runtimePort}`
+  const response=await call('/api/identity/local-owner-session',{},undefined,'POST',{Host:authority,Origin:`http://${authority}`,'Sec-Fetch-Site':'same-origin'})
   assert.ok([403,404].includes(response.status),`Production must deny local owner login for ${host}`)
   assert.equal(response.headers.get('Set-Cookie'),null)
  }

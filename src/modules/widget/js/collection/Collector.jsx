@@ -2,7 +2,7 @@ import TurndownService from "turndown";
 import {cleanText, removePII} from "./Helper";
 import { describeTarget, nameTags } from "./Describe";
 import { HesitationDetector } from "./Hesitation";
-import { lastAction, recordAction, setMessageHandler, setWidgetState, setCollectorEnabled, onAction, onReady } from "./Action";
+import { lastAction, recordAction, setMessageHandler, setWidgetState, setCollectorEnabled as setActionCollectorEnabled, onAction, onReady, resetCollectorState } from "./Action";
 
 export const captureEvents = [
     {type: "mousedown", action: "clicked on", clearAllTimers: true},
@@ -24,6 +24,12 @@ const watchClasses = [
     ["msg", "saw a message"],
 ];
 
+let cleanups = [];
+function listen(target, type, handler, options) {
+    target.addEventListener(type, handler, options);
+    cleanups.push(() => target.removeEventListener(type, handler, options));
+}
+
 let eventTimer = {};
 let excludedElements = [];
 let lastScrollY = 0;
@@ -39,13 +45,15 @@ export const scrollAction = (direction, description = "") => (
 export const createSettledScrollScheduler = onSettled => {
     let timer = null;
 
-    return () => {
+    const schedule = () => {
         if(timer) window.clearTimeout(timer);
         timer = window.setTimeout(() => {
             timer = null;
             onSettled();
         }, 300);
     };
+    schedule.cancel = () => { window.clearTimeout(timer); timer = null; };
+    return schedule;
 };
 
 function recordEventAction(name, event) {
@@ -128,7 +136,7 @@ function recordEvent(captureEvent, event) {
 function observeEvents() {
     // We want to record relevant event for detecting what the user is doing to the website
     captureEvents.forEach((captureEvent) =>
-        window.addEventListener(captureEvent.type, (event) => recordEvent(captureEvent, event), {capture: true, passive: true})
+        listen(window, captureEvent.type, (event) => recordEvent(captureEvent, event), {capture: true, passive: true})
     );
 }
 
@@ -140,7 +148,7 @@ function observeChanges() {
             if (mutation.type === "childList") {
                 watchLoop:
                 for (const [className, msg] of watchClasses) {
-                    if(mutation.target.classList.contains(className) && mutation.target.innerText) {
+                    if(mutation.target.classList?.contains(className) && mutation.target.innerText) {
                         recordAction(msg+": "+cleanText(mutation.target.innerText));
                         break;
                     }
@@ -159,6 +167,7 @@ function observeChanges() {
         }
     });
 
+    cleanups.push(() => observer.disconnect());
     observer.observe(document, { attributes: true, childList: true, subtree: true });
 }
 
@@ -215,11 +224,12 @@ function recordScroll() {
 
 function observeScroll() {
     const scheduleSettledScroll = createSettledScrollScheduler(recordScroll);
-    window.addEventListener('scroll', scheduleSettledScroll, { passive: true });
+    listen(window, 'scroll', scheduleSettledScroll, { passive: true });
+    cleanups.push(scheduleSettledScroll.cancel);
 }
 
 function observeCommandEvents() {
-    window.addEventListener('keydown', function(event) {
+    listen(window, 'keydown', function(event) {
         // check if ctrl (or cmd on osx) + shift + F is pressed
         if ((event.ctrlKey || event.metaKey)) {
             if(event.key === "f") {
@@ -242,7 +252,7 @@ function observeCommandEvents() {
 }
 
 function observeSelection() {
-    document.addEventListener('selectionchange', (event) => {
+    listen(document, 'selectionchange', (event) => {
         if(selectionTimer) window.clearTimeout(selectionTimer);
 
         selectionTimer = window.setTimeout(() => {
@@ -272,7 +282,8 @@ function observeRageClicks() {
         timer: null
     };
 
-    document.addEventListener('click', function(event) {
+    cleanups.push(() => clearTimeout(clickData.timer));
+    listen(document, 'click', function(event) {
         const target = event.target;
 
         // If the user clicks on a different element than before, first record the previous rage session (if any)
@@ -314,10 +325,11 @@ function observeRageClicks() {
 
 
 function observeHesitation() {
-    new HesitationDetector({
+    const detector = new HesitationDetector({
         sendMessage: recordAction,
         debug: false
     });
+    cleanups.push(() => detector.destroy());
 }
 
 function getDomain(url) {
@@ -332,6 +344,7 @@ let initialized = false;
 function init() {
     if (initialized) return;
     initialized = true;
+    lastScrollY = window.scrollY;
     if(document.referrer && getDomain(window.location.href) !== getDomain(document.referrer)) {
         // We usually won't get this information, but if we do, it's useful to know
         recordAction(`referred from ${document.referrer}`, false, true);
@@ -370,6 +383,28 @@ function init() {
     recordAction("visited page "+pageInfo.join(" ").trim(), false, true);
 }
 
+function stopObserving() {
+    cleanups.splice(0).reverse().forEach(cleanup => cleanup());
+    Object.values(eventTimer).forEach(timer => window.clearTimeout(timer));
+    window.clearTimeout(selectionTimer);
+    eventTimer = {};
+    selectionTimer = null;
+    lastEventTarget = null;
+    lastScrollY = 0;
+    initialized = false;
+}
+
+function setCollectorEnabled(enabled) {
+    if (!enabled) stopObserving();
+    setActionCollectorEnabled(enabled);
+}
+
+function destroy() {
+    stopObserving();
+    excludedElements = [];
+    resetCollectorState();
+}
+
 function excludeElement(element) {
     for(let i = 0; i < excludedElements.length; i++) {
         if(element === excludedElements[i]) return;
@@ -380,6 +415,7 @@ function excludeElement(element) {
 
 const Collector = {
     init,
+    destroy,
     excludeElement,
     recordAction,
     setMessageHandler,

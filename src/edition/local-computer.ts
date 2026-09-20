@@ -1,8 +1,8 @@
-import type { Env, Actor } from '../../platform/env';
-import { requireProject } from '../../platform/auth';
-import { admitMessage } from '../conversations/admission';
-import type { Integration } from './contracts';
-import { requireValue } from './contracts';
+import type { Env, Actor } from '../platform/env';
+import { requireProject } from '../platform/auth';
+import { admitMessage } from '../modules/conversations/admission';
+import type { Integration } from '../modules/local-computer/contracts';
+import { requireValue } from '../modules/local-computer/contracts';
 export const localComputerIntegration: Integration = {
  async authorize(c,projectId){const a=await requireProject(c,projectId,true);return {userId:a.id,projectId:a.projectId};},
  async hasAccess(db,userId,projectId){return !!await db.prepare('SELECT 1 FROM memberships WHERE user_id=? AND project_id=?').bind(userId,projectId).first();},

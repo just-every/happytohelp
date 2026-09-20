@@ -3,7 +3,7 @@
 Native D1 collector admission, durable monitoring/profile jobs, bounded evidence,
 correction/retraction, summary compaction and optional public personalization.
 The edition mounts authenticated routes and dispatches `context.run` jobs to
-`consumeContextJob`; scheduled recovery requeues only durable queued jobs.
+`consumeContextJob(job, env, request)` with an explicit execution adapter; scheduled recovery requeues only durable queued jobs.
 
 The `profiles/` and `monitoring/` implementations are ported from
 `happytohelp-chat` bce98c897ec5743dcf243311b6c1886b1057f5e3, with ESM imports for
@@ -16,7 +16,7 @@ uncertain-attempt boundary. Dismissal cooldowns retain 1/7/30/182 days.
 `enqueueContextJob` requires an explicit model and persisted subject settings.
 Contact monitoring/profiling needs consent and an enabled bot; public copy sees
 only approved broad categories and approved content, never private history.
-The provider adapter executes the shared Ensemble engine without mutation tools,
+The edition adapter in `src/edition/ai/customer-context-provider.ts` executes the shared Ensemble engine without mutation tools,
 records attempt events and usage, and fails if the configured provider is absent.
 Interrupted started attempts become uncertain and are not retried. An operator
 can explicitly abandon an uncertain job; this does not replay or prove its

@@ -20,6 +20,9 @@ export class HesitationDetector {
             ...options
         };
 
+        this.destroyed = false;
+        this.timers = new Set();
+        this.proximityReports = new WeakMap();
         // Internal state
         this.lastActivityTime = Date.now();
         this.lastMousePosition = { x: 0, y: 0 };
@@ -61,6 +64,20 @@ export class HesitationDetector {
         this.init();
     }
 
+    schedule(callback, delay) {
+        const timer = setTimeout(() => {
+            this.timers.delete(timer);
+            if (!this.destroyed) callback();
+        }, delay);
+        this.timers.add(timer);
+        return timer;
+    }
+
+    cancel(timer) {
+        clearTimeout(timer);
+        this.timers.delete(timer);
+    }
+
     log(message) {
         if (this.options.debug) {
             console.log(`[HesitationDetector] ${message}`);
@@ -68,6 +85,7 @@ export class HesitationDetector {
     }
 
     sendHesitationMessage(message) {
+        if (this.destroyed) return;
         // Check if the same message was sent recently
         const now = Date.now();
         const lastSent = this.sentMessages.get(message);
@@ -132,7 +150,7 @@ export class HesitationDetector {
 
         const idleDelay = Math.max(0, this.options.idleThreshold - (Date.now() - this.lastActivityTime));
 
-        this.idleTimer = setTimeout(() => {
+        this.idleTimer = this.schedule(() => {
             this.idleTimer = null;
 
             if (document.hidden || this.idleEpisodeReported) {
@@ -152,7 +170,7 @@ export class HesitationDetector {
 
     clearIdleTimer() {
         if (this.idleTimer !== null) {
-            clearTimeout(this.idleTimer);
+            this.cancel(this.idleTimer);
             this.idleTimer = null;
         }
     }
@@ -252,9 +270,9 @@ export class HesitationDetector {
                 const ctaDescription = describeTarget({ target: cta });
 
                 // Only send once per CTA with a cooldown
-                if (!cta._proximityReported || Date.now() - cta._proximityReported > 10000) {
+                if (!this.proximityReports.has(cta) || Date.now() - this.proximityReports.get(cta) > 10000) {
                     this.sendHesitationMessage(`Mouse lingering near ${ctaDescription} without clicking - user may be hesitating`);
-                    cta._proximityReported = Date.now();
+                    this.proximityReports.set(cta, Date.now());
                 }
 
                 break; // Only report one proximity at a time
@@ -271,7 +289,7 @@ export class HesitationDetector {
 
             // Start a hover timer
             if (!this.hoverTimers.has(target)) {
-                const timerId = setTimeout(() => {
+                const timerId = this.schedule(() => {
                     const ctaDescription = describeTarget({ target });
                     this.sendHesitationMessage(`User hovered over ${ctaDescription} for ${this.options.ctaHoverThreshold / 1000} seconds without clicking - showing purchase hesitation`);
                 }, this.options.ctaHoverThreshold);
@@ -286,7 +304,7 @@ export class HesitationDetector {
 
         // Clear hover timer if mouse leaves a CTA
         if (this.hoverTimers.has(target)) {
-            clearTimeout(this.hoverTimers.get(target));
+            this.cancel(this.hoverTimers.get(target));
             this.hoverTimers.delete(target);
 
             if (this.currentHoveredCTA === target) {
@@ -419,8 +437,9 @@ export class HesitationDetector {
 
             // Start hover timer for key fields
             if (this.isImportantField(element)) {
+                this.cancel(this.hoverTimers.get(element));
                 const fieldDesc = this.describeField(element);
-                const timerId = setTimeout(() => {
+                const timerId = this.schedule(() => {
                     if (this.currentFocusedElement === element) {
                         this.sendHesitationMessage(`User has been focused on ${fieldDesc} for ${this.options.formFieldHesitationThreshold / 1000} seconds without typing - may be hesitating`);
                     }
@@ -441,7 +460,7 @@ export class HesitationDetector {
 
             // Clear any hover timers
             if (this.hoverTimers.has(element)) {
-                clearTimeout(this.hoverTimers.get(element));
+                this.cancel(this.hoverTimers.get(element));
                 this.hoverTimers.delete(element);
             }
 
@@ -461,7 +480,7 @@ export class HesitationDetector {
 
             // Clear hover timer as user has started typing
             if (this.hoverTimers.has(element)) {
-                clearTimeout(this.hoverTimers.get(element));
+                this.cancel(this.hoverTimers.get(element));
                 this.hoverTimers.delete(element);
             }
 
@@ -485,7 +504,7 @@ export class HesitationDetector {
         this.sendHesitationMessage(`Form validation error: "${message}" on ${this.describeField(element)} - may cause user hesitation`);
 
         // Start a timer to check for post-error pause
-        setTimeout(() => {
+        this.schedule(() => {
             const timeSinceActivity = Date.now() - this.lastActivityTime;
             if (timeSinceActivity > 5000) {
                 this.sendHesitationMessage(`User paused for ${Math.round(timeSinceActivity / 1000)} seconds after form error - may be confused or stuck`);
@@ -595,7 +614,7 @@ export class HesitationDetector {
 
             if (significantChanges) {
                 // Refresh CTAs after DOM changes
-                setTimeout(() => this.findCTAs(), 300);
+                this.schedule(() => this.findCTAs(), 300);
 
                 // Check if this might be a cart or checkout view
                 const potentialCartView = document.querySelector('.cart, .basket, .bag, [class*="cart-"], [id*="cart"]');
@@ -861,6 +880,10 @@ export class HesitationDetector {
 
     // Clean up when no longer needed
     destroy() {
+        if (this.destroyed) return;
+        this.destroyed = true;
+        this.timers.forEach(timer => clearTimeout(timer));
+        this.timers.clear();
         // Remove all event listeners
         document.removeEventListener('mousemove', this.eventHandlers.mousemove);
         document.removeEventListener('click', this.eventHandlers.userActivity);
@@ -888,6 +911,12 @@ export class HesitationDetector {
 
         this.hoverTimers.forEach(timerId => clearTimeout(timerId));
 
+        this.hoverTimers.clear();
+        this.formCompletions.clear();
+        this.fieldRefocusCount.clear();
+        this.ctaElements = [];
+        this.currentFocusedElement = null;
+        this.currentHoveredCTA = null;
         this.log('Hesitation detector destroyed');
     }
 }

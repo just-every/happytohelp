@@ -18,10 +18,10 @@ export const fields = {
   addressMode: { valid: value => ['automatic', 'custom'].includes(value) },
   prefix: { label: 'Resource name', help: '3–40 lowercase letters, numbers or hyphens; start with a letter.', valid: value => /^[a-z][a-z0-9-]{2,39}$/.test(value || '') },
   appOrigin: { label: 'Team workspace address', type: 'url', autocomplete: 'url', inputMode: 'url', help: 'The HTTPS address your team will open to use HappyToHelp.', valid: value => origin(value, true) },
-  emailProvider: { label: 'Email service', options: [['cloudflare', 'Cloudflare Email Sending'], ['resend', 'Resend'], ['later', 'Set up email later']], valid: value => ['cloudflare', 'resend', 'later'].includes(value) },
+  emailProvider: { label: 'Email service', options: [['cloudflare', 'Cloudflare Email Sending'], ['resend', 'Resend'], ['sendgrid', 'SendGrid'], ['later', 'Set up email later']], valid: value => ['cloudflare', 'resend', 'sendgrid', 'later'].includes(value) },
   emailFrom: { label: 'Sender email address', type: 'email', autocomplete: 'email', inputMode: 'email', help: 'Use an address on your verified sending domain.', valid: email },
   emailAccountId: { label: 'Email Sending account', valid: account },
-  emailApiKey: { label: 'Email sending token', type: 'password', help: 'Cloudflare requires Email Sending: Edit permission; Resend requires a sending API key.', valid: value => typeof value === 'string' && Boolean(value.trim()) },
+  emailApiKey: { label: 'Email sending token', type: 'password', help: 'Cloudflare requires Email Sending: Edit permission; Resend and SendGrid require a sending API key.', valid: value => typeof value === 'string' && Boolean(value.trim()) },
 };
 export const safeKeys = ['target', 'ownerName', 'email', 'name', 'allowedOrigin', 'primaryColor', 'accountId', 'prefix', 'appOrigin', 'emailProvider', 'emailFrom', 'emailAccountId', 'prefixMode', 'addressMode'];
 

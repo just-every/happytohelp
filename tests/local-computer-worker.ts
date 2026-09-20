@@ -1,6 +1,6 @@
 import {Hono} from 'hono';
 import {registerLocalComputerRoutes} from '../src/modules/local-computer';
-import {localComputerIntegration} from '../src/modules/local-computer/edition';
+import {localComputerIntegration} from '../src/edition/local-computer';
 import {trainingRoutes,recoverTrainingRuns} from '../src/modules/training-runs';
 import {executeTrainingRun} from '../src/modules/training-runs/runner';
 const app=new Hono<any>();

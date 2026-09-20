@@ -8,7 +8,8 @@
     "tests/widget-transport.mjs",
     "tests/widget-native-lost-response.mjs",
     "tests/widget-browser.mjs",
-    "tests/widget-browser-runtime.mjs"
+    "tests/widget-browser-runtime.mjs",
+    "tests/widget-lifecycle-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base",

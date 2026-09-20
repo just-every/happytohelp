@@ -21,35 +21,47 @@ routes additionally use `src/platform` identity, environment and D1 contracts.
 The remaining identity, management, email/integration, public-site,
 legacy-import, dashboard and bootstrapping paths are edition integration. They
 remain editable source and can be extracted later when a real second use
-establishes a useful boundary. The public-site integration is limited to the
-simple local-owner landing page and dynamic published help centers; its former
+establishes a useful boundary. The public-site integration includes the approved journey homepage and dynamic
+published help centers; its former
 marketing, pricing, waitlist, referrer and homepage-widget paths are retired.
 The customer widget module remains an independently installable support surface.
 An implementation's directory name alone is not an independent component
 contract.
 
-`requires` in this edition's recipe describes the complete selected integration.
-AI assistance, customer context and training reference each other's optional entry
-points, so the integrated graph includes them together. Consumers need not import
-those entry points. The context-only selection in ai-support/module.json is five
-self-contained ESM files: packet, packetBounds, passEvidence, historyCursor and
-historyOutput. It has no provider/storage import and preserves evidence IDs,
-omission metadata, bounded newest-first context and recoverable history cursors.
-The Beacon exercise adopts this source in an existing preparation path while
-keeping mandatory human review and its original provider interface.
+`requires` records the acyclic selected capability graph. HappyToHelp wires the
+optional engines in `src/edition`: `ai/customer-context-provider.ts` supplies
+context execution, `ai/training*.ts` binds the training runner to AI and context
+builders, and `local-computer.ts` binds local authority to conversation admission.
+`src/jobs.ts` passes execution and generation-effect adapters explicitly.
+The AI lifecycle separates provider requests, currentness checks and guarded
+finalization; `src/edition/ai/generation-effects.ts` owns its socket and notification
+effects. Durable admission finishes before delivery effects, and an effect failure
+cannot reopen a completed generation or replay a provider request. The context engine has
+no provider default; missing wiring fails before it claims a persisted job.
+Training uses its own input validation rather than depending on local-computer.
+
+The context-only selection in ai-support/module.json is five self-contained ESM
+files: packet, packetBounds, passEvidence, historyCursor and historyOutput. It has
+no provider/storage import and preserves evidence IDs, omission metadata, bounded
+newest-first context and recoverable history cursors. The Beacon exercise adopts
+this source in an existing preparation path while keeping mandatory human review
+and its original provider interface. `tests/module-boundaries.mjs` copies the
+published packet selection outside the checkout and exercises image/evidence
+bounds; it also bundles context and training entry points without their optional
+execution capabilities and checks the selected graph against module contracts.
+
+Full Worker routes and persistence engines remain integrated with this edition's
+`src/platform` identity, project-liveness and D1 schema. These are real integration
+requirements, not an independently deployable folder: adopting them means adapting
+those contracts and carrying the listed migrations. The isolated packet selection,
+plugin SDK, widget browser surface and local-computer Integration contract have
+narrower consumer requirements. No runtime plugin registry or universal storage
+abstraction is required.
 
 Migration filenames are current identities, not a proposed reorder. Each module's
 sourcePaths lists the actual files to carry. Aggregate tests such as the delegation
 runtime include its real edition dependencies; their passing result does not imply
 that an isolated folder with missing adapters will run. Package dependencies and
 third-party notices are covered by the root locked package and provenance notes.
-
-The recipe cycles describe optional HappyToHelp adapter imports, not a portable
-engine dependency cycle. For example, AI `training.ts` is the edition executor
-for the training runner; it is unnecessary for standalone packet construction.
-The local-computer `contracts.ts` Integration interface separates delivery from
-its `edition.ts` conversation adapter. Training `contracts.ts` defines the
-TrainingExecutor; this edition retains raw observed provider rounds and bounded
-run budgets without an active payment, balance or Stripe ledger. Selecting full
-routes carries these edition dependencies; selecting neutral builders does not
-silently include them.
+Training retains raw observed provider rounds and bounded run budgets without an
+active payment, balance or Stripe ledger.

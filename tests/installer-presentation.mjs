@@ -69,6 +69,14 @@ try {
   await page.locator('#choice-now').check(); await page.locator('#choice-resend').check();
   assert.equal(await page.locator('#emailFrom').getAttribute('type'), 'email');
   assert.equal(await page.locator('#emailApiKey').getAttribute('type'), 'password');
+  await page.locator('#choice-sendgrid').check();
+  await page.locator('#emailFrom').fill('help@justevery.com');
+  await page.locator('#emailApiKey').fill('sendgrid-fixture-key');
+  await page.locator('#heading').click();
+  await wait(() => installer.state.draft.emailProvider === 'sendgrid');
+  assert.equal(await page.locator('#choice-sendgrid').isChecked(), true);
+  assert.equal(await page.locator('#emailFrom').inputValue(), 'help@justevery.com');
+  assert.equal(await page.locator('#emailApiKey').inputValue(), 'sendgrid-fixture-key');
   await page.locator('#choice-later').check(); await page.locator('#heading').click();
   await visible(page, ['target-local', 'target-remote', 'choice-now', 'choice-later']); await shot(page, '04-hosting-and-email');
   await page.setViewportSize({ width: 390, height: 844 }); await shot(page, '04-hosting-and-email-mobile');

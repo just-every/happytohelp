@@ -1,7 +1,6 @@
 import {requireActiveProject,isProjectActive} from '../../platform/project-status'
 import type {Env,Job} from '../../platform/env'
 import {z} from 'zod'
-import {requestContextModel} from './provider'
 import {currentGuard,publishProfile,finishContextJob} from './outcomes'
 // @ts-ignore Retained profile schemas.
 import * as schemas from './profiles/schemas.js'
@@ -14,8 +13,9 @@ import * as monitoring from './monitoring/context.js'
 // @ts-ignore Retained escalating dismissal cooldown.
 import * as dismissal from './collector/insightCooldown.js'
 export type ContextRequest=(env:Env,job:any,task:string,request:any)=>Promise<any>
-export async function consumeContextJob(message:Job,env:Env,request:ContextRequest=requestContextModel){
+export async function consumeContextJob(message:Job,env:Env,request:ContextRequest){
  if(message.type!=='context.run')return false
+ if(typeof request!=='function')throw new TypeError('Customer context requires an explicit execution adapter')
  const job=await env.DB.prepare('SELECT * FROM context_jobs WHERE id=? AND project_id=?').bind(message.id,message.projectId).first<any>()
  if(!job||job.state!=='queued')return true
  if(!await isProjectActive(env,job.project_id)){await env.DB.prepare("UPDATE context_jobs SET state='failed',error='Project deleted before provider dispatch',finished_at=? WHERE id=? AND state='queued'").bind(Date.now(),job.id).run();return true}

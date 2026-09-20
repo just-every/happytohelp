@@ -1,7 +1,7 @@
 import type {Env} from '../../platform/env'
-import type {TrainingExecution} from '../training-runs/contracts'
+import type {TrainingExecution} from '../../modules/training-runs/contracts'
 // @ts-ignore Selected provider model catalogue.
-import {findModel} from './vendor/ensemble/data/model_data.js'
+import {findModel} from '../../modules/ai-support/vendor/ensemble/data/model_data.js'
 export function checkTrainingBudget(env:Env,input:TrainingExecution){
  const pricing=JSON.parse(String(env.TRAINING_PRICE_CEILINGS||'{}'))[input.model]
  const model=findModel(input.model),contextLimit=model?.features?.context_length

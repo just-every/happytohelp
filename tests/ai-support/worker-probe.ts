@@ -1,4 +1,4 @@
-import {executeTrainingCase} from '../../src/modules/ai-support/training'
+import {executeTrainingCase} from '../../src/edition/ai/training'
 import { withWorkerRuntime, durableFiles } from '../../src/modules/ai-support/vendor/ensemble/worker-runtime.js'
 import { runStream } from '../../src/modules/ai-support/llm/orchestrator.js'
 export default {async fetch(request:Request,env:any){

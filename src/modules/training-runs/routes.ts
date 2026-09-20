@@ -3,7 +3,7 @@ import {trainingSeedRoutes} from './seed';
 import {finishTrainingPlanning} from './recovery';
 import type {AppEnv} from '../../platform/env';
 import {requireProject} from '../../platform/auth';
-import {requireValue,text} from '../local-computer/contracts';
+import {requireValue,text} from './validation';
 export const trainingRoutes=new Hono<AppEnv>();
 trainingRoutes.route('/',trainingSeedRoutes);
 const root='/projects/:project/runs';

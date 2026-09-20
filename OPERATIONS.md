@@ -76,7 +76,7 @@ boundaries; the application never invents answers or reports fake delivery.
 | Ensemble reply, assist, profiles and monitoring | Models selected in project/AI configuration; `CONTEXT_MODEL` for widget-triggered context work | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`; supplied-content lexical retrieval does not require these providers |
 | Help-center provider import | Explicit platform/subdomain and destination project per import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |
-| Email and inbound mail | Project email settings; native inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM`, `INBOUND_EMAIL_TOKEN` |
+| Email and inbound mail | `EMAIL_PROVIDER` (`resend`, `cloudflare` or `sendgrid`), project email settings; native inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM`, `EMAIL_ACCOUNT_ID` for Cloudflare, `INBOUND_EMAIL_TOKEN` |
 | Lead research and reviewed outreach | `LEAD_MODEL`; persisted lead review before sending | `OPENAI_API_KEY`, selected email configuration |
 | GitHub | `GITHUB_CLIENT_ID`, optionally `GITHUB_PROJECT_ID` for one fixed credential | `GITHUB_CLIENT_SECRET`, `INTEGRATION_ENCRYPTION_KEY`; optional `GITHUB_TOKEN` or JSON `GITHUB_TOKENS` map keyed by project ID |
 | Brand image generation | Explicit `BRAND_IMAGE_MODEL`, `BRAND_IMAGE_SIZE`, `BRAND_IMAGE_QUALITY` | `OPENAI_API_KEY` |

@@ -1,14 +1,5 @@
 /* Shared page shell. The approved hero continues to use its original landing.css engine. */
 .h2h-homepage{scroll-behavior:smooth;scroll-padding-top:24px}
-.h2h-homepage .page{min-height:100vh}/* Size the headline from its available column, including on capped desktop layouts. */
-.h2h-homepage .page>main{container-type:inline-size}
-.h2h-homepage .page h1{font-size:19.7cqw}
-@media(max-width:520px){
-.h2h-homepage .page h1{font-size:19cqw}}
-.h2h-homepage .intro{position:relative}
-.h2h-homepage .intro p+p{margin-top:18px}
-.h2h-homepage .hero-chapter{position:absolute;top:-27px;left:0;display:flex;align-items:center;gap:12px;color:#8c4e17;font-size:13px;font-weight:600;letter-spacing:.06em;line-height:16px}
-.h2h-homepage .hero-chapter:before{content:"";width:34px;height:2px;background:currentColor}
 .h2h-homepage .homepage-icons{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
 .h2h-homepage .home-section{position:relative;isolation:isolate;background:#fff;color:#111}
 .h2h-homepage .home-section.dark{background:#111;color:#fff}
@@ -22,16 +13,11 @@
 .h2h-homepage .home-footer{background:#fff;color:#111;padding:48px 4%;display:flex;align-items:center;justify-content:space-between;gap:36px}
 .h2h-homepage .home-footer nav{gap:38px;padding:0}
 .h2h-homepage .home-footer nav a{font-size:14px}
-.h2h-homepage .home-footer .brand{font-size:26px}
 .h2h-homepage .skip-link{position:absolute;left:16px;top:-80px;z-index:10;padding:12px;background:#fff;color:#111}
 .h2h-homepage .skip-link:focus{top:16px}
-@media(min-width:1001px){
-.h2h-homepage .page:has(.scene-corner){min-height:max(100vh,1137px)}
-.h2h-homepage .sculpture.scene-corner{width:475px;height:auto;top:auto;bottom:0}}
 @media(min-width:1537px){
 .h2h-homepage .home-footer{padding-left:max(4%,calc((100vw - 1413px)/2));padding-right:max(4%,calc((100vw - 1413px)/2))}}
 @media(max-width:1000px){
-.h2h-homepage .sculpture.scene-corner{width:56%;max-width:475px;margin-right:0;margin-top:26px}
 .h2h-homepage .section-inner{padding:64px 5%}
 .h2h-homepage .section-copy h2{font-size:clamp(40px,5.5vw,56px)}
 .h2h-homepage .section-copy p{font-size:17px}
@@ -44,7 +30,5 @@
 .h2h-homepage .home-footer{align-items:flex-start;flex-direction:column;gap:28px;padding:38px 6%}
 .h2h-homepage .home-footer nav{width:100%;gap:18px;justify-content:space-between}
 .h2h-homepage .home-footer nav a{font-size:13px}}
-@media(max-width:520px){
-.h2h-homepage .sculpture.scene-corner{width:78%;margin-top:26px}}
 @media(prefers-reduced-motion:reduce){
 .h2h-homepage{scroll-behavior:auto}}

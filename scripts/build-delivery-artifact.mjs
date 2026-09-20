@@ -6,10 +6,15 @@ import { pathToFileURL } from 'node:url';
 
 // This producer runs only in the credential-free build. Its output is untrusted
 // data: the independent delivery service validates every byte and owns bindings.
+// Wrangler may copy local bindings into dist/server/.dev.vars during a local
+// build. Environment and package-manager credential files are never deployable
+// modules or public assets, including when they appear in a nested directory.
+const privateBuildEntry = name => /^(?:\.env(?:\..*)?|\.dev\.vars(?:\..*)?|\.npmrc|\.yarnrc(?:\.yml)?|\.netrc|\.pypirc)$/i.test(name);
 export async function collectFiles(directory) {
   const files = [];
   async function visit(path) {
     for (const entry of await readdir(path, { withFileTypes: true })) {
+      if (privateBuildEntry(entry.name)) continue;
       const child = join(path, entry.name);
       if (entry.isSymbolicLink()) throw new Error(`Artifact cannot contain symlinks: ${child}`);
       if (entry.isDirectory()) await visit(child);
@@ -25,7 +30,7 @@ export async function collectFiles(directory) {
 
 function mimeType(path) {
   const extension = path.split('.').pop();
-  return ({ js: 'application/javascript', css: 'text/css', html: 'text/html', json: 'application/json', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', ico: 'image/x-icon', woff2: 'font/woff2' })[extension] ?? 'application/octet-stream';
+  return ({ js: 'application/javascript', css: 'text/css', html: 'text/html', json: 'application/json', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', ico: 'image/x-icon', woff2: 'font/woff2', woff: 'font/woff', ttf: 'font/ttf', mp4: 'video/mp4' })[extension] ?? 'application/octet-stream';
 }
 
 export async function produceArtifact({ root = process.cwd(), output = 'delivery-artifact/happytohelp-worker-artifact.json' } = {}) {

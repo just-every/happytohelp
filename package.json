@@ -30,7 +30,8 @@
     "test:demo-inbox-browser": "node tests/demo-inbox-browser.mjs",
     "test:mobile-inbox-browser": "node tests/mobile-inbox-browser.mjs",
     "verify:visual": "node scripts/verify-visual-edit.mjs",
-    "install:app": "node scripts/install.mjs"
+    "install:app": "node scripts/install.mjs",
+    "test:widget-lifecycle-browser": "node tests/widget-lifecycle-browser.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

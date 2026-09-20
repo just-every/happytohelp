@@ -20,7 +20,13 @@ assets: a sculpted beacon hero loop, horse-and-spear rider, crossing/lookout/
 helping-hand/well sculptures and journey map backgrounds, together with official/
 app brand icons. This describes the source categories only and makes no universal
 ownership, licence or redistribution claim. The implementation and local browser outcome are recorded in HANDOVER.md;
-`src/ui/homepage/asset-provenance.json` records the 15 selected homepage assets.
+`src/ui/homepage/asset-provenance.json` records the selected homepage assets,
+including the owner-supplied HappyToHelp SVG brand artwork added unchanged on
+19 September 2026, and the standalone rider icon extracted from its original
+paths 0 and 11 with unchanged geometry, a rider-only viewBox, and the owner-requested #33344a fill. The
+complete supplied logo remains available as the source artwork. The owner-supplied
+`happytohelp-favicon.png` was copied unchanged on 19 September 2026, with no
+conversion, re-encoding, or color changes.
 
 The historical source contained Font Awesome Pro SVGs inline in marketing and
 sidebar markup. Any removed or retained replacement must be reviewed against the
@@ -54,6 +60,31 @@ evidence, not an active route contract.
 Historical referrer mapping and waitlist fixtures were retained in Git for source
 comparison. They do not establish current public-route acceptance, notification
 delivery or provider behavior after the landing-page scope change.
+
+## Public release asset boundary — 20 September 2026
+
+The edition root `LICENSE` carries the maintained Run Edit Run MIT notice for
+first-party source. Third-party notices retained with the public source are
+listed under `docs/licenses/`, including the Base notice, Ensemble notice and
+patch/source receipt, Inter, Lucide, Feather-derived dashboard glyphs and
+Font Awesome Free. These notices describe the retained source categories; they
+do not assert rights over owner-supplied artwork, trademarks or any asset whose
+licence is not stated there.
+
+The approved homepage art, HappyToHelp logo, icon and favicon remain unchanged
+and are listed with byte hashes in `src/ui/homepage/asset-provenance.json`. The
+active non-homepage assets are limited to the installer's `public/setup/ocean.png`,
+the dashboard `public/img/icon.svg` and avatar masks, Inter, the active
+Feather-derived WOFF font, and the Help Center CSS/pattern assets listed in
+`src/modules/public-site/asset-provenance.json`. The active Feather-derived WOFF
+remains because the dashboard imports it directly; the unused generated CSS, SVG and
+TTF fallback paths were removed. A fresh tracked-source scan found no other
+unreferenced public asset.
+
+Font Awesome Pro marketing/source assets were not retained. The widget's selected
+Font Awesome Free packages and licence boundary are recorded in
+`docs/licenses/FONT-AWESOME-FREE.md`; no Pro package or paid provider request is
+part of this source release.
 
 Read-only site baseline was `94863c4557cad8bfc02817a6c5a06a54db0fb3f0`. The only
 reported original worktree changes at final source inspection were untracked

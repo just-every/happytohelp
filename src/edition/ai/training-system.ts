@@ -1,14 +1,14 @@
 // Retained system evaluation request builders; the caller supplies an explicit case context.
 // @ts-ignore Retained CJS source.
-import * as monitoring from '../customer-context/monitoring/prompt.js'
+import * as monitoring from '../../modules/customer-context/monitoring/prompt.js'
 // @ts-ignore Retained CJS source.
-import * as profiles from '../customer-context/profiles/prompt.js'
+import * as profiles from '../../modules/customer-context/profiles/prompt.js'
 // @ts-ignore Retained CJS source.
-import * as validation from '../customer-context/profiles/validation.js'
+import * as validation from '../../modules/customer-context/profiles/validation.js'
 // @ts-ignore Retained schemas.
-import * as schemas from '../customer-context/profiles/schemas.js'
+import * as schemas from '../../modules/customer-context/profiles/schemas.js'
 // @ts-ignore Retained neutral orchestration.
-import {runStream,TASKS} from './llm/orchestrator.js'
+import {runStream,TASKS} from '../../modules/ai-support/llm/orchestrator.js'
 export async function executeSystemCase(input:any,trace:any){
  const definition=input.caseDefinition,context=definition.context
  if(!context)throw new Error('System evaluation requires explicit case context')

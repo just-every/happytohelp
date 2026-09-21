@@ -49,16 +49,55 @@ not identify a new deployed runtime or require moving the service's runtime pin.
 
 ## RER launch boundary
 
-Standalone qualification does not complete RER Assisted or Managed launch
-qualification. The initial Managed installation has separately passed an export,
-independent restore and retained-data deployment on its recorded source. Final
-updated-source restoration, the advertised update and voice workflows, Assisted
-installation qualification and the production RER rollout remain separate gates
-until their exact evidence is accepted. Keep the public opening notice in place.
+Standalone qualification, Assisted qualification and the production management
+service are now separately evidenced. Managed local continuity is also
+qualified on merged source `686b52ea298ba8f2e5c3e68fe07162fb13648457` and
+release `b4e90f7dd8cd1801b3578ab4503c26c5e6e6e7da288691ea5078f87ea07f2e57`,
+preserving the custom footer, owner access, project data, conversations and
+media with zero management-credit debit.
+
+The live voice-driven Managed update passed the voice interaction, durable
+startup, source transfer and input delivery boundaries. Its voice session
+settled `29167` microUSD. A separate corrective hosted source follow-up ran
+without another voice session. The two hosted source turns returned
+`needs_attention` and were rejected; an independent full-tree audit found
+upstream runtime changes missing from the customer tree. No publication or
+deployment of that hosted update is accepted.
+
+A direct independent correction now contains the cumulative native help-center
+markup, the escaped owner footer and a real regression test. Full verification
+passed on candidate source `5a7e7fb4a6512b8e2a2524d316e9e613e2568e9a` with 166
+checks passed, one deliberate paid-voice skip and zero failures; desktop and
+mobile Help Center browser checks passed. [PR #3](https://github.com/runeditrun/rer-managed-bc94bb85-4834-414e-be38-b6f77f02/pull/3)
+is merged through ordinary owner review at Managed main
+`ee9ef7325f1d74721c62ce2bdf9b05da7578e80c` (tree `438a4ebf`); trusted build
+`35570008281` is retained with the accepted source evidence. This is a direct
+agent repair of the hosted candidate, not publication of the failed hosted task.
+Managed production now registers release
+`b1d7aa9fc446439b6f005068449a423250768a238365f91a80344082695125da` on Worker
+version `c3439ada-79f0-40da-80e6-2b7cdf61748f`, deployment
+`7c900377-5f78-4e35-b2cb-4524cecdc17c`; owner continuity, both projects,
+conversation revision 2, exact messages and media hashes, footer and desktop
+and mobile checks passed with zero management-credit debit. The independent
+update is now accepted on release
+`ce795fab74edd8aed23a38eb1e24b23005ea7184e6416517a5735295af88abcb`, artifact
+`c6ab0aacb57d01c09607bcaaea745daa55ffe8bb52d8fab7de5125fbe303b0f8`, with
+backend version `d72d7d0e-bc23-41cc-9a12-4b329c9a7380` and deployment
+`224606ed-cc37-47ba-b8bc-ecde45e03242`. Independent deployment and GET
+reverification passed; owner continuity, data and media preservation, the
+RER-disabled state, and desktop/mobile footer checks passed without importing
+new resources. The corrected preview contract rejects invalid grants with 403;
+the root 404 is informational. Receipts are retained under
+`restore/final-b1d7aa9-independent-update/`; public opening publication is
+handled separately and is underway. The existing restore now covers the
+accepted update, while the public opening notice remains until that publication
+completes.
+
 Current cross-repository evidence and remaining work belong in
 `/Users/zemaj/www/runeditrun/reports/happytohelp-launch-plan-2026-09-20.md` and the
-launch evidence directory; earlier account blockers are not asserted as current
-from this edition handover.
+launch evidence directory. The exact standalone runtime and its hosted receipts
+remain the source and deployment record for this edition; later documentation
+does not identify a new native deployment.
 
 ## 17 September homepage integration — local verification
 
@@ -147,10 +186,12 @@ first-owner setup. The setup browser check submits the actual form, verifies
 password validation, dashboard reload, subsequent login and completed setup.
 
 The tests use actual local D1, R2, Durable Objects and Worker execution. Provider
-fixtures intercept real SDK/HTTP boundaries in test harnesses. The optional live
-human-voice evaluation remains explicitly skipped without provider authorization.
-The repository's `evidence/` directory preserves integration-stage results;
-final verification must identify the exact source revision and resulting bundle.
+fixtures intercept real SDK/HTTP boundaries in test harnesses. The live
+voice/source-update lane is a separate paid hosted acceptance path; its receipts
+must be read together with the resulting source artifacts and audit before any
+source adoption claim. The repository's `evidence/` directory preserves
+integration-stage results; final verification must identify the exact source
+revision and resulting bundle.
 
 ## Migration and external operation — historical migration checkpoint
 

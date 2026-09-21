@@ -13,39 +13,52 @@ active edition. The earlier 15 September simple-landing description is historica
 
 ## Current launch status — 21 September 2026
 
-The core standalone replacement is qualified on exact native source commit
-`79382a0706062c21bca620e4302a4caab32c48e8`, with 34 migrations, the deployed
-artifact and Worker recorded in
-`/Users/zemaj/.orchestrator/evidence/happytohelp/launch-20260920-v3/launch-status.json`.
-The public `help.justevery.com` root and `/health` endpoint are live and readable,
-and the source release is public at
-`https://github.com/runeditrun/support-happytohelp`. The final acceptance record
-qualifies one bounded owner-approved GitHub repository README read. Its
-temporary GitHub credential was removed; the permanent company project remains
-GitHub-unconfigured. Mail, knowledge and application AI retain their separately
-qualified configuration.
+The qualified standalone runtime is exact native source
+`5956f1a1987644a2cfede871b14f85ce2a4a06e4`, publicly available at
+`https://github.com/runeditrun/support-happytohelp`. Its immutable artifact is
+live at `https://help.justevery.com`, with website preview on the separate
+`https://preview-help.justevery.com` origin. Worker
+`h2h-help-prod-20260920` serves version
+`bf6ad195-4b2c-43cc-b1ee-15de75752cd6` at 100 percent. The artifact contains
+49 modules, 52 assets and 34 migrations; its SHA-256 is
+`76f944bb2ae4625a7a1f8d4959387542a75ca8540090716943eb42df6913ec7d`.
 
-RER Assisted and Managed paid workflows remain separate launch gates. Current
-cross-repository evidence and remaining work are listed in
-`/Users/zemaj/www/runeditrun/reports/happytohelp-launch-plan-2026-09-20.md`.
+[CI run 35561320343](https://github.com/runeditrun/support-happytohelp/actions/runs/35561320343)
+passed: 166 tests passed, none failed and one was skipped, with build, typecheck,
+emitted runtime, source integrity and mobile browser checks. Fresh hosted checks
+confirmed the homepage, native D1/R2 health, authenticated owner readback and
+matching downloadable artifact. All 32 foreign-origin probes returned 403
+without cookies or allowed-origin headers; production local-owner access returned
+404. Existing bindings, secrets, starter data and migration history were preserved;
+no migrations were applied and none remain pending.
 
-## Current RER service checkpoint — 21 September 2026
+Broad acceptance carries forward from `79382a0` through explicit source
+continuity. The only application-source change is the bounded CORS rejection
+response repair; all other application source and all 34 migration bytes are
+unchanged. The trusted delivery workflow pin, regression coverage, documentation,
+metadata and source lock also changed. Prior paid AI, mail, knowledge and optional
+GitHub evidence was retained, not rerun or represented as fresh provider execution.
+GitHub qualification remains one bounded owner-approved repository README read;
+the temporary credential was removed and the permanent company project remains
+GitHub-unconfigured.
 
-The staged RER source is `5e588d33b2060ceecfaadd3e0fd3a9fccd7afb5c`, published
-on service `main` after fresh frozen installation, build, source checks and full
-verification. Worker version `032ddf7f-bbfb-4fe5-bc3a-2e5bbed122ed` serves the
-same 17 compiled server modules, independently matched against the frozen build.
-Production RER remains unchanged while launch workflow qualification finishes.
+The exact records are
+`/Users/zemaj/.orchestrator/evidence/happytohelp/launch-20260920-v3/h2h/final-acceptance-5956f1a.json`
+and `hosted-update-5956f1a.json` beside it. Later documentation-only commits do
+not identify a new deployed runtime or require moving the service's runtime pin.
 
-The first Managed installation has passed owner/member checks, export,
-independent restore and a follow-up deployment preserving the owner, data,
-attachment metadata and all 34 migrations. Its restored browser renders the
-retained conversation without contacting RER management. This qualifies the
-initial `c3d381a` Managed source, separately from the native `79382a0` release.
-Local Codex execution passed with no management-credit debit; publication, the
-hosted upstream update and final updated-source restore remain open. Assisted
-Cloudflare authorization, the GitHub Actions spending cap and the restricted
-live Stripe key are the pending owner account actions.
+## RER launch boundary
+
+Standalone qualification does not complete RER Assisted or Managed launch
+qualification. The initial Managed installation has separately passed an export,
+independent restore and retained-data deployment on its recorded source. Final
+updated-source restoration, the advertised update and voice workflows, Assisted
+installation qualification and the production RER rollout remain separate gates
+until their exact evidence is accepted. Keep the public opening notice in place.
+Current cross-repository evidence and remaining work belong in
+`/Users/zemaj/www/runeditrun/reports/happytohelp-launch-plan-2026-09-20.md` and the
+launch evidence directory; earlier account blockers are not asserted as current
+from this edition handover.
 
 ## 17 September homepage integration — local verification
 

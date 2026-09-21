@@ -1,6 +1,7 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AppEnv } from './env'
 import { hashToken } from './auth'
+import { rejectedResponse } from '../base/rejected-response'
 /** Widget origins are project data. Never reflect arbitrary origins or grant cookies cross-site. */
 export const projectCors:MiddlewareHandler<AppEnv>=async(c,next)=>{
  const origin=c.req.header('Origin');if(!origin||origin===new URL(c.req.url).origin)return next()
@@ -9,7 +10,7 @@ export const projectCors:MiddlewareHandler<AppEnv>=async(c,next)=>{
  if(token){const session=await c.env.DB.prepare('SELECT project_id FROM sessions WHERE token_hash=? AND revoked_at IS NULL AND expires_at>?').bind(await hashToken(token),Date.now()).first<{project_id:string}>();projectId=session?.project_id}
  const previewAllowed=origin===c.env.PREVIEW_ORIGIN?await c.env.DB.prepare('SELECT 1 FROM preview_grants WHERE expires_at>? AND remaining_requests>0'+(projectId?' AND project_id=?':'')+' LIMIT 1').bind(Date.now(),...(projectId?[projectId]:[])).first():null
  const allowed=previewAllowed||(projectId?await c.env.DB.prepare('SELECT id FROM projects WHERE id=? AND allowed_origin=?').bind(projectId,origin).first():await c.env.DB.prepare('SELECT id FROM projects WHERE allowed_origin=? LIMIT 1').bind(origin).first())
- if(!allowed)return c.json({error:'Origin not allowed'},403)
+ if(!allowed)return rejectedResponse(c.req.raw,c.json({error:'Origin not allowed'},403))
  c.header('Access-Control-Allow-Origin',origin);c.header('Vary','Origin');c.header('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');c.header('Access-Control-Allow-Headers','Authorization,Content-Type,X-Filename');c.header('Access-Control-Max-Age','600')
  if(c.req.method==='OPTIONS')return c.body(null,204)
  await next()

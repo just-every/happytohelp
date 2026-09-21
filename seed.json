@@ -2,7 +2,7 @@
   "id": "happytohelp",
   "name": "HappyToHelp",
   "version": "0.1.0",
-  "maturity": "native edition; local verification only, not deployed",
+  "maturity": "standalone core qualified; public source and help.justevery.com live; RER Assisted and Managed launch qualification ongoing",
   "category": "support",
   "spine": {
     "id": "happytohelp-conversation",

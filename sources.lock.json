@@ -1342,7 +1342,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "9613391022ee874879dfc0a552b0f0fe600afc34c51532c1d8fd0a15b42605cb",
+      "sha256": "b200f0dc8ea3069c10d567e2bff28cf9c4cb9049e91ffc534411781249ad56ec",
       "executable": false
     },
     "src/app.ts": {
@@ -2862,7 +2862,7 @@
       "executable": false
     },
     "src/platform/cors.ts": {
-      "sha256": "c2af841c09dd37e7819d6ac6b92fe810ef9a221a16a28e87b1783a9217b75ad9",
+      "sha256": "ff8f70de97f12d196d38bf04d97829ad032ddd92b581ef01e2947095e32ed3d7",
       "executable": false
     },
     "src/platform/db.ts": {
@@ -4577,6 +4577,10 @@
       "sha256": "b3c20820351b49465ee55f34dcdfa7e8b75543ae73ce9fac77cc54061094931f",
       "executable": false
     },
+    "tests/helpers/runtime-cors.mjs": {
+      "sha256": "556096d9fab37718ad995d089887e8d7c3809d4048f7618f715e7e686fc7099f",
+      "executable": false
+    },
     "tests/helpers/setup-browser-flow.mjs": {
       "sha256": "fc5384eed3ab09bd4d562138ceeca65643a26c08fefee885fe4320a916812248",
       "executable": false
@@ -4742,7 +4746,7 @@
       "executable": false
     },
     "tests/runtime.mjs": {
-      "sha256": "a601916381335d6b5cd341a46a6014c4b5087dc1b26da573573a44fc0b886cdc",
+      "sha256": "41ff9d928effc35128ad0403f0ee802f43d7f91e6a27919df5e0490b06f004c3",
       "executable": false
     },
     "tests/sendgrid-email.mjs": {

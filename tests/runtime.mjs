@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import {execFile} from 'node:child_process'
 import {promisify} from 'node:util'
 import {createRuntime} from './helpers/emitted-runtime.mjs'
+import {verifyCorsUploadRejections} from './helpers/runtime-cors.mjs'
 const runtime=await createRuntime();let success=false
 try{
  const {origin}=runtime;const call=async(path,body,token,method=body===undefined?'GET':'POST',headers={})=>fetch(origin+path,{method,headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}) ,...headers},body:body===undefined?undefined:JSON.stringify(body)})
@@ -13,6 +14,7 @@ try{
  // Development auto-login must not exist in the emitted Worker, even when
  // every request header claims a same-origin loopback browser.
  assert.equal((await call('/api/identity/local-owner-session',{},undefined,'POST',{Origin:origin,'Sec-Fetch-Site':'same-origin'})).status,404)
+ await verifyCorsUploadRejections(origin)
  const secondResponse=await call('/api/management/projects',{name:'Second project',allowedOrigin:origin},login.token);assert.equal(secondResponse.status,201);const second=await secondResponse.json();const switchedResponse=await call('/api/identity/switch-project',{projectId:second.id},login.token);assert.equal(switchedResponse.status,200);const switched=await switchedResponse.json();assert.equal(switched.actor.projectId,second.id)
  const outsider=await runtime.seedTenant({name:'Other tenant',email:'other-tenant@example.com',allowedOrigin:origin});assert.equal((await call('/api/identity/switch-project',{projectId:outsider.projectId},login.token)).status,403)
  const projectResponse=await call('/api/identity/projects/'+first.projectId,undefined,login.token);assert.equal(projectResponse.status,200);const project=await projectResponse.json();const contactResponse=await call('/api/identity/widget/session',{widgetKey:project.widget_key},undefined,'POST',{Origin:origin});assert.equal(contactResponse.status,201);const contact=await contactResponse.json();const conversationResponse=await call('/api/conversations',{projectId:first.projectId},contact.token);assert.equal(conversationResponse.status,201);const conversation=await conversationResponse.json();const command={localId:'runtime-message',content:'Native emitted Worker durable message',expectedRevision:0};const sentResponse=await call(`/api/conversations/${conversation.id}/messages`,command,contact.token);assert.equal(sentResponse.status,200);const sent=await sentResponse.json();assert.equal(sent.accepted,true);assert.equal((await(await call(`/api/conversations/${conversation.id}/messages`,command,contact.token)).json()).duplicate,true);assert.equal((await call(`/api/conversations/${conversation.id}/messages`,undefined,outsider.token)).status,404);const transcript=await(await call(`/api/conversations/${conversation.id}/messages`,undefined,login.token)).json();assert.equal(transcript.messages.length,1);assert.equal(transcript.messages[0].content,command.content)

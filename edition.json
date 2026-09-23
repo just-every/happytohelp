@@ -379,6 +379,16 @@
           "docs/INBOUND-EMAIL-RECOVERY.md"
         ]
       }
+    },
+    {
+      "id": "runeditrun/happytohelp-management-integration",
+      "role": "module",
+      "source": {
+        "kind": "local",
+        "paths": [
+          "management"
+        ]
+      }
     }
   ]
 }

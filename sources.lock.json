@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "a86a3ac46c463e8e2fa55a7221528be761f6d9bf2ce44d4494205a29f5023f81",
+  "manifest": "2f77f4261c3e594bf4fb4ff33e892e60f322a8a7e1e8220bf79e80015c2647b9",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -342,6 +342,16 @@
         ]
       },
       "baseline": null
+    },
+    {
+      "id": "runeditrun/happytohelp-management-integration",
+      "source": {
+        "kind": "local",
+        "paths": [
+          "management"
+        ]
+      },
+      "baseline": null
     }
   ],
   "files": {
@@ -430,7 +440,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "a86a3ac46c463e8e2fa55a7221528be761f6d9bf2ce44d4494205a29f5023f81",
+      "sha256": "2f77f4261c3e594bf4fb4ff33e892e60f322a8a7e1e8220bf79e80015c2647b9",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -635,6 +645,46 @@
     },
     "local-agent/test/connector.test.mjs": {
       "sha256": "cc0cd8a75642b8fada6b255cb66e3980a33fe11889c05b885f082975cac6fe61",
+      "executable": false
+    },
+    "management/integration/contract.ts": {
+      "sha256": "9f8189b9701cdd47d52b6342f11ea706a70db1fc54aa8345108c90fa76f97f7b",
+      "executable": false
+    },
+    "management/integration/environment.ts": {
+      "sha256": "528017bd9fba5aca196b07755eabdf0ffa61946fedd1f7d0e5511f7ad587d439",
+      "executable": false
+    },
+    "management/integration/index.ts": {
+      "sha256": "690528f8d17e4837d6ba76cc1e030d6829739e8ae2c72bbd19ed2634204b729e",
+      "executable": false
+    },
+    "management/integration/plan.ts": {
+      "sha256": "e62c5848d925a3834d90d539145bdf522f4fadbf3420e6292ab1daa64f950548",
+      "executable": false
+    },
+    "management/integration/profile.json": {
+      "sha256": "e0ad81c827ca5a07fc16f187eefae072d804d98dd7feb85b0e1768b4e76cfb72",
+      "executable": false
+    },
+    "management/integration/recipe.json": {
+      "sha256": "99d45b04a2ced36551d39484f9805d164c28ca5b6c223033bca4d11557627fcd",
+      "executable": false
+    },
+    "management/integration/revision.ts": {
+      "sha256": "2230637cd584787bd9dbd683e727cc3333a265bbf6b0d959839b37b38cfa90c5",
+      "executable": false
+    },
+    "management/README.md": {
+      "sha256": "d1c6efd241f6f5c4554e811ef7cd4171c2cc4454182d328dc009dc907bb9c2d5",
+      "executable": false
+    },
+    "management/tooling/compile-plan.mjs": {
+      "sha256": "beb9005aee3bf818bfe568cb5f0c0a29b253e7715d22e99a0484bf46723de55a",
+      "executable": false
+    },
+    "management/tooling/refresh-recipe.mjs": {
+      "sha256": "e2d28dc454cfa6198e084c6af9529bf94d0f0871fd1930122c1e027320603f5c",
       "executable": false
     },
     "migrations/0001_identity.sql": {

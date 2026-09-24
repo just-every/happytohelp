@@ -12,7 +12,7 @@
     "dev": "pnpm run build:assets && vite dev",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "verify": "node scripts/operations.mjs describe && pnpm run build && pnpm run typecheck && pnpm run test:modules && pnpm run test:runtime && pnpm run source:check",
+    "verify": "node scripts/operations.mjs describe && pnpm run build && pnpm run typecheck && pnpm run test:modules && pnpm run test:runtime && pnpm run source:check && node --test tests/independent-contract.mjs",
     "setup": "node scripts/setup.mjs",
     "deploy": "node scripts/deploy.mjs",
     "test:runtime": "node tests/runtime.mjs",
@@ -32,7 +32,8 @@
     "test:mobile-inbox-browser": "node tests/mobile-inbox-browser.mjs",
     "verify:visual": "node scripts/verify-visual-edit.mjs",
     "install:app": "node scripts/install.mjs",
-    "test:widget-lifecycle-browser": "node tests/widget-lifecycle-browser.mjs"
+    "test:widget-lifecycle-browser": "node tests/widget-lifecycle-browser.mjs",
+    "test:independent-runtime": "node tests/independent-runtime.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

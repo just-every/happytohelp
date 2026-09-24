@@ -1,5 +1,7 @@
 # HappyToHelp
 
+For a new independent installation and release, read [INDEPENDENT-RELEASE.md](docs/INDEPENDENT-RELEASE.md). The existing company SaaS and all of its resources remain separate.
+
 This repository owns the HappyToHelp application on the maintained RER runtime:
 TanStack Start/React documents, Hono HTTP, Cloudflare Workers, D1, R2, Queues and
 conversation Durable Objects. It ports the existing HappyToHelp dashboard,

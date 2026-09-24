@@ -19,3 +19,5 @@ local-agent/.state/
 /src/routeTree.gen.ts
 
 /delivery-artifact/
+
+.rer-tools/

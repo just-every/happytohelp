@@ -55,7 +55,7 @@ let defaultAppContext = {
     },
     app_logo: {
         show: true,
-        url: "https://happytohelp.com/",
+        url: "https://github.com/runeditrun/support-happytohelp",
     },
     settings: {
         await_consent: false,

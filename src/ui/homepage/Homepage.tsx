@@ -1,17 +1,11 @@
-import { Hero } from './Hero';
-import { HomepageIcons } from './HomepageIcons';
-import { FeaturesSection } from './FeaturesSection';
-import { WatchSection } from './WatchSection';
-import { AgentsSection } from './AgentsSection';
-import { OpenSourceSection } from './OpenSourceSection';
-import { HomepageFooter } from './HomepageFooter';
-import './landing.css';
-import './home.css';
-import './home-components.css';
-import './home-agents.css';
-import './home-maps.css';
-import './native.css';
+import { VillageHero } from './VillageHero';
+import { VillageIcons } from './VillageIcons';
+import { VillageKnowledge } from './VillageKnowledge';
+import { VillageWorkshops, VillageFooter } from './VillageWorkshops';
+import './village.css';
+import './village-workshops.css';
+import './village-responsive.css';
 
 export default function Homepage() {
-  return <div className="h2h-homepage"><HomepageIcons /><a className="skip-link" href="#features">Skip to features</a><Hero /><FeaturesSection /><WatchSection /><AgentsSection /><OpenSourceSection /><HomepageFooter /></div>;
+  return <div className="h2h-village"><VillageIcons /><a className="village-skip" href="#features">Skip to features</a><main><VillageHero /><VillageKnowledge /><VillageWorkshops /></main><VillageFooter /></div>;
 }

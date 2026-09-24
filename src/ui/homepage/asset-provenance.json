@@ -1,110 +1,80 @@
 [
   {
-    "source": "homepage/media/beacon-positions/beacon-sculpted-toy-start.png",
-    "sha256": "aa7d0fe3555185816217e265a26873b867e7b3eda9e8940eaf10e1009eeba5c3",
-    "bytes": 2044504,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/media/beacon-positions/beacon-toy-loop.mp4",
-    "sha256": "1111b9105bf6d95f49923ab98f91630b063b07add89389d1392a1cd9d94798ac",
-    "bytes": 10821055,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/media/brands/claude-asterisk.svg",
-    "sha256": "b150888bc7257af83e3b85d3c2be4294f88986026f8168f6c12fc1fde6697350",
-    "bytes": 2558,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/media/brands/codex-monochrome.svg",
-    "sha256": "3aedaffda5fe5a44e4938adae95dfdde8f0bbb93df2dce887ebeb4826e10097a",
-    "bytes": 2121,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/media/brands/happytohelp-logo.svg",
-    "sha256": "81d8bd9254cffb0d860ef4927dcef6aa7e9ebed73a5551d597246b647c94c9f8",
-    "bytes": 10052,
-    "origin": "Owner-supplied HappyToHelp brand artwork; copied unchanged 2026-09-19"
-  },
-  {
-    "source": "homepage/media/brands/happytohelp-icon.svg",
-    "sha256": "fd5221d0699b0289eb4d457af9a35bd047f0b6a57e6246eb859ade0627ab1d30",
-    "bytes": 6172,
-    "origin": "Derived 2026-09-19 from owner-supplied happytohelp-logo.svg; original rider path geometry retained and both path fills recolored #33344a per owner; rider-only viewBox 0 0 419 547"
-  },
-  {
     "source": "homepage/media/brands/happytohelp-favicon.png",
     "sha256": "a10803603a265e99bb3706d2e0f2c8cb562baee30c705dca2cf48d56abd3d60b",
     "bytes": 82657,
     "origin": "Owner-supplied happytohelp-favicon.png; copied unchanged 2026-09-19 with no conversion or color changes"
   },
   {
-    "source": "homepage/media/graphics/rider-sculpted-toy.png",
-    "sha256": "29166e08b58df420b7e2edda53a15c1fcb42953c1b851c3d5203104106219329",
-    "bytes": 1626664,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/agents.webp",
+    "sha256": "06da571d1f008c345616241d279d8d15f581c0772f23e8d86afd9dce8aba3a55",
+    "bytes": 457930,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/branch-continuation/branch/pages/p0-happytohelp.assets/agents-scene.png",
+    "sourceSha256": "40186bf31406f5898e8c13aaa0319b0891d29ea316e2f78c4af9e6982a0ac3bd",
+    "transformation": "12ui extracted artwork encoded as WebP quality90 at unchanged source dimensions.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/human-story-options/anticipation-c-sculpted.png",
-    "sha256": "128b676e1ed34194675ec5df5ba38bd6e86c1180c5d30dec6282be7266fdeded",
-    "bytes": 2608071,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/context-background.webp",
+    "sha256": "332b1b3e8deed90546714559c7c2ea0c3fc481e1c8ddf4527e091bab275317bb",
+    "bytes": 208132,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/parallax-assets/context-background.png",
+    "sourceSha256": "62d06bbec0fb4a1c23f74d316b5fa66b80c02bff522bc2df371b03d809c76386",
+    "transformation": "ImageGen clean background plate; WebP quality92, full canvas. Normalized 1535x1025 source to1535x1024 to match alpha canvas.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/human-story-options/open-c-sculpted.png",
-    "sha256": "179095e5fbcd67de3c7e4182955c63f83a0c02bad0ddb84c5727a03d9090fccb",
-    "bytes": 2012102,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/context-foreground.webp",
+    "sha256": "144d73d98783cc374e9d8b59013b8e61d00c8df6caeb65c34d8ff79e8be3adef",
+    "bytes": 13032,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/parallax-assets/context-foreground.png",
+    "sourceSha256": "ece4253945868037587da540cced71ee98ca518e0d5cad1d75032a1d07e0bf04",
+    "transformation": "ImageGen real-alpha foreground extraction; WebP quality92, full canvas.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/human-story-options/team-c-sculpted.png",
-    "sha256": "2f17c759a95fe0de0842cd12252d691444f142ddf243be3a24e7cc5c4a814912",
-    "bytes": 2203673,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/hero-background.webp",
+    "sha256": "f9dfb86a14984882b46b66db0d3fcb40514b37dcff31dee513daa46fc7a18544",
+    "bytes": 213670,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/parallax-assets/hero-background.png",
+    "sourceSha256": "100eef0105ed4fa5b61d435ebdb42ab0ac010ddabfdc8be96345156d5b0895f7",
+    "transformation": "ImageGen clean background plate; WebP quality92, full canvas.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/human-story-options/watch-a-sculpted.png",
-    "sha256": "cb717149ea7e720115ef16fd9406d692e2d3c3b726c50628dd4b32e95eab28de",
-    "bytes": 2005389,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/hero-foreground.webp",
+    "sha256": "a02ca91679511145280201d2cd899ea49169425165c453e7b47b7ebc0db2d6a7",
+    "bytes": 34952,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/parallax-assets/hero-foreground.png",
+    "sourceSha256": "b24bef8b123513c31933a4245dee8918f5cefb3f5866711159087cadd3764394",
+    "transformation": "ImageGen real-alpha foreground extraction; WebP quality92, full canvas.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/journey-maps/agents-b.png",
-    "sha256": "8cadd9f07da2f3f2fb4bb5a37b0b3534e971e8b47ad25e35c6e68fec8ee9126d",
-    "bytes": 496529,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/knowledge.webp",
+    "sha256": "971372cdd0ea1100b2afc79c47940fd2301a0603c1d58f81573678f8e7108c5a",
+    "bytes": 521786,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/branch-village/branch/pages/p0-happytohelp-home.assets/knowledge.png",
+    "sourceSha256": "d66a3c34418eda26d70a0184d30dc67c7cd74a00db272d2ec0627bd56ba8e1d6",
+    "transformation": "12ui extracted artwork encoded as WebP quality90 at unchanged source dimensions.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/journey-maps/crossing-b-lines.png",
-    "sha256": "23981d7bce274547a4addf22ac606652aa00c7dac380c0ae3eb9d50aab7d17d7",
-    "bytes": 358080,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/license.webp",
+    "sha256": "2e73cacf55d7148d54ce471aa7dc5b532f6fe590d454a950681cdf2e953488a7",
+    "bytes": 478576,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/branch-continuation/branch/pages/p0-happytohelp.assets/license-scene.png",
+    "sourceSha256": "331175831a6fe33c47fb1548999d7be46497f7ba36264f266ba57ba362d1e77d",
+    "transformation": "12ui extracted artwork encoded as WebP quality90 at unchanged source dimensions.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   },
   {
-    "source": "homepage/media/journey-maps/hero-b.png",
-    "sha256": "0d65fd42e881fed800a01f6b939e2e0725e7030dd01cd30a64577809d19a1521",
-    "bytes": 383043,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/media/journey-maps/ownership-a-lines.png",
-    "sha256": "755d66ebc3488c20ab706e8e4e4e5294acb22530133ce4ea31ae193510b1ac6c",
-    "bytes": 507526,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/media/journey-maps/watch-b.png",
-    "sha256": "db6e2a635d2cb1f7ebb11e630ee4945ab89d691421ef255bc2a210bbd1f8cb96",
-    "bytes": 535628,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
-  },
-  {
-    "source": "homepage/paper.png",
-    "sha256": "8a7315dd4d537dffd61e89f2712232a4bf54c9b364f1ef4ba1669540c6c3794d",
-    "bytes": 79927,
-    "origin": "Owner-approved homepage prototype, happytohelp-type-mask-conversion-20260916; copied unchanged 2026-09-17"
+    "source": "homepage/village/paper.webp",
+    "sha256": "9de29a98e8fbd39923e0cd2bd5bae180fa4731c43b1df39d9e19d6db6a18c8fa",
+    "bytes": 1424,
+    "origin": "/Users/zemaj/www/runeditrun/site/design/happytohelp-village-homepage-2026-09-22/branch-continuation/branch/pages/p0-happytohelp.assets/paper.png",
+    "sourceSha256": "e2f9b1f74d544e3bda4df141d7759402803111e496a4a5b2aeb4b77c113a2049",
+    "transformation": "12ui extracted artwork encoded as WebP quality90 at unchanged source dimensions.",
+    "licenseBoundary": "Owner-approved generated edition artwork; not relicensed as MIT code."
   }
 ]

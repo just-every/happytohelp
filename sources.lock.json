@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "7aceee8011450f91ada83f503d7733041afcafc57271802b81f360179f18b034",
+  "manifest": "da52eb6fa75b475a112d8f9c76e4611f5b5e40a5514db64b6d0e8e5f86942459",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -62,14 +62,14 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "b56be71e92af684969553530b1c665f1f1789fd2",
+          "revision": "6d64e215f9003c23c09b887a4bcff2db47f2c5f2",
           "path": "onboarding"
         }
       },
       "baseline": {
-        "key": "c274633a448a5bb611a416c3bd219e0848508eadb43f22ccaffd59ab0a024a84",
-        "digest": "b13016795a20e746e3c2e55540826ab8d71c8570a2004c4a58d61278b75c2f61",
-        "sha256": "5414fbb90769c7f8145369b44f3a0005fe7ead0f51c85e2c790cefb7affb236d"
+        "key": "c296a76a9004e7c52101d3b8e0523cefdc559031174d5cf993fa1975b32cf349",
+        "digest": "b31aa80bc26edf0d85d9f8c5a7e70c39bd907a3005881902855454e71727ba5d",
+        "sha256": "5e79d5abac46258a44a8d3ebe54fffa9ac6869eab13a3ffb9b542feaca6efee5"
       }
     },
     {
@@ -444,7 +444,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "7aceee8011450f91ada83f503d7733041afcafc57271802b81f360179f18b034",
+      "sha256": "da52eb6fa75b475a112d8f9c76e4611f5b5e40a5514db64b6d0e8e5f86942459",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -1028,7 +1028,7 @@
       "executable": false
     },
     "scripts/base-onboarding/ui/style.css": {
-      "sha256": "ee587839877e9fc9c3300a784e78632526fe9c41f154c9729813971dbfd3d8cf",
+      "sha256": "c10488070b07729405e0c0c21df7a7923f7e55c5471a914ca785abb7de2b801c",
       "executable": false
     },
     "scripts/base-onboarding/ui/workspace-art.js": {

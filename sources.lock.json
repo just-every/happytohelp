@@ -1044,7 +1044,7 @@
       "executable": false
     },
     "scripts/delivery/deployment-spec.mjs": {
-      "sha256": "6e73f419ce337981ab2d5b60ddeb39419d5374cc8fd45de64983bc483b5676d0",
+      "sha256": "c12b0dfa8177b09420473f8fee8438f988fd08ed81cb2882bbe7bd0ff9eddd10",
       "executable": false
     },
     "scripts/delivery/README.md": {
@@ -1052,7 +1052,7 @@
       "executable": false
     },
     "scripts/delivery/spec-inputs.mjs": {
-      "sha256": "1e5450fbbcef5514831e8ef424c6a7b22da80ddd20807a75f4fcbd32a09cf588",
+      "sha256": "9a6ed95cee3dcefdb8afe5df8067d3bb75805803b7f6d1415400e2092eac2cec",
       "executable": false
     },
     "scripts/deploy.mjs": {
@@ -2024,7 +2024,7 @@
       "executable": false
     },
     "src/modules/identity/setup.ts": {
-      "sha256": "987232681a2780b894cb822ff033d540b52917910665b0045e530c9f232f3afe",
+      "sha256": "e1641f7253883e2f1c44663dea8c0483d7d2fbed8b53635d575cedd25d53b68b",
       "executable": false
     },
     "src/modules/identity/widget.ts": {
@@ -4612,7 +4612,7 @@
       "executable": false
     },
     "tests/independent-runtime.mjs": {
-      "sha256": "9dfe2b2558f1eb6dc710b5dd6aa0eb50fd24be697fe59f7b59474087c8277a91",
+      "sha256": "317303e229751e30eb2c4a15bc6aab0c2467d5f18edc65f2ab3080c3fc543b46",
       "executable": false
     },
     "tests/installer-address.mjs": {

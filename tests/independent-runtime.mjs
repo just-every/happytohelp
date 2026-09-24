@@ -13,9 +13,11 @@ const body={name:'Independent owner workspace',email:'independent@example.test',
 async function snapshot(r){const tables=(await r.inspect({sql:"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' ORDER BY name"})).results;const result={};for(const {name}of tables){result[name]=(await r.inspect({sql:`SELECT * FROM "${name.replaceAll('"','""')}"`})).results.map(row=>JSON.stringify(row)).sort()}return result}
 try{
  console.log('runtime ready',runtime.directory);
+ assert.equal((await call(runtime,'/api/identity/setup-status')).status,409);
  assert.equal((await call(runtime,'/api/identity/bootstrap',body)).status,403);
  assert.equal((await call(runtime,'/api/identity/bootstrap',{...body,setupToken:'wrong'})).status,403);
  console.log('token refusal passed');const setup=await call(runtime,'/api/identity/bootstrap',{...body,setupToken});assert.equal(setup.status,201);const owner=await setup.json();
+ assert.equal((await call(runtime,'/api/identity/setup-status')).status,200);
  assert.equal((await call(runtime,'/api/identity/bootstrap',{...body,setupToken})).status,409);
  const project=await(await call(runtime,`/api/identity/projects/${owner.projectId}`,undefined,owner.token)).json();
  assert.equal((await call(runtime,'/api/identity/widget/session',{widgetKey:project.widget_key},undefined,'POST',{Origin:'https://foreign.example'})).status,403);

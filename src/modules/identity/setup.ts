@@ -8,6 +8,12 @@ import { sessionCookie } from './session'
 
 export const setup = new Hono<AppEnv>()
 const available = 'NOT EXISTS(SELECT 1 FROM owner_setup) AND NOT EXISTS(SELECT 1 FROM users) AND NOT EXISTS(SELECT 1 FROM projects)'
+// Independent deployment readiness exposes no owner identity or credentials.
+setup.get('/setup-status', async c => {
+ const state = await c.env.DB.prepare(`SELECT (${available}) AS available`).first<{available: number}>()
+ c.header('Cache-Control', 'no-store')
+ return c.json({setupRequired: state?.available === 1}, state?.available === 1 ? 409 : 200)
+})
 setup.get('/setup', async c => {
  const state = await c.env.DB.prepare(`SELECT (${available}) AS available`).first<{available: number}>()
  c.header('Cache-Control', 'no-store')

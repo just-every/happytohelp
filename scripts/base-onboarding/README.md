@@ -72,3 +72,7 @@ a completed session opens review so the product can explicitly restart its local
 runtime. Adapters must preserve existing owner data and bind any private receipt
 to the acquired source and selected target. The core nonsecret draft is product
 bound; it is not a deployment or native authentication receipt.
+Answer, credential, activity, address and connection requests reserve their work
+before reading a request body. Start refuses while any such request is pending,
+so a previously admitted slow request cannot mutate setup across the Start
+boundary. The reservation is released on success, refusal or request failure.

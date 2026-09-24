@@ -20,7 +20,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
  const uiRoot=fileURLToPath(new URL('./ui/',import.meta.url));
  if(resume&&noPrefill)throw Error('--resume cannot be combined with --no-prefill.');
  const vault=createSecretVault(seed.model);
- const store=await createState(root,seed),token=randomBytes(32).toString('hex'),cookie=randomBytes(32).toString('hex');let origin,app,work,connection,starting=false;const abort=new AbortController();
+ const store=await createState(root,seed),token=randomBytes(32).toString('hex'),cookie=randomBytes(32).toString('hex');let origin,app,work,connection,starting=false,mutations=0;const abort=new AbortController();
  store.state.sessionId=randomBytes(16).toString('hex');
  const {workspaceArt,artworkBridge,imageLimit}=seed.artwork?await seed.artwork(root,store):{};
  if(agent)store.state.agent.mode='connecting';
@@ -36,6 +36,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
  const assets={'/seed.mjs':[seed.browserModule,'text/javascript'],'/model-core.mjs':['model-core.mjs','text/javascript'],'/workspace-art.js':['workspace-art.js','text/javascript'],'/activity.js':['activity.js','text/javascript'], '/':['index.html','text/html'], '/app.js':['app.js','text/javascript'], '/address-client.mjs':['address-client.mjs','text/javascript'], '/model.mjs':['model.mjs','text/javascript'], '/style.css':['style.css','text/css'], '/ocean.png':[null,seed.background?.endsWith('.svg')?'image/svg+xml':'image/png']};
  const equal=(a,b)=>typeof a==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
  const server=createServer(async(req,res)=>{
+  let mutation=false;
   const json=(status,body)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body))};
   try{
    if(req.headers.host!==new URL(origin).host)return json(403,{error:'Invalid installer host.'});
@@ -45,6 +46,11 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
     if(req.headers.origin&&req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
     const session=req.headers.cookie?.split(';').map(s=>s.trim()).find(s=>s.startsWith('rer_installer='))?.slice(14);
     if(!equal(req.headers['x-installer-token'],token)||!equal(session,cookie))return json(403,{error:'Reload the installer page.'});
+    if(req.method==='POST'&&['/api/draft','/api/prefill','/api/secrets','/api/activity','/api/address','/api/connect'].includes(path)){
+     if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
+     if(starting||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
+     mutation=true;mutations++;
+    }
     if(req.method==='POST'&&path.startsWith('/api/workspace-art')){
      if(!workspaceArt)return json(404,{error:'This seed does not support workspace artwork.'});
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
@@ -104,7 +110,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
     }
     if(req.method==='POST'&&path==='/api/start'){
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(starting||connection||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation is already running.'});
+     if(starting||mutations||connection||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation is already running.'});
      starting=true;
      try{
      let body='';for await(const chunk of req){body+=chunk;if(body.length>16000)return json(413,{error:'Too much input.'})}
@@ -118,7 +124,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
    const [file,type]=assets[path];let content=await readFile(file?(path==='/seed.mjs'?join(root,file):join(uiRoot,file)):join(root,seed.background));
    if(path==='/'){content=content.toString().replaceAll('{{product}}',String(seed.product).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))).replace('</head>',`${accentStyle}<meta name="installer-token" content="${token}"></head>`);res.setHeader('Set-Cookie',`rer_installer=${cookie}; Path=/; HttpOnly; SameSite=Strict`);res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'")}
    res.writeHead(200,{'Content-Type':type});res.end(content);
-  }catch{json(500,{error:'The installer could not complete this request.'})}
+  }catch{json(500,{error:'The installer could not complete this request.'})}finally{if(mutation)mutations--;}
  });
  await new Promise(resolve=>server.listen(port,'127.0.0.1',resolve));origin=`http://127.0.0.1:${server.address().port}`;
  return {origin,state:store.state,close:async()=>{artworkBridge?.close();vault.clear();abort.abort();stopChild(app);await work;await connection;await new Promise(resolve=>server.close(resolve))}};

@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "dd08cb27c0977e3a11edde1c2b70a324f15863797fc83165636e23d74b79b01d",
+  "manifest": "7aceee8011450f91ada83f503d7733041afcafc57271802b81f360179f18b034",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -62,14 +62,14 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "337401a411d4c79299e4a76a2bb380cd9c007df0",
+          "revision": "b56be71e92af684969553530b1c665f1f1789fd2",
           "path": "onboarding"
         }
       },
       "baseline": {
-        "key": "50f2eaedaeffd845fbba0f775853ebd5a641cc610b67892c8a2dc88be45e07c5",
-        "digest": "2ca07e96cb511c57e35fe311a6de63ff095486dce42ab07807caa2456cdce529",
-        "sha256": "7672ffc14765578a33b7aec3f5ca98ed088efe5dabcc8a857b32c773f9b426c3"
+        "key": "c274633a448a5bb611a416c3bd219e0848508eadb43f22ccaffd59ab0a024a84",
+        "digest": "b13016795a20e746e3c2e55540826ab8d71c8570a2004c4a58d61278b75c2f61",
+        "sha256": "5414fbb90769c7f8145369b44f3a0005fe7ead0f51c85e2c790cefb7affb236d"
       }
     },
     {
@@ -444,7 +444,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "dd08cb27c0977e3a11edde1c2b70a324f15863797fc83165636e23d74b79b01d",
+      "sha256": "7aceee8011450f91ada83f503d7733041afcafc57271802b81f360179f18b034",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -955,6 +955,10 @@
       "sha256": "5dba3f1c9e6c72cf89e52f2c0e4cc1c7a06295e2841c7b0800d865baf24a92ce",
       "executable": false
     },
+    "scripts/base-onboarding/pending-request.test.mjs": {
+      "sha256": "9936e6693b6bcae83724b485f9fd3629eb45737ef55b4d2123e89f406461638c",
+      "executable": false
+    },
     "scripts/base-onboarding/prefill.mjs": {
       "sha256": "5e24cc1f31512c0c40e2a9c0dc8b95c9621a86db362e4ceb952c0a9e7915534f",
       "executable": false
@@ -976,7 +980,7 @@
       "executable": false
     },
     "scripts/base-onboarding/README.md": {
-      "sha256": "4e0a9507725b264dcde57299f0bcdd9bf1fa5644c13ecf0a94047e6b2d303504",
+      "sha256": "a4b2918e4afb19bc794af40fdcefc6439f2dcf0108302575801dbb465550f6f2",
       "executable": false
     },
     "scripts/base-onboarding/secrets.mjs": {
@@ -984,7 +988,7 @@
       "executable": false
     },
     "scripts/base-onboarding/server.mjs": {
-      "sha256": "c212c352be998ae866b6384a9d39084b8d6daa5313a7fa99b6f227eb64734bb9",
+      "sha256": "1b1e5ab291535b64c5a81699ff2bf91b989d181a5c8a40fbac611dd06ec1ddea",
       "executable": false
     },
     "scripts/base-onboarding/start-concurrency.test.mjs": {

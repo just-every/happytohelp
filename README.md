@@ -4,20 +4,19 @@ This repository owns the HappyToHelp application on the maintained RER runtime:
 TanStack Start/React documents, Hono HTTP, Cloudflare Workers, D1, R2, Queues and
 conversation Durable Objects. It ports the existing HappyToHelp dashboard,
 customer widget, chat, delegation and knowledge architecture into native source.
-The public root is the approved designed journey homepage with dynamic published
-help centers. Its integrated art direction includes a sculpted beacon hero loop,
-a horse-and-spear rider, crossing/lookout/helping-hand/well sculptures, journey
-map backgrounds and official/app brand icons. Pricing, legal, waitlist, referrer
-and public auto-widget behavior remain outside the active scope. The earlier
+The public root is the owner-approved village homepage with dynamic published
+help centers. Its 12ui-converted artwork moves from a beacon-lit mountain
+procession into the conversation square, knowledge archive, agent handoff and
+open workshop. Pricing, legal, waitlist, referrer and public auto-widget behavior remain outside the active scope. The earlier
 small RER delegation desk remains in Git history; its family publisher is retired.
 
-## Current public-root scope — 17 September 2026
+## Current public-root scope — 22 September 2026
 
-The owner approved integrating the existing designed prototype as the real public
-root homepage. This supersedes the earlier description of `/` as only a simple
-local-owner landing page; it does not change the setup, login, dashboard or
-dynamic published help-center commitments. The implementation and local browser evidence are recorded in HANDOVER.md.
-Hosted and provider acceptance remain separate.
+The owner approved the village page as the real public root, replacing the earlier
+journey artwork. It retains the exact “Support. Free. Yours.” introduction, real
+source/documentation links and native setup, login and workspace destinations.
+The implementation and local verification are recorded in HANDOVER.md. Hosted and
+provider acceptance remain separate; this homepage change is not a deployment.
 
 Read ACCEPTANCE.md, CONTRACT.md and OPERATIONS.md for the product and operating
 requirements. The current implementation/verification boundary belongs in the

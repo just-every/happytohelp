@@ -4,12 +4,54 @@ The edition now owns the native HappyToHelp owner workspace and its selected
 source. The PHP application has been replaced by TanStack Start/React, Hono and
 the RER Worker runtime. Existing dashboard, customer widget, prompts, evaluation
 and local-agent source were retained or ported with their behavior and provenance
-recorded. As of 17 September, the owner-approved public root is the designed
-journey homepage with dynamic published help centers. Its selected art is the
-sculpted beacon hero loop, horse-and-spear rider, crossing/lookout/helping-hand/
-well sculptures, journey map backgrounds and official/app brand icons. Pricing,
+recorded. As of 22 September, the local public root is the owner-approved village homepage
+with dynamic published help centers. Its selected art is the beacon-lit mountain
+procession, conversation square, knowledge archive, agent handoff and open workshop.
+Pricing,
 legal, waitlist, referrer and public auto-widget behavior remain outside the
 active edition. The earlier 15 September simple-landing description is historical.
+
+## 22 September village homepage — local integration
+
+The native React root now uses the actual 12ui HTML conversions from
+`site/design/happytohelp-village-homepage-2026-09-22/branch-village` and
+`branch-continuation` in the parent workspace. The original approved hero is
+`site/design/happytohelp-support-arriving-2026-09-22/round-seven/stack/a.png`.
+The two converted page structures were split into focused React/CSS components;
+illustrative floating cards, the intermediate footer and placeholder links were
+removed. The exact owner introduction remains DOM text. Lower copy describes
+configured assistance and source citations without universal accuracy claims.
+Real repository, documentation, installer and native workspace/setup/login links
+replace generated destinations. Source is free/MIT; hosting and model usage costs
+remain explicit.
+
+WebP delivery derivatives retain full conversion dimensions, with original PNGs
+in the parent design evidence. Generated clean plates and transparent foregrounds
+supply subtle transform-only parallax. IntersectionObserver suspends work offscreen;
+reduced-motion preferences disable transforms. No React state changes on scroll.
+The older homepage components and unreferenced artwork were removed; the shared
+owner-supplied favicon remains unchanged. Asset hashes, origins and transformations
+are in `src/ui/homepage/asset-provenance.json` and `docs/PUBLIC-SOURCE-PROVENANCE.md`.
+
+Node 26.8.1 build and typecheck passed. Focused public-root runtime and browser
+checks passed; the browser checks cover 320–1920px widths, no horizontal overflow,
+real navigation targets, motion/offscreen suspension and reduced motion without
+layout shift. Browser evidence is `/Users/zemaj/.orchestrator/evidence/happytohelp/village-homepage-20260922/browser`; local preview is
+`http://127.0.0.1:5186/`. The parent task owns the final 12ui Improve and visual
+review records. This is local source work, not a deployment, hosted acceptance or
+provider requalification. The existing launch/runtime record below is unchanged.
+
+Reproduce the focused checks against a local native preview with Node 26.8.1 and
+pnpm 10.12.4:
+
+```sh
+H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs
+H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/public-site-runtime.mjs
+```
+
+The public-root check does not run its optional published Help Center fixture
+checks unless `H2H_TEST_PROJECT_ID` is supplied. Build/typecheck and these focused
+checks do not repeat unrelated authenticated or provider acceptance suites.
 
 ## Current launch status — 21 September 2026
 

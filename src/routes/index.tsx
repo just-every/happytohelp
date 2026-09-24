@@ -4,10 +4,10 @@ import Homepage from '../ui/homepage/Homepage';
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'HappyToHelp — Support is here.' },
-      { name: 'description', content: 'AI customer support that puts your knowledge to work. Explore HappyToHelp, open software for your team.' },
+      { title: 'HappyToHelp — Support. Free. Yours.' },
+      { name: 'description', content: 'Free, MIT-licensed customer support software with a shared inbox, published knowledge, AI assistance and local agents. Run it and make it yours.' },
     ],
-    links: [{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Geist:wght@700;900&family=Inter:wght@400;500;600;700;900&display=swap' }],
+    links: [{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap' }],
   }),
   component: withVisualEdits(Homepage),
 });

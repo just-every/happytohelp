@@ -1,0 +1,52 @@
+/* Native adaptation of branch-village's 12ui conversion, 22 September 2026. */
+body:has(.h2h-village){margin:0;padding:0;background:#f3f0e9}
+.h2h-village{--unit: min(.0651041667vw,1.25px);margin:0;color:#172635;font-family:Inter,Arial,sans-serif;background:#f3f0e9;isolation:isolate}
+.h2h-village *{box-sizing:border-box}
+.h2h-village main{max-width:1920px;margin:0 auto}
+.h2h-village a{color:inherit;text-decoration:none}
+.h2h-village a:focus-visible{outline:3px solid #54748d;outline-offset:5px}
+.h2h-village h1,.h2h-village h2,.h2h-village p{margin:0}
+.h2h-village h1,.h2h-village h2{font-weight:900;letter-spacing:-.065em}
+.h2h-village section,.h2h-village header,.h2h-village footer{position:relative}
+.h2h-village .village-scene{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.h2h-village .art{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}
+.h2h-village .inner{position:relative;z-index:1}
+.h2h-village .hero{min-height:calc(864 * var(--unit))}
+.h2h-village header{display:flex;align-items:center;justify-content:space-between;padding:calc(15 * var(--unit)) calc(75 * var(--unit)) 0;height:calc(61 * var(--unit));z-index:2}
+.h2h-village .brand{font-size:calc(29 * var(--unit));font-weight:800;letter-spacing:-.038em}
+.h2h-village nav{display:flex;align-items:center;gap:calc(41 * var(--unit));font-size:max(14px,calc(16 * var(--unit)))}
+.h2h-village .button{background:#192839;color:#fff;border-radius:8px;padding:calc(13 * var(--unit)) calc(27 * var(--unit));font-weight:600;display:inline-block}
+.h2h-village .button:hover{background:#31485a}
+.h2h-village .hero-copy{margin:calc(43 * var(--unit)) 0 0 calc(78 * var(--unit));width:calc(590 * var(--unit))}
+.h2h-village h1{font-size:calc(132 * var(--unit));line-height:.865;max-width:calc(540 * var(--unit))}
+.h2h-village .hero-copy p{margin-top:calc(29 * var(--unit));font-size:max(18px,calc(24 * var(--unit)));line-height:1.292;color:#38465b;max-width:calc(570 * var(--unit))}
+.h2h-village .context{min-height:calc(1025 * var(--unit))}
+.h2h-village .context-copy{padding:calc(106 * var(--unit)) 0 0 calc(78 * var(--unit));width:calc(700 * var(--unit))}
+.h2h-village h2{font-size:calc(106 * var(--unit));line-height:.84}
+.h2h-village .context-copy h2{max-width:calc(660 * var(--unit))}
+.h2h-village .description{font-size:max(18px,calc(23 * var(--unit)));line-height:1.348;color:#3a4d60}
+.h2h-village .context-copy>.description{margin-top:calc(36 * var(--unit));width:calc(550 * var(--unit))}
+.h2h-village .features{display:grid;gap:calc(37 * var(--unit));margin-top:calc(39 * var(--unit));max-width:calc(415 * var(--unit))}
+.h2h-village .feature{display:grid;grid-template-columns:calc(64 * var(--unit)) 1fr;gap:calc(21 * var(--unit));align-items:start}
+.h2h-village .badge{width:calc(63 * var(--unit));height:calc(64 * var(--unit));background:#21394a;clip-path:polygon(49% 0,87% 15%,100% 51%,83% 89%,43% 100%,9% 84%,0 47%,14% 13%);display:grid;place-items:center}
+.h2h-village .badge svg{width:59%;height:59%;fill:none;stroke:#ebece5;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.h2h-village .feature h3{font-size:max(17px,calc(20 * var(--unit)));line-height:1.35;margin:calc(2 * var(--unit)) 0 calc(3 * var(--unit));font-weight:700}
+.h2h-village .feature p{font-size:max(16px,calc(18 * var(--unit)));line-height:1.389;color:#3b5065}
+.h2h-village .knowledge{min-height:calc(891 * var(--unit))}
+.h2h-village .knowledge-copy{padding:calc(106 * var(--unit)) 0 0 calc(73 * var(--unit));width:calc(710 * var(--unit))}
+.h2h-village .knowledge h2{font-size:calc(85 * var(--unit));line-height:.94;max-width:calc(650 * var(--unit))}
+.h2h-village .knowledge-copy>.description{margin-top:calc(24 * var(--unit));max-width:calc(538 * var(--unit))}
+.h2h-village .knowledge .features{margin-top:calc(32 * var(--unit));gap:calc(28 * var(--unit));max-width:calc(405 * var(--unit))}
+.h2h-village .knowledge .feature{grid-template-columns:calc(62 * var(--unit)) 1fr;gap:calc(25 * var(--unit))}
+.h2h-village .knowledge .feature h3{font-size:max(16px,calc(18 * var(--unit)));line-height:1.389}
+.h2h-village .knowledge .feature p{font-size:max(14px,calc(16 * var(--unit)));line-height:1.375}
+.h2h-village .village-symbols{position:absolute;width:0;height:0;overflow:hidden}
+.h2h-village .village-skip{position:fixed;top:8px;left:8px;z-index:100;padding:12px 18px;background:#fff;transform:translateY(-150%)}
+.h2h-village .village-skip:focus{transform:none}
+.h2h-village .scene-foreground{transform:translate3d(var(--scene-x,0px),var(--scene-y,0px),0) scale(1.025);transform-origin:bottom right}
+.h2h-village [data-parallax-state="active"] .scene-foreground{will-change:transform}
+@media(prefers-reduced-motion:reduce){.h2h-village .scene-foreground{transform:none!important;will-change:auto!important}}
+
+.h2h-village .village-scene-context .scene-foreground{transform:translate3d(var(--scene-x,0px),var(--scene-y,0px),0)}
+
+.h2h-village #hero-title span{display:block}

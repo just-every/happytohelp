@@ -1,8 +1,8 @@
 # Public-source custody review — 2026-09-14
 
 Source: `/Users/zemaj/www/happytohelp-site`, read-only. The original route and
-asset inventory remains a historical comparison record. As of 17 September 2026,
-the active edition includes the owner-approved designed journey homepage at the
+asset inventory remains a historical comparison record. As of 22 September 2026,
+the active edition includes the owner-approved designed village homepage at the
 public root and dynamic published help-center source. Pricing, legal, waitlist,
 referrer and public auto-widget behavior remain outside the active public
 surface; broader retired marketing/resource routes remain historical. No original
@@ -11,25 +11,38 @@ documents are editable React and Help Center HTML, without retained PHP runtime 
 original byte hashes and paths are in `src/modules/public-site/asset-provenance.json`
 where retained.
 
-## Current approved homepage scope — 17 September 2026
+## Current approved homepage scope — 22 September 2026
 
-The owner approved integrating the existing designed prototype at
-`/Users/zemaj/.orchestrator/evidence/runeditrun/happytohelp-type-mask-conversion-20260916/prototype`
-as the real public root homepage. The selected art comprises original generated
-assets: a sculpted beacon hero loop, horse-and-spear rider, crossing/lookout/
-helping-hand/well sculptures and journey map backgrounds, together with official/
-app brand icons. This record distinguishes attribution and use from source
-licensing: the selected art is retained under owner approval for this edition and
-is not relicensed as MIT source. The Claude and Codex marks are nominative
-references to supported local tools; Run Edit Run makes no ownership or
-endorsement claim. The implementation and local browser outcome are recorded in HANDOVER.md;
-`src/ui/homepage/asset-provenance.json` records the selected homepage assets,
-including the owner-supplied HappyToHelp SVG brand artwork added unchanged on
-19 September 2026, and the standalone rider icon extracted from its original
-paths 0 and 11 with unchanged geometry, a rider-only viewBox, and the owner-requested #33344a fill. The
-complete supplied logo remains available as the source artwork. The owner-supplied
-`happytohelp-favicon.png` was copied unchanged on 19 September 2026, with no
-conversion, re-encoding, or color changes.
+The native root uses actual 12ui HTML conversions, not a manual recreation of the
+images. The approved hero is `happytohelp-support-arriving-2026-09-22/round-seven/stack/a.png`.
+The generated source pages are `happytohelp-village-homepage-2026-09-22/branch-village/branch/pages/p0-happytohelp-home.html`
+and `branch-continuation/branch/pages/p0-happytohelp.html`, beneath the parent
+workspace's `site/design/`. The first supplies the hero, conversation square and
+knowledge archive; the continuation supplies agent handoff, ownership workshop
+and the final footer. React preserves their editable layout/style structure,
+with approved factual copy, real links and no floating illustrative UI cards.
+
+The selected art is owner-approved generated artwork for this edition and is not
+relicensed as MIT source. Original converted PNGs remain in the design evidence;
+WebP derivatives optimize browser delivery. The `parallax-assets` manifest records
+image-generation extraction of transparent foreground props and corresponding
+clean plates, their exact sources, dimensions and compositing contract. The
+shipped hashes, byte counts and transformations are recorded in
+`src/ui/homepage/asset-provenance.json`.
+
+Design-alignment captures and kits are retained under the same design root's
+`improve/` directory. Lower-section anchor screenshots were correct, but the
+12ui DOM extractor supplied hero selectors to some lower-section patch plans.
+Those mismatched plans were not applied. Direct comparison with the approved
+screens informed the knowledge/ownership typography corrections; the parent task
+records the final visual review and per-kit completion status separately.
+
+The old journey art and unused Claude/Codex marks were removed after reference
+checks. Their prior origins remain in Git history. The owner-supplied
+`happytohelp-favicon.png` remains byte-for-byte unchanged and is shared by the
+root document. Text references to Codex/Claude identify supported local tools
+without claiming endorsement. Local implementation and verification are recorded
+in HANDOVER.md; this work does not identify a new public or deployed release.
 
 The historical source contained Font Awesome Pro SVGs inline in marketing and
 sidebar markup. None of those Pro assets is retained. The selected Free SVG
@@ -40,8 +53,9 @@ stylesheet. The former copied theme and its eight transitive pattern SVGs were
 removed on 20 September 2026 after confirming that no active markup or runtime
 source referenced them; their exact hashes and removal reasons remain in the
 manifest. The retired 15 September landing CSS and art have been removed; the
-journey homepage has its own asset manifest. No identified Pro asset package or
-paid provider request was used.
+village homepage has its own asset manifest. No identified Pro asset package is retained. The original custody/import
+review did not execute paid provider requests; the later 12ui design work is a
+separate generation workflow.
 
 Public landing-page analytics and homepage widget bootstrapping are removed. No
 original service project ID, verification secret, session token or Google tracking
@@ -78,9 +92,6 @@ first-party source. The retained public paths are classified as follows:
   `setup-ocean-cliffs-conversion/SELECTION.md` and `ocean-delivery.json` in the
   retained design evidence record the approved crop and unchanged delivery. Its
   SHA-256 is `9e76eb5c98d25004c5993171f83c2ed0ea069397a5456e7f09bbde0363f4b983`.
-- The Claude and Codex SVGs under `public/homepage/media/brands/` are official
-  product marks used only as nominative support references. They are not claimed
-  as Run Edit Run property or vendor endorsement.
 - The native Help Center stylesheet at
   `public/site-assets/help_center/css/app.css` is first-party source. Its
   replacement of the copied H2H Site theme is recorded in

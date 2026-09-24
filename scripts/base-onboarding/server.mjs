@@ -1,3 +1,4 @@
+import { installationFailureMessage } from './failures.mjs';
 import { agentHandoff } from './agent-handoff.mjs';
 import { validateAnswers } from './prefill.mjs';
 import { createSecretVault } from './secrets.mjs';
@@ -115,7 +116,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
      try{
      let body='';for await(const chunk of req){body+=chunk;if(body.length>16000)return json(413,{error:'Too much input.'})}
      let input;try{input=seed.validateInput(vault.merge(JSON.parse(body),store.state.draft),configuredEnv,store.state.known.providers)}catch(error){return json(400,{error:error.message})}
-     await store.draft(input);await workspaceArt?.deliverSidebar();await store.phase('running');vault.clear();json(202,{started:true});work=Promise.resolve().then(()=>seed.install(root,input,store,child=>{app=child},abort.signal,artworkBridge)).catch(async()=>{store.state.error='Installation failed. Inspect the seed operating commands in your terminal.';await store.phase('failed');}).finally(()=>{for(const key of Object.keys(seed.model.secretScopes||{}))input[key]='';});void work;return;
+     await store.draft(input);await workspaceArt?.deliverSidebar();delete store.state.error;await store.phase('running');vault.clear();json(202,{started:true});work=Promise.resolve().then(()=>seed.install(root,input,store,child=>{app=child},abort.signal,artworkBridge)).catch(async(error)=>{store.state.error=installationFailureMessage(error);await store.phase('failed');}).finally(()=>{for(const key of Object.keys(seed.model.secretScopes||{}))input[key]='';});void work;return;
      }finally{starting=false;}
     }
     return json(404,{error:'Unknown installer action.'});

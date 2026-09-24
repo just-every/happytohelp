@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "da52eb6fa75b475a112d8f9c76e4611f5b5e40a5514db64b6d0e8e5f86942459",
+  "manifest": "6488ad8f922b73c97d0436c1b207d63c4df9fc3893d9c6cdf9bec792f83d3651",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -62,14 +62,14 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "6d64e215f9003c23c09b887a4bcff2db47f2c5f2",
+          "revision": "2fe4ebdcadadc7b5efa7edae11b0cb75939fdcd8",
           "path": "onboarding"
         }
       },
       "baseline": {
-        "key": "c296a76a9004e7c52101d3b8e0523cefdc559031174d5cf993fa1975b32cf349",
-        "digest": "b31aa80bc26edf0d85d9f8c5a7e70c39bd907a3005881902855454e71727ba5d",
-        "sha256": "5e79d5abac46258a44a8d3ebe54fffa9ac6869eab13a3ffb9b542feaca6efee5"
+        "key": "e98d316423cc17d3f4fb579070e3fa7bee04383329825642e71f0876f9f44dff",
+        "digest": "2a95dfa6d9f8c4235edc6c0755b9017e209fccaefd7b4e2581fdeec04e8f0c20",
+        "sha256": "5f9575b5f49abd4183145d3388b3d2f9a01b4e845bbcdfab7b35ab77f11894fc"
       }
     },
     {
@@ -444,7 +444,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "da52eb6fa75b475a112d8f9c76e4611f5b5e40a5514db64b6d0e8e5f86942459",
+      "sha256": "6488ad8f922b73c97d0436c1b207d63c4df9fc3893d9c6cdf9bec792f83d3651",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -943,6 +943,14 @@
       "sha256": "19613fc0312e0a3da1cc4d59266d89221b68e571e2cdfe4bd255e23591d1a616",
       "executable": false
     },
+    "scripts/base-onboarding/failures.mjs": {
+      "sha256": "df637ef5cd8ff1cb6bd3a060f054ac320b0dda8f5bcae396bfbb4236a226b30e",
+      "executable": false
+    },
+    "scripts/base-onboarding/failures.test.mjs": {
+      "sha256": "25111ce322da979e2725e36f41f507bfe924d427f139c360959a885819f6d814",
+      "executable": false
+    },
     "scripts/base-onboarding/fill.mjs": {
       "sha256": "e673c021f6e70a20505afd468eb18c0568dc92e3f4a19f78cb50555d1a04f4ba",
       "executable": false
@@ -980,7 +988,7 @@
       "executable": false
     },
     "scripts/base-onboarding/README.md": {
-      "sha256": "a4b2918e4afb19bc794af40fdcefc6439f2dcf0108302575801dbb465550f6f2",
+      "sha256": "519bb12093858e1d0ba8488079963cae3e65b7d5ace53dfa38d836fe0ad4c6d7",
       "executable": false
     },
     "scripts/base-onboarding/secrets.mjs": {
@@ -988,7 +996,7 @@
       "executable": false
     },
     "scripts/base-onboarding/server.mjs": {
-      "sha256": "1b1e5ab291535b64c5a81699ff2bf91b989d181a5c8a40fbac611dd06ec1ddea",
+      "sha256": "57df2d2cbfa4033844544d90c0dc284a84d179553d23029689f45aae91f37f05",
       "executable": false
     },
     "scripts/base-onboarding/start-concurrency.test.mjs": {
@@ -1275,6 +1283,10 @@
       "sha256": "17f8f6170272314c53181cf26fffec2d915c4d5860f70122959d21d7e8a43594",
       "executable": false
     },
+    "scripts/installer/commands.mjs": {
+      "sha256": "e47f21a5d01e672acd4676f9dbd9b88f50befa85225c101b84ba07ecd8a2bb93",
+      "executable": false
+    },
     "scripts/installer/email.mjs": {
       "sha256": "817c35aa0a1760a5dfb7d3dccde7858cd83efb43ad5566253c5333348958866e",
       "executable": false
@@ -1300,7 +1312,7 @@
       "executable": false
     },
     "scripts/installer/run.mjs": {
-      "sha256": "37a470e2ff2167838adfcd79377839d3b2f82b7d519053a55bba822ddc81e8ae",
+      "sha256": "3480bdb4b8b5a2d0cbcadfeb3debe19337e7bcab4f13e2c6238b47bbd3d37680",
       "executable": false
     },
     "scripts/installer/secrets.mjs": {
@@ -4641,6 +4653,10 @@
     },
     "tests/installer-prefill.mjs": {
       "sha256": "15d7aacf227e9f925e220d31bc68790191000a1295342dcfeb09ebdf5e9208ae",
+      "executable": false
+    },
+    "tests/installer-prerequisite-failures.mjs": {
+      "sha256": "d8df77bd18a3d584d90288f6bec0561749ab0a7d3ac274d189cbd7781e11403c",
       "executable": false
     },
     "tests/installer-presentation.mjs": {

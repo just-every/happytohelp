@@ -76,3 +76,30 @@ Answer, credential, activity, address and connection requests reserve their work
 before reading a request body. Start refuses while any such request is pending,
 so a previously admitted slow request cannot mutate setup across the Start
 boundary. The reservation is released on success, refusal or request failure.
+
+### Safe installation failures
+
+The UI starts before dependency or runtime checks. Perform checks only inside
+`install` after explicit Start. Import `installationFailure` from the copied
+`failures.mjs` and throw one of these canned errors:
+
+- `installationFailure('node_version', {version:'26.8.1'})` for an unmet exact
+  Node requirement (the version must contain three numeric components).
+- `installationFailure('missing_tool', {tool:'npm'})` when the executable cannot
+  be found. Supported tools are `node`, `npm`, `pnpm`, and `git`.
+- `installationFailure('command_failed', {step:'dependencies'})` for a real
+  unsuccessful command. Supported steps are `dependencies`, `setup`, `build`,
+  `verify`, `start`, and `deploy`.
+
+At the command boundary map a spawn `ENOENT` to the known executable's
+`missing_tool` failure; map an unsuccessful exit to the corresponding
+`command_failed` step. Preserve cancellation behavior. Do not classify every
+exception as a missing tool, pass command arguments/output/environment, or add
+untrusted error messages to progress labels. Unknown failures remain redacted
+and direct the owner to the last displayed step and their agent. The core does
+not promise terminal diagnostics that the adapter may not have emitted.
+Only errors created by this module instance are approved: matching properties,
+subclasses, modified messages and nested causes cannot supply browser text.
+Draft answers survive failure and reopening with `--resume`; credentials remain
+memory-only and may need to be supplied again. Restarting clears stale failure
+text. This contract reports failures; it does not install tools or retry commands.

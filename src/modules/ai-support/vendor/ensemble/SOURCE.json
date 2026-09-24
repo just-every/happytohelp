@@ -23,6 +23,14 @@
         "tests/ai-support/repositoryToolDispatch.test.js"
       ],
       "upstream_patch_includes_override": false
+    },
+    {
+      "path": "model_providers/openrouter.js",
+      "description": "Attribute independent HappyToHelp provider requests to the open-source application rather than the original company SaaS. Uses the installer owner supplied provider API key.",
+      "tests": [
+        "tests/independent-contract.mjs"
+      ],
+      "upstream_patch_includes_override": false
     }
   ]
 }

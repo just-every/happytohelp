@@ -7,9 +7,9 @@ function supportsNativeStructuredOutput(model) {
 export class OpenRouterProvider extends OpenAIChat {
     constructor(apiKey) {
         super('openrouter', apiKey, 'https://openrouter.ai/api/v1', {
-            'User-Agent': 'JustEvery_',
-            'HTTP-Referer': 'https://justevery.com/',
-            'X-Title': 'JustEvery_',
+            'User-Agent': 'HappyToHelp',
+            'HTTP-Referer': 'https://github.com/runeditrun/support-happytohelp',
+            'X-Title': 'HappyToHelp',
         }, {
             provider: {
                 require_parameters: true,

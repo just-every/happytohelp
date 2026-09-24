@@ -1712,11 +1712,11 @@
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/model_providers/openrouter.js": {
-      "sha256": "8a20dd8ee542050549ef88ba4e58f176d9c5f4df7a0b7e16bdbc13b4dbf04381",
+      "sha256": "71a19438f97842801f52ca971e11ad111f07360b9d787f73ca18a95f4046c8a2",
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/SOURCE.json": {
-      "sha256": "d7fad913cc8d6a793df307e2e4b2d46a3c0b6b7638ba5e27fc70b593523828e9",
+      "sha256": "48a150e6588752bf3cd4405859f0f87148bba70ceb8abbddcd02a5ed8d45a84f",
       "executable": false
     },
     "src/modules/ai-support/vendor/ensemble/SOURCE.patch": {
@@ -4616,7 +4616,7 @@
       "executable": false
     },
     "tests/independent-contract.mjs": {
-      "sha256": "c1f9b6430bd0577f89e796daba6153fd4600b6855417fe55e8a5ef2a46bf729b",
+      "sha256": "7789883cf541afb8b85061998dd18a804ec95b576d08e6296816094bfc991eb7",
       "executable": false
     },
     "tests/independent-runtime.mjs": {

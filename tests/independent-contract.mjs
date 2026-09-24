@@ -17,6 +17,9 @@ test('independent project declares isolated origins and protected owner setup',a
  assert.match(workflow,/build_profile: project/);assert.match(workflow,/trusted-build.yml@[a-f0-9]{40}/);
  const defaults=await readFile('src/modules/widget/js/context/AppContext.jsx','utf8');
  assert.ok(!defaults.includes('https://happytohelp.com'));
+ const provider=await readFile('src/modules/ai-support/vendor/ensemble/model_providers/openrouter.js','utf8');
+ assert.ok(!provider.includes('https://justevery.com'));
+ assert.match(provider,/https:\/\/github.com\/runeditrun\/support-happytohelp/);
 });
 test('artifact collection refuses a public symlink instead of reading outside source',async()=>{
  const root=await mkdtemp(join(tmpdir(),'h2h-artifact-link-'));

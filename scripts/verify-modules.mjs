@@ -10,7 +10,7 @@ const standalone = [
   'github-integration.mjs', 'github-discovery.mjs', 'github-workerd-runtime.mjs', 'identity.mjs', 'identity-setup.mjs', 'knowledge-context.mjs',
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs',
   'operating-environment.mjs', 'management.mjs', 'demo-inbox.mjs', 'demo-transcript-events.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
-  'site-preview.mjs', 'workspace-artwork.mjs', 'not-found-response.mjs', 'delivery-deployment-spec.mjs', 'delivery-migration-order.mjs',
+  'site-preview.mjs', 'workspace-artwork.mjs', 'not-found-response.mjs', 'error-response.mjs', 'provider-effects.mjs', 'delivery-deployment-spec.mjs', 'delivery-migration-order.mjs',
   'ui-transport.mjs', 'login-return.mjs', 'local-owner-login.mjs', 'widget-transport.mjs', 'installer-secret-scopes.mjs',
 ].map(name => `tests/${name}`);
 const groups = ['tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test'];

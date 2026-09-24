@@ -1,4 +1,4 @@
-import { notFoundResponse } from './base/rejected-response'
+import { notFoundResponse, rejectedResponse } from './base/rejected-response'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from './platform/env'
@@ -20,11 +20,11 @@ import { previewRoutes } from './modules/site-preview/proxy'
 export const app = new Hono<AppEnv>()
 app.use('/api/*', projectCors)
 app.onError((error,c) => {
- if(error instanceof HTTPException) return c.json({error:error.message},error.status)
+ if(error instanceof HTTPException) return rejectedResponse(c.req.raw,c.json({error:error.message},error.status))
  const status=(error as Error & {status?:number}).status
- if(status && [400,401,403,404,409,413,422,429,503].includes(status)) return c.json({error:error.message},status as 400)
+ if(status && [400,401,403,404,409,413,422,429,503].includes(status)) return rejectedResponse(c.req.raw,c.json({error:error.message},status as 400))
  console.error('Request failed',error.name)
- return c.json({error:'Request failed. Check server diagnostics.'},500)
+ return rejectedResponse(c.req.raw,c.json({error:'Request failed. Check server diagnostics.'},500))
 })
 app.get('/health',async c=>{
  try { await Promise.all([c.env.DB.prepare('SELECT 1').first(),c.env.FILES.head('_health_probe')]);return c.json({status:'ok',runtime:'native-rer',database:'reachable',files:'reachable'}) }

@@ -21,7 +21,7 @@ export async function installationCredential(root,origin,scope){
 export async function localSetupToken(root,key){
  try{const text=await readPrivateFile(join(root,'.dev.vars'));const line=text.split(/\r?\n/).find(value=>value.slice(0,value.indexOf('=')).trim()===key);if(!line)return undefined;const value=line.slice(line.indexOf('=')+1).trim();return /^['"].*['"]$/.test(value)?value.slice(1,-1):value}catch(error){if(error.code==='ENOENT')return undefined;throw error}
 }
-export function stopChild(child){if(!child||child.exitCode!==null)return;try{process.kill(-child.pid,'SIGTERM')}catch{child.kill('SIGTERM')}}
+export function stopChild(child){if(!child||!child.pid||child.exitCode!==null||child.signalCode!==null)return;try{process.kill(-child.pid,'SIGTERM')}catch{child.kill('SIGTERM')}}
 export async function persistLocalEmail(root,variables){
  const path=join(root,'.dev.vars');let content='';try{content=await readPrivateFile(path)}catch(error){if(error.code!=='ENOENT')throw error}
  const lines=content.split(/\r?\n/).filter(line=>!Object.keys(variables).some(key=>line.startsWith(key+'=')));

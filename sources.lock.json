@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "6488ad8f922b73c97d0436c1b207d63c4df9fc3893d9c6cdf9bec792f83d3651",
+  "manifest": "29abbceeb15a35a46a4e94ce0a806bd0156388ca56c1176baa2fd897484c1bf0",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -62,14 +62,14 @@
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
-          "revision": "2fe4ebdcadadc7b5efa7edae11b0cb75939fdcd8",
+          "revision": "390328736c8dae82f87c86e5af4c17cca6bb9c00",
           "path": "onboarding"
         }
       },
       "baseline": {
-        "key": "e98d316423cc17d3f4fb579070e3fa7bee04383329825642e71f0876f9f44dff",
-        "digest": "2a95dfa6d9f8c4235edc6c0755b9017e209fccaefd7b4e2581fdeec04e8f0c20",
-        "sha256": "5f9575b5f49abd4183145d3388b3d2f9a01b4e845bbcdfab7b35ab77f11894fc"
+        "key": "99054db9ab23d6dcb1022deb06ab0505bde2af76b9a345b771da52f491665dcd",
+        "digest": "d22256e35600643109fcd31da468a0b4c6fc030877d1a08b44c18e49e251c804",
+        "sha256": "f901d74a67fd8de755c0beb75035a31b15a40fea2837491a1963a3ca3e45ffcb"
       }
     },
     {
@@ -444,7 +444,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "6488ad8f922b73c97d0436c1b207d63c4df9fc3893d9c6cdf9bec792f83d3651",
+      "sha256": "29abbceeb15a35a46a4e94ce0a806bd0156388ca56c1176baa2fd897484c1bf0",
       "executable": false
     },
     "evidence/setup-artwork-exploration/coastal-ai-background-v2-live-provenance.json": {
@@ -935,6 +935,14 @@
       "sha256": "92ce729e8f17d94b63ef7f3db34be5acd71743f501258cd219d55908fa298c50",
       "executable": false
     },
+    "scripts/base-onboarding/app-processes.mjs": {
+      "sha256": "1785ff0fed553c5490fdecce12b55e7fd6fbc39b29e9316681aa1c0893e06b19",
+      "executable": false
+    },
+    "scripts/base-onboarding/app-processes.test.mjs": {
+      "sha256": "5bf81f095239d5d790d926b00945fe91008df1fec74bbba4edb9ee40958bcc6b",
+      "executable": false
+    },
     "scripts/base-onboarding/contract.test.mjs": {
       "sha256": "d54b8e8211c1d0017149e8dbeecdc57a02d1dbb841b78ca6d16656be14609da1",
       "executable": false
@@ -976,7 +984,7 @@
       "executable": false
     },
     "scripts/base-onboarding/private.mjs": {
-      "sha256": "683d2f7b8c145d1942c779e1d6c37049f001411e70f58ea349ec821f82c6a633",
+      "sha256": "6b974afe918c709dabfd5ce2c90ce0743f500dcf7f1a98f5d34f19fcd5452526",
       "executable": false
     },
     "scripts/base-onboarding/private.test.mjs": {
@@ -988,7 +996,7 @@
       "executable": false
     },
     "scripts/base-onboarding/README.md": {
-      "sha256": "519bb12093858e1d0ba8488079963cae3e65b7d5ace53dfa38d836fe0ad4c6d7",
+      "sha256": "c8d8e4ca066ef8e06682b92a72c57e4aa0f9ce089dd25495e7aed9ba5e6620df",
       "executable": false
     },
     "scripts/base-onboarding/secrets.mjs": {
@@ -996,7 +1004,7 @@
       "executable": false
     },
     "scripts/base-onboarding/server.mjs": {
-      "sha256": "57df2d2cbfa4033844544d90c0dc284a84d179553d23029689f45aae91f37f05",
+      "sha256": "e4944acbf3af8d88dadc838569d83d6791fa62e3a97d5586e17fc5aa30aa3a21",
       "executable": false
     },
     "scripts/base-onboarding/start-concurrency.test.mjs": {

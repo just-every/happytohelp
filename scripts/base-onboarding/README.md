@@ -32,6 +32,13 @@ are served directly; the browser module must use browser-resolvable imports.
 
 Install callbacks call `store.step(label)`, retain a spawned app with `onApp(child)`,
 respect cancellation, set `store.state.appUrl`, then call `store.phase('complete')`.
+Register each detached app child immediately after spawning it, before awaiting
+readiness or bootstrap, and finish all registrations before `install` settles.
+The installer owns every registered live child: failed attempts stop their children
+and await their exit before exposing retry; successful children stay running until
+installer shutdown. Shutdown cancels the adapter and also stops children registered
+while cancellation settles. Already-exited child handles are never signalled again.
+Adapters must cooperate with cancellation and children must honour SIGTERM.
 They own actual seed commands and bootstrap policy. Callback failures become a
 visible failed installation; do not put secrets in labels/errors or command args.
 Optional `resolveAddress`, `artwork` and `handoff` callbacks integrate supported

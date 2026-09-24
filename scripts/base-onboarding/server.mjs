@@ -1,3 +1,4 @@
+import { createAppProcesses } from './app-processes.mjs';
 import { installationFailureMessage } from './failures.mjs';
 import { agentHandoff } from './agent-handoff.mjs';
 import { validateAnswers } from './prefill.mjs';
@@ -11,7 +12,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { emailMetadata } from './email.mjs';
 import { createState } from './state.mjs';
 import { metadata } from './metadata.mjs';
-import { stopChild, localEmailBindings } from './private.mjs';
+import { localEmailBindings } from './private.mjs';
 export async function startInstaller(root,{seed,port=0,answers,secretInput,noPrefill=false,resume=false,agent=false}={}){
  root=resolve(root);
  if(!seed?.product||!seed.model?.fields||!seed.model?.safeKeys||typeof seed.install!=='function'||typeof seed.validateInput!=='function')throw Error('Provide a seed onboarding contract.');
@@ -21,7 +22,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
  const uiRoot=fileURLToPath(new URL('./ui/',import.meta.url));
  if(resume&&noPrefill)throw Error('--resume cannot be combined with --no-prefill.');
  const vault=createSecretVault(seed.model);
- const store=await createState(root,seed),token=randomBytes(32).toString('hex'),cookie=randomBytes(32).toString('hex');let origin,app,work,connection,starting=false,mutations=0;const abort=new AbortController();
+ const store=await createState(root,seed),token=randomBytes(32).toString('hex'),cookie=randomBytes(32).toString('hex');let origin,work,connection,starting=false,mutations=0;const apps=createAppProcesses();const abort=new AbortController();
  store.state.sessionId=randomBytes(16).toString('hex');
  const {workspaceArt,artworkBridge,imageLimit}=seed.artwork?await seed.artwork(root,store):{};
  if(agent)store.state.agent.mode='connecting';
@@ -40,6 +41,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
   let mutation=false;
   const json=(status,body)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body))};
   try{
+   if(abort.signal.aborted)return json(503,{error:'The installer is closing.'});
    if(req.headers.host!==new URL(origin).host)return json(403,{error:'Invalid installer host.'});
    const path=new URL(req.url,origin).pathname;
    res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('Cache-Control','no-store');
@@ -116,7 +118,14 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
      try{
      let body='';for await(const chunk of req){body+=chunk;if(body.length>16000)return json(413,{error:'Too much input.'})}
      let input;try{input=seed.validateInput(vault.merge(JSON.parse(body),store.state.draft),configuredEnv,store.state.known.providers)}catch(error){return json(400,{error:error.message})}
-     await store.draft(input);await workspaceArt?.deliverSidebar();delete store.state.error;await store.phase('running');vault.clear();json(202,{started:true});work=Promise.resolve().then(()=>seed.install(root,input,store,child=>{app=child},abort.signal,artworkBridge)).catch(async(error)=>{store.state.error=installationFailureMessage(error);await store.phase('failed');}).finally(()=>{for(const key of Object.keys(seed.model.secretScopes||{}))input[key]='';});void work;return;
+     await store.draft(input);await workspaceArt?.deliverSidebar();delete store.state.error;await store.phase('running');
+     if(abort.signal.aborted)return json(503,{error:'The installer is closing.'});
+     vault.clear();json(202,{started:true});const attempt=createAppProcesses();
+     work=Promise.resolve().then(()=>seed.install(root,input,store,child=>{
+      apps.register(child);attempt.register(child);
+     },abort.signal,artworkBridge)).catch(async(error)=>{
+      await attempt.stop();store.state.error=installationFailureMessage(error);await store.phase('failed');
+     }).finally(()=>{for(const key of Object.keys(seed.model.secretScopes||{}))input[key]='';});void work;return;
      }finally{starting=false;}
     }
     return json(404,{error:'Unknown installer action.'});
@@ -128,5 +137,5 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
   }catch{json(500,{error:'The installer could not complete this request.'})}finally{if(mutation)mutations--;}
  });
  await new Promise(resolve=>server.listen(port,'127.0.0.1',resolve));origin=`http://127.0.0.1:${server.address().port}`;
- return {origin,state:store.state,close:async()=>{artworkBridge?.close();vault.clear();abort.abort();stopChild(app);await work;await connection;await new Promise(resolve=>server.close(resolve))}};
+ return {origin,state:store.state,close:async()=>{artworkBridge?.close();vault.clear();abort.abort();const stopped=apps.stop();await work;await stopped;await apps.stop();await connection;await new Promise(resolve=>server.close(resolve))}};
 }

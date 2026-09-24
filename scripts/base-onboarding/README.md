@@ -7,6 +7,10 @@ operations and subsequent changes. A working-tree adoption is not an upstream
 publication: record a comparison revision only after those bytes are committed.
 Foundation exports include the same source and a minimal real local adapter.
 
+This onboarding path is optional Base convenience. RER can manage independently
+authored software with a different installer, runtime or provider target; the
+product declares its supported effects and the checks that establish them.
+
 ## Edition contract
 
 `launch(root, seed)` starts the CLI; `fill(seed)` fills the existing session.
@@ -60,3 +64,11 @@ HappyToHelp adopted this private-storage implementation and regression tests
 byte-for-byte on 20 September 2026. Both shared and copied onboarding suites were
 run locally; this is working-tree adoption evidence, not publication or hosted
 installation acceptance.
+
+Start reserves its session before awaiting draft persistence or artwork transfer.
+Concurrent Start, answer edits and provider connection are refused during this
+reservation; the running phase is persisted before calling the adapter. On resume,
+a completed session opens review so the product can explicitly restart its local
+runtime. Adapters must preserve existing owner data and bind any private receipt
+to the acquired source and selected target. The core nonsecret draft is product
+bound; it is not a deployment or native authentication receipt.

@@ -23,7 +23,7 @@ const server=await startInstaller(root,{seed,port,answers,secretInput,noPrefill,
 console.log(`${seed.product} installer: ${server.origin}\nKeep this terminal open while installing and using the local app.`);
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,async()=>{await server.close();process.exit()});
 
-if(!noOpen){const tool=process.platform==='darwin'?'open':process.platform==='win32'?'explorer.exe':'xdg-open';const child=spawn(tool,[server.origin],{stdio:'ignore',shell:false});child.on('error',()=>console.log('Open the installer URL above in your browser.'));}
+if(!noOpen){const tool=process.platform==='darwin'?'open':process.platform==='win32'?'explorer.exe':'xdg-open';const child=spawn(tool,[server.origin],{stdio:'ignore',shell:false});const fallback=()=>console.log('Open the installer URL above in your browser.');child.on('error',fallback);child.on('exit',code=>{if(code)fallback()});}
 
 return server;
 }

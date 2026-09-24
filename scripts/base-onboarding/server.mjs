@@ -20,7 +20,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
  const uiRoot=fileURLToPath(new URL('./ui/',import.meta.url));
  if(resume&&noPrefill)throw Error('--resume cannot be combined with --no-prefill.');
  const vault=createSecretVault(seed.model);
- const store=await createState(root,seed),token=randomBytes(32).toString('hex'),cookie=randomBytes(32).toString('hex');let origin,app,work,connection;const abort=new AbortController();
+ const store=await createState(root,seed),token=randomBytes(32).toString('hex'),cookie=randomBytes(32).toString('hex');let origin,app,work,connection,starting=false;const abort=new AbortController();
  store.state.sessionId=randomBytes(16).toString('hex');
  const {workspaceArt,artworkBridge,imageLimit}=seed.artwork?await seed.artwork(root,store):{};
  if(agent)store.state.agent.mode='connecting';
@@ -64,14 +64,14 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
     if(req.method==='GET'&&path==='/api/state'){await workspaceArt?.refresh();store.state.known.secretReadiness=vault.readiness(store.state.draft);return json(200,store.state);}
     if(req.method==='POST'&&path==='/api/activity'){
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
+     if(starting||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
      let body='';for await(const chunk of req){body+=chunk;if(body.length>1000)return json(413,{error:'Too much input.'})}
      try{const activity=store.activity.agent(JSON.parse(body));await workspaceArt?.request();return json(200,{activity})}catch{return json(400,{error:'Choose a supported activity phase and topic.'})}
     }
     if(req.method==='POST'&&path==='/api/address'){
      if(!seed.resolveAddress)return json(404,{error:'This seed does not support address discovery.'});
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
+     if(starting||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
      let body='';for await(const chunk of req){body+=chunk;if(body.length>8000)return json(413,{error:'Too much input.'})}
      let input;try{input=JSON.parse(body);if(!input||typeof input!=='object'||Array.isArray(input))throw Error()}catch{return json(400,{error:'Provide your workspace name and Cloudflare account.',code:'invalid_input'})}
      const merged=vault.merge(input,store.state.draft);
@@ -81,14 +81,14 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
     }
     if(req.method==='POST'&&['/api/prefill','/api/secrets'].includes(path)){
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
+     if(starting||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
      let body='';for await(const chunk of req){body+=chunk;if(body.length>16000)return json(413,{error:'Too much input.'})}
      try{const input=JSON.parse(body);if(path==='/api/prefill'){const answers=Object.fromEntries(Object.entries(validate(input)).filter(([key])=>store.state.sources[key]!=='browser'));await store.draft({...store.state.draft,...answers},'agent',Object.keys(answers));await workspaceArt?.request();}else {if(input.revision!==store.state.lastUpdate.revision)throw Error('Setup details changed; read them again before supplying credentials.');vault.set(input.secrets,store.state.draft);if(Object.keys(input.secrets).length)store.activity.secrets();}}catch{return json(400,{error:'Invalid setup input. Use supported nonsecret answers or the secure credential endpoint.'})}
      return json(200,{saved:true,revision:store.state.lastUpdate.revision,updatedFields:store.state.lastUpdate.keys,secretReadiness:vault.readiness(store.state.draft)});
     }
     if(req.method==='POST'&&path==='/api/connect'){
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(store.state.phase==='running'||connection)return json(409,{error:'Another operation is running.'});
+     if(starting||['running','complete'].includes(store.state.phase)||connection)return json(409,{error:'Another operation is running.'});
      let body='';for await(const chunk of req){body+=chunk;if(body.length>1000)return json(413,{error:'Too much input.'})}
      let provider;try{provider=JSON.parse(body).provider;if(!['cloudflare','github'].includes(provider)||(provider==='cloudflare'&&!seed.features?.hosting)||(provider==='github'&&!seed.features?.github))throw Error()}catch{return json(400,{error:'Select Cloudflare or GitHub.'})}
      store.state.connection={provider,state:'starting'};store.activity.provider(provider,'starting');json(202,{started:true});
@@ -96,7 +96,7 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
     }
     if(req.method==='POST'&&path==='/api/draft'){
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
+     if(starting||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation has already started.'});
      let body='';for await(const chunk of req){body+=chunk;if(body.length>16000)return json(413,{error:'Too much input.'})}
      let draft;try{draft=JSON.parse(body);if(!draft||typeof draft!=='object'||Array.isArray(draft)||Object.values(draft).some(value=>typeof value!=='string'||value.length>2048))throw Error()}catch{return json(400,{error:'Provide nonsecret setup details.'})}
      try{draft=validate(draft)}catch{return json(400,{error:'Provide supported nonsecret setup details.'})}
@@ -104,10 +104,13 @@ export async function startInstaller(root,{seed,port=0,answers,secretInput,noPre
     }
     if(req.method==='POST'&&path==='/api/start'){
      if(req.headers.origin!==origin)return json(403,{error:'Use the local installer page.'});
-     if(['running','complete'].includes(store.state.phase))return json(409,{error:'Installation is already running.'});
+     if(starting||connection||['running','complete'].includes(store.state.phase))return json(409,{error:'Installation is already running.'});
+     starting=true;
+     try{
      let body='';for await(const chunk of req){body+=chunk;if(body.length>16000)return json(413,{error:'Too much input.'})}
      let input;try{input=seed.validateInput(vault.merge(JSON.parse(body),store.state.draft),configuredEnv,store.state.known.providers)}catch(error){return json(400,{error:error.message})}
-     await store.draft(input);await workspaceArt?.deliverSidebar();store.state.phase='running';vault.clear();json(202,{started:true});work=Promise.resolve().then(()=>seed.install(root,input,store,child=>{app=child},abort.signal,artworkBridge)).catch(async()=>{store.state.error='Installation failed. Inspect the seed operating commands in your terminal.';await store.phase('failed');}).finally(()=>{for(const key of Object.keys(seed.model.secretScopes||{}))input[key]='';});void work;return;
+     await store.draft(input);await workspaceArt?.deliverSidebar();await store.phase('running');vault.clear();json(202,{started:true});work=Promise.resolve().then(()=>seed.install(root,input,store,child=>{app=child},abort.signal,artworkBridge)).catch(async()=>{store.state.error='Installation failed. Inspect the seed operating commands in your terminal.';await store.phase('failed');}).finally(()=>{for(const key of Object.keys(seed.model.secretScopes||{}))input[key]='';});void work;return;
+     }finally{starting=false;}
     }
     return json(404,{error:'Unknown installer action.'});
    }

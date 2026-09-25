@@ -1,0 +1,23 @@
+import { Hono } from 'hono'
+import { HTTPException } from 'hono/http-exception'
+import type { AppEnv } from '../../platform/env'
+import { hashToken } from '../../platform/auth'
+import { id,requiredString } from '../../platform/db'
+import { clientAddress,enforceRateLimits } from '../../platform/rate-limits'
+async function verify(secret:string,value:string,signature:string){if(!/^[a-f0-9]{64}$/i.test(signature))return false;const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['verify']);return crypto.subtle.verify('HMAC',key,Uint8Array.from(signature.match(/../g)!,x=>parseInt(x,16)),new TextEncoder().encode(value))}
+export const widget=new Hono<AppEnv>()
+widget.post('/widget/session',async c=>{
+ const b=await c.req.json();const project=await c.env.DB.prepare("SELECT id,allowed_origin,verification_secret FROM projects WHERE widget_key=? AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=projects.id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)").bind(requiredString(b.widgetKey,'widgetKey')).first<{id:string;allowed_origin:string;verification_secret:string|null}>();if(!project)throw new HTTPException(403);if(c.req.header('Origin')!==project.allowed_origin){if(!b.previewToken||c.req.header('Origin')!==c.env.PREVIEW_ORIGIN||!await c.env.DB.prepare('SELECT 1 FROM preview_grants g WHERE g.public_demo=0 AND EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=g.project_id AND m.user_id=g.actor_id) AND g.token_hash=? AND g.project_id=? AND g.expires_at>? AND g.remaining_requests>0').bind(await hashToken(b.previewToken),project.id,Date.now()).first())throw new HTTPException(403)}
+ // Origin is client-supplied outside browsers, so admission is also bounded per widget key and client address,
+ // and per project so rotating addresses cannot create unbounded sessions and contacts.
+ await enforceRateLimits(c.env,[['widgetSessionsPerIpHour',`${project.id}|${clientAddress(c.req)}`],['widgetSessionsPerProjectHour',project.id]])
+ const identifier=typeof b.identifier==='string'?b.identifier:typeof b.email==='string'?b.email:null;let verified=false
+ if(b.contact_hash){if(!project.verification_secret||!identifier||!await verify(project.verification_secret,identifier,b.contact_hash))throw new HTTPException(403,{message:'Contact signature invalid'});verified=true}
+ const existing=verified?await c.env.DB.prepare('SELECT id,metadata_json FROM contacts WHERE project_id=? AND external_id=? AND is_verified=1').bind(project.id,identifier).first<{id:string;metadata_json:string}>():null
+ if(existing&&JSON.parse(existing.metadata_json||'{}').is_blocked)throw new HTTPException(403,{message:'Contact is blocked'})
+ const contactId=existing?.id||id(),token=id()+id(),now=Date.now();const statements=[]
+ if(!existing)statements.push(c.env.DB.prepare('INSERT INTO contacts(id,project_id,name,email,external_id,created_at,is_verified) VALUES(?,?,?,?,?,?,?) ON CONFLICT(project_id,external_id) DO NOTHING').bind(contactId,project.id,typeof b.name==='string'?b.name:null,typeof b.email==='string'?b.email:null,verified?identifier:null,now,verified?1:0))
+ await c.env.DB.batch(statements.length?statements:[c.env.DB.prepare('SELECT 1')]);const actual=verified?await c.env.DB.prepare('SELECT id,metadata_json FROM contacts WHERE project_id=? AND external_id=? AND is_verified=1').bind(project.id,identifier).first<{id:string}>():{id:contactId};if(!actual)throw new HTTPException(409,{message:'Verified contact identity conflict'})
+ if(b.metadata&&typeof b.metadata==='object'&&!Array.isArray(b.metadata)&&b.metadata.hash){const {hash,...metadata}=b.metadata;const encoded=JSON.stringify(metadata).replaceAll('/','\\/').replace(/[\u007f-\uffff]/g,char=>'\\u'+char.charCodeAt(0).toString(16).padStart(4,'0'));if(!project.verification_secret||!await verify(project.verification_secret,encoded,hash))throw new HTTPException(403,{message:'Metadata signature invalid'});await c.env.DB.prepare('UPDATE contacts SET metadata_json=? WHERE id=? AND project_id=?').bind(JSON.stringify(metadata),actual.id,project.id).run()}
+ await c.env.DB.prepare("INSERT INTO sessions VALUES(?,?,?,'contact',?,?,NULL)").bind(await hashToken(token),actual.id,project.id,actual.id,now+2592000000).run();return c.json({token,contactId:actual.id,projectId:project.id,verified},201)
+})

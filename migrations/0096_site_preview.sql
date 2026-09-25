@@ -1,0 +1,6 @@
+CREATE TABLE brand_generations(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),actor_id TEXT NOT NULL,request_id TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,size TEXT NOT NULL,quality TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('queued','running','ready','failed','uncertain')),asset_id TEXT,provider_request_id TEXT,usage_json TEXT,revised_prompt TEXT,error TEXT,created_at INTEGER NOT NULL,started_at INTEGER,completed_at INTEGER,expires_at INTEGER NOT NULL,UNIQUE(project_id,request_id));
+CREATE UNIQUE INDEX brand_one_active ON brand_generations(project_id) WHERE state IN('queued','running','uncertain');
+CREATE TABLE brand_assets(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),object_key TEXT NOT NULL UNIQUE,content_type TEXT NOT NULL,filename TEXT NOT NULL,created_by TEXT NOT NULL,created_at INTEGER NOT NULL,published_at INTEGER);
+CREATE TABLE preview_grants(token_hash TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),actor_id TEXT NOT NULL,target_origin TEXT NOT NULL,expires_at INTEGER NOT NULL,remaining_requests INTEGER NOT NULL DEFAULT 1000);
+ALTER TABLE preview_grants ADD COLUMN public_demo INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE preview_limits(key TEXT PRIMARY KEY,requests INTEGER NOT NULL,window_start INTEGER NOT NULL);

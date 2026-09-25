@@ -1,0 +1,66 @@
+// Element defaults for the dashboard on top of Bootstrap's reboot.
+
+[data-bs-theme="dark"] {
+  --bs-light: #{$gray-800-dark};
+  --bs-light-rgb: #{to-rgb($gray-800-dark)};
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+}
+
+ul,
+ol {
+  padding-left: 2.5rem;
+}
+
+[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+// Headings: tighter tracking, and bottom margins that shrink with the level.
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+  letter-spacing: -.02em;
+
+  > a {
+    color: inherit;
+  }
+}
+
+h1, .h1 {
+  font-size: 1.5rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: $h1-font-size;
+  }
+}
+
+h3, .h3 {
+  margin-bottom: $headings-margin-bottom * .75;
+}
+
+h4, .h4, h5, .h5, h6, .h6 {
+  margin-bottom: $headings-margin-bottom * .5;
+}
+
+h6.text-uppercase {
+  letter-spacing: .08em;
+}
+
+.display-1, .display-2, .display-3, .display-4 {
+  letter-spacing: -.02em;
+}
+
+b,
+strong {
+  font-weight: $font-weight-bold;
+}
+
+a:focus,
+button:focus {
+  outline: none !important;
+}

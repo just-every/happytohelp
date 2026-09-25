@@ -1,0 +1,19 @@
+// Dark colour mode (`data-bs-theme="dark"`, set for workspaces in dark mode).
+
+// Navy surfaces used by dark-mode components.
+$gray-600-dark: #244166;
+$gray-700-dark: #1E3A5C;
+$gray-800-dark: #152E4D;
+$gray-900-dark: #132A46;
+
+$body-color-dark: $white;
+$body-bg-dark: $black;
+$body-secondary-color-dark: $gray-700;
+$body-secondary-bg-dark: $gray-800;
+$body-emphasis-color-dark: $white;
+$border-color-dark: $gray-700-dark;
+$link-color-dark: $primary;
+$code-color-dark: $primary;
+$form-select-indicator-color-dark: $gray-600;
+$form-select-indicator-dark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 5' fill='none'><path d='M1 1l3.25 3.25L7.5 1' stroke='#{$form-select-indicator-color-dark}' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+$form-switch-color-dark: $gray-800-dark;

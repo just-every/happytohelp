@@ -1,0 +1,8 @@
+CREATE TABLE email_settings(project_id TEXT PRIMARY KEY REFERENCES projects(id),from_name TEXT NOT NULL,from_address TEXT NOT NULL,inbound_address TEXT UNIQUE,is_enabled INTEGER NOT NULL DEFAULT 0,updated_at INTEGER NOT NULL);
+CREATE TABLE email_deliveries(id TEXT PRIMARY KEY,project_id TEXT,recipient TEXT NOT NULL,subject TEXT NOT NULL,intent_hash TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('sending','sent','failed','uncertain')),provider_id TEXT,error TEXT,created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);
+CREATE TABLE inbound_emails(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,conversation_id TEXT,intent_hash TEXT NOT NULL,state TEXT NOT NULL,error TEXT,created_at INTEGER NOT NULL);
+CREATE TABLE billing_accounts(project_id TEXT PRIMARY KEY REFERENCES projects(id),stripe_customer_id TEXT UNIQUE,currency TEXT NOT NULL DEFAULT 'usd',auto_top_up INTEGER NOT NULL DEFAULT 0,top_up_minor INTEGER,threshold_minor INTEGER);
+CREATE TABLE billing_ledger(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),kind TEXT NOT NULL,amount_minor INTEGER NOT NULL,currency TEXT NOT NULL,provider_id TEXT UNIQUE,created_at INTEGER NOT NULL);
+CREATE TABLE billing_operations(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,kind TEXT NOT NULL,state TEXT NOT NULL,response_json TEXT,error TEXT,created_at INTEGER NOT NULL);
+CREATE TABLE github_settings(project_id TEXT PRIMARY KEY REFERENCES projects(id),repositories_json TEXT NOT NULL DEFAULT '[]',allow_agents INTEGER NOT NULL DEFAULT 1,allow_contacts INTEGER NOT NULL DEFAULT 0,updated_at INTEGER NOT NULL);
+CREATE TABLE integration_events(id TEXT PRIMARY KEY,provider TEXT NOT NULL,event_type TEXT NOT NULL,created_at INTEGER NOT NULL);

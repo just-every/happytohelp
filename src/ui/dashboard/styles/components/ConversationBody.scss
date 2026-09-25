@@ -1,0 +1,50 @@
+.chat-body-line-bg {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    height: 100%;
+    left: 0;
+
+    display: none;
+
+    &.agent-line {
+        left: unset;
+        right: 0;
+        .chat-line {
+            border-right: none;
+            border-left: 1px solid #E3EBF6;
+        }
+    }
+}
+
+.chat-body {
+    position: relative;
+    height: 100%;
+
+    & > .bucket-group:last-child {
+        padding-bottom: 2.5rem;
+    }
+}
+
+.chat-line {
+    border-right: 1px solid #E3EBF6;
+    height: 100%;
+    width: 1.25rem;
+    width: calc(1.25rem + 3px);
+    box-sizing: border-box;
+
+    display: none;
+}
+
+.chat-line-cover {
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    left: 2.25rem;
+    background: #F9FBFD;
+    height: 100%;
+    width: 3rem;
+    transition: max-height 0.5s ease;
+    max-height: 100%;
+    display: none;
+}

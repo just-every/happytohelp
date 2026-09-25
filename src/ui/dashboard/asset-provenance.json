@@ -1,0 +1,436 @@
+{
+  "scope": "Dashboard, sign-in and identity page styles (src/ui/dashboard/styles) and their public assets.",
+  "recorded": "2026-09-25",
+  "removedAtCommitParent": "a258a8b81c418ec7c568f1031f945ad9eb938e8f",
+  "current": [
+    {
+      "source": "src/ui/dashboard/styles/dashboard.scss",
+      "origin": "First-party entry stylesheet (MIT, edition LICENSE)."
+    },
+    {
+      "source": "src/ui/dashboard/styles/foundation/",
+      "origin": "First-party partials written for this product (MIT, edition LICENSE): tokens, base, icons, app shell, sidebar, page header, avatars, controls, surfaces, transcript, utilities."
+    },
+    {
+      "source": "node_modules/bootstrap (npm bootstrap 5.3.x)",
+      "origin": "Third-party, MIT (The Bootstrap Authors)."
+    },
+    {
+      "source": "node_modules/feather-icons (npm feather-icons 4.29.2)",
+      "origin": "Third-party, MIT (Cole Bemis). Icon SVGs are inlined into the built stylesheet as CSS masks."
+    },
+    {
+      "source": "node_modules/highlight.js (vs2015 style)",
+      "origin": "Third-party, BSD-3-Clause."
+    },
+    {
+      "source": "public/fonts/inter/InterVariable.woff2",
+      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+      "origin": "Third-party, SIL Open Font License 1.1 (public/fonts/inter/LICENSE.txt). Unchanged."
+    }
+  ],
+  "removed": [
+    {
+      "source": "public/fonts/feather/fonts/Feather.woff",
+      "sha256": "7341145fb66763ed9ae003e4ef40340836cd3a8f171adbf79ce46a9be0fb9ca9",
+      "bytes": 81588,
+      "reason": "Feather icon webfont (IcoMoon build) distributed with the purchased admin theme. Replaced by the feather-icons npm package (MIT) rendered as CSS masks (foundation/_icons.scss)."
+    },
+    {
+      "source": "public/img/masks/avatar-group-hover-last.svg",
+      "sha256": "5cb4a6e779630d287bc964a78b4abbda36cdb36f14ccc75186f628d3872b0f82",
+      "bytes": 412,
+      "reason": "Avatar mask image from the purchased admin theme. Removed; nothing in the dashboard applies avatar masks."
+    },
+    {
+      "source": "public/img/masks/avatar-group-hover.svg",
+      "sha256": "1ed17cb7dfe2a5e7770f5bfb6685fbca98e78609d0d624035793de13d1679abc",
+      "bytes": 465,
+      "reason": "Avatar mask image from the purchased admin theme. Removed; nothing in the dashboard applies avatar masks."
+    },
+    {
+      "source": "public/img/masks/avatar-group.svg",
+      "sha256": "b8322250bdb4ae91f0ea8e4db26aadf125b29fed844f6667664e538bd60b1440",
+      "bytes": 394,
+      "reason": "Avatar mask image from the purchased admin theme. Removed; nothing in the dashboard applies avatar masks."
+    },
+    {
+      "source": "public/img/masks/avatar-status.svg",
+      "sha256": "a27e1ee1288d648b6067520bbb3be0152a07d5dc3d09b9754dc617aaf00e9c18",
+      "bytes": 395,
+      "reason": "Avatar mask image from the purchased admin theme. Removed; nothing in the dashboard applies avatar masks."
+    },
+    {
+      "source": "src/ui/dashboard/styles/_chat.scss",
+      "sha256": "be50c688cba3d7ae1d5252c192da1c471eb630efb4ca1d5552baa0df3376ccc1",
+      "bytes": 4943,
+      "reason": "Chat layout of unestablished origin (structure matches a purchased chat template). Rewritten first-party in foundation/_app-shell.scss and foundation/_transcript.scss."
+    },
+    {
+      "source": "src/ui/dashboard/styles/_hide-scrollbar.scss",
+      "sha256": "3a3b8b2c1ab33c1cf164f8746fcefd9552e4f57081d754c1e925c109abd63c90",
+      "bytes": 271,
+      "reason": "Scrollbar mixin of unestablished origin (paired with _chat.scss). Rewritten first-party in foundation/_app-shell.scss."
+    },
+    {
+      "source": "src/ui/dashboard/styles/_user-variables.scss",
+      "sha256": "256263ef0d6b14ee2cc7ca8e65c128dfce10a2a6bb44c8aa7b56166080b78008",
+      "bytes": 304,
+      "reason": "Purchased admin theme template file for variable overrides. Replaced by foundation/_tokens.scss."
+    },
+    {
+      "source": "src/ui/dashboard/styles/_user.scss",
+      "sha256": "90d07d5480a80952a0d291845365fc05f3c16165675555e9a9bd9d8aba3d24a1",
+      "bytes": 8341,
+      "reason": "Purchased admin theme template file that also carried pasted compiled theme CSS. The rules the UI uses were rewritten in foundation/ (controls, avatars, app-shell, utilities)."
+    },
+    {
+      "source": "src/ui/dashboard/styles/libs.scss",
+      "sha256": "527342ceb97b7393830469c05f5643b0bb0d395794ed77e5ca7543b274c12909",
+      "bytes": 113,
+      "reason": "Purchased admin theme template vendor-import file. The highlight.js (BSD-3-Clause, npm) import moved into dashboard.scss."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme.scss",
+      "sha256": "235443f6bec29a044e5069998ef75ebd9a5911bb5b6540f6a698b28be8654424",
+      "bytes": 4604,
+      "reason": "Entry stylesheet structured on the purchased admin theme template and importing its partials. Replaced by first-party src/ui/dashboard/styles/dashboard.scss."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_accordion.scss",
+      "sha256": "27035f97ae30faade32af1e415cd2f9a8ac2b5009efafccd93cb908104233455",
+      "bytes": 211,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_alert.scss",
+      "sha256": "8c23a7f99a8d7355e685901576df0205e330fed5b9879394ebf03a32cf7b81e1",
+      "bytes": 1484,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_avatar.scss",
+      "sha256": "f642c0d48ecbe05fdf7161d9a389830ff78634b6b8d529ac510ee7b67b2e8210",
+      "bytes": 2909,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_badge.scss",
+      "sha256": "820d78c20d460a9e44b5d6626b5f1afc86f28f2e5d576d95c42b8b127ecf62b5",
+      "bytes": 321,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_breadcrumb.scss",
+      "sha256": "24144a929e8e5c7ee4a89d5ac4bf0e4286c537de80bb6846c34087248b4987c6",
+      "bytes": 789,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_buttons.scss",
+      "sha256": "44300681cc448c76d413621acc293b9e6e88bec5651fb70bec10996100123983",
+      "bytes": 4214,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_card.scss",
+      "sha256": "e9f65911e3ae2ed82fbb7523a5a4260985963789666d71a3e6b8dd6334387c6c",
+      "bytes": 6379,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_chart.scss",
+      "sha256": "2d9abc0440b790fac287c9f8b200b579f53a25c4234b8de43fe712b8af50e646",
+      "bytes": 1630,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_checklist.scss",
+      "sha256": "aea231560b3abe9aba2065cc6dd97583972828c9176cfdb9ba0ce1fc5a1bb010",
+      "bytes": 802,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_close.scss",
+      "sha256": "302950a1df3065c1bf8cecdc83db3bfc35c5d4f7653497a7269b74924469fde2",
+      "bytes": 78,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_comment.scss",
+      "sha256": "8c110f3b67753db62c8fb48bd5700d3442488b927c4240f9c0549717960af0c0",
+      "bytes": 1472,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_dropdown.scss",
+      "sha256": "c3624cf60a708dab3e1f46be397b7085015b7f30b84b027569ed0977e8cd50bb",
+      "bytes": 3304,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_forms.scss",
+      "sha256": "923ae77b2ab0be120e73d5fafb1252530f62c062d60f0a2e1949fc841b5e92af",
+      "bytes": 232,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_header.scss",
+      "sha256": "ca034856bfb3b20a4bed25566f94a4adea8fb9b9e89ad9eec5afd73cab9116b4",
+      "bytes": 2153,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_helpers.scss",
+      "sha256": "2624c4a56981caec709ff84c1e7d92194798cb439f61cfdc4048a4e74ad4ec82",
+      "bytes": 79,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_icon.scss",
+      "sha256": "3a21f370f9bdccb808d99e50169a950fff08bf81e351f17d213af5fe6e933145",
+      "bytes": 718,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_kanban.scss",
+      "sha256": "322c7003c412279c0bc18b1426db5fe2390e32256b7e29d34ed0d8580e83a4f7",
+      "bytes": 983,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_list-group.scss",
+      "sha256": "cb3c56d3b406c0d733450c75c93c6f23669769c38d5d6569e4b2491f5f159e80",
+      "bytes": 1387,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_main-content.scss",
+      "sha256": "8ea9de90eb8faa4efae49e41987ad937f5f3aeb8f09956e0c71e8ffd089d9aee",
+      "bytes": 1392,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_mixins.scss",
+      "sha256": "8157ad5fae04c8270c75928e394f7cb5eed957e700ce8a0317ec812d35801e53",
+      "bytes": 60,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_modal.scss",
+      "sha256": "f3b509957109397aafe4c36196a90cd14b60c5f530bf379250616da5030171c8",
+      "bytes": 1042,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_nav.scss",
+      "sha256": "64a56e585d7f281ddabb14d2a120a2960457f5d4dbae90783a13138801b77ab1",
+      "bytes": 2171,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_navbar.scss",
+      "sha256": "4e7ac236933ec40c062c20852edace127e88f2bea8d1f0de894e8464f3e57225",
+      "bytes": 15638,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_offcanvas.scss",
+      "sha256": "f01a600c27fecef72c3101204813f46d96c9034a3ceb35cd53b612ef56551916",
+      "bytes": 555,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_pagination.scss",
+      "sha256": "b1e4634e2a5fe7c641f04c2a1583737871fab8d8b23e2b4ee63c2cc2f24a9b53",
+      "bytes": 3744,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_popover.scss",
+      "sha256": "224e33e194dbd8f94f3e0e05388d50d2850717fcace2d791f243540e14c5f886",
+      "bytes": 1153,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_progress.scss",
+      "sha256": "2f6dd421edb5af0ab38d33fdc3174af813427a84561eb80d405097f2da7c7b86",
+      "bytes": 803,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_reboot.scss",
+      "sha256": "5c13bb9cf067540e55560fe7008a0fa2320f01de9e663e7ff96e712841021390",
+      "bytes": 294,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_root.scss",
+      "sha256": "a72ad836e07cc08b230080b976c1e72f08633ce34b9e3bbd288508cdafe23d8c",
+      "bytes": 1459,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_tables.scss",
+      "sha256": "339bce40af46c70dcc702bdfeb11e8b9765150a782cb48fba6785407bb9656ba",
+      "bytes": 1921,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_toasts.scss",
+      "sha256": "9192ca8e6104d8f3627d3d5898109d1217c428844e14cab3845e90191e6c01b1",
+      "bytes": 283,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_tooltip.scss",
+      "sha256": "c81a54ce2eeb0755b845ff5c4ad1b86a90f379669940f9ba08d9f9ddc49aaebf",
+      "bytes": 259,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_type.scss",
+      "sha256": "dfbd354c47fc3b284e5e2044997335374786c1918642bd7bf76267e2ff53f2a8",
+      "bytes": 1558,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_utilities.scss",
+      "sha256": "da73797c7d94f330ab5b6303c299e3af36d58f209c76f0d17a965b84d2ca9b9d",
+      "bytes": 3005,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_variables-dark.scss",
+      "sha256": "6836d245b09dae0ce67428e278b43bd01c12aeb04c00a773f0fc6ba01a5f0ea6",
+      "bytes": 8353,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_variables.scss",
+      "sha256": "f41ab0f17104aa5bf9854bcdf04ee2d735af354d481e5eba034bae7b40cf0241",
+      "bytes": 27423,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/_vendor.scss",
+      "sha256": "f45c04ecea2ee8db0c215859548a36d0ca1a6aeba9b62bc662116837695063d4",
+      "bytes": 158,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/dark/_overrides-dark.scss",
+      "sha256": "01b2439fdc173352169bb9a194c3fd85ac43e06ec8e14ca70cbb159a6e6d71d0",
+      "bytes": 839,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_floating-labels.scss",
+      "sha256": "8ac16277a1552e80e6d2be2ba9531057951737be761ced27eaf73c1dff3c1e75",
+      "bytes": 203,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_form-check.scss",
+      "sha256": "9627291ce56adaa5349b0cfd1f7be03e81e7e282c84d48b99b5c16a25dd804d4",
+      "bytes": 2389,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_form-control.scss",
+      "sha256": "5cae2642b93514312d0cd4cfd0d0d47b770d9cc0e1fce4a5c89f2bba9a686d6f",
+      "bytes": 3704,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_form-group.scss",
+      "sha256": "9deeaba3bccfbe22a7fd4a981320654b61f5aae447b57725d2c9c0fdce0feb8d",
+      "bytes": 107,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_form-select.scss",
+      "sha256": "6044eabe419f5186e1e4472a3576f374c74ac08961d79ddc076a407763be3522",
+      "bytes": 2221,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_form-text.scss",
+      "sha256": "3639d0d38d2aa034174ec004fd87969fc68799d2b36b8e62c3fec97dcb8301f4",
+      "bytes": 128,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_input-group.scss",
+      "sha256": "adf0d23b0a2aebd1f60d3791a67dd558b40e73299821d9fbc6a4142fb94ab59e",
+      "bytes": 5586,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/forms/_validation.scss",
+      "sha256": "5d459fdc15d115bb974a7a9a2457674f7f38a8912c4a16308380b2aae3d3b321",
+      "bytes": 279,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/helpers/_color-bg.scss",
+      "sha256": "bfea7d0a04de6011b49b1d48e2644c3a0c16cad0219f34a60ebc3d86d5226dbd",
+      "bytes": 550,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/mixins/_breakpoints.scss",
+      "sha256": "58f5ddce999e2cc3da3734884387835b8bc5830a4ae5c9d80449fe08871d62cd",
+      "bytes": 280,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/utilities/_background.scss",
+      "sha256": "d73bf96afb7ec7ee7e21c95de0e935408870a92f626415a755a1244e84636871",
+      "bytes": 970,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/utilities/_lift.scss",
+      "sha256": "3fc3dcfb20a00d1dd4b844d86b026e75a629cf3f14f23e237cca35dd84478af1",
+      "bytes": 335,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/vendor/_choices.scss",
+      "sha256": "c59cc9a02742a7823fd07b11b87bb584f3872f2a8cdb74a4d7f9b027abbc1a8a",
+      "bytes": 3765,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/vendor/_dropzone.scss",
+      "sha256": "9f5d1ecab5cff40afae6a6a72d73a5b85cac40dd979bc85da8b456c830fa3954",
+      "bytes": 1909,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/vendor/_feather.scss",
+      "sha256": "4881cf200e9e0f724e446cadc0ecd02b4584d3902961ab7bed719875f3c6c1d7",
+      "bytes": 12711,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/vendor/_flatpickr.scss",
+      "sha256": "7f663db21c5bb527483a978ce55efe94a53776a8da76b883aea72bb515904e3c",
+      "bytes": 1914,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/vendor/_highlight.scss",
+      "sha256": "eb7b882ea678b1cf147d3a56765c282168f7691f8d88928f2f90940a7e4f92ec",
+      "bytes": 82,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    },
+    {
+      "source": "src/ui/dashboard/styles/theme/vendor/_list.scss",
+      "sha256": "4108ad4e3a2f6ee198ae15c64a8109adbfdf392caf9e1c4734f4f15980e0ca07",
+      "bytes": 1106,
+      "reason": "Source of the purchased commercial admin theme. Removed; the dashboard now uses Bootstrap (MIT) with first-party partials in src/ui/dashboard/styles/foundation."
+    }
+  ]
+}

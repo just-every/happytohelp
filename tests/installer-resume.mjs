@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { startInstaller } from '../scripts/installer/server.mjs';
+import { createState } from '../scripts/installer/state.mjs';
+import { validateAnswers } from '../scripts/installer/prefill.mjs';
+const root = await mkdtemp(join(tmpdir(), 'h2h-installer-resume-')), oldPath = process.env.PATH;
+let server;
+try {
+ process.env.PATH = join(root, 'no-tools');
+ await mkdir(join(root, 'scripts/installer/ui'), { recursive: true });
+ await writeFile(join(root, 'scripts/installer/ui/index.html'), '<head></head>');
+ const draft = { name: 'User workspace', accountId: 'a'.repeat(32), prefix: 'user-workspace', prefixMode: 'automatic', appOrigin: 'https://user-workspace.actual.workers.dev', addressMode: 'automatic' };
+ await (await createState(root)).draft(draft);
+ assert.deepEqual((await createState(root)).state.draft, draft);
+ server = await startInstaller(root, { resume: true });
+ assert.deepEqual(server.state.draft, draft);
+ assert.equal(server.state.known.name, undefined); assert.equal(server.state.known.email, undefined);
+ assert.equal(server.state.draft.ownerName, undefined); assert.equal(server.state.draft.target, undefined); assert.equal(server.state.draft.primaryColor, undefined);
+ assert.deepEqual(validateAnswers({ prefix: 'chosen-name' }), { prefix: 'chosen-name', prefixMode: 'custom' });
+ assert.deepEqual(validateAnswers({ appOrigin: 'https://chosen.example', addressMode: 'automatic' }), { appOrigin: 'https://chosen.example', addressMode: 'automatic' });
+ assert.throws(() => validateAnswers({ addressMode: 'guess' }), /Invalid/);
+ await assert.rejects(startInstaller(root, { resume: true, noPrefill: true }), /cannot be combined/);
+ const page = await fetch(server.origin), html = await page.text();
+ const headers = { Cookie: page.headers.get('set-cookie').split(';')[0], 'X-Installer-Token': html.match(/content="([a-f0-9]+)"/)[1], 'Content-Type': 'application/json' };
+ assert.equal((await fetch(server.origin + '/api/address', { method: 'POST', headers, body: '{}' })).status, 403);
+ headers.Origin = server.origin;
+ const invalid = await fetch(server.origin + '/api/address', { method: 'POST', headers, body: JSON.stringify({ name: 'Safe', accountId: '../unsafe' }) });
+ assert.equal(invalid.status, 400); assert.equal((await invalid.json()).code, 'invalid_input');
+ assert.deepEqual(server.state.draft, draft);
+ console.log('Installer resume passed: exact saved answers/modes, no defaults, explicit override provenance, protected address endpoint.');
+} finally { await server?.close(); process.env.PATH = oldPath; await rm(root, { recursive: true, force: true }); }

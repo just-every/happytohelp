@@ -1,0 +1,261 @@
+// HappyToHelp dashboard design tokens.
+//
+// This is the Bootstrap configuration layer for the dashboard: it sets the
+// Bootstrap variables that differ from Bootstrap's defaults before Bootstrap's
+// own variables are imported. Workspace colours are applied at runtime through
+// CSS custom properties (see ../user/_site.scss and the layouts), so these
+// values are the neutral product palette and the type/spacing scale.
+
+// Palette ------------------------------------------------------------------
+
+$white: #FFFFFF;
+$gray-100: #F9FBFD;
+$gray-200: #EDF2F9;
+$gray-300: #E3EBF6;
+$gray-400: #D2DDEC;
+$gray-500: #B1C2D9;
+$gray-600: #95AAC9;
+$gray-700: #6E84A3;
+$gray-800: #3B506C;
+$gray-900: #283E59;
+$black: #12263F;
+
+$blue: #2C7BE5;
+$indigo: #727cf5;
+$purple: #6b5eae;
+$pink: #ff679b;
+$red: #E63757;
+$orange: #fd7e14;
+$yellow: #F6C343;
+$green: #00D97E;
+$teal: #02a8b5;
+$cyan: #39afd1;
+
+$primary: $blue;
+$secondary: $gray-700;
+$success: $green;
+$info: $cyan;
+$warning: $yellow;
+$danger: $red;
+$light: $gray-200;
+$dark: $black;
+
+// Buttons on light fills keep white text; the palette is light-leaning.
+$min-contrast-ratio: 1.75;
+$color-contrast-dark: $gray-900;
+$color-contrast-light: $white;
+
+// Behaviour switches --------------------------------------------------------
+
+$enable-smooth-scroll: false;
+$enable-rfs: false;
+$enable-validation-icons: false;
+$enable-negative-margins: true;
+
+// Spacing: a 1.5rem base with finer steps at the small end.
+$spacer: 1.5rem;
+$spacers: (
+  0: 0,
+  1: $spacer * .125,
+  2: $spacer * .25,
+  3: $spacer * .5,
+  4: $spacer,
+  5: $spacer * 1.5,
+  6: $spacer * 3,
+  7: $spacer * 4.5,
+  8: $spacer * 9,
+);
+
+// Body and links -------------------------------------------------------------
+
+$body-bg: $gray-100;
+$body-color: $black;
+$body-secondary-color: $gray-600;
+$body-secondary-bg: $gray-200;
+$body-tertiary-bg: $gray-100;
+$body-emphasis-color: $black;
+$link-color: $primary;
+$link-decoration: none;
+$link-hover-decoration: none;
+$border-color: $gray-300;
+$container-max-widths: (sm: 540px, md: 720px, lg: 960px, xl: 1140px);
+
+// Type -----------------------------------------------------------------------
+
+$font-family-sans-serif: 'Inter', Helvetica, Arial, sans-serif;
+$font-size-base: .9375rem;
+$font-size-sm: .8125rem;
+$font-size-lg: 1.0625rem;
+$font-weight-light: 400;
+$font-weight-bold: 600;
+$line-height-sm: 1.75;
+$line-height-lg: 1.5;
+
+$h1-font-size: 1.625rem;
+$h2-font-size: 1.25rem;
+$h3-font-size: 1.0625rem;
+$h4-font-size: .9375rem;
+$h5-font-size: .8125rem;
+$h6-font-size: .625rem;
+$headings-margin-bottom: 1.125rem;
+$headings-line-height: 1.1;
+$display-font-sizes: (1: 4rem, 2: 3.25rem, 3: 2.625rem, 4: 2rem);
+$display-font-weight: 600;
+$display-line-height: 1.1;
+$lead-font-size: $font-size-base * 1.25;
+$small-font-size: $font-size-sm;
+$hr-color: var(--bs-border-color);
+$hr-opacity: 1;
+$dt-font-weight: 600;
+$code-font-size: 87.5%;
+$code-color: $primary;
+$kbd-font-size: 87.5%;
+
+// Tables -------------------------------------------------------------------
+
+$table-cell-padding-y: 1rem;
+$table-cell-padding-x: 1rem;
+$table-cell-padding-y-sm: 1rem;
+$table-cell-padding-x-sm: 1rem;
+$table-bg: transparent;
+$table-border-color: var(--bs-gray-200);
+$table-hover-bg: var(--bs-gray-100);
+
+// Buttons and inputs --------------------------------------------------------
+
+$input-btn-padding-y: .5rem;
+$input-btn-font-size: $font-size-base;
+$input-btn-focus-width: .15rem;
+$input-btn-focus-box-shadow: none;
+$input-btn-padding-y-sm: .125rem;
+$input-btn-font-size-sm: $font-size-sm;
+$input-btn-padding-y-lg: .75rem;
+$input-btn-padding-x-lg: 1.25rem;
+$input-btn-font-size-lg: $font-size-base;
+$btn-focus-box-shadow: none;
+$btn-link-disabled-color: var(--bs-gray-500);
+
+$input-bg: $white;
+$input-disabled-bg: $white;
+$input-border-color: var(--bs-gray-400);
+$input-focus-bg: $white;
+$input-focus-border-color: var(--bs-primary);
+$input-focus-box-shadow: none;
+$input-placeholder-color: var(--bs-gray-500);
+$form-text-margin-top: 0;
+$form-text-font-size: $font-size-sm;
+
+$form-check-min-height: $font-size-base * 1.5;
+$form-check-padding-start: 1.5rem;
+$form-check-label-cursor: pointer;
+$form-check-input-bg: var(--bs-gray-300);
+$form-check-input-border: transparent;
+$form-check-input-border-radius: var(--bs-border-radius);
+$form-check-input-focus-border: transparent;
+$form-check-input-focus-box-shadow: none;
+$form-check-input-active-filter: none;
+$form-switch-color: $white;
+$form-switch-width: 3rem;
+$form-switch-padding-start: 3.5rem;
+$form-switch-border-radius: 3rem;
+$form-switch-focus-color: $white;
+
+$input-group-addon-color: var(--bs-secondary-color);
+$input-group-addon-bg: $white;
+$input-group-addon-border-color: var(--bs-gray-400);
+
+// Select chevron drawn for this product: a 9x5 open chevron.
+$form-select-indicator-color: $gray-600;
+$form-select-indicator: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 5' fill='none'><path d='M1 1l3.25 3.25L7.5 1' stroke='#{$form-select-indicator-color}' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+$form-select-indicator-padding: 1.75rem;
+$form-select-bg: $white;
+$form-select-disabled-bg: $white;
+$form-select-bg-size: .75em .75em;
+$form-select-border-color: var(--bs-gray-400);
+$form-select-focus-border-color: var(--bs-primary);
+$form-select-focus-box-shadow: none;
+
+// Navigation ---------------------------------------------------------------
+
+$nav-link-focus-box-shadow: 0 0;
+$nav-tabs-border-radius: 0;
+$nav-tabs-link-hover-border-color: transparent;
+$nav-tabs-link-active-color: var(--bs-body-color);
+$nav-tabs-link-active-bg: transparent;
+$nav-tabs-link-active-border-color: transparent transparent var(--bs-primary);
+$navbar-padding-y: .75rem;
+$navbar-padding-x: 1rem;
+$navbar-toggler-padding-x: 0;
+$navbar-toggler-focus-width: 0;
+$navbar-light-color: var(--bs-gray-700);
+$navbar-light-hover-color: var(--bs-black);
+$navbar-light-active-color: var(--bs-black);
+$navbar-light-toggler-border-color: transparent;
+
+// Menus, cards, overlays ---------------------------------------------------
+
+$caret-width: .25em;
+
+$dropdown-spacer: 0;
+$dropdown-font-size: $font-size-base;
+$dropdown-bg: var(--bs-white);
+$dropdown-border-color: rgba(var(--bs-black-rgb), .1);
+$dropdown-divider-bg: rgba(var(--bs-black-rgb), .1);
+$dropdown-divider-margin-y: .75rem;
+$dropdown-link-color: var(--bs-gray-700);
+$dropdown-link-hover-color: var(--bs-black);
+$dropdown-link-hover-bg: transparent;
+$dropdown-link-active-color: var(--bs-dropdown-link-hover-color);
+$dropdown-link-active-bg: var(--bs-dropdown-link-hover-bg);
+$dropdown-item-padding-y: .375rem;
+$dropdown-item-padding-x: 1.5rem;
+$dropdown-header-color: inherit;
+
+$card-spacer-y: 1.5rem;
+$card-spacer-x: 1.5rem;
+$card-border-color: var(--bs-gray-200);
+$card-border-radius: var(--bs-border-radius-lg);
+// Follows the card's own radius, so a card restyled to square corners has square caps.
+$card-inner-border-radius: calc(var(--bs-card-border-radius) - var(--bs-card-border-width));
+$card-box-shadow: 0 .75rem 1.5rem rgba(var(--bs-black-rgb), .03);
+$card-cap-padding-y: 1rem;
+$card-cap-bg: transparent;
+$card-bg: $white;
+
+$badge-font-size: 76%;
+$badge-font-weight: 400;
+$badge-padding-y: .33em;
+$badge-padding-x: .5em;
+
+$modal-inner-padding: 1.5rem;
+$modal-content-border-color: transparent;
+$modal-backdrop-bg: $black;
+$modal-header-padding-y: 1rem;
+$modal-header-padding-x: 1.5rem;
+$modal-header-padding: $modal-header-padding-y $modal-header-padding-x;
+$modal-md: 600px;
+
+$alert-padding-y: .75rem;
+$alert-padding-x: 1.25rem;
+$alert-margin-bottom: 1.5rem;
+$alert-link-font-weight: 400;
+
+$list-group-bg: transparent;
+$list-group-border-color: var(--bs-gray-200);
+$list-group-item-padding-y: 1rem;
+$list-group-item-padding-x: 1.25rem;
+$list-group-disabled-bg: transparent;
+$list-group-action-color: var(--bs-body-color);
+
+$btn-close-width: .5em;
+$btn-close-height: .5em;
+$btn-close-padding-x: .5em;
+$btn-close-padding-y: .5em;
+$btn-close-color: $black;
+
+$tooltip-font-size: $font-size-sm;
+$tooltip-color: var(--bs-black);
+$tooltip-bg: var(--bs-gray-300);
+$tooltip-opacity: 1;
+$tooltip-padding-y: .375rem;
+$tooltip-padding-x: .75rem;

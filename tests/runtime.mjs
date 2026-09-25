@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict'
+import {execFile} from 'node:child_process'
+import {promisify} from 'node:util'
+import {createRuntime} from './helpers/emitted-runtime.mjs'
+import {verifyCorsUploadRejections} from './helpers/runtime-cors.mjs'
+const runtime=await createRuntime();let success=false
+try{
+ const {origin}=runtime;const call=async(path,body,token,method=body===undefined?'GET':'POST',headers={})=>fetch(origin+path,{method,headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}) ,...headers},body:body===undefined?undefined:JSON.stringify(body)})
+ const health=await(await call('/health')).json();assert.equal(health.status,'ok');assert.equal(health.database,'reachable');assert.equal(health.files,'reachable')
+ const homepage=await call('/');assert.equal(homepage.status,200);const html=await homepage.text();assert.match(html,/HappyToHelp/i);assert.match(html,/<html/i);assert.doesNotMatch(html,/<h1>Foundation<\/h1>/)
+ assert.equal((await call('/api/identity/session')).status,401);assert.equal((await call('/api/management/bootstrap')).status,401)
+ const firstResponse=await call('/api/identity/bootstrap',{password:'test-setup-password-123',name:'Runtime project',email:'runtime-owner@example.com',allowedOrigin:origin});assert.equal(firstResponse.status,201);const first=await firstResponse.json();assert.equal((await call('/api/identity/password',{currentPassword:'test-setup-password-123',password:'runtime-fixture-password-123'},first.token)).status,200);assert.equal((await call('/api/identity/session',undefined,first.token)).status,401)
+ const loginResponse=await call('/api/identity/login',{email:'runtime-owner@example.com',password:'runtime-fixture-password-123'});assert.equal(loginResponse.status,200);assert.match(loginResponse.headers.get('Set-Cookie'),/HttpOnly/);const login=await loginResponse.json();const profile=await call('/api/identity/session',undefined,undefined,'GET',{Cookie:loginResponse.headers.get('Set-Cookie').split(';')[0]});assert.equal(profile.status,200)
+ // Development auto-login must not exist in the emitted Worker, even when
+ // every request header claims a same-origin loopback browser.
+ assert.equal((await call('/api/identity/local-owner-session',{},undefined,'POST',{Origin:origin,'Sec-Fetch-Site':'same-origin'})).status,404)
+ await verifyCorsUploadRejections(origin)
+ const secondResponse=await call('/api/management/projects',{name:'Second project',allowedOrigin:origin},login.token);assert.equal(secondResponse.status,201);const second=await secondResponse.json();const switchedResponse=await call('/api/identity/switch-project',{projectId:second.id},login.token);assert.equal(switchedResponse.status,200);const switched=await switchedResponse.json();assert.equal(switched.actor.projectId,second.id)
+ const outsider=await runtime.seedTenant({name:'Other tenant',email:'other-tenant@example.com',allowedOrigin:origin});assert.equal((await call('/api/identity/switch-project',{projectId:outsider.projectId},login.token)).status,403)
+ const projectResponse=await call('/api/identity/projects/'+first.projectId,undefined,login.token);assert.equal(projectResponse.status,200);const project=await projectResponse.json();const contactResponse=await call('/api/identity/widget/session',{widgetKey:project.widget_key},undefined,'POST',{Origin:origin});assert.equal(contactResponse.status,201);const contact=await contactResponse.json();const conversationResponse=await call('/api/conversations',{projectId:first.projectId},contact.token);assert.equal(conversationResponse.status,201);const conversation=await conversationResponse.json();const command={localId:'runtime-message',content:'Native emitted Worker durable message',expectedRevision:0};const sentResponse=await call(`/api/conversations/${conversation.id}/messages`,command,contact.token);assert.equal(sentResponse.status,200);const sent=await sentResponse.json();assert.equal(sent.accepted,true);assert.equal((await(await call(`/api/conversations/${conversation.id}/messages`,command,contact.token)).json()).duplicate,true);assert.equal((await call(`/api/conversations/${conversation.id}/messages`,undefined,outsider.token)).status,404);const transcript=await(await call(`/api/conversations/${conversation.id}/messages`,undefined,login.token)).json();assert.equal(transcript.messages.length,1);assert.equal(transcript.messages[0].content,command.content)
+ const retiredBilling=`/api/management/projects/${first.projectId}/billing`
+ for(const [path,method] of [[retiredBilling,'GET'],[retiredBilling+'/top-up','POST'],[retiredBilling+'/setup','POST'],[retiredBilling+'/portal','POST'],[retiredBilling+'/automated','PUT'],[retiredBilling+'/toggle','POST'],['/api/management/webhooks/stripe','POST']])assert.equal((await call(path,method==='GET'?undefined:{},login.token,method)).status,404,`${method} ${path}`)
+ const publicProof=await promisify(execFile)(process.execPath,['tests/public-site-runtime.mjs'],{env:{...process.env,H2H_TEST_ORIGIN:origin,H2H_TEST_PROJECT_ID:first.projectId}});console.log(publicProof.stdout.trim())
+ // Repeated unknown uploads exercise the workerd proxy/body-discard race. Each
+ // response must itself be 404; this loop never retries a failed request.
+ for (const method of ['POST','PUT']) for (const body of [undefined,{}]) for(let index=0;index<32;index++) {
+  const response=await call('/api/unknown-upload-route',body,undefined,method)
+  const text=await response.text()
+  assert.equal(response.status,404,`${method} unknown upload ${index}: ${text}`)
+ }
+ for(const path of ['/this-document-does-not-exist','/health/extra','/api','/api/this-route-does-not-exist'])assert.equal((await call(path)).status,404,path)
+ assert.equal((await call('/api/management/projects/'+first.projectId,undefined,login.token,'DELETE')).status,200);assert.equal((await call('/api/management/projects/'+second.id,undefined,switched.token,'DELETE')).status,200);const accountResponse=await call('/api/identity/login',{email:'runtime-owner@example.com',password:'runtime-fixture-password-123'});assert.equal(accountResponse.status,200);const account=await accountResponse.json();assert.equal(account.accountOnly,true);const restoredResponse=await call('/api/management/projects',{name:'Recreated project',allowedOrigin:origin},account.token);assert.equal(restoredResponse.status,201);const restored=await restoredResponse.json();assert.equal((await call('/api/identity/switch-project',{projectId:restored.id},account.token)).status,200)
+ console.log(`Native emitted runtime passed: ${runtime.migrationCount} fresh isolated migrations; D1/R2 health; self-hosted landing; bootstrap/password/login/cookie/revocation; project switching and last-project deletion/recreation; tenant/private denial; durable duplicate-safe message; API/document 404s. No provider configuration or shared state used.`);success=true
+}finally{await runtime.close(success)}

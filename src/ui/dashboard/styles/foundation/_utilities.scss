@@ -1,0 +1,33 @@
+// Utility classes the dashboard uses beyond Bootstrap's defaults:
+// `.text-gray-100` … `.text-gray-900` and `.fs-base` / `.fs-sm` / `.fs-lg`.
+
+$dashboard-text-grays: ();
+@each $step, $value in $grays {
+  $dashboard-text-grays: map-merge($dashboard-text-grays, ("gray-#{$step}": $value));
+}
+
+$utilities: map-merge(
+  $utilities,
+  (
+    "color": map-merge(
+      map-get($utilities, "color"),
+      (values: map-merge(map-get(map-get($utilities, "color"), "values"), $dashboard-text-grays))
+    ),
+    "font-size": map-merge(
+      map-get($utilities, "font-size"),
+      (values: map-merge(map-get(map-get($utilities, "font-size"), "values"), (base: $font-size-base, sm: $font-size-sm, lg: $font-size-lg)))
+    ),
+  )
+);
+
+// Soft badges and labels: state-coloured text on the state's subtle tint.
+@each $state, $value in $theme-colors {
+  .text-bg-#{$state}-subtle {
+    color: var(--bs-#{$state}) !important;
+    background-color: var(--bs-#{$state}-bg-subtle) !important;
+  }
+}
+
+.icon-md {
+  font-size: 1.1875rem !important;
+}

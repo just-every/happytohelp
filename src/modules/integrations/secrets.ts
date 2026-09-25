@@ -1,0 +1,6 @@
+import type {Env} from '../../platform/env'
+import {HTTPException} from 'hono/http-exception'
+const bytes=(value:string)=>Uint8Array.from(atob(value),c=>c.charCodeAt(0))
+async function key(env:Env){if(typeof env.INTEGRATION_ENCRYPTION_KEY!=='string')throw new HTTPException(503,{message:'Integration encryption key is not configured'});const raw=bytes(env.INTEGRATION_ENCRYPTION_KEY);if(raw.length!==32)throw new HTTPException(503,{message:'Integration encryption key must encode 32 bytes'});return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt'])}
+export async function encryptToken(env:Env,projectId:string,value:string){const iv=crypto.getRandomValues(new Uint8Array(12)),result=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:new TextEncoder().encode(projectId)},await key(env),new TextEncoder().encode(value));return btoa(String.fromCharCode(...iv))+'.'+btoa(String.fromCharCode(...new Uint8Array(result)))}
+export async function decryptToken(env:Env,projectId:string,value:string){const [iv,data]=value.split('.');return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(iv),additionalData:new TextEncoder().encode(projectId)},await key(env),bytes(data)))}

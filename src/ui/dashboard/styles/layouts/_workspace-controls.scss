@@ -1,0 +1,4 @@
+// Signed-in page controls are split by responsibility to keep visual tweaks
+// discoverable as the shared workspace grows.
+@import "workspace-controls-forms";
+@import "workspace-controls-actions";

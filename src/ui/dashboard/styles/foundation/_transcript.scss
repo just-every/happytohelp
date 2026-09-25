@@ -1,0 +1,81 @@
+// Message rows in a conversation transcript. A `.message` pairs an avatar with
+// a `.message-body` of bubbles (`.message-content`); `.message-right` mirrors
+// the row for the workspace's own replies. ../layouts/_conversation-transcript
+// refines the current transcript on top of this.
+
+.message {
+  display: flex;
+  align-items: flex-end;
+
+  + .message {
+    margin-top: 1rem;
+  }
+
+  .avatar,
+  .avatar > img {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .message-row + .message-row {
+    margin-top: .5rem;
+  }
+
+  // Visited page links stay on one line.
+  .pageview {
+    display: inline-block;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+}
+
+.message-body {
+  flex: 1;
+}
+
+.message-content {
+  display: inline-block;
+  padding: .75rem 1rem;
+  border-radius: $border-radius-lg $border-radius-lg $border-radius-lg 2px;
+  white-space: pre-line;
+
+  p {
+    margin: 0;
+  }
+
+  &.message-note {
+    background-color: rgb(242, 212, 156) !important;
+    border-color: rgb(242, 212, 156) !important;
+  }
+}
+
+.message-right {
+  .avatar {
+    order: 2;
+  }
+
+  .message-body {
+    order: 1;
+  }
+
+  .message-row .message-content {
+    border-radius: $border-radius-lg $border-radius-lg 2px $border-radius-lg;
+  }
+}
+
+@media (min-width: map-get($grid-breakpoints, lg)) {
+  .message-content {
+    max-width: 45%;
+  }
+}
+
+@media (min-width: map-get($grid-breakpoints, lg)) and (max-width: map-get($grid-breakpoints, xxl)) {
+  .sidebar-is-open .message-content {
+    max-width: 100%;
+  }
+}

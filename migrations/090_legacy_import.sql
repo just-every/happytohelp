@@ -1,0 +1,5 @@
+CREATE TABLE legacy_import_runs(id TEXT PRIMARY KEY,source_json TEXT NOT NULL,bundle_digest TEXT NOT NULL UNIQUE,state TEXT NOT NULL,created_at INTEGER NOT NULL,completed_at INTEGER);
+CREATE TABLE legacy_import_rows(run_id TEXT NOT NULL REFERENCES legacy_import_runs(id),source_table TEXT NOT NULL,source_id TEXT NOT NULL,row_digest TEXT NOT NULL,source_json TEXT NOT NULL,target_table TEXT,target_key TEXT,status TEXT NOT NULL,PRIMARY KEY(run_id,source_table,source_id));
+CREATE TABLE legacy_import_objects(run_id TEXT NOT NULL REFERENCES legacy_import_runs(id),object_key TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,PRIMARY KEY(run_id,object_key));
+CREATE TABLE legacy_import_holds(id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES legacy_import_runs(id),source_table TEXT NOT NULL,source_id TEXT NOT NULL,reason TEXT NOT NULL,resolved_at INTEGER);
+CREATE TABLE billing_usage_history(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,model TEXT,input_tokens INTEGER,output_tokens INTEGER,cost_decimal TEXT,currency TEXT NOT NULL,created_at INTEGER NOT NULL,source_json TEXT NOT NULL);

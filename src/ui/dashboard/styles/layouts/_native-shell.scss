@@ -1,0 +1,33 @@
+.native-shell {
+    .native-profile-toggle { display:flex; align-items:center; gap:9px; width:100%; padding:0; border:0; background:transparent; color:var(--conversation-nav-ink); text-align:left; }
+    .native-profile-avatar { position:relative; display:flex; align-items:center; justify-content:center; flex:0 0 40px; width:40px; height:40px; border-radius:10px; background:#b2e2ff; color:#394878; font-size:13px; }
+    .native-profile-avatar img { width:100%; height:100%; border-radius:inherit; object-fit:cover; }
+    .native-profile-status { position:absolute; right:2px; bottom:2px; width:8px; height:8px; border-radius:50%; background:#00d97e; }
+    .native-account-dropdown { right:0; left:auto; }
+    #sidebarUser .native-account-dropdown { bottom:calc(100% + 10px); top:auto; }
+    .navbar-workspace-menu { z-index:1050; }
+    #sidebarSettings[hidden] { display:none; }
+}
+@media(max-width:1199.98px) {
+    body .native-shell.navbar-vertical { min-height:71px; padding:15px 16px; }
+    body .native-shell.navbar-vertical > .container-fluid { display:flex; flex-wrap:wrap; gap:0; }
+    body .native-shell .navbar-workspace { flex:1; max-width:none; margin:0 24px; }
+    body .native-shell .navbar-workspace-toggle { width:100%; padding:0; }
+    body .native-shell .navbar-workspace-toggle img { width:28px; height:28px; }
+    body .native-shell .navbar-toggler { width:24px; padding:0; }
+    body .native-shell .navbar-user { margin:0; }
+    body .native-shell .navbar-collapse { flex-basis:100%; }
+    body:has(.native-shell) { --conversation-mobile-header-height:71px; }
+}
+.native-shell .native-extra-settings > summary { padding:10px 20px; color:var(--conversation-nav-muted); font-size:12px; cursor:pointer; }
+.native-shell .native-extra-settings > .nav { padding-top:0 !important; }
+.native-shell .native-global-contacts {
+    > summary { display:flex; align-items:center; gap:10px; padding:11px 10px; min-height:42px; border-radius:7px; color:var(--conversation-nav-ink); font-size:13px; font-weight:500; cursor:pointer; list-style:none; }
+    > summary::-webkit-details-marker { display:none; }
+    > summary > .fe { width:18px; font-size:18px; color:var(--conversation-nav-muted); }
+    > summary > span { flex:1; }
+    > summary > .fe:last-child { width:12px; font-size:12px; }
+    > summary:hover { background:var(--conversation-nav-hover); }
+    .nav-link { margin:0; padding:10px 16px; color:var(--conversation-nav-muted); font-size:12px; white-space:normal; }
+    .nav-link:hover { background:var(--conversation-nav-hover); color:var(--conversation-nav-ink); }
+}

@@ -1,0 +1,6 @@
+import { type Row,type LegacyBundle,type MappedRow,timestamp,text,stable } from './types'
+import {mapCore} from './map-core'
+import {mapKnowledge} from './map-knowledge'
+import {mapOperations} from './map-operations'
+export function mapLegacy(table:string,row:Row,bundle:LegacyBundle):MappedRow[]{return mapCore(table,row,bundle)??mapKnowledge(table,row,bundle)??mapOperations(table,row,bundle)??[]}
+export const tableOrder=['projects','users','project_users','memberships','ai_defaults','ais','ai_profiles','contacts','conversations','buckets','messages','notes','conversation_notes','conversation_participants','media','datasets','knowledge_datasets','dataset_files','knowledge_versions','knowledge_documents','categories','knowledge_categories','articles','knowledge_articles','article_categories','knowledge_article_categories','macros','plugins','context_subjects','collectors','collector_actions','context_evidence','context_profiles','context_insights','insights','collector_summaries','ai_generations','ai_attempts','ai_round_usage','local_agent_grants','local_grants','local_agent_devices','local_devices','support_delegations','local_jobs','support_delegation_events','local_events','training_runs','training_cases','billing_accounts','charges','billing_ledger','billing_operations','ai_usages','ai_usage']

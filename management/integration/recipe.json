@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "source": "just-every/happytohelp",
+  "variableNames": [
+    "EMAIL_PROVIDER",
+    "EMAIL_ACCOUNT_ID",
+    "RER_INSTALLATION_ID",
+    "RER_MANAGEMENT_ORIGIN",
+    "H2H_SETUP_OWNER_EMAIL",
+    "REGISTRATION_ENABLED",
+    "LEAD_MODEL",
+    "CONTEXT_MODEL",
+    "KNOWLEDGE_EMBEDDING_MODEL",
+    "QDRANT_URL",
+    "APIFY_CRAWLER_ACTOR_ID",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_PROJECT_ID",
+    "PREVIEW_ORIGIN",
+    "BRAND_IMAGE_MODEL",
+    "BRAND_IMAGE_SIZE",
+    "BRAND_IMAGE_QUALITY",
+    "TRAINING_PRICE_CEILINGS",
+    "ENABLE_SYNTHETIC_EVALUATION",
+    "RATE_LIMITS",
+    "AI_DAILY_CEILINGS"
+  ],
+  "secretNames": [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "GOOGLE_API_KEY",
+    "GEMINI_API_KEY",
+    "DEEPSEEK_API_KEY",
+    "XAI_API_KEY",
+    "OPENROUTER_API_KEY",
+    "APIFY_TOKEN",
+    "QDRANT_API_KEY",
+    "INTERCOM_TOKEN",
+    "FRESHDESK_TOKEN",
+    "ZENDESK_TOKEN",
+    "ZENDESK_EMAIL",
+    "EMAIL_API_KEY",
+    "EMAIL_FROM",
+    "INBOUND_EMAIL_TOKEN",
+    "INTEGRATION_ENCRYPTION_KEY",
+    "H2H_SETUP_TOKEN",
+    "GITHUB_CLIENT_SECRET",
+    "GITHUB_TOKEN",
+    "GITHUB_TOKENS",
+    "TURNSTILE_SECRET"
+  ],
+  "plan": {
+    "schema": 1,
+    "environment": "production",
+    "resources": [
+      {
+        "kind": "d1",
+        "binding": "DB",
+        "name": "rer-e1d8e552330911f9-prod-db"
+      },
+      {
+        "kind": "r2",
+        "binding": "FILES",
+        "name": "rer-e1d8e552330911f9-prod-files"
+      },
+      {
+        "kind": "queue",
+        "binding": "JOBS",
+        "name": "rer-e1d8e552330911f9-prod-jobs"
+      },
+      {
+        "kind": "queue",
+        "binding": "JOBS_DEAD_LETTER",
+        "name": "rer-e1d8e552330911f9-prod-jobs-dead"
+      }
+    ],
+    "migrations": [
+      {
+        "binding": "DB",
+        "name": "0001_identity.sql",
+        "sha256": "7da302790af3c65a9a3278f763530caa246855e0a44d0d993f7dcfaf691d961b",
+        "sql": "PRAGMA foreign_keys=ON;\nCREATE TABLE projects(id TEXT PRIMARY KEY,name TEXT NOT NULL,widget_key TEXT UNIQUE NOT NULL,allowed_origin TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE users(id TEXT PRIMARY KEY,email TEXT NOT NULL UNIQUE,name TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE memberships(project_id TEXT NOT NULL REFERENCES projects(id),user_id TEXT NOT NULL REFERENCES users(id),role TEXT NOT NULL CHECK(role IN ('owner','admin','operator')),PRIMARY KEY(project_id,user_id));\nCREATE TABLE contacts(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),name TEXT,email TEXT,external_id TEXT,created_at INTEGER NOT NULL,UNIQUE(project_id,external_id));\nCREATE TABLE sessions(token_hash TEXT PRIMARY KEY,actor_id TEXT NOT NULL,project_id TEXT NOT NULL REFERENCES projects(id),role TEXT NOT NULL CHECK(role IN ('owner','admin','operator','contact')),contact_id TEXT REFERENCES contacts(id),expires_at INTEGER NOT NULL,revoked_at INTEGER);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0002_conversations.sql",
+        "sha256": "cd2234540e10603d4affd62bd2dee96e3fd94674034d21ddbf8c2cc0d3e6724c",
+        "sql": "CREATE TABLE conversations(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),contact_id TEXT NOT NULL REFERENCES contacts(id),revision INTEGER NOT NULL DEFAULT 0,last_message_id TEXT,assigned_to TEXT,resolved_at INTEGER,created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);\nCREATE INDEX conversations_project ON conversations(project_id,updated_at);\nCREATE TABLE messages(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),conversation_id TEXT NOT NULL REFERENCES conversations(id),local_id TEXT NOT NULL,actor_id TEXT NOT NULL,actor_role TEXT NOT NULL,content TEXT NOT NULL,revision INTEGER NOT NULL,created_at INTEGER NOT NULL,UNIQUE(conversation_id,local_id),UNIQUE(conversation_id,revision));\nCREATE TABLE media(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,conversation_id TEXT NOT NULL REFERENCES conversations(id),uploaded_by TEXT NOT NULL,object_key TEXT UNIQUE NOT NULL,filename TEXT NOT NULL,content_type TEXT NOT NULL,size INTEGER NOT NULL,message_id TEXT REFERENCES messages(id),created_at INTEGER NOT NULL);\nCREATE TABLE conversation_outbox(id INTEGER PRIMARY KEY AUTOINCREMENT,project_id TEXT NOT NULL,conversation_id TEXT NOT NULL,message_id TEXT UNIQUE NOT NULL REFERENCES messages(id),created_at INTEGER NOT NULL,delivered_at INTEGER);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0003_identity_credentials.sql",
+        "sha256": "c049d65fccdd1f32b37ebb7ee68f4ac8bcdf9048339a04140b518045651bee9f",
+        "sql": "CREATE TABLE credentials(user_id TEXT PRIMARY KEY REFERENCES users(id),password_hash TEXT NOT NULL,updated_at INTEGER NOT NULL);\nCREATE TABLE identity_tokens(token_hash TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),project_id TEXT NOT NULL REFERENCES projects(id),email TEXT NOT NULL,role TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('invite','reset')),expires_at INTEGER NOT NULL,consumed_at INTEGER);\nCREATE TABLE login_attempts(key TEXT PRIMARY KEY,failures INTEGER NOT NULL,window_start INTEGER NOT NULL);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0004_message_intent.sql",
+        "sha256": "68940fa5b30c8ec71b88dedb7f934ef4c7e1b85e4d88fb80344e09dc6eb71fe0",
+        "sql": "ALTER TABLE messages ADD COLUMN intent_hash TEXT;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0005_widget_identity.sql",
+        "sha256": "c662a9b5c5753400471af2fffe8b8a37d5b53c2d27c9419c9b70caa45d4b3cdd",
+        "sql": "ALTER TABLE projects ADD COLUMN verification_secret TEXT;\nALTER TABLE contacts ADD COLUMN is_verified INTEGER NOT NULL DEFAULT 0;\nALTER TABLE contacts ADD COLUMN metadata_json TEXT NOT NULL DEFAULT '{}';\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0006_registration.sql",
+        "sha256": "9f9a04f6d4f0b8489688d3eada410efd9d6fb08c4228d936d0639c2f28e7b502",
+        "sql": "CREATE TABLE registrations(token_hash TEXT PRIMARY KEY,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,project_name TEXT NOT NULL,allowed_origin TEXT NOT NULL,expires_at INTEGER NOT NULL,consumed_at INTEGER);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0007_conversation_history.sql",
+        "sha256": "d6da31fdac779295a96081f9ac7f0e5c15c7d510a68d7386ac46ce81fe7b0fdc",
+        "sql": "CREATE TABLE conversation_buckets(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id),created_at INTEGER NOT NULL,metadata_json TEXT NOT NULL DEFAULT '{}');\nALTER TABLE messages ADD COLUMN bucket_id TEXT;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0008_account_sessions.sql",
+        "sha256": "01b7d035a483ffc46a16b8183e7364250f0befe0d2aa6e207957d4caf80bd6fc",
+        "sql": "CREATE TABLE sessions_account(token_hash TEXT PRIMARY KEY,actor_id TEXT NOT NULL,project_id TEXT REFERENCES projects(id),role TEXT NOT NULL CHECK(role IN ('owner','admin','operator','contact')),contact_id TEXT REFERENCES contacts(id),expires_at INTEGER NOT NULL,revoked_at INTEGER,CHECK(project_id IS NOT NULL OR (role='operator' AND contact_id IS NULL)));\nINSERT INTO sessions_account SELECT * FROM sessions;\nDROP TABLE sessions;\nALTER TABLE sessions_account RENAME TO sessions;\nCREATE TABLE identity_tokens_account(token_hash TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),project_id TEXT REFERENCES projects(id),email TEXT NOT NULL,role TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('invite','reset')),expires_at INTEGER NOT NULL,consumed_at INTEGER,CHECK(kind='reset' OR project_id IS NOT NULL));\nINSERT INTO identity_tokens_account SELECT * FROM identity_tokens;\nDROP TABLE identity_tokens;\nALTER TABLE identity_tokens_account RENAME TO identity_tokens;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0050_knowledge.sql",
+        "sha256": "a2a0fc51109e5af6737a0a2fd45abd9be95554259db2d6f1f33800043c077566",
+        "sql": "CREATE TABLE knowledge_datasets(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,name TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'empty',published_version TEXT,ingest_started_at INTEGER,ingest_cursor INTEGER NOT NULL DEFAULT -1,claim_token TEXT,source_input TEXT,error TEXT,refresh_mode TEXT NOT NULL DEFAULT 'manual',unchanged_count INTEGER NOT NULL DEFAULT 0,next_refresh_at INTEGER,last_refreshed_at INTEGER,created_at INTEGER NOT NULL);\nCREATE INDEX knowledge_datasets_project ON knowledge_datasets(project_id);\nCREATE TABLE knowledge_versions(id TEXT PRIMARY KEY,dataset_id TEXT NOT NULL REFERENCES knowledge_datasets(id) ON DELETE CASCADE, fingerprint TEXT NOT NULL,created_at INTEGER NOT NULL,semantic INTEGER NOT NULL DEFAULT 0,embedding_model TEXT);\nCREATE TABLE knowledge_documents(id TEXT PRIMARY KEY,version_id TEXT NOT NULL REFERENCES knowledge_versions(id) ON DELETE CASCADE,url TEXT NOT NULL,title TEXT NOT NULL,content TEXT NOT NULL);\nCREATE INDEX knowledge_documents_version ON knowledge_documents(version_id);\nCREATE TABLE knowledge_categories(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,parent_id TEXT REFERENCES knowledge_categories(id),name TEXT NOT NULL,slug TEXT NOT NULL,UNIQUE(project_id,slug));\nCREATE TABLE knowledge_articles(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,category_id TEXT REFERENCES knowledge_categories(id),slug TEXT NOT NULL,title TEXT NOT NULL,content TEXT NOT NULL,summary TEXT NOT NULL DEFAULT '',status TEXT NOT NULL CHECK(status IN ('draft','published')),updated_at INTEGER NOT NULL,UNIQUE(project_id,slug));\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0051_knowledge_authoring.sql",
+        "sha256": "49b144efebdb3e33cb2adad26c25dc31875e7da90e4fafc24b1fdf85a237f747",
+        "sql": "ALTER TABLE knowledge_datasets ADD COLUMN url TEXT;\nALTER TABLE knowledge_datasets ADD COLUMN excluded_urls TEXT NOT NULL DEFAULT '[]';\nALTER TABLE knowledge_datasets ADD COLUMN max_crawl_depth INTEGER NOT NULL DEFAULT 3;\nALTER TABLE knowledge_datasets ADD COLUMN max_crawl_pages INTEGER NOT NULL DEFAULT 100;\nALTER TABLE knowledge_categories ADD COLUMN summary TEXT NOT NULL DEFAULT '';\nALTER TABLE knowledge_categories ADD COLUMN is_published INTEGER NOT NULL DEFAULT 1;\nALTER TABLE knowledge_categories ADD COLUMN position INTEGER NOT NULL DEFAULT 0;\nALTER TABLE knowledge_articles ADD COLUMN position INTEGER NOT NULL DEFAULT 0;\nCREATE TABLE knowledge_article_categories(article_id TEXT NOT NULL REFERENCES knowledge_articles(id) ON DELETE CASCADE,category_id TEXT NOT NULL REFERENCES knowledge_categories(id) ON DELETE CASCADE,PRIMARY KEY(article_id,category_id));\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0052_knowledge_imports.sql",
+        "sha256": "bdba35642bb339146fe188221c04cc1f6b8ab18d94c6661c2c7da4cdd35fde0c",
+        "sql": "CREATE TABLE knowledge_imports(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,platform TEXT NOT NULL,status TEXT NOT NULL,cursor INTEGER NOT NULL DEFAULT 0,categories INTEGER NOT NULL DEFAULT 0,articles INTEGER NOT NULL DEFAULT 0,error TEXT,created_at INTEGER NOT NULL);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0053_knowledge_recovery.sql",
+        "sha256": "5182e65ab704555c956558a86c717008a652f176bf6b062099cce66c095bd9ca",
+        "sql": "ALTER TABLE knowledge_imports ADD COLUMN processing_started_at INTEGER;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0060_customer_context.sql",
+        "sha256": "8d1a31b7610a7cf20e0315d17c7b282d47a9a75b484d3d47496a233977cde748",
+        "sql": "CREATE TABLE context_subjects(project_id TEXT NOT NULL,subject_id TEXT NOT NULL,consent INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(project_id,subject_id));\nCREATE TABLE context_evidence(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,subject_id TEXT NOT NULL,source TEXT NOT NULL,content TEXT NOT NULL,visibility TEXT NOT NULL,occurred_at INTEGER NOT NULL,UNIQUE(project_id,subject_id,id));\nCREATE INDEX context_evidence_subject ON context_evidence(project_id,subject_id,occurred_at);\nCREATE TABLE context_profiles(project_id TEXT NOT NULL,subject_id TEXT NOT NULL,type TEXT NOT NULL,profile TEXT NOT NULL DEFAULT '{}',evidence_fingerprint TEXT,generated_count INTEGER NOT NULL DEFAULT 0,started_at INTEGER,PRIMARY KEY(project_id,subject_id,type));\nCREATE TABLE context_insights(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,subject_id TEXT NOT NULL,help_type TEXT NOT NULL,content TEXT NOT NULL,buttons TEXT NOT NULL,evidence_ids TEXT NOT NULL,created_at INTEGER NOT NULL,dismissed_at INTEGER);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0060_customer_context_engine.sql",
+        "sha256": "91c862ec5c331ccfc33e77033ff0759ad995c416fba1c38b64e4bc1dd21f9b39",
+        "sql": "ALTER TABLE context_subjects ADD COLUMN revision INTEGER NOT NULL DEFAULT 0;\nALTER TABLE context_subjects ADD COLUMN help_types TEXT NOT NULL DEFAULT '[]';\nALTER TABLE context_subjects ADD COLUMN bot_enabled INTEGER NOT NULL DEFAULT 1;\nCREATE TABLE context_collectors(project_id TEXT NOT NULL,subject_id TEXT NOT NULL,actions_count INTEGER NOT NULL DEFAULT 0,analysis_actions INTEGER NOT NULL DEFAULT 0,analysis_count INTEGER NOT NULL DEFAULT 0,analysis_since_insight INTEGER NOT NULL DEFAULT 0,job_id TEXT,last_run_at INTEGER,PRIMARY KEY(project_id,subject_id));\nCREATE TABLE context_actions(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,subject_id TEXT NOT NULL,local_id TEXT NOT NULL,action TEXT NOT NULL,occurred_at INTEGER NOT NULL,UNIQUE(project_id,subject_id,local_id));\nCREATE INDEX context_actions_subject ON context_actions(project_id,subject_id,occurred_at);\nCREATE TABLE context_summaries(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,subject_id TEXT NOT NULL,summary TEXT NOT NULL,evidence_ids TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE context_tracked_events(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,subject_id TEXT NOT NULL,local_id TEXT NOT NULL,type TEXT NOT NULL,payload TEXT NOT NULL,created_at INTEGER NOT NULL,UNIQUE(project_id,subject_id,local_id));\nCREATE TABLE context_jobs(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,subject_id TEXT NOT NULL,kind TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN ('queued','running','completed','no_op','failed','uncertain','superseded')),source_revision INTEGER NOT NULL,packet_json TEXT NOT NULL,model TEXT NOT NULL,created_at INTEGER NOT NULL,started_at INTEGER,finished_at INTEGER,result_json TEXT,error TEXT,provider_started INTEGER NOT NULL DEFAULT 0);\nCREATE UNIQUE INDEX context_one_job ON context_jobs(project_id,subject_id,kind) WHERE state IN ('queued','running','uncertain');\nCREATE TABLE context_job_events(id INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL REFERENCES context_jobs(id),kind TEXT NOT NULL,payload TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE context_write_guards(id TEXT PRIMARY KEY,result TEXT NOT NULL CHECK(result='ok'));\nCREATE TRIGGER context_evidence_added AFTER INSERT ON context_evidence BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_evidence_changed AFTER UPDATE ON context_evidence BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_evidence_removed AFTER DELETE ON context_evidence BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id AND subject_id=OLD.subject_id; END;\nCREATE TRIGGER context_action_added AFTER INSERT ON context_actions BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; UPDATE context_collectors SET actions_count=actions_count+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_consent_changed AFTER UPDATE OF consent,help_types,bot_enabled ON context_subjects BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_message_added AFTER INSERT ON messages BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND (subject_id IN (SELECT contact_id FROM conversations WHERE id=NEW.conversation_id AND project_id=NEW.project_id) OR subject_id=NEW.actor_id); END;\nCREATE TRIGGER context_profile_changed AFTER UPDATE OF profile ON context_profiles BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_summary_added AFTER INSERT ON context_summaries BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_insight_dismissed AFTER UPDATE OF dismissed_at ON context_insights BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_project_changed AFTER UPDATE OF name ON projects BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.id; END;\nCREATE TRIGGER context_knowledge_published AFTER UPDATE OF published_version ON knowledge_datasets BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;\nCREATE TRIGGER context_message_changed AFTER UPDATE OF content ON messages BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;\nCREATE TRIGGER context_message_removed AFTER DELETE ON messages BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id; END;\nCREATE TRIGGER context_insight_added AFTER INSERT ON context_insights BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_dataset_removed BEFORE DELETE ON knowledge_datasets BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id; END;\nCREATE TRIGGER context_document_changed AFTER UPDATE ON knowledge_documents BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id IN (SELECT project_id FROM knowledge_datasets WHERE published_version IN (OLD.version_id,NEW.version_id)); END;\nCREATE TRIGGER context_document_removed BEFORE DELETE ON knowledge_documents BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id IN (SELECT project_id FROM knowledge_datasets WHERE published_version=OLD.version_id); END;\nCREATE TRIGGER context_document_added AFTER INSERT ON knowledge_documents BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id IN (SELECT project_id FROM knowledge_datasets WHERE published_version=NEW.version_id); END;\nCREATE TRIGGER context_action_changed AFTER UPDATE ON context_actions BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_action_removed AFTER DELETE ON context_actions BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id AND subject_id=OLD.subject_id; END;\nCREATE TRIGGER context_summary_changed AFTER UPDATE ON context_summaries BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.subject_id; END;\nCREATE TRIGGER context_summary_removed AFTER DELETE ON context_summaries BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id AND subject_id=OLD.subject_id; END;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0070_management.sql",
+        "sha256": "46c36b150b3124d577472f73217359a60cba24c138309f2bfc386aaf5a39ef71",
+        "sql": "CREATE TABLE project_settings(project_id TEXT PRIMARY KEY REFERENCES projects(id), settings_json TEXT NOT NULL DEFAULT '{}',updated_at INTEGER NOT NULL);\nCREATE TABLE ai_profiles(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),name TEXT NOT NULL,role TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,is_enabled INTEGER NOT NULL DEFAULT 1,is_animated INTEGER NOT NULL DEFAULT 0,avatar_url TEXT,created_at INTEGER NOT NULL);\nCREATE TABLE macros(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),title TEXT NOT NULL,content TEXT NOT NULL,created_by TEXT NOT NULL REFERENCES users(id),created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);\nCREATE TABLE plugins(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),name TEXT NOT NULL,url TEXT NOT NULL,sort_order INTEGER NOT NULL DEFAULT 0,is_enabled INTEGER NOT NULL DEFAULT 1,created_at INTEGER NOT NULL);\nCREATE TABLE conversation_reads(conversation_id TEXT NOT NULL REFERENCES conversations(id),user_id TEXT NOT NULL,revision INTEGER NOT NULL,PRIMARY KEY(conversation_id,user_id));\nCREATE TABLE conversation_notes(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id),user_id TEXT NOT NULL REFERENCES users(id),content TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE conversation_participants(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id),contact_id TEXT NOT NULL REFERENCES contacts(id),created_at INTEGER NOT NULL,UNIQUE(conversation_id,contact_id));\nCREATE TABLE conversation_ai(conversation_id TEXT PRIMARY KEY REFERENCES conversations(id),ai_id TEXT REFERENCES ai_profiles(id));\nCREATE TABLE management_audit(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,actor_id TEXT NOT NULL,action TEXT NOT NULL,subject_id TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE user_settings(user_id TEXT PRIMARY KEY REFERENCES users(id),timezone TEXT NOT NULL DEFAULT 'UTC',avatar_url TEXT,is_notifiable_on_conversation_assignment INTEGER NOT NULL DEFAULT 1);\nCREATE TABLE platform_admins(user_id TEXT PRIMARY KEY REFERENCES users(id));\nCREATE TABLE ai_defaults(id TEXT PRIMARY KEY,role TEXT NOT NULL,name TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE TABLE leads(id TEXT PRIMARY KEY,name TEXT NOT NULL,email TEXT NOT NULL,website TEXT,created_at INTEGER NOT NULL);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0071_management_preferences.sql",
+        "sha256": "7e2d7c414da09724ba12762b5f5c1a57c9ffd13c887f8f7d43d574f7aa606133",
+        "sql": "CREATE TABLE user_project_preferences(project_id TEXT NOT NULL REFERENCES projects(id),user_id TEXT NOT NULL REFERENCES users(id),is_primary INTEGER NOT NULL DEFAULT 0,is_notified_on_unassigned_activity INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(project_id,user_id));\nCREATE UNIQUE INDEX user_primary_project ON user_project_preferences(user_id) WHERE is_primary=1;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0080_integrations.sql",
+        "sha256": "7a6b93b889bd665ca8d54901567d13187c1ac8e52a2b369d162b16ad99a6d926",
+        "sql": "CREATE TABLE email_settings(project_id TEXT PRIMARY KEY REFERENCES projects(id),from_name TEXT NOT NULL,from_address TEXT NOT NULL,inbound_address TEXT UNIQUE,is_enabled INTEGER NOT NULL DEFAULT 0,updated_at INTEGER NOT NULL);\nCREATE TABLE email_deliveries(id TEXT PRIMARY KEY,project_id TEXT,recipient TEXT NOT NULL,subject TEXT NOT NULL,intent_hash TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('sending','sent','failed','uncertain')),provider_id TEXT,error TEXT,created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);\nCREATE TABLE inbound_emails(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,conversation_id TEXT,intent_hash TEXT NOT NULL,state TEXT NOT NULL,error TEXT,created_at INTEGER NOT NULL);\nCREATE TABLE billing_accounts(project_id TEXT PRIMARY KEY REFERENCES projects(id),stripe_customer_id TEXT UNIQUE,currency TEXT NOT NULL DEFAULT 'usd',auto_top_up INTEGER NOT NULL DEFAULT 0,top_up_minor INTEGER,threshold_minor INTEGER);\nCREATE TABLE billing_ledger(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),kind TEXT NOT NULL,amount_minor INTEGER NOT NULL,currency TEXT NOT NULL,provider_id TEXT UNIQUE,created_at INTEGER NOT NULL);\nCREATE TABLE billing_operations(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,kind TEXT NOT NULL,state TEXT NOT NULL,response_json TEXT,error TEXT,created_at INTEGER NOT NULL);\nCREATE TABLE github_settings(project_id TEXT PRIMARY KEY REFERENCES projects(id),repositories_json TEXT NOT NULL DEFAULT '[]',allow_agents INTEGER NOT NULL DEFAULT 1,allow_contacts INTEGER NOT NULL DEFAULT 0,updated_at INTEGER NOT NULL);\nCREATE TABLE integration_events(id TEXT PRIMARY KEY,provider TEXT NOT NULL,event_type TEXT NOT NULL,created_at INTEGER NOT NULL);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0081_billing_receipts.sql",
+        "sha256": "3c2d1378c41569788eb305b6dc2bc4224f8aaefea165495c98f2e4c216396a3f",
+        "sql": "ALTER TABLE billing_operations ADD COLUMN intent_hash TEXT;\nALTER TABLE billing_operations ADD COLUMN request_json TEXT;\nALTER TABLE billing_operations ADD COLUMN provider_id TEXT;\nALTER TABLE billing_accounts ADD COLUMN default_payment_method TEXT;\nALTER TABLE billing_accounts ADD COLUMN auto_state TEXT NOT NULL DEFAULT 'idle';\nCREATE TABLE billing_webhook_receipts(id TEXT PRIMARY KEY,event_type TEXT NOT NULL,payload_hash TEXT NOT NULL,created_at INTEGER NOT NULL);\nALTER TABLE billing_accounts ADD COLUMN usd_conversion_rate REAL;\nUPDATE billing_accounts SET usd_conversion_rate=1 WHERE currency='usd';\nALTER TABLE billing_ledger ADD COLUMN amount_micros INTEGER;\nUPDATE billing_ledger SET amount_micros=amount_minor*10000;\nALTER TABLE billing_ledger ADD COLUMN receipt_url TEXT;\nALTER TABLE billing_ledger ADD COLUMN invoice_url TEXT;\nALTER TABLE billing_ledger ADD COLUMN provider_charge_id TEXT;\nCREATE TABLE billing_usage_receipts(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),attempt_id TEXT NOT NULL,request_id TEXT NOT NULL,state TEXT NOT NULL,provider_cost_micros INTEGER,currency TEXT NOT NULL,conversion_rate REAL,amount_micros INTEGER,usage_json TEXT,created_at INTEGER NOT NULL,UNIQUE(attempt_id,request_id));\nCREATE INDEX billing_usage_project_time ON billing_usage_receipts(project_id,created_at);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0082_github_oauth.sql",
+        "sha256": "66c4ef80397d8dcf77258510b4927c416bc8b989235217893df5eb5c72eeaf40",
+        "sql": "CREATE TABLE github_oauth_states(state_hash TEXT PRIMARY KEY,project_id TEXT NOT NULL,user_id TEXT NOT NULL,redirect_uri TEXT NOT NULL,expires_at INTEGER NOT NULL,consumed_at INTEGER);\nCREATE TABLE github_connections(project_id TEXT PRIMARY KEY REFERENCES projects(id),github_user_id TEXT NOT NULL,github_login TEXT NOT NULL,token_cipher TEXT NOT NULL,scopes TEXT NOT NULL,connected_at INTEGER NOT NULL);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0083_lead_operations.sql",
+        "sha256": "6c1451c89ae61ac600477043c70734896234d746b9fa760b386a06347963e2d2",
+        "sql": "ALTER TABLE leads ADD COLUMN source TEXT NOT NULL DEFAULT 'happytohelp';\nALTER TABLE leads ADD COLUMN status TEXT NOT NULL DEFAULT 'new';\nALTER TABLE leads ADD COLUMN subject TEXT;\nALTER TABLE leads ADD COLUMN content TEXT;\nALTER TABLE leads ADD COLUMN website_html TEXT;\nALTER TABLE leads ADD COLUMN error TEXT;\nALTER TABLE leads ADD COLUMN sent_at INTEGER;\nCREATE TABLE lead_jobs(id TEXT PRIMARY KEY,lead_id TEXT NOT NULL REFERENCES leads(id),state TEXT NOT NULL,provider_started INTEGER NOT NULL DEFAULT 0,usage_json TEXT,error TEXT,created_at INTEGER NOT NULL,started_at INTEGER,finished_at INTEGER);\nCREATE UNIQUE INDEX lead_one_job ON lead_jobs(lead_id) WHERE state IN ('queued','running','uncertain');\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0084_billing_project_usage.sql",
+        "sha256": "b6a438646b52e10aa266f124419227b0b658eb777a2c75bef5b3e667eb3e03f2",
+        "sql": "CREATE TABLE billing_project_usage_checkpoints(source TEXT NOT NULL,source_id TEXT NOT NULL,fingerprint TEXT NOT NULL,PRIMARY KEY(source,source_id));\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0085_ai_context_guards.sql",
+        "sha256": "df95fa831824db49ed5dfde6efd6ff0d99e3958e19bde723f3fa6478470c84d6",
+        "sql": "CREATE TRIGGER ai_note_added AFTER INSERT ON conversation_notes BEGIN UPDATE context_subjects SET revision=revision+1 WHERE (project_id,subject_id) IN (SELECT project_id,contact_id FROM conversations WHERE id=NEW.conversation_id); END;\nCREATE TRIGGER ai_note_changed AFTER UPDATE ON conversation_notes BEGIN UPDATE context_subjects SET revision=revision+1 WHERE (project_id,subject_id) IN (SELECT project_id,contact_id FROM conversations WHERE id IN (OLD.conversation_id,NEW.conversation_id)); END;\nCREATE TRIGGER ai_note_removed AFTER DELETE ON conversation_notes BEGIN UPDATE context_subjects SET revision=revision+1 WHERE (project_id,subject_id) IN (SELECT project_id,contact_id FROM conversations WHERE id=OLD.conversation_id); END;\nCREATE TRIGGER ai_contact_changed AFTER UPDATE OF name,email ON contacts BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id AND subject_id=NEW.id; END;\nCREATE TRIGGER ai_profile_configuration_changed AFTER UPDATE ON ai_profiles BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id IN (OLD.project_id,NEW.project_id); END;\nCREATE TRIGGER ai_project_settings_changed AFTER UPDATE ON project_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;\nCREATE TRIGGER ai_repository_settings_changed AFTER UPDATE ON github_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;\nCREATE TRIGGER ai_project_settings_added AFTER INSERT ON project_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;\nCREATE TRIGGER ai_project_settings_removed AFTER DELETE ON project_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id; END;\nCREATE TRIGGER ai_repository_settings_added AFTER INSERT ON github_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=NEW.project_id; END;\nCREATE TRIGGER ai_repository_settings_removed AFTER DELETE ON github_settings BEGIN UPDATE context_subjects SET revision=revision+1 WHERE project_id=OLD.project_id; END;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0095_public_site.sql",
+        "sha256": "1321928bd26a9e49fb090c54fbcbb34fe8db78008a8215856d3bf73efb1c48c7",
+        "sql": "CREATE TABLE public_waitlist (\n id TEXT PRIMARY KEY,\n name TEXT NOT NULL,\n email TEXT NOT NULL UNIQUE COLLATE NOCASE,\n website_url TEXT NOT NULL,\n created_at INTEGER NOT NULL,\n request_hash TEXT NOT NULL,\n notification_status TEXT NOT NULL DEFAULT 'not_configured'\n);\nCREATE INDEX public_waitlist_admission ON public_waitlist(request_hash,created_at);\nCREATE TABLE public_project_aliases (\n slug TEXT PRIMARY KEY,\n project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE\n);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0096_site_preview.sql",
+        "sha256": "a7113d8a6c510fd49df13dfe5f6989854540745b707ade14d2b76a352850d8e7",
+        "sql": "CREATE TABLE brand_generations(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),actor_id TEXT NOT NULL,request_id TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,size TEXT NOT NULL,quality TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('queued','running','ready','failed','uncertain')),asset_id TEXT,provider_request_id TEXT,usage_json TEXT,revised_prompt TEXT,error TEXT,created_at INTEGER NOT NULL,started_at INTEGER,completed_at INTEGER,expires_at INTEGER NOT NULL,UNIQUE(project_id,request_id));\nCREATE UNIQUE INDEX brand_one_active ON brand_generations(project_id) WHERE state IN('queued','running','uncertain');\nCREATE TABLE brand_assets(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),object_key TEXT NOT NULL UNIQUE,content_type TEXT NOT NULL,filename TEXT NOT NULL,created_by TEXT NOT NULL,created_at INTEGER NOT NULL,published_at INTEGER);\nCREATE TABLE preview_grants(token_hash TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),actor_id TEXT NOT NULL,target_origin TEXT NOT NULL,expires_at INTEGER NOT NULL,remaining_requests INTEGER NOT NULL DEFAULT 1000);\nALTER TABLE preview_grants ADD COLUMN public_demo INTEGER NOT NULL DEFAULT 0;\nCREATE TABLE preview_limits(key TEXT PRIMARY KEY,requests INTEGER NOT NULL,window_start INTEGER NOT NULL);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0097_owner_setup.sql",
+        "sha256": "fd6c371bc3b78cf2fbb41a69bb86467c7cd6cf257136f8ce0bd467d38d9be9d7",
+        "sql": "-- Retained independently of users so deletion cannot reopen first-owner setup.\nCREATE TABLE owner_setup (singleton INTEGER PRIMARY KEY CHECK(singleton=1), claim_id TEXT NOT NULL);\nINSERT INTO owner_setup SELECT 1,'existing-installation' WHERE EXISTS(SELECT 1 FROM users) OR EXISTS(SELECT 1 FROM projects);\n-- Imports and registration also close first-owner setup permanently.\nCREATE TRIGGER owner_setup_on_user AFTER INSERT ON users BEGIN\n INSERT INTO owner_setup(singleton,claim_id) VALUES(1,'existing-installation') ON CONFLICT(singleton) DO NOTHING;\nEND;\nCREATE TRIGGER owner_setup_on_project AFTER INSERT ON projects BEGIN\n INSERT INTO owner_setup(singleton,claim_id) VALUES(1,'existing-installation') ON CONFLICT(singleton) DO NOTHING;\nEND;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0098_personal_visual_inspiration.sql",
+        "sha256": "26a09d2287b9699769a3392d68ebf7a32d6eb49fee0878cd6c73b6bb02306bdf",
+        "sql": "ALTER TABLE user_settings ADD COLUMN visual_inspiration TEXT;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0099_personal_sidebar_artwork.sql",
+        "sha256": "4aaa6533722afb636e1600e1cbaf94a10dc0786164aaebc123a7addab9040e03",
+        "sql": "ALTER TABLE user_settings ADD COLUMN sidebar_artwork_id TEXT;\nALTER TABLE user_settings ADD COLUMN sidebar_artwork_enabled INTEGER NOT NULL DEFAULT 0 CHECK (sidebar_artwork_enabled IN (0,1));\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0100_inbound_email_claims.sql",
+        "sha256": "4f1e4e7f4b786c96aa810f08b11ac76075d1e4f28578cd9d887b138c3240e4e7",
+        "sql": "ALTER TABLE inbound_emails ADD COLUMN claim_token TEXT;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0101_email_mailbox_lifecycle.sql",
+        "sha256": "f07adc6af5f95671c6581ddac2e5befdfec105ac3599c6b8871e615e8cd8b09f",
+        "sql": "UPDATE project_settings\nSET settings_json=json_set(settings_json,'$.retired_inbound_address',(SELECT inbound_address FROM email_settings WHERE email_settings.project_id=project_settings.project_id),'$.mailbox_archived_at',json_extract(settings_json,'$.deleted_at')),updated_at=coalesce(json_extract(settings_json,'$.deleted_at'),updated_at)\nWHERE json_extract(settings_json,'$.deleted_at') IS NOT NULL\n  AND EXISTS(SELECT 1 FROM email_settings WHERE email_settings.project_id=project_settings.project_id AND inbound_address IS NOT NULL);\n\nUPDATE email_settings\nSET inbound_address=NULL,is_enabled=0,updated_at=coalesce((SELECT json_extract(settings_json,'$.deleted_at') FROM project_settings WHERE project_settings.project_id=email_settings.project_id),updated_at)\nWHERE project_id IN(SELECT project_id FROM project_settings WHERE json_extract(settings_json,'$.deleted_at') IS NOT NULL);\n\nCREATE UNIQUE INDEX IF NOT EXISTS email_settings_active_inbound_ci\nON email_settings(lower(inbound_address))\nWHERE is_enabled=1 AND inbound_address IS NOT NULL;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0102_public_abuse_limits.sql",
+        "sha256": "62bf0d01d4f96b3d2efc05603cf1c349346a03fdf28dbbf90caf25378503a6d5",
+        "sql": "CREATE TABLE abuse_counters(key TEXT PRIMARY KEY,window_start INTEGER NOT NULL,used INTEGER NOT NULL CHECK(used>=0),expires_at INTEGER NOT NULL);\nCREATE INDEX abuse_counters_expiry ON abuse_counters(expires_at);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0103_contact_erasure.sql",
+        "sha256": "623ab8ac6cb9d3da153b0259353a90ca18526d772eb18a3e8f91ea76ba243084",
+        "sql": "-- Erased message rows keep their identity, revision and frontier; only content is removed.\nALTER TABLE messages ADD COLUMN erased_at INTEGER;\n-- Non-identifying erasure audit: who requested it, when, and how many records were removed.\nCREATE TABLE contact_erasures(project_id TEXT NOT NULL,contact_id TEXT NOT NULL,erased_by TEXT NOT NULL,erased_at INTEGER NOT NULL,last_erased_at INTEGER NOT NULL,runs INTEGER NOT NULL DEFAULT 1,conversations INTEGER NOT NULL DEFAULT 0,messages INTEGER NOT NULL DEFAULT 0,attachments INTEGER NOT NULL DEFAULT 0,tracked_events INTEGER NOT NULL DEFAULT 0,context_records INTEGER NOT NULL DEFAULT 0,sessions INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(project_id,contact_id));\n-- Durable R2 deletion ledger: staged before objects are deleted, cleared by the atomic D1 erasure.\nCREATE TABLE contact_erasure_objects(project_id TEXT NOT NULL,contact_id TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('media','local_attachment')),source_id TEXT NOT NULL,object_key TEXT NOT NULL,PRIMARY KEY(project_id,contact_id,kind,source_id));\n"
+      },
+      {
+        "binding": "DB",
+        "name": "0104_inbound_email_classification.sql",
+        "sha256": "9659a267f1de1ab3eb4d87665aab70c320c0fa39370bec8f62b5cc05ec7fa7be",
+        "sql": "ALTER TABLE inbound_emails ADD COLUMN automatic INTEGER NOT NULL DEFAULT 0 CHECK (automatic IN (0,1));\nALTER TABLE inbound_emails ADD COLUMN evidence_json TEXT;\nALTER TABLE inbound_emails ADD COLUMN local_id TEXT;\nALTER TABLE inbound_emails ADD COLUMN message_id TEXT;\nCREATE INDEX IF NOT EXISTS inbound_emails_local ON inbound_emails(project_id,local_id);\n"
+      },
+      {
+        "binding": "DB",
+        "name": "020_ai_support.sql",
+        "sha256": "4ec50c2e9835942005996386397f8c88d4302e01e51d9d5d8ebf3172568e9a74",
+        "sql": "CREATE TABLE ai_generations (\n id TEXT PRIMARY KEY, project_id TEXT NOT NULL, conversation_id TEXT NOT NULL,\n state TEXT NOT NULL CHECK(state IN ('queued','running','completed','uncertain','cancelled','superseded','failed')),\n source_revision INTEGER NOT NULL, source_context_revision INTEGER NOT NULL DEFAULT 0, source_last_message_id TEXT, actor_json TEXT NOT NULL,\n model TEXT NOT NULL, ai_id TEXT NOT NULL, ai_profile_json TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'reply', instruction TEXT NOT NULL DEFAULT '', options_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL, updated_at TEXT NOT NULL, error TEXT, output_json TEXT\n);\nCREATE INDEX ai_generation_conversation ON ai_generations(project_id,conversation_id,state);\nCREATE TABLE ai_attempts (\n id TEXT PRIMARY KEY, generation_id TEXT NOT NULL REFERENCES ai_generations(id),\n state TEXT NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, error TEXT,\n UNIQUE(generation_id)\n);\nCREATE TABLE ai_round_usage (\n attempt_id TEXT NOT NULL REFERENCES ai_attempts(id), request_id TEXT NOT NULL,\n model TEXT, usage_json TEXT, observed INTEGER NOT NULL DEFAULT 0,\n PRIMARY KEY(attempt_id,request_id)\n);\n\nCREATE TABLE ai_attempt_events (\n id INTEGER PRIMARY KEY AUTOINCREMENT, attempt_id TEXT NOT NULL REFERENCES ai_attempts(id),\n type TEXT NOT NULL, event_json TEXT NOT NULL, created_at TEXT NOT NULL\n);\n\n"
+      },
+      {
+        "binding": "DB",
+        "name": "030_local_computer.sql",
+        "sha256": "8ff39ad08552aed3edb7edb485e74f6365d63386711d08c1ccc4409752978eb5",
+        "sql": "CREATE TABLE local_pairings (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, user_id TEXT NOT NULL, code_hash TEXT NOT NULL UNIQUE, expires_at TEXT NOT NULL, redeemed_at TEXT);\nCREATE TABLE local_grants (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, project_id TEXT, token_hash TEXT UNIQUE, revoked_at TEXT);\nCREATE TABLE local_authorizations (id TEXT PRIMARY KEY, device_hash TEXT NOT NULL UNIQUE, user_code TEXT NOT NULL UNIQUE, name TEXT NOT NULL, client_session_id TEXT NOT NULL, capabilities TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', user_id TEXT, expires_at TEXT NOT NULL);\nCREATE TABLE local_devices (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, project_id TEXT, grant_id TEXT REFERENCES local_grants(id), pairing_id TEXT, client_session_id TEXT, token_hash TEXT NOT NULL UNIQUE, name TEXT NOT NULL, provider TEXT NOT NULL, capabilities TEXT NOT NULL, max_concurrent_tasks INTEGER NOT NULL DEFAULT 3 CHECK(max_concurrent_tasks BETWEEN 1 AND 8), last_seen_at TEXT, worker_ready_at TEXT, worker_mode TEXT, revoked_at TEXT, UNIQUE(grant_id,client_session_id));\nCREATE TABLE local_device_settings (device_id TEXT NOT NULL REFERENCES local_devices(id), project_id TEXT NOT NULL, working_directories TEXT NOT NULL DEFAULT '[]', PRIMARY KEY(device_id,project_id));\nCREATE TABLE local_jobs (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, conversation_id TEXT NOT NULL, operator_id TEXT NOT NULL, device_id TEXT NOT NULL REFERENCES local_devices(id), request_id TEXT NOT NULL, mode TEXT NOT NULL CHECK(mode IN ('investigate','resolve','resolve_reply')), instructions TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued', claim_id TEXT, run_id TEXT, context TEXT, expected_last_message_id TEXT, session_id TEXT, result TEXT, cancel_requested INTEGER NOT NULL DEFAULT 0, delivery_state TEXT, parent_delegation_id TEXT, source_proposal_id TEXT, created_at TEXT NOT NULL, started_at TEXT, completed_at TEXT, UNIQUE(project_id,request_id), UNIQUE(device_id,claim_id));\nCREATE UNIQUE INDEX local_one_active_conversation ON local_jobs(project_id,conversation_id) WHERE status IN ('queued','running','needs_input');\nCREATE TABLE local_events (job_id TEXT NOT NULL REFERENCES local_jobs(id), event_id TEXT NOT NULL, kind TEXT NOT NULL, payload TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(job_id,event_id));\nCREATE TABLE local_attachments (id TEXT PRIMARY KEY, job_id TEXT NOT NULL REFERENCES local_jobs(id), device_id TEXT NOT NULL, storage_key TEXT NOT NULL, mime_type TEXT NOT NULL, filename TEXT NOT NULL, size INTEGER NOT NULL);\nCREATE TABLE local_receipts (job_id TEXT NOT NULL, proposal_id TEXT NOT NULL, kind TEXT NOT NULL, status TEXT NOT NULL, message_id TEXT, child_delegation_id TEXT, review_message TEXT, PRIMARY KEY(job_id,proposal_id,kind));\nCREATE TABLE local_attachment_grants (attachment_id TEXT NOT NULL REFERENCES local_attachments(id),job_id TEXT NOT NULL REFERENCES local_jobs(id),device_id TEXT NOT NULL,PRIMARY KEY(attachment_id,job_id));\nCREATE TABLE local_result_effects(job_id TEXT PRIMARY KEY REFERENCES local_jobs(id),event_id TEXT NOT NULL,payload TEXT NOT NULL,state TEXT NOT NULL DEFAULT 'pending');\n\nALTER TABLE local_receipts ADD COLUMN expected_revision INTEGER;\nALTER TABLE local_receipts ADD COLUMN expected_last_message_id TEXT;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "040_training_runs.sql",
+        "sha256": "548926008bbc4c6a6b013cd796c973d5aaabb13fc77f58b51bec7079f2a0f973",
+        "sql": "CREATE TABLE training_runs(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,operator_id TEXT NOT NULL,request_id TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('evaluation','simulation')),status TEXT NOT NULL DEFAULT 'queued',config TEXT NOT NULL,case_count INTEGER NOT NULL,max_cost REAL NOT NULL CHECK(max_cost>=0),max_tokens INTEGER NOT NULL CHECK(max_tokens>0),spent_cost REAL NOT NULL DEFAULT 0,reserved_cost REAL NOT NULL DEFAULT 0,created_at INTEGER NOT NULL,completed_at INTEGER,UNIQUE(project_id,request_id));\nCREATE TABLE training_cases(id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES training_runs(id),case_id TEXT NOT NULL,model TEXT NOT NULL,variant TEXT NOT NULL,definition TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'queued',attempt_id TEXT,output_key TEXT,checks TEXT,usage TEXT,error TEXT,started_at INTEGER,completed_at INTEGER,UNIQUE(run_id,case_id,model,variant));\nCREATE TABLE training_workspaces(project_id TEXT PRIMARY KEY REFERENCES projects(id),namespace TEXT NOT NULL UNIQUE,fixture_digest TEXT NOT NULL,seeded_at INTEGER NOT NULL,state TEXT NOT NULL DEFAULT 'planning');\nALTER TABLE training_cases ADD COLUMN lease_expires_at INTEGER;\n"
+      },
+      {
+        "binding": "DB",
+        "name": "041_training_model_usage.sql",
+        "sha256": "5e87e8ef2f581d86d09829a647c06b73b6931ec3c0c2400038913b571feb81a1",
+        "sql": "CREATE TABLE training_model_events(id INTEGER PRIMARY KEY AUTOINCREMENT,attempt_id TEXT NOT NULL,project_id TEXT NOT NULL,type TEXT NOT NULL,event_json TEXT NOT NULL,created_at INTEGER NOT NULL);\nCREATE INDEX training_model_event_attempt ON training_model_events(attempt_id,id);\nCREATE TABLE training_model_rounds(attempt_id TEXT NOT NULL,request_id TEXT NOT NULL,project_id TEXT NOT NULL,model TEXT,usage_json TEXT,observed INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(attempt_id,request_id));\n"
+      },
+      {
+        "binding": "DB",
+        "name": "090_legacy_import.sql",
+        "sha256": "4deaa980d50ee87df8d2eb6068db6bc353a50aa3ec82ea788da1de0a46198a07",
+        "sql": "CREATE TABLE legacy_import_runs(id TEXT PRIMARY KEY,source_json TEXT NOT NULL,bundle_digest TEXT NOT NULL UNIQUE,state TEXT NOT NULL,created_at INTEGER NOT NULL,completed_at INTEGER);\nCREATE TABLE legacy_import_rows(run_id TEXT NOT NULL REFERENCES legacy_import_runs(id),source_table TEXT NOT NULL,source_id TEXT NOT NULL,row_digest TEXT NOT NULL,source_json TEXT NOT NULL,target_table TEXT,target_key TEXT,status TEXT NOT NULL,PRIMARY KEY(run_id,source_table,source_id));\nCREATE TABLE legacy_import_objects(run_id TEXT NOT NULL REFERENCES legacy_import_runs(id),object_key TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,PRIMARY KEY(run_id,object_key));\nCREATE TABLE legacy_import_holds(id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES legacy_import_runs(id),source_table TEXT NOT NULL,source_id TEXT NOT NULL,reason TEXT NOT NULL,resolved_at INTEGER);\nCREATE TABLE billing_usage_history(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,model TEXT,input_tokens INTEGER,output_tokens INTEGER,cost_decimal TEXT,currency TEXT NOT NULL,created_at INTEGER NOT NULL,source_json TEXT NOT NULL);\n"
+      }
+    ],
+    "compatibilityDate": "2026-09-08",
+    "compatibilityFlags": [
+      "nodejs_compat"
+    ],
+    "durableObjects": [
+      {
+        "binding": "CONVERSATIONS",
+        "className": "ConversationSocket"
+      }
+    ],
+    "durableObjectMigrations": [
+      {
+        "tag": "v1",
+        "newSqliteClasses": [
+          "ConversationSocket"
+        ]
+      }
+    ],
+    "healthPath": "/health",
+    "schedules": [
+      "* * * * *"
+    ],
+    "queueConsumers": [
+      {
+        "binding": "JOBS",
+        "deadLetterBinding": "JOBS_DEAD_LETTER",
+        "maxBatchSize": 1,
+        "maxBatchTimeout": 5,
+        "maxRetries": 0
+      }
+    ],
+    "recovery": "Retain source, D1 backups and R2 objects. Preserve applied migration history and reconcile uncertain provider jobs before resuming. Restore data into separate resources and verify before switching traffic."
+  }
+}

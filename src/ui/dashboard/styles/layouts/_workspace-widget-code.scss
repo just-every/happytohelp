@@ -1,0 +1,98 @@
+// Adapted from the selected 12UI Code-tab layout to the existing workspace shell.
+body.workspace-page .widget-code {
+    display: grid;
+    gap: 24px;
+    min-width: 0;
+    color: var(--conversation-ink);
+    font-size: 13px;
+
+    &__section { min-width: 0; }
+    &__section-heading { margin: 0 0 8px; color: var(--conversation-ink); font-size: 14px; font-weight: 600; line-height: 1.4; }
+    &__section-heading h2 { margin: 0 0 8px; color: inherit; font: inherit; }
+    &__section-heading p { margin: 0 0 12px; color: var(--conversation-muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
+    &__section > p { margin: 0 0 12px; color: var(--conversation-muted); font-size: 12px; line-height: 1.5; }
+    &__secret-frame { display: grid; grid-template-columns: minmax(160px, .9fr) minmax(0, 1fr) auto; align-items: center; gap: 12px 16px; padding: 14px 16px; }
+    &__secret-name { color: inherit; font-size: 11px; overflow-wrap: anywhere; }
+    &__secret-value { min-width: 0; }
+    &__secret-value code { color: inherit; font-size: 12px; overflow-wrap: anywhere; }
+    &__secret-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    &__secret-note { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; color: var(--conversation-muted); font-size: 11px; line-height: 1.5; }
+    &__secret-note code { padding: 2px 5px; border-radius: 4px; color: var(--bs-primary); background: var(--workspace-primary-soft); font-size: 10px; }
+    &__secret-server-only { margin-left: auto; }
+
+    &__copy,
+    &__secret-action {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 8px 12px; border: 1px solid var(--conversation-line); border-radius: 7px;
+        background: var(--workspace-field-bg, #fff); color: var(--bs-primary);
+        font: inherit; font-size: 12px; font-weight: 500; white-space: nowrap;
+        &:hover { background: var(--workspace-primary-hover); }
+        &:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+        &:disabled { cursor: default; opacity: .55; }
+    }
+    &__secret-action { padding: 6px 0; border: 0; background: transparent; }
+    &__copy-feedback { color: var(--conversation-muted); font-size: 11px; }
+    &__copy-feedback:empty { display: none; }
+    // Code and the server secret share a dark surface in every appearance mode.
+    &__snippet,
+    &__secret-frame { min-width: 0; border: 1px solid #29292e; border-radius: 8px; background: #0d0d0f; color: #e4e4e7; color-scheme: dark; }
+    &__snippet { overflow: hidden; }
+    &__snippet pre { margin: 0; max-height: 360px; padding: 4px 16px 16px; overflow: auto; }
+    &__snippet code { display: block; padding: 0; background: transparent; color: #e4e4e7; font-size: 12px; line-height: 1.6; tab-size: 4; }
+    // Reset the inherited VS2015 tokens before applying one complete palette.
+    &__snippet code span { color: inherit; background: transparent; }
+    &__snippet-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; padding: 10px 12px; }
+    &__snippet-buttons { display: flex; align-items: center; gap: 6px; }
+    &__snippet .widget-code__copy,
+    &__secret-frame .widget-code__secret-action { padding: 6px 9px; border-color: transparent; background: transparent; color: #c9c9d0; }
+    &__snippet .widget-code__copy:hover,
+    &__secret-frame .widget-code__secret-action:hover { background: #26262b; color: #fff; }
+    &__snippet .widget-code__copy:focus-visible,
+    &__secret-frame .widget-code__secret-action:focus-visible { outline-color: #c4b5fd; }
+    &__snippet .widget-code__copy-feedback,
+    &__secret-frame .widget-code__copy-feedback { color: #b8b8c2; }
+    &__snippet .hljs-comment,
+    &__snippet .hljs-quote,
+    &__snippet .hljs-doctag { color: #9b9ba8; font-style: normal; }
+    &__snippet .hljs-keyword,
+    &__snippet .hljs-name,
+    &__snippet .hljs-literal,
+    &__snippet .hljs-selector-tag { color: #d8b4fe; }
+    &__snippet .hljs-string,
+    &__snippet .hljs-meta-string,
+    &__snippet .hljs-regexp { color: #9ed6ad; }
+    &__snippet .hljs-number,
+    &__snippet .hljs-symbol { color: #e7bc87; }
+    &__snippet .hljs-title,
+    &__snippet .hljs-built_in,
+    &__snippet .hljs-type,
+    &__snippet .hljs-attr,
+    &__snippet .hljs-attribute { color: #a7c7eb; }
+    &__languages { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; margin-bottom: 10px; border: 1px solid var(--conversation-line); border-radius: 8px; }
+    &__languages button { border: 0; border-radius: 5px; padding: 6px 14px; background: transparent; color: var(--conversation-muted); font: inherit; font-size: 12px; line-height: 1.4; }
+    &__languages button.is-active,
+    &__languages button[aria-selected=true] { color: var(--bs-primary); background: var(--workspace-primary-soft); }
+    &__languages button:hover { color: var(--bs-primary); background: var(--workspace-primary-hover); }
+    &__languages button:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 1px; }
+    &__metadata { min-width: 0; }
+    &__metadata summary { cursor: pointer; color: var(--conversation-ink); font-size: 13px; font-weight: 600; }
+    &__metadata > p { margin: 10px 0 12px; color: var(--conversation-muted); font-size: 12px; line-height: 1.5; }
+    &__metadata-content p { margin: 10px 0 12px; color: var(--conversation-muted); font-size: 12px; line-height: 1.5; }
+    &__metadata .widget-code__snippet { margin-top: 12px; }
+
+    @media (max-width: 991.98px) {
+        &__secret-frame { grid-template-columns: minmax(0, 1fr) auto; }
+        &__secret-name { grid-column: 1 / -1; }
+        &__secret-server-only { margin-left: 0; }
+    }
+    @media (max-width: 575.98px) {
+        &__secret-frame { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+        &__secret-actions { justify-content: space-between; }
+        &__secret-note { display: block; }
+        &__secret-server-only { display: block; margin-top: 8px; }
+        &__languages { display: flex; }
+        &__languages button { flex: 1 1 auto; padding: 6px 9px; }
+        &__snippet pre { padding: 4px 12px 12px; }
+        &__snippet-actions { padding: 8px; }
+    }
+}

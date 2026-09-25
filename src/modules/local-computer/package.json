@@ -1,0 +1,1 @@
+{"name":"@run-edit-run/local-computer","version":"0.1.0","private":true,"type":"module","exports":{".":"./index.ts","./edition":"./edition.ts"}}

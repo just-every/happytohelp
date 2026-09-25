@@ -1,0 +1,162 @@
+#happytohelp-root .happytohelp-chat-box {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  letter-spacing: 0.01em;
+  padding: 0.7rem 1rem;
+  list-style: none;
+  text-align: left;
+  display: inline-block;
+  border-radius: 0.5rem 0.5rem 0.5rem 2px;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 94%;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  top: 0;
+  transition: top 200ms ease-out;
+}
+#happytohelp-root .happytohelp-chat-box a, #happytohelp-root .happytohelp-chat-box h1, #happytohelp-root .happytohelp-chat-box h2, #happytohelp-root .happytohelp-chat-box h3, #happytohelp-root .happytohelp-chat-box h4, #happytohelp-root .happytohelp-chat-box h5 {
+  color: #000 !important;
+}
+#happytohelp-root .happytohelp-chat-box a {
+  text-decoration: underline;
+}
+#happytohelp-root .happytohelp-chat-box em {
+  font-style: italic;
+}
+#happytohelp-root .happytohelp-chat-box strong {
+  font-weight: 600;
+}
+#happytohelp-root .happytohelp-chat-box code {
+  font-family: monospace;
+  background: #444444;
+  color: #fff;
+  padding: 0px 2px;
+}
+#happytohelp-root .happytohelp-chat-box pre {
+  background: #444444;
+  padding: 9px 14px;
+  border-radius: 2px;
+  margin: 5px 0px;
+}
+#happytohelp-root .happytohelp-chat-box pre code {
+  background: transparent;
+  padding: 0px;
+}
+#happytohelp-root .happytohelp-chat-box p + pre {
+  margin-top: -10px;
+}
+#happytohelp-root .happytohelp-chat-box pre + p {
+  margin-top: -15px;
+}
+#happytohelp-root .happytohelp-chat-box ul, #happytohelp-root .happytohelp-chat-box ol {
+  margin: 0;
+  padding: 0;
+  white-space: normal;
+}
+#happytohelp-root .happytohelp-chat-box li {
+  padding: 0;
+  margin: 2px 0 2px 15px;
+  white-space: normal;
+  list-style: disc;
+}
+#happytohelp-root .happytohelp-chat-box li.task-list-item {
+  list-style: none;
+  margin-left: 0;
+}
+#happytohelp-root .happytohelp-chat-box li li {
+  list-style: circle;
+}
+#happytohelp-root .happytohelp-chat-box li + li {
+  margin-top: 0.8rem;
+}
+#happytohelp-root .happytohelp-chat-box ol li {
+  list-style: decimal;
+}
+#happytohelp-root .happytohelp-chat-box ol li li {
+  list-style: lower-roman;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local {
+  border-radius: 0.5rem 0.5rem 2px 0.5rem;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local a {
+  color: #fff !important;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local code {
+  background: #0070b1;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local pre {
+  background: #0070b1;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local pre code {
+  background: transparent;
+}
+#happytohelp-root .happytohelp-chat-box img {
+  display: block;
+  padding-top: 0.3rem;
+  max-width: 100%;
+}
+#happytohelp-root .happytohelp-chat-box img.happytohelp-preview {
+  cursor: zoom-in;
+}
+#happytohelp-root .happytohelp-chat-box img.happytohelp-preview-loading {
+  background: #f3f3f3;
+  min-height: 200px;
+  min-width: 300px;
+}
+#happytohelp-root .happytohelp-chat-box img + div.happytohelp-preview {
+  margin-top: 8px;
+}
+#happytohelp-root .happytohelp-chat-box img + .happytohelp-chat-message {
+  padding-top: 0.6rem;
+}
+#happytohelp-root .happytohelp-chat-box div.happytohelp-preview {
+  display: block;
+  padding: 5px 0 6px;
+}
+#happytohelp-root .happytohelp-chat-box div.happytohelp-preview + img.happytohelp-preview {
+  margin-top: 2px;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-image-only {
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: rgba(0, 0, 0, 0.0509803922) 0px 0px 0px 1px;
+  margin: 1px;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-image-only img {
+  padding: 0;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-image-only .happytohelp-chat-message {
+  display: none;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-has-content img:last-child {
+  padding-bottom: 8px;
+}
+#happytohelp-root .happytohelp-chat-message.happytohelp-chat-message-expanding {
+  overflow: hidden;
+  will-change: height;
+  position: relative;
+}
+#happytohelp-root .happytohelp-chat-message .happytohelp-chat-message-fade {
+  height: 70px;
+  width: 100%;
+  background: linear-gradient(0deg, rgb(241, 249, 255) 30%, rgba(241, 249, 255, 0) 100%);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+#happytohelp-root .happytohelp-chat-message .happytohelp-chat-message-fade.happytohelp-chat-message-fade-show {
+  opacity: 1;
+}
+
+/*# sourceMappingURL=ChatMessage.css.map */

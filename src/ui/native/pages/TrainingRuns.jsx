@@ -1,0 +1,19 @@
+import { useUnsavedChanges } from '../NavigationGuard';
+import { Link } from '@tanstack/react-router';
+import React, { useEffect, useState } from 'react';
+import { nativeRequest } from '../transport';
+import {PageHeaderTabs} from '../PageHeader';
+import { Field, Section, Feedback } from './forms';
+export default function TrainingRuns({ projectId }) {
+ const {markDirty,markSaved}=useUnsavedChanges();
+
+    const path=`/api/training/projects/${projectId}/runs`;
+    const [runs,setRuns]=useState([]),[error,setError]=useState(''),[draft,setDraft]=useState({kind:'evaluation',models:'',cases:'',variants:'',max_cost:0,max_tokens:0}),[selected,setSelected]=useState(null);
+    const load=()=>nativeRequest(path).then(r=>setRuns(r.data||r.runs||r)).catch(e=>setError(e.message));
+    useEffect(()=>{load();},[path]);
+    const change=(name,value)=>{markDirty();setDraft(d=>({...d,[name]:value}));};
+    const submit=async e=>{e.preventDefault();setError('');try{await nativeRequest(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...draft,request_id:crypto.randomUUID(),models:draft.models.split('\n').filter(Boolean),cases:JSON.parse(draft.cases),variants:draft.variants?JSON.parse(draft.variants):[]})});markSaved();await load();}catch(e){setError(e.message);}};
+    const inspect=async id=>{try{const result=await nativeRequest(`${path}/${id}`);setSelected(result.data||result);}catch(e){setError(e.message);}};
+    const cancel=async id=>{try{await nativeRequest(`${path}/${id}/cancel`,{method:'POST'});await inspect(id);await load();}catch(e){setError(e.message);}};
+    return <div className="workspace-settings"><PageHeaderTabs><ul className="nav nav-tabs header-tabs">{[['ais','AI'],['datasets','Training'],['training-runs','Evaluation runs']].map(([section,label])=><li className="nav-item" key={section}><Link className={`nav-link ${section==='training-runs'?'active':''}`} to={`/projects/${projectId}/${section}`}>{label}</Link></li>)}</ul></PageHeaderTabs><Feedback error={error}/><Section title="Training runs"><table className="table"><thead><tr><th>Run</th><th>Status</th><th>Cost</th></tr></thead><tbody>{runs.map(run=><tr key={run.id}><td><button className="btn btn-link" onClick={()=>inspect(run.id)}>{run.kind}</button></td><td>{run.status}</td><td>{run.cost ?? 'Not recorded'}</td></tr>)}</tbody></table></Section>{selected&&<Section title="Run details"><p>Status: {selected.status}</p><button className="btn btn-white" onClick={()=>cancel(selected.id)}>Cancel run</button>{selected.cases?.map(item=><article key={item.id}><h3>{item.name||item.id}</h3><p>{item.status}</p><a href={`${path}/${selected.id}/cases/${item.id}/artifact`}>Open retained artifact</a></article>)}</Section>}<form onSubmit={submit}><Section title="Start evaluation or simulation"><Field name="kind" label="Run type" value={draft.kind} options={['evaluation','simulation']} onChange={change}/><Field name="models" label="Models (one per line)" type="textarea" required value={draft.models} onChange={change}/><Field name="cases" label="Case definitions (JSON)" type="textarea" required value={draft.cases} onChange={change}/><Field name="variants" label="Variants (JSON)" type="textarea" value={draft.variants} onChange={change}/><div className="settings-grid"><Field name="max_cost" label="Maximum cost" type="number" value={draft.max_cost} onChange={change}/><Field name="max_tokens" label="Maximum tokens" type="number" value={draft.max_tokens} onChange={change}/></div></Section><button className="btn btn-primary">Create run</button></form></div>;
+}

@@ -1,0 +1,18 @@
+import type { Actor,Env } from '../../platform/env'
+export async function admitInsightPair(env:Env,input:{actor:Actor;conversationId:string;insightId:string;button:string;aiLocalId:string;contactLocalId:string;expectedRevision:number}){
+ const {actor,conversationId,insightId,button,aiLocalId,contactLocalId,expectedRevision}=input
+ if(actor.role!=='contact'||!actor.contactId||!aiLocalId||!contactLocalId||aiLocalId===contactLocalId||!Number.isSafeInteger(expectedRevision))throw new Error('Invalid insight command')
+ // The server-minted prefixes admission.ts reserves (reservedLocalId); kept inline so this module has no runtime imports.
+ if([aiLocalId,contactLocalId].some(localId=>/^(?:email|erased):/.test(localId)))throw Object.assign(new Error('Reserved local id prefix'),{status:400})
+ const insight=await env.DB.prepare('SELECT content,buttons FROM context_insights WHERE id=? AND project_id=? AND subject_id=? AND dismissed_at IS NULL').bind(insightId,actor.projectId,actor.contactId).first<{content:string;buttons:string}>();if(!insight)throw new Error('Insight not available')
+ const buttons=JSON.parse(insight.buttons) as unknown[];if(!buttons.some(value=>value===button||(value&&typeof value==='object'&&(value as {text?:string}).text===button)))throw new Error('Insight button not available')
+ const prior=await env.DB.prepare('SELECT * FROM messages WHERE conversation_id=? AND project_id=? AND local_id IN (?,?) ORDER BY revision').bind(conversationId,actor.projectId,aiLocalId,contactLocalId).all();if(prior.results.length){if(prior.results.length===2&&prior.results[0].local_id===aiLocalId&&prior.results[0].content===insight.content&&prior.results[1].local_id===contactLocalId&&prior.results[1].content===button&&prior.results[1].actor_id===actor.id)return {accepted:true,duplicate:true,messages:prior.results};return {accepted:false,reason:'local_id_conflict'}}
+ const aiId=crypto.randomUUID(),contactId=crypto.randomUUID(),now=Date.now()
+ await env.DB.batch([
+ env.DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) SELECT ?,c.project_id,c.id,?,'ai','ai',?,c.revision+1,? FROM conversations c JOIN contacts ct ON ct.id=c.contact_id WHERE c.id=? AND c.project_id=? AND c.contact_id=? AND c.revision=? AND COALESCE(json_extract(ct.metadata_json,'$.is_blocked'),0)!=1 AND EXISTS(SELECT 1 FROM context_insights WHERE id=? AND content=? AND buttons=? AND dismissed_at IS NULL) AND NOT EXISTS(SELECT 1 FROM messages WHERE conversation_id=c.id AND local_id IN (?,?))").bind(aiId,aiLocalId,insight.content,now,conversationId,actor.projectId,actor.contactId,expectedRevision,insightId,insight.content,insight.buttons,aiLocalId,contactLocalId),
+ env.DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) SELECT ?,project_id,conversation_id,?,?,'contact',?,revision+1,? FROM messages WHERE id=?").bind(contactId,contactLocalId,actor.id,button,now,aiId),
+ env.DB.prepare('UPDATE conversations SET revision=revision+2,last_message_id=?,resolved_at=NULL,updated_at=? WHERE id=? AND EXISTS(SELECT 1 FROM messages WHERE id=?)').bind(contactId,now,conversationId,contactId),
+ env.DB.prepare('INSERT INTO conversation_outbox(project_id,conversation_id,message_id,created_at) SELECT project_id,conversation_id,id,created_at FROM messages WHERE id IN (?,?) ORDER BY revision').bind(aiId,contactId)
+ ])
+ const messages=await env.DB.prepare('SELECT * FROM messages WHERE id IN (?,?) ORDER BY revision').bind(aiId,contactId).all();return messages.results.length===2?{accepted:true,duplicate:false,messages:messages.results}:{accepted:false,reason:'conversation_changed'}
+}

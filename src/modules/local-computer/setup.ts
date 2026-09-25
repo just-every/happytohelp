@@ -1,0 +1,5 @@
+import type {App} from './contracts';
+export function registerLocalSetup(app:App){
+ app.get('/api/local-agents/download',c=>c.redirect('/downloads/happytohelp-local-agent.tar.gz',302));
+ app.get('/api/local-agents/setup',c=>{const origin=new URL(c.req.url).origin;return c.json({data:{server:origin,download_url:origin+'/downloads/happytohelp-local-agent.tar.gz',runtime:'Node.js 20 or newer',pairing:'Create a one-use pairing code in Computers settings. Never put a device bearer in a browser URL.',commands:['tar -xzf happytohelp-local-agent.tar.gz','cd happytohelp-local-agent','npm install',`node bin/h2h-local.mjs connect --server ${JSON.stringify(origin)} --code YOUR_PAIRING_CODE --provider codex --name YOUR_DEVICE_NAME`,'node bin/h2h-local.mjs run'],modes:{direct:'Starts the explicitly selected Codex or Claude provider CLI.',mcp:'Uses an existing desktop MCP session and its native computer tools.',skill:'Use browser authorization from the active task; no separate provider process.'}}});});
+}

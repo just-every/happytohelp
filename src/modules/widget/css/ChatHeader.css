@@ -1,0 +1,329 @@
+#happytohelp-root .happytohelp-interact-container .happytohelp-close {
+  position: absolute;
+  z-index: 2147483620;
+  top: -10px;
+  right: -25px;
+  font-size: 23px;
+  cursor: pointer;
+  padding: 20px 36px 10px;
+  box-sizing: border-box;
+  display: none;
+  color: #333333;
+  transition: color 0.2s ease-in-out;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-close:hover {
+    color: #000000;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-close {
+    display: block;
+    transition: none !important;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+  border-radius: 0px;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container .happytohelp-chat-header {
+  border-radius: 0px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container .happytohelp-chat-header {
+    padding-right: 1.5rem;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container.happytohelp-thinking .happytohelp-chat-header-container {
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 5px 0px, rgba(255, 255, 255, 0.2) 0px 0px 10px 0px;
+  }
+  #happytohelp-root .happytohelp-interact-container.happytohelp-thinking .happytohelp-chat-header-container::after {
+    opacity: 1;
+    filter: blur(10px);
+    animation-play-state: running;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  border-top-left-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 1px 0px;
+  transition: box-shadow 1s ease-in-out, height 100ms ease-out;
+}
+@media (max-height: 400px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+    height: 0px !important;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+    border-top-left-radius: 0px;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 0px;
+  background: linear-gradient(45deg, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3, #00b2f4) repeat;
+  background-position: 0 0;
+  background-size: 200%;
+  animation: happytohelp-large-border 4s linear infinite;
+  opacity: 0;
+  filter: blur(0px);
+  transition: opacity 2s, filter 2s;
+  animation-play-state: paused;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-collapsed {
+  height: 90px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-collapsed {
+    height: 75px;
+    max-height: 75px;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-expanded {
+  transition: box-shadow 1s ease-in-out, height 300ms ease-out;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-expanded::after {
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header {
+  padding: 0 16px;
+  height: 90px;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: hidden;
+  border-top-left-radius: 8px;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+  justify-content: flex-start;
+}
+@media (max-height: 400px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header {
+    display: none;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header {
+    height: 75px;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header.happytohelp-chat-no-action {
+  cursor: default;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header:hover .happytohelp-chat-header-edit svg {
+    transform: scale(1.2);
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info {
+  font-size: 0.8em;
+  color: #b9b9b9;
+  line-height: 1.6em;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-seperator-tiny {
+  display: none;
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info {
+    color: #b9b9b9;
+    display: inline;
+    font-size: 0.9em;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info .happytohelp-insight-agent-seperator-tiny {
+    display: inline;
+    padding: 0 0.4rem;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit {
+  margin: 0 10px;
+  font-size: 21px;
+  color: #000;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit svg {
+  transition: transform 200ms;
+  transform: scale(1);
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit {
+    display: none;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
+  font-size: 16px;
+  color: #8a8a8a;
+  vertical-align: -0.1rem;
+  padding-left: 0.5rem;
+  display: none;
+  white-space: nowrap;
+  font-weight: normal;
+}
+@media (max-height: 600px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline {
+    display: inline;
+  }
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline {
+    display: none;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
+  vertical-align: -0.05rem;
+  padding-left: 0.7rem;
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
+    display: inline;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-ai-avatar-container {
+  flex-shrink: 0;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent {
+  font-size: 14px;
+  flex-grow: 1;
+  -webkit-font-smoothing: antialiased;
+  padding-left: 1.2rem;
+  transition: color 200ms;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-seperator {
+  padding: 0 6px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent {
+    flex-grow: 0;
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+  }
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-seperator {
+    display: none;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-role {
+    display: block;
+    font-size: 0.8em;
+    color: #b9b9b9;
+    line-height: 1.6em;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  gap: 1.4rem;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2.1rem 1.5rem 2.3rem;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-edit-inline {
+  padding-left: 0.8rem;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-desc-title {
+  flex-grow: 1;
+  padding: 0px 0px 0.5rem 0px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-desc-title {
+    flex-grow: 0;
+    padding: 0;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-edit {
+  margin-right: 2px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-edit {
+    display: none;
+  }
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc:hover .happytohelp-chat-header-edit svg {
+    transform: scale(1.2);
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent {
+  width: 100%;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 2rem;
+  background: #f5f6fb;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent:hover {
+    background: #b2e2ff;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  color: #002c46;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-info {
+  font-size: 0.8em;
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-seperator {
+    display: none;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-role {
+    display: block;
+    color: #002c46;
+    font-size: 0.8em;
+    line-height: 1em;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-info {
+    color: #a2aeb4;
+    font-size: 0.8em;
+    line-height: 1.6em;
+    display: inline;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-agent-avatar, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-ai-avatar, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-ai-avatar img {
+  height: 60px;
+  width: 60px;
+  font-size: 1.2em;
+  margin: 0;
+  border: none;
+  background: none !important;
+  color: #002c46;
+}
+
+/*# sourceMappingURL=ChatHeader.css.map */

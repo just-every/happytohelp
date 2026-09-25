@@ -1,0 +1,2782 @@
+@keyframes happytohelp-in-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes happytohelp-no-change {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes happytohelp-in-fade-light {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+@keyframes happytohelp-out-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes happytohelp-in-out-fade {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes happytohelp-in-zoom {
+  0% {
+    transform: translateY(40px) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes happytohelp-out-zoom {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(40px) scale(0.9);
+    opacity: 0;
+  }
+}
+@keyframes happytohelp-in-slide {
+  0% {
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+}
+@keyframes happytohelp-out-slide {
+  from {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+}
+@keyframes happytohelp-in-slide-large {
+  0% {
+    transform: translateY(30px) scale(0.99);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+}
+@keyframes happytohelp-out-slide-large {
+  from {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(15px) scale(0.99);
+    opacity: 0;
+  }
+}
+@keyframes happytohelp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes happytohelp-border {
+  0%, 100% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 300%;
+  }
+}
+@keyframes happytohelp-large-border {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+@keyframes happytohelp-blur {
+  0% {
+    filter: blur(6px);
+  }
+  45% {
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(10px);
+  }
+  75% {
+    filter: blur(6px);
+  }
+  100% {
+    filter: blur(6px);
+  }
+}
+@keyframes happytohelp-opacity {
+  0% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.7;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  body.happytohelp-active {
+    height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100);
+    max-height: 100vh !important;
+    max-height: calc(var(--vh, 1vh) * 100);
+    width: 100vw !important;
+    width: calc(var(--vw, 1vw) * 100);
+    max-width: 100vw !important;
+    max-width: calc(var(--vw, 1vw) * 100);
+    overflow: hidden !important;
+    touch-action: pan-y !important;
+  }
+}
+
+#happytohelp-root {
+  /* HTML5 display-role reset for older browsers */
+  all: revert;
+  opacity: 1;
+  transition: opacity 200ms ease;
+  will-change: opacity;
+  position: relative;
+  z-index: 2147483600;
+}
+#happytohelp-root html, #happytohelp-root body, #happytohelp-root div, #happytohelp-root span, #happytohelp-root applet, #happytohelp-root object, #happytohelp-root iframe,
+#happytohelp-root h1, #happytohelp-root h2, #happytohelp-root h3, #happytohelp-root h4, #happytohelp-root h5, #happytohelp-root h6, #happytohelp-root p, #happytohelp-root blockquote, #happytohelp-root pre,
+#happytohelp-root a, #happytohelp-root abbr, #happytohelp-root acronym, #happytohelp-root address, #happytohelp-root big, #happytohelp-root cite, #happytohelp-root code,
+#happytohelp-root del, #happytohelp-root dfn, #happytohelp-root em, #happytohelp-root img, #happytohelp-root ins, #happytohelp-root kbd, #happytohelp-root q, #happytohelp-root s, #happytohelp-root samp,
+#happytohelp-root small, #happytohelp-root strike, #happytohelp-root strong, #happytohelp-root sub, #happytohelp-root sup, #happytohelp-root tt, #happytohelp-root var,
+#happytohelp-root b, #happytohelp-root u, #happytohelp-root i, #happytohelp-root center,
+#happytohelp-root dl, #happytohelp-root dt, #happytohelp-root dd, #happytohelp-root ol, #happytohelp-root ul, #happytohelp-root li,
+#happytohelp-root fieldset, #happytohelp-root form, #happytohelp-root label, #happytohelp-root legend,
+#happytohelp-root table, #happytohelp-root caption, #happytohelp-root tbody, #happytohelp-root tfoot, #happytohelp-root thead, #happytohelp-root tr, #happytohelp-root th, #happytohelp-root td,
+#happytohelp-root article, #happytohelp-root aside, #happytohelp-root canvas, #happytohelp-root details, #happytohelp-root embed,
+#happytohelp-root figure, #happytohelp-root figcaption, #happytohelp-root footer, #happytohelp-root header, #happytohelp-root hgroup,
+#happytohelp-root menu, #happytohelp-root nav, #happytohelp-root output, #happytohelp-root ruby, #happytohelp-root section, #happytohelp-root summary,
+#happytohelp-root time, #happytohelp-root mark, #happytohelp-root audio, #happytohelp-root video, #happytohelp-root button, #happytohelp-root svg, #happytohelp-root path {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: revert;
+  color: revert;
+  font: revert;
+  letter-spacing: revert;
+  box-sizing: revert;
+  display: revert;
+}
+#happytohelp-root html:not(svg), #happytohelp-root body:not(svg), #happytohelp-root div:not(svg), #happytohelp-root span:not(svg), #happytohelp-root applet:not(svg), #happytohelp-root object:not(svg), #happytohelp-root iframe:not(svg),
+#happytohelp-root h1:not(svg), #happytohelp-root h2:not(svg), #happytohelp-root h3:not(svg), #happytohelp-root h4:not(svg), #happytohelp-root h5:not(svg), #happytohelp-root h6:not(svg), #happytohelp-root p:not(svg), #happytohelp-root blockquote:not(svg), #happytohelp-root pre:not(svg),
+#happytohelp-root a:not(svg), #happytohelp-root abbr:not(svg), #happytohelp-root acronym:not(svg), #happytohelp-root address:not(svg), #happytohelp-root big:not(svg), #happytohelp-root cite:not(svg), #happytohelp-root code:not(svg),
+#happytohelp-root del:not(svg), #happytohelp-root dfn:not(svg), #happytohelp-root em:not(svg), #happytohelp-root img:not(svg), #happytohelp-root ins:not(svg), #happytohelp-root kbd:not(svg), #happytohelp-root q:not(svg), #happytohelp-root s:not(svg), #happytohelp-root samp:not(svg),
+#happytohelp-root small:not(svg), #happytohelp-root strike:not(svg), #happytohelp-root strong:not(svg), #happytohelp-root sub:not(svg), #happytohelp-root sup:not(svg), #happytohelp-root tt:not(svg), #happytohelp-root var:not(svg),
+#happytohelp-root b:not(svg), #happytohelp-root u:not(svg), #happytohelp-root i:not(svg), #happytohelp-root center:not(svg),
+#happytohelp-root dl:not(svg), #happytohelp-root dt:not(svg), #happytohelp-root dd:not(svg), #happytohelp-root ol:not(svg), #happytohelp-root ul:not(svg), #happytohelp-root li:not(svg),
+#happytohelp-root fieldset:not(svg), #happytohelp-root form:not(svg), #happytohelp-root label:not(svg), #happytohelp-root legend:not(svg),
+#happytohelp-root table:not(svg), #happytohelp-root caption:not(svg), #happytohelp-root tbody:not(svg), #happytohelp-root tfoot:not(svg), #happytohelp-root thead:not(svg), #happytohelp-root tr:not(svg), #happytohelp-root th:not(svg), #happytohelp-root td:not(svg),
+#happytohelp-root article:not(svg), #happytohelp-root aside:not(svg), #happytohelp-root canvas:not(svg), #happytohelp-root details:not(svg), #happytohelp-root embed:not(svg),
+#happytohelp-root figure:not(svg), #happytohelp-root figcaption:not(svg), #happytohelp-root footer:not(svg), #happytohelp-root header:not(svg), #happytohelp-root hgroup:not(svg),
+#happytohelp-root menu:not(svg), #happytohelp-root nav:not(svg), #happytohelp-root output:not(svg), #happytohelp-root ruby:not(svg), #happytohelp-root section:not(svg), #happytohelp-root summary:not(svg),
+#happytohelp-root time:not(svg), #happytohelp-root mark:not(svg), #happytohelp-root audio:not(svg), #happytohelp-root video:not(svg), #happytohelp-root button:not(svg), #happytohelp-root svg:not(svg), #happytohelp-root path:not(svg) {
+  vertical-align: baseline;
+}
+#happytohelp-root article, #happytohelp-root aside, #happytohelp-root details, #happytohelp-root figcaption, #happytohelp-root figure,
+#happytohelp-root footer, #happytohelp-root header, #happytohelp-root hgroup, #happytohelp-root menu, #happytohelp-root nav, #happytohelp-root section {
+  display: block;
+}
+#happytohelp-root body {
+  line-height: 1;
+}
+#happytohelp-root ol, #happytohelp-root ul {
+  list-style: none;
+}
+#happytohelp-root blockquote, #happytohelp-root q {
+  quotes: none;
+}
+#happytohelp-root blockquote:before, #happytohelp-root blockquote:after,
+#happytohelp-root q:before, #happytohelp-root q:after {
+  content: "";
+  content: none;
+}
+#happytohelp-root table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+#happytohelp-root.happytohelp-screenshot {
+  opacity: 0 !important;
+}
+#happytohelp-root.happytohelp-opened .happytohelp-show-closed {
+  display: none;
+}
+#happytohelp-root.happytohelp-closed .happytohelp-show-opened {
+  display: none;
+}
+#happytohelp-root .happytohelp-bg {
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
+  height: 500px;
+  width: 500px;
+  z-index: 2147483602;
+  pointer-events: none;
+  background: radial-gradient(at right bottom, rgba(0, 0, 0, 0.19) 0px, rgba(0, 0, 0, 0) 70%);
+  transition: opacity 2s cubic-bezier(0.15, 0.99, 0.15, 1);
+  will-change: opacity, display;
+  opacity: 0;
+  display: none;
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-bg {
+  animation: happytohelp-no-change 2s;
+  display: block;
+  opacity: 0.4;
+}
+#happytohelp-root.happytohelp-opened .happytohelp-bg {
+  animation: happytohelp-no-change 2s;
+  display: block;
+  opacity: 1;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root.happytohelp-opened .happytohelp-bg {
+    display: none;
+  }
+}
+#happytohelp-root.happytohelp-closed .happytohelp-bg.happytohelp-in-complete {
+  display: block;
+  animation: happytohelp-no-change 0.5s;
+}
+
+#happytohelp-flash {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  height: calc(var(--vh) * 100);
+  width: 100vw;
+  width: calc(var(--vw, 1vw) * 100);
+  z-index: 2147483601;
+  background: rgba(255, 255, 255, 0.8);
+  animation: happytohelp-in-out-fade 1s ease forwards;
+}
+
+html.wf-sacramento-n4-active .happytohelp-title {
+  opacity: 1 !important;
+}
+
+#happytohelp-root .happytohelp-agent-avatar {
+  background: #b2e2ff;
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  display: block;
+  position: relative;
+}
+#happytohelp-root .happytohelp-agent-avatar.happytohelp-agent-avatar-initials {
+  -webkit-font-smoothing: antialiased;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-size: 1.1em;
+  font-weight: 600;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  line-height: 0;
+}
+#happytohelp-root .happytohelp-agent-avatar.happytohelp-agent-avatar-initials span {
+  letter-spacing: 0.05em;
+  margin-right: -0.05em;
+  margin-top: -0.04em;
+}
+#happytohelp-root .happytohelp-agent-avatar img {
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-agent-avatar {
+    height: 55px;
+    width: 55px;
+  }
+  #happytohelp-root .happytohelp-agent-avatar img {
+    height: 55px;
+    width: 55px;
+  }
+}
+#happytohelp-root .happytohelp-chat-group .happytohelp-agent-avatar {
+  height: 2.4rem;
+  width: 2.4rem;
+  border-radius: 50%;
+  margin: 0 9px 0 0;
+}
+#happytohelp-root .happytohelp-chat-group .happytohelp-agent-avatar img {
+  border-radius: 50%;
+  height: 2.4rem;
+  width: 2.4rem;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-chat-group .happytohelp-agent-avatar {
+    height: 2.2rem;
+    width: 2.2rem;
+  }
+  #happytohelp-root .happytohelp-chat-group .happytohelp-agent-avatar img {
+    height: 2.2rem;
+    width: 2.2rem;
+  }
+}
+
+#happytohelp-root .happytohelp-ai-avatar {
+  background: #b2e2ff;
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  display: block;
+  position: relative;
+}
+#happytohelp-root .happytohelp-ai-avatar img {
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  will-change: opacity;
+  z-index: 1;
+}
+#happytohelp-root .happytohelp-ai-avatar img.happytohelp-avatar-move {
+  opacity: 0.001;
+  z-index: 2;
+  transition-duration: 1s;
+}
+#happytohelp-root .happytohelp-ai-avatar.happytohelp-ai-avatar-animating img {
+  opacity: 0.001;
+  transition-duration: 1s;
+}
+#happytohelp-root .happytohelp-ai-avatar.happytohelp-ai-avatar-animating img.happytohelp-avatar-move {
+  opacity: 1;
+  transition-duration: 0.3s;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-ai-avatar {
+    height: 55px;
+    width: 55px;
+  }
+  #happytohelp-root .happytohelp-ai-avatar img {
+    height: 55px;
+    width: 55px;
+  }
+}
+#happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar {
+  height: 2.4rem;
+  width: 2.4rem;
+  border-radius: 50%;
+  margin: 0 9px 0 0;
+}
+#happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar img {
+  border-radius: 50%;
+  height: 2.4rem;
+  width: 2.4rem;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar {
+    height: 2.2rem;
+    width: 2.2rem;
+  }
+  #happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar img {
+    height: 2.2rem;
+    width: 2.2rem;
+  }
+}
+
+#happytohelp-root .happytohelp-shake {
+  animation: happytohelp-shake-keyframes 1s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes happytohelp-shake-keyframes {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+#happytohelp-root .happytohelp-button {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 2147483604;
+  will-change: opacity;
+  line-height: 60px;
+  text-align: center;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  border-radius: 50%;
+  padding: 0;
+  border: 0;
+  height: 60px;
+  width: 60px;
+  transform: scale(1);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 20px 0px, rgba(0, 0, 0, 0.05) 0px 2px 4px 0px;
+  cursor: pointer;
+  transition: background 0.02s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.2s ease-out 0s, color 0.2s ease-out 0s;
+}
+#happytohelp-root .happytohelp-button svg {
+  text-align: center;
+  display: block !important;
+  line-height: 60px;
+  opacity: 0;
+  margin: 0 auto;
+  position: absolute;
+  font-size: 25px;
+  left: 20px;
+  transform: rotate(0deg) scaleX(-1);
+  top: 18px;
+  will-change: opacity, transform;
+  display: none;
+  transition: opacity 0.3s ease 0s, transform 0.2s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-button svg.happytohelp-show-closed {
+  font-size: 26px;
+  top: 17px;
+  left: 16px;
+}
+#happytohelp-root .happytohelp-button .happytohelp-ai-avatar,
+#happytohelp-root .happytohelp-button .happytohelp-workspace-brand {
+  opacity: 0;
+}
+#happytohelp-root .happytohelp-button .happytohelp-workspace-brand {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 9px;
+}
+#happytohelp-root .happytohelp-button .happytohelp-workspace-brand img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-button {
+    bottom: 15px;
+    right: 15px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-button {
+    height: 55px;
+    width: 55px;
+    line-height: 55px;
+    bottom: 10px;
+    right: unset !important;
+    left: calc(100vw - 65px);
+    left: calc(var(--vw, 1vw) * 100 - 65px);
+  }
+  #happytohelp-root .happytohelp-button svg {
+    left: 18px;
+    top: 16px;
+  }
+  #happytohelp-root .happytohelp-button svg.happytohelp-show-closed {
+    font-size: 26px;
+    top: 15px;
+    left: 14px;
+  }
+}
+#happytohelp-root .happytohelp-button.happytohelp-button-transitioning {
+  transition: background 0.01s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.1s ease-in 0s, color 0.2s ease-out 0s !important;
+  transform: scale(0.4) !important;
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-button-transitioning svg, #happytohelp-root .happytohelp-button.happytohelp-button-transitioning .happytohelp-ai-avatar, #happytohelp-root .happytohelp-button.happytohelp-button-transitioning .happytohelp-workspace-brand {
+  opacity: 0 !important;
+  transition: opacity 0.1s ease-in-out 0s, transform 0.2s ease-out 0s !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar {
+  background: #fff !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar .happytohelp-ai-avatar,
+#happytohelp-root .happytohelp-button.happytohelp-avatar .happytohelp-workspace-brand {
+  opacity: 1;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar svg.happytohelp-show-closed {
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar.happytohelp-avatar-animated img {
+  opacity: 0.001;
+  transition-duration: 1s;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar.happytohelp-avatar-animated img.happytohelp-avatar-move {
+  opacity: 1;
+  transition-duration: 0.3s;
+}
+#happytohelp-root .happytohelp-button.happytohelp-workspace-brand-launcher {
+  background: #fff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+#happytohelp-root .happytohelp-button:focus-visible {
+  outline: 2px solid #2ca1e5;
+  outline-offset: 3px;
+}
+#happytohelp-root .happytohelp-button.happytohelp-icon svg {
+  opacity: 0.9;
+}
+#happytohelp-root .happytohelp-button.happytohelp-icon svg.happytohelp-show-opened {
+  opacity: 0;
+}
+#happytohelp-root .happytohelp-button.happytohelp-customize {
+  bottom: 46px;
+  right: 253px;
+  width: 140px;
+  padding-left: 30px;
+  background: transparent !important;
+  border: 1px solid #484748;
+  box-shadow: none;
+  color: #484748;
+  border-radius: 0px;
+  border-bottom-right-radius: 0.5rem;
+  transform: translateY(-60px);
+  opacity: 0;
+  transition: opacity 0.1s ease 0s, transform 0.1s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-button.happytohelp-customize.happytohelp-open {
+  transform: translateY(0px);
+  opacity: 0.2;
+  transition: opacity 0.4s ease 0.5s, transform 0.4s ease-in-out 0.5s;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-button.happytohelp-customize.happytohelp-open:hover {
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-button.happytohelp-customize svg {
+  top: 18px;
+  transform: scaleX(1);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-button:hover {
+    transition: background 0.01s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.2s ease-in-out 0.05s, color 0.2s ease-out 0s;
+    transform: scale(1.03);
+  }
+}
+#happytohelp-root .happytohelp-button:active {
+  transition: background 0.01s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.1s ease-in-out 0s, color 0.2s ease-out 0s;
+  transform: scale(0.9);
+}
+#happytohelp-root.happytohelp-opened .happytohelp-button {
+  transition: background 0.02s ease-in-out 0.01s, opacity 0.5s ease-out 0s, transform 0.2s ease-out 0s, color 0.2s ease-out 0s;
+}
+@media (hover) {
+  #happytohelp-root.happytohelp-opened .happytohelp-button:hover {
+    color: rgb(72, 71, 72);
+  }
+}
+#happytohelp-root.happytohelp-opened svg.happytohelp-show-closed {
+  opacity: 0 !important;
+  transform: scaleX(-0.5) scaleY(0.5) rotate(-5deg);
+}
+#happytohelp-root.happytohelp-opened .happytohelp-button svg.happytohelp-show-opened {
+  opacity: 1;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root.happytohelp-opened .happytohelp-button {
+    display: none;
+  }
+}
+#happytohelp-root.happytohelp-closed svg.happytohelp-show-opened {
+  opacity: 0 !important;
+  transform: scaleX(-0.9) scaleY(0.9) rotate(20deg);
+}
+
+#happytohelp-root .happytohelp-interact-container .happytohelp-close {
+  position: absolute;
+  z-index: 2147483620;
+  top: -10px;
+  right: -25px;
+  font-size: 23px;
+  cursor: pointer;
+  padding: 20px 36px 10px;
+  box-sizing: border-box;
+  display: none;
+  color: #333333;
+  transition: color 0.2s ease-in-out;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-close:hover {
+    color: #000000;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-close {
+    display: block;
+    transition: none !important;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+  border-radius: 0px;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container .happytohelp-chat-header {
+  border-radius: 0px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container .happytohelp-chat-header {
+    padding-right: 1.5rem;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container.happytohelp-thinking .happytohelp-chat-header-container {
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 5px 0px, rgba(255, 255, 255, 0.2) 0px 0px 10px 0px;
+  }
+  #happytohelp-root .happytohelp-interact-container.happytohelp-thinking .happytohelp-chat-header-container::after {
+    opacity: 1;
+    filter: blur(10px);
+    animation-play-state: running;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  border-top-left-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 1px 0px;
+  transition: box-shadow 1s ease-in-out, height 100ms ease-out;
+}
+@media (max-height: 400px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+    height: 0px !important;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
+    border-top-left-radius: 0px;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 0px;
+  background: linear-gradient(45deg, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3, #00b2f4) repeat;
+  background-position: 0 0;
+  background-size: 200%;
+  animation: happytohelp-large-border 4s linear infinite;
+  opacity: 0;
+  filter: blur(0px);
+  transition: opacity 2s, filter 2s;
+  animation-play-state: paused;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-collapsed {
+  height: 90px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-collapsed {
+    height: 75px;
+    max-height: 75px;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-expanded {
+  transition: box-shadow 1s ease-in-out, height 300ms ease-out;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-expanded::after {
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header {
+  padding: 0 16px;
+  height: 90px;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: hidden;
+  border-top-left-radius: 8px;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+  justify-content: flex-start;
+}
+@media (max-height: 400px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header {
+    display: none;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header {
+    height: 75px;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header.happytohelp-chat-no-action {
+  cursor: default;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header:hover .happytohelp-chat-header-edit svg {
+    transform: scale(1.2);
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info {
+  font-size: 0.8em;
+  color: #b9b9b9;
+  line-height: 1.6em;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-seperator-tiny {
+  display: none;
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info {
+    color: #b9b9b9;
+    display: inline;
+    font-size: 0.9em;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info .happytohelp-insight-agent-seperator-tiny {
+    display: inline;
+    padding: 0 0.4rem;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit {
+  margin: 0 10px;
+  font-size: 21px;
+  color: #000;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit svg {
+  transition: transform 200ms;
+  transform: scale(1);
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit {
+    display: none;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
+  font-size: 16px;
+  color: #8a8a8a;
+  vertical-align: -0.1rem;
+  padding-left: 0.5rem;
+  display: none;
+  white-space: nowrap;
+  font-weight: normal;
+}
+@media (max-height: 600px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline {
+    display: inline;
+  }
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline {
+    display: none;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
+  vertical-align: -0.05rem;
+  padding-left: 0.7rem;
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
+    display: inline;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-ai-avatar-container {
+  flex-shrink: 0;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent {
+  font-size: 14px;
+  flex-grow: 1;
+  -webkit-font-smoothing: antialiased;
+  padding-left: 1.2rem;
+  transition: color 200ms;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-seperator {
+  padding: 0 6px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent {
+    flex-grow: 0;
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+  }
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-seperator {
+    display: none;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-role {
+    display: block;
+    font-size: 0.8em;
+    color: #b9b9b9;
+    line-height: 1.6em;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  gap: 1.4rem;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2.1rem 1.5rem 2.3rem;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-edit-inline {
+  padding-left: 0.8rem;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-desc-title {
+  flex-grow: 1;
+  padding: 0px 0px 0.5rem 0px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-desc-title {
+    flex-grow: 0;
+    padding: 0;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-edit {
+  margin-right: 2px;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc .happytohelp-chat-header-edit {
+    display: none;
+  }
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-desc:hover .happytohelp-chat-header-edit svg {
+    transform: scale(1.2);
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent {
+  width: 100%;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 2rem;
+  background: #f5f6fb;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent:hover {
+    background: #b2e2ff;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  color: #002c46;
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-info {
+  font-size: 0.8em;
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-seperator {
+    display: none;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-role {
+    display: block;
+    color: #002c46;
+    font-size: 0.8em;
+    line-height: 1em;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-insight-agent .happytohelp-insight-agent-info {
+    color: #a2aeb4;
+    font-size: 0.8em;
+    line-height: 1.6em;
+    display: inline;
+  }
+}
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-agent-avatar, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-ai-avatar, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-title-agents .happytohelp-chat-header-agent .happytohelp-ai-avatar img {
+  height: 60px;
+  width: 60px;
+  font-size: 1.2em;
+  margin: 0;
+  border: none;
+  background: none !important;
+  color: #002c46;
+}
+
+#happytohelp-root .happytohelp-chat-list {
+  position: relative;
+  z-index: 2;
+  color: #666;
+  outline: none;
+  margin: 0px;
+  padding: 0px 10px 0px 8px;
+  box-sizing: content-box;
+}
+#happytohelp-root .happytohelp-chat-list + .happytohelp-send-message .happytohelp-message-input {
+  border-top-left-radius: 0px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-info-header {
+  font-size: 0.8em;
+  padding: 20px;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-info-header a {
+  text-decoration: none;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-chat-list .happytohelp-info-header a:hover {
+    text-decoration: underline;
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-info-header + .happytohelp-chat-group-time {
+  padding-top: 0px !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group-time {
+  font-size: 0.7em;
+  padding-top: 20px;
+  padding-bottom: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group-time + .happytohelp-chat-group .happytohelp-chat-agent-name {
+  padding-top: 0 !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-list-no-groups + .happytohelp-chat-agent, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-list-no-groups + .happytohelp-chat-local {
+  padding-top: 0 !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group {
+  align-items: flex-end;
+  display: flex;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group .happytohelp-chat-group-messages {
+  flex-grow: 1;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-local, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-local + .happytohelp-chat-agent, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-agent {
+  padding-top: 20px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-local .happytohelp-chat-group-time, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-local + .happytohelp-chat-agent .happytohelp-chat-group-time, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-agent .happytohelp-chat-group-time {
+  padding-top: 0 !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent {
+  box-sizing: border-box;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local:first-child .happytohelp-chat-group-time, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent:first-child .happytohelp-chat-group-time {
+  padding-top: 13px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent-name {
+  font-size: 0.7em;
+  padding: 0 0 3px 0;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-agent .happytohelp-chat-agent-name {
+  padding-top: 10px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-box-container {
+  padding-bottom: 9px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-box-container:last-child {
+  padding-bottom: 0;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local {
+  overflow: hidden;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local .happytohelp-chat-box-container {
+  text-align: right;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-clear {
+  height: 25px;
+}
+
+#happytohelp-root .happytohelp-chat-box {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  letter-spacing: 0.01em;
+  padding: 0.7rem 1rem;
+  list-style: none;
+  text-align: left;
+  display: inline-block;
+  border-radius: 0.5rem 0.5rem 0.5rem 2px;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 94%;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  top: 0;
+  transition: top 200ms ease-out;
+}
+#happytohelp-root .happytohelp-chat-box a, #happytohelp-root .happytohelp-chat-box h1, #happytohelp-root .happytohelp-chat-box h2, #happytohelp-root .happytohelp-chat-box h3, #happytohelp-root .happytohelp-chat-box h4, #happytohelp-root .happytohelp-chat-box h5 {
+  color: #000 !important;
+}
+#happytohelp-root .happytohelp-chat-box a {
+  text-decoration: underline;
+}
+#happytohelp-root .happytohelp-chat-box em {
+  font-style: italic;
+}
+#happytohelp-root .happytohelp-chat-box strong {
+  font-weight: 600;
+}
+#happytohelp-root .happytohelp-chat-box code {
+  font-family: monospace;
+  background: #444444;
+  color: #fff;
+  padding: 0px 2px;
+}
+#happytohelp-root .happytohelp-chat-box pre {
+  background: #444444;
+  padding: 9px 14px;
+  border-radius: 2px;
+  margin: 5px 0px;
+}
+#happytohelp-root .happytohelp-chat-box pre code {
+  background: transparent;
+  padding: 0px;
+}
+#happytohelp-root .happytohelp-chat-box p + pre {
+  margin-top: -10px;
+}
+#happytohelp-root .happytohelp-chat-box pre + p {
+  margin-top: -15px;
+}
+#happytohelp-root .happytohelp-chat-box ul, #happytohelp-root .happytohelp-chat-box ol {
+  margin: 0;
+  padding: 0;
+  white-space: normal;
+}
+#happytohelp-root .happytohelp-chat-box li {
+  padding: 0;
+  margin: 2px 0 2px 15px;
+  white-space: normal;
+  list-style: disc;
+}
+#happytohelp-root .happytohelp-chat-box li.task-list-item {
+  list-style: none;
+  margin-left: 0;
+}
+#happytohelp-root .happytohelp-chat-box li li {
+  list-style: circle;
+}
+#happytohelp-root .happytohelp-chat-box li + li {
+  margin-top: 0.8rem;
+}
+#happytohelp-root .happytohelp-chat-box ol li {
+  list-style: decimal;
+}
+#happytohelp-root .happytohelp-chat-box ol li li {
+  list-style: lower-roman;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local {
+  border-radius: 0.5rem 0.5rem 2px 0.5rem;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local a {
+  color: #fff !important;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local code {
+  background: #0070b1;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local pre {
+  background: #0070b1;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-local pre code {
+  background: transparent;
+}
+#happytohelp-root .happytohelp-chat-box img {
+  display: block;
+  padding-top: 0.3rem;
+  max-width: 100%;
+}
+#happytohelp-root .happytohelp-chat-box img.happytohelp-preview {
+  cursor: zoom-in;
+}
+#happytohelp-root .happytohelp-chat-box img.happytohelp-preview-loading {
+  background: #f3f3f3;
+  min-height: 200px;
+  min-width: 300px;
+}
+#happytohelp-root .happytohelp-chat-box img + div.happytohelp-preview {
+  margin-top: 8px;
+}
+#happytohelp-root .happytohelp-chat-box img + .happytohelp-chat-message {
+  padding-top: 0.6rem;
+}
+#happytohelp-root .happytohelp-chat-box div.happytohelp-preview {
+  display: block;
+  padding: 5px 0 6px;
+}
+#happytohelp-root .happytohelp-chat-box div.happytohelp-preview + img.happytohelp-preview {
+  margin-top: 2px;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-image-only {
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: rgba(0, 0, 0, 0.0509803922) 0px 0px 0px 1px;
+  margin: 1px;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-image-only img {
+  padding: 0;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-image-only .happytohelp-chat-message {
+  display: none;
+}
+#happytohelp-root .happytohelp-chat-box.happytohelp-chat-box-has-content img:last-child {
+  padding-bottom: 8px;
+}
+#happytohelp-root .happytohelp-chat-message.happytohelp-chat-message-expanding {
+  overflow: hidden;
+  will-change: height;
+  position: relative;
+}
+#happytohelp-root .happytohelp-chat-message .happytohelp-chat-message-fade {
+  height: 70px;
+  width: 100%;
+  background: linear-gradient(0deg, rgb(241, 249, 255) 30%, rgba(241, 249, 255, 0) 100%);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+#happytohelp-root .happytohelp-chat-message .happytohelp-chat-message-fade.happytohelp-chat-message-fade-show {
+  opacity: 1;
+}
+
+#happytohelp-root .happytohelp-chat-prompt {
+  margin: 0;
+  padding: 0;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-chat-box-prompt {
+  border: none;
+  border-radius: 0px;
+  margin: 20px 0px 0px 0px;
+  padding: 0px 0px 2px 1%;
+  background: #fff;
+  max-width: unset;
+  width: 98%;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-chat-box-prompt.happytohelp-chat-box-prompt-error {
+  color: #cb0000;
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-chat-box-prompt.happytohelp-chat-box-prompt-error input {
+  border: 1px solid #cb0000;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon {
+  position: relative;
+  margin-top: 10px;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon input {
+  padding-left: 48px !important;
+  border-radius: 4px;
+  width: 100%;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon svg {
+  position: absolute;
+  top: 12px;
+  left: 17px;
+  font-size: 14px;
+  color: #c7c8ce;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon svg.happytohelp-loading {
+  animation: happytohelp-spin 1s linear infinite;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt svg {
+  color: #cecece;
+  font-size: 16px;
+  left: 14px;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div {
+  position: absolute;
+  top: 15px;
+  left: 10px;
+  background: #cecece;
+  width: 5px;
+  height: 1px;
+  border-radius: 1px;
+  transform: rotate(30deg);
+  display: none;
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash2 {
+  top: 24px;
+  transform: rotate(-30deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash3 {
+  left: 33px;
+  transform: rotate(-30deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash4 {
+  left: 33px;
+  top: 24px;
+  transform: rotate(30deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash5 {
+  width: 4px;
+  left: 18px;
+  top: 9px;
+  transform: rotate(70deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash6 {
+  width: 4px;
+  left: 26px;
+  top: 9px;
+  transform: rotate(-70deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash7 {
+  width: 4px;
+  left: 18px;
+  top: 28px;
+  transform: rotate(-70deg);
+}
+#happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt div.happytohelp-prompt-dash8 {
+  width: 4px;
+  left: 26px;
+  top: 28px;
+  transform: rotate(70deg);
+}
+
+#happytohelp-root .happytohelp-chat-box-status {
+  display: block;
+  font-size: 0.7em;
+  padding-top: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  opacity: 0;
+  will-change: opacity;
+  transition: none;
+}
+#happytohelp-root .happytohelp-chat-box-status:first-letter {
+  text-transform: capitalize;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-agent {
+  padding-left: 46px;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-local {
+  text-align: right;
+  padding-right: 2px;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-failed {
+  color: #b70000;
+}
+#happytohelp-root .happytohelp-chat-box-status.happytohelp-chat-box-status-animate {
+  transition: opacity 600ms ease;
+  opacity: 0.4;
+}
+#happytohelp-root .happytohelp-chat-box-status .happytohelp-chat-box-status-progress {
+  height: 4px;
+  background-color: #f1f9ff;
+  width: 94%;
+  overflow: hidden;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 1px;
+}
+#happytohelp-root .happytohelp-chat-box-status .happytohelp-chat-box-status-progress div {
+  width: 50%;
+  height: 100%;
+  border-radius: 4px;
+  background-color: #2ca1e5;
+  animation: happytohelp-indeterminate-progress 2s infinite linear;
+  transform-origin: 0% 50%;
+}
+
+@keyframes happytohelp-indeterminate-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+#happytohelp-root .happytohelp-collect-customer {
+  background: #fff;
+  padding: 0.4rem 0.9rem;
+  position: relative;
+}
+#happytohelp-root .happytohelp-collect-customer .happytohelp-collect-customer-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 18px;
+  cursor: pointer;
+  z-index: 99;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-collect-customer .happytohelp-collect-customer-close:hover {
+    color: #000;
+  }
+}
+#happytohelp-root .happytohelp-collect-customer .happytohelp-collect-customer-prompt {
+  color: #333;
+  padding: 0px 0px 8px 0px;
+  font-size: 13px;
+}
+#happytohelp-root .happytohelp-collect-customer .happytohelp-collect-notify-email {
+  font-size: 0.8em;
+  color: #b9b9b9;
+}
+#happytohelp-root .happytohelp-collect-customer input {
+  width: 100%;
+  border-radius: 4px;
+  letter-spacing: 0.01em;
+  font-size: 13px !important;
+}
+#happytohelp-root .happytohelp-collect-customer .happytohelp-send-message-row.happytohelp-has-icon input {
+  padding-left: 48px !important;
+}
+#happytohelp-root .happytohelp-collect-customer .happytohelp-send-message-row.happytohelp-has-icon svg {
+  position: absolute;
+  top: 13px;
+  left: 17px;
+  font-size: 14px;
+  color: #c7c8ce;
+}
+#happytohelp-root .happytohelp-collect-customer .happytohelp-send-message-row.happytohelp-has-icon svg.happytohelp-loading {
+  animation: happytohelp-spin 1s linear infinite;
+}
+
+#happytohelp-modal-preview {
+  all: revert;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 2147483620;
+}
+#happytohelp-modal-preview .happytohelp-modal-preview-close {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  font-size: 23px;
+  cursor: pointer;
+  padding: 15px;
+  display: block;
+  color: #fff;
+}
+#happytohelp-modal-preview img, #happytohelp-modal-preview iframe {
+  max-width: 95%;
+  max-height: 95%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+#happytohelp-modal-preview iframe {
+  width: 95%;
+  height: 95%;
+  border: 0;
+  background: transparent;
+}
+
+#happytohelp-root .happytohelp-footer {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  width: clamp(430px, 50vw + 30px, 530px);
+  height: 85px;
+  z-index: 2147483603;
+  padding: 18px 0px;
+  box-sizing: border-box;
+  display: none;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-footer {
+    width: 515px;
+    height: 80px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-footer {
+    display: none !important;
+  }
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo {
+  opacity: 0.4;
+  font-size: 13px;
+  line-height: 20px;
+  display: inline-block;
+  margin: 0;
+  cursor: pointer;
+  font-family: "Quicksand", cursive;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  background-color: rgba(243, 243, 243, 0.7);
+  padding: 4px 12px 6px 2px;
+  border-radius: 25px;
+  color: #6d6e77;
+  transition: opacity 0.4s ease 0.1s, color 0.6s ease 0.1s, background-color 0.4s ease 0.1s;
+  will-change: opacity, background-color;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-pre {
+  font-weight: 400;
+  width: 0;
+  overflow: hidden;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: top;
+  transition: width 0.4s ease 0.1s;
+  box-sizing: content-box;
+  padding-left: 3px;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-post {
+  font-weight: 400;
+  width: 0;
+  overflow: hidden;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: top;
+  font-size: 13px;
+  padding-left: 2px;
+  transition: width 0.4s ease 0.1s;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-text {
+  font-family: "Quicksand", cursive;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-text strong {
+  font-weight: 600;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-icon {
+  width: 19px;
+  height: 19px;
+  display: inline-block;
+  position: relative;
+  margin: 0 6px;
+  vertical-align: middle;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-icon svg {
+  fill: #6d6e77;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 19px;
+  height: 19px;
+  transform: scaleX(1) scaleY(1) rotate(0deg);
+  will-change: fill, transform;
+  transition: fill 0.3s ease-in-out 0.05s, transform 0.3s ease-in-out 0.05s;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-icon svg.happytohelp-logo-circle-top {
+  transform: scaleX(1) scaleY(1) rotate(180deg);
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover {
+  opacity: 1;
+  background-color: #ffffff;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover .happytohelp-logo-pre {
+  width: 48px;
+  transition: width 0.5s ease-in-out 0.2s;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover .happytohelp-logo-post {
+  width: 6px;
+  transition: width 0.3s ease-in-out 0.5s;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg {
+  transition: fill 5s ease-in-out 1s, transform 0.6s ease-in-out 0.2s;
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg.happytohelp-logo-circle-top {
+  fill: #d83e6e;
+  transform: scaleX(1.15) scaleY(1.15) rotate(360deg);
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg.happytohelp-logo-circle-bottom {
+  fill: #5f57ca;
+  transform: scaleX(1.15) scaleY(1.15) rotate(180deg);
+}
+#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg.happytohelp-logo-smile {
+  fill: #5f57ca;
+  transform: scaleX(1.2) scaleY(1.2) rotate(0deg);
+}
+
+#happytohelp-root .happytohelp-insight-container {
+  position: fixed;
+  bottom: 100px;
+  right: 60px;
+  width: 365px;
+  z-index: 2147483605;
+  box-sizing: border-box;
+  max-height: calc(100vh - 114px);
+  max-height: calc(var(--vh) * 100 - 114px);
+  text-align: left;
+  line-height: 1.45em;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  font-size: 1em;
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-insight-container {
+    bottom: 90px;
+    right: 50px;
+  }
+}
+@media (max-width: 800px) {
+  #happytohelp-root .happytohelp-insight-container {
+    right: 25px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-insight-container {
+    bottom: 75px;
+    right: 15px;
+  }
+}
+@media (max-width: 415px) {
+  #happytohelp-root .happytohelp-insight-container {
+    left: 0px;
+    right: unset;
+    width: 100%;
+    padding: 0 0.5rem;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-content {
+    padding: 0.8rem 1.3rem !important;
+    border-radius: 0.5rem !important;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-button-container:first-child {
+    margin-top: 1.2rem !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-close {
+  position: absolute;
+  top: -0.6em;
+  right: -0.6em;
+  cursor: pointer;
+  font-size: 1em;
+  transform: scale(1);
+  transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  will-change: opacity, color, box-shadow, transform;
+  border-radius: 50%;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+  z-index: 1;
+  padding: 0.2em;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 5px 0px;
+  color: rgba(0, 0, 0, 0.15) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@media (max-width: 415px) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-close {
+    right: 0.5em;
+    top: -1.8em;
+    color: rgba(0, 0, 0, 0.2) !important;
+  }
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-close:hover {
+    color: rgba(0, 0, 0, 0.8) !important;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 5px 0px;
+    transform: scale(1.25) !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-close svg {
+  vertical-align: revert;
+  height: 16px;
+}
+#happytohelp-root .happytohelp-insight-container.happytohelp-insight-container-hover .happytohelp-insight-close {
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight {
+  position: relative;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight a {
+  color: #333;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight strong {
+  font-weight: 700;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content {
+  padding: 1rem 2rem;
+  border-radius: 0.5rem 0.5rem 2px 0.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-y: scroll;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 10px 0px;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content::after {
+  border-radius: 0.5rem 0.5rem 2px 0.5rem;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content.happytohelp-insight-no-glow {
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 10px 0px, rgba(0, 0, 0, 0.3) 0px 0px 2px 0px;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight .happytohelp-insight-content p + p {
+  padding-top: 1em;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3);
+  background-size: 200%;
+  animation: happytohelp-border 8s linear infinite;
+  opacity: 0.4;
+  filter: blur(3px);
+  transition: opacity 2s, filter 2s;
+  animation-play-state: paused;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow.happytohelp-insight-glow-hover::after {
+  transition: opacity 1s, filter 1s;
+  filter: blur(0px);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow.happytohelp-insight-glow-hover:hover::after {
+    transition: opacity 0.3s, filter 0.3s 0.1s;
+    opacity: 0.8 !important;
+    filter: blur(6px) !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-has-glow.happytohelp-insight-glow-hover:active::after {
+  transition: opacity 0.05s, filter 0.1s;
+  opacity: 1 !important;
+  filter: blur(10px) !important;
+  animation-play-state: running;
+}
+#happytohelp-root .happytohelp-insight-container.happytohelp-insight-show-glow .happytohelp-insight-content.happytohelp-insight-has-glow::after {
+  transition: opacity 0.3s, filter 0.3s;
+  opacity: 1 !important;
+}
+#happytohelp-root .happytohelp-insight-container.happytohelp-insight-move-glow .happytohelp-insight-content.happytohelp-insight-has-glow::after {
+  filter: blur(8px);
+  animation-play-state: running;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container {
+  width: 100%;
+  box-sizing: content-box;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease-in-out 1s;
+  will-change: grid-template-rows;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons {
+  display: flex;
+  overflow-y: hidden;
+  gap: 1.2rem;
+  box-sizing: border-box;
+  width: calc(100% + 4rem);
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 2rem;
+  margin: 0 -2rem;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container {
+  position: relative;
+  transform: scale(1);
+  transition: transform 0.1s ease-in-out;
+  will-change: transform;
+  user-select: none;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:first-child {
+  margin-top: 2.4rem;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:last-child {
+  margin-bottom: 0.6rem;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:hover {
+    transition: transform 0.2s ease-in-out 0.05s;
+    transform: scale(1.02);
+  }
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container:active {
+  transition: transform 0.1s ease-in-out 0s;
+  transform: scale(1) !important;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container .happytohelp-insight-button {
+  margin: 0;
+  font-size: 1em;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 2px 0px;
+  cursor: pointer;
+  font-weight: 400;
+  transition: color 0.2s ease-in-out;
+  will-change: color;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container .happytohelp-insight-button.happytohelp-insight-button-close {
+  font-weight: 400;
+  transition: opacity 0.2s ease-in-out;
+  will-change: opacity;
+  opacity: 0.7;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-buttons-container .happytohelp-insight-buttons .happytohelp-insight-button-container .happytohelp-insight-button.happytohelp-insight-button-close:hover {
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-insight-footer {
+  position: fixed;
+  bottom: 0px;
+  width: 300px;
+  right: 108px;
+  height: 70px;
+  width: 300px;
+  z-index: 2147483603;
+  box-sizing: border-box;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-insight-footer {
+    right: 98px;
+    height: 63px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-insight-footer {
+    right: 88px;
+    height: 56px;
+  }
+}
+@media (max-width: 415px) {
+  #happytohelp-root .happytohelp-insight-footer {
+    display: none !important;
+  }
+}
+#happytohelp-root .happytohelp-insight-footer .happytohelp-insight-agent {
+  opacity: 0.3;
+  font-size: 12px;
+  line-height: 19px;
+  display: inline-block;
+  margin: 0;
+  cursor: pointer;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
+  font-variation-settings: "wdth" 100;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  transition: opacity 0.4s ease 0.1s, color 0.6s ease 0.1s;
+  will-change: opacity, background-color;
+  float: right;
+}
+#happytohelp-root .happytohelp-insight-footer .happytohelp-insight-agent strong {
+  font-weight: 600;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-footer .happytohelp-insight-agent:hover {
+    opacity: 1;
+  }
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-insight, #happytohelp-root.happytohelp-insight-opened .happytohelp-insight-footer {
+  display: block;
+  animation: happytohelp-in-slide 3s cubic-bezier(0.05, 0.99, 0.05, 0.99);
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-insight.happytohelp-in-complete .happytohelp-content, #happytohelp-root.happytohelp-insight-opened .happytohelp-insight-footer.happytohelp-in-complete .happytohelp-content {
+  transform: translateY(0px);
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-insight-close {
+  animation: happytohelp-in-slide 3s cubic-bezier(0.05, 0.99, 0.05, 0.99);
+}
+#happytohelp-root.happytohelp-insight-opened .happytohelp-insight-close.happytohelp-in-complete .happytohelp-content {
+  transform: translateY(0px);
+}
+#happytohelp-root.happytohelp-insight-closed .happytohelp-insight.happytohelp-in-complete, #happytohelp-root.happytohelp-insight-closed .happytohelp-insight-footer.happytohelp-in-complete {
+  display: block;
+  animation: happytohelp-out-slide 2s cubic-bezier(0.15, 0.99, 0.15, 1);
+}
+#happytohelp-root.happytohelp-insight-closed .happytohelp-insight-close.happytohelp-in-complete {
+  animation: happytohelp-out-slide 2s cubic-bezier(0.15, 0.99, 0.15, 1);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-events:hover .happytohelp-insight-buttons-container {
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.4s ease-in-out 0.01s;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-events:hover .happytohelp-insight-close {
+    opacity: 0 !important;
+  }
+  #happytohelp-root .happytohelp-insight-container .happytohelp-insight-events:hover .happytohelp-insight-content.happytohelp-insight-has-glow::after {
+    transition: opacity 0.3s, filter 0.1s;
+    opacity: 1 !important;
+    filter: blur(1px) !important;
+    animation-play-state: running !important;
+  }
+}
+
+#happytohelp-root .happytohelp-tooltip {
+  z-index: 2147483621;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  padding: 8px 21px;
+  font-size: 13px;
+  margin: 0 10px 0 0;
+  color: #fff;
+}
+#happytohelp-root .happytohelp-tooltip.type-light {
+  border-radius: 25px;
+}
+#happytohelp-root .happytohelp-text-muted {
+  opacity: 0.4;
+}
+#happytohelp-root .happytohelp-transition-appear-enter {
+  opacity: 0;
+  transition: opacity 0.7s ease 0.3s;
+}
+#happytohelp-root .happytohelp-transition-appear-enter-active {
+  opacity: 1;
+}
+#happytohelp-root .happytohelp-transition-appear-exit {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+#happytohelp-root .happytohelp-transition-appear-exit-active {
+  opacity: 0;
+}
+#happytohelp-root .happytohelp-transition-enter {
+  overflow-y: hidden;
+}
+#happytohelp-root .happytohelp-transition-enter > div {
+  margin-top: -100% !important;
+  transition: margin 0.3s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-transition-enter-active > div {
+  margin-top: 0 !important;
+}
+#happytohelp-root .happytohelp-transition-exit {
+  overflow-y: hidden;
+}
+#happytohelp-root .happytohelp-transition-exit > div {
+  margin-top: 0 !important;
+  transition: margin 0.3s ease-out 0s;
+}
+#happytohelp-root .happytohelp-transition-exit-active > div {
+  margin-top: -100% !important;
+}
+#happytohelp-root .happytohelp-transition-chatlist-enter {
+  scroll-behavior: initial !important;
+}
+#happytohelp-root .happytohelp-transition-chatlist-exit {
+  scroll-behavior: initial !important;
+}
+#happytohelp-root input, #happytohelp-root textarea {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  margin: 0;
+  box-shadow: none;
+  display: inline-block;
+  padding: 0 1px 0 13px;
+  font-size: 13px;
+  line-height: 38px;
+  color: #555;
+  border: 1px solid #E0E0E0;
+  border-radius: 0px;
+  border-top-left-radius: 0.3rem;
+  border-bottom-right-radius: 0.3rem;
+  background: #fff;
+  font-weight: 500;
+  box-sizing: border-box;
+  height: auto;
+}
+#happytohelp-root input:focus, #happytohelp-root textarea:focus {
+  outline: 0;
+}
+#happytohelp-root button.happytohelp-btn {
+  width: initial;
+  text-shadow: none;
+  box-shadow: none;
+  font-weight: 400;
+  line-height: 41px;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  margin: 0;
+  -webkit-appearance: none;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#happytohelp-root .happytohelp-interact-container {
+  position: fixed;
+  bottom: 104px;
+  right: 25px;
+  z-index: 2147483610;
+  box-sizing: border-box;
+  max-height: calc(100vh - 87px);
+  max-height: calc(var(--vh) * 100 - 87px);
+  display: none;
+  width: clamp(400px, 50vw, 500px);
+  max-width: 500px;
+}
+#happytohelp-root .happytohelp-interact-container::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 8px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  background: linear-gradient(45deg, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3, #00b2f4, #3ec8fc, #fea917, #f95780, #e398fe, #7b34f3, #00b2f4) repeat;
+  background-position: 0 0;
+  background-size: 200%;
+  animation: happytohelp-large-border 2s linear infinite, happytohelp-blur 5s linear infinite;
+  opacity: 0;
+  filter: blur(0px);
+  transition: opacity 3s ease, filter 3s ease;
+  animation-play-state: paused;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-interact-container {
+    bottom: 94px;
+    right: 15px;
+    max-height: calc(100vh - 66px);
+    max-height: calc(var(--vh) * 100 - 66px);
+  }
+}
+@media (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container {
+    left: 0 !important;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact-container {
+    top: var(--offset-top, 0) !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    position: fixed;
+    max-height: none;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+    width: 100vw;
+    width: calc(var(--vw, 1vw) * 100);
+    max-width: 500px;
+    transform: translate3d(0, 0, 0);
+  }
+  #happytohelp-root .happytohelp-interact-container::after {
+    display: none;
+    content: none;
+    opacity: 0 !important;
+    filter: blur(0px) !important;
+    animation-play-state: paused !important;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-interact {
+    max-height: none;
+    border-radius: 0px;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  #happytohelp-root .happytohelp-interact-container textarea, #happytohelp-root .happytohelp-interact-container input {
+    font-size: 15px;
+  }
+  #happytohelp-root .happytohelp-interact-container textarea::placeholder, #happytohelp-root .happytohelp-interact-container input::placeholder {
+    font-size: 15px;
+  }
+  #happytohelp-root .happytohelp-interact-container .happytohelp-tooltip {
+    display: none;
+  }
+}
+#happytohelp-root .happytohelp-interact {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  border-radius: 8px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-shadow: rgba(0, 0, 0, 0.03) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 0px 25px 0px, rgba(0, 0, 0, 0.02) 0px 4px 2px 0px;
+  background-attachment: fixed;
+  will-change: opacity, transform, display;
+}
+#happytohelp-root .happytohelp-interact input, #happytohelp-root .happytohelp-interact textarea {
+  font-weight: 400;
+}
+#happytohelp-root .happytohelp-interact input::placeholder, #happytohelp-root .happytohelp-interact textarea::placeholder {
+  font-family: system-ui;
+  font-weight: 400;
+  color: #9a9a9a;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header {
+  color: #fff;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: 30px 30px 80px 30px;
+  box-sizing: border-box;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header p {
+  margin: 0;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-title {
+  font-size: 54px;
+  font-family: "Sacramento", cursive;
+  font-weight: 400;
+  padding: 26px 0 31px;
+  line-height: 45px;
+  opacity: 0;
+  will-change: opacity;
+  text-align: center;
+  transition: opacity 0.5s;
+  word-break: break-word;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-extra {
+  font-size: 15px;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-help-center {
+  padding: 30px 0 0 0;
+  position: relative;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-help-center input {
+  width: 100%;
+  border: none !important;
+  padding: 0 0 0 40px;
+  box-shadow: 5px 5px 7px hsla(0, 0%, 0%, 0.06);
+  line-height: 36px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-help-center .happytohelp-help-center-bg {
+  position: absolute;
+  top: 39px;
+  left: 15px;
+  color: rgba(0, 0, 0, 0.22);
+  font-size: 13px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-callout {
+  margin-top: 25px;
+  border-top-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-callout a {
+  color: #fff;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-callout:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-callout + .happytohelp-callout {
+  margin-top: 15px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-callout .happytohelp-callout-title {
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-header .happytohelp-callout .happytohelp-callout-content {
+  opacity: 0.9;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content {
+  color: #333;
+  width: 100%;
+  margin-top: -50px;
+  padding: 50px 0 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: stretch;
+  min-height: 0;
+  max-height: calc(100vh - 87px);
+  max-height: calc(var(--vh) * 100 - 87px);
+  position: relative;
+  z-index: 20;
+  will-change: transform, padding;
+  transition: transform 0.7s cubic-bezier(0.01, 0.98, 0.2, 0.99) 0s, padding 0.3s ease-out 0s, min-height 0.3s ease-out 0s;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact .happytohelp-content {
+    right: 0 !important;
+    z-index: 20;
+  }
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content .happytohelp-chatlist-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content::before {
+  content: "";
+  display: block;
+  position: absolute;
+  background: #fff;
+  height: 110%;
+  width: 200%;
+  top: 0px;
+  right: 0px;
+  transform: translate3d(0, 0, 0) rotate(-3deg);
+  transform-origin: top right;
+  will-change: transform, margin;
+  transition: transform 0.2s ease-out 0s, margin 0.2s ease-out 0s;
+  backface-visibility: hidden;
+  border: 1px solid transparent;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content::after {
+  content: "";
+  display: block;
+  position: absolute;
+  background: #fff;
+  height: 100%;
+  width: 100%;
+  top: 300px;
+  right: 0px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full {
+  padding: 140px 0px 0px;
+  height: 100vh;
+  height: calc(var(--vh) * 100);
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full::before {
+  transform: translate3d(0, 0, 0) rotate(0deg);
+  margin-top: 70px;
+}
+@media (max-height: 400px) {
+  #happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full {
+    padding: 0px !important;
+  }
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full {
+    max-height: calc(100vh - 66px);
+    max-height: calc(var(--vh) * 100 - 66px);
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full {
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    width: 100vw;
+    width: calc(var(--vw, 1vw) * 100);
+    max-width: 500px;
+    padding: 75px 0px 0px;
+    margin: 0;
+    box-sizing: border-box;
+    transition: transform 0.7s cubic-bezier(0.01, 0.98, 0.2, 0.99) 0s;
+  }
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full .happytohelp-error {
+  padding: 5px 20px 14px 5px;
+  margin: 0px 10px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full .happytohelp-error .happytohelp-error-close {
+  top: 5px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-error {
+  background: #fff;
+  color: #c70000;
+  padding: 0 20px 19px 5px;
+  font-size: 0.9em;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  font-weight: bold;
+  margin: 0px 30px;
+}
+#happytohelp-root .happytohelp-interact .happytohelp-error .happytohelp-error-close {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  font-weight: bold;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-interact .happytohelp-error:hover .happytohelp-error-close {
+    color: #000;
+  }
+}
+#happytohelp-root.happytohelp-opened .happytohelp-interact-container {
+  display: block;
+  animation: happytohelp-in-slide 1.5s cubic-bezier(0, 0.99, 0, 0.99);
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root.happytohelp-opened .happytohelp-interact-container {
+    animation: happytohelp-in-zoom 0.3s cubic-bezier(0, 0.99, 0, 0.99);
+  }
+}
+#happytohelp-root.happytohelp-opened .happytohelp-interact-container.happytohelp-thinking::after {
+  transition: opacity 1s ease, filter 2s ease;
+  opacity: 1;
+  filter: blur(5px);
+  animation-play-state: running;
+}
+#happytohelp-root.happytohelp-opened .happytohelp-interact, #happytohelp-root.happytohelp-opened .happytohelp-footer {
+  display: block;
+}
+#happytohelp-root.happytohelp-closed .happytohelp-interact-container, #happytohelp-root.happytohelp-insight-opened .happytohelp-interact-container {
+  animation: happytohelp-out-slide 0.4s cubic-bezier(0.15, 0.99, 0.15, 1) forwards;
+}
+#happytohelp-root.happytohelp-closed .happytohelp-interact-container.happytohelp-in-complete, #happytohelp-root.happytohelp-insight-opened .happytohelp-interact-container.happytohelp-in-complete {
+  display: block;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root.happytohelp-closed .happytohelp-interact-container, #happytohelp-root.happytohelp-insight-opened .happytohelp-interact-container {
+    animation: happytohelp-out-zoom 0.16s cubic-bezier(0.15, 0.99, 0.15, 1) forwards;
+  }
+}
+#happytohelp-root.happytohelp-closed .happytohelp-interact-container::after, #happytohelp-root.happytohelp-insight-opened .happytohelp-interact-container::after {
+  display: none;
+}
+#happytohelp-root .happytohelp-content-overlay {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  display: none;
+}
+#happytohelp-root .happytohelp-content-overlay.happytohelp-content-overlay-show, #happytohelp-root .happytohelp-content-overlay.happytohelp-content-overlay-animate {
+  display: block;
+}
+#happytohelp-root .happytohelp-content-overlay.happytohelp-content-overlay-show.happytohelp-content-overlay-animate {
+  transition: opacity 600ms ease;
+  opacity: 1;
+}
+#happytohelp-root.happytohelp-inline {
+  width: 100%;
+  max-width: 100%;
+  z-index: auto;
+}
+#happytohelp-root.happytohelp-inline .happytohelp-button,
+#happytohelp-root.happytohelp-inline .happytohelp-interact-container .happytohelp-close {
+  display: none !important;
+}
+#happytohelp-root.happytohelp-inline .happytohelp-interact-container {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  z-index: auto;
+  animation: none !important;
+}
+#happytohelp-root.happytohelp-inline .happytohelp-interact-container::after {
+  content: none;
+  display: none;
+}
+#happytohelp-root.happytohelp-inline .happytohelp-content.happytohelp-content-full {
+  width: 100% !important;
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview {
+  min-height: var(--happytohelp-preview-height, 560px);
+  position: relative;
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-interact-container,
+#happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-interact {
+  height: var(--happytohelp-preview-height, 560px);
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-content {
+  overflow: clip;
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-content.happytohelp-content-full {
+  height: calc(var(--happytohelp-preview-height, 560px) + 50px);
+  min-height: 0;
+  max-height: none;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-content.happytohelp-content-full {
+    height: var(--happytohelp-preview-height, 560px);
+  }
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-button {
+  display: block !important;
+  position: absolute;
+  top: auto !important;
+  left: auto !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  z-index: 1;
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview .happytohelp-interact-container .happytohelp-close {
+  display: block !important;
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview.happytohelp-opened .happytohelp-button {
+  display: none !important;
+}
+#happytohelp-root.happytohelp-inline.happytohelp-preview.happytohelp-closed .happytohelp-interact-container {
+  display: none !important;
+}
+
+#happytohelp-root .happytohelp-return-to-chat {
+  position: relative;
+  z-index: 2;
+  color: #666;
+  border-top-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  padding: 23px 60px 24px 30px;
+  position: relative;
+  font-size: 14px;
+  cursor: pointer;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-return-to-chat:hover {
+    background: rgba(245, 246, 251, 0.4);
+    color: #000;
+  }
+  #happytohelp-root .happytohelp-return-to-chat:hover svg {
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-return-to-chat + .happytohelp-send-message .happytohelp-message-input {
+  border-top-left-radius: 0px;
+}
+#happytohelp-root .happytohelp-return-to-chat svg {
+  position: absolute;
+  top: 26px;
+  right: 28px;
+  font-size: 15px;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 18px;
+  background: rgb(72, 71, 72);
+  color: #fff;
+  opacity: 0.9;
+}
+#happytohelp-root .happytohelp-return-to-chat .happytohelp-return-to-chat-title {
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-return-to-chat .happytohelp-return-to-chat-content {
+  opacity: 0.9;
+  font-size: 12px;
+}
+#happytohelp-root .happytohelp-send-message {
+  position: relative;
+  z-index: 2;
+  outline: none;
+  margin: 0px 30px 30px;
+  transition: margin 0.3s ease-out;
+  border-top-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+#happytohelp-root .happytohelp-send-message a {
+  color: #000;
+}
+#happytohelp-root .happytohelp-send-message.happytohelp-send-message-conversation {
+  border-top-left-radius: 0px;
+  margin: 0px;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-message-input {
+  padding-bottom: 10px;
+  outline: none;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row {
+  position: relative;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-error {
+  color: #cb0000;
+  font-weight: bold;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-error svg {
+  color: #cb0000;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-error input {
+  color: #cb0000;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-larger {
+  padding-top: 15px;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons {
+  padding-left: 6px;
+  padding-right: 10px;
+  cursor: text;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container {
+  flex-grow: 1;
+  display: flex;
+  min-width: 0;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact {
+  color: #bbb;
+  letter-spacing: 0.01em;
+  font-size: 12px;
+  line-height: 33px !important;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 0;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact svg {
+  font-size: 14px;
+  color: #cecece;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact:hover {
+    background: #fff;
+    color: #333;
+  }
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact:hover svg {
+    color: #484748;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-drag-files {
+  margin-top: -15px;
+  margin-bottom: 10px;
+  align-items: center;
+  text-align: center;
+  padding: 50px 10px;
+  border-width: 2px;
+  border-radius: 2px;
+  border-color: #eeeeee;
+  border-style: dashed;
+  background-color: #ffffff;
+  color: #bdbdbd;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row label.error {
+  position: absolute;
+  left: 0px;
+  bottom: unset;
+  top: -2px;
+  color: #bd0502;
+  font-size: 12px;
+  z-index: 1;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  letter-spacing: 0.01em;
+  width: 100%;
+  border: none;
+  color: #333;
+  height: unset;
+  background: transparent;
+  border-radius: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea.error {
+  border-color: #bd0502 !important;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea {
+  height: 48px;
+  min-height: 48px;
+  max-height: 300px;
+  resize: none;
+  line-height: 1.5em;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  vertical-align: top;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn {
+  background: transparent;
+  border: none;
+  color: #cecece;
+  padding: 0;
+  height: 33px !important;
+  line-height: 33px;
+  min-width: 40px;
+  display: inline-block;
+  font-size: 20px;
+  float: right;
+  margin-left: 1px;
+  outline: none;
+  transform: scale(1);
+  will-change: transform;
+  transition: transform 0.1s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn:active {
+  transform: scale(0.9);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn:hover {
+    color: #484748;
+    background: #fff;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit] {
+  color: #fff;
+  padding: 0px 27px;
+  float: right;
+  font-size: 15px;
+  margin-left: 10px;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit]:hover {
+    opacity: 0.9;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit]:active {
+  transform: scale(0.97);
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn[type=submit] svg {
+  font-size: 15px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files {
+  margin: 0;
+  padding: 0;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li {
+  list-style: none;
+  font-size: 14px;
+  color: #484748;
+  padding: 8px 26px 3px 15px;
+  position: relative;
+  word-break: break-word;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li:last-child {
+  margin-bottom: -6px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li img.happytohelp-preview {
+  max-width: 70%;
+  max-height: 110px;
+  cursor: zoom-in;
+  border-radius: 3px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li span.happytohelp-preview {
+  display: inline-block;
+  padding: 3px 15px 9px 0px;
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li span.happytohelp-preview a {
+  cursor: zoom-in;
+  text-decoration: underline;
+  color: #484748;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message ul.happytohelp-files li span.happytohelp-preview a:hover {
+    color: #000;
+  }
+}
+#happytohelp-root .happytohelp-send-message ul.happytohelp-files li .happytohelp-preview-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-send-message ul.happytohelp-files li .happytohelp-preview-close:hover {
+    color: #000;
+  }
+}
+#happytohelp-root .happytohelp-send-message .happytohelp-send-message-clear {
+  clear: both;
+}
+
+#happytohelp-root .happytohelp-shake {
+  animation: happytohelp-shake-keyframes 1s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+#happytohelp-root .happytohelp-typing-message {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: width 0.3s ease-out;
+}
+#happytohelp-root .happytohelp-typing-message.happytohelp-typing-message-has-message {
+  transition: width 0.5s ease-in-out;
+}
+#happytohelp-root .happytohelp-typing-indicator {
+  width: 100px;
+  height: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+#happytohelp-root .happytohelp-typing-indicator span {
+  height: 6px;
+  width: 6px;
+  float: left;
+  background-color: rgba(0, 168, 255, 0.2);
+  display: block;
+  border-radius: 50%;
+  opacity: 1;
+}
+#happytohelp-root .happytohelp-typing-indicator span:nth-of-type(1) {
+  animation: 1500ms happytohelp-blink infinite 0s;
+  animation-timing-function: ease-out;
+}
+#happytohelp-root .happytohelp-typing-indicator span:nth-of-type(2) {
+  animation: 1500ms happytohelp-blink infinite 0.3333s;
+  animation-timing-function: ease-out;
+}
+#happytohelp-root .happytohelp-typing-indicator span:nth-of-type(3) {
+  animation: 1500ms happytohelp-blink infinite 0.6666s;
+  animation-timing-function: ease-out;
+}
+@keyframes happytohelp-blink {
+  50% {
+    transform: scale(1.15);
+    background-color: rgb(0, 168, 255);
+  }
+}
+#happytohelp-root .happytohelp-animated-text {
+  position: relative;
+  color: inherit;
+  background: #fff;
+  mix-blend-mode: multiply;
+  overflow: hidden;
+  display: inline-block;
+  border: 1px solid #fff;
+  transition: opacity 0.5s ease-in-out;
+  opacity: 1;
+}
+#happytohelp-root .happytohelp-animated-text.happytohelp-animated-text-transition {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+#happytohelp-root .happytohelp-animated-text::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -100%;
+  bottom: 0;
+  left: 0;
+  background: #000 repeating-linear-gradient(45deg, #000, #62bcff, #000) no-repeat;
+  background-size: 200%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: happytohelp-animated-text-move 3s linear infinite;
+}
+@keyframes happytohelp-animated-text-move {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -30% 0;
+  }
+}
+@supports not (mix-blend-mode: multiply) {
+  #happytohelp-root .happytohelp-animated-text::before {
+    content: none;
+  }
+}
+
+/*# sourceMappingURL=Root.css.map */

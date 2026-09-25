@@ -1,0 +1,48 @@
+// Person avatars on signed-in Blade pages share the inbox's rounded-square
+// profile treatment. This is deliberately scoped away from widget and email UI.
+body.workspace-page {
+    .avatar-contact,
+    .avatar-agent {
+        &,
+        .avatar-img,
+        .avatar-title { border-radius: 25% !important; }
+
+        .avatar-img { object-fit: cover; }
+    }
+
+    .avatar-agent.avatar-fallback .avatar-title {
+        color: #394878 !important;
+        background: #b2e2ff !important;
+        border: 0 !important;
+    }
+
+    // Initials are usable before the enhancement bundle loads. The renderer
+    // replaces them with the deterministic profile glyph and its bright tile.
+    .avatar-contact.avatar-fallback .avatar-title {
+        color: #182955 !important;
+        background: #b2d6fd !important;
+        border: 0 !important;
+    }
+
+    .avatar-contact-symbol.avatar-fallback .avatar-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--contact-profile-symbol-ink, #182955) !important;
+        background: var(--contact-profile-symbol-tile, #b2d6fd) !important;
+        overflow: hidden;
+    }
+
+    .avatar-contact-symbol .contact-profile-symbol {
+        flex: 0 0 75%;
+        width: 75%;
+        height: 75%;
+        display: block;
+        overflow: visible;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+}

@@ -1,0 +1,86 @@
+#happytohelp-root .happytohelp-chat-list {
+  position: relative;
+  z-index: 2;
+  color: #666;
+  outline: none;
+  margin: 0px;
+  padding: 0px 10px 0px 8px;
+  box-sizing: content-box;
+}
+#happytohelp-root .happytohelp-chat-list + .happytohelp-send-message .happytohelp-message-input {
+  border-top-left-radius: 0px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-info-header {
+  font-size: 0.8em;
+  padding: 20px;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-info-header a {
+  text-decoration: none;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-chat-list .happytohelp-info-header a:hover {
+    text-decoration: underline;
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-info-header + .happytohelp-chat-group-time {
+  padding-top: 0px !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group-time {
+  font-size: 0.7em;
+  padding-top: 20px;
+  padding-bottom: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group-time + .happytohelp-chat-group .happytohelp-chat-agent-name {
+  padding-top: 0 !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-list-no-groups + .happytohelp-chat-agent, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-list-no-groups + .happytohelp-chat-local {
+  padding-top: 0 !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group {
+  align-items: flex-end;
+  display: flex;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-group .happytohelp-chat-group-messages {
+  flex-grow: 1;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-local, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-local + .happytohelp-chat-agent, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-agent {
+  padding-top: 20px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-local .happytohelp-chat-group-time, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-local + .happytohelp-chat-agent .happytohelp-chat-group-time, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-agent .happytohelp-chat-group-time {
+  padding-top: 0 !important;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent {
+  box-sizing: border-box;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local:first-child .happytohelp-chat-group-time, #happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent:first-child .happytohelp-chat-group-time {
+  padding-top: 13px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent-name {
+  font-size: 0.7em;
+  padding: 0 0 3px 0;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-agent + .happytohelp-chat-agent .happytohelp-chat-agent-name {
+  padding-top: 10px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-box-container {
+  padding-bottom: 9px;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-box-container:last-child {
+  padding-bottom: 0;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local {
+  overflow: hidden;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-local .happytohelp-chat-box-container {
+  text-align: right;
+}
+#happytohelp-root .happytohelp-chat-list .happytohelp-chat-clear {
+  height: 25px;
+}
+
+/*# sourceMappingURL=ChatList.css.map */

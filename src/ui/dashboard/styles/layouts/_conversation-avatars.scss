@@ -1,0 +1,29 @@
+// Shared avatar treatment in the conversation workspace.
+body.conversation-workspace {
+    .avatar,
+    .avatar .avatar-img,
+    .avatar .avatar-title { border-radius: 25% !important; }
+}
+
+body.conversation-workspace #chat {
+    .avatar.avatar-fallback .avatar-title {
+        box-sizing: border-box;
+        border-width: 1px;
+        border-style: solid;
+        font-weight: 600;
+        letter-spacing: .01em;
+    }
+
+    // Contact initials retain the nickname's recognizable hue while mixing it
+    // into a pale surface and a darker readable ink. Anonymous shape icons keep
+    // their existing inline color semantics and are intentionally excluded.
+    .avatar.avatar-contact.avatar-fallback:not(.avatar-contact-anonymous) .avatar-title {
+        color: color-mix(in srgb, var(--avatar-identity-color, #5473d8) 50%, #162242) !important;
+        background: color-mix(in srgb, var(--avatar-identity-color, #5473d8) 10%, #ffffff) !important;
+        border-color: color-mix(in srgb, var(--avatar-identity-color, #5473d8) 24%, #ffffff) !important;
+    }
+
+    .avatar.avatar-fallback .avatar-title > span {
+        font-weight: 600;
+    }
+}

@@ -1,0 +1,46 @@
+import React, { useEffect } from 'react';
+import { createWorkspaceTheme, normalizeWorkspaceMode } from './workspaceModes';
+import { Outlet } from '@tanstack/react-router';
+import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
+import Chat from '../dashboard/components/Chat';
+import { Provider } from '../dashboard/contexts/ChatContext';
+import WorkspacePages from './WorkspacePages';
+import Navigation from './Navigation';
+import { NavigationGuard } from './NavigationGuard';
+import { MobileNavigationProvider } from './MobileNavigation';
+export default function DashboardClient({ settings }) {
+    const pathname = useDashboardLocation().pathname;
+    const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
+    useEffect(() => {
+        document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed theme-happytohelp`;
+    }, [isInbox]);
+    useEffect(() => {
+        let properties = [];
+        const apply = appearance => {
+            const mode = normalizeWorkspaceMode(appearance?.display_mode);
+            const palette = createWorkspaceTheme(appearance?.primary_color, mode);
+            properties.filter(key => !(key in palette)).forEach(key => document.body.style.removeProperty(key));
+            Object.entries(palette).forEach(([key,value]) => document.body.style.setProperty(key,value));
+            properties = Object.keys(palette);
+            document.body.dataset.workspaceMode = mode;
+            document.documentElement.dataset.bsTheme = mode === 'dark' ? 'dark' : 'light';
+        };
+        apply(settings.isGlobalInbox ? {} : settings.project);
+        const update = event => apply(event.detail);
+        window.addEventListener('workspace-appearance',update);
+        return () => { window.removeEventListener('workspace-appearance',update); properties.forEach(key=>document.body.style.removeProperty(key)); delete document.body.dataset.workspaceMode; document.documentElement.dataset.bsTheme='light'; };
+    }, [settings]);
+    const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
+    return <NavigationGuard><MobileNavigationProvider><Navigation settings={settings} /><Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
+        <Outlet />
+    </Provider></MobileNavigationProvider></NavigationGuard>;
+}
+
+export function DashboardContent() {
+    const settings = useDashboardSettings();
+    const pathname = useDashboardLocation().pathname;
+    const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
+    return !settings.accountOnly && isInbox
+        ? <div className="main-content"><div id="chat"><Chat /></div></div>
+        : <WorkspacePages settings={settings} />;
+}

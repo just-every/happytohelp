@@ -1,0 +1,103 @@
+// Avatars for people, assistants and attachments.
+//
+// Markup (components/Avatar.jsx, ContactAvatar.jsx, FormMedia.jsx and the
+// settings pages):
+//   .avatar[.avatar-xs|-sm|-lg][.avatar-online]   square frame, or an <img>
+//     > .avatar-img     photo filling the frame
+//     > .avatar-title   lettered or icon tile filling the frame
+//     > .avatar-text    file-type tile filling the frame (upload previews)
+//
+// The frame is sized by one custom property, --avatar-size; layouts that need
+// another size set it rather than overriding width and height. Tile lettering
+// is a third of the frame so initials keep their proportion at every step.
+
+$avatar-sizes: (
+  xs: 1.625rem, // assignee menus and the inbox row's agent badge
+  sm: 2.5rem,   // transcript rows, conversation header, settings rows
+  lg: 4rem,     // attachment previews and avatar upload
+);
+$avatar-default-size: 3rem;
+
+// Presence dot: its diameter and inset from the corner, plus the clear ring
+// cut out of the photo around it, all as fractions of the frame.
+$avatar-presence-diameter: 20%;
+$avatar-presence-inset: 5%;
+$avatar-presence-ring: 5%;
+
+$avatar-file-ink: #98aaca;
+$avatar-file-paper: #dae4f1;
+
+// Content that fills the frame and centres its single child.
+@mixin avatar-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  line-height: 0;
+}
+
+.avatar {
+  --avatar-size: #{$avatar-default-size};
+  --avatar-tile-paper: var(--bs-gray-500);
+  --avatar-tile-ink: var(--bs-white);
+
+  position: relative;
+  display: inline-block;
+  inline-size: var(--avatar-size);
+  min-inline-size: var(--avatar-size);
+  block-size: var(--avatar-size);
+  font-size: calc(var(--avatar-size) / 3);
+}
+
+@each $step, $size in $avatar-sizes {
+  .avatar-#{$step} {
+    --avatar-size: #{$size};
+  }
+}
+
+[data-bs-theme="dark"] .avatar {
+  --avatar-tile-paper: #{$gray-600-dark};
+}
+
+.avatar-img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.avatar-title {
+  @include avatar-fill;
+  color: var(--avatar-tile-ink);
+  background-color: var(--avatar-tile-paper);
+}
+
+// The file tile wins over the colour utilities FormMedia.jsx also sets.
+.avatar > .avatar-text {
+  @include avatar-fill;
+  color: $avatar-file-ink;
+  background-color: $avatar-file-paper !important;
+}
+
+// Online contacts: a presence dot in the lower-right corner, with a clear ring
+// masked out of the photo so the dot reads against any picture.
+.avatar-online {
+  $centre: calc(100% - #{$avatar-presence-inset} - #{$avatar-presence-diameter} / 2);
+  $cutout: calc(#{$avatar-presence-diameter} / 2 + #{$avatar-presence-ring});
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto $avatar-presence-inset $avatar-presence-inset auto;
+    inline-size: $avatar-presence-diameter;
+    block-size: $avatar-presence-diameter;
+    border-radius: 50%;
+    background: var(--bs-success);
+  }
+
+  > .avatar-img {
+    $mask: radial-gradient($cutout $cutout at $centre $centre, transparent 99%, #000 100%);
+    -webkit-mask-image: $mask;
+    mask-image: $mask;
+  }
+}

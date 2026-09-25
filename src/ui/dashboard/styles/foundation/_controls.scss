@@ -1,0 +1,233 @@
+// Buttons and form controls.
+
+// Buttons -------------------------------------------------------------------
+
+.btn-lg {
+  line-height: $line-height-lg;
+}
+
+.btn-sm {
+  line-height: $line-height-sm;
+}
+
+// A white button with a light outline, used for secondary actions.
+.btn-white {
+  --bs-btn-bg: var(--bs-white);
+  --bs-btn-border-color: var(--bs-gray-300);
+  --bs-btn-hover-bg: var(--bs-gray-100);
+  --bs-btn-hover-border-color: var(--bs-gray-400);
+  --bs-btn-active-bg: var(--bs-gray-100);
+  --bs-btn-active-border-color: var(--bs-gray-400);
+  --bs-btn-disabled-bg: var(--bs-white);
+  --bs-btn-disabled-border-color: var(--bs-gray-300);
+}
+
+[data-bs-theme="dark"] {
+  .btn-white,
+  .btn-light {
+    --bs-btn-bg: #{$gray-800-dark};
+    --bs-btn-border-color: #{$gray-600-dark};
+    --bs-btn-color: var(--bs-white);
+    --bs-btn-hover-bg: var(--bs-black);
+    --bs-btn-hover-border-color: #{$gray-700-dark};
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-active-bg: var(--bs-black);
+    --bs-btn-active-border-color: #{$gray-700-dark};
+    --bs-btn-active-color: var(--bs-white);
+    --bs-btn-disabled-bg: #{$gray-800-dark};
+    --bs-btn-disabled-border-color: #{$gray-600-dark};
+    --bs-btn-disabled-color: var(--bs-white);
+  }
+}
+
+// Labels and groups ------------------------------------------------------------
+
+label {
+  margin-bottom: .5rem;
+}
+
+label.form-check-label {
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 1.375rem;
+}
+
+// Text inputs ------------------------------------------------------------------
+
+.form-control,
+.form-select {
+  --bs-input-bg: #{$input-bg};
+  --bs-input-border-color: #{$input-border-color};
+  --bs-input-color: var(--bs-body-color);
+  --bs-input-disabled-bg: #{$input-disabled-bg};
+  --bs-input-placeholder-color: #{$input-placeholder-color};
+  background-color: var(--bs-input-bg);
+  border-color: var(--bs-input-border-color);
+  color: var(--bs-input-color);
+
+  &::placeholder {
+    color: var(--bs-input-placeholder-color);
+  }
+
+  &:focus {
+    background-color: var(--bs-input-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-input-color);
+  }
+}
+
+.form-control {
+  font-size: .9rem;
+
+  &:not(.form-select) {
+    padding-right: 0;
+  }
+
+  &:disabled,
+  &[readonly] {
+    background-color: #e9ecef;
+    border-color: $gray-400;
+    opacity: 1;
+  }
+}
+
+.form-control-lg {
+  line-height: $line-height-lg;
+}
+
+// A borderless input that sits directly on its surface.
+.form-control-flush {
+  padding-left: 0;
+  border-color: transparent !important;
+  background-color: transparent !important;
+  resize: none;
+}
+
+.form-control-color {
+  width: 50px;
+  padding: 3px !important;
+}
+
+[data-bs-theme="dark"] {
+  .form-control,
+  .form-select {
+    --bs-input-bg: #{$gray-700-dark};
+    --bs-input-border-color: #{$gray-700-dark};
+    --bs-input-color: var(--bs-white);
+    --bs-input-disabled-bg: #{$gray-700-dark};
+    --bs-input-placeholder-color: var(--bs-gray-600);
+  }
+}
+
+// Input groups ---------------------------------------------------------------
+
+.input-group > :not(:first-child):not(.dropdown-menu) {
+  margin-left: 0;
+}
+
+.input-group > .input-group-append > .btn,
+.input-group > .input-group-append > .input-group-text {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group-text {
+  background-color: $input-group-addon-bg;
+  border-color: $input-group-addon-border-color;
+}
+
+[data-bs-theme="dark"] .input-group-text {
+  background-color: #{$gray-700-dark};
+  border-color: #{$gray-700-dark};
+}
+
+// Inbox search: the field and its button read as one control.
+.search-query {
+  .form-control {
+    color: #7f808c;
+    background-color: #F9FBFD;
+    background-clip: padding-box;
+    border: 1px solid #e2e6ed;
+    border-right: none;
+  }
+
+  .btn,
+  .btn:hover {
+    color: #7f808c;
+    background-color: #F9FBFD;
+    border: 1px solid #e2e6ed;
+    border-left: none;
+  }
+
+  .btn:hover {
+    color: #333;
+  }
+}
+
+#chat .sidebar .search-query input:focus,
+#chat .sidebar .search-query input:focus + div > button {
+  border-color: $primary;
+}
+
+// Checks and switches --------------------------------------------------------
+
+.form-check {
+  margin-bottom: 0;
+}
+
+.form-check + .form-check {
+  margin-top: $form-check-margin-bottom;
+}
+
+.form-check-input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: calc((#{$line-height-base} * 1em - 1rem) / 2);
+  cursor: pointer;
+
+  &:checked {
+    background-color: rgb(var(--bs-primary-rgb));
+    border-color: rgb(var(--bs-primary-rgb));
+  }
+
+  &:focus:not(:checked) {
+    background-color: lighten($primary, 35%);
+  }
+}
+
+.form-check:not(.form-switch) .form-check-input:checked {
+  background-size: 75% 75%;
+}
+
+.form-switch {
+  min-height: 1.5rem;
+
+  > .form-check-input {
+    height: 1.5rem;
+    margin-top: 0;
+  }
+
+  > .form-check-label {
+    margin-top: calc((1.5rem - #{$line-height-base} * 1em) / 2);
+  }
+}
+
+[data-bs-theme="dark"] {
+  .form-check-input {
+    --bs-form-check-bg: #{$gray-600-dark};
+  }
+
+  .form-switch .form-check-input:focus {
+    --bs-form-switch-bg: #{escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$gray-800-dark}'/></svg>"))};
+  }
+
+  .form-switch .form-check-input:checked {
+    --bs-form-switch-bg: #{escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$white}'/></svg>"))};
+  }
+
+  .form-check-input:focus:not(:checked) {
+    background-color: #{$gray-700-dark};
+  }
+}

@@ -1,0 +1,66 @@
+#happytohelp-root .happytohelp-ai-avatar {
+  background: #b2e2ff;
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  display: block;
+  position: relative;
+}
+#happytohelp-root .happytohelp-ai-avatar img {
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  will-change: opacity;
+  z-index: 1;
+}
+#happytohelp-root .happytohelp-ai-avatar img.happytohelp-avatar-move {
+  opacity: 0.001;
+  z-index: 2;
+  transition-duration: 1s;
+}
+#happytohelp-root .happytohelp-ai-avatar.happytohelp-ai-avatar-animating img {
+  opacity: 0.001;
+  transition-duration: 1s;
+}
+#happytohelp-root .happytohelp-ai-avatar.happytohelp-ai-avatar-animating img.happytohelp-avatar-move {
+  opacity: 1;
+  transition-duration: 0.3s;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-ai-avatar {
+    height: 55px;
+    width: 55px;
+  }
+  #happytohelp-root .happytohelp-ai-avatar img {
+    height: 55px;
+    width: 55px;
+  }
+}
+#happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar {
+  height: 2.4rem;
+  width: 2.4rem;
+  border-radius: 50%;
+  margin: 0 9px 0 0;
+}
+#happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar img {
+  border-radius: 50%;
+  height: 2.4rem;
+  width: 2.4rem;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar {
+    height: 2.2rem;
+    width: 2.2rem;
+  }
+  #happytohelp-root .happytohelp-chat-group .happytohelp-ai-avatar img {
+    height: 2.2rem;
+    width: 2.2rem;
+  }
+}
+
+/*# sourceMappingURL=AIAvatar.css.map */

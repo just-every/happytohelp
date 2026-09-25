@@ -1,0 +1,180 @@
+// Workspace navigation: `nav#sidebar.navbar.navbar-vertical.navbar-expand-xl`.
+// Below the xl breakpoint it is a top bar whose menu collapses; from xl up it is
+// a fixed column on the left. ../layouts/_conversation-navigation.scss styles
+// the refined sidebar on top of this structure.
+
+$sidebar-width: 250px;
+$sidebar-padding-x: 1.5rem;
+$sidebar-icon-width: 1.75rem;
+
+.navbar {
+  --bs-navbar-bg: var(--bs-white);
+  --bs-navbar-border-color: var(--bs-border-color);
+  --bs-navbar-divider-color: var(--bs-border-color);
+  background-color: var(--bs-navbar-bg);
+  border: 0 solid var(--bs-navbar-border-color);
+  border-bottom-width: var(--bs-border-width);
+
+  > [class*="container"] {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .navbar-user {
+    border-top-color: var(--bs-navbar-divider-color);
+  }
+}
+
+// Light workspaces draw the menu toggle in slate; dark ones keep Bootstrap's.
+[data-bs-theme="light"] .navbar .navbar-toggler-icon {
+  --bs-navbar-toggler-icon-bg: #{escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='#{$gray-700}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>"))};
+}
+
+[data-bs-theme="dark"] .navbar {
+  --bs-navbar-bg: #{$gray-800-dark};
+  --bs-navbar-border-color: #{$gray-800-dark};
+  --bs-navbar-hover-color: var(--bs-white);
+  --bs-navbar-active-color: var(--bs-white);
+}
+
+.navbar[class*="fixed-"] {
+  z-index: $zindex-fixed;
+}
+
+.navbar-nav .nav-link:not(.active) {
+  color: var(--bs-navbar-color);
+
+  &:hover,
+  &:focus {
+    color: var(--bs-navbar-hover-color);
+  }
+}
+
+// Collapsed (top bar) layout: the menu spans the bar and starts with a rule.
+.navbar-collapse {
+  width: calc(100% + var(--bs-navbar-padding-x) * 2);
+  margin-left: calc(var(--bs-navbar-padding-x) * -1);
+  margin-right: calc(var(--bs-navbar-padding-x) * -1);
+  padding-left: var(--bs-navbar-padding-x);
+  padding-right: var(--bs-navbar-padding-x);
+
+  &::before {
+    content: "";
+    display: block;
+    margin: var(--bs-navbar-padding-y) calc(var(--bs-navbar-padding-x) * -1);
+    border-top: var(--bs-border-width) solid var(--bs-navbar-divider-color);
+  }
+}
+
+.navbar-nav {
+  margin-left: calc(var(--bs-navbar-padding-x) * -1);
+  margin-right: calc(var(--bs-navbar-padding-x) * -1);
+
+  .nav-link {
+    padding-left: var(--bs-navbar-padding-x);
+    padding-right: var(--bs-navbar-padding-x);
+
+    &.active {
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: var(--bs-nav-link-padding-y);
+        bottom: var(--bs-nav-link-padding-y);
+        left: 0;
+        border-left: 2px solid var(--bs-primary);
+      }
+    }
+
+    > .fe {
+      display: inline-block;
+      min-width: $sidebar-icon-width;
+      padding-bottom: .125em;
+      font-size: $font-size-lg;
+      line-height: $font-size-base * $line-height-base;
+    }
+  }
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.navbar-vertical {
+  .navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-nav .nav .nav-link {
+    padding-left: calc(var(--bs-navbar-padding-x) + #{$sidebar-icon-width});
+  }
+}
+
+// Fixed column from xl up.
+@include media-breakpoint-up(xl) {
+  .navbar-vertical.navbar-expand-xl {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: $sidebar-width;
+    padding-left: $sidebar-padding-x;
+    padding-right: $sidebar-padding-x;
+    overflow-y: auto;
+    border-width: 0 1px 0 0;
+
+    > [class*="container"] {
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 100%;
+    }
+
+    .navbar-collapse {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: auto;
+      min-width: 100%;
+      margin-left: -$sidebar-padding-x;
+      margin-right: -$sidebar-padding-x;
+      padding-left: $sidebar-padding-x;
+      padding-right: $sidebar-padding-x;
+
+      &::before {
+        display: none;
+      }
+
+      > * {
+        min-width: 100%;
+      }
+    }
+
+    .navbar-nav {
+      flex-direction: column;
+      margin-left: -$sidebar-padding-x;
+      margin-right: -$sidebar-padding-x;
+    }
+
+    .navbar-nav .nav-link {
+      padding: var(--bs-nav-link-padding-y) $sidebar-padding-x;
+    }
+
+    .navbar-nav .nav .nav-link {
+      padding-left: $sidebar-padding-x + $sidebar-icon-width;
+    }
+
+    .navbar-user {
+      margin-left: -$sidebar-padding-x;
+      margin-right: -$sidebar-padding-x;
+      padding: $spacer $sidebar-padding-x calc(#{$spacer} - var(--bs-navbar-padding-y));
+      border-top: 1px solid var(--bs-navbar-divider-color);
+    }
+  }
+}

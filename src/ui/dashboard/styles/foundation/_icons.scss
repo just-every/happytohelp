@@ -1,0 +1,53 @@
+// Line icons: `<i class="fe fe-NAME">` renders the Feather icon NAME
+// (feather-icons package, MIT) in the current text colour.
+//
+// Each icon is a CSS mask over a 1em square, so it scales with font-size and
+// follows `color` like a glyph. The icon element uses a metrics-only face
+// (the bundled Inter file with overridden vertical metrics: 0.9375em above
+// and 0.0625em below the baseline, no line gap), so an icon occupies the same
+// line box as a 1em icon glyph and sits on the text baseline in inline,
+// inline-block and flex layouts alike.
+
+@import "./feather-icon-names";
+
+@font-face {
+  font-family: "Dashboard Icon Metrics";
+  src: url("/fonts/inter/InterVariable.woff2") format("woff2");
+  font-display: swap;
+  ascent-override: 93.75%;
+  descent-override: 6.25%;
+  line-gap-override: 0%;
+}
+
+.fe {
+  font-family: "Dashboard Icon Metrics" !important;
+  font-style: normal;
+  font-weight: normal;
+  text-transform: none;
+
+  // The zero-width space makes the icon face load. The square is clipped and
+  // takes no height in the line: its margin box collapses to a point at the
+  // centre of the icon's own line box (0.4375em above the baseline), which lies
+  // inside that line box at any line-height. It is then painted 0.5em lower, so
+  // it spans the glyph's 1em from 0.0625em below the baseline.
+  &::before {
+    content: "\200b";
+    position: relative;
+    top: .5em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-top: -1em;
+    overflow: hidden;
+    vertical-align: .4375em;
+    background-color: currentColor;
+    -webkit-mask: var(--fe-icon) center / 100% 100% no-repeat;
+    mask: var(--fe-icon) center / 100% 100% no-repeat;
+  }
+}
+
+@each $name in $feather-icon-names {
+  .fe-#{$name} {
+    --fe-icon: url("../../../../../node_modules/feather-icons/dist/icons/#{$name}.svg");
+  }
+}

@@ -1,0 +1,310 @@
+// Cards, tables, tabs, menus, dialogs and code blocks.
+
+// Cards ------------------------------------------------------------------------
+
+.card {
+  --bs-card-outline-color: var(--bs-gray-200);
+  margin-bottom: 1.5rem;
+  border-color: var(--bs-card-outline-color);
+  box-shadow: var(--bs-card-box-shadow);
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 60px;
+  padding-top: calc(var(--bs-card-spacer-y) * .5);
+  padding-bottom: calc(var(--bs-card-spacer-y) * .5);
+
+  > *:first-child {
+    flex: 1;
+  }
+}
+
+// A table that fills a card edge to edge.
+.card-table {
+  margin-bottom: 0;
+
+  thead th {
+    border-top-width: 0;
+  }
+
+  thead th,
+  tbody td {
+    &:first-child {
+      padding-left: var(--bs-card-spacer-x) !important;
+    }
+
+    &:last-child {
+      padding-right: var(--bs-card-spacer-x) !important;
+    }
+  }
+}
+
+[data-bs-theme="dark"] .card {
+  --bs-card-border-color: var(--bs-border-color);
+  --bs-card-bg: #{$gray-800-dark};
+  --bs-card-outline-color: #{$gray-800-dark};
+  --bs-card-box-shadow: 0 .75rem 1.5rem rgba(var(--bs-black-rgb), .5);
+}
+
+// Tables -----------------------------------------------------------------------
+
+.table {
+  --bs-table-head-bg: var(--bs-gray-100);
+  --bs-table-head-color: var(--bs-secondary-color);
+
+  thead th {
+    background-color: var(--bs-table-head-bg);
+    color: var(--bs-table-head-color);
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  td,
+  th {
+    border-top: $table-border-width solid var(--bs-table-border-color);
+    border-bottom: 0;
+  }
+
+  > :not(:first-child) {
+    border-top: 0;
+  }
+}
+
+.table thead th,
+tbody th,
+tbody td {
+  vertical-align: middle;
+}
+
+.table-sm {
+  font-size: $font-size-sm;
+
+  thead th {
+    font-size: .625rem;
+  }
+}
+
+[data-bs-theme="dark"] .table {
+  --bs-table-border-color: var(--bs-border-color);
+  --bs-table-hover-bg: #{$gray-900-dark};
+  --bs-table-head-bg: var(--bs-black);
+}
+
+// Tabs -------------------------------------------------------------------------
+
+// Underlined tabs: the active tab is marked by a primary-coloured rule.
+.nav-tabs {
+  --bs-nav-link-color: var(--bs-gray-600);
+  --bs-nav-link-hover-color: var(--bs-gray-700);
+
+  .nav-item {
+    margin-left: .75rem;
+    margin-right: .75rem;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .nav-link {
+    padding: 1rem 0;
+    border-width: 0 0 1px;
+    border-bottom: 1px solid transparent;
+  }
+}
+
+// Compact tabs (saved replies picker): smaller type, tighter spacing and a
+// body-coloured active tab.
+.nav-tabs.nav-tabs-sm {
+  --bs-nav-link-font-size: #{$font-size-sm};
+  --bs-nav-tabs-border-color: var(--bs-border-color);
+  --bs-nav-tabs-link-active-border-color: transparent transparent var(--bs-body-color);
+
+  .nav-item {
+    margin-left: .5rem;
+    margin-right: .5rem;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .nav-link {
+    padding: .25em 0;
+    color: var(--bs-gray-500);
+
+    &.active {
+      color: var(--bs-body-color);
+    }
+  }
+}
+
+// Menus ------------------------------------------------------------------------
+
+// Dropdown carets use the chevron icon instead of a CSS triangle.
+.dropdown-toggle::after {
+  content: "";
+  width: 1em;
+  height: 1em;
+  border: none !important;
+  vertical-align: middle;
+  background-color: currentColor;
+  -webkit-mask: url("../../../../../node_modules/feather-icons/dist/icons/chevron-down.svg") center / 100% 100% no-repeat;
+  mask: url("../../../../../node_modules/feather-icons/dist/icons/chevron-down.svg") center / 100% 100% no-repeat;
+}
+
+.dropup > .dropdown-toggle::after {
+  vertical-align: 0 !important;
+  -webkit-mask-image: url("../../../../../node_modules/feather-icons/dist/icons/chevron-up.svg");
+  mask-image: url("../../../../../node_modules/feather-icons/dist/icons/chevron-up.svg");
+}
+
+.dropdown-menu {
+  animation: dashboard-menu-in .15s;
+}
+
+@keyframes dashboard-menu-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+  --bs-dropdown-bg: #{$gray-800-dark};
+  --bs-dropdown-border-color: var(--bs-black);
+  --bs-dropdown-divider-bg: var(--bs-black);
+  --bs-dropdown-link-color: var(--bs-secondary-color);
+  --bs-dropdown-link-hover-color: var(--bs-white);
+}
+
+// Dialogs ----------------------------------------------------------------------
+
+.modal {
+  padding: 1%;
+}
+
+.modal-dialog {
+  .modal.fade & {
+    transform: translate(0, -150px);
+  }
+
+  .modal.show & {
+    transform: translate(0, 0);
+  }
+}
+
+.modal-header .btn-close {
+  margin: -1.5rem -1.5rem -1.5rem auto;
+}
+
+[data-bs-theme="dark"] .modal {
+  --bs-modal-bg: #{$gray-800-dark};
+  --bs-modal-border-color: var(--bs-black);
+}
+
+// Alerts -----------------------------------------------------------------------
+
+// Alerts are filled with their state colour, with contrasting text.
+@each $state, $value in $theme-colors {
+  .alert-#{$state} {
+    --bs-alert-color: #{color-contrast($value)};
+    --bs-alert-bg: var(--bs-#{$state});
+    --bs-alert-border-color: var(--bs-#{$state});
+    --bs-alert-link-color: #{color-contrast($value)};
+  }
+}
+
+.alert-link {
+  text-decoration: underline;
+}
+
+// Attachments ------------------------------------------------------------------
+
+// A file row: round icon tile, then name and size.
+.media {
+  display: flex;
+  align-items: flex-start;
+}
+
+.media-body {
+  flex: 1;
+}
+
+.icon-shape {
+  position: relative;
+  display: inline-block;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 50%;
+  font-size: 1.125rem;
+
+  > i,
+  > span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+// Image preview dialog sized to the image.
+.modal-fullscreen {
+  max-width: fit-content;
+}
+
+// Round remove badge pinned to the top-right corner of a preview.
+.badge-circle {
+  position: relative;
+  height: calc(1em + .778em);
+  padding: .389em;
+  border-radius: 2.25rem;
+}
+
+.badge-top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  transform: translate(25%, -25%);
+}
+
+// Small pieces -----------------------------------------------------------------
+
+.badge {
+  vertical-align: middle;
+}
+
+.btn .badge {
+  top: -2px;
+}
+
+.btn-close {
+  float: right;
+}
+
+.hljs {
+  padding: 0;
+}

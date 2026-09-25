@@ -1,0 +1,22 @@
+.avatar-title {
+    background-color: #fff;
+    border: 1px solid #efefef;
+    color: #737373;
+    font-size: 1.1em;
+    font-weight: 600;
+    -webkit-font-smoothing: antialiased;
+
+    &.has-icon {
+        font-size: 1.2em;
+    }
+
+    span {
+        letter-spacing: 0.05em;
+        margin-right: -0.05em;
+        margin-top: -0.04em;
+    }
+}
+
+.badge-avatar .avatar-title {
+    border: 1px solid #efefef;
+}

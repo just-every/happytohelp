@@ -1,0 +1,13 @@
+CREATE TABLE project_settings(project_id TEXT PRIMARY KEY REFERENCES projects(id), settings_json TEXT NOT NULL DEFAULT '{}',updated_at INTEGER NOT NULL);
+CREATE TABLE ai_profiles(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),name TEXT NOT NULL,role TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,is_enabled INTEGER NOT NULL DEFAULT 1,is_animated INTEGER NOT NULL DEFAULT 0,avatar_url TEXT,created_at INTEGER NOT NULL);
+CREATE TABLE macros(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),title TEXT NOT NULL,content TEXT NOT NULL,created_by TEXT NOT NULL REFERENCES users(id),created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL);
+CREATE TABLE plugins(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),name TEXT NOT NULL,url TEXT NOT NULL,sort_order INTEGER NOT NULL DEFAULT 0,is_enabled INTEGER NOT NULL DEFAULT 1,created_at INTEGER NOT NULL);
+CREATE TABLE conversation_reads(conversation_id TEXT NOT NULL REFERENCES conversations(id),user_id TEXT NOT NULL,revision INTEGER NOT NULL,PRIMARY KEY(conversation_id,user_id));
+CREATE TABLE conversation_notes(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id),user_id TEXT NOT NULL REFERENCES users(id),content TEXT NOT NULL,created_at INTEGER NOT NULL);
+CREATE TABLE conversation_participants(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id),contact_id TEXT NOT NULL REFERENCES contacts(id),created_at INTEGER NOT NULL,UNIQUE(conversation_id,contact_id));
+CREATE TABLE conversation_ai(conversation_id TEXT PRIMARY KEY REFERENCES conversations(id),ai_id TEXT REFERENCES ai_profiles(id));
+CREATE TABLE management_audit(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,actor_id TEXT NOT NULL,action TEXT NOT NULL,subject_id TEXT NOT NULL,created_at INTEGER NOT NULL);
+CREATE TABLE user_settings(user_id TEXT PRIMARY KEY REFERENCES users(id),timezone TEXT NOT NULL DEFAULT 'UTC',avatar_url TEXT,is_notifiable_on_conversation_assignment INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE platform_admins(user_id TEXT PRIMARY KEY REFERENCES users(id));
+CREATE TABLE ai_defaults(id TEXT PRIMARY KEY,role TEXT NOT NULL,name TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,created_at INTEGER NOT NULL);
+CREATE TABLE leads(id TEXT PRIMARY KEY,name TEXT NOT NULL,email TEXT NOT NULL,website TEXT,created_at INTEGER NOT NULL);

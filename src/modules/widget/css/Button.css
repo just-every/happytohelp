@@ -1,0 +1,167 @@
+#happytohelp-root .happytohelp-button {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 2147483604;
+  will-change: opacity;
+  line-height: 60px;
+  text-align: center;
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  transform: scale(1);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 20px 0px, rgba(0, 0, 0, 0.05) 0px 2px 4px 0px;
+  cursor: pointer;
+  transition: background 0.02s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.2s ease-out 0s, color 0.2s ease-out 0s;
+}
+#happytohelp-root .happytohelp-button svg {
+  text-align: center;
+  display: block !important;
+  line-height: 60px;
+  opacity: 0;
+  margin: 0 auto;
+  position: absolute;
+  font-size: 25px;
+  left: 20px;
+  transform: rotate(0deg) scaleX(-1);
+  top: 18px;
+  will-change: opacity, transform;
+  display: none;
+  transition: opacity 0.3s ease 0s, transform 0.2s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-button svg.happytohelp-show-closed {
+  font-size: 26px;
+  top: 17px;
+  left: 16px;
+}
+#happytohelp-root .happytohelp-button .happytohelp-ai-avatar {
+  opacity: 0;
+}
+@media (max-height: 800px) {
+  #happytohelp-root .happytohelp-button {
+    bottom: 15px;
+    right: 15px;
+  }
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root .happytohelp-button {
+    height: 55px;
+    width: 55px;
+    line-height: 55px;
+    bottom: 10px;
+    right: unset !important;
+    left: calc(100vw - 65px);
+    left: calc(var(--vw, 1vw) * 100 - 65px);
+  }
+  #happytohelp-root .happytohelp-button svg {
+    left: 18px;
+    top: 16px;
+  }
+  #happytohelp-root .happytohelp-button svg.happytohelp-show-closed {
+    font-size: 26px;
+    top: 15px;
+    left: 14px;
+  }
+}
+#happytohelp-root .happytohelp-button.happytohelp-button-transitioning {
+  transition: background 0.01s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.1s ease-in 0s, color 0.2s ease-out 0s !important;
+  transform: scale(0.4) !important;
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-button-transitioning svg, #happytohelp-root .happytohelp-button.happytohelp-button-transitioning .happytohelp-ai-avatar {
+  opacity: 0 !important;
+  transition: opacity 0.1s ease-in-out 0s, transform 0.2s ease-out 0s !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar {
+  background: #fff !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar .happytohelp-ai-avatar {
+  opacity: 1;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar svg.happytohelp-show-closed {
+  opacity: 0 !important;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar.happytohelp-avatar-animated img {
+  opacity: 0.001;
+  transition-duration: 1s;
+}
+#happytohelp-root .happytohelp-button.happytohelp-avatar.happytohelp-avatar-animated img.happytohelp-avatar-move {
+  opacity: 1;
+  transition-duration: 0.3s;
+}
+#happytohelp-root .happytohelp-button.happytohelp-icon svg {
+  opacity: 0.9;
+}
+#happytohelp-root .happytohelp-button.happytohelp-icon svg.happytohelp-show-opened {
+  opacity: 0;
+}
+#happytohelp-root .happytohelp-button.happytohelp-customize {
+  bottom: 46px;
+  right: 253px;
+  width: 140px;
+  padding-left: 30px;
+  background: transparent !important;
+  border: 1px solid #484748;
+  box-shadow: none;
+  color: #484748;
+  border-radius: 0px;
+  border-bottom-right-radius: 0.5rem;
+  transform: translateY(-60px);
+  opacity: 0;
+  transition: opacity 0.1s ease 0s, transform 0.1s ease-in-out 0s;
+}
+#happytohelp-root .happytohelp-button.happytohelp-customize.happytohelp-open {
+  transform: translateY(0px);
+  opacity: 0.2;
+  transition: opacity 0.4s ease 0.5s, transform 0.4s ease-in-out 0.5s;
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-button.happytohelp-customize.happytohelp-open:hover {
+    opacity: 1;
+  }
+}
+#happytohelp-root .happytohelp-button.happytohelp-customize svg {
+  top: 18px;
+  transform: scaleX(1);
+}
+@media (hover) {
+  #happytohelp-root .happytohelp-button:hover {
+    transition: background 0.01s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.2s ease-in-out 0.05s, color 0.2s ease-out 0s;
+    transform: scale(1.03);
+  }
+}
+#happytohelp-root .happytohelp-button:active {
+  transition: background 0.01s ease-in-out 0.01s, opacity 0.1s ease-in-out 0s, transform 0.1s ease-in-out 0s, color 0.2s ease-out 0s;
+  transform: scale(0.9);
+}
+#happytohelp-root.happytohelp-opened .happytohelp-button {
+  transition: background 0.02s ease-in-out 0.01s, opacity 0.5s ease-out 0s, transform 0.2s ease-out 0s, color 0.2s ease-out 0s;
+}
+@media (hover) {
+  #happytohelp-root.happytohelp-opened .happytohelp-button:hover {
+    color: rgb(72, 71, 72);
+  }
+}
+#happytohelp-root.happytohelp-opened svg.happytohelp-show-closed {
+  opacity: 0 !important;
+  transform: scaleX(-0.5) scaleY(0.5) rotate(-5deg);
+}
+#happytohelp-root.happytohelp-opened .happytohelp-button svg.happytohelp-show-opened {
+  opacity: 1;
+}
+@media (max-height: 600px), (max-width: 500px) {
+  #happytohelp-root.happytohelp-opened .happytohelp-button {
+    display: none;
+  }
+}
+#happytohelp-root.happytohelp-closed svg.happytohelp-show-opened {
+  opacity: 0 !important;
+  transform: scaleX(-0.9) scaleY(0.9) rotate(20deg);
+}
+
+/*# sourceMappingURL=Button.css.map */

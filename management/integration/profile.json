@@ -1,0 +1,22 @@
+{
+  "id": "happytohelp",
+  "name": "HappyToHelp",
+  "sourceRepository": "just-every/happytohelp",
+  "artifactFile": "delivery-artifact/happytohelp-worker-artifact.json",
+  "artifactNamePrefix": "happytohelp-worker-",
+  "compiler": "management/integration",
+  "requiredPublicInputs": [
+    "H2H_SETUP_OWNER_EMAIL"
+  ],
+  "ownerSetup": "Create the first owner at /setup using the privately delivered H2H_SETUP_TOKEN and connected owner email. The atomic setup claim consumes ownership once. Subsequent sessions use /login.",
+  "providerSetup": [
+    "Selected model provider API credentials for AI features",
+    "Email provider and verified sender for outbound mail; inbound token/routing for inbound mail",
+    "Integration encryption key and selected GitHub/import credentials when those features are enabled",
+    "A separate Cloudflare website preview address is assigned automatically",
+    "The management service configures the owner/admin editor bridge automatically"
+  ],
+  "operationalGaps": [
+    "Live model/email/provider acceptance is separate from build and /health"
+  ]
+}

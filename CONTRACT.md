@@ -47,8 +47,10 @@ implementation and acceptance evidence are tracked separately in ACCEPTANCE.md.
   becoming usable customer context.
 - **DELEGATION-001 — Explicit local authority.** Pairing, devices/grants,
   revocation, tool context and work/result states preserve investigation, resolve
-  and advance-authorized resolve-and-reply distinctions. Local processes remain
-  in the optional connector, never an implicit Worker capability.
+  and advance-authorized resolve-and-reply distinctions. Revocation withdraws
+  authority and never asserts that a local process stopped: started work becomes
+  terminal with an unconfirmed outcome, and only the device may report cancellation.
+  Local processes remain in the optional connector, never an implicit Worker capability.
 - **TRAINING-001 — Durable evaluation.** Training and evaluation preserve run/case
   state, model/budget selection, raw provider usage and cancellation/recovery.
   Synthetic data admission is explicitly local/test-only. Historical pending

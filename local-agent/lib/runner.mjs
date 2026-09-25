@@ -313,7 +313,7 @@ async function startCancellationMonitor(config, api, save, runtimeAbort, log, ac
       reconcileTerminalJobs(config, response);
       if (!activeJobs(config)[active.jobId]) {
         await save();
-        runtimeAbort.abort(new ConnectorError('The server terminally cancelled this assignment after workspace access changed.', { code: 'JOB_TERMINAL' }));
+        runtimeAbort.abort(new ConnectorError('The server withdrew this assignment after workspace access changed.', { code: 'JOB_TERMINAL' }));
         return;
       }
       const state = scopedJobState(response, active.jobId);
@@ -432,7 +432,7 @@ async function execute(config, api, save, {
     } else if (runtimeAbort.signal.reason?.code === 'DEVICE_REVOKED') {
       await markRevoked(config, save);
     } else if (runtimeAbort.signal.reason?.code === 'JOB_TERMINAL') {
-      // The server already terminally cancelled an inaccessible workspace job.
+      // The server already withdrew this job (for example after workspace access changed); it never learns the local outcome.
     } else if (runtimeAbort.signal.aborted) {
       await submitResult(config, api, 'cancelled', failureResult('Delegated local runtime was cancelled.'), active.providerIdentity?.providerSessionId, save, active);
     } else {
@@ -550,7 +550,7 @@ export class LocalRunner {
     const active = activeFor(this.config, jobId);
     const activity = await this.mcpActivity();
     if (activity.terminalJobs.some((job) => job.jobId === active.jobId)) {
-      throw new ConnectorError('The server terminally cancelled this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
+      throw new ConnectorError('The server withdrew this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
     }
     if (fresh) {
       const snapshot = await this.api.context(active.jobId, active.runId);
@@ -572,7 +572,7 @@ export class LocalRunner {
     const active = activeFor(this.config, jobId);
     const activity = await this.mcpActivity();
     if (activity.terminalJobs.some((job) => job.jobId === active.jobId)) {
-      throw new ConnectorError('The server terminally cancelled this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
+      throw new ConnectorError('The server withdrew this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
     }
     await postProgress(this.config, this.api, message, { force: true, active });
     await this.save();
@@ -583,7 +583,7 @@ export class LocalRunner {
     const active = activeFor(this.config, jobId);
     const activity = await this.mcpActivity();
     if (activity.terminalJobs.some((job) => job.jobId === active.jobId)) {
-      throw new ConnectorError('The server terminally cancelled this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
+      throw new ConnectorError('The server withdrew this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
     }
     if (status === 'completed' || status === 'needs_input') {
       const validated = validateAgentOutput({ status, ...result });
@@ -603,7 +603,7 @@ export class LocalRunner {
     const active = activeFor(this.config, jobId);
     const activity = await this.mcpActivity();
     if (activity.terminalJobs.some((job) => job.jobId === active.jobId)) {
-      throw new ConnectorError('The server terminally cancelled this assignment. Do not upload or retry it.', { code: 'JOB_TERMINAL' });
+      throw new ConnectorError('The server withdrew this assignment. Do not upload or retry it.', { code: 'JOB_TERMINAL' });
     }
     const state = scopedJobState(activity.response, active.jobId);
     if (cancelRequested(state)) {
@@ -642,7 +642,7 @@ export class LocalRunner {
     const active = activeFor(this.config, jobId);
     const activity = await this.mcpActivity();
     if (activity.terminalJobs.some((job) => job.jobId === active.jobId)) {
-      throw new ConnectorError('The server terminally cancelled this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
+      throw new ConnectorError('The server withdrew this assignment. Do not continue or retry it.', { code: 'JOB_TERMINAL' });
     }
     if (!mcpRecovery(this.config, this.mcpInstanceId, active)) {
       return assignmentForSession(active.job);
@@ -721,8 +721,8 @@ export class LocalRunner {
         const terminal = reconcileTerminalJobs(this.config, response);
         for (const active of terminal) {
           const running = this.runningJobs.get(active.jobId);
-          running?.controller.abort(new ConnectorError('The server terminally cancelled this assignment after workspace access changed.', { code: 'JOB_TERMINAL' }));
-          this.log(`Job ${active.jobId} was terminally cancelled by the server and removed from the local queue.`);
+          running?.controller.abort(new ConnectorError('The server withdrew this assignment after workspace access changed.', { code: 'JOB_TERMINAL' }));
+          this.log(`Job ${active.jobId} was withdrawn by the server and removed from the local queue.`);
         }
         const launchCandidates = [];
         let reconciledTerminalWork = false;

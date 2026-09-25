@@ -32,4 +32,27 @@ is authenticated; the edition supplies the first-party browser form.
 
 Verification: node tests/local-computer-runtime.mjs runs the real module HTTP routes against local workerd, D1 and R2. The native browser authorization page is supplied by WorkspacePages/ComputersPage; pairing/device secrets never enter its URL.
 
-Result event, terminal status and pending effects commit atomically. Retry or scheduled recoverLocalResultEffects resumes notes and exact-ID reply admission after a crash. Tests inject a post-delivery/pre-note failure and prove one message plus one note after recovery.
+Revocation withdraws authority; it never confirms that the paired host stopped. Revoking a device or a
+grant cancels only queued work (it never started) and moves running/needs_input work to the terminal status
+`revoked` with `cancel_requested=1`, `completed_at` and `delivery_state='authority_revoked'`; heartbeat
+membership loss uses the same status with `delivery_state='membership_lost'`. The server cannot learn the local
+process outcome afterwards: a revoked device or grant answers 401 and the connector records `revoked_unknown`
+for its active work, while after membership loss the heartbeat omits the withdrawn job, job routes answer 403 and
+the connector stops and drops that run locally without reporting. `cancelled` is written only for queued work or
+for a cancellation the device itself reports. Job scope is exactly the revoked device plus its grant siblings;
+jobs on any other device, including devices revoked earlier, are untouched. The terminal status frees the
+one-active-delegation index, so the conversation can be delegated again.
+
+A claim id belongs to at most one job. Replaying a claim id whose job is no longer running or awaiting input
+returns `data:null`: a reconnecting connector is never handed back withdrawn or finished work, and the spent
+claim id never claims other queued work.
+
+Result event, terminal status and pending effects commit atomically. Retry or scheduled recoverLocalResultEffects
+resumes notes and exact-ID reply admission after a crash. When authority is gone (device revoked or operator
+membership lost) the effect is blocked and `delivery_state='authorization_lost'` is recorded while the report
+stays terminal; it is never reopened for input that nobody could act on. A reply that fails delivery reopens the
+report as `needs_input` with `delivery_state='review'` only while no replacement delegation holds the
+conversation. Each effect is swept independently, so one failing row cannot abort the sweep or the scheduled
+recoveries after it. Legacy imports use the same vocabulary: started delegations arrive
+`revoked`/`authority_revoked`, queued ones `cancelled`/`held`. Tests inject a post-delivery/pre-note failure and
+prove one message plus one note after recovery. Verification: node tests/local-computer-revocation.mjs.

@@ -75,6 +75,9 @@ try{
  assert.equal((await request('/api/local-agents/task-sessions',{client_session_id:'native-test',name:'Fixture skill',capabilities:[]},grant.data.grant_token)).status,409);
  assert.equal((await request('/api/projects/p/local-agent-grants/'+task.data.device.grant_id,undefined,'operator','DELETE')).status,200);
  assert.equal((await request('/api/local-agents/heartbeat',{},task.data.token)).status,401);
- await db.prepare("DELETE FROM memberships WHERE project_id='p'").run();assert.equal((await request('/api/local-agents/claim',{claim_id:'claim1'},token)).status,403);
- console.log('Local native runtime: pairing single use, scoped claims/replay, run mismatch, results idempotency, missing-cost reservation/no-replay, membership revocation passed.');
+ await db.prepare("DELETE FROM memberships WHERE project_id='p'").run();
+ // The device token stays valid: membership loss answers 403 from accessible(), and a claim id whose job is already terminal yields no assignment at all.
+ assert.equal((await request('/api/local-agents/jobs/'+queued.data.id+'/context?run_id='+claim.data.run_id,undefined,token,'GET')).status,403);
+ const terminalClaim=await request('/api/local-agents/claim',{claim_id:'claim1'},token);assert.equal(terminalClaim.status,200,JSON.stringify(terminalClaim));assert.equal(terminalClaim.data,null);
+ console.log('Local native runtime: pairing single use, scoped claims/replay, terminal claim ids unassigned, run mismatch, results idempotency, missing-cost reservation/no-replay, membership revocation passed.');
 }finally{await mf.dispose();await rm(folder,{recursive:true,force:true});}

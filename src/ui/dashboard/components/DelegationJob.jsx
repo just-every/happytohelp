@@ -17,6 +17,13 @@ const statusNames = {
     completed: 'Completed',
     failed: 'Could not complete',
     cancelled: 'Cancelled',
+    revoked: 'Authority revoked · local outcome unconfirmed',
+};
+
+// A completed report whose follow-up effects stopped says why, so an undelivered reply is never mistaken for a sent one.
+const completionNotices = {
+    authorization_lost: 'Authority was withdrawn before this report’s note or reply was recorded.',
+    review: 'The reply was not delivered. Review the conversation before replying yourself.',
 };
 
 const isActive = job => [ 'queued', 'running', 'needs_input' ].includes(job.status);
@@ -36,8 +43,8 @@ export default function DelegationJob({ job, onCancel, onInsertDraft, onSendInpu
     const canInsertDraft = Boolean(result?.reply_draft) && job.mode !== 'resolve_reply';
     const freshnessReview = job.freshness_review?.required ? job.freshness_review : null;
     const freshnessReviewId = freshnessReview?.latest_last_message_id || null;
-    const statusLabel = job.delivery_state === 'revoked'
-        ? 'Cancelled — device access revoked'
+    const statusLabel = job.status === 'revoked' && job.delivery_state === 'membership_lost'
+        ? 'Workspace access ended · local outcome unconfirmed'
         : statusNames[job.status] || job.status;
     const latestProgress = progress[progress.length - 1] || null;
 
@@ -107,6 +114,7 @@ export default function DelegationJob({ job, onCancel, onInsertDraft, onSendInpu
                 <div>
                     <h3 id={ 'delegation-job-' + job.id }>{ modeNames[job.mode] || 'Task' } completed</h3>
                     { result?.summary && <p className="delegation-job__summary">{ result.summary }</p> }
+                    { completionNotices[job.delivery_state] && <p className="delegation-job__summary" role="status">{ completionNotices[job.delivery_state] }</p> }
                 </div>
             </div>
             <DelegationAttachments attachments={ result?.attachments } />

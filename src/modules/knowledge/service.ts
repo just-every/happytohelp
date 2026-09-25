@@ -4,7 +4,6 @@ import {consumeImport} from './import-jobs'
 import {startCrawl,crawlStatus,type CrawlConfig} from './crawl'
 import {stageCorpus,consumePage} from './ingestion'
 import type { Env, Job } from '../../platform/env'
-import { hashToken } from '../../platform/auth'
 import { apifyDocuments, collection, embeddings, qdrant, type DocumentInput } from './providers'
 export interface Citation { id:string;sourceVersion:string;url:string;title:string;content:string;score:number }
 export function validateDocuments(value:unknown):DocumentInput[]{

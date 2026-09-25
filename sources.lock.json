@@ -836,7 +836,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "90eb01d314cae7a0fcfc7c6323c419cd2ba6dd14e5a07ebaa64e36dc6c528e22",
+      "sha256": "2cd7e57d161e950892773382f82f82e6bfd75d86cce9e6a2a46936fb3aa6f82d",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -1392,7 +1392,7 @@
       "executable": false
     },
     "scripts/verify-modules.mjs": {
-      "sha256": "8a573acc78f7db4cf8a0f9fc1d87d6adc5d599cfcfe57998f3f48fca9e0e9ef4",
+      "sha256": "40f58b2fcb17e7a534025ca7cb81ad43c57049765f72f49a05265be726f812b8",
       "executable": false
     },
     "scripts/verify-visual-edit.mjs": {
@@ -1636,7 +1636,7 @@
       "executable": false
     },
     "src/modules/ai-support/repository.ts": {
-      "sha256": "8a4a947e15b11ac3c4b21ad68d61bd3579c1c6a91cbbe0bcc4443f1bab474733",
+      "sha256": "a187a58055bf5c93387ed570fda68db8b8439a3f83f81b842078b9a1d67146bc",
       "executable": false
     },
     "src/modules/ai-support/routes.ts": {
@@ -2196,7 +2196,7 @@
       "executable": false
     },
     "src/modules/knowledge/service.ts": {
-      "sha256": "b399d2110a32cd734e7bbb12ddabc90db96a5661a54177bab13461f92f3c6437",
+      "sha256": "d20b047e4db05e219aa9f037b020c96686a4d6ea773cd9d327badd72feb9b452",
       "executable": false
     },
     "src/modules/legacy-import/importer.ts": {

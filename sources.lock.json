@@ -396,7 +396,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "4f6da18e7c60ad86c8708c9ad5388ecaca899cdb143e8102a9eaa3e9fed83bdc",
+      "sha256": "736f4fb5f204d6de899e3042f42e1796e968abe5409531fc1254167b1c9fc332",
       "executable": false
     },
     "CONTRACT.md": {
@@ -4536,7 +4536,7 @@
       "executable": false
     },
     "tests/independent-runtime.mjs": {
-      "sha256": "44a031a8fb0c58afc7cb6534c7d25c1e7eaf8d9f156c4c0678d0b7ea6e19731d",
+      "sha256": "eed496ab5e3bf0ea3de73b97ca2124bdacaec3e70a52a11a89f7a8eb35be650c",
       "executable": false
     },
     "tests/installer-address.mjs": {

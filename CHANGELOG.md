@@ -14,6 +14,11 @@ include breaking changes.
   `rer-project.json` build and verify commands now put the pnpm 10.12.4 that
   `scripts/independent/setup-build.mjs` installs in `.rer-tools` first on
   `PATH`. Standalone installation and the `pnpm run` scripts are unchanged.
+- The `rer-project.json` artifact check no longer fails with `97 !== 94`.
+  `tests/independent-runtime.mjs` still requires an exact table count, now 97:
+  migrations `0102_public_abuse_limits` (`abuse_counters`) and
+  `0103_contact_erasure` (`contact_erasures`, `contact_erasure_objects`) in
+  0.2.0 added three tables that the expected count had not been updated for.
 
 ## 0.2.0 - 2026-09-25
 

@@ -4,6 +4,17 @@ All notable changes to HappyToHelp are recorded here. Versions follow
 [Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
 include breaking changes.
 
+## 0.2.1 - 2026-09-27
+
+### Fixed
+
+- Hosted Assisted and Managed builds no longer fail with `pnpm: not found`.
+  Run Edit Run's trusted project build provides Node but no global pnpm, and the
+  package scripts that `build` and `verify` run call `pnpm`. The
+  `rer-project.json` build and verify commands now put the pnpm 10.12.4 that
+  `scripts/independent/setup-build.mjs` installs in `.rer-tools` first on
+  `PATH`. Standalone installation and the `pnpm run` scripts are unchanged.
+
 ## 0.2.0 - 2026-09-25
 
 First public source release of the self-hosted edition.

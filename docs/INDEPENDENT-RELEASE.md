@@ -52,7 +52,10 @@ installations of HappyToHelp. These files describe the project to that service:
   at a pinned commit. Candidate commands receive no deployment credentials; the
   delivery service owns publication.
 - `node scripts/independent/setup-build.mjs` installs pnpm into `.rer-tools`,
-  the frozen application dependencies and Chromium for that build.
+  the frozen application dependencies and Chromium for that build. The trusted
+  build provides Node but no global pnpm, so the build and verify commands put
+  `.rer-tools/node_modules/.bin` first on `PATH` before running the package
+  scripts.
 - `management/` holds the integration profile the service adopts
   ([management/README.md](../management/README.md)).
 

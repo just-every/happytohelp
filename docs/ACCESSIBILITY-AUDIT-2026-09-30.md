@@ -1,41 +1,60 @@
-# Dashboard and widget accessibility closeout
+# Dashboard and widget accessibility audit
 
-This is a bounded local audit of the native dashboard and embedded chat widget. It records the rendered states and checks exercised; it is not a claim of complete WCAG certification or a substitute for assistive-technology and user testing.
+This is a bounded local Chromium audit targeting WCAG 2.2 AA, not complete WCAG certification or assistive-technology acceptance. It supersedes the earlier closeout's unsupported claims about populated article Delete contrast, settled note-dialog containment, and translucent branding focus contrast. The correction starts from composed source `c7f0d1b8ce447e59804d736ce364e9812dcf2715`.
 
-## Automated and manual scope
+## Corrections and direct evidence
 
-`pnpm run test:accessibility-browser` runs Axe 4.13.0 in Chromium 153.0.8010.12 against tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` and `wcag22aa`. The test uses the locally emitted Worker and a local widget host with synthetic tenant, visitor, conversation and attachment data. It checks these 19 rendered states:
+- The populated article editor's red Delete text was `#e63757` on white (4.15:1). Its existing destructive text style now uses `#c62949`; desktop and 320-pixel measurements must pass the unchanged 4.5:1 threshold. The check creates an article through the real local API, opens its editor, and activates and cancels the real deletion confirmation with Enter at both widths.
+- The settled Add Note dialog previously let forward Tab escape through BODY and could strand reverse navigation on the dialog container. A dialog-level boundary now resolves current native tab stops on each Tab, wraps in both directions, and focuses the dialog when all controls are disabled. The close icon follows the same busy state as Note, Close and Add. The audit waits beyond the entrance transition, verifies container entry in both directions and three complete forward and reverse four-control loops (24 presses), Escape and Reply tools restoration. It also delays then forwards an unchanged real note request to prove all four controls are disabled while busy, Tab/Shift+Tab remain contained, Escape does not cancel the in-flight save, and the resulting note persists.
+- Additional branding previously used `rgba(113,62,224,.4)` on white: the composited ratio is about 1.90:1, not the opaque RGB value 6.06:1. Native summaries now receive the existing opaque focus ring and halo. Eight pixels of spacing prevent the ring overlapping the adjacent brand image. The corrected oracle also exposed a fading, initially transparent halo over the mobile navigation surface; focus styles now apply immediately, and that control has a separate rendered-pixel check. The widget Send button also inherited a white outside ring that blended into its light surrounding surface; removing that override restores the existing blue ring, verified against the outside surface rather than its blue button fill. Both computed alpha compositing and independent screenshot pixels are checked against 3:1 at desktop and 320 pixels; Enter and Space toggle the disclosure and Tab reaches Logo URL.
 
-| Surface | Axe states |
+The six independent checks in `node tests/accessibility-corrections.mjs` exercise repeated forward/reverse Tab, disabled fieldsets/inert/hidden/negative-tabindex controls, entry from the container, busy/no-control containment, dynamic single-control containment, and the contrast oracle. A deliberately translucent test ring is measured near 1.90:1 by both compositing and screenshot sampling, and an opaque ring passes both. These are isolated component test fixtures; the application audit uses real Worker/D1/R2 behavior.
+
+## Rendered audit scope
+
+`pnpm run test:accessibility-browser` runs Axe 4.13.0 with tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` and `wcag22aa`. All original 19 states are retained, with two additional populated editor scans:
+
+| Surface | Rendered states |
 | --- | --- |
-| Dashboard | Setup; login; populated inbox; open workspace switcher; open composer tools; note dialog; account menu; project settings General; project Appearance; knowledge datasets; knowledge articles; knowledge categories; 320 CSS-pixel mobile inbox. |
-| Widget | Consent-granted closed widget; open composer; validation errors; attachment composer; attachment preview dialog; 320 CSS-pixel mobile widget. |
+| Dashboard, original 13 | Setup; login; populated inbox; open workspace switcher; open composer tools; note dialog; account menu; project settings General; Appearance; knowledge datasets; knowledge articles list; knowledge categories; 320-pixel mobile inbox. |
+| Widget, original 6 | Consent-granted closed widget; open composer; validation errors; image attachment composer; image preview dialog; 320-pixel mobile widget. |
+| Added dashboard 2 | Populated article editor at 1440 and 320 CSS pixels. |
 
-All 19 scans returned **zero Axe violations**. Axe reported no incomplete rule other than `color-contrast`. Of its 83 color-contrast review nodes, the rendered-pixel sampler measured 71 against the background actually composited behind the text; every measurement met Axe’s applicable threshold (lowest 4.61:1). Twelve nodes could not be classified by that sampler. Their disposition is recorded here rather than counted as passing Axe results:
+The worker and widget host use synthetic local tenant/customer records. The article-list scan retains its empty state; populated article coverage is explicitly the added editor. The widget mobile state includes both an image and a non-image attachment. Image preview supports a keyboard-contained dialog with Escape and trigger restoration. Non-image media uses an actual blob link: Enter opens its content in a separate tab. Its focusable target now has 24-pixel minimum height and spacing so the outside focus ring does not overlap adjacent file-size text; the focused mobile state remains in the contrast scan. Although the preview component has an iframe branch, supported media controls never open that branch; no iframe-preview state or coverage is claimed.
 
-| Incomplete target(s) | Count | Disposition |
+The skip link moves focus to main content. Workspace/account menus retain Escape restoration. The mobile inbox list is inert and hidden from assistive technology while its conversation covers it. Reflow checks use desktop, 320 CSS pixels and a reduced CSS viewport equivalent to 200% zoom; this is not operating-system scaling. Layout receipts include visible control sizes, clipping, names and center reachability.
+
+## Evidence and disposition
+
+The fresh run returned **zero Axe violations across 21 scans** in Chromium 153.0.8010.12. Its only incomplete rule was color contrast: 86 nodes, of which 74 were measured against rendered background pixels (minimum 4.61:1) and 12 remain explicitly limited below. All 39 direct text/icon measurements passed. Article Delete measured **5.51:1** at both widths; branding focus measured **5.98:1** in both compositing and pixels. The Send ring measured **5.55:1** against its actual surrounding surface. Seven general keyboard passes made 122 Tab presses and recorded 113 named, visible, reachable stops (minimum computed ring contrast 4.23:1), in addition to the dedicated note/disclosure/media checks.
+
+| Limited contrast target | Count | Disposition |
 | --- | ---: | --- |
-| `.conversation-suggestions__empty` under the open note dialog | 1 | The dialog covers this background content, so its current pixels are not available as a text/background pair. The same text in the unobscured populated inbox was measured at 6.06:1. The modal state itself has no Axe violation. |
-| `#timezone` | 1 | Axe does not expose the native select’s displayed option as a text node. The actual control foreground/background was measured at 17.27:1, and its embedded select chevron at 3.82:1 against the field surface. |
-| `.avatar-title.rounded-circle > span` in the account-menu and mobile states | 2 | Axe could not classify the one-character initials. Direct rendered-style measurement found 6.41:1 against the avatar fill. |
-| Widget responder initials in the consent-closed, composer, error, attachment and mobile states | 8 | Axe could not resolve the Shadow DOM pseudo-element/background composition for these repeated initials. The same visible header and launcher initials were directly measured in the open state at 8.73:1 against their blue fill. |
+| Inbox suggestion under the open note dialog | 1 | Covered by the modal; its unobscured inbox rendering measured 6.06:1. No fabricated modal-background sample. |
+| Native timezone select text | 1 | No exposed text fragment for the pixel sampler. Direct resolved control text measured 17.27:1; embedded chevron separately measured 3.82:1. |
+| Dashboard account initials | 2 | One-character text not classified by Axe; the same initials/fill measured 6.41:1 directly. |
+| Widget header/launcher responder initials | 8 | Shadow/pseudo-element composition not resolved by Axe; the repeated visible initials/fill measured 8.73:1 directly. |
 
-The non-text widget and select icons, their hover/focus states, and keyboard focus indicators were separately checked. The select chevron measured 3.82:1 (3:1 minimum); widget action icons measured at least 4.61:1 (3:1 minimum), including 4.97:1 in the hover/focus checks; the focus ring measured at least 3.51:1 against its surrounding surface (3:1 minimum). Across 37 direct text/initial/icon measurements, all 32 text/initial checks passed (lowest 4.61:1), as did all five widget icon checks. The select chevron result is a separate measurement. Evidence records preserve the foreground, resolved background, ratio and applicable threshold for each check.
+Seven layout measurements found no horizontal overflow, clipped controls, unnamed controls or unreachable centers. The populated article's Published switch is 36×20 pixels at both widths; its separate target-spacing receipt checks that its centered 24-pixel circle does not intersect another target or another undersized target's circle. It is not falsely reported as a 24×24 target. The other five layout measurements have no targets below 24×24.
 
-Seven keyboard passes made 122 Tab presses and recorded 113 focused controls. Every recorded stop had a non-empty name, a visible focus indicator, and was reachable at its center; no focus indicator measured below 3:1. Name extraction checks `aria-labelledby`, `aria-label`, associated native labels, image alt text, title and visible text. Of the recorded names, 4 came from associated labels, 49 from ARIA labels, 2 from titles and 58 from visible text. The skip link was separately focused and activated to verify that it moves focus to the main region. Escape and focus restoration were checked for the workspace switcher, note dialog and account menu. The widget preview dialog was checked for Tab containment, Escape dismissal and focus restoration; host consent revocation was checked to unmount the widget.
+Build, typecheck, the six independent correction checks and `git diff --check` passed. The protected-input receipt verifies 214 original non-audit tests, fixtures and migrations against the composed base byte for byte. Commands used Node 26.8.1 and pnpm 10.12.4:
 
-Layout checks measured visible dashboard controls at 1440×1000, 320×568 and a 720×500 viewport equivalent to 200% zoom reflow. The settled widget panel itself—not its zero-height outer host—was measured at 500×815 in a 1440×960 viewport and 320×560 at 320×568. All five measurements reported no document or widget-surface horizontal overflow, no clipped controls, no unnamed controls, no unreachable control centers and no targets smaller than 24×24 CSS pixels. On mobile, the visually covered inbox list is both `inert` and `aria-hidden` while a conversation is open.
+```sh
+source /Users/zemaj/.orchestrator/evidence/runeditrun/runtime/runtime-paths.sh
+export PATH="$RER_RUNTIME/pnpm10/node_modules/.bin:$PATH"
+pnpm install --frozen-lockfile
+pnpm run build
+pnpm run typecheck
+H2H_EVIDENCE_DIR=/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-fix node tests/accessibility-corrections.mjs
+H2H_EVIDENCE_DIR=/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-fix node tests/accessibility-browser.mjs
+```
 
-## Changes made
+Final machine-readable results, exact source revision and emitted artifact hashes are in `/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-fix/accessibility-browser-summary.json`. The same directory contains Axe reports/screenshots, keyboard/layout/text measurements, `branding-focus-contrast.json`, `note-dialog-repeated-navigation.json`, `note-dialog-busy.json`, `widget-nonimage-keyboard.json`, `correction-regressions.json`, build/typecheck logs and `process-cleanup.json`. Diagnostic failed attempts remain separate from final results.
 
-The closeout adds visible keyboard focus, a skip link and main-region focus target; fixes navigation and inbox layout around that main region; makes dialog and mobile-covered content unavailable to background keyboard stops; names the reply field and widget actions; repairs native button semantics, dialog focus handling and status announcements; and darkens the measured low-contrast setup, dashboard and widget text/icons. The native select chevron now uses the darker neutral token and is checked at runtime. Existing product layout and the audited widget flow are retained.
+Axe incomplete color-contrast nodes are not counted as Axe passes. The existing pixel sampler measures the background behind text where it can resolve visible text fragments; `incompleteContrast` retains each measured or limited disposition. Obscured background content under a dialog, native select text and avatar initials require separate disposition rather than a fabricated sample. Direct style measurements resolve foreground alpha; keyboard focus measurements now composite outline and halo alpha, with rendered-pixel checks for the corrected branding control. Solid ring/halo checks do not establish arbitrary custom-theme, image-backed or ancestor-opacity combinations.
 
-The test is split by responsibility: `tests/accessibility-browser.mjs` coordinates the isolated runtime, `tests/helpers/accessibility-axe-audit.mjs` stores scans and contrast dispositions, `tests/helpers/accessibility-interaction-audit.mjs` measures keyboard/layout/manual styles, and separate dashboard/widget flow files exercise their routes and interactions.
+## Limits
 
-## Evidence and limits
+This audit covers Chromium, the listed native states and the configured single human responder. That widget configuration has a static named responder, not an operable picker, so multi-responder picker acceptance remains unverified. VoiceOver, NVDA, JAWS, other browser/assistive-technology combinations and independent human review remain required outside this local evidence. No live email/model/provider calls, deployment, production import or public-release acceptance are claimed. The provider and feature gaps in `UI-PARITY.md` remain explicit; its ten rows each record reason, user impact and a supported alternative or none, including the existing native demo inbox.
 
-The machine-readable results and screenshots are in `/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-execution/`. The summary records each Axe scan, incomplete-node disposition, keyboard sequence, layout rectangle, contrast ratio, browser version and emitted artifact hash. In the final audit run the dashboard arrow measurement is also in `dashboard-timezone-chevron-contrast.json`.
-
-This run covers Chromium only. It does not include VoiceOver, NVDA, JAWS, a screen-reader/browser matrix, an independent human usability study, live email/model/provider journeys or hosted deployment. The 200% reflow check uses the corresponding reduced CSS viewport rather than operating-system display scaling. The widget’s local configuration has one human responder, so it exposes a static, named responder and has no picker control to operate. These limitations do not change the scan results, but they bound where those results apply.
-
-`docs/UI-PARITY.md` records the remaining native feature/API differences and why each unsupported legacy capability has no working native equivalent. This accessibility report does not treat those product gaps as accessibility fixes or silently claim feature equality.
+The corrections retain the accepted presentation. The applicable 12ui guidance was read and its existing-style integration path used; no remote or charged design operation was run. Original non-audit tests, fixtures and migrations remain byte-identical. Source-lock refresh and release metadata are owned by the composition/release lane and are not part of this correction commit.

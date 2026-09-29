@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {writeFile} from 'node:fs/promises';
+import {checkNoteLoop, checkBrandingFocus, checkPopulatedArticle, submitBusyNote} from './accessibility-correction-flow.mjs';
+import {measureFocusIndicator} from './accessibility-focus-contrast.mjs';
 import {contrastRatio, svgBackgroundStrokeColor} from './accessibility-contrast.mjs';
 
 export async function runDashboardAccessibility({browser, page, runtime, hostOrigin, call, axePath, audit, checks, errors, failedResponses, evidenceDir}) {
@@ -96,6 +98,8 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
     const noteDialog = page.getByRole('dialog', {name: 'Add Note'});
     await noteDialog.waitFor();
     assertAxeClean(await scan(page, 'dashboard-note-dialog'), 'note dialog');
+    await checkNoteLoop(page, evidenceDir);
+    checks.push('settled note dialog completes three forward and three reverse four-control loops');
     const noteFocus = await page.evaluate(() => ({active: document.activeElement?.outerHTML?.slice(0, 240), visible: document.activeElement?.getBoundingClientRect().width > 0}));
     await page.keyboard.press('Escape');
     await noteDialog.waitFor({state: 'detached'});
@@ -107,7 +111,8 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
     await page.getByRole('button', {name: /Reply tools/}).click();
     await page.getByRole('menuitem', {name: 'Internal note', exact: true}).click();
     await page.getByRole('dialog', {name: 'Add Note'}).getByLabel('Note', {exact: true}).fill('Accessibility audit note, synthetic content.');
-    await page.getByRole('dialog', {name: 'Add Note'}).getByRole('button', {name: 'Add', exact: true}).click();
+    await submitBusyNote(page, evidenceDir);
+    checks.push('busy note disables all four controls, retains Tab/Shift+Tab/Escape focus, then persists through the real Worker');
     await page.getByText('Accessibility audit note, synthetic content.', {exact: true}).waitFor();
     await measureContrast(page, 'dashboard-inbox', [
         {label: 'conversation search placeholder', selector: '#chat input[type="search"]', pseudo: '::placeholder'},
@@ -143,6 +148,8 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
     await page.getByRole('button', {name: 'Appearance', exact: true}).click();
     assertAxeClean(await scan(page, 'dashboard-project-appearance'), 'project appearance');
     await keyboardPass(page, 'dashboard-project-settings', {count: 24});
+    await checkBrandingFocus(page, evidenceDir);
+    checks.push('branding disclosure focus passes composited and rendered-pixel contrast at desktop and 320 pixels; Enter/Space toggle and Tab reaches Logo URL');
     checks.push('project settings General and Appearance tabs are axe scanned');
 
     for (const route of ['datasets', 'articles', 'categories']) {
@@ -151,6 +158,8 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
         const result = await scan(page, `dashboard-knowledge-${route}`);
         assertAxeClean(result, `knowledge ${route}`);
     }
+    await checkPopulatedArticle({page, runtime, projectId: bootstrap.projectId, ownerToken: owner.token, call, audit, evidenceDir});
+    checks.push('populated article editor passes desktop/mobile Axe, Delete text contrast, layout and keyboard confirmation cancellation');
     checks.push('datasets, article knowledge, and categories routes are axe scanned');
 
     await page.setViewportSize({width: 320, height: 568});
@@ -171,6 +180,10 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
     assert.equal(zoomReflow.targetsClipped.length, 0, `200% viewport-equivalent dashboard controls remain clipped after scrolling: ${JSON.stringify(zoomReflow.targetsClipped)}`);
     assert.equal(zoomReflow.interactive.filter(item => !item.centerReachable).length, 0, '200% viewport-equivalent dashboard controls cannot be reached at their center');
     await keyboardPass(page, 'dashboard-200-percent-zoom', {count: 20});
+    await page.getByRole('button', {name: 'Toggle navigation', exact: true}).focus();
+    const navigationFocus = await measureFocusIndicator(page, {samplePixels: true});
+    assert.ok(navigationFocus.ringContrastAgainstHalo >= 3 && navigationFocus.pixelSample.contrastRatio >= 3, 'navigation focus halo must be opaque immediately on focus');
+    await writeFile(join(evidenceDir, 'navigation-focus-contrast.json'), JSON.stringify(navigationFocus, null, 2));
     checks.push('320 CSS-pixel reflow and 200% CSS zoom emulation measured');
 
         return {widgetConfig};

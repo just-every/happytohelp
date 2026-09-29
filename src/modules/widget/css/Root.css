@@ -2475,6 +2475,14 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-root .happytohelp-send-message a {
   color: #000;
 }
+#happytohelp-root .happytohelp-files .happytohelp-preview > a {
+  display: inline-block;
+  min-height: 24px;
+  padding-block: 3px;
+  margin-inline-end: 6px;
+  max-width: calc(100% - 6px);
+  box-sizing: border-box;
+}
 #happytohelp-root .happytohelp-send-message.happytohelp-send-message-conversation {
   border-top-left-radius: 0px;
   margin: 0px;
@@ -2791,9 +2799,6 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-modal-preview :focus-visible {
   outline: 2px solid #005fcc !important;
   outline-offset: 2px !important;
-}
-#happytohelp-root .happytohelp-send-message-row button[name="submit"]:focus-visible {
-  outline-color: #fff !important;
 }
 
 #happytohelp-root button.happytohelp-close,

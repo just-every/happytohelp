@@ -46,18 +46,18 @@ This is a substantial consistency pass, not full legacy feature equality. Each
 remaining gap has an explicit product/API disposition; this accessibility closeout
 does not invent unsupported data or controls to make the screens appear complete.
 
-| Remaining legacy gap | Current disposition and reason |
-| --- | --- |
-| Global Contacts aggregation | Native Contacts offers explicit workspace choices. The cross-workspace aggregate is not backed by a native API and is not presented as if it were available. |
-| Global Inbox Appearance settings | Appearance is project-scoped in the native settings model. A global override has no matching persisted contract, so the native UI keeps the supported per-project controls. |
-| Standalone computer-consent metadata | The native project schema does not expose the legacy standalone consent fields. No editable control is shown without a persisted API contract. |
-| AI type catalogue | Native assistant controls cover the configured responder types exposed by the current API. The wider legacy type catalogue is not in that API and is not implied by these controls. |
-| Invitation-time notification preferences | The native invitation/member contract does not persist the original per-invite notification options. They remain a feature gap rather than a local-only setting. |
-| Some contact history | The native contact API does not return all legacy history records. Existing history is shown only where the native API supplies it. |
-| Per-import credential entry | The native import flow has no per-import credential storage/entry contract. The interface does not simulate credential retention. |
-| Administrative aggregates/actions | Several legacy aggregate values and admin actions lack native API support. Unsupported aggregates remain an em dash; unavailable actions are not exposed as working. |
-| Original onboarding and demo flows | The local acceptance path uses native setup and synthetic records. The original legacy demo/onboarding journeys are not asserted as equivalent. |
-| Configured provider journeys | This local pass makes no live provider calls and does not establish external credentials, delivery, or provider acceptance. Those journeys remain separate qualification work. |
+| Remaining legacy gap | Reason and user impact | Supported alternative |
+| --- | --- | --- |
+| Global Contacts aggregation | Contact reads are project-scoped; there is no combined account-wide list. | Switch workspaces to review each workspace's Contacts. |
+| Global Inbox Appearance settings | Color and display mode are saved per project. There is no persisted global inbox theme override, so one change cannot style every project. | Use each project's Appearance controls. |
+| Standalone computer-consent metadata | The project settings contract has no matching standalone consent field, so that legacy metadata cannot be edited. Contact-specific customer-context consent is a different contract. | None for the standalone metadata. |
+| AI type catalogue | The wider legacy catalogue is not exposed by the native API; those pre-defined types cannot be selected. | Define assistants by name, role, model and prompt; choose defaults for signed-in/other visitors and allow human responders. |
+| Invitation-time notification preferences | Invitation records hold project, email, role and expiry, without notification preferences. The preference cannot be chosen when inviting. | After acceptance, edit the member's notification preference. |
+| Some contact history | Contact profiles show available facts and transcripts include messages, notes and selected attributed events; there is no complete legacy contact-wide timeline. | Open available conversations for their supported history; no equivalent for missing historical event types. |
+| Per-import credential entry | Imports use installation-configured credentials; the import form cannot retain credentials per job. | Configure the chosen source's credentials for the installation, then select the source and required subdomain in the import form. |
+| Administrative aggregates/actions | Admin lists read raw records (up to 200), without several legacy aggregates/actions. Missing aggregate values display as em dashes and unsupported actions are absent. | Lead processing, sending a reviewed draft and deletion are supported. None for other missing aggregates/actions. |
+| Original onboarding and demo flows | The original onboarding journey is not reproduced. Native owner setup and the existing demo inbox provide a different entry path. | In an empty workspace choose **Try a demo inbox** to create **Demo inbox · Northstar Outfitters**, with fictional conversations, an editable assistant and three published FAQs. Creation makes no AI, email or provider calls. **Generate replies** is a separate configured-provider action and never sends a customer reply. |
+| Configured provider journeys | Local accessibility checks make no live provider calls, so delivery, OAuth acceptance and hosted behavior are unqualified. | Qualify the native integrations separately with configured accounts; local boundary fixtures are no substitute for provider acceptance. |
 
 The accessibility audit and its exact route/state limits are recorded in
 [ACCESSIBILITY-AUDIT-2026-09-30.md](ACCESSIBILITY-AUDIT-2026-09-30.md). It qualifies

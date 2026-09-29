@@ -44,8 +44,7 @@ body.workspace-page {
     .workspace-settings table tbody tr + tr { border-top: 1px solid var(--conversation-line); }
     .workspace-settings .settings-empty { padding: 32px 12px; color: var(--conversation-muted); font-size: 12px; }
     .settings-empty p { margin: 0 0 4px; color: var(--conversation-ink); font-size: 13px; font-weight: 600; }
-    .workspace-settings details > summary { width: fit-content; color: var(--conversation-muted); cursor: pointer; font-size: 12px; font-weight: 600; }
-    .workspace-settings details > summary:focus-visible { outline: 2px solid rgba(var(--bs-primary-rgb), .4); outline-offset: 4px; }
+    .workspace-settings details > summary { width: fit-content; margin-top: 8px; color: var(--conversation-muted); cursor: pointer; font-size: 12px; font-weight: 600; }
 
     @media (max-width: 767.98px) {
         .settings-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }

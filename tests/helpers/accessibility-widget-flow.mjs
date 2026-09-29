@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {writeFile} from 'node:fs/promises';
+import {measureFocusIndicator} from './accessibility-focus-contrast.mjs';
 
 export async function runWidgetAccessibility({browser, runtime, hostOrigin, widgetConfig, axePath, audit, checks, errors, failedResponses, evidenceDir}) {
     const {scan, assertAxeClean, keyboardPass, measureLayout, measureContrast} = audit;
@@ -39,6 +40,10 @@ export async function runWidgetAccessibility({browser, runtime, hostOrigin, widg
     }
     assertAxeClean(await scan(widgetPage, 'widget-open-composer', {shadow: true}), 'widget open composer');
     await keyboardPass(widgetPage, 'widget-open', {count: 20, shadow: true});
+    await widgetPage.getByRole('button', {name: 'Send message', exact: true}).focus();
+    const sendFocus = await measureFocusIndicator(widgetPage, {shadow: true, samplePixels: true});
+    assert.ok(sendFocus.ringContrastAgainstHalo >= 3 && sendFocus.pixelSample.contrastRatio >= 3, 'send focus must contrast against the surface outside its button');
+    await writeFile(join(evidenceDir, 'widget-send-focus-contrast.json'), JSON.stringify(sendFocus, null, 2));
     const widgetDesktop = await measureLayout(widgetPage, 'widget-desktop', {shadow: true});
     await measureContrast(widgetPage, 'widget-open-composer', [
         {label: 'human response estimate', selector: '.happytohelp-insight-agent-info'},
@@ -145,6 +150,26 @@ export async function runWidgetAccessibility({browser, runtime, hostOrigin, widg
     });
     assert.deepEqual(previewAfterClose, {ariaHidden: null, inert: false}, 'closing preview did not restore the widget interaction state');
     checks.push('attachment preview dialog traps Tab, closes on Escape, and restores focus');
+
+    await fileInput.setInputFiles({name: 'accessibility-context.txt', mimeType: 'text/plain', buffer: Buffer.from('Synthetic non-image accessibility attachment.')});
+    // Dropzone retains a relative path for untransformed files (images are resized).
+    const documentLink = widgetPage.getByRole('link', {name: /(?:^|\/)accessibility-context\.txt$/});
+    await documentLink.waitFor();
+    const documentHref = await documentLink.getAttribute('href');
+    assert.match(documentHref, /^blob:/, 'non-image composer attachment should expose its real local blob link');
+    await documentLink.focus();
+    const popupEvent = widgetPage.waitForEvent('popup');
+    await widgetPage.keyboard.press('Enter');
+    const documentPage = await popupEvent;
+    try {
+        await documentPage.waitForLoadState();
+        assert.equal(documentPage.url(), documentHref);
+        assert.match(await documentPage.locator('body').innerText(), /Synthetic non-image accessibility attachment/);
+        await writeFile(join(evidenceDir, 'widget-nonimage-keyboard.json'), JSON.stringify({activation: 'Enter', hrefScheme: 'blob:', target: await documentLink.getAttribute('target'), openedMatchingUrl: true, contentVerified: true, previewDialogCount: await widgetPage.getByRole('dialog').count()}, null, 2));
+    } finally {
+        await documentPage.close();
+    }
+    checks.push('non-image attachment opens its real blob link in a new tab with Enter; no iframe preview UI is claimed');
 
     await widgetPage.setViewportSize({width: 320, height: 568});
     await widgetPage.waitForFunction(() => {

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {writeFile} from 'node:fs/promises';
+import {measureFocusIndicator} from './accessibility-focus-contrast.mjs';
 
 export function createInteractionAudit({evidenceDir, keyboard, layout, contrast}) {
     const keyboardPass = async (page, label, {count = 28, shadow = false} = {}) => {
@@ -23,29 +24,6 @@ export function createInteractionAudit({evidenceDir, keyboard, layout, contrast}
                 const hit = typeof root.elementFromPoint === 'function'
                     ? root.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
                     : document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-                const parseColor = color => {
-                    if (typeof color !== 'string') return null;
-                    const hex = color.trim().match(/^#([\da-f]{3,8})$/i)?.[1];
-                    if (hex) {
-                        const expanded = hex.length <= 4 ? [...hex].map(channel => channel + channel).join('') : hex;
-                        const channels = expanded.match(/[\da-f]{2}/gi)?.map(channel => Number.parseInt(channel, 16)) || [];
-                        return channels.length >= 3 ? [channels[0], channels[1], channels[2], channels.length > 3 ? channels[3] / 255 : 1] : null;
-                    }
-                    const channels = color.match(/[\d.]+/g)?.map(Number) || [];
-                    return channels.length >= 3 ? [channels[0], channels[1], channels[2], channels.length > 3 ? channels[3] : 1] : null;
-                };
-                const luminance = color => color.slice(0, 3).map(channel => channel / 255).map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
-                const shadowColor = style.boxShadow.match(/rgba?\([^)]*\)|#[\da-f]{3,8}/i)?.[0];
-                let halo = parseColor(shadowColor) || parseColor(style.getPropertyValue('--accessibility-focus-halo'));
-                if (!halo) {
-                    for (let current = active; current && current.nodeType === 1; current = current.parentElement) {
-                        const background = parseColor(getComputedStyle(current).backgroundColor);
-                        if (background && background[3] >= 0.95) { halo = background; break; }
-                    }
-                }
-                if (!halo) halo = [255, 255, 255, 1];
-                const ring = parseColor(style.outlineColor);
-                const ringRatio = ring ? (Math.max(luminance(ring), luminance(halo)) + 0.05) / (Math.min(luminance(ring), luminance(halo)) + 0.05) : null;
                 const references = (active.getAttribute('aria-labelledby') || '').split(/\s+/).filter(Boolean);
                 const referencedText = references.map(id => root.getElementById?.(id) || document.getElementById(id)).filter(Boolean).map(element => element.innerText?.trim() || element.textContent?.trim()).filter(Boolean).join(' ');
                 const labels = active.labels ? [...active.labels].map(label => label.innerText?.trim() || label.textContent?.trim()).filter(Boolean).join(' ') : '';
@@ -62,7 +40,7 @@ export function createInteractionAudit({evidenceDir, keyboard, layout, contrast}
                 rect: {x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height)},
                 centerTarget: hit ? {tag: hit.tagName?.toLowerCase(), className: typeof hit.className === 'string' ? hit.className : '', rect: (() => { const targetRect = hit.getBoundingClientRect(); return {x: Math.round(targetRect.x), y: Math.round(targetRect.y), width: Math.round(targetRect.width), height: Math.round(targetRect.height)}; })()} : null,
                 windowScroll: {x: window.scrollX, y: window.scrollY},
-                focusIndicator: {outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth, outlineColor: style.outlineColor, surroundingSurface: halo.map(channel => Math.round(channel)).slice(0, 3), boxShadow: style.boxShadow, ringContrastAgainstHalo: ringRatio === null ? null : Number(ringRatio.toFixed(2))},
+
                     focusedVisible: (style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) >= 1) || style.boxShadow !== 'none',
                     withinViewport: rect.right > 0 && rect.bottom > 0 && rect.left < innerWidth && rect.top < innerHeight,
                     centerHit: hit === active || active.contains(hit),
@@ -70,6 +48,7 @@ export function createInteractionAudit({evidenceDir, keyboard, layout, contrast}
                 };
             }, {shadow});
             if (item) {
+                item.focusIndicator = await measureFocusIndicator(page, {shadow});
                 sequence.push(item);
                 if (!item.centerHit) await page.screenshot({path: join(evidenceDir, `${label}-occluded-${index}.png`)});
             }

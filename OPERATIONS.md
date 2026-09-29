@@ -411,3 +411,27 @@ sign-in endpoint and client behavior are excluded from production builds, even
 when the flag is present during `pnpm run build`. Deployed authentication and
 normal tenant/permission checks are unchanged. Signing out while the opt-in is
 active returns to automatic sign-in; restart without the flag to test logout.
+
+## Measured local usage and cost scenarios
+
+The [2026-09-29 operating-usage record](docs/usage/README.md) measures a real local
+emitted Worker conversation with three visitor messages, two owner replies,
+a 1 MiB upload/download and socket reconnect/replay. A new visitor used 12 dynamic
+requests; a returning visitor with a valid token used 11. Both used one R2 put,
+one get, 12 immediate DO fetches and one incoming socket frame. Scheduled outbox
+recovery added two DO fetches per conversation. Complete D1 row totals, hosted
+CPU/DO duration/storage and actual Cloudflare billing remain unknown; partial
+query metadata and local file sizes are retained without treating them as bills.
+No AI provider ran: provider calls were zero, token usage and cost are null.
+
+For 1, 1,000 and 10,000 conversations/month, the record separates 43,200 scheduled
+monthly ticks, setup, static assets and the measured per-conversation units. With
+an otherwise unused paid account and assumed owner-managed 30-day R2 retention,
+priced component subtotals are $5.000, $5.000 and $5.015. These **exclude unknown
+CPU, D1, DO duration/storage, AI/email and other costs** and are not total bills.
+Retention is a scenario, not an automatic expiry policy. See the record for dated
+official rates, formulas, raw JSON, reproduction commands and limitations.
+
+`node --test tests/usage-limits.mjs` proves configured local request 429/
+`Retry-After` behavior and project/installation daily AI count ceilings without
+provider execution. Configurable defaults remain guards, not measured capacity.

@@ -1,0 +1,291 @@
+{
+  "phases": {
+    "setup": {
+      "worker_requests": 2,
+      "worker_local_wall_ms": 11,
+      "d1": {
+        "statements": 8,
+        "metadata_statements": 6,
+        "missing_metadata_statements": 2,
+        "rows_read": null,
+        "rows_written": null,
+        "known_subset_rows_read": 18,
+        "known_subset_rows_written": 16
+      },
+      "r2": {
+        "class_a": 0,
+        "class_b": 0,
+        "uploaded_bytes": 0,
+        "downloaded_bytes": 0,
+        "retained_object_bytes": 0
+      },
+      "do": {
+        "requests": 0,
+        "conversation_requests": 0,
+        "project_requests": 0,
+        "incoming_frames": 0,
+        "outgoing_frames": 0,
+        "handler_local_wall_ms": 0,
+        "peak_socket_attachments": 0,
+        "peak_socket_attachment_bytes": 0
+      },
+      "queue_messages": 0,
+      "queue_consumer_invocations": 0,
+      "cron_invocations": 0
+    },
+    "static_assets": {
+      "worker_requests": 0,
+      "worker_local_wall_ms": 0,
+      "d1": {
+        "statements": 0,
+        "metadata_statements": 0,
+        "missing_metadata_statements": 0,
+        "rows_read": 0,
+        "rows_written": 0,
+        "known_subset_rows_read": 0,
+        "known_subset_rows_written": 0
+      },
+      "r2": {
+        "class_a": 0,
+        "class_b": 0,
+        "uploaded_bytes": 0,
+        "downloaded_bytes": 0,
+        "retained_object_bytes": 0
+      },
+      "do": {
+        "requests": 0,
+        "conversation_requests": 0,
+        "project_requests": 0,
+        "incoming_frames": 0,
+        "outgoing_frames": 0,
+        "handler_local_wall_ms": 0,
+        "peak_socket_attachments": 0,
+        "peak_socket_attachment_bytes": 0
+      },
+      "queue_messages": 0,
+      "queue_consumer_invocations": 0,
+      "cron_invocations": 0
+    },
+    "new_visitor": {
+      "worker_requests": 12,
+      "worker_local_wall_ms": 102,
+      "d1": {
+        "statements": 116,
+        "metadata_statements": 35,
+        "missing_metadata_statements": 81,
+        "rows_read": null,
+        "rows_written": null,
+        "known_subset_rows_read": 75,
+        "known_subset_rows_written": 57
+      },
+      "r2": {
+        "class_a": 1,
+        "class_b": 1,
+        "uploaded_bytes": 1048576,
+        "downloaded_bytes": 1048576,
+        "retained_object_bytes": 1048576
+      },
+      "do": {
+        "requests": 12,
+        "conversation_requests": 7,
+        "project_requests": 5,
+        "incoming_frames": 1,
+        "outgoing_frames": 6,
+        "handler_local_wall_ms": 7,
+        "peak_socket_attachments": 1,
+        "peak_socket_attachment_bytes": 147
+      },
+      "queue_messages": 0,
+      "queue_consumer_invocations": 0,
+      "cron_invocations": 0
+    },
+    "returning_visitor": {
+      "worker_requests": 11,
+      "worker_local_wall_ms": 77,
+      "d1": {
+        "statements": 111,
+        "metadata_statements": 33,
+        "missing_metadata_statements": 78,
+        "rows_read": null,
+        "rows_written": null,
+        "known_subset_rows_read": 90,
+        "known_subset_rows_written": 52
+      },
+      "r2": {
+        "class_a": 1,
+        "class_b": 1,
+        "uploaded_bytes": 1048576,
+        "downloaded_bytes": 1048576,
+        "retained_object_bytes": 1048576
+      },
+      "do": {
+        "requests": 12,
+        "conversation_requests": 7,
+        "project_requests": 5,
+        "incoming_frames": 1,
+        "outgoing_frames": 6,
+        "handler_local_wall_ms": 7,
+        "peak_socket_attachments": 1,
+        "peak_socket_attachment_bytes": 148
+      },
+      "queue_messages": 0,
+      "queue_consumer_invocations": 0,
+      "cron_invocations": 0
+    },
+    "recovery_cron": {
+      "worker_requests": 0,
+      "worker_local_wall_ms": 0,
+      "d1": {
+        "statements": 63,
+        "metadata_statements": 25,
+        "missing_metadata_statements": 38,
+        "rows_read": null,
+        "rows_written": null,
+        "known_subset_rows_read": 98,
+        "known_subset_rows_written": 10
+      },
+      "r2": {
+        "class_a": 0,
+        "class_b": 0,
+        "uploaded_bytes": 0,
+        "downloaded_bytes": 0,
+        "retained_object_bytes": 0
+      },
+      "do": {
+        "requests": 4,
+        "conversation_requests": 2,
+        "project_requests": 2,
+        "incoming_frames": 0,
+        "outgoing_frames": 0,
+        "handler_local_wall_ms": 0,
+        "peak_socket_attachments": 0,
+        "peak_socket_attachment_bytes": 0
+      },
+      "queue_messages": 0,
+      "queue_consumer_invocations": 0,
+      "cron_invocations": 1
+    },
+    "idle_cron": {
+      "worker_requests": 0,
+      "worker_local_wall_ms": 0,
+      "d1": {
+        "statements": 21,
+        "metadata_statements": 21,
+        "missing_metadata_statements": 0,
+        "rows_read": 37,
+        "rows_written": 0,
+        "known_subset_rows_read": 37,
+        "known_subset_rows_written": 0
+      },
+      "r2": {
+        "class_a": 0,
+        "class_b": 0,
+        "uploaded_bytes": 0,
+        "downloaded_bytes": 0,
+        "retained_object_bytes": 0
+      },
+      "do": {
+        "requests": 0,
+        "conversation_requests": 0,
+        "project_requests": 0,
+        "incoming_frames": 0,
+        "outgoing_frames": 0,
+        "handler_local_wall_ms": 0,
+        "peak_socket_attachments": 0,
+        "peak_socket_attachment_bytes": 0
+      },
+      "queue_messages": 0,
+      "queue_consumer_invocations": 0,
+      "cron_invocations": 1
+    }
+  },
+  "scenarios": [
+    {
+      "conversations": 1,
+      "cron_invocations": 43200,
+      "worker_requests": 43212,
+      "do_request_equivalent": 14.05,
+      "r2_class_a": 1,
+      "r2_class_b": 1,
+      "r2_gb_month": 0.001048576,
+      "queue_messages": 0,
+      "d1_total_rows_read": null,
+      "d1_total_rows_written": null,
+      "priced_component_subtotal_usd": 5,
+      "priced_components": {
+        "workers_account_minimum": 5,
+        "worker_request_overage": 0,
+        "do_request_overage": 0,
+        "r2_operation_overage": 0,
+        "r2_storage_overage": 0
+      },
+      "excluded_unknowns": [
+        "Worker CPU",
+        "D1 total rows and hosted storage",
+        "DO duration and hosted storage",
+        "AI/provider/email",
+        "other account usage",
+        "observability and ancillary services"
+      ],
+      "billing_total_usd": null
+    },
+    {
+      "conversations": 1000,
+      "cron_invocations": 43200,
+      "worker_requests": 55200,
+      "do_request_equivalent": 14050,
+      "r2_class_a": 1000,
+      "r2_class_b": 1000,
+      "r2_gb_month": 1.048576,
+      "queue_messages": 0,
+      "d1_total_rows_read": null,
+      "d1_total_rows_written": null,
+      "priced_component_subtotal_usd": 5,
+      "priced_components": {
+        "workers_account_minimum": 5,
+        "worker_request_overage": 0,
+        "do_request_overage": 0,
+        "r2_operation_overage": 0,
+        "r2_storage_overage": 0
+      },
+      "excluded_unknowns": [
+        "Worker CPU",
+        "D1 total rows and hosted storage",
+        "DO duration and hosted storage",
+        "AI/provider/email",
+        "other account usage",
+        "observability and ancillary services"
+      ],
+      "billing_total_usd": null
+    },
+    {
+      "conversations": 10000,
+      "cron_invocations": 43200,
+      "worker_requests": 163200,
+      "do_request_equivalent": 140500,
+      "r2_class_a": 10000,
+      "r2_class_b": 10000,
+      "r2_gb_month": 10.48576,
+      "queue_messages": 0,
+      "d1_total_rows_read": null,
+      "d1_total_rows_written": null,
+      "priced_component_subtotal_usd": 5.015,
+      "priced_components": {
+        "workers_account_minimum": 5,
+        "worker_request_overage": 0,
+        "do_request_overage": 0,
+        "r2_operation_overage": 0,
+        "r2_storage_overage": 0.015
+      },
+      "excluded_unknowns": [
+        "Worker CPU",
+        "D1 total rows and hosted storage",
+        "DO duration and hosted storage",
+        "AI/provider/email",
+        "other account usage",
+        "observability and ancillary services"
+      ],
+      "billing_total_usd": null
+    }
+  ]
+}

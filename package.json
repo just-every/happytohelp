@@ -43,7 +43,9 @@
     "test:widget-lifecycle-browser": "node tests/widget-lifecycle-browser.mjs",
     "test:independent-runtime": "node tests/independent-runtime.mjs",
     "test:reproducible-build": "node --test tests/reproducible-build.mjs",
-    "test:contact-erasure-browser": "node tests/contact-erasure-browser.mjs"
+    "test:contact-erasure-browser": "node tests/contact-erasure-browser.mjs",
+    "test:delegation": "node --test tests/delegation-sqlite.mjs && python3 tests/delegation-backup.py && node tests/delegation-runtime.mjs",
+    "test:delegation-browser": "node tests/delegation-browser.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

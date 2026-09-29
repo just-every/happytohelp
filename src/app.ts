@@ -17,6 +17,10 @@ import { applyMessageEffects } from './message-effects'
 import { routes as sitePreview,brandMediaRoutes } from './modules/site-preview/routes'
 import { previewRoutes } from './modules/site-preview/proxy'
 
+import {delegation} from './edition/delegation/routes'
+import {consent} from './edition/delegation/consent'
+import {nativeDelegation} from './edition/delegation/launch'
+
 export const app = new Hono<AppEnv>()
 app.use('/api/*', projectCors)
 app.onError((error,c) => {
@@ -31,6 +35,9 @@ app.get('/health',async c=>{
  try { await Promise.all([c.env.DB.prepare('SELECT 1').first(),c.env.FILES.head('_health_probe')]);return c.json({status:'ok',runtime:'native-rer',database:'reachable',files:'reachable'}) }
  catch { return c.json({status:'unavailable',runtime:'native-rer'},503) }
 })
+app.route('/api/delegation/v1',delegation)
+app.route('/api/delegation',nativeDelegation)
+app.route('/delegation',consent)
 app.route('/api/identity',identity)
 app.route('/api/conversations',createConversationRoutes(applyMessageEffects))
 app.route('/api/conversations',widgetEvents)

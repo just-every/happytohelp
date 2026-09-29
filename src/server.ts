@@ -12,7 +12,7 @@ async function route(request:Request,env:Env,execution:ExecutionContext,path:str
   const { localOwnerLogin } = await import('./development/local-owner-login');
   return localOwnerLogin.fetch(request,env,execution);
  }
- if(path.startsWith('/preview/'))return app.fetch(request,env,execution);if(publicSite)return publicSiteRoutes.fetch(request,env,execution);return dispatch(request,()=>app.fetch(request,env,execution),()=>start.fetch(request))
+ if(path.startsWith('/delegation/'))return app.fetch(request,env,execution);if(path.startsWith('/preview/'))return app.fetch(request,env,execution);if(publicSite)return publicSiteRoutes.fetch(request,env,execution);return dispatch(request,()=>app.fetch(request,env,execution),()=>start.fetch(request))
 }
 export default {
  async fetch(request:Request,env:Env,execution:ExecutionContext){const path=new URL(request.url).pathname,publicSite=!path.startsWith('/preview/')&&await isPublicSitePath(path,env);

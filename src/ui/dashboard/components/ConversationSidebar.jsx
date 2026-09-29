@@ -1,3 +1,4 @@
+import SlateInquiryLink from '../../native/SlateInquiryLink';
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import ContactUpdateModal from './ContactUpdateModal';
@@ -53,6 +54,7 @@ export default function ConversationSidebar({ conversation }) {
     usePluginMessageEvent(handlePluginSetHeight, 'setHeight');
 
     return <div className="conversation-details">
+        <SlateInquiryLink conversation={ conversation } />
         <ConversationAssignmentControl conversation={ conversation } />
         <ConversationParticipantsControl conversation={ conversation } />
         <ConversationContactDetails

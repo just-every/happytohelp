@@ -1,4 +1,4 @@
-export const dashboardPath = /^\/(?:conversations(?:\/[^/]+)?|projects(?:\/create|\/[^/]+(?:\/(?:conversations(?:\/[^/]+)?|edit|settings|email-settings|widget-settings|github-settings|local-agent|training-runs(?:\/[^/]+)?|insights(?:\/[^/]+)?|(?:ais|macros|contacts|plugins|agents|datasets|articles|categories)(?:\/[^/]+)?))?)?|local-agent\/authorize|users\/[^/]+|admin(?:\/[^/]+(?:\/[^/]+)?)?)\/?$/;
+export const dashboardPath = /^\/(?:conversations(?:\/[^/]+)?|projects(?:\/create|\/[^/]+(?:\/(?:conversations(?:\/[^/]+)?|edit|settings|email-settings|widget-settings|github-settings|local-agent|training-runs(?:\/[^/]+)?|insights(?:\/[^/]+)?|(?:ais|macros|contacts|plugins|agents|datasets|articles|categories)(?:\/[^/]+)?))?)?|local-agent\/authorize|delegation\/(?:authorize|settings)|users\/[^/]+|admin(?:\/[^/]+(?:\/[^/]+)?)?)\/?$/;
 
 /** Login resumes only a dashboard URL within this application. */
 export function loginDestination(returnTo, origin, accountOnly = false) {

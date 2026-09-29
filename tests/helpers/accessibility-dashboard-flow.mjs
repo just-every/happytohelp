@@ -120,6 +120,7 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
         {label: 'transcript note label', selector: '#chat .transcript-note-label'},
         {label: 'composer reply placeholder', selector: '#chat textarea', pseudo: '::placeholder'},
         {label: 'account initials', selector: '.avatar-title.rounded-circle > span'},
+        {label: 'unoccluded Settings navigation label', selector: '.navbar-settings-toggle > .navbar-link-label'},
     ]);
 
     await page.getByRole('button', {name: 'Account menu', exact: true}).click();

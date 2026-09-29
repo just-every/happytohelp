@@ -83,6 +83,19 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
                         if (style.filter !== 'none') unsupportedTextEffects.push(`filter ${style.filter}`);
                         if (style.textShadow !== 'none') unsupportedTextEffects.push(`text-shadow ${style.textShadow}`);
                     }
+                    // A screenshot of a fully covered label contains menu pixels, not
+                    // that label's text/background pair. Require geometric evidence at
+                    // every text rectangle's corners and center; never mark it passing.
+                    const coveringMenus = fragments.flatMap(fragment => fragment.rects.flatMap(rect =>
+                        [[1, 1], [rect.width - 1, 1], [1, rect.height - 1], [rect.width - 1, rect.height - 1], [rect.width / 2, rect.height / 2]].map(([x, y]) => {
+                            const hit = root.elementFromPoint(elementRect.x + rect.x + x, elementRect.y + rect.y + y);
+                            const menu = hit?.closest('.native-account-dropdown, .navbar-workspace-menu, [role="menu"]');
+                            return menu && !menu.contains(element) ? {className: menu.className, role: menu.getAttribute('role')} : null;
+                        })));
+                    if (coveringMenus.length && coveringMenus.every(Boolean)) {
+                        targets.push({...descriptor, id, status: 'limited', reason: 'Every text rectangle is covered by an open menu at all four corners and its center; menu pixels cannot establish the hidden label contrast. This remains a review limitation, with any unoccluded measurements recorded separately.', coveringMenus});
+                        continue;
+                    }
                 targets.push({...descriptor, id, elementSize: {width: elementRect.width, height: elementRect.height}, fragments, unsupportedTextEffects: [...new Set(unsupportedTextEffects)], obscuredByModal, status: fragments.length && elementRect.width > 0 && elementRect.height > 0 ? 'pending' : 'limited', reason: fragments.length ? undefined : 'The axe target has no visible text or placeholder in this rendered state.'});
                 }
             }

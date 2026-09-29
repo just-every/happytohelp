@@ -14,9 +14,10 @@ function AccountMenu({ agent, desktop = false }) {
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
     const menu = useRef(null);
-    useEffect(()=>{const close=e=>{if(e.type==='keydown' ? e.key==='Escape' : !menu.current?.contains(e.target))setOpen(false);};document.addEventListener('click',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('click',close);document.removeEventListener('keydown',close);};},[]);
+    const toggle = useRef(null);
+    useEffect(()=>{const close=e=>{if(e.type==='keydown'&&e.key==='Escape'){if(open){e.preventDefault();setOpen(false);toggle.current?.focus();}}else if(!menu.current?.contains(e.target))setOpen(false);};document.addEventListener('click',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('click',close);document.removeEventListener('keydown',close);};},[open]);
     return <div ref={menu} className={`navbar-account-menu ${desktop ? 'dropup' : ''}`}>
-        <button type="button" className="native-profile-toggle" aria-label="Account menu" aria-expanded={open} onClick={()=>setOpen(!open)}>
+        <button ref={toggle} type="button" className="native-profile-toggle" aria-label="Account menu" aria-expanded={open} onClick={()=>setOpen(!open)}>
             <span className="native-profile-avatar">{agent.avatar_url ? <img src={agent.avatar_url} alt=""/> : agent.name?.slice(0,1)}<span className="native-profile-status"/></span>
             {desktop && <><span className="navbar-profile-name">{agent.name}</span><i className="fe fe-chevron-up" aria-hidden="true"/></>}
         </button>
@@ -33,8 +34,10 @@ export default function Navigation({ settings }) {
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
     const [settingsOpen,setSettingsOpen] = useState(!pathname.includes('conversations'));
     const nav = useRef(null);
+    const workspaceToggle = useRef(null);
+    const navigationToggle = useRef(null);
     useEffect(()=>{setOpen(false);setWorkspaceOpen(false);if(!pathname.includes('conversations'))setSettingsOpen(true);},[pathname]);
-    useEffect(()=>{const close = e=>{if(e.key==='Escape'){setOpen(false);setWorkspaceOpen(false);}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[]);
+    useEffect(()=>{const close = e=>{if(e.key==='Escape'){if(workspaceOpen){e.preventDefault();setWorkspaceOpen(false);workspaceToggle.current?.focus();}else if(open){e.preventDefault();setOpen(false);navigationToggle.current?.focus();}}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[open,workspaceOpen]);
     useEffect(()=>{const close=e=>{if(nav.current && !nav.current.contains(e.target))setWorkspaceOpen(false);};document.addEventListener('click',close);return()=>document.removeEventListener('click',close);},[]);
     const project = settings.project?.id || Object.keys(settings.projects || {})[0];
     const base = project ? `/projects/${project}` : '';
@@ -46,8 +49,8 @@ export default function Navigation({ settings }) {
     const switchWorkspace = async id=>{if(switching||!await confirmNavigation())return;setSwitching(true);setSwitchError('');try{if(id)await nativeRequest('/api/identity/switch-project',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projectId:id})});await navigate({to:id?`/projects/${id}/conversations`:'/conversations',ignoreBlocker:true});}catch(error){setSwitchError(error.message);}finally{setSwitching(false);}};
     if (pathname === '/admin' || pathname.startsWith('/admin/')) return <AdminNavigation agent={settings.currentAgent} AccountMenu={AccountMenu}/>;
     return <nav ref={nav} className="navbar navbar-vertical fixed-left navbar-expand-xl navbar-light navbar-refined native-shell" id="sidebar" aria-label="Main navigation"><div className="container-fluid">
-        <button className="navbar-toggler" type="button" aria-controls="sidebarCollapse" aria-label="Toggle navigation" aria-expanded={open} onClick={()=>setOpen(!open)}><span className="navbar-toggler-icon" /></button>
-        <div className="navbar-workspace"><button className="navbar-workspace-toggle" type="button" aria-label={`Switch workspace: ${workspaceName}`} aria-expanded={workspaceOpen} onClick={()=>setWorkspaceOpen(!workspaceOpen)}>{brand && <img className="navbar-workspace-brand" src={brand} alt=""/>}<span className="navbar-workspace-copy"><span className="navbar-workspace-label">Workspace</span><span className="navbar-workspace-name">{workspaceName}</span></span><i className="fe fe-chevron-down" aria-hidden="true"/></button>
+        <button ref={navigationToggle} className="navbar-toggler" type="button" aria-controls="sidebarCollapse" aria-label="Toggle navigation" aria-expanded={open} onClick={()=>setOpen(!open)}><span className="navbar-toggler-icon" /></button>
+        <div className="navbar-workspace"><button ref={workspaceToggle} className="navbar-workspace-toggle" type="button" aria-label={`Switch workspace: ${workspaceName}`} aria-expanded={workspaceOpen} onClick={()=>setWorkspaceOpen(!workspaceOpen)}>{brand && <img className="navbar-workspace-brand" src={brand} alt=""/>}<span className="navbar-workspace-copy"><span className="navbar-workspace-label">Workspace</span><span className="navbar-workspace-name">{workspaceName}</span></span><i className="fe fe-chevron-down" aria-hidden="true"/></button>
         {workspaceOpen && <ul className="dropdown-menu navbar-workspace-menu show"><li><h6 className="dropdown-header">Your workspaces</h6></li>{Object.values(settings.projects || {}).map(p=><li key={p.id}><button className={`dropdown-item ${!settings.isGlobalInbox && p.id === project ? 'active' : ''}`} disabled={switching} onClick={()=>switchWorkspace(p.id)}>{p.name}</button></li>)}<li><hr className="dropdown-divider"/></li><li><button className={`dropdown-item ${settings.isGlobalInbox ? 'active' : ''}`} disabled={switching} onClick={()=>switchWorkspace('')}>Global Inbox</button></li></ul>}{switchError&&<p className="text-danger" role="alert">{switchError}</p>}</div>
         <div className="navbar-user d-xl-none"><AccountMenu agent={settings.currentAgent}/></div>
         <div className={`navbar-collapse collapse ${open ? 'show' : ''}`} id="sidebarCollapse"><div className="navbar-scroll"><ul className="navbar-nav navbar-nav-primary">

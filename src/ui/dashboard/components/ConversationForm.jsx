@@ -130,6 +130,7 @@ export default function ConversationForm({
                             ref={ textareaRef }
                             className="form-control form-control-flush"
                             placeholder="Type your reply…"
+                            aria-label="Reply to conversation"
                             onKeyDown={ handleKeyDown }
                             onChange={ event => onContentChange(event.target.value) }
                             value={ textareaContent }
@@ -147,7 +148,8 @@ export default function ConversationForm({
                             { files.map(file => <FormMedia key={ file.id } media={ file } onRemove={ onFileRemove } />) }
                         </div> }
                         <div className="col-auto flex-grow-1 d-flex gap-2 justify-content-end">
-                            { !isEnabled && !helper && <span className="btn btn-ico rounded-circle text-gray-600 active" aria-label="Uploading attachment">
+                            { !isEnabled && !helper && <span className="btn btn-ico rounded-circle text-gray-600 active" role="status" aria-live="polite">
+                                <span className="visually-hidden">Uploading attachment</span>
                                 <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
                             </span> }
                             <ConversationDraftStatus />

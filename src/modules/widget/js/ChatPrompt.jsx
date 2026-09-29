@@ -37,7 +37,7 @@ export default function ChatPrompt({ contact, sendContact }) {
                 { error || context.text.prompt.email_prompt }
                 <div className={"happytohelp-send-message-row happytohelp-has-icon"+(shake ? " happytohelp-shake" : "")}>
                     <div className="happytohelp-prompt"><div className="happytohelp-prompt-dash1" /><div className="happytohelp-prompt-dash2" /><div className="happytohelp-prompt-dash3" /><div className="happytohelp-prompt-dash4" /><FontAwesomeIcon icon={fasEnvelope} /></div>
-                    <input type="text" name="email" defaultValue={ contact.email } autoComplete="off" onChange={e => setEmail(e.target.value)} onFocus={ handleFocus } onBlur={ handleSubmit } placeholder={ context.text.prompt.placeholder_email } />
+                    <input type="email" name="email" aria-label={context.text.prompt.placeholder_email} defaultValue={ contact.email } autoComplete="email" onChange={e => setEmail(e.target.value)} onFocus={ handleFocus } onBlur={ handleSubmit } placeholder={ context.text.prompt.placeholder_email } />
                 </div>
             </div>
         </form>

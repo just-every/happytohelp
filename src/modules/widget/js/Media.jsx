@@ -23,13 +23,14 @@ function Media({ upload, media, setPreview }) {
         media.preview = media.preview_url ?? media.url;
     }
 
-    return media.isImage ? <img
-            src={media.preview}
-            className={ "happytohelp-preview " + (loaded ? "happytohelp-preview-loaded" : "happytohelp-preview-loading")}
-            alt={media.filename}
-            style={{ maxWidth: '100%' }}
-            onClick={e => setPreview(media)}
-            onLoad={() => setLoaded(true)} />
+    return media.isImage ? <button type="button" className="happytohelp-preview-trigger" aria-label={`Preview ${media.filename || 'image'}`} onClick={() => setPreview(media)}>
+            <img
+                src={media.preview}
+                className={ "happytohelp-preview " + (loaded ? "happytohelp-preview-loaded" : "happytohelp-preview-loading")}
+                alt=""
+                style={{ maxWidth: '100%' }}
+                onLoad={() => setLoaded(true)} />
+        </button>
             :
         <div className="happytohelp-preview">
             <a href={media.preview} target="_blank" rel="noopener noreferrer">{media.filename}</a>

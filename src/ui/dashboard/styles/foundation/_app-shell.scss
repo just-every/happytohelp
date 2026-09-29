@@ -1,5 +1,5 @@
 // Application frame: the sidebar (`nav#sidebar`) is followed by
-// `.main-content`, which holds either a workspace page or the inbox
+// `main#workspace-main`, whose `.main-content` holds either a workspace page or the inbox
 // (`#chat > .layout`, with the conversation list in `.sidebar` and the open
 // conversation in `.main`). From xl up the three sit side by side; below xl
 // the sidebar is a fixed top bar and the conversation slides over the list.
@@ -19,7 +19,7 @@ $app-top-bar-height: 73px;
 
 // Page gutters beside the sidebar.
 @include media-breakpoint-up(md) {
-  .navbar-vertical ~ .main-content {
+  .navbar-vertical ~ #workspace-main > .main-content {
     .container,
     .container-fluid {
       padding-left: 2.25rem !important;
@@ -29,7 +29,7 @@ $app-top-bar-height: 73px;
 }
 
 @include media-breakpoint-up(xl) {
-  .navbar-vertical.navbar-expand-xl ~ .main-content {
+  .navbar-vertical.navbar-expand-xl ~ #workspace-main > .main-content {
     margin-left: 250px;
   }
 }

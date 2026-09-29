@@ -36,9 +36,9 @@ function NoteModal({ onHide, conversation }) {
     }
 
     return (
-        <Modal show onHide={ cancel }>
+        <Modal show onHide={ cancel } aria-labelledby="add-note-title">
             <Modal.Header closeButton>
-                <Modal.Title>Add Note</Modal.Title>
+                <Modal.Title id="add-note-title">Add Note</Modal.Title>
             </Modal.Header>
             <Form onSubmit={ handleSubmit(handleAddNote) } onChange={ () => { markDirty(); setIsValidated(null); setErrors({})} } noValidate validated={ isValidated }>
                 <Modal.Body>
@@ -56,7 +56,7 @@ function NoteModal({ onHide, conversation }) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" disabled={ isLoading } onClick={ cancel }>Close</Button>
-                    <Button variant="primary" disabled={ isLoading } onClick={ handleSubmit(handleAddNote) }>Add</Button>
+                    <Button variant="primary" type="submit" disabled={ isLoading }>Add</Button>
                 </Modal.Footer>
             </Form>
         </Modal>

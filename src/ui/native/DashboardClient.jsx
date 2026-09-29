@@ -31,9 +31,15 @@ export default function DashboardClient({ settings }) {
         return () => { window.removeEventListener('workspace-appearance',update); properties.forEach(key=>document.body.style.removeProperty(key)); delete document.body.dataset.workspaceMode; document.documentElement.dataset.bsTheme='light'; };
     }, [settings]);
     const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
-    return <NavigationGuard><MobileNavigationProvider><Navigation settings={settings} /><Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
-        <Outlet />
-    </Provider></MobileNavigationProvider></NavigationGuard>;
+    return <NavigationGuard><MobileNavigationProvider>
+        <a className="workspace-skip-link" href="#workspace-main">Skip to main content</a>
+        <Navigation settings={settings} />
+        <Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
+            <main id="workspace-main" tabIndex={-1}>
+                <Outlet />
+            </main>
+        </Provider>
+    </MobileNavigationProvider></NavigationGuard>;
 }
 
 export function DashboardContent() {
@@ -41,6 +47,6 @@ export function DashboardContent() {
     const pathname = useDashboardLocation().pathname;
     const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
     return !settings.accountOnly && isInbox
-        ? <div className="main-content"><div id="chat"><Chat /></div></div>
+        ? <div className="main-content"><h1 className="visually-hidden">Inbox</h1><div id="chat"><Chat /></div></div>
         : <WorkspacePages settings={settings} />;
 }

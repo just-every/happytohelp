@@ -95,7 +95,7 @@ body.workspace-page .global-inbox-appearance {
 
         i { font-size: 12px; }
         b { overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-        em { display: inline-flex; align-items: center; justify-content: center; min-width: 14px; height: 14px; margin-left: auto; border-radius: 4px; color: #fff; background: var(--conversation-nav-active-badge, #8d5ded); font-size: 8px; font-style: normal; }
+        em { display: inline-flex; align-items: center; justify-content: center; min-width: 14px; height: 14px; margin-left: auto; border-radius: 4px; color: #fff; background: var(--conversation-nav-active-badge, #8350d9); font-size: 8px; font-style: normal; }
         &.is-active { color: var(--conversation-nav-active-ink, #faf8ff); background: var(--conversation-nav-active, #5b33b8); }
     }
 

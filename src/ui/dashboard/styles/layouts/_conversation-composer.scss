@@ -51,7 +51,7 @@ body.conversation-workspace {
         textarea {
             display: block;
             width: 100%;
-            min-height: 0 !important;
+            min-height: 24px !important;
             max-height: min(18rem, 32dvh) !important;
             padding: 0;
             font-size: .8125rem;

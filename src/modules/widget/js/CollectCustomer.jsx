@@ -67,7 +67,7 @@ export default function CollectCustomer({ setShowCollector, localContact, contac
         content.push(
             <div key="collect-name" className={"happytohelp-send-message-row"+(nameIcon ? " happytohelp-has-icon" : "")+(errorName && contact.name ? " happytohelp-send-message-row-error"+(shake ? " happytohelp-shake" : "") : "")}>
                 { nameIcon }
-                <input type="text" name="name" defaultValue={ contact.name || localContact.provided_name } autoComplete="off" onChange={e => setName(e.target.value)} onFocus={ handleFocus } onBlur={ handleSubmit } placeholder={ context.text.collect.placeholder_name } />
+                <input type="text" name="name" aria-label={context.text.collect.placeholder_name} defaultValue={ contact.name || localContact.provided_name } autoComplete="name" onChange={e => setName(e.target.value)} onFocus={ handleFocus } onBlur={ handleSubmit } placeholder={ context.text.collect.placeholder_name } />
             </div>
         );
     }
@@ -80,8 +80,8 @@ export default function CollectCustomer({ setShowCollector, localContact, contac
             <div key="collect-email"
                  className={"happytohelp-send-message-row" + (emailIcon ? " happytohelp-has-icon" : "") + (errorEmail && contact.email ? " happytohelp-send-message-row-error" + (shake ? " happytohelp-shake" : "") : "")}>
                 {emailIcon}
-                <input type="text" name="email" defaultValue={contact.email || localContact.provided_email}
-                       autoComplete="off" onChange={e => setEmail(e.target.value)} onFocus={handleFocus}
+                <input type="email" name="email" aria-label={context.text.collect.placeholder_email} defaultValue={contact.email || localContact.provided_email}
+                       autoComplete="email" onChange={e => setEmail(e.target.value)} onFocus={handleFocus}
                        onBlur={handleSubmit} placeholder={context.text.collect.placeholder_email}/>
             </div>
         );
@@ -99,7 +99,7 @@ export default function CollectCustomer({ setShowCollector, localContact, contac
             {!needsNotifyEmail && <div className="happytohelp-collect-customer-prompt">
                 { context.text.prompt.edit_contact }
             </div> }
-            { !needsNotifyEmail && <FontAwesomeIcon className="happytohelp-collect-customer-close" icon={falTimes} onClick={() => setShowCollector(false)} /> }
+            { !needsNotifyEmail && <button type="button" className="happytohelp-collect-customer-close" aria-label="Close contact details" onClick={() => setShowCollector(false)}><FontAwesomeIcon icon={falTimes} aria-hidden="true" /></button> }
             {content}
         </form>
     );

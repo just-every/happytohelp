@@ -15,7 +15,7 @@ const DEFAULT_PALETTE = {
     '--conversation-nav-active': '#5b33b8',
     '--conversation-nav-parent-active': '#2f215e',
     '--conversation-nav-badge': '#392c65',
-    '--conversation-nav-active-badge': '#8d5ded',
+    '--conversation-nav-active-badge': '#8350d9',
     '--conversation-nav-line': '#392969',
     '--conversation-nav-focus': '#cda0fd',
     '--workspace-nav-bg': '#1f144e',

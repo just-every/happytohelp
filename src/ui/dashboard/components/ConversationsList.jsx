@@ -10,7 +10,7 @@ import { getInboxView, inboxViewFilter, normalizeInboxView } from './inboxViewDe
 import useConversationList from '../hooks/useConversationList';
 import useScrollEdge from '../hooks/useScrollEdge';
 
-function ConversationsList({ canTryDemo = false }) {
+function ConversationsList({ canTryDemo = false, hideBehindConversation = false }) {
     const {
         conversationLists,
         setConversationLists,
@@ -59,7 +59,7 @@ function ConversationsList({ canTryDemo = false }) {
     };
 
     return (
-        <div className={ `sidebar conversation-inbox px-4 py-3${isScrolled ? ' is-scrolled' : ''}` }>
+        <div className={ `sidebar conversation-inbox px-4 py-3${isScrolled ? ' is-scrolled' : ''}` } aria-hidden={ hideBehindConversation ? 'true' : undefined } inert={ hideBehindConversation || undefined }>
             <div className="conversation-inbox-header">
                 <InboxSearch query={ searchQuery } viewLabel={ view.label } onSearch={ handleSearch } />
             </div>

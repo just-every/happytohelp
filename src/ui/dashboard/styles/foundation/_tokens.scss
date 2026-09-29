@@ -165,7 +165,7 @@ $input-group-addon-bg: $white;
 $input-group-addon-border-color: var(--bs-gray-400);
 
 // Select chevron drawn for this product: a 9x5 open chevron.
-$form-select-indicator-color: $gray-600;
+$form-select-indicator-color: $gray-700;
 $form-select-indicator: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 5' fill='none'><path d='M1 1l3.25 3.25L7.5 1' stroke='#{$form-select-indicator-color}' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'/></svg>");
 $form-select-indicator-padding: 1.75rem;
 $form-select-bg: $white;

@@ -13,7 +13,7 @@ const LIGHT_SURFACES = {
     '--workspace-surface-subtle': '#f9fbfd',
     '--workspace-ink': '#19153d',
     '--workspace-muted': '#536080',
-    '--workspace-quiet': '#747f9b',
+    '--workspace-quiet': '#667085',
     '--workspace-line': '#e7eaf1',
 };
 
@@ -63,7 +63,7 @@ function createGlobalInboxSurfaceTheme(background, accent) {
 
     const ink = readableInk(normalizedBackground);
     const muted = readableTone(normalizedBackground, ink, 4.5);
-    const quiet = readableTone(normalizedBackground, ink, 3);
+    const quiet = readableTone(normalizedBackground, ink, 4.5);
     const primarySoft = readableSelectedSurface(normalizedBackground, normalizedAccent, ink, 0.18);
     const primaryHover = readableSelectedSurface(normalizedBackground, normalizedAccent, ink, 0.09);
     const surfaceRaised = readableSelectedSurface(normalizedBackground, ink, ink, 0.018);

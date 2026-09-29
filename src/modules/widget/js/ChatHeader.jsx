@@ -18,6 +18,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
     } = useContext(ConnectContext);
 
     const contentEl = useRef(null);
+    const responderToggleRef = useRef(null);
     const [lastHeight, setLastHeight] = useState(0);
 
     const currentAgent = getCurrentAgent();
@@ -35,6 +36,19 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
             sendMessage('assignAi', { ai_id: aiId });
         }
     }
+
+    const handleHeaderKeyDown = event => {
+        if(event.key !== 'Escape' || !headerExpanded) return;
+        event.preventDefault();
+        setHeaderExpanded(false);
+        window.requestAnimationFrame(() => responderToggleRef.current?.focus());
+    };
+
+    const activateWithKeyboard = (event, action) => {
+        if(event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        action(event);
+    };
 
     useLayoutEffect(() => {
         if(contentEl.current) {
@@ -57,7 +71,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
 
         let agentRows = [];
         agents.forEach((agent, index) => {
-            agentRows.push(<div key={index} className={"happytohelp-chat-header-agent"+(currentAgent.id === agent.id ? " happytohelp-chat-header-agent-active" : "")} onClick={(event) => handleAgentChange(event, agent)}>
+            agentRows.push(<div key={index} className={"happytohelp-chat-header-agent"+(currentAgent.id === agent.id ? " happytohelp-chat-header-agent-active" : "")} role="button" tabIndex={0} aria-pressed={currentAgent.id === agent.id} onClick={(event) => handleAgentChange(event, agent)} onKeyDown={event => activateWithKeyboard(event, action => handleAgentChange(action, agent))}>
                 <AgentAvatar agent={ agent } />
                 <div className="happytohelp-insight-agent">
                     <div>
@@ -72,7 +86,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
 
         content = (
             <div className="happytohelp-chat-header-title-agents" style={ context.theme.window }>
-                <div className="happytohelp-chat-header-desc" onClick={() => setHeaderExpanded(false)}>
+                <div className="happytohelp-chat-header-desc" role="button" tabIndex={0} onClick={() => setHeaderExpanded(false)} onKeyDown={event => activateWithKeyboard(event, () => setHeaderExpanded(false))}>
                     <div className="happytohelp-chat-header-desc-title">
                         {context.text.ai.selection}
                         <span className="happytohelp-chat-header-edit-inline">
@@ -89,7 +103,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
     }
     else if(currentAgent) {
         content = (
-            <div className={"happytohelp-chat-header"+(canExpand ? "" : " happytohelp-chat-no-action")} onClick={() => canExpand && setHeaderExpanded(true)} style={ context.theme.window }>
+            <div className={"happytohelp-chat-header"+(canExpand ? "" : " happytohelp-chat-no-action")} role={canExpand ? 'button' : undefined} tabIndex={canExpand ? 0 : undefined} aria-expanded={canExpand ? headerExpanded : undefined} aria-label={canExpand ? `${currentAgent.first_name ?? currentAgent.name}, ${context.text.ai.selection}` : undefined} onClick={() => canExpand && setHeaderExpanded(true)} onKeyDown={canExpand ? event => activateWithKeyboard(event, () => setHeaderExpanded(true)) : undefined} ref={responderToggleRef} style={ context.theme.window }>
                 <AgentAvatar agent={currentAgent} canAnimate={thinking}/>
                 <div className="happytohelp-insight-agent">
                     <span className="happytohelp-insight-agent-name">
@@ -120,10 +134,10 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
         style = {height: lastHeight};
     }
 
-    return <div className={"happytohelp-chat-header-container " + (headerExpanded ? "happytohelp-chat-header-container-expanded" : "happytohelp-chat-header-container-collapsed")} style={style}>
-        <div className={"happytohelp-close"} onClick={() => { setOpen(false) }}>
-            <FontAwesomeIcon icon={falTimes}/>
-        </div>
+    return <div className={"happytohelp-chat-header-container " + (headerExpanded ? "happytohelp-chat-header-container-expanded" : "happytohelp-chat-header-container-collapsed")} style={style} onKeyDown={handleHeaderKeyDown}>
+        <button type="button" className="happytohelp-close" aria-label="Close chat" onClick={() => { setOpen(false) }}>
+            <FontAwesomeIcon icon={falTimes} aria-hidden="true"/>
+        </button>
         <div ref={contentEl}>
             {content}
         </div>

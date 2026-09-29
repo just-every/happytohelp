@@ -42,14 +42,27 @@ review also corrected an unset human-response preference being saved as disabled
 Setup and widget browser suites, module tests and emitted Worker checks remain
 part of acceptance. See `HANDOVER.md` for commands.
 
-This is a substantial consistency pass, not full legacy feature equality. Native
-APIs still lack the original global Contacts aggregation and global Inbox
-Appearance settings, standalone computer-consent metadata, the AI type catalogue,
-invitation-time notification preferences, some contact history, per-import
-credential entry, and several administrative aggregates/actions. Global Contacts
-now offers explicit workspace choices. Unsupported fields/actions are not shown
-as working; unavailable aggregates use an em dash. Original onboarding/demo flows
-and configured provider journeys have not been established by this pass.
+This is a substantial consistency pass, not full legacy feature equality. Each
+remaining gap has an explicit product/API disposition; this accessibility closeout
+does not invent unsupported data or controls to make the screens appear complete.
+
+| Remaining legacy gap | Current disposition and reason |
+| --- | --- |
+| Global Contacts aggregation | Native Contacts offers explicit workspace choices. The cross-workspace aggregate is not backed by a native API and is not presented as if it were available. |
+| Global Inbox Appearance settings | Appearance is project-scoped in the native settings model. A global override has no matching persisted contract, so the native UI keeps the supported per-project controls. |
+| Standalone computer-consent metadata | The native project schema does not expose the legacy standalone consent fields. No editable control is shown without a persisted API contract. |
+| AI type catalogue | Native assistant controls cover the configured responder types exposed by the current API. The wider legacy type catalogue is not in that API and is not implied by these controls. |
+| Invitation-time notification preferences | The native invitation/member contract does not persist the original per-invite notification options. They remain a feature gap rather than a local-only setting. |
+| Some contact history | The native contact API does not return all legacy history records. Existing history is shown only where the native API supplies it. |
+| Per-import credential entry | The native import flow has no per-import credential storage/entry contract. The interface does not simulate credential retention. |
+| Administrative aggregates/actions | Several legacy aggregate values and admin actions lack native API support. Unsupported aggregates remain an em dash; unavailable actions are not exposed as working. |
+| Original onboarding and demo flows | The local acceptance path uses native setup and synthetic records. The original legacy demo/onboarding journeys are not asserted as equivalent. |
+| Configured provider journeys | This local pass makes no live provider calls and does not establish external credentials, delivery, or provider acceptance. Those journeys remain separate qualification work. |
+
+The accessibility audit and its exact route/state limits are recorded in
+[ACCESSIBILITY-AUDIT-2026-09-30.md](ACCESSIBILITY-AUDIT-2026-09-30.md). It qualifies
+keyboard and visual accessibility for the audited native states; it does not close
+the feature/API gaps above.
 
 The comparison screenshots are not part of this repository. The browser suites
 named above (`pnpm run test:ui-browser` and related `test:*-browser` scripts)

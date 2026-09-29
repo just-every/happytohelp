@@ -15,11 +15,12 @@ let defaultAppContext = {
             },
             open: {
                 background: "#f5f6fb",
-                color: "#cecece",
+                color: "#667085",
             },
         },
         avatar: {
             background: "#b2e2ff",
+            color: "#24384b",
         },
         insight: {
             background: "#ffffff",
@@ -45,7 +46,7 @@ let defaultAppContext = {
                 color: "#666",
             },
             button: {
-                color: "#cecece",
+                color: "#667085",
             },
             send: {
                 background: "#484748",
@@ -140,4 +141,3 @@ let defaultAppContext = {
 const AppContext = React.createContext({});
 
 export {AppContext as default, defaultAppContext};
-

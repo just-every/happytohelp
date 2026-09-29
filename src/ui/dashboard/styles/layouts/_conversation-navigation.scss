@@ -12,7 +12,7 @@ body:is(.conversation-workspace, .workspace-themed) {
     --conversation-nav-active: #5b33b8;
     --conversation-nav-parent-active: #2f215e;
     --conversation-nav-badge: #392c65;
-    --conversation-nav-active-badge: #8d5ded;
+    --conversation-nav-active-badge: #8350d9;
     --conversation-nav-line: #392969;
     --conversation-nav-focus: #cda0fd;
     --workspace-nav-bg: #1f144e;
@@ -193,7 +193,7 @@ body:is(.conversation-workspace, .workspace-themed) {
         padding: 16px 12px;
         overflow: visible;
 
-        & ~ .main-content { margin-left: var(--conversation-rail-width); }
+        & ~ #workspace-main > .main-content { margin-left: var(--conversation-rail-width); }
         > .container-fluid { padding: 0; align-items: stretch; height: 100%; min-height: 0; }
         .navbar-workspace { flex-shrink: 0; }
         .navbar-collapse { width: 100%; min-width: 0; margin: 0; padding: 0; }
@@ -222,7 +222,7 @@ body:is(.conversation-workspace, .workspace-themed) {
 @media (min-width: 1200px) { .native-workspace-select { margin-bottom: 1rem; } }
 @media (max-width: 1199.98px) {
  body .navbar-refined.navbar-vertical > .container-fluid { display: grid; grid-template-columns: 28px minmax(0, 1fr) 130px; gap: 10px; align-items: center; }
- body .navbar-refined .navbar-workspace-toggle { width: auto; min-width: 0; font-size: 12px; }
+ body .navbar-refined .navbar-workspace-toggle { width: auto; min-width: 0; min-height: 24px; font-size: 12px; }
  body .navbar-refined .navbar-workspace-toggle img { width: 24px; height: 24px; }
  body .navbar-refined .navbar-collapse { grid-column: 1 / -1; }
 }

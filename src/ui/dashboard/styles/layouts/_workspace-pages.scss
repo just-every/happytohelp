@@ -65,3 +65,8 @@ body.workspace-page {
         .workspace-page-content > .row { row-gap: 20px; }
     }
 }
+
+body.workspace-entry .auth-secondary-link a {
+    text-decoration: underline;
+    text-underline-offset: .16em;
+}

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ConversationsList from "./ConversationsList";
 import Conversation from "./Conversation";
 import DemoInboxInvitation from './DemoInboxInvitation';
@@ -9,6 +9,7 @@ import { ChatContext } from "../contexts/ChatContext";
 import useInboxRoute from "../hooks/useInboxRoute";
 
 export default function Chat() {
+    const [ isCompactViewport, setIsCompactViewport ] = useState(false);
     const { urlConversationId } = useInboxRoute();
     const settings = useDashboardSettings();
     const {
@@ -31,6 +32,14 @@ export default function Chat() {
     }, [ urlConversationId, setActiveConversationId ]);
 
     useEffect(() => {
+        const compactViewport = window.matchMedia('(max-width: 1199.98px)');
+        const updateViewport = () => setIsCompactViewport(compactViewport.matches);
+        updateViewport();
+        compactViewport.addEventListener('change', updateViewport);
+        return () => compactViewport.removeEventListener('change', updateViewport);
+    }, []);
+
+    useEffect(() => {
         updateNavigationUnreadBadge(inboxViewCounts.unread);
     }, [ inboxViewCounts ]);
 
@@ -39,7 +48,7 @@ export default function Chat() {
             <InboxViews />
 
             <div className="layout">
-                <ConversationsList canTryDemo={canTryDemo} />
+                <ConversationsList canTryDemo={canTryDemo} hideBehindConversation={isMainVisible && isCompactViewport} />
 
                 <div className={ isMainVisible ? 'main main-visible' : 'main' }>
                     {activeConversationId && <Conversation

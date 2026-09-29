@@ -4,6 +4,22 @@ All notable changes to HappyToHelp are recorded here. Versions follow
 [Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
 include breaking changes.
 
+## 0.2.1 - 2026-09-27
+
+### Fixed
+
+- Hosted Assisted and Managed builds no longer fail with `pnpm: not found`.
+  Run Edit Run's trusted project build provides Node but no global pnpm, and the
+  package scripts that `build` and `verify` run call `pnpm`. The
+  `rer-project.json` build and verify commands now put the pnpm 10.12.4 that
+  `scripts/independent/setup-build.mjs` installs in `.rer-tools` first on
+  `PATH`. Standalone installation and the `pnpm run` scripts are unchanged.
+- The `rer-project.json` artifact check no longer fails with `97 !== 94`.
+  `tests/independent-runtime.mjs` still requires an exact table count, now 97:
+  migrations `0102_public_abuse_limits` (`abuse_counters`) and
+  `0103_contact_erasure` (`contact_erasures`, `contact_erasure_objects`) in
+  0.2.0 added three tables that the expected count had not been updated for.
+
 ## 0.2.0 - 2026-09-25
 
 First public source release of the self-hosted edition.

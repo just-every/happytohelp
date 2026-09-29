@@ -1,6 +1,6 @@
 {
   "name": "@run-edit-run/happytohelp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Open-source customer support workspace: chat widget, team inbox, AI-assisted replies and help centers on Cloudflare Workers.",
   "license": "MIT",
   "repository": {

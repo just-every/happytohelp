@@ -1,0 +1,146 @@
+{
+  "schema": "runeditrun/happytohelp-local-usage-receipt-v1",
+  "candidate": "0.2.2-rc.1",
+  "measuredAt": "2026-09-29T23:12:15.066Z",
+  "sourceRevision": "c7f0d1b8ce447e59804d736ce364e9812dcf2715",
+  "emittedWorkerSha256": "b88e40ff7a74ba7b61c77bcca6fe000f99e9730bfa24dff087f2b3f0d6f6220b",
+  "externalEvidence": {
+    "measurementPath": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-composed-usage/run-XTUCAb/measurement.json",
+    "measurementSha256": "4869ab16a1dde40d40a3ed9d248278894e7809be2d4d3ecfeecad5a9b0350fd1",
+    "summaryPath": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-composed-usage/summary.json",
+    "summarySha256": "4697571e842a6b8fe5087a2c6716613e2f5fa79366edeb2b87fb734ac9f90629",
+    "usageTestsLogPath": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-composed-usage-tests.log",
+    "usageTestsLogSha256": "1c65df9884aeaccafa819de5ca81f4da66dd9a95fff51e3209339278b4917399"
+  },
+  "instrumentationSha256": {
+    "measure.mjs": "6cac4f73f1575c61bead0c0992ac4762a9a1d58297ef9c430bf17717539545a6",
+    "worker.js": "4ba99a16e30c38835faeade275a36dbd5799e0e728ab9a06eeb0fe67cc46edf7",
+    "runtime.mjs": "a959bebb6217a44cd882556ce4570687fca7f638f0b364957dbc27471b60929f"
+  },
+  "workload": {
+    "visitorMessages": 3,
+    "operatorReplies": 2,
+    "attachmentBytes": 1048576,
+    "uploads": 1,
+    "downloads": 1,
+    "socketConnections": 2,
+    "incomingPingFrames": 1,
+    "retentionDaysAssumed": 30
+  },
+  "observed": {
+    "newVisitor": {
+      "workerRequests": 12,
+      "workerLocalWallMs": 194,
+      "d1Statements": 116,
+      "d1TotalRowsRead": null,
+      "d1TotalRowsWritten": null,
+      "d1KnownSubsetRowsRead": 75,
+      "d1KnownSubsetRowsWritten": 57,
+      "r2ClassA": 1,
+      "r2ClassB": 1,
+      "r2UploadedBytes": 1048576,
+      "r2DownloadedBytes": 1048576,
+      "r2RetainedObjectBytes": 1048576,
+      "doRequests": 12,
+      "doConversationRequests": 7,
+      "doProjectRequests": 5,
+      "incomingFrames": 1,
+      "outgoingFrames": 6
+    },
+    "returningVisitor": {
+      "workerRequests": 11,
+      "workerLocalWallMs": 141,
+      "d1Statements": 111,
+      "d1TotalRowsRead": null,
+      "d1TotalRowsWritten": null,
+      "d1KnownSubsetRowsRead": 90,
+      "d1KnownSubsetRowsWritten": 52,
+      "r2ClassA": 1,
+      "r2ClassB": 1,
+      "r2UploadedBytes": 1048576,
+      "r2DownloadedBytes": 1048576,
+      "r2RetainedObjectBytes": 1048576,
+      "doRequests": 12,
+      "doConversationRequests": 7,
+      "doProjectRequests": 5,
+      "incomingFrames": 1,
+      "outgoingFrames": 6
+    },
+    "recoveryCron": {
+      "invocations": 1,
+      "d1Statements": 63,
+      "d1KnownSubsetRowsRead": 98,
+      "d1KnownSubsetRowsWritten": 10,
+      "d1TotalRowsRead": null,
+      "d1TotalRowsWritten": null,
+      "doRequests": 4
+    },
+    "idleCron": {
+      "invocations": 1,
+      "d1Statements": 21,
+      "d1RowsRead": 37,
+      "d1RowsWritten": 0,
+      "doRequests": 0
+    }
+  },
+  "monthlyScenarios": [
+    {
+      "conversations": 1,
+      "workerRequests": 43212,
+      "doRequestEquivalent": 14.05,
+      "r2ClassA": 1,
+      "r2ClassB": 1,
+      "r2GbMonth": 0.001048576,
+      "pricedComponentSubtotalUsd": 5,
+      "billingTotalUsd": null
+    },
+    {
+      "conversations": 1000,
+      "workerRequests": 55200,
+      "doRequestEquivalent": 14050,
+      "r2ClassA": 1000,
+      "r2ClassB": 1000,
+      "r2GbMonth": 1.048576,
+      "pricedComponentSubtotalUsd": 5,
+      "billingTotalUsd": null
+    },
+    {
+      "conversations": 10000,
+      "workerRequests": 163200,
+      "doRequestEquivalent": 140500,
+      "r2ClassA": 10000,
+      "r2ClassB": 10000,
+      "r2GbMonth": 10.48576,
+      "pricedComponentSubtotalUsd": 5.015,
+      "billingTotalUsd": null
+    }
+  ],
+  "assumptions": [
+    "43,200 scheduled minute-cron ticks in a 30-day month",
+    "Otherwise unused paid account with a $5 account minimum",
+    "Owner-managed 30-day R2 retention and one 1 MiB retained object per conversation",
+    "Monthly conversation mix is 100% new visitors",
+    "Priced component subtotals exclude unknown D1, Worker CPU, Durable Object duration/storage, provider, email, other account and ancillary service costs"
+  ],
+  "usageTests": {
+    "sourceRevision": "c7f0d1b8ce447e59804d736ce364e9812dcf2715",
+    "command": "node scripts/migrations.mjs && node --test tests/usage-summary.mjs tests/usage-limits.mjs",
+    "exitCode": 0,
+    "tests": 2,
+    "passed": 2,
+    "failed": 0,
+    "requestStatuses": [201, 201, 429],
+    "projectAiAdmissions": 2,
+    "installationAiAdmissions": 3,
+    "explicitAiDenials": [429, 429],
+    "providerCalls": 0,
+    "providerTokens": null,
+    "providerCostUsd": null
+  },
+  "limits": [
+    "Local emitted-Worker evidence only; no hosted or production behavior is measured.",
+    "The root measurement predates RC metadata edits and the accessibility correction; it is not the final frozen-candidate emitted identity.",
+    "D1 total row counts, hosted Worker CPU, Durable Object duration/storage, provider usage, and total billing are unknown, not zero.",
+    "No paid provider, email service, deployment, or production data operation was used."
+  ]
+}

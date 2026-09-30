@@ -5,14 +5,74 @@ with [README.md](README.md) to install and run it, then read this page.
 
 ## What it is
 
-HappyToHelp 0.2.0 is a native TypeScript rewrite of the original HappyToHelp
+HappyToHelp 0.2.2-rc.1 is a private preservation candidate for the native
+TypeScript rewrite of the original HappyToHelp
 customer support application, which ran on PHP/Laravel and AWS. It keeps the
 original React dashboard and Shadow DOM customer widget, the AI assistance
 pipeline, knowledge ingestion, customer context and local-agent delegation, and
 runs them on a single Cloudflare Worker. Pricing, billing, marketing, waitlist
 and referrer features of the original service are deliberately not part of this
-edition. [CONTRACT.md](CONTRACT.md) states the required behavior;
+edition. The `0.2.2-rc.1` version does not mean public release or product
+acceptance: the public source release remains 0.2.1 until a separate owner
+decision. [CONTRACT.md](CONTRACT.md) states the required behavior;
 [ACCEPTANCE.md](ACCEPTANCE.md) states the evidence each requirement needs.
+
+## Private candidate qualification record
+
+The measured application source is `c7f0d1b8ce447e59804d736ce364e9812dcf2715`.
+Its emitted local Worker digest is recorded in
+[`verification/rc-0.2.2-rc.1/composed-usage.json`](verification/rc-0.2.2-rc.1/composed-usage.json).
+That measurement predates the RC metadata edits and any subsequent accessibility
+correction; it is not the final emitted identity for the frozen candidate.
+
+The root's focused local usage run passed 2/2 tests. It made no provider calls.
+The receipt preserves unknown D1 totals, hosted Worker CPU, Durable Object
+duration/storage and total billing as unknown; its monthly price scenarios are
+component subtotals under stated assumptions, not invoices or total costs.
+At `c7f0d1b`, the root also reported frozen install, build and typecheck as
+passing. Earlier focused delegation evidence passed on
+`e6c1136043f7ccd649f43969f57254f3d5be492d`; it is lane evidence, not the final
+composed RC gate.
+
+The failed source-specific composed accessibility gate on `c7f0d1b` reported
+three reproduced findings:
+
+- The article-editor **Delete** link measured 4.15:1 against white at desktop
+  and 320 CSS pixels, below the 4.5:1 text threshold.
+- Add note keyboard navigation can leave the dialog on forward Tab and strand
+  reverse navigation on the dialog container.
+- A branding focus outline measured 1.90:1 after alpha compositing; an earlier
+  audit result of 6.06:1 did not account for the alpha channel.
+
+The earlier 19-state Axe result remains bounded to its documented states and
+does not close these findings. The accessibility corrections are integrated in
+the root's later `6ffffb0` composition; its fresh composed gate is pending. Treat
+the c7 result as historical evidence for that exact source snapshot. The root
+will append the corrected final adjudication after the gate. Do not mark
+accessibility accepted before that result.
+The gate also found the UI parity record incomplete: six rows (53 and 55–59)
+need an explicit consequence and supported alternative, or an explicit
+statement that none exists. The onboarding/demo row omits the existing native
+**Try a demo inbox** option. The failed-gate receipt and external report digest
+are in
+[`verification/rc-0.2.2-rc.1/composed-accessibility-gate.json`](verification/rc-0.2.2-rc.1/composed-accessibility-gate.json).
+
+Portability recovery work remains on the separate private branch
+`codex/h2h-portability-fidelity-20260929` at
+`ef8406f654908cf67612a498511f99ce13f8ae12`; it is not selected by this
+candidate. Its two bounded correction rounds ended with a reproduced persisted
+resizable-`ArrayBuffer` fidelity loss. The owner's question about one further
+narrow correction is unanswered (default: hold). This candidate has no fresh
+full-restore claim.
+
+The retained original verification harness expects 97 application tables and
+37 migrations; the composed candidate has 104 tables (the 97-table baseline
+plus seven delegation tables) and 38 migrations. The owner-exception proposal
+is review-only and has not been applied. Full `pnpm run verify`, source-lock
+freshness and final composed acceptance are therefore not claimed here. The
+metadata branch leaves `sources.lock.json` for the root to refresh after the
+source and records are frozen. No public push, tag or deployment is part of
+this candidate record.
 
 ## Architecture
 
@@ -65,6 +125,21 @@ pnpm run test:mobile-inbox-browser
 pnpm run test:conversation-panel-resize-browser
 pnpm run test:contact-erasure-browser
 ```
+
+The candidate also exposes these focused commands for its existing tests:
+
+```sh
+pnpm run test:accessibility-browser
+pnpm run test:delegation-authority-runtime
+pnpm run test:delegation-scoped-browser
+pnpm run test:usage
+```
+
+They are supplemental qualification commands, not changes to `verify` or the
+existing delegation commands. The accessibility command is bounded to its
+declared browser states; the three fresh composed-gate findings above remain
+open. `test:usage` prepares generated migrations, then runs the two existing
+usage tests.
 
 `pnpm run verify` runs the operations descriptor, build, type check, module
 suites, the emitted-Worker runtime and security-header suites, the first-release
@@ -127,9 +202,14 @@ in [SECURITY.md](SECURITY.md).
 
 ## Known gaps
 
-- Accessibility is targeted at WCAG 2.2 AA but has not been audited; operating
-  costs and limits are unmeasured (`seed.json`).
+- Accessibility is targeted at WCAG 2.2 AA. The bounded 19-state audit is not a
+  complete conformance review; the c7 composed gate failed and awaits final
+  adjudication against the corrected source. Hosted operating costs remain
+  unmeasured; local scenarios preserve unknown usage and billing totals
+  (`seed.json` and the composed-usage receipt).
 - Some legacy dashboard features are not yet native; see
   [docs/UI-PARITY.md](docs/UI-PARITY.md).
-- Durable Object storage is not part of a portable export; recovery relies on D1
-  and R2 (see [docs/INDEPENDENT-RELEASE.md](docs/INDEPENDENT-RELEASE.md)).
+- The separate portability candidate still has a resizable-`ArrayBuffer`
+  fidelity failure and is not integrated or accepted for this RC. Durable
+  Object storage is not part of a portable export; recovery relies on D1 and R2
+  ([docs/INDEPENDENT-RELEASE.md](docs/INDEPENDENT-RELEASE.md)).

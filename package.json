@@ -1,6 +1,6 @@
 {
   "name": "@run-edit-run/happytohelp",
-  "version": "0.2.1",
+  "version": "0.2.2-rc.1",
   "description": "Open-source customer support workspace: chat widget, team inbox, AI-assisted replies and help centers on Cloudflare Workers.",
   "license": "MIT",
   "repository": {
@@ -46,6 +46,9 @@
     "test:reproducible-build": "node --test tests/reproducible-build.mjs",
     "test:contact-erasure-browser": "node tests/contact-erasure-browser.mjs",
     "test:delegation": "node --test tests/delegation-sqlite.mjs && python3 tests/delegation-backup.py && node tests/delegation-runtime.mjs",
+    "test:delegation-authority-runtime": "node tests/delegation-authority-runtime.mjs",
+    "test:delegation-scoped-browser": "node tests/delegation-scoped-browser.mjs",
+    "test:usage": "pnpm run migrations:prepare && node --test tests/usage-summary.mjs tests/usage-limits.mjs",
     "test:delegation-browser": "node tests/delegation-browser.mjs"
   },
   "dependencies": {

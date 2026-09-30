@@ -4,6 +4,40 @@ All notable changes to HappyToHelp are recorded here. Versions follow
 [Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
 include breaking changes.
 
+## 0.2.2-rc.1 - 2026-09-30 (private candidate)
+
+This version marks a private preservation candidate for review. It is not a
+public release, tag, deployment or product-acceptance record.
+
+### Added
+
+- Focused commands for the existing scoped-delegation browser and authority
+  runtime checks, plus the local usage-summary and request-limit checks. The
+  original `verify`, `test:delegation` and browser commands remain unchanged.
+- A compact receipt for a composed local emitted-Worker usage run on
+  `c7f0d1b8ce447e59804d736ce364e9812dcf2715`, including its emitted artifact
+  digest, measured units, pricing assumptions and unknowns.
+
+### Qualification status
+
+- The composed usage tests passed 2/2 at that source revision. The receipt is
+  local-only: no model/provider was called, and hosted CPU, D1 totals, Durable
+  Object duration/storage and actual billing remain unknown.
+- The bounded accessibility gate failed on source `c7f0d1b`. Its findings are
+  historical evidence for that source snapshot, not a disposition of a later
+  corrected source; see the
+  [gate receipt](verification/rc-0.2.2-rc.1/composed-accessibility-gate.json).
+- The portability-fidelity branch is not integrated. Its second correction
+  round still loses resizable `ArrayBuffer` fidelity; the owner decision on one
+  further narrow correction is pending, with hold as the default. No full fresh
+  restore qualification is claimed for this candidate.
+- Full `pnpm run verify` is not claimed: the retained harness expects 97 tables
+  and 37 migrations, while this candidate has 104 tables (97 plus seven
+  delegation tables) and 38 migrations. The owner-exception proposal remains
+  review-only and unapplied.
+
+No public push, tag or deployment is part of this candidate record.
+
 ## 0.2.1 - 2026-09-27
 
 ### Fixed

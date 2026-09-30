@@ -1,0 +1,52 @@
+{
+  "schema": "runeditrun/happytohelp-accessibility-gate-receipt-v1",
+  "candidate": "0.2.2-rc.1",
+  "status": "audit complete; candidate fails bounded accessibility gate",
+  "sourceRevision": "c7f0d1b8ce447e59804d736ce364e9812dcf2715",
+  "sourceTreeClean": true,
+  "externalReport": {
+    "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-gate/gate-report.json",
+    "sha256": "4d79e2a498ae4be5b73a6fec402c028dbd55f7d688654f77b8de562373d0c391"
+  },
+  "confirmedFindings": [
+    {
+      "id": "A11Y-ARTICLE-DELETE",
+      "severity": "P2",
+      "source": [
+        "src/ui/native/pages/KnowledgePage.jsx:28",
+        "src/ui/dashboard/styles/foundation/_tokens.scss:27"
+      ],
+      "reason": "The article-editor Delete text is #e63757 on white at 13px normal and measures 4.15:1, below 4.5:1, on desktop and at 320 CSS pixels.",
+      "impact": "Low-vision users have insufficient contrast on the destructive article control."
+    },
+    {
+      "id": "A11Y-NOTE-FOCUS",
+      "severity": "P2",
+      "source": ["src/ui/dashboard/components/NoteModal.jsx:39"],
+      "reason": "After the note dialog settles, forward Tab visits Close, Add, BODY and the dialog; reverse traversal from Close repeatedly focuses the dialog container instead of wrapping to Add.",
+      "impact": "Keyboard focus leaves the modal's visible controls, and reverse traversal cannot reach the last action by wrapping. Escape and focus restoration work. This is not asserted as a screen-reader failure."
+    },
+    {
+      "id": "A11Y-FOCUS-ALPHA",
+      "severity": "P2",
+      "source": [
+        "src/ui/dashboard/styles/layouts/_workspace-settings.scss:48",
+        "tests/helpers/accessibility-interaction-audit.mjs:37-48"
+      ],
+      "reason": "The branding summary focus outline rgba(113,62,224,.4) on white measures 1.90:1 after alpha compositing; the audit ignored alpha and reported 6.06:1.",
+      "impact": "The focus outline misses the stated 3:1 non-text requirement, and the audit calculation conceals it."
+    }
+  ],
+  "parityRecord": {
+    "status": "correction pending",
+    "rows": [53, 55, 56, 57, 58, 59],
+    "requiredCorrection": "For each named gap, state the user consequence and supported alternative, or explicitly state that none exists.",
+    "omission": "The onboarding/demo row omits the existing native Try a demo inbox option."
+  },
+  "scopeLimits": [
+    "The unchanged 19-state Axe suite scans empty knowledge lists; an independent probe supplied the populated article editor where the contrast defect was found.",
+    "Chromium only; no screen-reader/user study, hosted, provider, delivery, package, or public-release acceptance.",
+    "The historical 19-state zero-Axe result does not override these findings.",
+    "At report capture, source/audit corrections and a fresh composed gate were pending."
+  ]
+}

@@ -435,3 +435,43 @@ official rates, formulas, raw JSON, reproduction commands and limitations.
 `node --test tests/usage-limits.mjs` proves configured local request 429/
 `Retry-After` behavior and project/installation daily AI count ceilings without
 provider execution. Configurable defaults remain guards, not measured capacity.
+
+The composed `c7f0d1b8` candidate was also measured on a local emitted Worker on
+2026-09-29 UTC. Its source revision, emitted digest, instrumentation hashes,
+per-phase units, test receipt, priced scenarios and unknowns are preserved in
+[`verification/rc-0.2.2-rc.1/composed-usage.json`](verification/rc-0.2.2-rc.1/composed-usage.json).
+That run recorded 12 dynamic Worker requests for a new visitor and 11 for a
+returning visitor, with 116 and 111 D1 statements respectively. D1 total row
+counts, hosted CPU, hosted DO duration/storage and total billing remain null.
+It made zero AI provider calls; provider tokens and cost are null. Its assumed
+monthly price subtotals are not total bills. The measurement predates the final
+metadata/source freeze and must not be presented as the frozen RC's emitted
+identity.
+
+`pnpm run test:usage` prepares generated migrations, then runs the existing
+`tests/usage-summary.mjs` and `tests/usage-limits.mjs`. On the measured source
+revision the root run recorded 2/2 passing tests, including real local
+`201, 201, 429` request-limit outcomes and project/installation AI admission
+ceilings, with no provider calls. This focused result is separate from
+`pnpm run verify` and hosted acceptance.
+
+## Private 0.2.2-rc.1 qualification boundary
+
+This branch labels a private preservation candidate. It does not authorize a
+public tag, publication, deployment or production cutover. The composed
+accessibility failure on `c7f0d1b` is historical evidence for that source
+snapshot, not a disposition of the later corrected composition. Its findings
+and parity requirements are preserved in
+[`HANDOVER.md`](HANDOVER.md) and the
+[historical gate receipt](verification/rc-0.2.2-rc.1/composed-accessibility-gate.json).
+The root has integrated accessibility corrections; its fresh composed gate and
+final adjudication are pending. The earlier 19-state zero-Axe result is bounded
+evidence, not accessibility acceptance.
+
+No passing full `pnpm run verify` result is established for this candidate.
+The unchanged harness and unapplied owner-only proposal are described in
+[`HANDOVER.md`](HANDOVER.md); do not treat focused checks or `operations.mjs
+describe` as full verification. The separate portability-fidelity candidate
+still has a persisted resizable-`ArrayBuffer` loss and remains on hold; this RC
+has no full-restore qualification. The root will refresh the source lock and
+rerun composed checks after source and records freeze.

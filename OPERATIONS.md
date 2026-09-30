@@ -457,21 +457,19 @@ ceilings, with no provider calls. This focused result is separate from
 
 ## Private 0.2.2-rc.1 qualification boundary
 
-This branch labels a private preservation candidate. It does not authorize a
-public tag, publication, deployment or production cutover. The composed
-accessibility failure on `c7f0d1b` is historical evidence for that source
-snapshot, not a disposition of the later corrected composition. Its findings
-and parity requirements are preserved in
-[`HANDOVER.md`](HANDOVER.md) and the
-[historical gate receipt](verification/rc-0.2.2-rc.1/composed-accessibility-gate.json).
-The root has integrated accessibility corrections; its fresh composed gate and
-final adjudication are pending. The earlier 19-state zero-Axe result is bounded
-evidence, not accessibility acceptance.
+This branch labels a private preservation candidate; public release remains HOLD.
+The current f205 accessibility gate is complete and fails checker reliability,
+with confirmed owner HOLD after two correction rounds. Four oracle false accepts
+and the root widget timing/background false failure remain recorded; 21 passing
+states do not close those limitations or establish complete WCAG conformance.
+See [HANDOVER.md](HANDOVER.md) and the
+[current receipt](verification/rc-0.2.2-rc.1/final-qualification.json) for exact
+source pins, retained failures, LIMITED coverage and the owner direction.
 
-No passing full `pnpm run verify` result is established for this candidate.
-The unchanged harness and unapplied owner-only proposal are described in
-[`HANDOVER.md`](HANDOVER.md); do not treat focused checks or `operations.mjs
-describe` as full verification. The separate portability-fidelity candidate
-still has a persisted resizable-`ArrayBuffer` loss and remains on hold; this RC
-has no full-restore qualification. The root will refresh the source lock and
-rerun composed checks after source and records freeze.
+The external port/import-adapted original v0.2.1 independent proof now passes
+97 tables/37 migrations and has root replication. Its unchanged command remains
+held at ports 12401/12501/default inspectors; it does not qualify this candidate's
+104 tables/38 migrations. Full verify, original port/lifecycle exceptions,
+separate portable-fidelity acceptance and final source-lock checks remain held
+or pending as recorded in HANDOVER. No publication, deployment or production
+cutover follows from these focused results.

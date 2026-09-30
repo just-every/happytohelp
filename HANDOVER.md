@@ -19,60 +19,58 @@ decision. [CONTRACT.md](CONTRACT.md) states the required behavior;
 
 ## Private candidate qualification record
 
-The measured application source is `c7f0d1b8ce447e59804d736ce364e9812dcf2715`.
-Its emitted local Worker digest is recorded in
-[`verification/rc-0.2.2-rc.1/composed-usage.json`](verification/rc-0.2.2-rc.1/composed-usage.json).
-That measurement predates the RC metadata edits and any subsequent accessibility
-correction; it is not the final emitted identity for the frozen candidate.
+The current source-pinned candidate is `f2054c3b7cd19fcddd9962e418f680f92c89109b`.
+Its final accessibility verdict is **FAIL / confirmed owner HOLD** because the
+checker remains unreliable. After two correction rounds, the owner answered
+question 12: “Hold the checker; record the audit limitation (default)”. No third
+checker correction is authorized. Public release remains **HOLD**.
 
-The root's focused local usage run passed 2/2 tests. It made no provider calls.
-The receipt preserves unknown D1 totals, hosted Worker CPU, Durable Object
-duration/storage and total billing as unknown; its monthly price scenarios are
-component subtotals under stated assumptions, not invoices or total costs.
-At `c7f0d1b`, the root also reported frozen install, build and typecheck as
-passing. Earlier focused delegation evidence passed on
-`e6c1136043f7ccd649f43969f57254f3d5be492d`; it is lane evidence, not the final
-composed RC gate.
+The untouched final gate passed 21 states with zero Axe violations, but the
+independent and root 23-case oracle both reproduced four false accepts:
+pseudo/ancestor opacity text was reported as 8.475:1 or 12.63:1 while actual
+pixels were at most 2.27:1. The root's widget audit failed at 4.36:1; the
+independent timing/background diagnosis measured settled actual glyphs at
+6.324:1. Its exact original animation frame is inferred, since the root capture
+omitted opacity. No remaining steady product defect was established in the
+exercised corrected states. Eighteen review nodes and every covered or
+unsupported pixel remain LIMITED; no complete WCAG conformance is claimed.
 
-The failed source-specific composed accessibility gate on `c7f0d1b` reported
-three reproduced findings:
+The final gate retains passing build/typecheck, six product correction checks,
+four occlusion regressions, 26 independent keyboard checks and five independent
+runtime checks. Native demo and the ten parity rows carry only from exact
+unchanged verified source and emitted bundles. The historical c7 gate receipt
+is retained as historical evidence, not the current disposition. Exact reports,
+root failures, commands and external SHA-256 references are in the
+[current receipt](verification/rc-0.2.2-rc.1/final-qualification.json).
 
-- The article-editor **Delete** link measured 4.15:1 against white at desktop
-  and 320 CSS pixels, below the 4.5:1 text threshold.
-- Add note keyboard navigation can leave the dialog on forward Tab and strand
-  reverse navigation on the dialog container.
-- A branding focus outline measured 1.90:1 after alpha compositing; an earlier
-  audit result of 6.06:1 did not account for the alpha channel.
+The original v0.2.1 independent runtime proof now **passes through an external
+port/import-only adapter**, preserving original assertions and runtime semantics.
+Both the independent run and root replication prove 97 tables and 37 migrations
+on artifact `f082bded3dd64470d7283c935934f4a2d7224e69fe540cece7c862a15989b968`.
+The unchanged CLI remains held at HTTP ports 12401/12501 and default inspector
+ports. This does not qualify the candidate's 104-table inventory, DO portable
+storage or complete RER export.
 
-The earlier 19-state Axe result remains bounded to its documented states and
-does not close these findings. The accessibility corrections are integrated in
-the root's later `6ffffb0` composition; its fresh composed gate is pending. Treat
-the c7 result as historical evidence for that exact source snapshot. The root
-will append the corrected final adjudication after the gate. Do not mark
-accessibility accepted before that result.
-The gate also found the UI parity record incomplete: six rows (53 and 55–59)
-need an explicit consequence and supported alternative, or an explicit
-statement that none exists. The onboarding/demo row omits the existing native
-**Try a demo inbox** option. The failed-gate receipt and external report digest
-are in
-[`verification/rc-0.2.2-rc.1/composed-accessibility-gate.json`](verification/rc-0.2.2-rc.1/composed-accessibility-gate.json).
+Portability fidelity remains separate at
+`ef8406f654908cf67612a498511f99ce13f8ae12`, privately pushed but not integrated.
+After two rounds, a persisted resizable ArrayBuffer with maximum length 12 still
+restores as a fixed length 4 buffer, losing resizability/length tracking. The
+further narrow correction question remains unanswered, default HOLD.
 
-Portability recovery work remains on the separate private branch
-`codex/h2h-portability-fidelity-20260929` at
-`ef8406f654908cf67612a498511f99ce13f8ae12`; it is not selected by this
-candidate. Its two bounded correction rounds ended with a reproduced persisted
-resizable-`ArrayBuffer` fidelity loss. The owner's question about one further
-narrow correction is unanswered (default: hold). This candidate has no fresh
-full-restore claim.
+Full `pnpm run verify` is not claimed: its retained original inventory expects
+97 tables/37 migrations; this candidate has 104 tables/38 migrations. Original
+port/lifecycle exceptions and DO decisions remain unanswered and unapplied.
+The root owns source-lock refresh and composed source checks after records
+freeze. Public main remains v0.2.1 at
+`59c6e2e1beb321e9f1cb5493efd05e20fc068638`, as verified by the root. No public
+push, tag, deployment or production cutover is authorized by this record.
 
-The retained original verification harness expects 97 application tables and
-37 migrations; the composed candidate has 104 tables (the 97-table baseline
-plus seven delegation tables) and 38 migrations. The owner-exception proposal
-is review-only and has not been applied. Full `pnpm run verify`, source-lock
-freshness and final composed acceptance are therefore not claimed here. The
-metadata branch leaves `sources.lock.json` for the root to refresh after the
-source and records are frozen. No public push, tag or deployment is part of
-this candidate record.
+The actual composed usage measurement remains pinned to `c7f0d1b8` and
+[its receipt](verification/rc-0.2.2-rc.1/composed-usage.json): two passing local
+tests, request admissions 201/201/429 and zero actual provider calls. Actual
+paid AI and hosted/billing totals remain unknown. Current UI changes do not
+establish a new measurement. Cost assumptions and limitations remain in
+[OPERATIONS.md](OPERATIONS.md#measured-local-usage-and-cost-scenarios).
 
 ## Architecture
 
@@ -137,9 +135,9 @@ pnpm run test:usage
 
 They are supplemental qualification commands, not changes to `verify` or the
 existing delegation commands. The accessibility command is bounded to its
-declared browser states; the three fresh composed-gate findings above remain
-open. `test:usage` prepares generated migrations, then runs the two existing
-usage tests.
+declared browser states; the final checker limitations above remain
+on confirmed owner HOLD. `test:usage` prepares generated migrations, then runs
+the two existing usage tests.
 
 `pnpm run verify` runs the operations descriptor, build, type check, module
 suites, the emitted-Worker runtime and security-header suites, the first-release
@@ -202,9 +200,10 @@ in [SECURITY.md](SECURITY.md).
 
 ## Known gaps
 
-- Accessibility is targeted at WCAG 2.2 AA. The bounded 19-state audit is not a
-  complete conformance review; the c7 composed gate failed and awaits final
-  adjudication against the corrected source. Hosted operating costs remain
+- Accessibility is targeted at WCAG 2.2 AA. The bounded 21-state audit is not a
+  complete conformance review; the final f205 gate remains FAIL / confirmed
+  owner HOLD because of checker false accepts and timing/background reliability.
+  Hosted operating costs remain
   unmeasured; local scenarios preserve unknown usage and billing totals
   (`seed.json` and the composed-usage receipt).
 - Some legacy dashboard features are not yet native; see

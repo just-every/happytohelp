@@ -1,0 +1,128 @@
+{
+  "schema": "runeditrun/happytohelp-final-qualification-receipt-v1",
+  "candidate": "0.2.2-rc.1",
+  "sourceRevision": "f2054c3b7cd19fcddd9962e418f680f92c89109b",
+  "publicRelease": "HOLD",
+  "evidence": {
+    "finalGateReport": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-final-gate/GATE-REPORT.md",
+      "sha256": "a371efc1b1a43c1e390f94d356417bedeea81333746ff8b84b0501046a019d93"
+    },
+    "finalGate": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-final-gate/gate-report.json",
+      "sha256": "a72fb4968e8c2dfad151c6534106029966fcfb12bc510f884cc63c82469e27cd"
+    },
+    "widgetAdjudication": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-final-gate/widget-race-adjudication.json",
+      "sha256": "eaf53757f648ef722639ecbf40261c9c5b2bac67025ae1c486a302b0af1ab37b"
+    },
+    "rootOracle": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-final-oracle/results/result.json",
+      "sha256": "caffb5839f0411c08dc4d4975c8b2ca4308b9883d5a117c9574a1bd18eeca005"
+    },
+    "rootAuditFailure": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-final-a11y/audit.log",
+      "sha256": "4f11a7140f35a30b20a08776995e73604997c86553e03c00a02d1ac128e93af1"
+    },
+    "v021Qualification": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-v021-independent-runtime/qualification.json",
+      "sha256": "05fba3049de1c32ea7cccd3044bc48452ef96b3522ede3fad9aba8cb3a7e4ee7"
+    },
+    "v021Receipt": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-v021-independent-runtime/receipt.json",
+      "sha256": "b0eb1f138a6956ad0739a87f64b01daf6bb9508b6d2c7440a6810da4677471af"
+    },
+    "v021Adapter": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-v021-independent-runtime/adapter.diff",
+      "sha256": "e90cac1115584549a702a821ed838d5a1a2fb5f3c43942588ac09790484ef86a"
+    },
+    "rootV021Receipt": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-v021-independent/receipt.json",
+      "sha256": "55a7ad74da2fec7450c6952bb46280dc207e229e238ebdb618fb8a8c82771550"
+    },
+    "usageMeasurement": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-composed-usage/run-XTUCAb/measurement.json",
+      "sha256": "4869ab16a1dde40d40a3ed9d248278894e7809be2d4d3ecfeecad5a9b0350fd1"
+    },
+    "portableGate": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-portability-final-gate/gate-report.json",
+      "sha256": "4eb89ad811ca33d3e0590ef2cd347099f99e6221af7561cf469aefb8e0f2dd76"
+    }
+  },
+  "accessibility": {
+    "verdict": "FAIL / confirmed owner HOLD",
+    "ownerQuestion": 12,
+    "ownerDirection": "Hold the checker; record the audit limitation (default)",
+    "correctionRoundsUsed": 2,
+    "thirdCorrectionAuthorized": false,
+    "gateStates": 21,
+    "gateChecksPassed": 21,
+    "axeViolations": 0,
+    "contrastNodesMeasured": 69,
+    "contrastNodesLimited": 18,
+    "allCoveredOrUnsupportedPixels": "LIMITED",
+    "rootOracleCases": 23,
+    "rootOracleFalseAccepts": 4,
+    "falseAcceptanceRatios": [
+      8.475411012315535,
+      12.63
+    ],
+    "realPixelMaximumContrast": 2.27,
+    "rootWidgetAuditRatio": 4.36,
+    "settledWidgetActualGlyphMinimum": 6.324,
+    "widgetFailureClassification": "audit timing/background reliability; exact original frame inferred because opacity was not captured",
+    "steadyNewProductDefectEstablished": false,
+    "completeWcagConformance": false,
+    "productCorrectionChecks": 6,
+    "occlusionRegressionChecks": 4,
+    "independentKeyboardChecks": 26,
+    "independentRuntimeChecks": 5,
+    "parityAndNativeDemo": "carried from exact unchanged verified source and emitted bundles; not a fresh demo run"
+  },
+  "v021IndependentRuntime": {
+    "status": "PASS: external port/import-adapted original semantics; independently replicated by root",
+    "sourceRevision": "59c6e2e1beb321e9f1cb5493efd05e20fc068638",
+    "artifactSha256": "f082bded3dd64470d7283c935934f4a2d7224e69fe540cece7c862a15989b968",
+    "tables": 97,
+    "migrations": 37,
+    "originalInputsUnchanged": true,
+    "unchangedCommand": "HOLD: HTTP 12401/12501 and default inspector ports remain unapproved",
+    "candidate104InventoryQualified": false,
+    "completeRerExport": false,
+    "providerCalls": 0
+  },
+  "portableFidelity": {
+    "sourceRevision": "ef8406f654908cf67612a498511f99ce13f8ae12",
+    "branch": "codex/h2h-portability-fidelity-20260929",
+    "privatePushed": true,
+    "integrated": false,
+    "status": "HOLD: two rounds exhausted; further narrow correction question unanswered",
+    "retainedFailure": "persisted resizable ArrayBuffer maxByteLength 12 restores as fixed length 4; length-tracking fidelity lost"
+  },
+  "usage": {
+    "receipt": "composed-usage.json",
+    "sourceRevision": "c7f0d1b8ce447e59804d736ce364e9812dcf2715",
+    "passedTests": 2,
+    "requestStatuses": [
+      201,
+      201,
+      429
+    ],
+    "actualProviderCalls": 0,
+    "actualPaidAiMeasured": false,
+    "billingTotalUsd": null,
+    "currentUiChangesEstablishNewMeasurement": false
+  },
+  "remainingHolds": [
+    "Full verify: unchanged original inventory expects 97 tables/37 migrations; candidate has 104 tables/38 migrations.",
+    "Original port/lifecycle exceptions and DO decisions remain unanswered and unapplied.",
+    "Portable fidelity branch is not integrated or accepted.",
+    "Source-lock refresh and composed source checks belong to root after records freeze.",
+    "Public release, provider, hosted, production migration and cutover acceptance are not established."
+  ],
+  "finalGateEmittedHashes": {
+    "dist/server/index.js": "786c179807c1f0e9b24d4584cb14c8d4997f509b117600bfaa020546ab4c6007",
+    "public/widget.js": "a2c0e27ead36bb83746f377df46d025ea21337e2fd2516f5fb2058209e5de26d"
+  },
+  "finalGateEmittedHashScope": "Final gate local build on f205; distinct from c7 usage measurement and not a release artifact acceptance."
+}

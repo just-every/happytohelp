@@ -23,18 +23,22 @@ public release, tag, deployment or product-acceptance record.
 - The composed usage tests passed 2/2 at that source revision. The receipt is
   local-only: no model/provider was called, and hosted CPU, D1 totals, Durable
   Object duration/storage and actual billing remain unknown.
-- The bounded accessibility gate failed on source `c7f0d1b`. Its findings are
-  historical evidence for that source snapshot, not a disposition of a later
-  corrected source; see the
-  [gate receipt](verification/rc-0.2.2-rc.1/composed-accessibility-gate.json).
-- The portability-fidelity branch is not integrated. Its second correction
-  round still loses resizable `ArrayBuffer` fidelity; the owner decision on one
-  further narrow correction is pending, with hold as the default. No full fresh
-  restore qualification is claimed for this candidate.
-- Full `pnpm run verify` is not claimed: the retained harness expects 97 tables
-  and 37 migrations, while this candidate has 104 tables (97 plus seven
-  delegation tables) and 38 migrations. The owner-exception proposal remains
-  review-only and unapplied.
+- The final f205 accessibility gate remains FAIL / confirmed owner HOLD after
+  two rounds: four independently replicated oracle false accepts and a widget
+  timing/background reliability failure. Its 21 passing states, 18 LIMITED
+  review nodes and carried parity/demo evidence do not establish conformance.
+  The owner chose to hold the checker and record the limitation; see the
+  [current receipt](verification/rc-0.2.2-rc.1/final-qualification.json).
+- The original v0.2.1 independent runtime proof now passes through an external
+  port/import-only adapter, replicated by root at 97 tables/37 migrations.
+  The unchanged command remains held; this does not qualify candidate 104 tables.
+- The separate privately pushed portability-fidelity branch is not integrated.
+  After two correction rounds, a resizable ArrayBuffer still restores as fixed
+  length 4 instead of preserving maximum length 12 and length tracking. The
+  further correction question remains unanswered, default HOLD.
+- Full verify is not claimed: unchanged original 97-table/37-migration inventory
+  differs from candidate 104 tables/38 migrations; owner port/lifecycle exceptions
+  and DO decisions remain unanswered and unapplied. Source-lock refresh is root-owned.
 
 No public push, tag or deployment is part of this candidate record.
 

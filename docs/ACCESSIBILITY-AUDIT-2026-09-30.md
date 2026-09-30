@@ -2,6 +2,38 @@
 
 This is a bounded local Chromium audit targeting WCAG 2.2 AA, not complete WCAG certification or assistive-technology acceptance. It supersedes the earlier closeout's unsupported claims about populated article Delete contrast, settled note-dialog containment, and translucent branding focus contrast. The correction starts from composed source `c7f0d1b8ce447e59804d736ce364e9812dcf2715`.
 
+## Current final disposition — FAIL / confirmed owner HOLD
+
+The final independent gate targets source
+`f2054c3b7cd19fcddd9962e418f680f92c89109b`. The owner answered question 12:
+“Hold the checker; record the audit limitation (default)”. Two correction rounds
+are exhausted; no third checker correction is authorized.
+
+The untouched final run passed 21 states and 21 checks with zero Axe violations,
+69 measured review nodes and 18 LIMITED nodes. All covered/unsupported pixels
+remain LIMITED. The independent and root adversarial oracle each retained four
+false accepts among 23 cases: pseudo/ancestor opacity text reported 8.475:1 or
+12.63:1 has actual screenshot contrast at most 2.27:1. The real-Axe minimal
+reproducer fails its unsuppressed regression assertion. These are checker
+correctness failures; isolated oracle fixtures do not establish a product defect.
+
+The root's untouched full audit also failed the widget email label at 4.36:1.
+Natural animation frames and settled actual glyph/background screenshots support
+a timing/background error: settled glyphs measure 6.324:1. The exact root frame
+is inferred because its capture omits opacity. Retain the failure; the independent
+full-run pass does not repair timing reliability. No remaining steady product
+AA defect was established in the exercised corrected states, and no blanket
+WCAG conformance follows.
+
+Six product correction checks, four occlusion regressions, 26 independent keyboard
+checks and five independent runtime checks passed. Native demo and ten parity
+rows carry from exact unchanged verified source/emitted bundles rather than a
+fresh demo execution. The final external `GATE-REPORT.md`, `gate-report.json`,
+`widget-race-adjudication.json`, root oracle result and root audit log have exact
+paths and SHA-256 references in
+[the current receipt](../verification/rc-0.2.2-rc.1/final-qualification.json).
+Historical attempts and observations below remain source-specific evidence.
+
 ## Corrections and direct evidence
 
 - The populated article editor's red Delete text was `#e63757` on white (4.15:1). Its existing destructive text style now uses `#c62949`; desktop and 320-pixel measurements must pass the unchanged 4.5:1 threshold. The check creates an article through the real local API, opens its editor, and activates and cancels the real deletion confirmation with Enter at both widths.
@@ -24,9 +56,9 @@ The worker and widget host use synthetic local tenant/customer records. The arti
 
 The skip link moves focus to main content. Workspace/account menus retain Escape restoration. The mobile inbox list is inert and hidden from assistive technology while its conversation covers it. Reflow checks use desktop, 320 CSS pixels and a reduced CSS viewport equivalent to 200% zoom; this is not operating-system scaling. Layout receipts include visible control sizes, clipping, names and center reachability.
 
-## Evidence and disposition
+## Historical first correction evidence and disposition
 
-The fresh run returned **zero Axe violations across 21 scans** in Chromium 153.0.8010.12. Its only incomplete rule was color contrast: the original successful correction run reported 86 nodes, of which 74 were measured against rendered background pixels (minimum 4.61:1) and 12 remained explicitly limited below. Axe may additionally report menu-covered labels; the exact final per-node counts and hit-test dispositions are retained in the machine-readable summary. All direct text/icon measurements passed (40 including the unoccluded Settings navigation label). Article Delete measured **5.51:1** at both widths; branding focus measured **5.98:1** in both compositing and pixels. The Send ring measured **5.55:1** against its actual surrounding surface. Seven general keyboard passes made 122 Tab presses and recorded 113 named, visible, reachable stops (minimum computed ring contrast 4.23:1), in addition to the dedicated note/disclosure/media checks.
+The historical first correction run returned **zero Axe violations across 21 scans** in Chromium 153.0.8010.12. Its only incomplete rule was color contrast: the original successful correction run reported 86 nodes, of which 74 were measured against rendered background pixels (minimum 4.61:1) and 12 remained explicitly limited below. Axe may additionally report menu-covered labels; the exact final per-node counts and hit-test dispositions are retained in the machine-readable summary. All direct text/icon measurements passed (40 including the unoccluded Settings navigation label). Article Delete measured **5.51:1** at both widths; branding focus measured **5.98:1** in both compositing and pixels. The Send ring measured **5.55:1** against its actual surrounding surface. Seven general keyboard passes made 122 Tab presses and recorded 113 named, visible, reachable stops (minimum computed ring contrast 4.23:1), in addition to the dedicated note/disclosure/media checks.
 
 | Limited contrast target | Count | Disposition |
 | --- | ---: | --- |
@@ -50,7 +82,7 @@ H2H_EVIDENCE_DIR=/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibilit
 H2H_EVIDENCE_DIR=/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-fix node tests/accessibility-browser.mjs
 ```
 
-Final machine-readable results, exact source revision and emitted artifact hashes are in `/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-fix/accessibility-browser-summary.json`. The same directory contains Axe reports/screenshots, keyboard/layout/text measurements, `branding-focus-contrast.json`, `note-dialog-repeated-navigation.json`, `note-dialog-busy.json`, `widget-nonimage-keyboard.json`, `correction-regressions.json`, build/typecheck logs and `process-cleanup.json`. Diagnostic failed attempts remain separate from final results.
+Historical first correction machine-readable results, exact source revision and emitted artifact hashes are in `/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-accessibility-fix/accessibility-browser-summary.json`. The same directory contains Axe reports/screenshots, keyboard/layout/text measurements, `branding-focus-contrast.json`, `note-dialog-repeated-navigation.json`, `note-dialog-busy.json`, `widget-nonimage-keyboard.json`, `correction-regressions.json`, build/typecheck logs and `process-cleanup.json`. Diagnostic failed attempts remain separate from final results.
 
 Axe incomplete color-contrast nodes are not counted as Axe passes. The existing pixel sampler measures the background behind text where it can resolve visible text fragments; `incompleteContrast` retains each measured or limited disposition. Obscured background content under a dialog, native select text and avatar initials require separate disposition rather than a fabricated sample. Direct style measurements resolve foreground alpha; keyboard focus measurements now composite outline and halo alpha, with rendered-pixel checks for the corrected branding control. Solid ring/halo checks do not establish arbitrary custom-theme, image-backed or ancestor-opacity combinations.
 

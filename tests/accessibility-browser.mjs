@@ -36,8 +36,8 @@ async function portIsFree(port) {
 }
 
 async function selectRuntimePorts() {
-    const ports = [8755, 8756, 8757, 8758, 8759, 8770, 8771, 8772, 8773, 8774, 8775, 8776, 8777, 8778, 8779];
-    for (const port of [8755, 8757, 8770, 8772, 8774, 8776, 8778]) {
+    const ports = [8770, 8771, 8772, 8773, 8774, 8775, 8776, 8777, 8778, 8779];
+    for (const port of [8770, 8772, 8774, 8776, 8778]) {
         const inspectorPort = port + 1;
         if (!await portIsFree(port) || !await portIsFree(inspectorPort)) continue;
         for (const hostPort of ports) {
@@ -46,7 +46,7 @@ async function selectRuntimePorts() {
             }
         }
     }
-    throw new Error('No free app/inspector/host ports in 8755-8759 or 8770-8779');
+    throw new Error('No free app/inspector/host ports in 8770-8779');
 }
 
 async function listen(server, port) {

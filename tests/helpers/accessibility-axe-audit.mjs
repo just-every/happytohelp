@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {writeFile} from 'node:fs/promises';
+import {measureOccludedContrast} from './accessibility-occlusion.mjs';
 import {decodePng, measureContrastInRegions} from './accessibility-contrast.mjs';
 
 const wcagTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
@@ -71,7 +72,7 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
                         const context = canvas.getContext('2d');
                         context.font = style.font;
                         const textWidth = Math.min(elementRect.width - paddingLeft - paddingRight, context.measureText(placeholder).width);
-                        fragments.push({text: placeholder, foreground: style.color, fontSize: style.fontSize, fontWeight: style.fontWeight, opacity: Number.parseFloat(baseStyle.opacity || '1'), rects: [{x: paddingLeft, y: (elementRect.height - fontSize) / 2, width: Math.max(1, textWidth), height: fontSize}]});
+                        fragments.push({text: placeholder, glyphRects: [{x: 0, y: 0, width: elementRect.width, height: elementRect.height}], foreground: style.color, fontSize: style.fontSize, fontWeight: style.fontWeight, opacity: Number.parseFloat(baseStyle.opacity || '1'), rects: [{x: paddingLeft, y: (elementRect.height - fontSize) / 2, width: Math.max(1, textWidth), height: fontSize}]});
                     }
                     for (let current = element; current?.nodeType === 1; current = current.parentElement) {
                         if (!savedScroll.has(current)) savedScroll.set(current, {x: current.scrollLeft, y: current.scrollTop});
@@ -83,19 +84,6 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
                         if (style.filter !== 'none') unsupportedTextEffects.push(`filter ${style.filter}`);
                         if (style.textShadow !== 'none') unsupportedTextEffects.push(`text-shadow ${style.textShadow}`);
                     }
-                    // A screenshot of a fully covered label contains menu pixels, not
-                    // that label's text/background pair. Require geometric evidence at
-                    // every text rectangle's corners and center; never mark it passing.
-                    const coveringMenus = fragments.flatMap(fragment => fragment.rects.flatMap(rect =>
-                        [[1, 1], [rect.width - 1, 1], [1, rect.height - 1], [rect.width - 1, rect.height - 1], [rect.width / 2, rect.height / 2]].map(([x, y]) => {
-                            const hit = root.elementFromPoint(elementRect.x + rect.x + x, elementRect.y + rect.y + y);
-                            const menu = hit?.closest('.native-account-dropdown, .navbar-workspace-menu, [role="menu"]');
-                            return menu && !menu.contains(element) ? {className: menu.className, role: menu.getAttribute('role')} : null;
-                        })));
-                    if (coveringMenus.length && coveringMenus.every(Boolean)) {
-                        targets.push({...descriptor, id, status: 'limited', reason: 'Every text rectangle is covered by an open menu at all four corners and its center; menu pixels cannot establish the hidden label contrast. This remains a review limitation, with any unoccluded measurements recorded separately.', coveringMenus});
-                        continue;
-                    }
                 targets.push({...descriptor, id, elementSize: {width: elementRect.width, height: elementRect.height}, fragments, unsupportedTextEffects: [...new Set(unsupportedTextEffects)], obscuredByModal, status: fragments.length && elementRect.width > 0 && elementRect.height > 0 ? 'pending' : 'limited', reason: fragments.length ? undefined : 'The axe target has no visible text or placeholder in this rendered state.'});
                 }
             }
@@ -105,6 +93,7 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
                 style.id = styleId;
                 style.textContent = '[data-a11y-contrast-sample], [data-a11y-contrast-sample] * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-shadow: none !important; } [data-a11y-contrast-sample]::before, [data-a11y-contrast-sample]::after, [data-a11y-contrast-sample] *::before, [data-a11y-contrast-sample] *::after { color: transparent !important; -webkit-text-fill-color: transparent !important; text-shadow: none !important; } [data-a11y-contrast-sample]::placeholder, [data-a11y-contrast-sample] *::placeholder { color: transparent !important; -webkit-text-fill-color: transparent !important; }';
                 (shadow ? root : document.head).appendChild(style);
+                style.disabled = true;
             }
             return {targets, styleId, savedScroll: [...savedScroll].map(([element, position], itemIndex) => {
                 const scrollId = `${label}-scroll-${itemIndex}`;
@@ -119,10 +108,51 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
                     review.push(target);
                     continue;
                 }
-            const imageBuffer = await page.locator(`[data-a11y-contrast-sample="${target.id}"]`).screenshot({animations: 'disabled', caret: 'hide'});
-            const measured = measureContrastInRegions(decodePng(imageBuffer), target.fragments, target.elementSize);
-            let status = target.unsupportedTextEffects.length ? 'limited' : measured.minimumContrastRatio === null ? 'limited' : measured.minimumContrastRatio < target.expectedContrastRatio ? 'failed' : 'measured';
-            let reason = status === 'limited' ? target.unsupportedTextEffects.length ? `Rendered text uses unsupported effects: ${target.unsupportedTextEffects.join(', ')}.` : 'No text pixels were captured from the rendered target.' : undefined;
+            const locator = page.locator(`[data-a11y-contrast-sample="${target.id}"]`);
+            const glyphBuffer = await locator.screenshot({animations: 'disabled', caret: 'hide'});
+            const visibility = await locator.evaluate((element, fragments) => {
+                const rect = element.getBoundingClientRect(), root = element.getRootNode();
+                const points = [];
+                for (const fragment of fragments) for (const region of fragment.glyphRects || fragment.rects) {
+                    for (let y = Math.max(0, Math.floor(region.y)); y < Math.min(rect.height, Math.ceil(region.y + region.height)); y++) {
+                        for (let x = Math.max(0, Math.floor(region.x)); x < Math.min(rect.width, Math.ceil(region.x + region.width)); x++) {
+                            const hit = root.elementFromPoint(rect.x + x + .5, rect.y + y + .5);
+                            points.push({x, y, visible: hit === element || element.contains(hit)});
+                        }
+                    }
+                }
+                return points;
+            }, target.fragments);
+            await page.evaluate(({shadow, styleId}) => {
+                const root = shadow ? document.querySelector('#happytohelp > div')?.shadowRoot : document;
+                root.getElementById(styleId).disabled = false;
+            }, {shadow, styleId: instrumented.styleId});
+            let measured;
+            try {
+                const imageBuffer = await locator.screenshot({animations: 'disabled', caret: 'hide'});
+                if (visibility.some(point => !point.visible)) {
+                    const originalStyle = await locator.getAttribute('style');
+                    let blackBuffer, whiteBuffer;
+                    try {
+                        await locator.evaluate(element => element.style.setProperty('background-color', 'black', 'important'));
+                        blackBuffer = await locator.screenshot({animations: 'disabled', caret: 'hide'});
+                        await locator.evaluate(element => element.style.setProperty('background-color', 'white', 'important'));
+                        whiteBuffer = await locator.screenshot({animations: 'disabled', caret: 'hide'});
+                    } finally {
+                        await locator.evaluate((element, value) => value === null ? element.removeAttribute('style') : element.setAttribute('style', value), originalStyle);
+                    }
+                    await writeFile(join(evidenceDir, `${target.id}-visibility.json`), JSON.stringify(visibility));
+                    measured = measureOccludedContrast({glyph: decodePng(glyphBuffer), background: decodePng(imageBuffer), black: decodePng(blackBuffer), white: decodePng(whiteBuffer), fragments: target.fragments, elementSize: target.elementSize, visibility});
+                    for (const [name, bytes] of [['glyph', glyphBuffer], ['background', imageBuffer], ['black', blackBuffer], ['white', whiteBuffer]]) await writeFile(join(evidenceDir, `${target.id}-${name}.png`), bytes);
+                } else measured = measureContrastInRegions(decodePng(imageBuffer), target.fragments, target.elementSize);
+            } finally {
+                await page.evaluate(({shadow, styleId}) => {
+                    const root = shadow ? document.querySelector('#happytohelp > div')?.shadowRoot : document;
+                    root.getElementById(styleId).disabled = true;
+                }, {shadow, styleId: instrumented.styleId});
+            }
+            let status = measured.minimumContrastRatio !== null && measured.minimumContrastRatio < target.expectedContrastRatio ? 'failed' : target.unsupportedTextEffects.length || measured.occlusion?.unsupportedPixels || measured.minimumContrastRatio === null ? 'limited' : 'measured';
+            let reason = status === 'limited' ? target.unsupportedTextEffects.length ? `Rendered text uses unsupported effects: ${target.unsupportedTextEffects.join(', ')}.` : measured.occlusion?.unsupportedPixels ? `${measured.occlusion.unsupportedPixels} visible glyph pixels have unsupported surface transmission and remain LIMITED.` : 'No visible glyph pixels were captured from the rendered target; occluded pixels remain LIMITED.' : undefined;
             if (target.obscuredByModal && status === 'failed') {
                 const unobscuredMeasurement = incompleteContrast.flatMap(scan => scan.entries.map(entry => ({scan: scan.label, ...entry})))
                     .find(entry => entry.status === 'measured' && entry.targets.some(targets => targets.includes(target.targets[0])));
@@ -131,7 +161,7 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
                     reason = `The active modal makes this background control unavailable; the same text was measured at ${unobscuredMeasurement.minimumContrastRatio}:1 while unobscured in ${unobscuredMeasurement.scan}.`;
                 }
             }
-                review.push({...target, screenshot: 'element screenshot with text hidden to sample actual composited background pixels', ...measured, status, reason});
+                review.push({...target, screenshot: 'actual glyph and transparent-text background screenshots; partially occluded targets use per-pixel hit tests and black/white surface transfer', ...measured, status, reason});
             }
         } finally {
             await page.evaluate(({shadow, styleId, targets, savedScroll, windowScroll}) => {
@@ -163,7 +193,21 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
             if (!root) throw new Error(`Accessibility scan root unavailable: ${shadow ? 'widget shadow root' : 'document'}`);
             return window.axe.run(root, options);
         }, {shadow, options: axeOptions});
-        const contrastReview = await reviewIncompleteContrast(page, label, result.incomplete, {shadow});
+        // Axe can omit a placeholder under a menu depending on hit-test timing.
+        // Explicitly retain overlapping empty placeholders in the rendered review.
+        const overlapTargets = await page.evaluate(({shadow}) => {
+            const root = shadow ? document.querySelector('#happytohelp > div')?.shadowRoot : document;
+            const menus = [...root.querySelectorAll('[role="menu"]')].map(menu => menu.getBoundingClientRect()).filter(rect => rect.width && rect.height);
+            return [...root.querySelectorAll('input[placeholder], textarea[placeholder]')].filter(element => {
+                if (element.value) return false;
+                const rect = element.getBoundingClientRect();
+                return menus.some(menu => rect.x < menu.right && rect.right > menu.x && rect.y < menu.bottom && rect.bottom > menu.y);
+            }).map(element => ({target: [`${element.tagName.toLowerCase()}[placeholder=${JSON.stringify(element.getAttribute('placeholder'))}]`], any: [{message: 'Rendered placeholder overlaps an open menu; visible glyph contrast requires per-pixel review.', data: {expectedContrastRatio: 4.5}}]}));
+        }, {shadow});
+        const existingTargets = new Set(result.incomplete.filter(rule => rule.id === 'color-contrast').flatMap(rule => rule.nodes.flatMap(node => node.target.flat())));
+        const supplemental = overlapTargets.filter(node => !node.target.some(target => existingTargets.has(target)));
+        const reviewRules = supplemental.length ? [...result.incomplete, {id: 'color-contrast', nodes: supplemental}] : result.incomplete;
+        const contrastReview = await reviewIncompleteContrast(page, label, reviewRules, {shadow});
         const entry = {
             label,
             url: page.url(),
@@ -172,6 +216,7 @@ export function createAxeAudit({axePath, evidenceDir, scans, axeIncomplete, inco
             violations: result.violations,
             passes: result.passes.map(({id, impact, nodes}) => ({id, impact, nodeCount: nodes.length})),
             incomplete: result.incomplete,
+            supplementalContrastTargets: supplemental,
             incompleteContrastReview: contrastReview,
             inapplicable: result.inapplicable.map(({id}) => id),
         };

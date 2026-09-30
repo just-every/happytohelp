@@ -110,14 +110,15 @@ export function svgBackgroundStrokeColor(backgroundImage) {
     return stroke ? `#${stroke}` : null;
 }
 
-export function contrastRatio(foregroundColor, backgroundColor) {
+export function contrastRatio(foregroundColor, backgroundColor, precision = 2) {
     const foreground = parseCssColor(foregroundColor);
     const background = parseCssColor(backgroundColor);
     if (!foreground || !background) return null;
     const compositeForeground = foreground.slice(0, 3).map((channel, index) => channel * foreground[3] + background[index] * (1 - foreground[3]));
     const foregroundLuminance = luminance(compositeForeground);
     const backgroundLuminance = luminance(background);
-    return Number(((Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05)).toFixed(2));
+    const ratio = (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+    return precision === null ? ratio : Number(ratio.toFixed(precision));
 }
 
 export function measureContrastInRegions(image, fragments, elementSize) {

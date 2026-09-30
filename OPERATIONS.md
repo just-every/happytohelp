@@ -469,7 +469,9 @@ source pins, retained failures, LIMITED coverage and the owner direction.
 The external port/import-adapted original v0.2.1 independent proof now passes
 97 tables/37 migrations and has root replication. Its unchanged command remains
 held at ports 12401/12501/default inspectors; it does not qualify this candidate's
-104 tables/38 migrations. Full verify, original port/lifecycle exceptions,
-separate portable-fidelity acceptance and final source-lock checks remain held
-or pending as recorded in HANDOVER. No publication, deployment or production
-cutover follows from these focused results.
+104 tables/38 migrations. Full verify, original port/lifecycle exceptions
+and separate portable-fidelity acceptance remain held as recorded in HANDOVER.
+The root refreshed and checked the source lock after integrating records at
+`557cb4e`: both commands passed with exit 0, changing only `sources.lock.json`.
+This validates source bytes, not full verify; exact logs are pinned in the current
+receipt. No publication, deployment or production cutover follows from these focused results.

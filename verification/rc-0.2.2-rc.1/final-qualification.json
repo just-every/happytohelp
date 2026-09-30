@@ -47,6 +47,14 @@
     "portableGate": {
       "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-portability-final-gate/gate-report.json",
       "sha256": "4eb89ad811ca33d3e0590ef2cd347099f99e6221af7561cf469aefb8e0f2dd76"
+    },
+    "rootSourceLockLog": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-final-records/source-lock.log",
+      "sha256": "12c4c67a1cab28663faad7d1334a85778a72b37272cb35f881722b98f539b97f"
+    },
+    "rootSourceCheckLog": {
+      "path": "/Users/zemaj/.orchestrator/evidence/runeditrun/h2h-root-final-records/source-check.log",
+      "sha256": "a75aae9db834a3608680129666d54f7e653489e6878847efe8e60f97d24651c4"
     }
   },
   "accessibility": {
@@ -117,12 +125,19 @@
     "Full verify: unchanged original inventory expects 97 tables/37 migrations; candidate has 104 tables/38 migrations.",
     "Original port/lifecycle exceptions and DO decisions remain unanswered and unapplied.",
     "Portable fidelity branch is not integrated or accepted.",
-    "Source-lock refresh and composed source checks belong to root after records freeze.",
     "Public release, provider, hosted, production migration and cutover acceptance are not established."
   ],
   "finalGateEmittedHashes": {
     "dist/server/index.js": "786c179807c1f0e9b24d4584cb14c8d4997f509b117600bfaa020546ab4c6007",
     "public/widget.js": "a2c0e27ead36bb83746f377df46d025ea21337e2fd2516f5fb2058209e5de26d"
   },
-  "finalGateEmittedHashScope": "Final gate local build on f205; distinct from c7 usage measurement and not a release artifact acceptance."
+  "finalGateEmittedHashScope": "Final gate local build on f205; distinct from c7 usage measurement and not a release artifact acceptance.",
+  "rootSourceCustody": {
+    "recordsIntegrationRevision": "557cb4e",
+    "status": "PASS: root pnpm run source:lock and pnpm run source:check, both exit 0",
+    "changedFiles": [
+      "sources.lock.json"
+    ],
+    "scope": "Source byte custody only; not full verify or release acceptance. Root will regenerate/check again after integrating this followup."
+  }
 }

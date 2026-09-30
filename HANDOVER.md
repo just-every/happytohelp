@@ -60,8 +60,10 @@ further narrow correction question remains unanswered, default HOLD.
 Full `pnpm run verify` is not claimed: its retained original inventory expects
 97 tables/37 migrations; this candidate has 104 tables/38 migrations. Original
 port/lifecycle exceptions and DO decisions remain unanswered and unapplied.
-The root owns source-lock refresh and composed source checks after records
-freeze. Public main remains v0.2.1 at
+The root integrated these records at `557cb4e`, then `pnpm run source:lock` and
+`pnpm run source:check` both passed (exit 0); only `sources.lock.json` changed.
+This validates recorded source bytes, not full verify or release acceptance.
+Exact command logs are pinned in the current receipt. Public main remains v0.2.1 at
 `59c6e2e1beb321e9f1cb5493efd05e20fc068638`, as verified by the root. No public
 push, tag, deployment or production cutover is authorized by this record.
 

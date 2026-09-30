@@ -38,7 +38,10 @@ public release, tag, deployment or product-acceptance record.
   further correction question remains unanswered, default HOLD.
 - Full verify is not claimed: unchanged original 97-table/37-migration inventory
   differs from candidate 104 tables/38 migrations; owner port/lifecycle exceptions
-  and DO decisions remain unanswered and unapplied. Source-lock refresh is root-owned.
+  and DO decisions remain unanswered and unapplied.
+- After integrating records at `557cb4e`, root source-lock refresh and source
+  check passed (exit 0), changing only `sources.lock.json`. This validates bytes,
+  not full verify or release acceptance; exact logs are pinned in the current receipt.
 
 No public push, tag or deployment is part of this candidate record.
 

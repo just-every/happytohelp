@@ -15,7 +15,7 @@ import TrainingRuns from './pages/TrainingRuns';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
 import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
-const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Training runs'};
+const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
 export default function WorkspacePages({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const segments=pathname.split('/').filter(Boolean);

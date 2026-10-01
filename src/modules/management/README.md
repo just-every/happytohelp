@@ -21,7 +21,8 @@ every project gets one at creation (migration `0106` backfills older projects).
 widget merges them over its own defaults (`src/modules/widget/js/context/defaults.js`).
 
 Project settings, availability, per-audience default AI selection, AI profiles,
-macros, plugins/order, contact details/blocking, memberships/invitations, primary
+macros, plugins/order, contact details/blocking (a dashboard-created contact needs
+a name, email or external ID), memberships/invitations, primary
 project preference, profile and administration use typed field allowlists. The
 retained dashboard reads original bucket IDs, messages and private notes from
 canonical storage and maps original status/assignment/cursor contracts. Widget

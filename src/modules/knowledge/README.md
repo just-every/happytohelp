@@ -24,7 +24,11 @@ selection per collection, matching the Python source; no missing-index lexical
 fallback is substituted.
 
 Dataset authoring retains URL, exclusions, crawl depth/page settings and
-manual/daily/weekly/monthly/adaptive refresh. A configured Apify actor starts the
+manual/daily/weekly/monthly/adaptive refresh. Crawl depth must be a whole number
+from 0 to 100 and the page limit from 1 to 10,000 (`crawl-limits.ts`); the dataset
+routes answer 400 otherwise, the dashboard form shows the same messages, and the
+crawler start re-checks stored values so an out-of-range record is refused before
+any provider request. A configured Apify actor starts the
 crawl and its persisted run is polled without starting another crawl. Supplied
 documents, Apify datasets and conversation messages can also be ingested.
 Article/category authoring includes hierarchy, cycle checks, ordering, summaries,

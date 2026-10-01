@@ -22,6 +22,24 @@ include breaking changes.
   see an explanation instead of disabled buttons.
 - `GET /api/identity/projects/:id` returns only the project's id, name, widget key, allowed
   origin and creation time; the server secret reaches owners and admins only through widget settings.
+- Every destructive delete in the management and library screens (saved reply,
+  contact, AI assistant, plugin, agent/member, article, category and website
+  dataset) now asks through one shared, accessible confirmation dialog instead
+  of deleting at once or using a native browser prompt; Tab and Shift+Tab stay
+  inside it. Contact erasure uses the
+  same dialog with its exact typed `ERASE` confirmation. The last owner cannot
+  be removed, and removing yourself is called out before it is confirmed.
+- List tables on phones (saved replies, agents, contacts, plugins, websites,
+  articles) stack each row as a captioned card, so no column or row action is
+  hidden behind an unnoticed sideways scroll; row actions that sit in a ⋮ menu on
+  wide screens are shown as visible controls on the card.
+- The evaluation-run form shows field-level messages in place of the browser's
+  JSON parser text, has an empty state, one consistent name (“Evaluation runs”)
+  and explains its limits (a maximum cost of 0 is not accepted; 1 to 32,000
+  tokens).
+- Website datasets refuse crawl depths outside 0 to 100 and page limits outside
+  1 to 10,000 in the form, the API and the crawler start; contacts created from
+  the dashboard or API must have a name, an email or an external ID.
 
 ### Changed
 

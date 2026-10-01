@@ -6,12 +6,15 @@ import AvatarUpload from './AvatarUpload';
 import { PageHeaderTabs } from '../PageHeader';
 import { nativeRequest } from '../transport';
 import { Field, Section, Feedback } from './forms';
+import { useConfirmation } from './ConfirmDialog';
+import { deleteCopy } from './delete-copy';
 
 const requestBody = value => ({ headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) });
 export default function AssistantsPage({ projectId, recordId }) {
  const {markDirty,markSaved}=useUnsavedChanges();
 
  const navigate=useNavigate();
+    const { ask, dialog } = useConfirmation();
 
     const base = `/api/management/projects/${projectId}`;
     const href = `/projects/${projectId}/ais`;
@@ -64,7 +67,7 @@ export default function AssistantsPage({ projectId, recordId }) {
         {recordId && draft && <form onSubmit={saveAssistant}>
             <Section title="Identity" description="Set the name, role, and avatar shown for this assistant."><div className="settings-grid">{field('name', 'Name', 'text', true)}{field('role', 'Role', 'text', true)}<AvatarUpload projectId={projectId} value={draft.avatar_url} onChange={value => {markDirty();setDraft(current => ({ ...current, avatar_url: value }));}}/></div></Section>
             <Section title="Behavior" description="Define how this assistant responds to conversations.">{field('model', 'Model', 'text', true)}{field('prompt', 'Prompt', 'textarea', true)}{field('is_animated', 'Animated', 'checkbox')}{field('is_enabled', 'Enabled', 'checkbox')}</Section>
-            <div className="settings-actions"><button className="btn btn-primary" disabled={busy}>{busy ? 'Saving…' : 'Save'}</button><Link className="btn btn-white ms-2" to={href}>Cancel</Link>{draft.id && <button type="button" className="btn btn-outline-danger ms-2" disabled={busy} onClick={() => action(async () => { await nativeRequest(`${base}/ais/${draft.id}`, { method: 'DELETE' }); markSaved();await navigate({to:href}); })}>Delete</button>}</div>
+            <div className="settings-actions"><button className="btn btn-primary" disabled={busy}>{busy ? 'Saving…' : 'Save'}</button><Link className="btn btn-white ms-2" to={href}>Cancel</Link>{draft.id && <button type="button" className="btn btn-outline-danger ms-2" disabled={busy} onClick={() => ask({ title: deleteCopy.ais.title(draft), body: <p>{deleteCopy.ais.effect}</p>, run: async () => { await nativeRequest(`${base}/ais/${draft.id}`, { method: 'DELETE' }); markSaved(); await navigate({to:href}); } })}>Delete</button>}</div>
         </form>}
         {!recordId && items && settings && <>
             <Section title="Assistants" description="Choose which assistants can respond in this project.">
@@ -78,5 +81,6 @@ export default function AssistantsPage({ projectId, recordId }) {
                 {invalidDefaults && <p role="alert" className="text-danger">Choose an enabled assistant or None for each default responder before saving.</p>}<div className="settings-actions"><button className="btn btn-primary" disabled={busy || invalidDefaults}>{busy ? 'Saving…' : 'Save'}</button></div>
             </Section></form>
         </>}
+        {dialog}
     </div>;
 }

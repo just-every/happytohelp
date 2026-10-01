@@ -20,7 +20,8 @@ include breaking changes.
   inbox) and migration `0106_project_verification_secret.sql` backfills existing projects
   that had none. Owners and admins can reveal and copy it from Widget > Code; other roles
   see an explanation instead of disabled buttons.
-- The widget settings preview header shows the project's first agent.
+- `GET /api/identity/projects/:id` returns only the project's id, name, widget key, allowed
+  origin and creation time; the server secret reaches owners and admins only through widget settings.
 
 ### Changed
 

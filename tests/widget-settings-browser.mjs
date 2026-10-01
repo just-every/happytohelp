@@ -34,6 +34,10 @@ const tab=name=>page.getByRole('tab',{name,exact:true}).click();
 const save=async()=>{const before=puts.length;await page.getByRole('button',{name:'Save',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor();assert.equal(puts.length,before+1);return puts.at(-1)};
 const value=selector=>page.locator(selector).inputValue();
 const assertThemeDefaults=async(except={})=>{for(const [selector,expected] of Object.entries(themeDefaults))assert.equal(await value(selector),except[selector]??expected,selector)};
+const previewState=name=>page.getByRole('group',{name:'Preview state'}).getByRole('button',{name,exact:true}).click();
+const launcher=preview.locator('.happytohelp-button').first();
+// The widget renders inside a shadow root, so poll through the piercing locator rather than document.querySelector.
+const launcherBackground=async expected=>{let actual;for(const deadline=Date.now()+5000;Date.now()<deadline;await page.waitForTimeout(100)){actual=await launcher.evaluate(element=>getComputedStyle(element).backgroundColor);if(actual===expected)return}assert.equal(actual,expected,'closed launcher background in the preview')};
 const checks=[];
 try{
  await page.goto(origin+'/login');await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL(/\/conversations/);
@@ -55,9 +59,11 @@ try{
 
  // Theme tab: effective defaults, not black.
  await tab('Theme');await assertThemeDefaults();await page.screenshot({path:join(evidenceDir,'desktop-theme-defaults.png'),fullPage:true});checks.push('all 18 theme swatches show widget defaults');
- // The preview renders the same defaults and shows the project agent in its header.
+ // The preview renders the same defaults in both its Conversation and Launcher views.
  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(72, 71, 72)');
- assert.match(await preview.locator('.happytohelp-chat-header').first().innerText(),/Widget Settings Workspace|widget-settings/i);checks.push('preview header shows the project agent');
+ await previewState('Launcher');assert.equal(await launcher.evaluate(element=>element.classList.contains('happytohelp-avatar')),false,'the preview launcher is the themed icon button');
+ await launcherBackground('rgb(72, 71, 72)');await page.screenshot({path:join(evidenceDir,'desktop-theme-launcher.png'),fullPage:true});
+ await previewState('Conversation');checks.push('preview renders the default theme in Conversation and Launcher views');
 
  // Texts and Settings tabs show effective values.
  await tab('Texts');const texts=page.locator('.tab-pane.active input[type=text]');assert.equal(await texts.count(),35);
@@ -71,12 +77,11 @@ try{
  assert.deepEqual(await save(),{});assert.deepEqual((await settingsApi()).settings,{});checks.push('save without edits stores no overrides');
  await open();await tab('Theme');await assertThemeDefaults();
 
- // One edit changes one value, in the form and in the preview.
+ // One edit changes one value in the form; the preview (which has no agent avatar) keeps its default colours.
  await tab('Theme');await page.locator(color('avatar][background')).fill('#ff0000');
  await assertThemeDefaults({[color('avatar][background')]:'#ff0000'});
  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(72, 71, 72)');
  assert.equal(await previewStyle('textarea','backgroundColor'),'rgb(245, 246, 251)');
- assert.equal(await previewStyle('.happytohelp-agent-avatar','backgroundColor'),'rgb(255, 0, 0)');
  await page.screenshot({path:join(evidenceDir,'desktop-theme-one-edit.png'),fullPage:true});checks.push('one color edit leaves every other color and the preview composer on defaults');
 
  // Save the edit with a text change and a switched-off default-on toggle.
@@ -93,6 +98,11 @@ try{
  await tab('Theme');await page.locator(color('avatar][background')).fill('#b2e2ff');
  await tab('Texts');await page.locator('input[name="text[message][button_send]"]').fill('');
  assert.deepEqual(await save(),{settings:{show_glow:{on_insight:false}}});assert.deepEqual((await settingsApi()).settings,{settings:{show_glow:{on_insight:false}}});checks.push('restoring a default or clearing a text removes the override');
+
+ // Editing the closed launcher background shows in the Launcher view.
+ await tab('Theme');await previewState('Launcher');await launcherBackground('rgb(72, 71, 72)');
+ await page.locator(color('button][closed][background')).fill('#123456');await launcherBackground('rgb(18, 52, 86)');
+ await page.screenshot({path:join(evidenceDir,'desktop-theme-launcher-edit.png'),fullPage:true});checks.push('closed launcher background edit shows in the Launcher preview');
 
  // Mobile: the secret and tabs work at phone width.
  await page.setViewportSize({width:390,height:844});await open();

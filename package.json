@@ -35,6 +35,7 @@
     "test:ui-browser": "node tests/ui-browser.mjs",
     "test:accessibility-browser": "node tests/accessibility-browser.mjs",
     "test:navigation-browser": "node tests/navigation-browser.mjs",
+    "test:workspace-shell-browser": "node tests/workspace-shell-browser.mjs",
     "test:public-help-center-browser": "node tests/public-help-center-browser.mjs",
     "test:setup-browser": "node tests/setup-browser.mjs",
     "test:demo-inbox-browser": "node tests/demo-inbox-browser.mjs",

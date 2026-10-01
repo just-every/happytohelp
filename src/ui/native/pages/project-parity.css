@@ -4,3 +4,5 @@ body.workspace-page .workspace-settings.project-account{max-width:800px}body.wor
 body.workspace-page .project-account .project-avatar .d-flex input[type=file]{min-width:0;max-width:calc(100% - 106px)}
 body.workspace-page #workspace-header-tabs .project-parity-tabs button.active{color:var(--workspace-button-bg,#713ee0);border-bottom-color:#dfff00}
 body.workspace-page .project-parity .settings-column .settings-section+.settings-section{margin-top:2px}
+.project-list-menu summary{display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;margin:-6px 0;cursor:pointer;list-style:none}
+.project-list-menu summary::-webkit-details-marker{display:none}

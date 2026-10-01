@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
-import { requiredString,id } from '../../platform/db'
+import { requiredString,id,serverSecret } from '../../platform/db'
 import { passwordHash } from './credentials'
 import { sendEmail, emailConfigured } from '../integrations/email'
 import { clientAddress,enforceRateLimit } from '../../platform/rate-limits'
@@ -22,5 +22,5 @@ registration.post('/verify-email',async c=>{
  await enforceRateLimit(c.env,'projectsPerIpDay',clientAddress(c.req))
  const b=await c.req.json(),hash=await hashToken(requiredString(b.token,'token')),now=Date.now(),userId=id(),projectId=id();const guard='token_hash=? AND consumed_at IS NULL AND expires_at>?'
  const row=await c.env.DB.prepare(`SELECT email FROM registrations WHERE ${guard}`).bind(hash,now).first();if(!row)throw new HTTPException(400,{message:'Verification token invalid or expired'})
- const results=await c.env.DB.batch([c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,email,name,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) SELECT ?,project_name,?,allowed_origin,? FROM registrations WHERE ${guard}`).bind(projectId,id(),now,hash,now),c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' FROM registrations WHERE ${guard}`).bind(projectId,userId,hash,now),c.env.DB.prepare(`INSERT INTO credentials SELECT ?,password_hash,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`UPDATE registrations SET consumed_at=? WHERE ${guard}`).bind(now,hash,now)]);if(!results[4].meta.changes)throw new HTTPException(409,{message:'Verification already consumed'});return c.json({verified:true,projectId,loginRequired:true})
+ const results=await c.env.DB.batch([c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,email,name,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) SELECT ?,project_name,?,allowed_origin,?,? FROM registrations WHERE ${guard}`).bind(projectId,id(),now,serverSecret(),hash,now),c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' FROM registrations WHERE ${guard}`).bind(projectId,userId,hash,now),c.env.DB.prepare(`INSERT INTO credentials SELECT ?,password_hash,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`UPDATE registrations SET consumed_at=? WHERE ${guard}`).bind(now,hash,now)]);if(!results[4].meta.changes)throw new HTTPException(409,{message:'Verification already consumed'});return c.json({verified:true,projectId,loginRequired:true})
 })

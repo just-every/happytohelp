@@ -48,6 +48,16 @@ assert.equal((await DB.prepare("SELECT count(*) n FROM messages WHERE content='H
 await DB.batch([DB.prepare("UPDATE projects SET verification_secret='private-proof' WHERE id='p'"),DB.prepare("INSERT INTO users VALUES('op','op@example.com','Operator',1)"),DB.prepare("INSERT INTO memberships VALUES('p','op','operator')"),DB.prepare("INSERT INTO sessions VALUES(?,'op','p','operator',NULL,?,NULL)").bind(await hashToken('operator-token'),Date.now()+999999)])
 for(const path of ['/bootstrap','/projects','/projects/p/settings','/projects/p/widget-settings']){const response=await routes.request('https://app.example'+path,{headers:{Authorization:'Bearer operator-token'}},env);assert.equal(response.status,200);assert.ok(!(await response.text()).includes('private-proof'),path+' must not expose verification secret')}
 const ownerSettings=await(await call(routes,'/projects/p/widget-settings')).json();assert.equal(ownerSettings.verificationSecret,'private-proof')
+// Widget settings are stored exactly as sent: the body is the settings object, so the widget's own `settings` section is not mistaken for a wrapper.
+const widgetBody={theme:{avatar:{background:'#ff0000'}},settings:{show_glow:{on_insight:false}},text:{message:{button_send:'Go'}}}
+assert.equal((await call(routes,'/projects/p/widget-settings','PUT',widgetBody)).status,200)
+assert.deepEqual((await(await call(routes,'/projects/p/widget-settings')).json()).settings,widgetBody)
+assert.equal((await routes.request('https://app.example/projects/p/widget-settings',{method:'PUT',headers:{Authorization:'Bearer operator-token','Content-Type':'application/json'},body:'{}'},env)).status,403)
+assert.deepEqual((await(await call(routes,'/projects/p/widget-settings')).json()).settings,widgetBody)
+// Every project created through the API gets its own server secret, readable by its owner and hidden from other roles.
+const fresh=await(await call(routes,'/projects','POST',{name:'Fresh',allowed_origin:'https://fresh.example'})).json(),freshSettings=await(await call(routes,`/projects/${fresh.id}/widget-settings`)).json()
+assert.match(freshSettings.verificationSecret,/^[0-9a-f]{64}$/);assert.notEqual(freshSettings.verificationSecret,ownerSettings.verificationSecret)
+assert.equal((await routes.request(`https://app.example/projects/${fresh.id}/widget-settings`,{headers:{Authorization:'Bearer operator-token'}},env)).status,403)
 await DB.prepare("INSERT INTO memberships VALUES('q','u','owner')").run()
 await DB.prepare("INSERT INTO sessions VALUES(?,'u','q','owner',NULL,?,NULL)").bind(await hashToken('q-token'),Date.now()+999999).run()
 async function callQ(path,method='GET',body){return routes.request('https://app.example'+path,{method,headers:{Authorization:'Bearer q-token','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env)}

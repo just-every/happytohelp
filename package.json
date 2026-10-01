@@ -32,6 +32,7 @@
     "test:modules": "node scripts/verify-modules.mjs",
     "test:homepage-source": "node --test tests/homepage-source.mjs",
     "test:widget-browser": "node tests/widget-browser-runtime.mjs",
+    "test:widget-settings-browser": "node tests/widget-settings-browser.mjs",
     "test:ui-browser": "node tests/ui-browser.mjs",
     "test:accessibility-browser": "node tests/accessibility-browser.mjs",
     "test:navigation-browser": "node tests/navigation-browser.mjs",

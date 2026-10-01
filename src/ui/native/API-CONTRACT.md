@@ -1,6 +1,6 @@
 # Dashboard data contract
 
-`GET /api/management/bootstrap?projectId=...` must return authenticated real currentAgent {id,name,email}, agents, ais, projects map keyed by id with name/agents/ais/plugins, project for current scope, plugins. UI supplies same-origin /api/dashboard and socket origin; no Laravel token required for same-origin HTTP cookie.
+`GET /api/management/bootstrap?projectId=...` must return authenticated real currentAgent {id,name,email}, agents, ais, projects map keyed by id with name/agents/ais/plugins, project for current scope, plugins. It also returns `sessionProjectId` (the project the session is bound to; `null` for an account with no project) and `isPlatformAdmin`. A `projectId` the account is not a member of, or that does not exist, returns 403 `Project not found, or you do not have access to it`; the loader then renders the in-shell unavailable state. UI supplies same-origin /api/dashboard and socket origin; no Laravel token required for same-origin HTTP cookie.
 
 Dashboard data adapter uses `/api/dashboard` prefix for retained endpoint contracts:
 - GET /conversations and /projects/:p/conversations with inbox filter query; {data: Conversation[],meta:{pagination:{total,current_page,total_pages}}}

@@ -13,8 +13,15 @@ export function DashboardPending() {
     return <main className="container py-5" aria-busy="true">Loading your workspace…</main>;
 }
 export function DashboardError({ error }: { error: unknown }) {
+    const router = useRouter();
     useEffect(() => { delete (window as any).chatSettings; }, []);
-    return <main className="container py-5"><h1>HappyToHelp</h1><p role="alert">{error instanceof Error ? error.message : 'The workspace could not be loaded.'}</p><Link to="/login">Sign in</Link></main>;
+    // Only an expired session offers sign-in; any other failure leaves a signed-in user a way to retry or leave.
+    const expired = (error as { status?: number } | null)?.status === 401;
+    return <main className="container py-5"><h1>HappyToHelp</h1>
+        <p role="alert">{error instanceof Error ? error.message : 'The workspace could not be loaded.'}</p>
+        {expired ? <Link to="/login">Sign in</Link>
+            : <p><button type="button" className="btn btn-primary me-3" onClick={() => { void router.invalidate(); }}>Try again</button><Link to="/">Back to the inbox</Link></p>}
+    </main>;
 }
 export function DashboardContent() {
     return <Suspense fallback={<DashboardPending />}><Content /></Suspense>;

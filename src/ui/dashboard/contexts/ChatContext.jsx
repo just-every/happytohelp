@@ -13,6 +13,8 @@ import { mergeConversationSuggestionMetadata } from '../hooks/replySuggestionLif
 
 import Favcount from '../favcount';
 
+const PROJECT_SOCKET_SETTLE_MS = 50;
+
 export const ChatContext = createContext({});
 
 export const Provider = (props) => {
@@ -378,10 +380,15 @@ export const Provider = (props) => {
     processMessageRef.current = processMessage;
 
     useEffect(() => {
-        const close = connectedProjectIds.map(id => connectProject(id, () => refreshInboxData(),
-            () => { refreshInboxData(); setLastConnected(Date.now()); },
-            error => console.warn(error.message)));
-        return () => close.forEach(dispose => dispose());
+        // Let the mount settle before dialling: Suspense can hide and reveal this provider
+        // within one mount, and closing a socket mid-handshake only logs a browser warning.
+        let close = [];
+        const timer = setTimeout(() => {
+            close = connectedProjectIds.map(id => connectProject(id, () => refreshInboxData(),
+                () => { refreshInboxData(); setLastConnected(Date.now()); },
+                error => console.warn(error.message)));
+        }, PROJECT_SOCKET_SETTLE_MS);
+        return () => { clearTimeout(timer); close.forEach(dispose => dispose()); };
     }, [connectedProjectIds.join(',')]);
 
     useEffect(() => {

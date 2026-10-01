@@ -52,3 +52,8 @@ body.workspace-themed .workspace-skip-link:focus {
 body.workspace-themed #workspace-main:focus {
     outline: 0;
 }
+
+// Account menu rows read at normal-text AA contrast against the dropdown surface (the stock link grey is 3.8:1 on white).
+.native-shell .native-account-dropdown .dropdown-item { color: var(--bs-body-color); }
+.native-shell .native-account-dropdown .dropdown-item:hover,
+.native-shell .native-account-dropdown .dropdown-item:focus-visible { color: var(--bs-emphasis-color, #000); }

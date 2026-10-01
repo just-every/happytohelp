@@ -11,12 +11,14 @@ include breaking changes.
 - The public homepage is now the owner-approved “Customer Support, Solved.” page
   (approval 2026-10-01): a drawn inbox hero, the four product parts, “Help before
   they ask”, “Your own agent can investigate” and “Yours to run”, set in Outfit on
-  warm paper with colour only inside labelled HTML/SVG drawings.
+  warm paper with colour only inside labelled HTML/SVG drawings. Outfit is
+  self-hosted from `public/fonts/outfit/` under the SIL Open Font License 1.1, so
+  the homepage makes no third-party request.
 
 ### Removed
 
-- The village homepage: its components, styles, scroll-parallax hook, the
-  `public/homepage/village` artwork and their provenance entries.
+- The previous illustrated homepage: its components, styles, scroll-parallax
+  hook, its artwork under `public/homepage` and their provenance entries.
 
 ## 0.2.2-rc.1 - 2026-09-30 (private candidate)
 

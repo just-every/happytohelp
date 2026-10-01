@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "2864e75de0cff87ddf356d39f99af358f21303c2dac88d4b2484c8dc5d36d11a",
+  "manifest": "6e59dbc69d1c388b909c15381954e91e60550069932a0992d36c393252ba0038",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -309,6 +309,7 @@
           "docs/INSTALLER.md",
           "src/editor",
           "public/homepage",
+          "public/fonts/outfit",
           "migrations/0098_personal_visual_inspiration.sql",
           "migrations/0099_personal_sidebar_artwork.sql",
           "scripts/setup-link.mjs",
@@ -388,7 +389,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "9f1a88dc8f31ff9df452ac1ad02fb8487562ff8757edbd0938d10f71b731063a",
+      "sha256": "16e1a23326f8efafb918e3f90a8c35bb2ea4887d2a97f26be8ea55f7e3981d7b",
       "executable": false
     },
     "AGENTS.md": {
@@ -396,11 +397,11 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "ab7edd6c0637b26ab9e0b7b30ba8e3d88ae73d6d6a09261e46de7ac272f0d335",
+      "sha256": "ba96f28692f22972d7e81be4b27a23c7e703f28aeefaa9d39fd0afad0a954d81",
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "2dcaa2f0cfa2a74ecc05f628e78cb41fb17a7d8c994609cd759eb4e0ab70d7e2",
+      "sha256": "b3e798a9f15f950d36b8791b4875591cad55c9994b3b950bc869cbf835ba707c",
       "executable": false
     },
     "docs/ACCESSIBILITY-AUDIT-2026-09-30.md": {
@@ -456,7 +457,7 @@
       "executable": false
     },
     "docs/PUBLIC-SOURCE-PROVENANCE.md": {
-      "sha256": "cc7ada29d6ed4c218648952918faaadf4ebb39484207a7a89a6dfac08ffd37cd",
+      "sha256": "84fcb6ef678394f807d6be8a3eb5c7411bff0e542dfb25a236412f17946716ad",
       "executable": false
     },
     "docs/SETUP-WORKFLOW.md": {
@@ -484,7 +485,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "2864e75de0cff87ddf356d39f99af358f21303c2dac88d4b2484c8dc5d36d11a",
+      "sha256": "6e59dbc69d1c388b909c15381954e91e60550069932a0992d36c393252ba0038",
       "executable": false
     },
     "HANDOVER.md": {
@@ -797,6 +798,18 @@
     },
     "public/fonts/inter/LICENSE.txt": {
       "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+      "executable": false
+    },
+    "public/fonts/outfit/LICENSE.txt": {
+      "sha256": "0e5fcef5d93bfcae273c11c00f0bb453d3b5491860e1ac8b658767b7577c938f",
+      "executable": false
+    },
+    "public/fonts/outfit/outfit-latin-ext-wght-normal.woff2": {
+      "sha256": "0f53d1c03b3918d744a843b5039001ee31695ca1e255e3914188df81beb461e9",
+      "executable": false
+    },
+    "public/fonts/outfit/outfit-latin-wght-normal.woff2": {
+      "sha256": "6c18d579fd87c3776be068b762cbc83fde3acb543d49eabd3ade842eb987e887",
       "executable": false
     },
     "public/homepage/media/brands/happytohelp-favicon.png": {
@@ -3004,7 +3017,7 @@
       "executable": false
     },
     "src/routes/index.tsx": {
-      "sha256": "3fad1eeac5083539187fc11f50e835fbba994be92a6448933cd8954e4fa3dec4",
+      "sha256": "7ad41edf3e8ac72871578259e362c3aa5e4b1749214c93a2a363e8a55caf6493",
       "executable": false
     },
     "src/routes/login.tsx": {
@@ -3956,7 +3969,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings.css": {
-      "sha256": "18d94b91a405ed80ab70b24864f6920a2b4eeb5a3caf9f97a3f7f43ba1c35670",
+      "sha256": "f336712a4235628d00314fc9e650a3c4c66a6066f774fdfd82aa63c498833f50",
       "executable": false
     },
     "src/ui/homepage/drawings/AgentDrawing.tsx": {
@@ -3976,7 +3989,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings/ProductDrawings.tsx": {
-      "sha256": "352cbdd6926cefc19ce2dce46140b5b1ea1d211785bee627c1e01e436db74d89",
+      "sha256": "94d8a4eadecf5c448a1eebde376c0c8d610ec6eb4310b96a6899cd3860ce61b6",
       "executable": false
     },
     "src/ui/homepage/drawings/Sketch.tsx": {
@@ -3992,7 +4005,7 @@
       "executable": false
     },
     "src/ui/homepage/HelpBeforeTheyAsk.tsx": {
-      "sha256": "3fce168da02b1503a9a1bbbe735e73f301a52df2919a9828f5ccc4305d3bc93f",
+      "sha256": "9fde214446fcdf1a7a8dd95992f11f31a52a299286a511878f031ab6d2f552be",
       "executable": false
     },
     "src/ui/homepage/Hero.tsx": {
@@ -4000,11 +4013,15 @@
       "executable": false
     },
     "src/ui/homepage/homepage.css": {
-      "sha256": "8ab85206038ed8bb4d896fc81df1e8945e5831aa79a0b85853e9240da40df84e",
+      "sha256": "423b04a2fdcac2a45f75c8988b0b6cd16b19fd4208bb4e2027afa2faa07373dd",
       "executable": false
     },
     "src/ui/homepage/Homepage.tsx": {
-      "sha256": "ed0304f1d834d9d555d9ed7c86c7c9722ea7cc942e7915c1ca716a2b78b92f2d",
+      "sha256": "baf4926e73f42d7ea1f64624e096870bd27c9cdbcdc775445e1e34c79fb77de3",
+      "executable": false
+    },
+    "src/ui/homepage/outfit.css": {
+      "sha256": "444c8e7371755516bab130712c309ae4b7032e3fcc90e13343139af81e18df98",
       "executable": false
     },
     "src/ui/homepage/Product.tsx": {
@@ -4664,11 +4681,11 @@
       "executable": false
     },
     "tests/homepage-browser.mjs": {
-      "sha256": "285feb8fd28da633a47d7d427f92ccb700677b39be407f82d6994e3c836e5300",
+      "sha256": "96b5d7413bd5ab625ef59e4ad00e70d9e4417a2ccf84309b2ed61ebedd1e7822",
       "executable": false
     },
     "tests/homepage-source.mjs": {
-      "sha256": "aaf8ffc8de5683716fb0eb04a8b9cf64bf8121c1b55ce9b69e86b353608940f6",
+      "sha256": "6959b3407663e5902c1bf9b09329454fdf6d18f7d024f036561dec70a1c66a1e",
       "executable": false
     },
     "tests/identity-setup-deployment.mjs": {
@@ -4860,7 +4877,7 @@
       "executable": false
     },
     "tests/public-site-runtime.mjs": {
-      "sha256": "e352636e36350218e330a0bb9c29484bde972ba548d62447f07549636dcc529e",
+      "sha256": "297cf1b6f5b4612bcf97f705c304001bd7ab714602d80d5497438dee637a346c",
       "executable": false
     },
     "tests/repository-identity.mjs": {

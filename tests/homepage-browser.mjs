@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
 
 // Real-browser check of the approved "Customer Support, Solved." homepage (owner approval 2026-10-01).
@@ -13,6 +14,15 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+page.on('requestfailed', request => errors.push(`request failed: ${request.url()}`));
+page.on('response', response => { if (response.status() >= 400) errors.push(`HTTP ${response.status()}: ${response.url()}`); });
+const requested = [];
+page.on('request', request => requested.push(request.url()));
+const axePath = createRequire(import.meta.url).resolve('axe-core/axe.min.js');
+const axeViolations = async () => {
+  if (!(await page.evaluate(() => Boolean(window.axe)))) await page.addScriptTag({ path: axePath });
+  return page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] } })).violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`));
+};
 const checks = [];
 const parseColor = value => {
   const match = value.match(/rgba?\(([^)]+)\)/);
@@ -40,14 +50,14 @@ try {
   ]);
   assert.deepEqual(await page.locator('.signals li').allInnerTexts(), ['Lingering on a page', 'Sitting idle', 'Scrolling back up', 'Pausing at checkout']);
   const offerCopy = await page.locator('#help-before-they-ask .split-copy > p').innerText();
-  for (const phrase of ['offer help once', 'with their consent', 'stays quiet', 'person can always take over']) assert.ok(offerCopy.includes(phrase), phrase);
+  for (const phrase of ['offer help once', 'with their consent', 'stays quiet', 'human can always take over']) assert.ok(offerCopy.includes(phrase), phrase);
   const agentCopy = await page.locator('#agent .section-head p').innerText();
   for (const phrase of ['Codex or Claude on your own computer', 'access and scope', 'internal note', 'reviews the replies']) assert.ok(agentCopy.includes(phrase), phrase);
   const yoursCopy = await page.locator('#yours-to-run .split-copy p').innerText();
   for (const phrase of ['free and MIT licensed', 'your own Cloudflare account', 'keep the code and the data', 'paid to the providers you choose']) assert.ok(yoursCopy.includes(phrase), phrase);
   assert.equal(await page.locator('footer').count(), 1);
   assert.deepEqual(await page.locator('footer a').allInnerTexts(), ['HappyToHelp', 'Docs', 'GitHub', 'Workspace', 'Set up', 'Log in', 'MIT licence']);
-  assert.equal(await page.locator('.h2h-village, .village-scene, [class*="village"]').count(), 0);
+  assert.ok(!(await page.locator('[class*="village"], [class*="parallax"]').count()), 'retired homepage markup is absent');
   checks.push('headline, subhead, five sections in order, four product parts, signals, agent and ownership copy, footer');
 
   // Links derive from package.json repository.url.
@@ -78,8 +88,11 @@ try {
   assert.deepEqual(families.map(([family]) => family), ['Outfit'], JSON.stringify(families));
   assert.ok(await page.evaluate(() => [...document.fonts].some(face => face.family.replace(/["']/g, '') === 'Outfit' && face.status === 'loaded')), 'Outfit font faces loaded');
   assert.ok(await page.evaluate(() => document.fonts.check('500 40px Outfit')));
-  assert.ok(await page.locator('link[rel="stylesheet"][href^="https://fonts.googleapis.com/css2?family=Outfit"]').count() === 1);
-  checks.push('all type is Outfit and the font faces loaded');
+  const fontFiles = await page.evaluate(() => performance.getEntriesByType('resource').map(entry => new URL(entry.name).pathname).filter(path => /\.woff2$/.test(path)));
+  assert.ok(fontFiles.includes('/fonts/outfit/outfit-latin-wght-normal.woff2') && fontFiles.every(path => path.startsWith('/fonts/outfit/')), `only self-hosted Outfit files are requested: ${fontFiles}`);
+  const thirdParty = requested.filter(request => /^https?:/.test(request) && new URL(request).origin !== new URL(origin).origin);
+  assert.deepEqual(thirdParty, [], 'the homepage makes no third-party request');
+  checks.push('all type is Outfit, self-hosted from /fonts/outfit, and the page makes no third-party request');
 
   // Paper, ink and a monochrome page: colour only inside the drawings.
   assert.deepEqual(await page.locator('body').evaluate(body => [getComputedStyle(body).paddingTop, getComputedStyle(body).marginTop]), ['0px', '0px'], 'no dashboard body spacing');
@@ -107,6 +120,11 @@ try {
   assert.deepEqual(coloured, [], 'page chrome stays monochrome');
   const cyan = await page.locator('.drawing *').evaluateAll(elements => elements.filter(el => getComputedStyle(el).backgroundColor === 'rgb(214, 245, 250)' || getComputedStyle(el).borderTopColor === 'rgb(143, 227, 238)').length);
   assert.ok(cyan >= 10, `soft cyan accents inside the drawings (${cyan})`);
+  const cyanPerDrawing = await page.locator('figure.drawing').evaluateAll(figures => figures.map(figure => [...figure.querySelectorAll('*')].filter(el => {
+    const style = getComputedStyle(el);
+    return [style.backgroundColor, style.borderTopColor, style.color].includes('rgb(143, 227, 238)') && el.getBoundingClientRect().width > 0;
+  }).length));
+  assert.ok(cyanPerDrawing.length === 8 && cyanPerDrawing.every(count => count > 0), `every drawing carries a #8FE3EE accent: ${cyanPerDrawing}`);
   const buttons = await page.locator('.pill--ink').evaluateAll(els => els.map(el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color, getComputedStyle(el).borderTopLeftRadius]));
   assert.ok(buttons.length === 3 && buttons.every(([bg, fg, radius]) => bg === 'rgb(20, 20, 20)' && fg === 'rgb(255, 255, 255)' && parseFloat(radius) >= 20), JSON.stringify(buttons));
   checks.push('warm paper with grain, near-black ink, black pill buttons, no colour outside the drawings');
@@ -153,6 +171,11 @@ try {
     assert.deepEqual(tiny, [], `drawing text under 11px at ${width}px`);
     const buttonsOk = await page.locator('.pill').evaluateAll(els => els.filter(el => el.getBoundingClientRect().width > 0).every(el => el.getBoundingClientRect().height >= 40));
     assert.ok(buttonsOk, `pill targets at ${width}px`);
+    if (width <= 390) {
+      for (const name of ['Docs', 'GitHub', 'Get the code']) assert.ok(await page.locator('header nav').getByRole('link', { name, exact: true }).isVisible(), `header ${name} visible at ${width}px`);
+      const fold = await page.evaluate(() => ({ h1: document.querySelector('h1').getBoundingClientRect().bottom, cta: document.querySelector('.hero .pill').getBoundingClientRect().bottom }));
+      assert.ok(fold.h1 < 844 && fold.cta < 844, `headline and Get the code above the fold at ${width}px: ${JSON.stringify(fold)}`);
+    }
     if (width === 390) {
       assert.equal(await page.locator('.hero-list').evaluate(el => getComputedStyle(el).display), 'none', 'narrow hero shows the open conversation only');
       assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
@@ -177,6 +200,25 @@ try {
   assert.ok(['0px', '0'].includes(frozen), `marks fully drawn under reduced motion (${frozen})`);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   checks.push('marks animate once by default; reduced motion disables animation, transitions and smooth scrolling');
+
+  // Accessibility: axe-core WCAG A and AA at the wide and narrow layouts.
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert.deepEqual(await axeViolations(), [], `axe-core violations at ${width}px`);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  checks.push('axe-core reports no WCAG 2.x A or AA violation at 1440px and 390px');
+
+  // Keyboard focus is a visible ink outline, never the browser's blue ring.
+  await page.evaluate(() => { window.scrollTo(0, 0); document.activeElement?.blur?.(); });
+  const rings = [];
+  for (let step = 0; step < 6; step++) {
+    await page.keyboard.press('Tab');
+    rings.push(await page.evaluate(() => { const style = getComputedStyle(document.activeElement); return [document.activeElement.textContent.trim(), style.outlineStyle, style.outlineColor, parseFloat(style.outlineWidth)]; }));
+  }
+  assert.ok(rings.every(([, style, color, width]) => style === 'solid' && color === 'rgb(20, 20, 20)' && width >= 2), JSON.stringify(rings));
+  checks.push('keyboard focus shows a solid ink outline on the skip link, wordmark, navigation and calls to action');
+  await page.goto(origin, { waitUntil: 'networkidle' });
 
   // Keyboard and anchors.
   await page.keyboard.press('Tab');

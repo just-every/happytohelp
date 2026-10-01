@@ -9,9 +9,8 @@ const read = path => readFile(url(path), 'utf8');
 const exists = path => access(url(path)).then(() => true, () => false);
 
 test('the village homepage is removed completely', async () => {
-  for (const path of ['public/homepage/village', 'src/ui/homepage/useVillageParallax.ts', 'src/ui/homepage/village.css', 'src/ui/homepage/village-workshops.css', 'src/ui/homepage/village-responsive.css', 'src/ui/homepage/VillageScene.tsx']) {
-    assert.equal(await exists(path), false, `${path} must stay removed`);
-  }
+  const removedPaths = ['public/homepage/village', 'src/ui/homepage/useVillageParallax.ts', 'src/ui/homepage/village.css', 'src/ui/homepage/village-workshops.css', 'src/ui/homepage/village-responsive.css', 'src/ui/homepage/VillageScene.tsx'];
+  for (const path of removedPaths) assert.equal(await exists(path), false, `${path} must stay removed`);
   const files = (await readdir(url('src/ui/homepage'), { recursive: true })).filter(file => /\.(tsx?|css|json)$/.test(file));
   for (const file of files) assert.doesNotMatch(await read(`src/ui/homepage/${file}`), /village|parallax/i, file);
   assert.deepEqual((await readdir(url('public/homepage'))).sort(), ['media']);
@@ -40,15 +39,27 @@ test('homepage styles are scoped so they cannot leak into the dashboard', async 
   }
 });
 
-test('one open-licensed typeface is loaded and recorded', async () => {
+test('one open-licensed typeface is self-hosted and recorded', async () => {
   const route = await read('src/routes/index.tsx');
-  assert.match(route, /fonts\.googleapis\.com\/css2\?family=Outfit:wght@400;500;600&display=swap/);
-  assert.doesNotMatch(route, /Inter/);
+  assert.match(route, /rel: 'preload', href: '\/fonts\/outfit\/outfit-latin-wght-normal\.woff2', as: 'font'/);
+  assert.doesNotMatch(route, /Inter|https?:\/\//);
+  const homepageSource = await Promise.all((await readdir(url('src/ui/homepage'), { recursive: true })).filter(file => /\.(tsx?|css)$/.test(file)).map(file => read(`src/ui/homepage/${file}`)));
+  for (const text of homepageSource) assert.doesNotMatch(text, /fonts\.googleapis|fonts\.gstatic|cdn\.|unpkg|typekit/i);
+  const faces = await read('src/ui/homepage/outfit.css');
+  const fontUrls = [...faces.matchAll(/url\('([^']+)'\)/g)].map(match => match[1]);
+  assert.deepEqual(fontUrls, ['/fonts/outfit/outfit-latin-wght-normal.woff2', '/fonts/outfit/outfit-latin-ext-wght-normal.woff2']);
+  for (const font of fontUrls) assert.ok(await exists(`public${font}`), font);
+  assert.match(faces, /font-family: Outfit;[\s\S]*font-weight: 100 900;/);
+  assert.match(await read('src/ui/homepage/Homepage.tsx'), /import '\.\/outfit\.css';/);
+  assert.match(await read('public/fonts/outfit/LICENSE.txt'), /SIL OPEN FONT LICENSE Version 1\.1/);
+  assert.ok(JSON.parse(await read('edition.json')).components.some(component => component.source?.paths?.includes('public/fonts/outfit')), 'edition.json locks the font directory');
   const css = await read('src/ui/homepage/homepage.css') + await read('src/ui/homepage/drawings.css');
   assert.equal([...css.matchAll(/font-family:\s*([^;]+);/g)].length, 1, 'font-family is declared once, on the page root');
   assert.doesNotMatch(css, /ui-monospace|Menlo|Consolas|Georgia|Times|monospace/);
   const provenance = await read('docs/PUBLIC-SOURCE-PROVENANCE.md');
   assert.match(provenance, /Outfit typeface/);
+  assert.match(provenance, /`public\/fonts\/outfit\/`/);
+  assert.match(provenance, /SIL Open Font License 1\.1, `public\/fonts\/outfit\/LICENSE\.txt`/);
   assert.match(provenance, /SIL Open Font License 1\.1/);
 });
 

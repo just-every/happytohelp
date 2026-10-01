@@ -60,7 +60,7 @@ Its source and documentation links derive from the `repository` field in
 
 | Component | Where | Licence and notice |
 | --- | --- | --- |
-| Outfit typeface (Copyright 2021 The Outfit Project Authors, <https://github.com/Outfitio/Outfit-Fonts>) | Not distributed: the homepage loads weights 400, 500 and 600 from Google Fonts, the same way it loaded Inter before. Chosen over Plus Jakarta Sans, Manrope, Urbanist, Figtree, Lexend, Albert Sans and Sora as the closest match to the approved headline by rendering them side by side | SIL Open Font License 1.1, <https://openfontlicense.org> |
+| Outfit typeface (Copyright 2021 The Outfit Project Authors, <https://github.com/Outfitio/Outfit-Fonts>) | `public/fonts/outfit/`: the variable-weight latin and latin-ext WOFF2 files, copied unchanged from the npm package `@fontsource-variable/outfit` 5.3.0 (built from <https://github.com/google/fonts>) and declared in `src/ui/homepage/outfit.css`. The homepage serves them itself and makes no request to a font host. Chosen over Plus Jakarta Sans, Manrope, Urbanist, Figtree, Lexend, Albert Sans and Sora as the closest match to the approved headline by rendering them side by side | SIL Open Font License 1.1, `public/fonts/outfit/LICENSE.txt` |
 | Inter typeface | `public/fonts/inter/` | SIL Open Font License, `public/fonts/inter/LICENSE.txt` |
 | Feather icons (`feather-icons` 4.29.2, Cole Bemis) | npm package; its SVGs are inlined as CSS masks in the built dashboard stylesheet (`src/ui/dashboard/styles/foundation/_icons.scss`) | MIT, [`docs/licenses/FEATHER-ICONS.md`](licenses/FEATHER-ICONS.md) |
 | Font Awesome Free | npm packages used by the widget and dashboard | MIT code and CC BY 4.0 icons, [`docs/licenses/FONT-AWESOME-FREE.md`](licenses/FONT-AWESOME-FREE.md) |
@@ -75,8 +75,9 @@ No Font Awesome Pro package or asset is included.
 
 ## External requests
 
-The homepage loads the Outfit stylesheet from Google Fonts, and the customer
-widget loads Open Sans from Google Fonts on the page that embeds it. The Help
+The homepage makes no third-party request: its Outfit font files are served
+from `public/fonts/outfit/`. The customer widget loads Open Sans from Google
+Fonts on the page that embeds it. The Help
 Center stylesheet makes no external font or image request. The homepage does not
 load the customer widget, analytics or any tracking script, and no public page
 embeds an operator token, widget secret or tracking ID. The customer widget is a

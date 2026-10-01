@@ -71,14 +71,15 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   admission and survives recovery and redelivery. The `email:` message local-id
   prefix is reserved for inbound claims and refused by the message API.
   Payment, checkout, Stripe and balance behavior are outside this edition.
-- **PUBLIC-001 — Public product source.** The approved “Customer Support,
-  Solved.” homepage (owner approval 2026-10-01) is the real public `/`
-  experience: the hero with the drawn inbox, the four product parts (chat
-  widget, shared inbox, help centre, AI-suggested replies that cite their
+- **PUBLIC-001 — Public product source.** The approved
+  “Customer Support, Solved.” homepage (owner approval 2026-10-01) is the real
+  public `/` experience: the hero with the drawn inbox, the four product parts
+  (chat widget, shared inbox, help centre, AI-suggested replies that cite their
   sources), “Help before they ask”, “Your own agent can investigate”, “Yours to
   run” and the footer. It is a warm off-white page in one geometric sans-serif
-  (Outfit) with near-black ink and black pill buttons; colour appears only inside
-  the drawings, which are labelled HTML/SVG rather than raster images. Its text
+  (Outfit, self-hosted from `public/fonts/outfit/`, so the page makes no
+  third-party request) with near-black ink and black pill buttons; colour
+  appears only inside the drawings, which are labelled HTML/SVG rather than raster images. Its text
   and real links, derived from `package.json` `repository.url`, are ordinary DOM
   content; the sketch marks draw in once and reduced-motion preferences remove
   all animation, transitions and smooth scrolling without changing layout. Dynamic published

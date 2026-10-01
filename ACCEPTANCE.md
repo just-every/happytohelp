@@ -11,7 +11,7 @@ outside this edition's scope.
 The homepage evidence (`tests/homepage-browser.mjs`, `tests/public-site-runtime.mjs`,
 `tests/homepage-source.mjs`) must cover the exact “Customer Support, Solved.”
 headline and subhead, the five sections in order, the labelled drawings built
-from real text, the single loaded Outfit typeface, the monochrome page chrome
+from real text, the single self-hosted Outfit typeface with no third-party request, the monochrome page chrome
 with colour only inside the drawings, repository-derived navigation destinations,
 layout without horizontal overflow from 320px to 1920px, and reduced-motion
 behavior (owner approval 2026-10-01).

@@ -8,7 +8,7 @@ export function ChatWidgetDrawing() {
     <SketchWindow>
       <div className="d-page chat-art">
         <div className="chat-row"><span className="d-avatar">M</span><p className="d-bubble">Hi, I can’t change my billing date. Can you help?</p></div>
-        <div className="chat-input"><span>Type a message…</span><Icon name="send" /></div>
+        <div className="chat-input"><span>Type a message…</span><span className="chat-send"><Icon name="send" /></span></div>
       </div>
     </SketchWindow>
   </Drawing>;

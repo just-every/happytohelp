@@ -347,6 +347,7 @@
           "docs/INSTALLER.md",
           "src/editor",
           "public/homepage",
+          "public/fonts/outfit",
           "migrations/0098_personal_visual_inspiration.sql",
           "migrations/0099_personal_sidebar_artwork.sql",
           "scripts/setup-link.mjs",

@@ -5,6 +5,7 @@ import { Product } from './Product';
 import { SiteFooter } from './SiteFooter';
 import { SiteHeader } from './SiteHeader';
 import { YoursToRun } from './YoursToRun';
+import './outfit.css';
 import './homepage.css';
 import './drawings.css';
 

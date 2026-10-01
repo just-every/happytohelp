@@ -7,13 +7,20 @@ const html = await response.text()
 assert.match(html, /<!doctype html>/i)
 const text = html.replace(/<[^>]*>/g, '')
 assert.match(html, /<h1[^>]+id="hero-title"[^>]*>.*Customer Support,.*Solved\./is)
+assert.ok(text.includes('Customer Support, Solved.'), 'the server HTML reads exactly "Customer Support, Solved."')
 assert.match(text, /Free and open source: chat widget, shared inbox, help centre and AI-suggested replies with sources\./)
 for (const [id, title] of [['product', 'The product'], ['help-before-they-ask', 'Help before they ask'], ['agent', 'Your own agent can investigate'], ['yours-to-run', 'Yours to run']]) {
   assert.match(html, new RegExp(`<section[^>]+id="${id}"[^>]+aria-labelledby="[^"]+"`, 'i'), id)
   assert.ok(text.includes(title), title)
 }
 assert.equal((html.match(/<figure[^>]+role="img"[^>]+aria-label="[^"]{40,}"/g) || []).length, 8, 'eight labelled drawings in the server-rendered page')
-assert.match(html, /fonts\.googleapis\.com\/css2\?family=Outfit/)
+assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic|https?:\/\/[^"]*\.(?:woff2?|css|js)\b/i, 'no third-party font, stylesheet or script')
+assert.match(html, /<link[^>]+rel="preload"[^>]+href="\/fonts\/outfit\/outfit-latin-wght-normal\.woff2"/)
+for (const font of ['/fonts/outfit/outfit-latin-wght-normal.woff2', '/fonts/outfit/outfit-latin-ext-wght-normal.woff2']) {
+ const fontResponse = await fetch(origin + font)
+ assert.equal(fontResponse.status, 200, font)
+ assert.match(fontResponse.headers.get('content-type') || '', /font\/woff2/, font)
+}
 assert.doesNotMatch(html, /village|parallax|<img\b|Support\. Free\. Yours\./i)
 for (const route of ['/projects', '/login', '/setup']) assert.ok(html.includes(`href="${route}"`), route)
 assert.doesNotMatch(html, /waitlist|pricing|widget\.js|stripe|<\?php|@extends\(/i)

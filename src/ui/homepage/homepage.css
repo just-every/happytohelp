@@ -22,11 +22,14 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home h1, .h2h-home h2, .h2h-home h3, .h2h-home p, .h2h-home ul, .h2h-home ol, .h2h-home figure { margin: 0; padding: 0; }
 .h2h-home ul, .h2h-home ol { list-style: none; }
 .h2h-home a { color: inherit; text-decoration: none; }
-.h2h-home a:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 6px; }
+/* Focus stays in ink. The shared keyboard ring in the dashboard stylesheet reads these two variables. */
+.h2h-home { --accessibility-focus-ring: var(--ink); --accessibility-focus-halo: var(--paper); }
+.h2h-home a, .h2h-home button { outline-color: var(--ink); }
+.h2h-home a:focus-visible, .h2h-home button:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 6px; }
 .h2h-home main { max-width: 1536px; margin: 0 auto; padding: 0 var(--gutter); }
 
 .h2h-home .skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; padding: 10px 16px; background: var(--paper); border: 1.5px solid var(--ink); border-radius: 999px; transform: translateY(-200%); }
-.h2h-home .skip-link:focus { transform: none; }
+.h2h-home .skip-link:focus { transform: none; outline: 3px solid var(--ink); outline-offset: 2px; }
 
 /* Header and footer */
 .h2h-home .site-header, .h2h-home .site-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1536px; margin: 0 auto; padding: 0 var(--gutter); }
@@ -97,7 +100,11 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
   .h2h-home .site-header { height: 76px; }
 }
 @media (max-width: 640px) {
-  .h2h-home .site-header nav > a:not(.pill) { display: none; }
+  /* The header wraps to two rows so Docs, GitHub and Get the code stay visible at every width. */
+  .h2h-home .site-header { flex-wrap: wrap; height: auto; gap: 10px; padding-top: 18px; padding-bottom: 4px; }
+  .h2h-home .site-header nav { flex: 1 0 100%; flex-wrap: nowrap; gap: 24px; }
+  .h2h-home .site-header nav > a:not(.pill) { padding: 8px 0; }
+  .h2h-home .site-header nav .pill { margin-left: auto; }
   .h2h-home { font-size: 17px; }
   .h2h-home .parts { grid-template-columns: minmax(0, 1fr); }
   .h2h-home .signals { grid-template-columns: minmax(0, 1fr); }

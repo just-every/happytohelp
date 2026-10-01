@@ -38,6 +38,14 @@ a deep link, the Projects list or the workspace switcher. The switcher still
 posts the switch itself and then navigates; the loader sees a matching session
 and does nothing more.
 
+The session cookie holds one active project, so tabs on different projects share
+it. After each load the loader announces the session's project on the
+`h2h-session-project` BroadcastChannel (`session-project-sync.ts`). A tab whose
+URL names another project marks itself displaced and, when its window regains
+focus, re-runs the loader, which re-activates its project (or shows the
+unavailable state if access was removed meanwhile). Tabs therefore never ping-pong
+the session while both are open; only the tab the user returns to rebinds it.
+
 A project the account does not belong to, or that does not exist, is not a
 failed load. The bootstrap refuses it with a message-bearing 403, the loader
 reads the account's own bootstrap instead and marks the result

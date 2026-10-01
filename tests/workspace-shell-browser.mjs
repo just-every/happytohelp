@@ -160,12 +160,12 @@ try {
   });
   await check('Projects list: owner reads Owner, Name is not a fake sort control, row actions are tappable',async()=>{
     await bindSession(bound.id);
-    await page.goto(runtime.origin+'/projects');await page.locator('.project-list-table').waitFor();
+    await page.goto(runtime.origin+'/projects');await page.locator('.project-list-table tbody tr').nth(fixture.projects.length-1).waitFor();
     const roles=await page.locator('.project-list-table tbody tr td:nth-child(2)').allInnerTexts();
     assert.deepEqual(roles,fixture.projects.map(()=>'Owner'));
     assert.equal(await page.locator('.project-list-table thead th').first().innerText(),'Name');
     for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
-      await page.setViewportSize(viewport);await page.reload();await page.locator('.project-list-table').waitFor();
+      await page.setViewportSize(viewport);await page.reload();await page.locator('.project-list-table tbody tr').nth(fixture.projects.length-1).waitFor();
       for(const box of await page.locator('.project-list-menu summary').evaluateAll(items=>items.map(i=>{const r=i.getBoundingClientRect();return [r.width,r.height]})))
         assert.ok(box[0]>=24&&box[1]>=24,`${viewport.width}px: row action ${box[0]}x${box[1]} is at least 24x24`);
     }
@@ -183,6 +183,23 @@ try {
       await page.getByRole('button',{name:'Update',exact:true}).waitFor();
       assert.equal(await page.getByText('This page was not found.').count(),0,segment);
     }
+  });
+  await check('a tab whose project another tab displaced re-activates it when focused',async()=>{
+    await page.goto(`${runtime.origin}/projects/${other.id}/articles`);await ready();
+    await page.locator('#workspace-main .header-title').waitFor();
+    const second=await context.newPage();second.setDefaultTimeout(15000);
+    try{
+      await second.goto(`${runtime.origin}/projects/${bound.id}/articles`);
+      await second.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:`Switch workspace: ${names[bound.id]}`,exact:true}).waitFor();
+      assert.equal(await api(`/api/knowledge/${other.id}/articles`),403,'the second tab moved the shared session to its project');
+      await page.bringToFront();await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+      await page.waitForFunction(async id=>(await fetch(`/api/knowledge/${id}/articles`)).status===200,other.id,{polling:200});
+      await page.waitForLoadState('networkidle');
+      assert.equal(await page.getByText('Project access denied').count(),0,'no "Project access denied" after returning to the tab');
+      assert.equal(await page.locator('#workspace-main [role=alert]').count(),0);
+      await second.bringToFront();await second.evaluate(()=>window.dispatchEvent(new Event('focus')));
+      await second.waitForFunction(async id=>(await fetch(`/api/knowledge/${id}/articles`)).status===200,bound.id,{polling:200});
+    }finally{await second.close()}
   });
   await check('dashboard loads open project sockets without teardown warnings',async()=>{
     const fresh=await context.newPage();const lines=[];let sockets=[];

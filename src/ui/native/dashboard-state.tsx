@@ -2,6 +2,7 @@ import { createContext, useContext, useSyncExternalStore } from 'react';
 import { redirect, type AnyRouter, type ParsedLocation } from '@tanstack/react-router';
 import { nativeRequest } from './transport';
 import { actsOnSessionProject, projectIdFromPath } from './workspace-scope';
+import { announceSessionProject } from './session-project-sync';
 
 export const DashboardSettingsContext = createContext<any>(null);
 export function useDashboardSettings() {
@@ -71,6 +72,7 @@ export async function loadDashboard({ location, abortController }: {
         settings = await bootstrap();
     }
     if (version !== sessionVersion) throw new Error('Your session changed. Reload the workspace.');
+    announceSessionProject(settings.sessionProjectId);
     const search = location.search as Record<string, unknown>;
     // Pages such as /local-agent/authorize have no project in the URL but act on the session's.
     const projectId = projectUnavailable ? undefined : urlProjectId ?? (actsOnSessionProject(location.pathname) ? settings.project?.id : undefined);

@@ -3,6 +3,7 @@ import { createWorkspaceTheme, normalizeWorkspaceMode } from './workspaceModes';
 import { Outlet } from '@tanstack/react-router';
 import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
 import { isInboxPath } from './workspace-scope';
+import { useSessionProjectGuard } from './session-project-sync';
 import Chat from '../dashboard/components/Chat';
 import { Provider } from '../dashboard/contexts/ChatContext';
 import WorkspacePages from './WorkspacePages';
@@ -12,6 +13,7 @@ import { MobileNavigationProvider } from './MobileNavigation';
 export default function DashboardClient({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
+    useSessionProjectGuard(settings.projectId);
     useEffect(() => {
         document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed theme-happytohelp`;
     }, [isInbox]);

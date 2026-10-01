@@ -9,7 +9,9 @@ Project membership is rechecked on every request. `GET /bootstrap?projectId=` an
 member with that project's workspace plus `sessionProjectId` (the project the session
 is bound to, which the dashboard loader aligns with the URL through
 `/api/identity/switch-project`) and `isPlatformAdmin`; a project the account does not
-belong to and one that does not exist are refused identically with a 403 that says so. Global inbox reads aggregate
+belong to and one that does not exist are refused identically with a 403 that says so;
+a member whose role is below owner/admin is refused owner/admin actions with a 403 that
+names the required role. Global inbox reads aggregate
 only the current user's memberships. Platform administration additionally requires
 an explicit `platform_admins` row; project ownership does not grant it. Widget
 identity verification secrets are projected only in owner/admin widget settings.

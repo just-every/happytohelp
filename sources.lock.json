@@ -447,7 +447,7 @@
       "executable": false
     },
     "docs/NAVIGATION.md": {
-      "sha256": "cd4e80a3f8ec014ab501d0bffc47da250f4d92ecaccd419a7ffb2eacafbc0d1c",
+      "sha256": "ac92c31b3e78a514e8416a487639b4f5f50e7ba810b8f308acc5e42ec11c8c24",
       "executable": false
     },
     "docs/PRIVACY.md": {
@@ -2295,7 +2295,7 @@
       "executable": false
     },
     "src/modules/management/common.ts": {
-      "sha256": "4858a0579d4f22ba074e37dad53c5a4664e56ef26c251fba51cb6d6e5f9d42cf",
+      "sha256": "d615a149c90fed3a44bf322376886ed9e355439c35c08613f1a158f2cc520a3d",
       "executable": false
     },
     "src/modules/management/contact-erasure.ts": {
@@ -2379,7 +2379,7 @@
       "executable": false
     },
     "src/modules/management/README.md": {
-      "sha256": "ae4591329e679cea08f77b4548e55e4c4bf4fcaad33fe64807f493d7127ff3bb",
+      "sha256": "c786ffddd5bda7a5cdd7c826d3fe2c0c1f2c8d5d8c7f2dbc6cc88f1cb65e0ee0",
       "executable": false
     },
     "src/modules/management/resources.ts": {
@@ -4067,7 +4067,7 @@
       "executable": false
     },
     "src/ui/native/dashboard-state.tsx": {
-      "sha256": "58bd2e8ef7c98755b8e81e1321def56665fcdcab5e5a70e320f083ac4d2fcf6e",
+      "sha256": "cedabc6c0361dec7c66864678d2702ce9059c6408e3a4bd44fae42e90ca9507e",
       "executable": false
     },
     "src/ui/native/Dashboard.tsx": {
@@ -4079,7 +4079,7 @@
       "executable": false
     },
     "src/ui/native/DashboardClient.jsx": {
-      "sha256": "66fe66713ebf96b4639bad880aebc4ea76d81d6d9df5aeea310ec3536d31ebe9",
+      "sha256": "52d9d748075d39bc75dc08f53d5a048a60285e75eddac57785021743d15c69da",
       "executable": false
     },
     "src/ui/native/IdentityPage.tsx": {
@@ -4843,7 +4843,7 @@
       "executable": false
     },
     "tests/management.mjs": {
-      "sha256": "3e0f68eaad4d47c4be2011f3a499913509a71bf5ec0ebc7b76981d7fbb5be4cb",
+      "sha256": "9d2ebc482fde6262d3070c90f1de5e3de0e539868249245898bf8991d093b906",
       "executable": false
     },
     "tests/mobile-inbox-browser.mjs": {
@@ -5015,7 +5015,7 @@
       "executable": false
     },
     "tests/workspace-shell-browser.mjs": {
-      "sha256": "d24c9a7b7eb39f55c3605058142e85514f8f37117c348b24f2e631c40db769e6",
+      "sha256": "ad8fb640476984504e5c9ec0e6687833dd09655bfb292fb73fa2d07cf4325280",
       "executable": false
     },
     "tsconfig.json": {

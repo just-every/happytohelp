@@ -25,6 +25,8 @@ const foreign=await call(routes,'/bootstrap?projectId=q');assert.equal(foreign.s
 const missing=await call(routes,'/bootstrap?projectId=00000000-0000-4000-8000-000000000000');assert.equal(missing.status,403,'an unknown project is indistinguishable from a foreign one');assert.equal(await missing.text(),await(await call(routes,'/bootstrap?projectId=q')).text())
 const crossBound=await(await call(routes,'/bootstrap?projectId=p')).json();assert.equal(crossBound.project.id,'p')
 await DB.prepare("INSERT INTO platform_admins(user_id) VALUES('u')").run();assert.equal((await(await call(routes,'/bootstrap')).json()).isPlatformAdmin,true,'a platform_admins row is reported to the client');await DB.prepare("DELETE FROM platform_admins WHERE user_id='u'").run()
+// A member whose role is too low for an owner/admin action is told so, not told the project is missing.
+await DB.prepare("INSERT INTO memberships VALUES('q','u','operator')").run();const lowRole=await call(routes,'/projects/q/widget-settings','PUT',{settings:{}});assert.equal(lowRole.status,403);assert.match(await lowRole.text(),/owner or admin role required/);await DB.prepare("DELETE FROM memberships WHERE project_id='q' AND user_id='u'").run()
 assert.equal((await call(dashboardRoutes,'/projects/q/conversations/c')).status,404)
 assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/notes','POST',{content:'Private note'})).status,201)
 assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:'other@example.com'})).status,201)

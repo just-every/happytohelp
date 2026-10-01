@@ -16,6 +16,7 @@ body.workspace-page .widget-code {
     &__secret-value { min-width: 0; }
     &__secret-value code { color: inherit; font-size: 12px; overflow-wrap: anywhere; }
     &__secret-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    &__secret-unavailable { margin: 10px 0 0; color: var(--conversation-muted); font-size: 12px; line-height: 1.5; }
     &__secret-note { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; color: var(--conversation-muted); font-size: 11px; line-height: 1.5; }
     &__secret-note code { padding: 2px 5px; border-radius: 4px; color: var(--bs-primary); background: var(--workspace-primary-soft); font-size: 10px; }
     &__secret-server-only { margin-left: auto; }

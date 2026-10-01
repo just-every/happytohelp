@@ -14,7 +14,11 @@ a member whose role is below owner/admin is refused owner/admin actions with a 4
 names the required role. Global inbox reads aggregate
 only the current user's memberships. Platform administration additionally requires
 an explicit `platform_admins` row; project ownership does not grant it. Widget
-identity verification secrets are projected only in owner/admin widget settings.
+identity verification secrets are projected only in owner/admin widget settings, and
+every project gets one at creation (migration `0106` backfills older projects).
+`PUT /projects/:id/widget-settings` takes the widget settings object itself as the body
+(`{theme, settings, text}`); the dashboard sends only the overrides a person edited and the
+widget merges them over its own defaults (`src/modules/widget/js/context/defaults.js`).
 
 Project settings, availability, per-audience default AI selection, AI profiles,
 macros, plugins/order, contact details/blocking, memberships/invitations, primary

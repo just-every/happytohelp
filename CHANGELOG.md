@@ -6,6 +6,23 @@ include breaking changes.
 
 ## Unreleased
 
+### Fixed
+
+- Widget settings (Theme, Texts, Settings) now show what the widget actually renders:
+  default colors, default copy and default toggles, with the default copy also shown as
+  each text field's placeholder. Editing one field changes only that value in the form
+  and the live preview, and Save stores only edited fields, so saving without edits no
+  longer blanks the widget copy, turns defaults off or paints colors black. Clearing a
+  text field or restoring a default removes its override. Saving widget settings no longer
+  discards the theme and text when the form includes a `settings` section.
+- Every project now has a server secret (`H2H_SECRET`) for signed-in-user verification.
+  It is generated when a project is created (setup, registration, project creation, demo
+  inbox) and migration `0106_project_verification_secret.sql` backfills existing projects
+  that had none. Owners and admins can reveal and copy it from Widget > Code; other roles
+  see an explanation instead of disabled buttons.
+- `GET /api/identity/projects/:id` returns only the project's id, name, widget key, allowed
+  origin and creation time; the server secret reaches owners and admins only through widget settings.
+
 ### Changed
 
 - The public homepage is now the owner-approved “Customer Support, Solved.” page

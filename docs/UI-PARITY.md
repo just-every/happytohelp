@@ -16,7 +16,7 @@ page records what was restored and which original features are still missing.
 | AI and management | Dedicated assistant/default-responder controls, saved reply and plugin forms, agent list and pending invitations, contact details. |
 | Knowledge | Dataset forms and source tabs, article editor/import selection, category tree, original help-center empty state, real editing/deletion and evaluation access. |
 | Insights and administration | Original list/empty-state presentation, dedicated admin navigation, resource-specific columns and labelled record details. |
-| Widget | Existing original React controls retained and checked across Code, Theme, Settings and Texts. |
+| Widget | Existing original React controls retained and checked across Code, Theme, Settings and Texts. Theme, Texts and Settings open on the widget's effective defaults (saved overrides laid over `src/modules/widget/js/context/defaults.js`), default copy doubles as placeholder text, and Save writes only edited fields. Widget > Code shows the project's server secret (`H2H_SECRET`, generated at project creation and backfilled by migration `0106`) to owners and admins with working Reveal and Copy; other roles see a note. `pnpm run test:widget-settings-browser` checks this. |
 
 ## Workspace scoping and shell corrections (1 October 2026)
 

@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
-import { id, requiredString } from '../../platform/db'
+import { id, requiredString, serverSecret } from '../../platform/db'
 import { passwordHash } from './credentials'
 import { sessionCookie } from './session'
 import { localDevelopmentRequest } from '../../platform/local-host'
@@ -66,7 +66,7 @@ setup.post('/bootstrap', async c => {
  const guard = 'EXISTS(SELECT 1 FROM owner_setup WHERE singleton=1 AND claim_id=?)'
  const results = await c.env.DB.batch([
   c.env.DB.prepare(`INSERT INTO owner_setup SELECT 1,? WHERE ${available} ON CONFLICT(singleton) DO NOTHING`).bind(userId),
-  c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) SELECT ?,?,?,?,? WHERE ${guard}`).bind(projectId,name,id(),allowedOrigin,now,userId),
+  c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) SELECT ?,?,?,?,?,? WHERE ${guard}`).bind(projectId,name,id(),allowedOrigin,now,serverSecret(),userId),
   ...(primaryColor === undefined ? [] : [c.env.DB.prepare(`INSERT INTO project_settings(project_id,settings_json,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(projectId,JSON.stringify({primary_color: primaryColor.toLowerCase()}),now,userId)]),
   c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,?,?,? WHERE ${guard}`).bind(userId,email,ownerName,now,userId),
   c.env.DB.prepare(`INSERT INTO credentials(user_id,password_hash,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(userId,password,now,userId),

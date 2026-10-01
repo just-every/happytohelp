@@ -116,6 +116,7 @@ pnpm run verify
 pnpm exec playwright install chromium   # once
 pnpm run test:widget-browser
 pnpm run test:widget-lifecycle-browser
+pnpm run test:widget-settings-browser
 pnpm run test:ui-browser
 pnpm run test:navigation-browser
 pnpm run test:workspace-shell-browser

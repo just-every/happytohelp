@@ -395,6 +395,10 @@
           "docs/INBOUND-EMAIL-RECOVERY.md",
           "tests/contact-erasure.mjs",
           "tests/contact-erasure-browser.mjs",
+          "tests/widget-settings-browser.mjs",
+          "tests/widget-settings-model.mjs",
+          "tests/project-verification-secret.mjs",
+          "migrations/0106_project_verification_secret.sql",
           "docs/PRIVACY.md"
         ]
       }

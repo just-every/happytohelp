@@ -31,6 +31,8 @@ const groups = [
     ] },
 ];
 
+export const appearanceFieldNames = groups.flatMap(({ fields }) => fields.map(([name]) => name));
+
 export default function WidgetAppearanceFields({ register }) {
     return groups.map(({ title, fields }) => (
         <WidgetFieldSection key={title} title={title}>

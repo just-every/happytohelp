@@ -7,6 +7,7 @@ import TimeAgo from 'react-timeago';
 import { ChatContext } from '../contexts/ChatContext';
 import CountryName from './includes/CountryName';
 import Moment from '../../native/Moment';
+import { contactTimezone } from '../utils/contactTimezone';
 
 import '../styles/components/ConversationHeader.scss';
 
@@ -39,6 +40,17 @@ export default function ConversationHeader({
             ? conversation.contact.provided_email
             : null;
 
+    const timezone = contactTimezone(conversation.contact);
+    const projectHref = `/projects/${conversation.project_id}/conversations/${conversation.id}`;
+    // The contact's clock is shown only when a timezone is recorded; the viewer's own clock is never substituted.
+    const metaItems = [
+        projectName && { key: 'project', node: <a className="conversation-header-project conversation-header-meta-project" href={ projectHref } title={ projectName }>{ projectName }</a> },
+        contactEmail && { key: 'email', node: <span className="conversation-header-meta-email" title={ contactEmail }>{ contactEmail }</span> },
+        timezone && { key: 'time', node: <span className="conversation-header-meta-fixed"><Moment tz={ timezone } format="LT">{ new Date() }</Moment></span> },
+        conversation.contact.country_code && { key: 'country', node: <span className="conversation-header-meta-fixed"><CountryName code={ conversation.contact.country_code } prefix /></span> },
+    ].filter(Boolean);
+    const contactName = conversation.contact.display_name;
+
     return (
         <div className={ `chat-header conversation-header${atTop ? '' : ' is-scrolled'}` }>
             <div className="conversation-header-panel">
@@ -49,7 +61,7 @@ export default function ConversationHeader({
                     <ContactAvatar contact={ conversation.contact } href={ `/projects/${conversation.project_id}/contacts/${conversation.contact_id}` } className="avatar avatar-sm" presentation="conversation-profile" />
                     <div className="conversation-header-identity-copy">
                         <div className="conversation-header-name-row">
-                            <a className="chat-header-title" href={ `/projects/${conversation.project_id}/contacts/${conversation.contact_id}` }>{ conversation.contact.display_name }</a>
+                            <a className="chat-header-title" href={ `/projects/${conversation.project_id}/contacts/${conversation.contact_id}` } title={ contactName }>{ contactName }</a>
                             { conversation.contact.is_verified ? <span className="badge text-bg-primary">Verified</span> : <span className="badge text-bg-secondary-subtle">Unverified</span> }
                             { conversation.resolved_at
                                 ? <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-resolved-at` }><TimeAgo date={ conversation.resolved_at } /></Tooltip> }><span className="conversation-header-status is-closed">{ statusLabel }</span></OverlayTrigger>
@@ -57,17 +69,17 @@ export default function ConversationHeader({
                             { isAiAssigned && <span className="conversation-header-status is-ai">AI</span> }
                         </div>
                         <div className="conversation-header-meta">
-                            { projectName && <a className="conversation-header-project conversation-header-meta-project" href={ `/projects/${conversation.project_id}/conversations/${conversation.id}` }>{ projectName }</a> }
-                            { projectName && <span className="conversation-header-meta-separator" aria-hidden="true">•</span> }
-                            { contactEmail && <span className="conversation-header-meta-email">{ contactEmail }</span> }
-                            { contactEmail && <span className="conversation-header-meta-separator" aria-hidden="true">•</span> }
-                            <span><Moment tz={ decodeURIComponent(conversation.contact.timezone) } format="LT">{ new Date() }</Moment></span>
-                            { conversation.contact.country_code && <span><span aria-hidden="true">•</span> <CountryName code={ conversation.contact.country_code } prefix /></span> }
+                            { metaItems.map((item, index) => <React.Fragment key={ item.key }>
+                                { index > 0 && <span className="conversation-header-meta-separator" aria-hidden="true">•</span> }
+                                { item.node }
+                            </React.Fragment>) }
                         </div>
                     </div>
                 </div>
                 <div className="conversation-header-actions">
-                    { !conversation.resolved_at && <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button> }
+                    { conversation.resolved_at
+                        ? <button type="button" className="btn btn-white conversation-header-reopen" title="Reopen conversation" onClick={ () => resolveConversation(conversation, false) }><i className="fe fe-rotate-ccw me-2" aria-hidden="true"></i>Reopen</button>
+                        : <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button> }
                     <button
                         type="button"
                         className="btn btn-white conversation-local-agent-toggle"

@@ -126,6 +126,7 @@ pnpm run test:identity-browser
 pnpm run test:demo-inbox-browser
 pnpm run test:mobile-inbox-browser
 pnpm run test:conversation-panel-resize-browser
+pnpm run test:inbox-conversation-browser
 pnpm run test:contact-erasure-browser
 ```
 

@@ -9,7 +9,7 @@ const rewriteTools = [
     { name: 'shorten', label: 'Make shorter', icon: 'fe-align-center' },
 ];
 
-export default function ConversationComposerTools({ disabled, hasHelper, canSend, onAttach, onSaved, onNote, onSendAndClose }) {
+export default function ConversationComposerTools({ disabled, hasHelper, canSend, canClose, onAttach, onSaved, onNote, onSendAndClose }) {
     const { canRunTools, canUndo, canRedo, runTool, undo, redo, suggestions } = useReplySuggestions();
     const historyDisabled = disabled || hasHelper || suggestions.loading;
 
@@ -57,12 +57,14 @@ export default function ConversationComposerTools({ disabled, hasHelper, canSend
                     <i className="fe fe-corner-up-right" aria-hidden="true" /> Redo draft change
                 </Dropdown.Item>
             </div>
-            <Dropdown.Divider role="separator" />
-            <div role="group" aria-label="Message actions">
-                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onSendAndClose } disabled={ !canSend }>
-                    <i className="fe fe-check-circle" aria-hidden="true" /> Send &amp; close
-                </Dropdown.Item>
-            </div>
+            { canClose && <>
+                <Dropdown.Divider role="separator" />
+                <div role="group" aria-label="Message actions">
+                    <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onSendAndClose } disabled={ !canSend }>
+                        <i className="fe fe-check-circle" aria-hidden="true" /> Send &amp; close
+                    </Dropdown.Item>
+                </div>
+            </> }
         </Dropdown.Menu>
     </Dropdown>;
 }
@@ -71,6 +73,7 @@ ConversationComposerTools.propTypes = {
     disabled: PropTypes.bool,
     hasHelper: PropTypes.bool,
     canSend: PropTypes.bool,
+    canClose: PropTypes.bool,
     onAttach: PropTypes.func.isRequired,
     onSaved: PropTypes.func.isRequired,
     onNote: PropTypes.func.isRequired,

@@ -43,6 +43,7 @@
     "test:demo-inbox-browser": "node tests/demo-inbox-browser.mjs",
     "test:mobile-inbox-browser": "node tests/mobile-inbox-browser.mjs",
     "test:conversation-panel-resize-browser": "node tests/conversation-panel-resize-browser.mjs",
+    "test:inbox-conversation-browser": "node tests/inbox-conversation-browser.mjs",
     "verify:visual": "node scripts/verify-visual-edit.mjs",
     "install:app": "node scripts/install.mjs",
     "test:widget-lifecycle-browser": "node tests/widget-lifecycle-browser.mjs",

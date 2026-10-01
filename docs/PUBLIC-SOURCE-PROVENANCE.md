@@ -9,14 +9,19 @@ third-party components keep their own licences, listed at the end of this page.
 All of the following are owner-generated or owner-supplied and are covered by
 the root MIT licence like the rest of the source:
 
-- **Village homepage art**: `public/homepage/village/*.webp`. The hero, conversation
-  square, knowledge archive, agent handoff and open workshop scenes, plus
-  transparent foreground layers and clean background plates used for subtle
-  parallax. They are WebP delivery derivatives of the owner's design sources;
-  each file's SHA-256, byte count, source hash and transformation is recorded in
-  [`src/ui/homepage/asset-provenance.json`](../src/ui/homepage/asset-provenance.json).
+- **Homepage drawings** (owner approval 2026-10-01): the hero inbox, the four
+  product drawings, the offer widget, the terminal and internal note, and the
+  ownership checklist are first-party React components, HTML and inline SVG in
+  `src/ui/homepage/drawings/` styled by `src/ui/homepage/drawings.css`. They
+  were redrawn as real DOM text from the owner-approved design images (the
+  approved hero image and the 12ui full-page conversion kept in the owner's
+  design workspace, which are not distributed). No raster image, third-party
+  illustration or logo is used; Codex, Claude and Cloudflare are named in text
+  only.
 - **HappyToHelp mark**: `public/homepage/media/brands/happytohelp-favicon.png`
-  (homepage favicon) and `public/img/icon.svg` (dashboard mark).
+  (homepage favicon) and `public/img/icon.svg` (dashboard mark). The favicon's
+  SHA-256, byte count and origin are recorded in
+  [`src/ui/homepage/asset-provenance.json`](../src/ui/homepage/asset-provenance.json).
 - **Installer and setup background**: `public/setup/ocean.webp` (SHA-256
   `a3dfb0d036ce7e773acdf1aaac2c3863cc4948f299c5bd0e6220a3d620165a09`,
   1,207,294 bytes, 3072x2048), used by the standalone installer and the in-app
@@ -26,8 +31,9 @@ the root MIT licence like the rest of the source:
   14,184,241 bytes).
 
 The homepage is an ordinary React route in `src/routes/index.tsx` built from the
-components in `src/ui/homepage`. Its text and links are real DOM content that
-works without the images; layered motion respects reduced-motion preferences.
+components in `src/ui/homepage`. Its text and links are real DOM content, and
+each drawing carries one accessible label; the only motion is a one-time
+draw-in of the sketch marks, which reduced-motion preferences remove.
 Its source and documentation links derive from the `repository` field in
 `package.json`.
 
@@ -38,7 +44,7 @@ Its source and documentation links derive from the `repository` field in
   beside them are first-party, built on Bootstrap 5.3 (MIT). Their only
   third-party inputs are Bootstrap, the `feather-icons` package (MIT), the
   highlight.js `vs2015` code style (BSD-3-Clause) and Inter (SIL Open Font
-  License 1.1). No commercial theme, font or image is used; the removed files
+  License 1.1). The public homepage uses Outfit instead (see below). No commercial theme, font or image is used; the removed files
   and their hashes are recorded in
   [`src/ui/dashboard/asset-provenance.json`](../src/ui/dashboard/asset-provenance.json).
 - **Help Center stylesheet**: `public/site-assets/help_center/css/app.css` is a
@@ -54,6 +60,7 @@ Its source and documentation links derive from the `repository` field in
 
 | Component | Where | Licence and notice |
 | --- | --- | --- |
+| Outfit typeface (Copyright 2021 The Outfit Project Authors, <https://github.com/Outfitio/Outfit-Fonts>) | Not distributed: the homepage loads weights 400, 500 and 600 from Google Fonts, the same way it loaded Inter before. Chosen over Plus Jakarta Sans, Manrope, Urbanist, Figtree, Lexend, Albert Sans and Sora as the closest match to the approved headline by rendering them side by side | SIL Open Font License 1.1, <https://openfontlicense.org> |
 | Inter typeface | `public/fonts/inter/` | SIL Open Font License, `public/fonts/inter/LICENSE.txt` |
 | Feather icons (`feather-icons` 4.29.2, Cole Bemis) | npm package; its SVGs are inlined as CSS masks in the built dashboard stylesheet (`src/ui/dashboard/styles/foundation/_icons.scss`) | MIT, [`docs/licenses/FEATHER-ICONS.md`](licenses/FEATHER-ICONS.md) |
 | Font Awesome Free | npm packages used by the widget and dashboard | MIT code and CC BY 4.0 icons, [`docs/licenses/FONT-AWESOME-FREE.md`](licenses/FONT-AWESOME-FREE.md) |
@@ -68,7 +75,7 @@ No Font Awesome Pro package or asset is included.
 
 ## External requests
 
-The homepage loads the Inter stylesheet from Google Fonts, and the customer
+The homepage loads the Outfit stylesheet from Google Fonts, and the customer
 widget loads Open Sans from Google Fonts on the page that embeds it. The Help
 Center stylesheet makes no external font or image request. The homepage does not
 load the customer widget, analytics or any tracking script, and no public page

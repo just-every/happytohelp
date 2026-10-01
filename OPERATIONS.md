@@ -27,7 +27,7 @@ for you. This document is the manual path and the reference for every setting.
    [Optional capabilities](#optional-native-capabilities)). Run `pnpm run dev`,
    open `/setup`, and choose an email and password to create the first owner.
    Setup closes once an owner exists; afterwards use `/login`. Dashboard routes
-   include `/projects` and `/conversations`; `/` is the public village homepage
+   include `/projects` and `/conversations`; `/` is the public “Customer Support, Solved.” homepage
    and published help centers are project-scoped routes. The homepage does not
    load the customer widget: configure a project's exact allowed website origin,
    then install the widget snippet shown in its widget settings on that site.

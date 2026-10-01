@@ -4,6 +4,20 @@ All notable changes to HappyToHelp are recorded here. Versions follow
 [Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
 include breaking changes.
 
+## Unreleased
+
+### Changed
+
+- The public homepage is now the owner-approved “Customer Support, Solved.” page
+  (approval 2026-10-01): a drawn inbox hero, the four product parts, “Help before
+  they ask”, “Your own agent can investigate” and “Yours to run”, set in Outfit on
+  warm paper with colour only inside labelled HTML/SVG drawings.
+
+### Removed
+
+- The village homepage: its components, styles, scroll-parallax hook, the
+  `public/homepage/village` artwork and their provenance entries.
+
 ## 0.2.2-rc.1 - 2026-09-30 (private candidate)
 
 This version marks a private preservation candidate for review. It is not a
@@ -76,7 +90,7 @@ First public source release of the self-hosted edition.
   delegation, training/evaluation runs and integrations (email, GitHub, help
   center imports, brand images and website preview), ported to the native
   runtime.
-- Village public homepage with layered, reduced-motion-aware artwork.
+- Village public homepage with layered, reduced-motion-aware artwork. (Replaced on 2026-10-01 by the “Customer Support, Solved.” homepage; see Unreleased.)
 - Standalone browser installer (`node scripts/install.mjs`) for local or
   Cloudflare installation, with agent-assisted prefill.
 - Fictional demo inbox for trying the workspace without real customer data.

@@ -388,7 +388,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "ebc24f6f550a254274e2d64283a246a213a0ebb0cbe5270171db246c5da2d961",
+      "sha256": "9f1a88dc8f31ff9df452ac1ad02fb8487562ff8757edbd0938d10f71b731063a",
       "executable": false
     },
     "AGENTS.md": {
@@ -396,11 +396,11 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "930a5fb4e01fc6b99bb6004348fed3d3d5a99b6b3ccbad86fa3c380616b55794",
+      "sha256": "ab7edd6c0637b26ab9e0b7b30ba8e3d88ae73d6d6a09261e46de7ac272f0d335",
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "4dd14efd593ef023c9117960bfe54341c29e3302a9904c03c85845d0daef7598",
+      "sha256": "2dcaa2f0cfa2a74ecc05f628e78cb41fb17a7d8c994609cd759eb4e0ab70d7e2",
       "executable": false
     },
     "docs/ACCESSIBILITY-AUDIT-2026-09-30.md": {
@@ -416,7 +416,7 @@
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
-      "sha256": "6705f975054c8505154fda1eab2a15e610942f4d2fc542336a0dbdd291b93b52",
+      "sha256": "53e3d50498d788761b5d1cf2165a85e510d053d56b0bd565455513af05784a9d",
       "executable": false
     },
     "docs/INSTALLER.md": {
@@ -440,7 +440,7 @@
       "executable": false
     },
     "docs/MODULES.md": {
-      "sha256": "31bfa2a5db5cee714d520bf36be80404751c9cc69f253fb57e30e9329f8b45c1",
+      "sha256": "1a43e4dc4e14296d7ca63deccc6b8589793f199a840a2664f0f05ce427cee2d7",
       "executable": false
     },
     "docs/NAVIGATION.md": {
@@ -456,7 +456,7 @@
       "executable": false
     },
     "docs/PUBLIC-SOURCE-PROVENANCE.md": {
-      "sha256": "87f416ee381129f46c5460172e6aa6536750df397395004969a87efb6c3c24a2",
+      "sha256": "cc7ada29d6ed4c218648952918faaadf4ebb39484207a7a89a6dfac08ffd37cd",
       "executable": false
     },
     "docs/SETUP-WORKFLOW.md": {
@@ -464,7 +464,7 @@
       "executable": false
     },
     "docs/SOURCE-PROVENANCE.md": {
-      "sha256": "47158a43f8c3d93468db7e35c6f7c351608b67ad069c2352fd41779e7c922ee1",
+      "sha256": "b9f76e6059dbccca4abf34f8fbfa125badd6e1f3ac0e0923dc706fbe6353d85b",
       "executable": false
     },
     "docs/UI-PARITY.md": {
@@ -488,7 +488,7 @@
       "executable": false
     },
     "HANDOVER.md": {
-      "sha256": "3084e9ababef0f7b944a4832d224e3e33e0316373dd17730f31438a163d9edb3",
+      "sha256": "977f3fb90cf5847cb2e834f69e01c9e3028267692ebdeff0f3d8516bc7ce6695",
       "executable": false
     },
     "LICENSE": {
@@ -780,11 +780,11 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "f3ae4ba7acd839108c353194c00fe96e2caa6f30c5d9050a416020ed0f5ad4e3",
+      "sha256": "9b8f1ac65f9fa5175676f9c6a7580c99707ddfe0b4492121ca8746cce741b7ee",
       "executable": false
     },
     "package.json": {
-      "sha256": "bba41e661e10a92e5bc0dc34fb512fd12bb4068e7c2df4df94ed14752fb9c53e",
+      "sha256": "be7869ba1ce557541c8b88c08a086bdb0eedff01abce3a85f87981c607439b5b",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -803,38 +803,6 @@
       "sha256": "a10803603a265e99bb3706d2e0f2c8cb562baee30c705dca2cf48d56abd3d60b",
       "executable": false
     },
-    "public/homepage/village/agents.webp": {
-      "sha256": "06da571d1f008c345616241d279d8d15f581c0772f23e8d86afd9dce8aba3a55",
-      "executable": false
-    },
-    "public/homepage/village/context-background.webp": {
-      "sha256": "332b1b3e8deed90546714559c7c2ea0c3fc481e1c8ddf4527e091bab275317bb",
-      "executable": false
-    },
-    "public/homepage/village/context-foreground.webp": {
-      "sha256": "144d73d98783cc374e9d8b59013b8e61d00c8df6caeb65c34d8ff79e8be3adef",
-      "executable": false
-    },
-    "public/homepage/village/hero-background.webp": {
-      "sha256": "f9dfb86a14984882b46b66db0d3fcb40514b37dcff31dee513daa46fc7a18544",
-      "executable": false
-    },
-    "public/homepage/village/hero-foreground.webp": {
-      "sha256": "a02ca91679511145280201d2cd899ea49169425165c453e7b47b7ebc0db2d6a7",
-      "executable": false
-    },
-    "public/homepage/village/knowledge.webp": {
-      "sha256": "971372cdd0ea1100b2afc79c47940fd2301a0603c1d58f81573678f8e7108c5a",
-      "executable": false
-    },
-    "public/homepage/village/license.webp": {
-      "sha256": "2e73cacf55d7148d54ce471aa7dc5b532f6fe590d454a950681cdf2e953488a7",
-      "executable": false
-    },
-    "public/homepage/village/paper.webp": {
-      "sha256": "9de29a98e8fbd39923e0cd2bd5bae180fa4731c43b1df39d9e19d6db6a18c8fa",
-      "executable": false
-    },
     "public/img/icon.svg": {
       "sha256": "93f377cffc031d58b27e9911737717f1d1b76b8456dd9cc06510c4a660ee9e4e",
       "executable": false
@@ -848,7 +816,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "cd6c36c92b53a2706450fdf82727ffbc4e960936431d72c73fb85c7033caa820",
+      "sha256": "a28218f55d4667231fe310b6c7622b3470aa4822008e731cce16d529280d1018",
       "executable": false
     },
     "rer-project.json": {
@@ -1368,7 +1336,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "b109212b9c491000e957059ca86397634c6f87eee7a240a75c289ad6e876c7f1",
+      "sha256": "278e08476623a59e53151aa3a3e6e4772da7c9ea0a6a606887d912f6904930bc",
       "executable": false
     },
     "src/app.ts": {
@@ -2480,7 +2448,7 @@
       "executable": false
     },
     "src/modules/public-site/README.md": {
-      "sha256": "6f31c5b9d9e0026769c5a7b5c1e172306ee506fb50dd117919bae4b7ab97eec2",
+      "sha256": "e5e0e157ab5da1a7cd5f8a2c794aac9b81390bcb36ec217792e56215149a17b6",
       "executable": false
     },
     "src/modules/sendgrid-email/module.json": {
@@ -3036,7 +3004,7 @@
       "executable": false
     },
     "src/routes/index.tsx": {
-      "sha256": "1aeed1bd3395974fac273a77b4470dcf6e343152075c391446a1de1b700d3da6",
+      "sha256": "3fad1eeac5083539187fc11f50e835fbba994be92a6448933cd8954e4fa3dec4",
       "executable": false
     },
     "src/routes/login.tsx": {
@@ -3979,56 +3947,84 @@
       "sha256": "e84fa405099e55778dd73b8301cd92ca6590f3dc60c90d1c1846996bfeb89388",
       "executable": false
     },
+    "src/ui/homepage/AgentInvestigates.tsx": {
+      "sha256": "faeae741c451de81d7d172fbbb62d61327e8e4880e9d2af3aa9df2c6076443be",
+      "executable": false
+    },
     "src/ui/homepage/asset-provenance.json": {
-      "sha256": "a51ef6a65c16a9f6acfe20397e3773a8934cc73f0a8ce1525c7c75d296f02db4",
+      "sha256": "1d8e56fa6126614a3c66a6111298d5e508a260c6d7b3738e08649587c54aa1e8",
+      "executable": false
+    },
+    "src/ui/homepage/drawings.css": {
+      "sha256": "18d94b91a405ed80ab70b24864f6920a2b4eeb5a3caf9f97a3f7f43ba1c35670",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/AgentDrawing.tsx": {
+      "sha256": "10b3472443ced134b38d3e876af0f24496fe4d1a57b851d7c5991d9082a8743d",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/HeroInbox.tsx": {
+      "sha256": "e4ba89bf050b1243b03a8c42374f65d2232fb16e21d576fc23caf09233a0cac8",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/Icons.tsx": {
+      "sha256": "8f298e56bdedce40061b74848bf1b0fff9c7945fca0ccb152ae1259c03a31bfe",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/OfferDrawing.tsx": {
+      "sha256": "59c5dbc0d107624609121339c903989d492982cf75ca12c388aa025572072655",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/ProductDrawings.tsx": {
+      "sha256": "352cbdd6926cefc19ce2dce46140b5b1ea1d211785bee627c1e01e436db74d89",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/Sketch.tsx": {
+      "sha256": "3ad30f6a888faf23161b664097ce69f5a3dafa0c357a8b2816805a14e1a5509a",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/SuggestedReply.tsx": {
+      "sha256": "f2d01a294a0d69fceaa8ac151cf6bf15fc773f469827507d0f4cc7fbae2686ec",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/YoursDrawing.tsx": {
+      "sha256": "2e643ffeb4843379244a526cde18a62508a3098ffcc7494f8e94649e9ab9ffcf",
+      "executable": false
+    },
+    "src/ui/homepage/HelpBeforeTheyAsk.tsx": {
+      "sha256": "3fce168da02b1503a9a1bbbe735e73f301a52df2919a9828f5ccc4305d3bc93f",
+      "executable": false
+    },
+    "src/ui/homepage/Hero.tsx": {
+      "sha256": "de331b75ef1b43590118168cfa4021d7ab0fafdc297000ef18fd0c12fe772db1",
+      "executable": false
+    },
+    "src/ui/homepage/homepage.css": {
+      "sha256": "8ab85206038ed8bb4d896fc81df1e8945e5831aa79a0b85853e9240da40df84e",
       "executable": false
     },
     "src/ui/homepage/Homepage.tsx": {
-      "sha256": "860ab93b88ea7d7eded376e8b37f58b52cd66c69842b17c3b369b1066e031732",
+      "sha256": "ed0304f1d834d9d555d9ed7c86c7c9722ea7cc942e7915c1ca716a2b78b92f2d",
+      "executable": false
+    },
+    "src/ui/homepage/Product.tsx": {
+      "sha256": "8afeb0c724756e30b12684a0e4b66f397e7bbec7b2b1aa16c5478bb734dd15bb",
       "executable": false
     },
     "src/ui/homepage/repository.ts": {
-      "sha256": "526cb8a6f41c6dd7fbe9586dc3d0c4a102349307c70c5fdb2bb0b75b79fc6192",
+      "sha256": "71beecf743a2e68de5a14b4eae8b2642de87e179231fe140b62418a89ca9990e",
       "executable": false
     },
-    "src/ui/homepage/useVillageParallax.ts": {
-      "sha256": "c8be11ef5dcf50ea1038bf701e0f5044b8acd33f9019f14352a2c9812c937ee3",
+    "src/ui/homepage/SiteFooter.tsx": {
+      "sha256": "9c09b369a6ccfe742fc3e7e33a1e1767391d8ef5a15da7133dab5296a7624f24",
       "executable": false
     },
-    "src/ui/homepage/village-responsive.css": {
-      "sha256": "8445f7fa1b9b64f76a13b581b40942a9775ba6fe4bf49fd1ce0e3fd1302ba553",
+    "src/ui/homepage/SiteHeader.tsx": {
+      "sha256": "d4390ede3f4c4f0487ae04ded2cce46e478359aff970c8feed02e258f737da6e",
       "executable": false
     },
-    "src/ui/homepage/village-workshops.css": {
-      "sha256": "49e4ce25520351f22a3c6ac8a62d4baf4692795418feac43dccc377cd63167b0",
-      "executable": false
-    },
-    "src/ui/homepage/village.css": {
-      "sha256": "ce104a4ec25e8c9308cf01e65eb350589e950b677942b6d13b39af00c2ce4307",
-      "executable": false
-    },
-    "src/ui/homepage/VillageFeature.tsx": {
-      "sha256": "3c471d93b1ccb0972165dbd1e051127e4f55b799e375199efb21d5a2b62c1ef5",
-      "executable": false
-    },
-    "src/ui/homepage/VillageHero.tsx": {
-      "sha256": "397cd562e82069b0a641df01cf0546af44dbdb8e90216071e59adf293c4a5ea3",
-      "executable": false
-    },
-    "src/ui/homepage/VillageIcons.tsx": {
-      "sha256": "b2793245c651c461277bb23043fbb08f7bd44ec19e8d8452dae445e603a50a8c",
-      "executable": false
-    },
-    "src/ui/homepage/VillageKnowledge.tsx": {
-      "sha256": "b5ddced3dcdf1af349e4bcf891512e0239e2fd073e916de13353c270bbaabbc6",
-      "executable": false
-    },
-    "src/ui/homepage/VillageScene.tsx": {
-      "sha256": "b6f79b9c8e602c536d7ce4cc1522fac92e0ffdb74e6472d89bc5d9accf0bf2db",
-      "executable": false
-    },
-    "src/ui/homepage/VillageWorkshops.tsx": {
-      "sha256": "6cf676e6a28c9594bcd5b4023fb659ce18f9aa132daffd1639b5336ead8ad6c4",
+    "src/ui/homepage/YoursToRun.tsx": {
+      "sha256": "f0780a5ed5190763083837f2d705a0888035f53875f99341c938f7b6588a0d07",
       "executable": false
     },
     "src/ui/native/AdminNavigation.jsx": {
@@ -4668,7 +4664,11 @@
       "executable": false
     },
     "tests/homepage-browser.mjs": {
-      "sha256": "26cef5e36cab1e68ef05d1dd4feb9b187ca7897130f10baad761c0c119e292f1",
+      "sha256": "285feb8fd28da633a47d7d427f92ccb700677b39be407f82d6994e3c836e5300",
+      "executable": false
+    },
+    "tests/homepage-source.mjs": {
+      "sha256": "aaf8ffc8de5683716fb0eb04a8b9cf64bf8121c1b55ce9b69e86b353608940f6",
       "executable": false
     },
     "tests/identity-setup-deployment.mjs": {
@@ -4860,11 +4860,11 @@
       "executable": false
     },
     "tests/public-site-runtime.mjs": {
-      "sha256": "7fe67d344de3369abae3c58dccbecc21589e988f876ccef6c1c10442648487cd",
+      "sha256": "e352636e36350218e330a0bb9c29484bde972ba548d62447f07549636dcc529e",
       "executable": false
     },
     "tests/repository-identity.mjs": {
-      "sha256": "9c19b7ce6c84df157d80e9c1acb36099f33b48d798cf583aece294c136d29271",
+      "sha256": "a3f60436f7458f9be822a771f407628222e0cd7425446676b24f51486c826060",
       "executable": false
     },
     "tests/reproducible-build.mjs": {

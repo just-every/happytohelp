@@ -78,7 +78,7 @@ establish a new measurement. Cost assumptions and limitations remain in
 
 | Layer | Implementation |
 | --- | --- |
-| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the village homepage (`src/ui/homepage`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
+| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the “Customer Support, Solved.” homepage (`src/ui/homepage`: one component per section, drawings in `drawings/`, scoped `homepage.css` and `drawings.css`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
 | API | Hono (`src/app.ts`, mounted by `src/server.ts`), with identity, project and role checks in `src/platform`. |
 | Records | D1 (`DB`). Schema lives in `migrations/` plus module migrations; `pnpm run migrations:prepare` collects them into `.generated/migrations`. |
 | Files | R2 (`FILES`) for attachments, media and knowledge artifacts. |

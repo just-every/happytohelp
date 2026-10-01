@@ -1,7 +1,8 @@
 # Public homepage and Help Center
 
 The public homepage is a native TanStack Start/React route in `src/routes/index.tsx`,
-composed from `src/ui/homepage` and the assets in `public/homepage`.
+composed from `src/ui/homepage` (inline drawings, no raster images) and the favicon in
+`public/homepage/media/brands`.
 It retains links to native workspace, setup and login. This module serves dynamic,
 project-scoped published help centers. Former pricing, resources, legal, waitlist,
 referrer-personalized and public homepage-widget behavior remains retired. The

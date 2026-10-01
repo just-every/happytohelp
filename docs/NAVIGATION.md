@@ -2,7 +2,12 @@
 
 HappyToHelp has one authenticated TanStack Router layout. The pathless
 `src/routes/_dashboard.tsx` validates implemented paths on the server so unknown
-documents return HTTP 404. Its nested pathless
+documents return HTTP 404. Every unmatched document, including dashboard-shaped
+paths that fail that check, renders the root route's `notFoundComponent`
+(`src/ui/homepage/NotFound.tsx`): a branded page in the homepage visual language
+with the title "Page not found · HappyToHelp", a short message and links to the
+homepage and the workspace. Help Center addresses have their own 404 pages (see
+`src/modules/public-site/README.md`). Its nested pathless
 `src/routes/_dashboard._workspace.tsx` is the client-only boundary with
 pending/error handling and the persistent shell. The workspace's index and splat
 leaves render `DashboardContent` and attach the bootstrap loader;
@@ -83,6 +88,9 @@ actual browser UI. It exercises delayed loader reads, shell/document identity,
 header portals, search and Back/Forward, project isolation and theme changes,
 dirty conversation and settings edits, widget mount/unmount, mobile navigation,
 direct refresh/not-found recovery, sign-out and expired-session recovery. The
+`pnpm run test:not-found-browser` separately drives the application and Help Center
+404 pages at desktop and mobile sizes (status, content type, title, links, axe, and a
+draft article being indistinguishable from a missing one). The navigation
 test writes its result and request evidence under `H2H_EVIDENCE_DIR` (or a
 temporary directory). This document records the contract and command; a test
 run must report its own result and exact source revision.

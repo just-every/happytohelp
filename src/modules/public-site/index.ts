@@ -1,7 +1,9 @@
 /// <reference types="vite/client" />
 import { Hono } from 'hono'
 import type { AppEnv, Env } from '../../platform/env'
+import { notFoundResponse, rejectedResponse } from '../../base/rejected-response'
 import { helpCenterRoutes, reserved, resolvePublicProject } from './help-center'
+import { missingHelpCenterPage } from './not-found'
 
 export async function isPublicSitePath(path: string, env: Env) {
  if (path.startsWith('/help/') || path.startsWith('/api/public-site/')) return true
@@ -14,3 +16,8 @@ export async function isPublicSitePath(path: string, env: Env) {
 
 export const publicSiteRoutes = new Hono<AppEnv>()
 publicSiteRoutes.route('/', helpCenterRoutes)
+
+// A Help Center address no route serves (for example /help/a/b/c) still gets the Help Center frame; API paths keep the plain 404.
+publicSiteRoutes.notFound(c => c.req.path.startsWith('/api/')
+ ? notFoundResponse(c.req.raw)
+ : rejectedResponse(c.req.raw, c.html(missingHelpCenterPage(), 404)))

@@ -119,6 +119,7 @@ pnpm run test:widget-lifecycle-browser
 pnpm run test:ui-browser
 pnpm run test:navigation-browser
 pnpm run test:public-help-center-browser
+pnpm run test:not-found-browser
 pnpm run test:setup-browser
 pnpm run test:demo-inbox-browser
 pnpm run test:mobile-inbox-browser

@@ -17,6 +17,7 @@ page records what was restored and which original features are still missing.
 | Knowledge | Dataset forms and source tabs, article editor/import selection, category tree, original help-center empty state, real editing/deletion and evaluation access. |
 | Insights and administration | Original list/empty-state presentation, dedicated admin navigation, resource-specific columns and labelled record details. |
 | Widget | Existing original React controls retained and checked across Code, Theme, Settings and Texts. |
+| Not-found pages | Added after the 15 September comparison (1 October 2026). The original Laravel application was not re-run for this row, so it is not a parity claim. Unknown application paths show a branded 404 in the homepage visual language (title, message, links to the homepage and workspace); Help Center 404s (unknown project, missing article, unpublished draft) show inside the Help Center header with HTTP 404. Both return HTTP 404. |
 
 Pages own their controls through `PageHeaderActions` and `PageHeaderTabs`; the
 common frame places these beside or below the title. Dashboard styles, icons and

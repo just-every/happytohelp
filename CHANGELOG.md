@@ -32,6 +32,24 @@ include breaking changes.
   self-hosted from `public/fonts/outfit/` under the SIL Open Font License 1.1, so
   the homepage makes no third-party request.
 
+- The public identity pages (`/login`, `/register`, `/forgot-password`, `/reset-password`,
+  `/verify-email`, `/accept-invitation` and the completed-setup state of `/setup`) use the
+  homepage's paper, ink and Outfit with the HappyToHelp wordmark, a link home and links to
+  one another, instead of the dashboard-styled form. Invitation, verification and reset links are
+  checked on load and report a missing, invalid, expired or used link with a way forward. A
+  signed-out invitee sees the workspace and email and either creates an account or signs in and
+  returns to the link. Every new-password field states and enforces the 12 to 1024 character rule.
+  `/login` points to `/setup` while no owner exists; sign-up is offered only when it can work and
+  stays closed until setup is done; forgot-password without an email provider still fails closed
+  and says the workspace owner must reset the password.
+
+### Added
+
+- Pending invitations on Agents can be copied, resent (when email is configured) and revoked by
+  owners and by admins for agent invitations. The routes re-check the caller's role. New public
+  helpers `GET /api/identity/auth-options` and `POST /api/identity/link-status`, with
+  `pnpm run test:identity-browser`, `tests/identity-links.mjs` and `tests/management-invitations.mjs`.
+
 ### Removed
 
 - The previous illustrated homepage: its components, styles, scroll-parallax

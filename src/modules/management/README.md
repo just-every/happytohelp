@@ -28,6 +28,15 @@ canonical storage and maps original status/assignment/cursor contracts. Widget
 collector actions use the customer-context module; selected insight pairs use
 conversation admission; generation and operator suggestions use AI support.
 
+Pending invitations (`invitations.ts`, `invitation-store.ts`) are the unused invite links for one email in one
+workspace, listed on `GET /projects/:projectId/agents` with `invitation_id` (the lower-cased email), `expires_at`
+and a per-row `canManage` computed from the caller's role (owners: all; admins: invitations that grant the operator
+role; operators: none). `POST .../invitations/:invitationId/link` issues another link (links are stored as hashes and
+cannot be shown again), `POST .../resend` emails a fresh link and fails closed with 503 when no email provider is
+configured, and `DELETE .../invitations/:invitationId` removes every unused link. Each re-reads the caller's membership of
+the path's workspace and refuses what they may not manage. Using one link retires the others issued for the same email
+(`identity/accounts.ts`). `tests/management-invitations.mjs` covers the routes and role refusals on real local D1.
+
 Owners and admins can permanently erase a contact's personal data
 (`contact-erasure.ts`, `contact-erasure/`): R2 objects are staged in
 `contact_erasure_objects` and deleted first, then one D1 batch removes or redacts

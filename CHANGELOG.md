@@ -61,6 +61,17 @@ include breaking changes.
   stays closed until setup is done; forgot-password without an email provider still fails closed
   and says the workspace owner must reset the password.
 
+- Local computers and delegation use the workspace design system. The Connect
+  computer dialog is styled outside the inbox; authorizing a computer shows
+  “Computer approved” or “Request denied” and clears the code; Connected
+  applications and the connection consent screen render in the application
+  shell instead of bare server HTML, cancelling a connection returns to
+  Connected applications, and missing, invalid, unavailable or signed-out
+  requests show friendly pages. The consent form and revocation rules are
+  unchanged. Registering a client whose identifier already exists now answers
+  409 `CLIENT_EXISTS` instead of a server error. URLs keep text that reads as a
+  number (an OAuth `state`, a device code) exactly as written.
+
 ### Added
 
 - Pending invitations on Agents can be copied, resent (when email is configured) and revoked by

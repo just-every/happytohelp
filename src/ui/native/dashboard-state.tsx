@@ -3,6 +3,7 @@ import { redirect, type AnyRouter, type ParsedLocation } from '@tanstack/react-r
 import { nativeRequest } from './transport';
 import { actsOnSessionProject, projectIdFromPath } from './workspace-scope';
 import { announceSessionProject } from './session-project-sync';
+import { delegationAccount, loadConsent } from './delegation-loader';
 
 export const DashboardSettingsContext = createContext<any>(null);
 export function useDashboardSettings() {
@@ -44,7 +45,8 @@ export async function loadDashboard({ location, abortController }: {
 }) {
     const version = sessionVersion;
     const { signal } = abortController;
-    const urlProjectId = projectIdFromPath(location.pathname);
+    // Connected applications and the consent screen name their workspace in `account_id` instead of the path.
+    const urlProjectId = projectIdFromPath(location.pathname) ?? delegationAccount(location);
     const bootstrap = async (projectId?: string) => {
         try { return await nativeRequest('/api/management/bootstrap' + (projectId ? `?projectId=${encodeURIComponent(projectId)}` : ''), { signal });
         } catch (error: any) {
@@ -71,13 +73,14 @@ export async function loadDashboard({ location, abortController }: {
         projectUnavailable = urlProjectId;
         settings = await bootstrap();
     }
+    const delegationConsent = await loadConsent(location, signal);
     if (version !== sessionVersion) throw new Error('Your session changed. Reload the workspace.');
     announceSessionProject(settings.sessionProjectId);
     const search = location.search as Record<string, unknown>;
     // Pages such as /local-agent/authorize have no project in the URL but act on the session's.
     const projectId = projectUnavailable ? undefined : urlProjectId ?? (actsOnSessionProject(location.pathname) ? settings.project?.id : undefined);
     return {
-        ...settings, apiUrl: '/api/dashboard', projectId, projectUnavailable, isGlobalInbox: !projectId, sessionVersion: version,
+        ...settings, apiUrl: '/api/dashboard', projectId, projectUnavailable, isGlobalInbox: !projectId, sessionVersion: version, delegationConsent,
         dashboardLocation: { ...location, search: { ...search, ...(search.q == null ? {} : { q: String(search.q) }) } },
     };
 }

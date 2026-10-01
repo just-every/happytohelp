@@ -12,7 +12,7 @@ const standalone = [
   'operating-environment.mjs', 'management.mjs', 'library-validation.mjs', 'contact-erasure.mjs', 'demo-inbox.mjs', 'demo-transcript-events.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
   'site-preview.mjs', 'workspace-artwork.mjs', 'not-found-response.mjs', 'error-response.mjs', 'provider-effects.mjs', 'delivery-deployment-spec.mjs', 'delivery-migration-order.mjs',
   'ui-transport.mjs', 'workspace-scope.mjs', 'dashboard-styles.mjs', 'login-return.mjs', 'abuse-limits.mjs', 'widget-rate-limit.mjs', 'local-agent-archive.mjs', 'reproducible-output.mjs', 'local-owner-login.mjs', 'widget-transport.mjs', 'installer-secret-scopes.mjs',
-  'project-verification-secret.mjs', 'widget-settings-model.mjs', 'deployment-setup-credential.mjs', 'identity-setup-deployment.mjs', 'security-headers.mjs', 'user-agent-parser.mjs', 'repository-identity.mjs',
+  'project-verification-secret.mjs', 'widget-settings-model.mjs', 'deployment-setup-credential.mjs', 'identity-setup-deployment.mjs', 'security-headers.mjs', 'search-codec.mjs', 'delegation-documents.mjs', 'user-agent-parser.mjs', 'repository-identity.mjs',
 ].map(name => `tests/${name}`);
 const groups = ['tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test'];
 for (const group of groups) {

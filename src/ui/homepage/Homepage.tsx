@@ -1,4 +1,4 @@
-import { AgentInvestigates } from './AgentInvestigates';
+import { HandoffDetail } from './HandoffDetail';
 import { Hero } from './Hero';
 import { HelpBeforeTheyAsk } from './HelpBeforeTheyAsk';
 import { Product } from './Product';
@@ -13,7 +13,7 @@ export default function Homepage() {
   return <div className="h2h-home">
     <a className="skip-link" href="#product">Skip to the product</a>
     <SiteHeader />
-    <main><Hero /><Product /><HelpBeforeTheyAsk /><AgentInvestigates /><YoursToRun /></main>
+    <main><Hero /><HelpBeforeTheyAsk /><Product /><HandoffDetail /><YoursToRun /></main>
     <SiteFooter />
   </div>;
 }

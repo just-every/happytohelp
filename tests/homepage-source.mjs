@@ -65,10 +65,16 @@ test('one open-licensed typeface is self-hosted and recorded', async () => {
 
 test('the page is composed from one component per section', async () => {
   const home = await read('src/ui/homepage/Homepage.tsx');
-  for (const name of ['SiteHeader', 'Hero', 'Product', 'HelpBeforeTheyAsk', 'AgentInvestigates', 'YoursToRun', 'SiteFooter']) {
+  const order = ['SiteHeader', 'Hero', 'HelpBeforeTheyAsk', 'Product', 'HandoffDetail', 'YoursToRun', 'SiteFooter'];
+  for (const name of order) {
     assert.ok(home.includes(`<${name} />`), name);
     assert.ok(await exists(`src/ui/homepage/${name}.tsx`), name);
   }
+  assert.deepEqual(order.map(name => home.indexOf(`<${name} />`)), order.map(name => home.indexOf(`<${name} />`)).sort((a, b) => a - b), 'sections are composed in order: hero handoff, help before they ask, product, handoff detail, yours to run');
+  for (const retired of ['AgentInvestigates', 'AgentDrawing', 'HeroInbox']) {
+    assert.ok(!home.includes(retired) && !(await exists(`src/ui/homepage/${retired}.tsx`)) && !(await exists(`src/ui/homepage/drawings/${retired}.tsx`)), `${retired} stays removed`);
+  }
+  assert.match(await read('src/ui/homepage/Hero.tsx'), /<HeroHandoff \/>/);
   assert.match(await read('src/routes/index.tsx'), /withVisualEdits\(Homepage\)/);
   for (const file of await readdir(url('src/ui/homepage'))) {
     if (/\.tsx$/.test(file)) assert.ok((await read(`src/ui/homepage/${file}`)).split('\n').length < 60, `${file} stays small`);

@@ -9,15 +9,16 @@ third-party components keep their own licences, listed at the end of this page.
 All of the following are owner-generated or owner-supplied and are covered by
 the root MIT licence like the rest of the source:
 
-- **Homepage drawings** (owner approval 2026-10-01): the hero inbox, the four
-  product drawings, the offer widget, the terminal and internal note, and the
-  ownership checklist are first-party React components, HTML and inline SVG in
-  `src/ui/homepage/drawings/` styled by `src/ui/homepage/drawings.css`. They
-  were redrawn as real DOM text from the owner-approved design images (the
-  approved hero image and the 12ui full-page conversion kept in the owner's
-  design workspace, which are not distributed). No raster image, third-party
-  illustration or logo is used; Codex, Claude and Cloudflare are named in text
-  only.
+- **Homepage drawings** (owner approval 2026-10-01, handoff-first order
+  2026-10-01): the hero handoff (a conversation with its internal note beside
+  the Local panel), the four product drawings, the widget offer, the New task
+  form and the ownership checklist are first-party React components, HTML and
+  inline SVG in `src/ui/homepage/drawings/` styled by
+  `src/ui/homepage/drawings.css`. They were drawn as real DOM text from the
+  owner-approved design direction and from this repository's own dashboard and
+  widget components (labels, structure and states), not from screenshots; no
+  screenshot is distributed. No raster image, third-party illustration or logo
+  is used; Codex, Claude and Cloudflare are named in text only.
 - **HappyToHelp mark**: `public/homepage/media/brands/happytohelp-favicon.png`
   (homepage favicon) and `public/img/icon.svg` (dashboard mark). The favicon's
   SHA-256, byte count and origin are recorded in

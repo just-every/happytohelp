@@ -54,7 +54,7 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .hero { display: grid; grid-template-columns: minmax(0, 0.44fr) minmax(0, 0.56fr); align-items: center; gap: clamp(24px, 3vw, 48px); padding: clamp(24px, 4vw, 64px) 0 clamp(72px, 9vw, 150px); }
 .h2h-home .hero h1 { font-size: clamp(2.5rem, 4.7vw, 4.7rem); font-weight: 500; line-height: 1.12; letter-spacing: -0.035em; text-wrap: balance; }
 .h2h-home .hero h1 span { display: inline-block; }
-.h2h-home .hero-copy p { margin-top: 28px; max-width: 23em; font-size: clamp(1.1rem, 1.5vw, 1.4rem); line-height: 1.5; color: var(--ink-soft); }
+.h2h-home .hero-copy p { margin-top: 28px; max-width: 26em; font-size: clamp(1.05rem, 1.3vw, 1.25rem); line-height: 1.55; color: var(--ink-soft); }
 
 /* Sections */
 .h2h-home .section { padding: clamp(56px, 8vw, 120px) 0; }
@@ -75,8 +75,6 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .signals { display: grid; grid-template-columns: repeat(2, auto); justify-content: start; gap: 12px 28px; margin-top: 30px; }
 .h2h-home .signals li { position: relative; padding-left: 22px; font-size: 1.05rem; }
 .h2h-home .signals li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 9px; height: 9px; border: 1.5px solid var(--ink); border-radius: 50%; }
-
-.h2h-home .agent .section-head { max-width: 50rem; }
 
 /* Motion: the only animations are the one-time draw-in of the sketch marks and button colour changes. */
 @media (prefers-reduced-motion: reduce) {

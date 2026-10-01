@@ -48,6 +48,12 @@ include breaking changes.
 
 ### Changed
 
+- The homepage now leads with the local-agent handoff: the hero draws a conversation whose
+  task Codex or Claude on the team's own computer has already completed, with the Local panel,
+  internal note and drafted reply the team reviews, and a subhead that says who runs it and who
+  approves sending. “Help before they ask” follows the hero, then the four product parts. The
+  “Your own agent can investigate” section is replaced by a short “How the handoff works” detail
+  built from the New task form. All drawings mirror the real interface wording.
 - The public homepage is now the owner-approved “Customer Support, Solved.” page
   (approval 2026-10-01): a drawn inbox hero, the four product parts, “Help before
   they ask”, “Your own agent can investigate” and “Yours to run”, set in Outfit on

@@ -8,8 +8,12 @@ assert.match(html, /<!doctype html>/i)
 const text = html.replace(/<[^>]*>/g, '')
 assert.match(html, /<h1[^>]+id="hero-title"[^>]*>.*Customer Support,.*Solved\./is)
 assert.ok(text.includes('Customer Support, Solved.'), 'the server HTML reads exactly "Customer Support, Solved."')
-assert.match(text, /Free and open source: chat widget, shared inbox, help centre and AI-suggested replies with sources\./)
-for (const [id, title] of [['product', 'The product'], ['help-before-they-ask', 'Help before they ask'], ['agent', 'Your own agent can investigate'], ['yours-to-run', 'Yours to run']]) {
+assert.match(text, /Free and open source\. Hand a conversation to Codex or Claude on your own computer\. It investigates, leaves an internal note and drafts a reply\./)
+assert.match(text, /You choose what it may do for each task, and your team reviews the draft and decides what is sent\./)
+for (const label of ['Work with your local agent', 'Internal note', 'Investigate completed', 'Suggested replies', 'Evidence and details']) assert.ok(text.includes(label), `server-rendered hero drawing shows ${label}`)
+assert.ok(text.indexOf('Help before they ask') < text.indexOf('The product'), 'Help before they ask comes before The product in the server HTML')
+assert.ok(text.indexOf('The product') < text.indexOf('How the handoff works') && text.indexOf('How the handoff works') < text.indexOf('Yours to run'))
+for (const [id, title] of [['help-before-they-ask', 'Help before they ask'], ['product', 'The product'], ['handoff', 'How the handoff works'], ['yours-to-run', 'Yours to run']]) {
   assert.match(html, new RegExp(`<section[^>]+id="${id}"[^>]+aria-labelledby="[^"]+"`, 'i'), id)
   assert.ok(text.includes(title), title)
 }

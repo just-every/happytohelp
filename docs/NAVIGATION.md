@@ -26,6 +26,40 @@ for embedded legacy components). A 401 redirects to `/login` with a validated
 `returnTo`; a session-version change invalidates the old router cache before a
 new workspace is accepted.
 
+## Workspace scoping
+
+The URL chooses the workspace. When the path names a project
+(`/projects/<id>/...`), `loadDashboard` reads the bootstrap for that project and,
+if the response's `sessionProjectId` differs, posts
+`/api/identity/switch-project` before the workspace renders. Pages and the
+session-scoped APIs they call (knowledge, training, insights, conversation
+media) therefore always agree with the URL, whether the project was opened from
+a deep link, the Projects list or the workspace switcher. The switcher still
+posts the switch itself and then navigates; the loader sees a matching session
+and does nothing more.
+
+A project the account does not belong to, or that does not exist, is not a
+failed load. The bootstrap refuses it with a message-bearing 403, the loader
+reads the account's own bootstrap instead and marks the result
+`projectUnavailable`. The shell stays mounted with the workspace labelled
+"Workspace unavailable", the inbox is not rendered, and the page offers
+"Go to Projects"; no "Sign in" link is shown to a signed-in user. The route
+error boundary offers "Sign in" only for a 401 and otherwise "Try again" and a
+way back to the inbox.
+
+`/local-agent/authorize` has no project in the URL but acts on the session's
+project, so the loader scopes it to that project: the sidebar shows the full
+project navigation with "Local computers" active, and the authorize form names
+the project it approves or denies for. In the Global Inbox the Settings group
+lists "Settings for <project>" per project instead of unlabelled links to the
+session's project.
+
+The bootstrap also carries `isPlatformAdmin`. The account menu offers Admin
+only to platform administrators, and `/admin` pages show an in-shell
+"limited to platform administrators" state, with no tables or forms and no admin
+API calls, to everyone else. `/users/<id>` is the signed-in user's profile only
+for `profile` or their own id; any other id is a not-found page.
+
 `DashboardClient` keeps `Navigation`, `NavigationGuard` and the shell around the
 child outlet while the pathless workspace parent remains mounted. The
 conversation `ChatContext` provider is keyed by session, agent and
@@ -82,7 +116,13 @@ server bundle), seeds real tenants through the Worker APIs, and drives the
 actual browser UI. It exercises delayed loader reads, shell/document identity,
 header portals, search and Back/Forward, project isolation and theme changes,
 dirty conversation and settings edits, widget mount/unmount, mobile navigation,
-direct refresh/not-found recovery, sign-out and expired-session recovery. The
+direct refresh/not-found recovery, sign-out and expired-session recovery.
+`tests/workspace-shell-browser.mjs` (`pnpm run test:workspace-shell-browser`)
+covers the workspace scoping above: deep links and Projects-list navigation
+activating the URL's project, unavailable projects, `/local-agent/authorize`,
+Global Inbox settings labels, sidebar active/visible state, account-menu
+contrast, Admin gating, the Projects list, `/users/<id>` and socket start-up
+without teardown warnings. The
 test writes its result and request evidence under `H2H_EVIDENCE_DIR` (or a
 temporary directory). This document records the contract and command; a test
 run must report its own result and exact source revision.

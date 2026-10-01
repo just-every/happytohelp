@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createWorkspaceTheme, normalizeWorkspaceMode } from './workspaceModes';
 import { Outlet } from '@tanstack/react-router';
 import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
+import { isInboxPath } from './workspace-scope';
 import Chat from '../dashboard/components/Chat';
 import { Provider } from '../dashboard/contexts/ChatContext';
 import WorkspacePages from './WorkspacePages';
@@ -10,7 +11,7 @@ import { NavigationGuard } from './NavigationGuard';
 import { MobileNavigationProvider } from './MobileNavigation';
 export default function DashboardClient({ settings }) {
     const pathname = useDashboardLocation().pathname;
-    const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
+    const isInbox = isInboxPath(pathname, settings);
     useEffect(() => {
         document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed theme-happytohelp`;
     }, [isInbox]);
@@ -45,8 +46,8 @@ export default function DashboardClient({ settings }) {
 export function DashboardContent() {
     const settings = useDashboardSettings();
     const pathname = useDashboardLocation().pathname;
-    const isInbox = !settings.accountOnly && (pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname));
-    return !settings.accountOnly && isInbox
+    const isInbox = isInboxPath(pathname, settings);
+    return isInbox
         ? <div className="main-content"><h1 className="visually-hidden">Inbox</h1><div id="chat"><Chat /></div></div>
         : <WorkspacePages settings={settings} />;
 }

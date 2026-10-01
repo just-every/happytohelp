@@ -18,6 +18,24 @@ page records what was restored and which original features are still missing.
 | Insights and administration | Original list/empty-state presentation, dedicated admin navigation, resource-specific columns and labelled record details. |
 | Widget | Existing original React controls retained and checked across Code, Theme, Settings and Texts. |
 
+## Workspace scoping and shell corrections (1 October 2026)
+
+An independent UI sweep of the review build found workspace-scoping and shell
+defects; each is fixed and covered by `tests/workspace-shell-browser.mjs`.
+
+| Surface | Behaviour now |
+| --- | --- |
+| Opening a project (deep link, Projects list, switcher) | The URL's project becomes the session's active project before its pages load, so Help Center, Categories, AI Training, Training runs, Insights and conversation attachments no longer show "Project access denied" or broken images under a switcher that names that project. |
+| Unknown or non-member project URL | An in-shell "Project not found" state with a link to Projects. It never offers "Sign in" to a signed-in user; the route error boundary offers "Sign in" only for an expired session. |
+| Global Inbox Settings | Lists "Settings for <project>" for each of the account's projects instead of unlabelled links that acted on the session's project. |
+| `/local-agent/authorize` | Scoped to the session's active project: full project sidebar with Local computers active, and the form names the project it acts on. |
+| Admin | The account menu offers Admin only to platform administrators; `/admin` pages show an access-limited state with no tables, forms or admin API calls for everyone else. |
+| Account menu | Rows use the body text colour (AA contrast) in light and dark workspaces. |
+| Sidebar | The active item is scrolled fully into view in the sidebar's own scroll area (900 px and shorter viewports); `/projects/<id>/settings` highlights Project like `/edit`. |
+| Projects list | The setup owner's role reads Owner; the Name header no longer shows a sort chevron it does not honour; row-action targets are at least 32 px square. |
+| `/users/<id>` | Only `profile` and the signed-in user's own id open the profile; any other id is not found. |
+| Live sockets | The project sockets start after the mount settles and a socket closed on purpose no longer logs "Live connection unavailable"; genuine failures still warn and reconnect. |
+
 Pages own their controls through `PageHeaderActions` and `PageHeaderTabs`; the
 common frame places these beside or below the title. Dashboard styles, icons and
 palette are editable first-party source; they replaced the earlier theme-based

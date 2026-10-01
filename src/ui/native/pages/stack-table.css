@@ -13,3 +13,5 @@
  .stack-table td.stack-table__actions{justify-content:flex-end}
  .stack-table td:not([data-label]):not(.stack-table__actions){display:block;text-align:left}
 }
+.row-actions-inline{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 8px}
+.row-actions-inline a,.row-actions-inline button{display:inline-flex;align-items:center;min-height:40px;padding:0 8px;border:0;background:none;color:inherit;font:inherit;font-weight:600;text-decoration:none}

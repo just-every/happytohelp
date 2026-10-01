@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import React, {useState} from 'react';
 import {PageHeaderActions} from '../PageHeader';
+import RowMenu from './RowMenu';
 import './stack-table.css';
 export function PersonAvatar({person}) {return person.avatar_url?<img className="management-avatar" src={person.avatar_url} alt=""/>:<span className="management-avatar">{(person.name||person.email||'?').slice(0,1).toUpperCase()}</span>}
 const date=value=>value?new Date(value).toLocaleDateString():'';
@@ -31,7 +32,7 @@ const columns={
  ],
  plugins:[
   {label:'Name',cell:({item,href})=><Link to={href}>{item.name}</Link>},
-  {actions:'Actions',cell:({item,href,index,rows,onMove})=><details className="management-menu"><summary aria-label={`Actions for ${item.name}`}>⋮</summary><Link to={href}>Edit</Link>{index>0&&<button onClick={()=>onMove(item.id,'move-up')}>Move Up</button>}{index<rows.length-1&&<button onClick={()=>onMove(item.id,'move-down')}>Move Down</button>}</details>},
+  {actions:'Actions',cell:({item,href,index,rows,onMove})=><RowMenu className="management-menu" label={item.name}><Link to={href}>Edit</Link>{index>0&&<button type="button" onClick={()=>onMove(item.id,'move-up')}>Move Up</button>}{index<rows.length-1&&<button type="button" onClick={()=>onMove(item.id,'move-down')}>Move Down</button>}</RowMenu>},
  ],
 };
 export default function ManagementLists({section,items,base,onMove}) {

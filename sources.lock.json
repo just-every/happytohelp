@@ -399,7 +399,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "891e3f2e4dc63a671d34699eb16e70c32dee64a2b111ab04084f13e3b9397094",
+      "sha256": "b40debc33723084c5b0d1337240358f84d43ecd6dbed5a3370bf86b9dd13fa77",
       "executable": false
     },
     "CONTRACT.md": {
@@ -471,7 +471,7 @@
       "executable": false
     },
     "docs/UI-PARITY.md": {
-      "sha256": "43158a4927ec3aef7a89bbeeb2496e0b9848f5f7b5183ff5d6328e9ca59a3774",
+      "sha256": "22888e5db10d3dbd2c42034fea20d01ecc7aa7f02f7a06dc75b66e275677d7e8",
       "executable": false
     },
     "docs/usage/measurement-2026-09-29.json": {
@@ -4155,7 +4155,7 @@
       "executable": false
     },
     "src/ui/native/pages/ConfirmDialog.jsx": {
-      "sha256": "f4665a40231e5335f864925670fcf8d577513323a03a3defb492ef05eaccb92f",
+      "sha256": "80228352d69316e4ee62e9188356f5014d12985906b193fa8569581ac40f0420",
       "executable": false
     },
     "src/ui/native/pages/ContactDetails.jsx": {
@@ -4195,7 +4195,7 @@
       "executable": false
     },
     "src/ui/native/pages/knowledge/KnowledgeLists.jsx": {
-      "sha256": "bd1406e3e6aad133fba60a5a7845807c9f71dedef237bf4bd5fa6a5c072c46fd",
+      "sha256": "493efb3a2450432c3f713bf62b1ab5c0145041a88cdfb9a93c4bcf804f08f10f",
       "executable": false
     },
     "src/ui/native/pages/KnowledgePage.jsx": {
@@ -4215,7 +4215,7 @@
       "executable": false
     },
     "src/ui/native/pages/ManagementLists.jsx": {
-      "sha256": "a9f43f463c4b20be827e683af24422a5604243f45536182ff6a07562529d9c53",
+      "sha256": "e7e5b0a2aae2034a09ff54e80418858c497aaae038ae821dd132cb754443647e",
       "executable": false
     },
     "src/ui/native/pages/ManagementPage.jsx": {
@@ -4242,8 +4242,12 @@
       "sha256": "3b275f0ac7556694670ba2d674ff006d7b27f9bb354d2d3838d3375cb492e486",
       "executable": false
     },
+    "src/ui/native/pages/RowMenu.jsx": {
+      "sha256": "7baac6b8777f48897b07d138ccbfca9bd51426ff2678f7bcd7d979e4b35eee7f",
+      "executable": false
+    },
     "src/ui/native/pages/stack-table.css": {
-      "sha256": "e15a24749ed49f1e6fe0bbf4c7e8d19d75af6c22013ae210188fdfec349ea8d5",
+      "sha256": "2185cb1eae863f791c70efd09df54bb20381f76901bbe6d1a01fdac8c7d778d3",
       "executable": false
     },
     "src/ui/native/pages/training-run-form.js": {
@@ -4879,7 +4883,7 @@
       "executable": false
     },
     "tests/management-library-browser.mjs": {
-      "sha256": "8a772e1eee6da49becda9318b234e87462e9f0c52e39b83a9cf49028c3f047b5",
+      "sha256": "321eb4fb3e1653a96db148ea6feb86e0f73957cdb6648418e8461bbc16f24c3b",
       "executable": false
     },
     "tests/management.mjs": {

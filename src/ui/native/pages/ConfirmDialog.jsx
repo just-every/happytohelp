@@ -1,12 +1,14 @@
 import React, {useCallback, useEffect, useId, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
+import {trapDialogTab} from '../../dashboard/components/dialogTabBoundary';
 import './confirm-dialog.css';
 
 /**
  * Modal confirmation shared by every destructive action. It is a native modal dialog, so the page behind it is inert,
- * focus stays inside, Escape cancels, and focus returns to the control that opened it. Cancel never touches data.
- * `confirmText` adds an exact type-to-confirm step for irreversible actions; a null `confirmLabel` makes the dialog
- * informational (the action is blocked and only Close is offered).
+ * Escape cancels, and focus returns to the control that opened it. A native modal still lets Tab leave for the browser
+ * chrome after the last control, so Tab and Shift+Tab wrap between the first and last enabled controls. Cancel never
+ * touches data. `confirmText` adds an exact type-to-confirm step for irreversible actions; a null `confirmLabel` makes
+ * the dialog informational (the action is blocked and only Close is offered).
  */
 export function ConfirmDialog({title, children, confirmLabel = 'Delete', busyLabel = 'Deleting…', cancelLabel, confirmText, busy = false, error = '', onConfirm, onCancel}) {
     const dialog = useRef(null), [typed, setTyped] = useState('');
@@ -22,7 +24,7 @@ export function ConfirmDialog({title, children, confirmLabel = 'Delete', busyLab
     }, []);
     const confirm = () => { if (!busy && ready && !blocked) onConfirm(); };
     return createPortal(<dialog ref={dialog} className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={bodyId}
-        onCancel={event => { event.preventDefault(); if (!busy) onCancel(); }}>
+        onKeyDown={trapDialogTab} onCancel={event => { event.preventDefault(); if (!busy) onCancel(); }}>
         <h2 id={titleId} className="confirm-dialog__title">{title}</h2>
         <div id={bodyId} className="confirm-dialog__body">{children}</div>
         {confirmText && <div className="form-group"><label htmlFor={inputId} className="form-label">Type {confirmText} to confirm</label><input id={inputId} className="form-control" autoComplete="off" value={typed} disabled={busy} onChange={event => setTyped(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); confirm(); } }}/></div>}

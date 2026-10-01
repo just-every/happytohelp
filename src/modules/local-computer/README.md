@@ -30,7 +30,7 @@ legacy presentation details need acceptance against the full original UI.
 Completed reports write native internal notes and context includes recent notes. The current project authorization decision endpoint
 is authenticated; the edition supplies the first-party browser form.
 
-Verification: node tests/local-computer-runtime.mjs runs the real module HTTP routes against local workerd, D1 and R2. The native browser authorization page is supplied by WorkspacePages/ComputersPage; pairing/device secrets never enter its URL.
+Verification: node tests/local-computer-runtime.mjs runs the real module HTTP routes against local workerd, D1 and R2. The native browser authorization page is supplied by WorkspacePages/ComputersPage (`LocalComputerAuthorize`): it reports the recorded outcome (approved, denied, or a code that is not valid), clears the code and refuses a second decision until a new code is entered. The code is the only value in its URL; pairing and device secrets never are. The Connect computer dialog is styled for any workspace page (`delegation-computers` styles), not only the inbox. `pnpm run test:computers-delegation-browser` checks both in a real browser.
 
 Revocation withdraws authority; it never confirms that the paired host stopped. Revoking a device or a
 grant cancels only queued work (it never started) and moves running/needs_input work to the terminal status

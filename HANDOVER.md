@@ -132,6 +132,7 @@ The candidate also exposes these focused commands for its existing tests:
 pnpm run test:accessibility-browser
 pnpm run test:delegation-authority-runtime
 pnpm run test:delegation-scoped-browser
+pnpm run test:computers-delegation-browser
 pnpm run test:usage
 ```
 

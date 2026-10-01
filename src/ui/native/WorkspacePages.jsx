@@ -10,6 +10,8 @@ import ManagementPage from './pages/ManagementPage';
 import ProjectSettings from './pages/ProjectSettings';
 import WidgetSettingsPage from './pages/WidgetSettingsPage';
 import ComputersPage from './pages/ComputersPage';
+import DelegationSettings from './pages/DelegationSettings';
+import DelegationAuthorize from './pages/DelegationAuthorize';
 import TrainingRuns from './pages/TrainingRuns';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
@@ -29,6 +31,8 @@ export default function WorkspacePages({ settings }) {
     else if(section==='github-settings')page=<GitHubSettings {...{projectId}}/>;
     else if(section==='widget-settings')page=<WidgetSettingsPage {...{projectId}}/>;
     else if(section==='local-agent')page=<ComputersPage {...{projectId}} projectName={settings.projects[projectId]?.name}/>;
+    else if(section==='delegation'&&recordId==='authorize')page=<DelegationAuthorize projectId={settings.isGlobalInbox?undefined:settings.project?.id}/>;
+    else if(section==='delegation')page=<DelegationSettings projectId={settings.isGlobalInbox?undefined:settings.project?.id} projects={settings.projects}/>;
     else if(section==='training-runs')page=<TrainingRuns {...{projectId}}/>;
     else if(section==='users')page=<AccountPage {...{projectId,section}}/>;
     else if(section==='admin')page=<AdminPage/>;
@@ -40,6 +44,7 @@ export default function WorkspacePages({ settings }) {
     if(section==='macros'&&recordId==='create')title='Save a Reply';
     if(section==='agents'&&recordId==='create')title='Invite Agent';
     if(section==='plugins')title='Plugins';
+    if(section==='delegation')title=recordId==='authorize'?'Connect to Slate':'Connected applications';
     if(section==='github-settings')title='Project';
     if(section==='admin')title=adminTitles[segments[1]||'projects']||'Admin';
     return <div className="main-content"><div className="container-fluid workspace-page-container">

@@ -1,6 +1,7 @@
 import { createContext, useContext, useSyncExternalStore } from 'react';
 import { redirect, type AnyRouter, type ParsedLocation } from '@tanstack/react-router';
 import { nativeRequest } from './transport';
+import { delegationAccount, loadConsent } from './delegation-loader';
 
 export const DashboardSettingsContext = createContext<any>(null);
 export function useDashboardSettings() {
@@ -35,7 +36,8 @@ export async function loadDashboard({ location, abortController }: {
 }) {
     const version = sessionVersion;
     const segment = location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
-    const projectId = segment && segment !== 'create' ? decodeURIComponent(segment) : undefined;
+    const account = delegationAccount(location);
+    const projectId = segment && segment !== 'create' ? decodeURIComponent(segment) : account;
     let settings;
     try { settings = await nativeRequest('/api/management/bootstrap' + (projectId ? `?projectId=${encodeURIComponent(projectId)}` : ''), { signal: abortController.signal });
     } catch (error: any) {
@@ -45,10 +47,11 @@ export async function loadDashboard({ location, abortController }: {
         }
         throw error;
     }
+    const delegationConsent = await loadConsent(location, abortController.signal);
     if (version !== sessionVersion) throw new Error('Your session changed. Reload the workspace.');
     const search = location.search as Record<string, unknown>;
     return {
-        ...settings, apiUrl: '/api/dashboard', projectId, isGlobalInbox: !projectId, sessionVersion: version,
+        ...settings, apiUrl: '/api/dashboard', projectId, isGlobalInbox: !projectId, sessionVersion: version, delegationConsent,
         dashboardLocation: { ...location, search: { ...search, ...(search.q == null ? {} : { q: String(search.q) }) } },
     };
 }

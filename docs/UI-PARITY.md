@@ -17,6 +17,7 @@ page records what was restored and which original features are still missing.
 | Knowledge | Dataset forms and source tabs, article editor/import selection, category tree, original help-center empty state, real editing/deletion and evaluation access. |
 | Insights and administration | Original list/empty-state presentation, dedicated admin navigation, resource-specific columns and labelled record details. |
 | Widget | Existing original React controls retained and checked across Code, Theme, Settings and Texts. |
+| Local computers and delegation | Not a restoration of a legacy screen: native surfaces use the workspace design system. The Connect computer dialog is styled on Local computers as well as in the inbox; authorizing a computer reports its outcome and clears the code; Connected applications (`/delegation/settings`) and the connection consent screen (`/delegation/authorize`) render in the workspace shell with friendly pages for missing, invalid, unavailable and signed-out requests. See `docs/NAVIGATION.md`. |
 
 Pages own their controls through `PageHeaderActions` and `PageHeaderTabs`; the
 common frame places these beside or below the title. Dashboard styles, icons and

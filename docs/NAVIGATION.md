@@ -55,6 +55,26 @@ Some transitions deliberately replace or leave the document:
   are document or external-resource transitions by design and should not be
   converted to router links.
 
+## Delegation pages
+
+Connected applications (`/delegation/settings?account_id=<project>`) and the connection
+consent screen (`/delegation/authorize?...`) are dashboard documents like any other: the
+Worker hands only their `GET`/`HEAD` requests to Start (`src/edition/delegation/document.ts`,
+which first redirects a request without a current session to `/login` with its `returnTo`, and
+makes the response `no-store` and unframeable), while every `POST` under `/delegation/`
+and their JSON reads (`/delegation/settings/data`, `/delegation/authorize/request`) stay in
+Hono with their session, origin, CSRF and role checks. `loadDashboard` scopes the shell to
+`account_id`, and loads the consent request before the screen renders so the heading and the
+decision form appear together; a rejected request becomes a page for the user, not JSON. The
+consent decision remains a real form post so approval ends in a redirect to the application;
+cancel returns to Connected applications with a notice. Bare `/delegation/settings` offers the
+user's workspaces and bare `/delegation/authorize` explains that an application starts the
+request.
+
+The router's `parseSearch`/`stringifySearch` (`src/search-codec.ts`) keep text such as `1e3`
+or a device code like `12E4567890` exactly as written; the default would turn it into a
+number and change an OAuth `state` or authorization code.
+
 ## Unsaved editing
 
 `NavigationGuard` is mounted once inside the persistent shell. Editors call
@@ -75,6 +95,10 @@ Run the focused browser check after producing the current build:
 pnpm run build
 pnpm run test:navigation-browser
 ```
+
+`tests/computers-delegation-browser.mjs` (`pnpm run test:computers-delegation-browser`) covers the
+Local computers dialog and authorization outcomes and the delegation pages above in the emitted
+Worker and a real browser.
 
 `tests/navigation-browser.mjs` starts an isolated local D1/R2/Durable Object
 runtime from the emitted Worker (`dist/server/wrangler.json` and its emitted

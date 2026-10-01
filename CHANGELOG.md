@@ -15,6 +15,17 @@ include breaking changes.
   self-hosted from `public/fonts/outfit/` under the SIL Open Font License 1.1, so
   the homepage makes no third-party request.
 
+- Local computers and delegation use the workspace design system. The Connect
+  computer dialog is styled outside the inbox; authorizing a computer shows
+  “Computer approved” or “Request denied” and clears the code; Connected
+  applications and the connection consent screen render in the application
+  shell instead of bare server HTML, cancelling a connection returns to
+  Connected applications, and missing, invalid, unavailable or signed-out
+  requests show friendly pages. The consent form and revocation rules are
+  unchanged. Registering a client whose identifier already exists now answers
+  409 `CLIENT_EXISTS` instead of a server error. URLs keep text that reads as a
+  number (an OAuth `state`, a device code) exactly as written.
+
 ### Removed
 
 - The previous illustrated homepage: its components, styles, scroll-parallax

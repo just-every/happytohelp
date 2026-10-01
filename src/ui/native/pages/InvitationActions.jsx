@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import {nativeRequest} from '../transport';
 
-/** Revoke, resend and copy-link controls for one pending invitation. The server decides who may use them. */
+/** Revoke, resend and copy-link controls for one pending invitation. The server decides who may use them.
+ * The controls are separated by spaces, like other row actions, so the row's text reads as separate actions. */
 export default function InvitationActions({projectId,invitation,emailConfigured,onChanged,onNotice,onError}) {
  const [busy,setBusy]=useState('');
  if(!invitation.canManage)return null;
@@ -17,8 +18,8 @@ export default function InvitationActions({projectId,invitation,emailConfigured,
  const revoke=run('revoke',async()=>{await nativeRequest(path,{method:'DELETE'});onNotice({kind:'revoked',email:invitation.email})});
  const label=(name,text,working)=>busy===name?working:text;
  return <div className="management-invite-actions">
-  <button type="button" className="btn btn-sm btn-outline-secondary" disabled={Boolean(busy)} onClick={copyLink}>{label('link','Copy link','Copying…')}</button>
-  <button type="button" className="btn btn-sm btn-outline-secondary" disabled={Boolean(busy)||!emailConfigured} title={emailConfigured?undefined:'Email delivery is not configured. Copy the link and share it instead.'} onClick={resend}>{label('resend','Resend','Sending…')}</button>
+  <button type="button" className="btn btn-sm btn-outline-secondary" disabled={Boolean(busy)} onClick={copyLink}>{label('link','Copy link','Copying…')}</button>{' '}
+  <button type="button" className="btn btn-sm btn-outline-secondary" disabled={Boolean(busy)||!emailConfigured} title={emailConfigured?undefined:'Email delivery is not configured. Copy the link and share it instead.'} onClick={resend}>{label('resend','Resend','Sending…')}</button>{' '}
   <button type="button" className="btn btn-sm btn-outline-danger" disabled={Boolean(busy)} onClick={revoke}>{label('revoke','Revoke','Revoking…')}</button>
  </div>;
 }

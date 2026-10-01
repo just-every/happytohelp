@@ -32,11 +32,12 @@ export default function Navigation({ settings }) {
     const [switchError,setSwitchError]=useState(''),[switching,setSwitching]=useState(false);
     const {open, setOpen} = useMobileNavigation();
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
-    const [settingsOpen,setSettingsOpen] = useState(!pathname.includes('conversations'));
+    // Settings opens by itself on a project's pages outside the inbox; in the Global Inbox it lists one link per project and stays closed until asked.
+    const [settingsOpen,setSettingsOpen] = useState(!pathname.includes('conversations') && !settings.isGlobalInbox);
     const nav = useRef(null);
     const workspaceToggle = useRef(null);
     const navigationToggle = useRef(null);
-    useEffect(()=>{setOpen(false);setWorkspaceOpen(false);if(!pathname.includes('conversations'))setSettingsOpen(true);},[pathname]);
+    useEffect(()=>{setOpen(false);setWorkspaceOpen(false);if(!pathname.includes('conversations') && !settings.isGlobalInbox)setSettingsOpen(true);},[pathname,settings.isGlobalInbox]);
     useEffect(()=>{const close = e=>{if(e.key==='Escape'){if(workspaceOpen){e.preventDefault();setWorkspaceOpen(false);workspaceToggle.current?.focus();}else if(open){e.preventDefault();setOpen(false);navigationToggle.current?.focus();}}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[open,workspaceOpen]);
     useEffect(()=>{const close=e=>{if(nav.current && !nav.current.contains(e.target))setWorkspaceOpen(false);};document.addEventListener('click',close);return()=>document.removeEventListener('click',close);},[]);
     // The sidebar scrolls on short viewports: keep the current page's link fully visible inside it.

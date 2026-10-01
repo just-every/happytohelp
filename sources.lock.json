@@ -4233,7 +4233,7 @@
       "executable": false
     },
     "src/ui/native/Navigation.jsx": {
-      "sha256": "2da391f3f3c4264888a7c6f368ae83b001e48012084cb6ba6a619b48a1c89433",
+      "sha256": "8f7a718be54cc5ca6a6769412426901b48ea6cdc977e2669964253bb437307d6",
       "executable": false
     },
     "src/ui/native/NavigationGuard.tsx": {
@@ -4325,7 +4325,7 @@
       "executable": false
     },
     "src/ui/native/pages/InvitationActions.jsx": {
-      "sha256": "b354e10f2f731218dd72d97f3adff484ead8429e5b96b78eb8a7b5f76adbecd1",
+      "sha256": "6ed5940973fa8b6d000d3d667a362681d3a899d8a27fa26d508aa07f788f18fd",
       "executable": false
     },
     "src/ui/native/pages/knowledge/dataset-validation.js": {

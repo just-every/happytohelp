@@ -27,6 +27,6 @@ export default function InvitationActions({projectId,invitation,emailConfigured,
 export function InvitationNotice({notice}) {
  if(!notice)return null;
  if(notice.kind==='link')return <div className="alert alert-info management-invite-notice" role="status">Invitation link for {notice.email}, valid for 24 hours{notice.copied?' and copied to your clipboard':''}: <a href={notice.url}>{notice.url}</a></div>;
- if(notice.kind==='resent')return <div className="alert alert-success" role="status">Invitation emailed to {notice.email} again with a fresh link.</div>;
+ if(notice.kind==='resent')return <div className="alert alert-success" role="status">Invitation sent to {notice.email} again with a fresh link.</div>;
  return <div className="alert alert-success" role="status">Invitation for {notice.email} revoked. Its links no longer work.</div>;
 }

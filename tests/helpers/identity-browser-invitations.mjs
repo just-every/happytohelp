@@ -79,7 +79,7 @@ export async function checkPendingInvitationsWithEmail({ origin, kit }, owner) {
     const sent = [];
     await page.route('**/api/management/projects/*/invitations/*/resend', route => { sent.push(`${route.request().method()} ${new URL(route.request().url()).pathname}`); return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ data: { delivery: 'sent' } }) }); });
     await resend.click();
-    await page.getByRole('status').filter({ hasText: 'Invitation emailed to mailed@review.test again' }).waitFor();
+    await page.getByRole('status').filter({ hasText: 'Invitation sent to mailed@review.test again' }).waitFor();
     assert.deepEqual(sent, [`POST /api/management/projects/${owner.projectId}/invitations/mailed%40review.test/resend`]);
     assert.equal(await rowFor(page, 'mailed@review.test').count(), 1, 'resending does not duplicate the row');
     await kit.done(page, 'agents-pending-row-email');

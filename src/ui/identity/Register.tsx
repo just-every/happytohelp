@@ -30,16 +30,20 @@ export default function Register() {
             {options.setupRequired && <a href="/setup">Set up this installation</a>}
         </div>
     </IdentityFrame>;
-    return <IdentityFrame>
+    return <IdentityFrame wide>
         <h1>Create your account</h1>
         <p className="id-lede">Start a workspace for your support team. We will email you a link to confirm your address.</p>
         <Alert>{error}</Alert>
         <form method="post" onSubmit={submit}>
-            <Field id="name" label="Your name" autoComplete="name" maxLength={200} />
-            <Field id="email" label="Email address" type="email" autoComplete="username" maxLength={320} />
+            <div className="id-row">
+                <Field id="name" label="Your name" autoComplete="name" maxLength={200} />
+                <Field id="email" label="Email address" type="email" autoComplete="username" maxLength={320} />
+            </div>
             <NewPasswordField />
-            <Field id="projectName" label="Workspace name" autoComplete="organization" maxLength={200} />
-            <Field id="allowedOrigin" label="Widget website origin" type="url" placeholder="https://example.com" hint="The website where your support widget will run." />
+            <div className="id-row">
+                <Field id="projectName" label="Workspace name" autoComplete="organization" maxLength={200} />
+                <Field id="allowedOrigin" label="Widget website origin" type="url" placeholder="https://example.com" hint="The website where your support widget will run." />
+            </div>
             <SubmitButton busy={busy} ready={ready} busyLabel="Creating…">Create account</SubmitButton>
         </form>
         <div className="id-links"><a href="/login">Already have an account? Sign in</a></div>

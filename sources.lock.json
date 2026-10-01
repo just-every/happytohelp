@@ -4081,11 +4081,11 @@
       "executable": false
     },
     "src/ui/identity/identity.css": {
-      "sha256": "ccaf44b714c7931381321f4881b5fc0bceb2df3e39dc9e964b9de1feb1461e29",
+      "sha256": "cfcf2d7f6406bfe5f2aeb67bf6d6829216649364d14816b199cae685c7c37896",
       "executable": false
     },
     "src/ui/identity/IdentityFrame.tsx": {
-      "sha256": "4f3d7b688a768378c4ccca0b3410f14a55715472228c90ff6618326d7de13f55",
+      "sha256": "9f0a61571fcb8ad8bb47d018a9a12c87012e575106e81135e628acad0dbab96a",
       "executable": false
     },
     "src/ui/identity/LinkProblem.tsx": {
@@ -4097,7 +4097,7 @@
       "executable": false
     },
     "src/ui/identity/Register.tsx": {
-      "sha256": "9e2c1f6224f151a945fe926c639bb41ee5313dc5e3171301022c3c784fa9bc55",
+      "sha256": "7fc4bd93279648a2fd03043be1e430cb8fa0df9867d5bd9f19268184ade586d1",
       "executable": false
     },
     "src/ui/identity/ResetPassword.tsx": {
@@ -4217,7 +4217,7 @@
       "executable": false
     },
     "src/ui/native/pages/InvitationActions.jsx": {
-      "sha256": "e97b55807aff92e7b7677976bac9b7c0133a24b3f0e50f34983fc6f72e0ade08",
+      "sha256": "b354e10f2f731218dd72d97f3adff484ead8429e5b96b78eb8a7b5f76adbecd1",
       "executable": false
     },
     "src/ui/native/pages/knowledge/knowledge.css": {
@@ -4701,7 +4701,7 @@
       "executable": false
     },
     "tests/helpers/identity-browser-invitations.mjs": {
-      "sha256": "8fda9a01d275b7ad23cbea8b8eee498a50273abf2b70a4a9659a65909656f8a7",
+      "sha256": "8028fab67dc143385049d84c2ead7ae5cb17cb142571de233caa1b354e8a29dc",
       "executable": false
     },
     "tests/helpers/identity-browser-kit.mjs": {

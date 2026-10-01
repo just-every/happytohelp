@@ -121,6 +121,7 @@ pnpm run test:ui-browser
 pnpm run test:navigation-browser
 pnpm run test:workspace-shell-browser
 pnpm run test:public-help-center-browser
+pnpm run test:not-found-browser
 pnpm run test:setup-browser
 pnpm run test:identity-browser
 pnpm run test:demo-inbox-browser

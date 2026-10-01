@@ -31,9 +31,36 @@ for (const path of ['/marketing', '/pricing', '/waitlist', '/features/sales', '/
  assert.equal((await fetch(origin + path)).status, 404, path)
 }
 assert.equal((await fetch(origin + '/waitlist', {method: 'POST', body: new URLSearchParams({email: 'removed@example.invalid'})})).status, 404)
+// Unknown application paths: a branded HTML 404 with a descriptive title, a message and links home and to the workspace.
+for (const path of ['/this-page-does-not-exist', '/foo/bar/baz', '/does-not-exist', '/admin/x/y/z']) {
+ const notFound = await fetch(origin + path)
+ assert.equal(notFound.status, 404, path)
+ assert.match(notFound.headers.get('content-type') || '', /^text\/html/, path)
+ const page = await notFound.text()
+ assert.match(page, /<title>Page not found · HappyToHelp<\/title>/, path)
+ assert.match(page, /<h1[^>]*>Page not found\.<\/h1>/, path)
+ assert.match(page, /<a [^>]*href="\/"[^>]*>Back to the homepage<\/a>/, path)
+ assert.match(page, /<a [^>]*href="\/projects"[^>]*>Open your workspace<\/a>/, path)
+ assert.match(page, /class="h2h-home"/, path)
+ assert.doesNotMatch(page, /<body><h1>Not found<\/h1>/, path)
+}
+// Help Center 404s: HTML inside the Help Center frame, never text/plain.
+for (const path of ['/help/no-such-project', '/help/no-such-project/no-such-article', '/help/a/b/c']) {
+ const missing = await fetch(origin + path)
+ assert.equal(missing.status, 404, path)
+ assert.match(missing.headers.get('content-type') || '', /^text\/html/, path)
+ assert.match(await missing.text(), /data-help-center-nav/, path)
+}
 if (process.env.H2H_TEST_PROJECT_ID) {
  const project = process.env.H2H_TEST_PROJECT_ID
  for (const path of [`/${project}`, `/${project}/search`, `/${project}/search?keyword=test`, `/help/${project}`]) assert.equal((await fetch(origin + path)).status, 200, path)
- assert.equal((await fetch(`${origin}/${project}/never-published-${Date.now()}`)).status, 404)
+ for (const path of [`/${project}/never-published-${Date.now()}`, `/help/${project}/never-published-${Date.now()}`]) {
+  const missing = await fetch(origin + path)
+  assert.equal(missing.status, 404, path)
+  assert.match(missing.headers.get('content-type') || '', /^text\/html/, path)
+  const page = await missing.text()
+  assert.match(page, /data-help-center-nav/, path)
+  assert.match(page, /type="search"/, path)
+ }
 }
 console.log('Native homepage: workspace entry, retired-route denial, local assets and no public widget passed. Published Help Center checks: ' + (process.env.H2H_TEST_PROJECT_ID ? 'passed' : 'not requested'))

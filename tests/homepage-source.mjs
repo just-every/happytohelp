@@ -74,3 +74,20 @@ test('the page is composed from one component per section', async () => {
     if (/\.tsx$/.test(file)) assert.ok((await read(`src/ui/homepage/${file}`)).split('\n').length < 60, `${file} stays small`);
   }
 });
+
+test('the 404 page uses the homepage language and its styles stay scoped', async () => {
+  const css = (await read('src/ui/homepage/not-found.css')).replace(/\/\*[\s\S]*?\*\//g, '');
+  const selectors = [...css.matchAll(/(?:^|[{}])\s*([^{}@]+?)\s*\{/g)].map(match => match[1]);
+  assert.ok(selectors.length >= 4, 'not-found.css has rules');
+  for (const selector of selectors.flatMap(group => group.split(',').map(part => part.trim()))) assert.match(selector, /^\.h2h-home\b/, `not-found.css: "${selector}" must be scoped to .h2h-home`);
+  assert.doesNotMatch(css, /font-family|https?:\/\//i, 'the typeface comes from the page root and nothing is third-party');
+  const component = await read('src/ui/homepage/NotFound.tsx');
+  assert.match(component, /className="h2h-home"/);
+  assert.match(component, /import '\.\/outfit\.css';/);
+  assert.match(component, /href="\/">Back to the homepage/);
+  assert.match(component, /href="\/projects">Open your workspace/);
+  const root = await read('src/routes/__root.tsx');
+  assert.match(root, /notFoundComponent: NotFound/);
+  assert.doesNotMatch(root, /<h1>Not found<\/h1>/);
+  assert.match(root, /Page not found · HappyToHelp/);
+});

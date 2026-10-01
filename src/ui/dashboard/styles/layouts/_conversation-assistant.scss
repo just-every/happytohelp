@@ -21,6 +21,7 @@ body.conversation-workspace {
         flex: 0 0 var(--conversation-top-height);
         align-items: center;
         justify-content: space-between;
+        gap: .5rem;
         height: var(--conversation-top-height);
         min-height: var(--conversation-top-height);
         padding: 0 1.25rem;
@@ -44,7 +45,8 @@ body.conversation-workspace {
             align-self: stretch;
             align-items: center;
             min-width: 0;
-            gap: 1.35rem;
+            // The panel is only ~300px wide on 1280px screens: three tabs plus Hide must keep clear of each other.
+            gap: 1rem;
         }
 
         .conversation-assistant__tab {

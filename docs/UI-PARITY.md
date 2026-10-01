@@ -25,6 +25,22 @@ styles with visual parity, and the one visible change is that the attachment row
 now shows its paperclip icon. A screenshot conversion is comparison evidence,
 not a replacement for dynamic workspace names, user data or original vector assets.
 
+## Inbox and conversation behaviour
+
+Corrections from the 1 October 2026 independent UI sweep, checked by
+`pnpm run test:inbox-conversation-browser`, `tests/inbox-search.mjs`,
+`tests/contact-timezone.mjs` and `tests/saved-reply-insertion.mjs`.
+
+| Surface | Behaviour |
+| --- | --- |
+| Contact local time | The conversation header and Details show the contact's clock only when a known timezone is recorded. Without one the header omits the time and Details shows **Local time: Unknown**; the viewer's own clock is never presented as the contact's and nothing is logged by Moment Timezone. |
+| Conversation header | With the right panel open the name, verification badge and status share one line inside the 72px bar. A long name, email or project name is ellipsised and carries its full text as a tooltip. Between 1200 and 1599px the **Local** button shows only its icon (its accessible name is unchanged) to leave room for the name. |
+| Inbox search | Matches a contact's name or email address, literally (`%`, `_` and `\` are ordinary characters), up to 200 characters. Longer input is answered with a 400 and the message "That search is too long…", shown in the list without a Retry button. The placeholder and accessible name say "name or email"; an empty result reads "No results for “query” in all open. Search looks at customer names and email addresses." Message text is **not** searched; there is no full-text index. |
+| Assignment menu | Escape closes it however it was opened (mouse, Enter, or from a menu item) and focus returns to the toggle. |
+| Saved replies | The draft stays visible while the picker is open. Choosing a reply inserts it as its own paragraph beside the caret's line (before it when the caret is at the line's start, after it otherwise), so typed text is never split or overwritten; an empty composer receives exactly the reply. |
+| Row Close / Reopen | A real button beside the row link (not nested in it) in its own column of the row. It is in the tab order, visible on keyboard focus and always visible on touch screens; on hover-capable pointers it is revealed on row hover or focus. |
+| Closed conversations | The header shows **Reopen** in place of **Close**, and the composer tools no longer offer **Send & close**. |
+
 ## Verification and limits
 
 The page sweep covered 35 routes and 11 tab states at desktop and mobile sizes

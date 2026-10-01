@@ -52,6 +52,7 @@ body.conversation-workspace #chat .conversation-inbox {
         color: var(--conversation-quiet);
         font-size: 12px;
         text-align: center;
+        overflow-wrap: anywhere;
     }
 }
 
@@ -62,9 +63,20 @@ body.conversation-workspace #chat .conversation-inbox {
 body.conversation-workspace #chat {
     .conversation-list-sentinel { height: 1px; }
 
+    // A rejected search term is feedback about the input, not a failed load: it offers no Retry.
+    .conversation-search-notice {
+        margin: 12px 0;
+        padding: 8px 12px;
+        color: var(--conversation-muted);
+        font-size: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
     .conversation-list-error,
     .conversation-load-error {
         margin: 12px 0;
+        overflow-wrap: anywhere;
         padding: 8px 12px;
         color: var(--conversation-muted);
         font-size: 12px;
@@ -119,9 +131,10 @@ body.conversation-workspace #chat .conversation-inbox .search-query {
     .btn { color: var(--workspace-quiet, #667085); }
 }
 
+body.conversation-workspace #chat .sidebar .conversation-item-wrap { margin-bottom: 8px; }
+
 body.conversation-workspace #chat .sidebar .conversation-item {
     display: block;
-    margin-bottom: 8px;
 
     .card {
         margin: 0;
@@ -132,7 +145,8 @@ body.conversation-workspace #chat .sidebar .conversation-item {
 
     .card-body {
         position: relative;
-        padding: 18px 14px;
+        // The right edge is the row's Close / Reopen column.
+        padding: 18px 48px 18px 14px;
         background: var(--workspace-surface-raised, #fff);
         border-radius: inherit;
 
@@ -274,7 +288,7 @@ body.conversation-workspace #chat .sidebar .conversation-item {
 
 @media (min-width: 1200px) and (max-width: 1439.98px) {
     body.conversation-workspace #chat .sidebar .conversation-item {
-        .card-body { padding: 14px 10px; }
+        .card-body { padding: 14px 46px 14px 10px; }
 
         .conversation-item-heading {
             gap: 4px;

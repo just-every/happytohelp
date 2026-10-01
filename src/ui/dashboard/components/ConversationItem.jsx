@@ -42,25 +42,19 @@ function ConversationItem({ conversation, setConversation }) {
         resolveConversation(conversation, resolved);
     }
 
+    const contactName = conversation.contact?.display_name || 'contact';
+    const isResolved = Boolean(conversation.resolved_at);
+    const actionLabel = isResolved ? 'Reopen' : 'Close';
+
+    // The action is a sibling of the row link (a button inside an anchor is invalid) and lives in
+    // its own reserved column, so it never covers the time, avatar or badges.
     return (
+        <div className="conversation-item-wrap">
         <Link to={conversationUrl} search={search}
               onClick={handleClick}
               className={ 'conversation-item text-reset nav-link p-0 ' + (urlConversationId === conversation.id ? 'active' : '') }>
             <div className="card">
                 <div className="card-body">
-                    { conversation.resolved_at ? <OverlayTrigger
-                        placement="left"
-                        overlay={ <Tooltip id={ `${ conversation.id }-resolved` } className={(urlConversationId === conversation.id ? 'tooltip-light' : 'tooltip-dark')}>Open</Tooltip> }>
-                        <button type="button" className="action-button show-on-hover btn btn-white" title="Open" aria-label={`Open conversation with ${conversation.contact?.display_name || 'contact'}`} onClick={(event) => handleResolve(event, false) }>
-                            <i className="fe fe-minus-circle" aria-hidden="true"></i>
-                        </button>
-                    </OverlayTrigger> : <OverlayTrigger
-                        placement="left"
-                        overlay={ <Tooltip id={ `${ conversation.id }-resolved` } className={(urlConversationId === conversation.id ? 'tooltip-light' : 'tooltip-dark')}>Close</Tooltip> }>
-                        <button type="button" className="action-button show-on-hover btn btn-white" title="Close" aria-label={`Close conversation with ${conversation.contact?.display_name || 'contact'}`} onClick={(event) => handleResolve(event, true) }>
-                            <i className="fe fe-check-circle" aria-hidden="true"></i>
-                        </button>
-                    </OverlayTrigger> }
                     <div className="row align-items-center">
                         <div className="col-auto align-self-start">
                             { conversation.contact && <ContactAvatar contact={ conversation.contact } projectId={ conversation.project_id } presentation="conversation-profile" /> }
@@ -99,6 +93,14 @@ function ConversationItem({ conversation, setConversation }) {
                 </div>
             </div>
         </Link>
+        <OverlayTrigger
+            placement="left"
+            overlay={ <Tooltip id={ `${ conversation.id }-resolved` } className={(urlConversationId === conversation.id ? 'tooltip-light' : 'tooltip-dark')}>{ actionLabel }</Tooltip> }>
+            <button type="button" className="conversation-item-action btn btn-white" aria-label={ `${ actionLabel } conversation with ${ contactName }` } onClick={ event => handleResolve(event, !isResolved) }>
+                <i className={ `fe ${ isResolved ? 'fe-rotate-ccw' : 'fe-check-circle' }` } aria-hidden="true"></i>
+            </button>
+        </OverlayTrigger>
+        </div>
     );
 }
 

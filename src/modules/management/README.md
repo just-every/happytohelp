@@ -18,6 +18,14 @@ canonical storage and maps original status/assignment/cursor contracts. Widget
 collector actions use the customer-context module; selected insight pairs use
 conversation admission; generation and operator suggestions use AI support.
 
+Inbox search (`inbox-search.ts`) matches a contact's name or email address as a literal,
+ASCII case-insensitive substring: `%`, `_` and `\` are ordinary characters and the match
+does not use `LIKE`, so the database's pattern-length limit cannot turn a long term into
+a 500. A term longer than 200 characters is a 400 whose message the inbox shows. Message
+text is deliberately not searched: the schema has no full-text index, and an unindexed scan
+of every message per keystroke is not acceptable, so the inbox says it searches names and
+email addresses. `tests/inbox-search.mjs` runs it on local D1.
+
 Owners and admins can permanently erase a contact's personal data
 (`contact-erasure.ts`, `contact-erasure/`): R2 objects are staged in
 `contact_erasure_objects` and deleted first, then one D1 batch removes or redacts

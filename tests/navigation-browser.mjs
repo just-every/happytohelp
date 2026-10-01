@@ -60,7 +60,7 @@ try {
   await link('Inbox').click();await nav.getByRole('link',{name:/All open/}).click();
   await page.waitForURL(url=>url.searchParams.get('view')==='open');
   const allOpenURL=page.url();
-  await page.getByRole('searchbox',{name:'Search all open',exact:true}).fill('Alpha');
+  await page.getByRole('searchbox',{name:'Search all open by customer name or email',exact:true}).fill('Alpha');
   await page.getByRole('button',{name:'Search conversations',exact:true}).click();
   await page.waitForURL(url=>url.searchParams.get('q')==='Alpha');
   const searchedURL=page.url();

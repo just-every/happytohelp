@@ -4226,6 +4226,10 @@
       "sha256": "585dfed834511691d4e7fbc767198a16b74672d932e504d86e7cbfdf2e605323",
       "executable": false
     },
+    "src/ui/native/session-project-sync.ts": {
+      "sha256": "ce7a2f90fe6373001fce7e8d07ea4b07b46184c7a007eeaedaed38b012689c98",
+      "executable": false
+    },
     "src/ui/native/Setup.tsx": {
       "sha256": "8e324aef719ee5233617fe642961a9a5d39448a1654856e669068394d95c89df",
       "executable": false

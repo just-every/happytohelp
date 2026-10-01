@@ -1,12 +1,47 @@
 import { Link } from '@tanstack/react-router';
 import React, {useState} from 'react';
 import {PageHeaderActions} from '../PageHeader';
+import './stack-table.css';
 export function PersonAvatar({person}) {return person.avatar_url?<img className="management-avatar" src={person.avatar_url} alt=""/>:<span className="management-avatar">{(person.name||person.email||'?').slice(0,1).toUpperCase()}</span>}
 const date=value=>value?new Date(value).toLocaleDateString():'';
+const labels={macros:'Save a Reply',agents:'Invite Agent',plugins:'Add Custom Plugin'};
+const hidden=text=><span className="visually-hidden">{text}</span>;
+const contactMetadata=item=>typeof item.metadata_json==='string'?JSON.parse(item.metadata_json):{};
+// One definition per column. `label` is the header and, on narrow screens where rows stack as cards, the caption of each value.
+// A column without a label holds row actions.
+const columns={
+ macros:[
+  {label:'Title',cell:({item,href})=><Link to={href}>{item.title}</Link>},
+  {label:'Created By',cell:({item})=>item.created_by_name},
+  {label:'Created',cell:({item})=>date(item.created_at)},
+ ],
+ agents:[
+  {label:'Agent',cell:({item,href})=><div className="management-person">{item.pending?<i className="fe fe-mail"/>:<PersonAvatar person={item}/>} {item.pending?'Pending invite':<Link to={href}>{item.name||item.email}</Link>}</div>},
+  {label:'Email',cell:({item})=>item.email},
+  {label:'Role',cell:({item})=><span className="management-role">{item.role==='operator'?'Agent':item.role?.replace(/^./,c=>c.toUpperCase())}</span>},
+  {actions:'Actions',cell:({item,href})=>!item.pending&&<Link aria-label={`Edit ${item.name||item.email}`} to={href}>⋮</Link>},
+ ],
+ contacts:[
+  {actions:'Photo',cell:({item,href})=><Link to={href}><PersonAvatar person={item}/></Link>},
+  {label:'Name',cell:({item,href,metadata})=><Link to={href}>{metadata.provided_name||item.name||item.nickname||'Visitor'}</Link>},
+  {label:'Email',cell:({item,metadata})=>metadata.provided_email||item.email},
+  {label:'Country',cell:({item,metadata})=>metadata.country_name||metadata.country_code||item.country_code},
+  {label:'Last Seen',cell:({item,metadata})=>metadata.is_online?'Online':date(item.last_seen_at||metadata.last_seen_at)},
+  {actions:'Actions',cell:({href})=><Link aria-label="View contact" to={href}>⋮</Link>},
+ ],
+ plugins:[
+  {label:'Name',cell:({item,href})=><Link to={href}>{item.name}</Link>},
+  {actions:'Actions',cell:({item,href,index,rows,onMove})=><details className="management-menu"><summary aria-label={`Actions for ${item.name}`}>⋮</summary><Link to={href}>Edit</Link>{index>0&&<button onClick={()=>onMove(item.id,'move-up')}>Move Up</button>}{index<rows.length-1&&<button onClick={()=>onMove(item.id,'move-down')}>Move Down</button>}</details>},
+ ],
+};
 export default function ManagementLists({section,items,base,onMove}) {
- const [search,setSearch]=useState(''); const labels={macros:'Save a Reply',agents:'Invite Agent',plugins:'Add Custom Plugin'};
+ const [search,setSearch]=useState('');
  const rows=(items||[]).filter(item=>[item.name,item.title,item.email].some(value=>String(value||'').toLowerCase().includes(search.toLowerCase())));
+ const shown=columns[section];
  return <><PageHeaderActions><div className="management-toolbar">{section!=='plugins'&&<div className="input-group"><input aria-label="Search" placeholder="Search" className="form-control" value={search} onChange={e=>setSearch(e.target.value)}/><span className="input-group-text"><i className="fe fe-search"/></span></div>}{labels[section]&&<Link className="btn btn-primary" to={`${base}/create`}>{labels[section]}</Link>}</div></PageHeaderActions>
  {section==='plugins'&&!items?.some(p=>p.url==='https://app.chargedesk.com/installed/happytohelp')&&<div className="management-plugin-intro"><h4>ChargeDesk</h4><p>You can enable the ChargeDesk plugin to manage your customer's payments right next to your support tickets. ChargeDesk works with Stripe, PayPal, Braintree, Square, WooCommerce, NMI and many more payment providers.</p><Link className="btn btn-primary" to={`${base}/create`} search={{name:'ChargeDesk',url:'https://app.chargedesk.com/installed/happytohelp'}}>Enable ChargeDesk</Link></div>}
- {(section!=='plugins'||rows.length>0)&&<div className="table-responsive"><table className="table table-sm table-hover management-table"><thead><tr>{(section==='macros'?['Title','Created By','Created']:section==='agents'?['Agent','Email','Role','']:section==='contacts'?['','Name','Email','Country','Last Seen','']:['Name','']).map((label,index)=><th key={index}>{label}</th>)}</tr></thead><tbody>{rows.map((item,index)=>{const metadata=typeof item.metadata_json==='string'?JSON.parse(item.metadata_json):{}; const href=`${base}/${item.id}`;return <tr key={item.id||item.email}>{section==='macros'?<><td><Link to={href}>{item.title}</Link></td><td>{item.created_by_name}</td><td>{date(item.created_at)}</td></>:section==='agents'?<><td><div className="management-person">{item.pending?<i className="fe fe-mail"/>:<PersonAvatar person={item}/>} {item.pending?'Pending invite':<Link to={href}>{item.name||item.email}</Link>}</div></td><td>{item.email}</td><td><span className="management-role">{item.role==='operator'?'Agent':item.role?.replace(/^./,c=>c.toUpperCase())}</span></td><td>{!item.pending&&<Link aria-label={`Edit ${item.name||item.email}`} to={href}>⋮</Link>}</td></>:section==='contacts'?<><td><Link to={href}><PersonAvatar person={item}/></Link></td><td><Link to={href}>{metadata.provided_name||item.name||item.nickname||'Visitor'}</Link></td><td>{metadata.provided_email||item.email}</td><td>{metadata.country_name||metadata.country_code||item.country_code}</td><td>{metadata.is_online?'Online':date(item.last_seen_at||metadata.last_seen_at)}</td><td><Link aria-label="View contact" to={href}>⋮</Link></td></>:<><td><Link to={href}>{item.name}</Link></td><td><details className="management-menu"><summary aria-label={`Actions for ${item.name}`}>⋮</summary><Link to={href}>Edit</Link>{index>0&&<button onClick={()=>onMove(item.id,'move-up')}>Move Up</button>}{index<rows.length-1&&<button onClick={()=>onMove(item.id,'move-down')}>Move Down</button>}</details></td></>}</tr>})}{section==='macros'&&items&&rows.length===0&&<tr><td colSpan="3"><strong>No saved replies yet</strong><p>Save a reply to reuse it in your conversations.</p></td></tr>}</tbody></table></div>}</>;
+ {(section!=='plugins'||rows.length>0)&&<div className="table-responsive"><table className="table table-sm table-hover management-table stack-table"><thead><tr>{shown.map((column,index)=><th key={index}>{column.label||hidden(column.actions)}</th>)}</tr></thead><tbody>{rows.map((item,index)=>{
+  const context={item,index,rows,onMove,href:`${base}/${item.id}`,metadata:section==='contacts'?contactMetadata(item):{}};
+  return <tr key={item.id||item.email}>{shown.map((column,position)=><td key={position} data-label={column.label} className={column.label?undefined:'stack-table__actions'}>{column.cell(context)}</td>)}</tr>;
+ })}{section==='macros'&&items&&rows.length===0&&<tr><td colSpan="3"><strong>No saved replies yet</strong><p>Save a reply to reuse it in your conversations.</p></td></tr>}</tbody></table></div>}</>;
 }

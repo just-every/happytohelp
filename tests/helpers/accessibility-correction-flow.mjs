@@ -111,15 +111,13 @@ export async function checkPopulatedArticle({page, runtime, projectId, ownerToke
         await writeFile(join(evidenceDir, `${label}-target-spacing.json`), JSON.stringify(spacing, null, 2));
         const action = page.getByRole('button', {name: 'Delete', exact: true});
         await action.focus();
-        const confirmation = page.waitForEvent('dialog').then(async prompt => {
-            try {
-                assert.equal(prompt.type(), 'confirm');
-                assert.match(prompt.message(), /Keyboard support article/);
-            } finally {
-                await prompt.dismiss();
-            }
-        });
-        await Promise.all([page.keyboard.press('Enter'), confirmation]);
+        await page.keyboard.press('Enter');
+        const confirmation = page.getByRole('dialog', {name: /Keyboard support article/});
+        await confirmation.waitFor();
+        audit.assertAxeClean(await audit.scan(page, `${label}-delete-dialog`), `${label} delete confirmation`);
+        await page.keyboard.press('Escape');
+        await confirmation.waitFor({state: 'hidden'});
+        assert.equal(await action.evaluate(element => element === document.activeElement), true, 'Escape returns focus to Delete');
         assert.equal(await action.isVisible(), true);
         await action.scrollIntoViewIfNeeded();
         await action.focus();

@@ -393,6 +393,8 @@
           "docs/INBOUND-EMAIL-RECOVERY.md",
           "tests/contact-erasure.mjs",
           "tests/contact-erasure-browser.mjs",
+        "tests/management-library-browser.mjs",
+        "tests/library-validation.mjs",
           "docs/PRIVACY.md"
         ]
       }

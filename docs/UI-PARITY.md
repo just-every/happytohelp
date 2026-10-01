@@ -25,6 +25,20 @@ styles with visual parity, and the one visible change is that the attachment row
 now shows its paperclip icon. A screenshot conversion is comparison evidence,
 not a replacement for dynamic workspace names, user data or original vector assets.
 
+## Management and library behaviour
+
+These rules were added after the 30 September review and are checked by
+`pnpm run test:management-library-browser` (browser, emitted Worker) and
+`tests/library-validation.mjs` (part of `pnpm run test:modules`).
+
+| Area | Behaviour |
+| --- | --- |
+| Deleting | Saved replies, contacts, AI assistants, plugins, agents/members, articles, categories and website datasets all open the shared `ConfirmDialog` (`src/ui/native/pages/ConfirmDialog.jsx`), a native modal dialog: the page behind it is inert, Cancel and Escape change nothing and return focus to **Delete**, and any server refusal is shown inside the dialog. No native browser prompt is used. Contact erasure uses the same dialog with an exact typed `ERASE` confirmation. |
+| Members | A project's last owner cannot be removed (the dialog explains this and offers only Close; the server refuses it with a 409). Removing yourself shows an explicit warning and, once confirmed, signs you out of the project. |
+| Phone tables | Below 768px the list tables of Saved Replies, Agents, Contacts, Plugins, Websites (datasets), Articles and a website's indexed pages stack each row as a card with a caption per value (`stack-table.css`); nothing is clipped or hidden behind a sideways scroll. |
+| Evaluation runs | One name (“Evaluation runs”) in the tab and the page title. The form validates before sending: models, a JSON list of cases with unique ids, optional variants, a maximum cost greater than 0 and a token limit from 1 to 32,000, each reported next to its field (`training-run-form.js`, mirroring the server). It has an empty state and explains the limits. |
+| Create forms | Datasets require a valid http(s) starting URL, a crawl depth from 0 to 100 and a page limit from 1 to 10,000 (form, `POST`/`PUT` dataset routes and the crawler start, `crawl-limits.ts`). A new contact needs a name, an email or an external ID (form and `POST` contact route; existing visitors without a name can still be edited). Plugin URLs must be https (http only for localhost) in the form as well as on the server. |
+
 ## Verification and limits
 
 The page sweep covered 35 routes and 11 tab states at desktop and mobile sizes

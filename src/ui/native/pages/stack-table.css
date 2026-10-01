@@ -1,0 +1,15 @@
+/* Phone layout for list tables: each row becomes a card that shows every column with its caption, so no column or row
+   action is hidden behind a sideways scroll. Tables keep their normal layout from 768px up. */
+.stack-table .visually-hidden{white-space:nowrap}
+@media(max-width:767px){
+ .table-responsive:has(.stack-table){overflow:visible}
+ .stack-table,.stack-table tbody,.stack-table tr,.stack-table td{display:block;width:100%}
+ .stack-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+ .stack-table tr{border:1px solid #e3e8f1;border-radius:8px;padding:6px 12px;margin-bottom:12px;background:#fff}
+ .stack-table td{display:flex;align-items:center;justify-content:space-between;gap:16px;border:0;padding:8px 0;text-align:right;overflow-wrap:anywhere;min-width:0}
+ .stack-table td+td{border-top:1px solid #eef1f6}
+ .stack-table td[data-label]::before{content:attr(data-label);flex:0 0 34%;max-width:34%;text-align:left;font-size:12px;font-weight:600;color:#52648d}
+ .stack-table td>*{min-width:0}
+ .stack-table td.stack-table__actions{justify-content:flex-end}
+ .stack-table td:not([data-label]):not(.stack-table__actions){display:block;text-align:left}
+}

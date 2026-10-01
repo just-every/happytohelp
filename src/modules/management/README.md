@@ -11,7 +11,8 @@ an explicit `platform_admins` row; project ownership does not grant it. Widget
 identity verification secrets are projected only in owner/admin widget settings.
 
 Project settings, availability, per-audience default AI selection, AI profiles,
-macros, plugins/order, contact details/blocking, memberships/invitations, primary
+macros, plugins/order, contact details/blocking (a dashboard-created contact needs
+a name, email or external ID), memberships/invitations, primary
 project preference, profile and administration use typed field allowlists. The
 retained dashboard reads original bucket IDs, messages and private notes from
 canonical storage and maps original status/assignment/cursor contracts. Widget

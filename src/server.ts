@@ -6,14 +6,14 @@ import { dispatch } from './base/dispatch'
 import { publicSiteRoutes,isPublicSitePath } from './modules/public-site'
 import { handleEmail } from './modules/integrations'
 import { headerSurface,withSecurityHeaders } from './platform/security-headers'
-import { delegationLoginRedirect,isDelegationDocument,protectDelegationDocument } from './edition/delegation/document'
+import { delegationDocument,isDelegationDocument } from './edition/delegation/document'
 export { ConversationSocket } from './modules/conversations/socket'
 async function route(request:Request,env:Env,execution:ExecutionContext,path:string,publicSite:boolean):Promise<Response>{
  if (import.meta.env.DEV && import.meta.env.H2H_LOCAL_OWNER_LOGIN && path === '/api/identity/local-owner-session') {
   const { localOwnerLogin } = await import('./development/local-owner-login');
   return localOwnerLogin.fetch(request,env,execution);
  }
- if(isDelegationDocument(request))return protectDelegationDocument(await delegationLoginRedirect(request,env,execution)??await start.fetch(request));if(path.startsWith('/delegation/'))return app.fetch(request,env,execution);if(path.startsWith('/preview/'))return app.fetch(request,env,execution);if(publicSite)return publicSiteRoutes.fetch(request,env,execution);return dispatch(request,()=>app.fetch(request,env,execution),()=>start.fetch(request))
+ if(isDelegationDocument(request))return delegationDocument(request,env,execution,async()=>start.fetch(request));if(path.startsWith('/delegation/'))return app.fetch(request,env,execution);if(path.startsWith('/preview/'))return app.fetch(request,env,execution);if(publicSite)return publicSiteRoutes.fetch(request,env,execution);return dispatch(request,()=>app.fetch(request,env,execution),()=>start.fetch(request))
 }
 export default {
  async fetch(request:Request,env:Env,execution:ExecutionContext){const path=new URL(request.url).pathname,publicSite=!path.startsWith('/preview/')&&await isPublicSitePath(path,env);

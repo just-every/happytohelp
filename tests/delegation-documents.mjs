@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 // delegation-sqlite.mjs registers the module resolver and exports the SQLite-backed D1; its own test is skipped here.
 process.env.H2H_DELEGATION_RUNTIME='1'
 const {sqliteDB,d1}=await import('./delegation-sqlite.mjs')
-const {Hono}=await import('hono'),{consent}=await import('../src/edition/delegation/consent.ts'),{delegationLoginRedirect,isDelegationDocument,protectDelegationDocument}=await import('../src/edition/delegation/document.ts'),{hashToken}=await import('../src/platform/auth.ts')
+const {Hono}=await import('hono'),{consent}=await import('../src/edition/delegation/consent.ts'),{delegationDocument,delegationDocumentPolicy,delegationLoginRedirect,isDelegationDocument,protectDelegationDocument}=await import('../src/edition/delegation/document.ts'),{hashToken}=await import('../src/platform/auth.ts')
 
 test('only GET and HEAD of the two delegation pages are dashboard documents', () => {
  const request=(path,method='GET')=>new Request('https://h2h.test'+path,{method})
@@ -31,6 +31,29 @@ test('delegation documents are never cached or framed', async () => {
  assert.equal(secured.headers.get('Cache-Control'),'no-store');assert.equal(secured.headers.get('Content-Security-Policy'),"frame-ancestors 'none'");assert.equal(secured.headers.get('X-Frame-Options'),'DENY');assert.equal(await secured.text(),'<html></html>')
  assert.equal(protectDelegationDocument(new Response('',{headers:{'Content-Security-Policy':"default-src 'self'"}})).headers.get('Content-Security-Policy'),"default-src 'self'; frame-ancestors 'none'")
  assert.equal(protectDelegationDocument(new Response('',{headers:{'Content-Security-Policy':"frame-ancestors 'self'"}})).headers.get('Content-Security-Policy'),"frame-ancestors 'self'")
+})
+
+test('delegation documents carry a strict app-page policy with form-action limited to this origin and the registered callback', async () => {
+ const db=sqliteDB(),DB=d1(db)
+ try{
+  const run=(sql,...args)=>DB.prepare(sql).bind(...args).run()
+  await run("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Support','widget-p','https://customer.test',1)")
+  await run("INSERT INTO users(id,email,name,created_at) VALUES('owner','owner@test.example','Owner',1)");await run("INSERT INTO memberships VALUES('p','owner','owner')")
+  await run('INSERT INTO sessions VALUES(?,?,?,?,NULL,?,NULL)',await hashToken('live-session'),'owner','p','owner',Date.now()+86400000)
+  await run("INSERT INTO edition_clients(id,project_id,origin,redirect_uri,allow_loopback,enabled) VALUES('docs','p','https://docs.test','https://docs.test/callback',0,1),('off','p','https://off.test','https://off.test/callback',0,0)")
+  const env={DB},directives=policy=>Object.fromEntries(policy.split(';').map(part=>part.trim().split(/\s+/)).map(([name,...values])=>[name,values.join(' ')]))
+  const authorize=(client,redirect)=>new Request('https://h2h.test/delegation/authorize?'+new URLSearchParams({client_id:client,account_id:'p',redirect_uri:redirect}))
+  const registered=directives(await delegationDocumentPolicy(authorize('docs','https://docs.test/callback'),env))
+  assert.equal(registered['form-action'],"'self' https://docs.test");assert.equal(registered['base-uri'],"'self'");assert.equal(registered['object-src'],"'none'");assert.equal(registered['default-src'],"'self'");assert.equal(registered['connect-src'],"'self'")
+  for(const [name,request] of [['a callback that is not the registered one',authorize('docs','https://evil.test/callback')],['an unknown client',authorize('nope','https://docs.test/callback')],['a disabled client',authorize('off','https://off.test/callback')],['the settings page',new Request('https://h2h.test/delegation/settings?account_id=p')],['a bare consent URL',new Request('https://h2h.test/delegation/authorize')]])
+   assert.equal(directives(await delegationDocumentPolicy(request,env))['form-action'],"'self'",name)
+  // The served document gets that policy, the framing denial and no-store, whatever the app renderer sent, and a signed-out request still goes to sign in.
+  const served=await delegationDocument(new Request('https://h2h.test/delegation/authorize?'+new URLSearchParams({client_id:'docs',account_id:'p',redirect_uri:'https://docs.test/callback'}),{headers:{Cookie:'h2h_session=live-session'}}),env,undefined,async()=>new Response('<html></html>',{headers:{'Content-Type':'text/html'}}))
+  const header=served.headers.get('Content-Security-Policy');assert.deepEqual({...directives(header)},{...registered,'frame-ancestors':"'none'"})
+  assert.equal(served.headers.get('Cache-Control'),'no-store');assert.equal(served.headers.get('X-Frame-Options'),'DENY');assert.equal(await served.text(),'<html></html>')
+  const signedOut=await delegationDocument(new Request('https://h2h.test/delegation/authorize'),env,undefined,async()=>{throw new Error('rendered without a session')})
+  assert.equal(signedOut.status,303);assert.equal(signedOut.headers.get('Cache-Control'),'no-store')
+ }finally{db.close()}
 })
 
 test('settings and consent page data re-check the session, project and role, and decisions land back in the app', async () => {

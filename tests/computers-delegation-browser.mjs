@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import {createServer} from 'node:http'
 import {chromium} from 'playwright'
 import {startDelegationWorker} from './helpers/delegation-worker.mjs'
 /**
@@ -19,6 +20,7 @@ try{
  browser=await chromium.launch({headless:true})
  const context=await browser.newContext({viewport:{width:1440,height:900}}),page=await context.newPage(),errors=[]
  page.on('pageerror',error=>errors.push(error.message))
+ page.on('console',message=>{if(message.type()==='error'&&/Content[ -]Security[ -]Policy|form-action|Refused to/i.test(message.text()))errors.push(message.text())})
  const projectId=await app.bootstrapOwner(context,'Computers delegation')
  const shell=page.getByRole('navigation',{name:'Main navigation'})
 
@@ -72,7 +74,13 @@ try{
  const verifier='v'.repeat(64),query=state=>new URLSearchParams({client_id:'pages-slate',redirect_uri:app.origin+'/pages-callback',response_type:'code',state,code_challenge:'',code_challenge_method:'S256',account_id:projectId,scope:'knowledge.article.read knowledge.article.update',targets:JSON.stringify([`projects/${projectId}/articles/page-article`])})
  const consentUrl=async state=>{const q=query(state);q.set('code_challenge',await challenge(verifier));return `${app.origin}/delegation/authorize?${q}`}
  const framing=await fetch(await consentUrl('framing'),{headers:{Cookie:(await context.cookies()).map(c=>`${c.name}=${c.value}`).join('; ')}})
- assert.equal(framing.status,200);assert.match(framing.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.match(framing.headers.get('cache-control'),/no-store/);assert.equal((await fetch((await consentUrl('anonymous')).replace('/delegation/authorize?','/delegation/authorize/request?'))).status,401,'the consent data needs the signed-in session')
+ assert.equal(framing.status,200);assert.match(framing.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.match(framing.headers.get('cache-control'),/no-store/);assert.equal(framing.headers.get('x-frame-options'),'DENY')
+ const policy=Object.fromEntries(framing.headers.get('content-security-policy').split(';').map(part=>part.trim().split(/\s+/)).map(([name,...values])=>[name,values.join(' ')]))
+ assert.equal(policy['form-action'],`'self' ${app.origin}`,'a form can only post to this origin and the registered callback');assert.equal(policy['base-uri'],"'self'");assert.equal(policy['object-src'],"'none'");assert.equal(policy['default-src'],"'self'");assert.equal(policy['frame-ancestors'],"'none'")
+ assert.ok(!/\*|https?:\/\/(?!127\.0\.0\.1|localhost)/.test(framing.headers.get('content-security-policy')),'no wildcard or foreign source in the policy')
+ const unregistered=await fetch((await consentUrl('framing')).replace('pages-callback','other-callback'),{headers:{Cookie:(await context.cookies()).map(c=>`${c.name}=${c.value}`).join('; ')}})
+ assert.equal(unregistered.status,200);assert.match(unregistered.headers.get('content-security-policy'),/form-action 'self'(;|$)/,'an unregistered callback is never added to form-action')
+ assert.equal((await fetch((await consentUrl('anonymous')).replace('/delegation/authorize?','/delegation/authorize/request?'))).status,401,'the consent data needs the signed-in session')
  await page.goto(await consentUrl('cancel-state'));await page.getByRole('heading',{name:'Connect to Slate',level:1}).waitFor();await shell.waitFor()
  const main=await page.locator('main').innerText();assert.match(main,/page-article/);assert.match(main,/Read help articles/);assert.match(main,/Edit help articles/)
  await page.getByRole('button',{name:'Cancel'}).click();await page.waitForURL(/\/delegation\/settings\?/);await page.getByRole('status').filter({hasText:'Connection cancelled'}).waitFor();await shell.waitFor()
@@ -83,6 +91,18 @@ try{
  await page.goto(`${app.origin}/delegation/settings?account_id=${projectId}`);await page.getByRole('heading',{name:'pages-slate',level:3}).first().waitFor()
  const revoke=page.getByRole('button',{name:'Revoke',exact:true});assert.equal(await revoke.count(),3);await revoke.first().click();await page.getByText('revoked',{exact:true}).waitFor();assert.equal(await revoke.count(),2)
  check('consent screen in the shell: cancel returns to settings, approve redirects with the exact state, revoke is recorded')
+
+ // An application on another origin: the browser enforces form-action on the redirect that ends an approval, so the
+ // registered callback origin must be allowed on the consent page (and only there) for the connection to complete.
+ const remote=createServer((request,response)=>{response.setHeader('Content-Type','text/html');response.end('<title>Slate</title>callback reached')});workers.push({stop:async()=>{remote.closeAllConnections();await new Promise(done=>remote.close(done))}})
+ await new Promise(done=>remote.listen(base?base+4:0,'127.0.0.1',done))
+ const remoteOrigin=`http://127.0.0.1:${remote.address().port}`,remoteCallback=remoteOrigin+'/callback'
+ await page.goto(`${app.origin}/delegation/settings?account_id=${projectId}`);await page.getByLabel('Client identifier').fill('pages-remote');await page.getByLabel('Slate origin').fill(remoteOrigin);await page.getByLabel('Exact callback URL').fill(remoteCallback);await page.getByLabel('Allow loopback development').check();await page.getByRole('button',{name:'Register client'}).click();await page.getByText('pages-remote —',{exact:false}).waitFor()
+ const remoteUrl=new URL(await consentUrl('remote-state'));remoteUrl.searchParams.set('client_id','pages-remote');remoteUrl.searchParams.set('redirect_uri',remoteCallback)
+ const remoteHeaders=await fetch(remoteUrl,{headers:{Cookie:(await context.cookies()).map(c=>`${c.name}=${c.value}`).join('; ')}});assert.equal(remoteHeaders.headers.get('content-security-policy').match(/form-action ([^;]*)/)[1],`'self' ${remoteOrigin}`)
+ await page.goto(remoteUrl.toString());await page.getByRole('button',{name:'Allow selected access'}).click();await page.waitForURL(url=>url.href.startsWith(remoteCallback+'?code='));assert.equal(new URL(page.url()).searchParams.get('state'),'remote-state','the cross-origin redirect after approval is not blocked by form-action')
+ assert.equal(await page.locator('body').innerText(),'callback reached')
+ check('consent policy: form-action is this origin plus the registered callback only; a cross-origin approval redirect completes without a CSP violation')
 
  // Bare and invalid URLs are friendly pages, not JSON.
  for(const [path,text] of [['/delegation/settings','Choose a workspace'],['/delegation/authorize','Nothing to approve'],['/delegation/authorize?client_id=unknown','incomplete']]){

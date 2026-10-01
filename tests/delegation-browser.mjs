@@ -8,14 +8,14 @@ import {chromium} from 'playwright'
 import {createServer} from 'node:net'
 const root=new URL('..',import.meta.url).pathname,dir=await mkdtemp(join(tmpdir(),'h2h-delegation-browser-')),configPath=join(dir,'wrangler.json'),persist=join(dir,'state')
 const server=join(root,'dist/server'),emitted=JSON.parse(await readFile(join(server,'wrangler.json'),'utf8')),wrangler=join(root,'node_modules/wrangler/bin/wrangler.js')
-const port=await new Promise((resolve,reject)=>{const s=createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p))})})
+const fixed=Number(process.env.H2H_TEST_PORT)||0,port=fixed||await new Promise((resolve,reject)=>{const s=createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p))})})
 const origin='http://127.0.0.1:'+port,setupToken='delegation-browser-private-setup-token',config={...emitted,name:'h2h-delegation-browser',main:resolve(server,emitted.main),assets:{directory:resolve(server,emitted.assets.directory)},d1_databases:[{binding:'DB',database_name:'delegation-browser',database_id:'delegation-browser-local',migrations_dir:join(root,'.generated/migrations')}],r2_buckets:[{binding:'FILES',bucket_name:'delegation-browser-files'}],queues:{producers:[{binding:'JOBS',queue:'delegation-browser-jobs'}]},vars:{RER_INSTALLATION_ID:'delegation-browser-installation',H2H_SETUP_TOKEN:setupToken},no_bundle:true}
 let child,browser,logs='',success=false
 const environment={...process.env,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'}
 try{
  await writeFile(configPath,JSON.stringify(config))
  await promisify(execFile)(process.execPath,[wrangler,'d1','migrations','apply','DB','--local','--config',configPath,'--persist-to',persist],{env:environment,maxBuffer:2*1024*1024})
- child=spawn(process.execPath,[wrangler,'dev','--local','--config',configPath,'--port',String(port),'--inspector-port','0','--ip','127.0.0.1','--persist-to',persist],{env:environment,stdio:['ignore','pipe','pipe']});child.stdout.on('data',b=>logs+=b);child.stderr.on('data',b=>logs+=b)
+ child=spawn(process.execPath,[wrangler,'dev','--local','--config',configPath,'--port',String(port),'--inspector-port',fixed?String(fixed+1):'0','--ip','127.0.0.1','--persist-to',persist],{env:environment,stdio:['ignore','pipe','pipe']});child.stdout.on('data',b=>logs+=b);child.stderr.on('data',b=>logs+=b)
  let ready=false;for(let n=0;n<160;n++){try{const r=await fetch(origin+'/health');if(r.ok){ready=true;break}}catch{}if(child.exitCode!==null)break;await new Promise(r=>setTimeout(r,250))}assert.ok(ready,logs)
  browser=await chromium.launch({headless:true});const context=await browser.newContext(),page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message))
  const setup=await context.request.post(origin+'/api/identity/bootstrap',{data:{name:'Delegation browser',ownerName:'Owner',email:'owner@delegation.test',password:'delegation-browser-password',allowedOrigin:origin,setupToken}});assert.equal(setup.status(),201,await setup.text());const owner=await setup.json();const pid=owner.projectId

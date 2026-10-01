@@ -405,7 +405,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "f1f17d6ecc6cec923d009a3e96247889795de830a9e2077af0ee6d53bc0e8d81",
+      "sha256": "22cab0b1d4b7db88c3f92aa1332e6d85b55a823ba73442cadd723fef5405ec3d",
       "executable": false
     },
     "CONTRACT.md": {
@@ -1421,7 +1421,7 @@
       "executable": false
     },
     "src/edition/delegation/document.ts": {
-      "sha256": "e2c81fbc30684333df32da502e6005cb44b645ef7b0e5823343a0644ffd6d82c",
+      "sha256": "af6e1aacea1b2f476d0eef666283f260f0755bd39a23124356341f5a2c9fa417",
       "executable": false
     },
     "src/edition/delegation/effects.ts": {
@@ -3045,7 +3045,7 @@
       "executable": false
     },
     "src/platform/security-headers.ts": {
-      "sha256": "8f51e96316bd7b0fb1cede7f6864f4cf3f16b8ea8b7de2602d36590e4bedd586",
+      "sha256": "dde731332b64026c7da3f59dabcea8e44a0d2387b37a4da3b85a031ab9201127",
       "executable": false
     },
     "src/platform/usage-counters.ts": {
@@ -3109,7 +3109,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "b2de6df5f36a35b2cbf952714024ed99d1b3b0436db3a9d569ce9051ac3b07cd",
+      "sha256": "01def19805e9e54006f80557235bc4313d048f2dbdbe62424fd1d848d5e2c2a2",
       "executable": false
     },
     "src/ui/dashboard/api.jsx": {
@@ -4585,7 +4585,7 @@
       "executable": false
     },
     "tests/computers-delegation-browser.mjs": {
-      "sha256": "83a829577a2edd567d811ffc72fb43458dc79ebe24461af751af54e84664d998",
+      "sha256": "22bd91e1524fc9a37d3124e918eb14715df455004f69d6d71e519246c8cdb7a1",
       "executable": false
     },
     "tests/contact-erasure-browser.mjs": {
@@ -4685,7 +4685,7 @@
       "executable": false
     },
     "tests/delegation-browser.mjs": {
-      "sha256": "ea83a4de06234c7fa249952fc5e5532e33ab19f8e99c6014f2921bafbab5a6c9",
+      "sha256": "7a77c2cc37752ee9b3ee79039b2c77d6943196317fe0acd9d4c4f03ba3ac114c",
       "executable": false
     },
     "tests/delegation-consent-race.mjs": {
@@ -4693,7 +4693,7 @@
       "executable": false
     },
     "tests/delegation-documents.mjs": {
-      "sha256": "64bb398e728f7ac1caa6e8cd34d7c34224901e6da16aaa91d50428f84b5f063a",
+      "sha256": "1054e6c81438b7e7082e8d63acecea598c65c86529413a796df947224a6f76e7",
       "executable": false
     },
     "tests/delegation-runtime.mjs": {
@@ -5193,7 +5193,7 @@
       "executable": false
     },
     "tests/security-headers.mjs": {
-      "sha256": "b7d2cc21fa59c17e52c7b8d36b152d724ecd9bf941c39e1ed54e35e3e36bc1bb",
+      "sha256": "8acb94e684f527040019f864a757539cabcb085429a6ac869e2b1723b97b948f",
       "executable": false
     },
     "tests/sendgrid-email.mjs": {

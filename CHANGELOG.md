@@ -22,6 +22,11 @@ include breaking changes.
   see an explanation instead of disabled buttons.
 - `GET /api/identity/projects/:id` returns only the project's id, name, widget key, allowed
   origin and creation time; the server secret reaches owners and admins only through widget settings.
+- The delegation consent page and Connected applications are served under a strict
+  Content-Security-Policy (same-origin sources, no plugins, `base-uri 'self'`, no framing) and
+  `form-action` limited to this origin plus, on the consent page, the callback registered for
+  the request's client. The consent page keeps `X-Frame-Options: DENY` and `no-store`; the
+  application header layer no longer replaces that `X-Frame-Options` with `SAMEORIGIN`.
 - Every destructive delete in the management and library screens (saved reply,
   contact, AI assistant, plugin, agent/member, article, category and website
   dataset) now asks through one shared, accessible confirmation dialog instead

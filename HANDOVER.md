@@ -120,6 +120,7 @@ pnpm run test:ui-browser
 pnpm run test:navigation-browser
 pnpm run test:public-help-center-browser
 pnpm run test:setup-browser
+pnpm run test:identity-browser
 pnpm run test:demo-inbox-browser
 pnpm run test:mobile-inbox-browser
 pnpm run test:conversation-panel-resize-browser
@@ -148,7 +149,8 @@ suites start their own isolated emitted Worker with local D1, R2 and Durable
 Objects and write evidence to a temporary directory or `H2H_EVIDENCE_DIR`; the
 resize suite also accepts `H2H_RUNTIME_PORT` and `H2H_RUNTIME_INSPECTOR_PORT` to
 fix its server and inspector ports, and the contact-erasure suite accepts
-`H2H_TEST_PORT` (its inspector uses the next port). The homepage and public-site checks run
+`H2H_TEST_PORT` (its inspector uses the next port). The identity suite also accepts `H2H_TEST_PORT` for its default
+Worker and runs its sign-up-and-email Worker two ports above; it never sends mail. The homepage and public-site checks run
 against a local native preview:
 `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and
 `node tests/public-site-runtime.mjs` with the same origin, after

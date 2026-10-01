@@ -4,11 +4,14 @@ import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
 import { requiredString,id } from '../../platform/db'
 import { passwordHash } from './credentials'
-import { sendEmail, emailConfigured } from '../integrations/email'
+import { sendEmail } from '../integrations/email'
+import { registrationAvailable } from './availability'
+import { setupAvailable } from './setup'
 import { clientAddress,enforceRateLimit } from '../../platform/rate-limits'
 export const registration=new Hono<AppEnv>()
 registration.post('/register',async c=>{
- if(c.env.REGISTRATION_ENABLED!=='true'||!emailConfigured(c.env)||!c.env.APP_ORIGIN)throw new HTTPException(503,{message:'Registration email is not configured'})
+ if(!registrationAvailable(c.env))throw new HTTPException(503,{message:'Sign-up is not available on this installation. Ask the workspace owner for an invitation.'})
+ if(await setupAvailable(c.env.DB))throw new HTTPException(503,{message:'Set up this installation first. The first owner account is created in setup, and sign-up opens after that.'})
  // Each registration sends email and can create a project that uses installation provider keys.
  await enforceRateLimit(c.env,'registrationsPerIpDay',clientAddress(c.req))
  const b=await c.req.json(),email=requiredString(b.email,'email',320).toLowerCase(),name=requiredString(b.name,'name',200),projectName=requiredString(b.projectName,'projectName',200),origin=new URL(requiredString(b.allowedOrigin,'allowedOrigin')).origin

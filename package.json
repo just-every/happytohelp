@@ -37,6 +37,7 @@
     "test:navigation-browser": "node tests/navigation-browser.mjs",
     "test:public-help-center-browser": "node tests/public-help-center-browser.mjs",
     "test:setup-browser": "node tests/setup-browser.mjs",
+    "test:identity-browser": "node tests/identity-browser.mjs",
     "test:demo-inbox-browser": "node tests/demo-inbox-browser.mjs",
     "test:mobile-inbox-browser": "node tests/mobile-inbox-browser.mjs",
     "test:conversation-panel-resize-browser": "node tests/conversation-panel-resize-browser.mjs",

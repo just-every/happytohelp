@@ -43,16 +43,17 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
 
     await page.goto(runtime.origin + '/login');
     await page.getByLabel('Email', {exact: true}).waitFor();
-    await page.waitForFunction(() => document.body.classList.contains('theme-happytohelp')
-        && getComputedStyle(document.querySelector('button.btn-primary')).backgroundColor === 'rgb(113, 62, 224)');
+    // The public identity pages use the homepage look: a black pill action on paper (rgb(20, 20, 20) ink).
+    await page.waitForFunction(() => document.querySelector('.h2h-identity .pill--ink')
+        && getComputedStyle(document.querySelector('.h2h-identity .pill--ink')).backgroundColor === 'rgb(20, 20, 20)');
     assertAxeClean(await scan(page, 'login'), 'login');
     await keyboardPass(page, 'login', {count: 12});
     await measureContrast(page, 'login', [
         {label: 'email label', selector: 'label[for*="email"]'},
         {label: 'password label', selector: 'label[for*="password"]'},
-        {label: 'primary login button', selector: 'button.btn-primary'},
+        {label: 'primary login button', selector: '.h2h-identity .pill--ink'},
         {label: 'password-reset link', selector: 'a[href$="forgot-password"]'},
-        {label: 'registration link', selector: 'a[href$="register"]'},
+        {label: 'wordmark link', selector: '.h2h-identity .brand'},
     ]);
     await page.getByLabel('Email', {exact: true}).fill(email);
     await page.getByLabel('Password', {exact: true}).fill(password);

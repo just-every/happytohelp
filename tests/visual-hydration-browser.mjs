@@ -52,13 +52,13 @@ try {
   await check();
   await page.reload();
   await check();
-  await page.locator('a[href="/register"]').click();
-  await page.waitForURL('**/register');
+  await page.locator('a[href="/forgot-password"]').click();
+  await page.waitForURL('**/forgot-password');
   await page.goBack();
   await check();
   assert.deepEqual(errors, [], 'Hydration must not produce browser errors');
   success = true;
-  console.log(JSON.stringify({success, checks:['real SSR heading compiled after leaf hydration', 'text and styles survive reload and register/Back', 'zero browser console/page errors']}));
+  console.log(JSON.stringify({success, checks:['real SSR heading compiled after leaf hydration', 'text and styles survive reload and forgot-password/Back', 'zero browser console/page errors']}));
 } finally {
   try {
     try { await browser?.close(); } finally { await runtime?.close(success); }

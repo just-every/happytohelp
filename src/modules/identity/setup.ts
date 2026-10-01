@@ -12,16 +12,21 @@ const available = 'NOT EXISTS(SELECT 1 FROM owner_setup) AND NOT EXISTS(SELECT 1
 const configuredToken = (env: AppEnv['Bindings']) => typeof env.H2H_SETUP_TOKEN === 'string' && env.H2H_SETUP_TOKEN.trim() ? env.H2H_SETUP_TOKEN : ''
 // Only loopback development may claim the first owner without a private setup token.
 const tokenRequired = (env: AppEnv['Bindings'], url: string) => Boolean(env.RER_INSTALLATION_ID || configuredToken(env) || !localDevelopmentRequest(url, env.APP_ORIGIN))
+/** True while nobody has claimed the installation: no owner record, user or project exists. */
+export async function setupAvailable(db: D1Database) {
+ const state = await db.prepare(`SELECT (${available}) AS available`).first<{available: number}>()
+ return state?.available === 1
+}
 // Independent deployment readiness exposes no owner identity or credentials.
 setup.get('/setup-status', async c => {
- const state = await c.env.DB.prepare(`SELECT (${available}) AS available`).first<{available: number}>()
+ const required = await setupAvailable(c.env.DB)
  c.header('Cache-Control', 'no-store')
- return c.json({setupRequired: state?.available === 1}, state?.available === 1 ? 409 : 200)
+ return c.json({setupRequired: required}, required ? 409 : 200)
 })
 setup.get('/setup', async c => {
- const state = await c.env.DB.prepare(`SELECT (${available}) AS available`).first<{available: number}>()
+ const open = await setupAvailable(c.env.DB)
  c.header('Cache-Control', 'no-store')
- return c.json({available: state?.available === 1, ...(tokenRequired(c.env, c.req.url) ? {tokenRequired: true} : {})})
+ return c.json({available: open, ...(tokenRequired(c.env, c.req.url) ? {tokenRequired: true} : {})})
 })
 setup.post('/bootstrap', async c => {
  const origin = c.req.header('Origin')

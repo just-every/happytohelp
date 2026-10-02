@@ -4080,6 +4080,10 @@
       "sha256": "a3b7aeb300b36302d95c03448b92b3b8c91faa2362b5360c701dc0d94ad8a4ac",
       "executable": false
     },
+    "src/ui/homepage/drawings/marks.ts": {
+      "sha256": "c35fd3a6f58703f35e71c8ea5482279d00625a1317ea0741689dbc77ea946ac8",
+      "executable": false
+    },
     "src/ui/homepage/drawings/OfferDrawing.tsx": {
       "sha256": "6f2af9533b1c5b96970b215196ae424dbce2d23a72c5b9b53de31fe84f0f22f0",
       "executable": false

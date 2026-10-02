@@ -4616,7 +4616,7 @@
       "executable": false
     },
     "tests/helpers/emitted-runtime.mjs": {
-      "sha256": "9f6c8c522c4f66d26aa56c3b180037fdc2cf48799bee3034544fa080fa8907f9",
+      "sha256": "42c59d884b9fa21be5a0d55d3782e340204d9ee09c455a0c506318589ed3e1af",
       "executable": false
     },
     "tests/helpers/independent-artifact.mjs": {

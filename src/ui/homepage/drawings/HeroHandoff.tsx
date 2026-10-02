@@ -2,9 +2,10 @@ import { HeroConversation } from './HeroConversation';
 import { HeroLocal } from './HeroLocal';
 import { Drawing, SketchMarks, SketchWindow } from './Sketch';
 
-// The hero: a conversation whose investigation has already been handled by the connected local agent, drawn in a tilted ink frame.
+// The hero: a conversation the connected local agent has already solved, drawn in a tilted ink frame. The customer's
+// problem is fixed and checked, and the reply is in the composer, so the team's only step left is Send.
 export function HeroHandoff() {
-  return <Drawing className="hero-art" label="Drawing of a HappyToHelp conversation that a local agent has already worked on. Maya Chen asks to change her billing date. An internal note records what the agent found, and the Local panel shows an Investigate task completed by Codex on the team's own computer, verified, with a suggested reply for the team to use and send.">
+  return <Drawing className="hero-art" label="Drawing of a HappyToHelp conversation. Maya Chen cannot turn on the Spanish version of her store. Codex, working on the team's own computer, has published Spanish and checked the store loads in Spanish: the Local panel shows Resolve completed and Verified, an internal note lists each step with its evidence, and the reply is in the composer, ready for the team to send.">
     <SketchMarks variant="bracket" />
     <SketchMarks variant="tick" />
     <SketchWindow className="hero-window">

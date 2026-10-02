@@ -72,16 +72,25 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   prefix is reserved for inbound claims and refused by the message API.
   Payment, checkout, Stripe and balance behavior are outside this edition.
 - **PUBLIC-001 — Public product source.** The approved
-  “Customer Support, Solved.” homepage (owner approval 2026-10-01) is the real
-  public `/` experience, in this order: the hero, which leads with the local-agent
-  handoff (a drawn conversation whose Investigate task Codex or Claude on the
-  team's own computer has completed, with its internal note and a drafted reply
-  the team reviews), “Help before they ask”, the four product parts (chat
-  widget, shared inbox, help centre, AI-suggested replies that cite their
-  sources), “How the handoff works” (the New task form: worker, the Investigate,
-  Resolve and Resolve & reply actions, and follow-up actions), “Yours to run”
-  and the footer. The drawings mirror the real interface and make no claim the
-  product cannot back. It is a warm off-white page in one geometric sans-serif
+  “Customer Support, Solved.” homepage (owner approval 2026-10-01, skeptic pass
+  2026-10-02) is the real public `/` experience, in this order: the hero, which
+  shows a problem already solved (a customer cannot turn on the Spanish version
+  of her store; Codex or Claude on the team's own computer found Spanish left in
+  Draft, published it, checked the store in Spanish and left an internal note
+  with its evidence, and the suggested reply sits in the composer, so the team
+  only checks it and presses Send) with the caption steps “The customer asks”,
+  “The agent fixes it” and “You press Send”; “Not just better. Free.” (no seats,
+  no fee per resolution, MIT, hosting from about US$5 a month in the owner's own
+  Cloudflare account, AI paid to the owner's provider, and a bill drawing ending
+  “Paid to HappyToHelp: $0”); “Help before they ask”; “The rest of your support
+  desk” (chat widget, shared inbox, help centre, AI-suggested replies that cite
+  their sources); “Try it beside what you have” (install, import help-centre
+  articles and categories from Zendesk, Intercom or Freshdesk by read-only
+  requests, add the widget, demo inbox); “Yours to run” (the installer's Hosting
+  & connections step, and hosted options through Run Edit Run); and the footer.
+  The drawings mirror the real interface and make no claim the product cannot
+  back; conversation, ticket-history and automation import, reporting and
+  compliance claims are deliberately absent. It is a warm off-white page in one geometric sans-serif
   (Outfit, self-hosted from `public/fonts/outfit/`, so the page makes no
   third-party request) with near-black ink and black pill buttons; colour
   appears only inside the drawings, which are labelled HTML/SVG rather than raster images. Its text

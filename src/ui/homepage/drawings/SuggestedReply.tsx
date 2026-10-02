@@ -7,10 +7,10 @@ export function SuggestedReply() {
     <div className="sr-card">
       <span className="sr-icon"><Icon name="chat" /></span>
       <span className="sr-content">
-        <b>Explain the change</b>
-        <small><strong>Use when:</strong> a customer asks about billing dates</small>
-        <span>Yes, you can change your billing date from your account settings. It applies from your next billing cycle.</span>
-        <em className="d-chip"><Icon name="link" />Source: Billing FAQ</em>
+        <b>Share the language guide</b>
+        <small><strong>Use when:</strong> a customer asks how to add a language</small>
+        <span>You can add a language in Store settings › Languages, then publish it. Your customers can switch to it straight away.</span>
+        <em className="d-chip"><Icon name="link" />Source: Languages guide</em>
       </span>
     </div>
     <div className="sr-composer"><span>Type your reply…</span><span className="hc-plus"><Icon name="plus" /></span><span className="d-btn d-btn--ink">Send</span></div>

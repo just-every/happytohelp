@@ -48,7 +48,18 @@ include breaking changes.
 
 ### Changed
 
-- The homepage now leads with the local-agent handoff: the hero draws a conversation whose
+- The homepage skeptic pass (owner direction 2026-10-02) shows what happens when the handoff works
+  well instead of how it is gated. The hero is now a solved case: Maya Chen cannot turn on the
+  Spanish version of her store, Codex on the team's own computer finds Spanish left in Draft,
+  publishes it, checks the store in Spanish and leaves an internal note with its evidence, and the
+  reply is in the composer, so the team presses Send (callouts 1, 2, 3 and caption steps). New
+  sections follow: “Not just better. Free.” (no seats, no fee per resolution, MIT, hosting from
+  about US$5 a month, a bill drawing ending “Paid to HappyToHelp: $0”), “Help before they ask”,
+  “The rest of your support desk”, “Try it beside what you have” (the read-only help-centre
+  article import, drawn from the real import page) and “Yours to run” (the installer drawing and
+  hosted options through Run Edit Run). “How the handoff works”, the New task form drawing, the
+  ownership checklist and the billing example are removed. The page meta description is updated.
+- The homepage previously led with the local-agent handoff: the hero draws a conversation whose
   task Codex or Claude on the team's own computer has already completed, with the Local panel,
   internal note and drafted reply the team reviews, and a subhead that says who runs it and who
   approves sending. “Help before they ask” follows the hero, then the four product parts. The

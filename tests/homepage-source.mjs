@@ -65,16 +65,24 @@ test('one open-licensed typeface is self-hosted and recorded', async () => {
 
 test('the page is composed from one component per section', async () => {
   const home = await read('src/ui/homepage/Homepage.tsx');
-  const order = ['SiteHeader', 'Hero', 'HelpBeforeTheyAsk', 'Product', 'HandoffDetail', 'YoursToRun', 'SiteFooter'];
+  const order = ['SiteHeader', 'Hero', 'Free', 'HelpBeforeTheyAsk', 'Product', 'MoveIn', 'YoursToRun', 'SiteFooter'];
   for (const name of order) {
     assert.ok(home.includes(`<${name} />`), name);
     assert.ok(await exists(`src/ui/homepage/${name}.tsx`), name);
   }
-  assert.deepEqual(order.map(name => home.indexOf(`<${name} />`)), order.map(name => home.indexOf(`<${name} />`)).sort((a, b) => a - b), 'sections are composed in order: hero handoff, help before they ask, product, handoff detail, yours to run');
-  for (const retired of ['AgentInvestigates', 'AgentDrawing', 'HeroInbox']) {
+  assert.deepEqual(order.map(name => home.indexOf(`<${name} />`)), order.map(name => home.indexOf(`<${name} />`)).sort((a, b) => a - b), 'sections are composed in order: hero, free, help before they ask, the rest of the support desk, try it beside what you have, yours to run');
+  for (const retired of ['AgentInvestigates', 'AgentDrawing', 'HeroInbox', 'HandoffDetail', 'TaskFormDrawing', 'YoursDrawing']) {
     assert.ok(!home.includes(retired) && !(await exists(`src/ui/homepage/${retired}.tsx`)) && !(await exists(`src/ui/homepage/drawings/${retired}.tsx`)), `${retired} stays removed`);
   }
+  const styles = await read('src/ui/homepage/drawings.css') + await read('src/ui/homepage/homepage.css');
+  assert.doesNotMatch(styles, /\.tf-|\.task-art|\.task-form/, 'the retired New task form styles stay removed');
+  for (const drawing of ['BillDrawing', 'ImportDrawing', 'InstallerDrawing', 'Callout']) assert.ok(await exists(`src/ui/homepage/drawings/${drawing}.tsx`), drawing);
   assert.match(await read('src/ui/homepage/Hero.tsx'), /<HeroHandoff \/>/);
+  const ids = [['Hero', 'top'], ['Free', 'free'], ['HelpBeforeTheyAsk', 'help-before-they-ask'], ['Product', 'product'], ['MoveIn', 'move-in'], ['YoursToRun', 'yours-to-run']];
+  for (const [name, id] of ids) assert.match(await read(`src/ui/homepage/${name}.tsx`), new RegExp(`id="${id}"`), `${name} keeps the anchor #${id}`);
+  const repository = await read('src/ui/homepage/repository.ts');
+  assert.match(repository, /export const costsUrl = `\$\{sourceUrl\}#before-you-start`;/);
+  assert.match(await read('src/routes/index.tsx'), /Hand a conversation to Codex or Claude on your own computer: it finds the cause, fixes it, confirms it works and writes the reply for your team to send\./);
   assert.match(await read('src/routes/index.tsx'), /withVisualEdits\(Homepage\)/);
   for (const file of await readdir(url('src/ui/homepage'))) {
     if (/\.tsx$/.test(file)) assert.ok((await read(`src/ui/homepage/${file}`)).split('\n').length < 60, `${file} stays small`);

@@ -10,9 +10,9 @@ All of the following are owner-generated or owner-supplied and are covered by
 the root MIT licence like the rest of the source:
 
 - **Homepage drawings** (owner approval 2026-10-01, handoff-first order
-  2026-10-01): the hero handoff (a conversation with its internal note beside
-  the Local panel), the four product drawings, the widget offer, the New task
-  form and the ownership checklist are first-party React components, HTML and
+  2026-10-01): the hero handoff (a solved conversation with its internal note,
+  the reply in the composer and the Local panel), the bill, the widget offer, the four
+  product drawings, the article import and the installer step are first-party React components, HTML and
   inline SVG in `src/ui/homepage/drawings/` styled by
   `src/ui/homepage/drawings.css`. They were drawn as real DOM text from the
   owner-approved design direction and from this repository's own dashboard and

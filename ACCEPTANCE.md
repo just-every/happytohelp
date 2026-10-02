@@ -10,10 +10,13 @@ outside this edition's scope.
 
 The homepage evidence (`tests/homepage-browser.mjs`, `tests/public-site-runtime.mjs`,
 `tests/homepage-source.mjs`) must cover the exact “Customer Support, Solved.”
-headline and the handoff subhead, the five sections in order (hero, Help before
-they ask, The product, How the handoff works, Yours to run), the hero drawing of
-a conversation already handled by the connected Codex or Claude with its
-Local panel, internal note and drafted reply, the labelled drawings built
+headline and the 36-word subhead, the six sections in order (hero, Not just
+better. Free., Help before they ask, The rest of your support desk, Try it beside
+what you have, Yours to run), the hero drawing of a conversation the connected
+Codex or Claude has already solved (Resolve completed and Verified in its Local
+panel, an internal note listing each action with evidence, the reply in the
+composer ready for Send, three numbered callouts and the caption steps), the
+bill, import and installer drawings, the labelled drawings built
 from real text that mirror the interface, the single self-hosted Outfit typeface with no third-party request, the monochrome page chrome
 with colour only inside the drawings, repository-derived navigation destinations,
 layout without horizontal overflow from 320px to 1920px, and reduced-motion

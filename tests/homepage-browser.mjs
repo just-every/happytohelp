@@ -38,49 +38,69 @@ try {
   // Content, in order.
   await page.getByRole('heading', { level: 1, name: 'Customer Support, Solved.', exact: true }).waitFor();
   assert.equal(await page.locator('h1').count(), 1);
-  const subhead = await page.locator('.hero-copy p').innerText();
-  assert.equal(subhead, 'Free and open source. Hand a conversation to Codex or Claude on your own computer. It investigates, leaves an internal note and drafts a reply. You choose what it may do for each task, and your team reviews the draft and decides what is sent.');
-  assert.ok(subhead.split(/\s+/).length <= 50, 'the subhead stays short');
-  assert.deepEqual(await page.locator('main > section').evaluateAll(sections => sections.map(section => section.id)), ['top', 'help-before-they-ask', 'product', 'handoff', 'yours-to-run']);
-  assert.deepEqual(await page.locator('main h2').allInnerTexts(), ['Help before they ask', 'The product', 'How the handoff works', 'Yours to run']);
+  const subhead = await page.locator('.hero-sub').innerText();
+  assert.equal(subhead, 'Hand the conversation to Codex or Claude on your own computer. It finds the cause, fixes it with the tools you already use, confirms it works and writes the reply. You check it and press Send.');
+  assert.equal(subhead.split(/\s+/).length, 36, 'the subhead stays at 36 words');
+  assert.equal(await page.locator('.hero-free').innerText(), 'Free and open source.');
+  assert.equal((await page.locator('.hero-examples').innerText()).replace(/\s+/g, ' '), 'The same move for: “I never got the invite.” · “My export is stuck.” · “I can’t turn on dark mode.”');
+  assert.deepEqual(await page.locator('.hero-steps li').allInnerTexts(), ['The customer asks', 'The agent fixes it', 'You press Send']);
+  assert.deepEqual(await page.locator('.hero-copy .actions a').allInnerTexts(), ['Get the code', 'Read the docs'], 'the hero has two controls and no third');
+  assert.deepEqual(await page.locator('main > section').evaluateAll(sections => sections.map(section => section.id)), ['top', 'free', 'help-before-they-ask', 'product', 'move-in', 'yours-to-run']);
+  assert.deepEqual(await page.locator('main h2').allInnerTexts(), ['Not just better. Free.', 'Help before they ask', 'The rest of your support desk', 'Try it beside what you have', 'Yours to run']);
+  assert.equal(await page.locator('#product .section-head p').innerText(), 'Chat, email, a help centre and suggested replies, in one shared inbox.');
   assert.deepEqual(await page.locator('.parts > li h3').allInnerTexts(), ['Chat widget', 'Shared inbox', 'Help centre', 'AI-suggested replies that cite their sources']);
   assert.deepEqual(await page.locator('.parts > li > p').allInnerTexts(), [
-    'Customers reach you from your site or app.',
-    'Assignments, notes and customer context are kept together.',
-    'Publish searchable articles so customers can find answers themselves.',
-    'Your team reviews every suggestion before it is sent.',
+    'Customers reach you from your site or app, and can send files and screenshots.',
+    'Chat and email in one place, with assignments, internal notes, saved replies and the customer’s details beside every conversation.',
+    'Publish searchable articles so customers find answers themselves.',
+    'Drafted from your own articles. Pick one, edit it and send it.',
   ]);
   assert.deepEqual(await page.locator('.signals li').allInnerTexts(), ['Lingering on a page', 'Sitting idle', 'Scrolling back up', 'Pausing at checkout']);
-  const offerCopy = await page.locator('#help-before-they-ask .split-copy > p').innerText();
-  for (const phrase of ['offer help once', 'with their consent', 'stays quiet', 'human can always take over']) assert.ok(offerCopy.includes(phrase), phrase);
-  const handoffCopy = await page.locator('#handoff .split-copy p').innerText();
-  for (const phrase of ['choose the computer and the action', 'Investigate is read-only', 'Resolve allows the changes you describe', 'Resolve & reply', 'after the worker reports verified work', 'scoped to its conversation and workspace', 'use or run']) assert.ok(handoffCopy.includes(phrase), phrase);
-  assert.ok(handoffCopy.split(/\s+/).length <= 110, 'the handoff detail stays short');
+  assert.equal(await page.locator('#help-before-they-ask .split-copy > p').innerText(), 'Some customers who get stuck never write in. They just leave. When a visitor seems stuck, the widget offers a hand once, if they have agreed to it. Say no and it stays quiet. A person can always take over.');
+  assert.equal(await page.locator('#free .split-copy > p').innerText(), 'HappyToHelp is open source under the MIT licence. There are no seats to buy, no plan to outgrow and no fee for each conversation it resolves, so adding your whole team costs nothing extra. It runs in your own Cloudflare account, where hosting starts at about US$5 a month. The agent is the Codex or Claude your team already uses, and AI is paid to your provider at their price, with nothing added by us.');
+  assert.deepEqual(await page.locator('#free .proof li').allInnerTexts(), ['Seats: none.', 'Fee per resolution: none.', 'Licence: MIT.']);
+  assert.deepEqual(await page.locator('#free .actions a').allInnerTexts(), ['Get the code', 'See what you need to run it']);
+  assert.equal(await page.locator('#move-in .split-copy > p').first().innerText(), 'Keep your current helpdesk running while you try it. Nothing there changes.');
+  assert.deepEqual((await page.locator('#move-in .steps li').allInnerTexts()).map(text => text.replace(/\s+/g, ' ')), [
+    'Install it. The installer asks only for what it cannot find, and nothing is set up until you approve. Codex or Claude can fill it in.',
+    'Bring your help centre. Import your articles and categories from Zendesk, Intercom or Freshdesk. Your old helpdesk is only read, never changed, and you can run the import again to pick up new edits.',
+    'Add the chat widget. One script tag on your website.',
+  ]);
+  assert.equal(await page.locator('#move-in .split-copy > p').last().innerText(), 'Want to look around first? Every empty workspace can open a demo inbox with sample conversations.');
+  assert.deepEqual(await page.locator('#move-in .actions a').allInnerTexts(), ['Read the installation guide'], 'Move in has a text link and no pill');
+  // The billing example is gone everywhere on the page.
+  assert.doesNotMatch(await page.locator('.h2h-home').innerText(), /billing|invoice|Explain the change/i, 'the billing example is removed');
   // Truth: only Codex and Claude, run on the owner's computer, never sending or deciding by themselves, no invented access levels.
   const pageText = await page.locator('.h2h-home').innerText();
   const labels = await page.locator('figure.drawing').evaluateAll(figures => figures.map(figure => figure.getAttribute('aria-label')).join(' '));
   assert.doesNotMatch(`${pageText} ${labels}`, /Cursor|Copilot|Gemini|Windsurf|Devin|ChatGPT|Aider|Cline|autonomous|autopilot|hands-free|no human|automatically|on its own|by itself|full access|admin access|read-write|sandbox|locked down|cloud agent|hosted agent|our agents|100%|guaranteed/i, 'no claim the product cannot back');
   assert.ok(!/sends? (it|the reply|replies) (automatically|itself)/i.test(pageText));
-  const yoursCopy = await page.locator('#yours-to-run .split-copy p').innerText();
-  for (const phrase of ['free and MIT licensed', 'your own Cloudflare account', 'keep the code and the data', 'paid to the providers you choose']) assert.ok(yoursCopy.includes(phrase), phrase);
+  const yoursParagraphs = await page.locator('#yours-to-run .split-copy > p').allInnerTexts();
+  assert.deepEqual(yoursParagraphs, [
+    'Your Cloudflare account, your code, your data. Conversations and files live in your own account, and the code is yours to read, fork and change. No vendor sits between you and your customers, and there is no price to be raised.',
+    'Rather not host it yourself? Hosted options are available through Run Edit Run.',
+  ]);
+  assert.deepEqual(await page.locator('#yours-to-run .actions a').allInnerTexts(), ['Get the code', 'Read the installation guide']);
   assert.equal(await page.locator('footer').count(), 1);
   assert.deepEqual(await page.locator('footer a').allInnerTexts(), ['HappyToHelp', 'Docs', 'GitHub', 'Workspace', 'Set up', 'Log in', 'MIT licence']);
   assert.ok(!(await page.locator('[class*="village"], [class*="parallax"]').count()), 'retired homepage markup is absent');
-  checks.push('headline, handoff subhead, five sections in order (Help before they ask before the product), four product parts, signals, handoff detail and ownership copy, no unbacked claims, footer');
+  checks.push('headline, 36-word subhead, free line, examples strip and three caption steps; six sections in order (hero, Not just better. Free., Help before they ask, The rest of your support desk, Try it beside what you have, Yours to run); exact copy for each; billing example gone; no unbacked claims; footer');
 
   // Links derive from package.json repository.url.
   const repository = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).repository.url;
   const links = await page.locator('.h2h-home a').evaluateAll(elements => elements.map(el => ({ text: el.textContent.trim(), href: el.getAttribute('href') })));
-  const allowed = ['#top', '#product', repository, `${repository}/blob/main/README.md`, `${repository}/blob/main/docs/INSTALLER.md`, `${repository}/blob/main/LICENSE`, '/projects', '/setup', '/login'];
+  const allowed = ['#top', '#product', repository, `${repository}#before-you-start`, 'https://runeditrun.com', `${repository}/blob/main/README.md`, `${repository}/blob/main/docs/INSTALLER.md`, `${repository}/blob/main/LICENSE`, '/projects', '/setup', '/login'];
   assert.ok(links.every(link => allowed.includes(link.href)), JSON.stringify(links));
   const hrefOf = text => links.filter(link => link.text === text).map(link => link.href);
-  assert.deepEqual(hrefOf('Get the code'), [repository, repository, repository]);
+  assert.deepEqual(hrefOf('Get the code'), [repository, repository, repository, repository]);
   assert.deepEqual(hrefOf('Read the docs'), [`${repository}/blob/main/README.md`]);
-  assert.deepEqual(hrefOf('Read the installation guide'), [`${repository}/blob/main/docs/INSTALLER.md`]);
+  assert.deepEqual(hrefOf('Read the installation guide'), [`${repository}/blob/main/docs/INSTALLER.md`, `${repository}/blob/main/docs/INSTALLER.md`]);
+  assert.deepEqual(hrefOf('See what you need to run it'), [`${repository}#before-you-start`]);
+  assert.deepEqual(hrefOf('Run Edit Run'), ['https://runeditrun.com']);
   assert.deepEqual(hrefOf('MIT licence'), [`${repository}/blob/main/LICENSE`]);
   assert.deepEqual(hrefOf('GitHub'), [repository, repository]);
   for (const href of ['/projects', '/setup', '/login']) assert.ok(links.some(link => link.href === href), href);
-  checks.push('every link is the repository, its README, installer guide or licence, or a local workspace route');
+  checks.push('every link is the repository, its README, cost section, installer guide or licence, Run Edit Run, or a local workspace route');
 
   // One open-licensed geometric sans-serif for every piece of type, actually loaded.
   const families = await page.locator('.h2h-home').evaluate(root => {
@@ -132,44 +152,64 @@ try {
     const style = getComputedStyle(el);
     return [style.backgroundColor, style.borderTopColor, style.color].includes('rgb(143, 227, 238)') && el.getBoundingClientRect().width > 0;
   }).length));
-  assert.ok(cyanPerDrawing.length === 8 && cyanPerDrawing.every(count => count > 0), `every drawing carries a #8FE3EE accent: ${cyanPerDrawing}`);
+  assert.ok(cyanPerDrawing.length === 9 && cyanPerDrawing.every(count => count > 0), `every drawing carries a #8FE3EE accent: ${cyanPerDrawing}`);
   const buttons = await page.locator('.pill--ink').evaluateAll(els => els.map(el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color, getComputedStyle(el).borderTopLeftRadius]));
-  assert.ok(buttons.length === 3 && buttons.every(([bg, fg, radius]) => bg === 'rgb(20, 20, 20)' && fg === 'rgb(255, 255, 255)' && parseFloat(radius) >= 20), JSON.stringify(buttons));
+  assert.ok(buttons.length === 4 && buttons.every(([bg, fg, radius]) => bg === 'rgb(20, 20, 20)' && fg === 'rgb(255, 255, 255)' && parseFloat(radius) >= 20), JSON.stringify(buttons));
   checks.push('warm paper with grain, near-black ink, black pill buttons, no colour outside the drawings');
 
   // Drawings: real DOM text, one accessible label each, no raster images, legible at every width.
   assert.equal(await page.locator('img').count(), 0);
   const drawings = await page.locator('figure.drawing').evaluateAll(figures => figures.map(figure => ({ role: figure.getAttribute('role'), label: figure.getAttribute('aria-label') })));
-  assert.equal(drawings.length, 8);
+  assert.equal(drawings.length, 9);
   assert.ok(drawings.every(drawing => drawing.role === 'img' && drawing.label.length > 40), JSON.stringify(drawings));
   const heroLabel = await page.locator('.hero-art').getAttribute('aria-label');
-  for (const phrase of ['conversation', 'local agent', 'internal note', 'Local panel', 'Codex', 'suggested reply']) assert.ok(heroLabel.includes(phrase), `hero drawing label mentions ${phrase}`);
+  assert.equal(heroLabel, "Drawing of a HappyToHelp conversation. Maya Chen cannot turn on the Spanish version of her store. Codex, working on the team's own computer, has published Spanish and checked the store loads in Spanish: the Local panel shows Resolve completed and Verified, an internal note lists each step with its evidence, and the reply is in the composer, ready for the team to send.");
   assert.ok((await page.locator('.offer-art').getAttribute('aria-label')).includes('Yes please and No thanks'));
-  assert.ok((await page.locator('.task-art').getAttribute('aria-label')).includes('Investigate, Resolve and Resolve & reply'));
+  assert.equal(await page.locator('.bill-art').getAttribute('aria-label'), 'Drawing of a bill: software, team seats and resolved conversations are free; hosting is your own Cloudflare account and AI is paid to your provider at their price. Paid to HappyToHelp: $0.');
+  assert.equal(await page.locator('.import-art').getAttribute('aria-label'), 'Drawing of the help-centre import: Zendesk is chosen from Zendesk, Intercom and Freshdesk, the subdomain northwind is entered, and the import is complete with 128 articles and 9 categories.');
+  assert.equal(await page.locator('.installer-art').getAttribute('aria-label'), 'Drawing of the HappyToHelp installer: Workspace and Your account are done, and Hosting & connections is choosing to publish online with Cloudflare, the team workspace address and Cloudflare Email Sending.');
+  assert.ok((await page.locator('.reply-art').getAttribute('aria-label')).includes('citing the Languages guide as its source'));
   assert.ok(await page.locator('.drawing .d-icon').evaluateAll(icons => icons.every(icon => icon.getAttribute('aria-hidden') === 'true')));
   assert.equal(await page.locator('.drawing a, .drawing button, .drawing input').count(), 0, 'drawn controls are not interactive');
-  const heroText = await page.locator('.hero-art').innerText();
-  for (const text of ['Maya Chen', 'Local', 'Internal note', 'Work with your local agent', 'Codex', 'Claude', 'Ready', 'Workspace connection', 'Investigate completed', 'Suggested replies', 'Explain the change', 'Use', 'Evidence and details', 'Verified', 'Type your reply…', 'Send']) assert.ok(heroText.includes(text), `hero drawing shows ${text}`);
-  // One consistent job state: the finished report, never a running task beside a drafted reply, and no reply shown as sent.
-  for (const text of ['Live progress', 'Working locally', 'Reply sent', 'Cancel']) assert.ok(!heroText.includes(text), `hero drawing does not show ${text}`);
-  assert.ok(heroText.length >= 160);
+  const heroText = (await page.locator('.hero-art').innerText()).replace(/\s+/g, ' ');
+  for (const text of ['Maya Chen', 'maya@example.com', 'Open', 'Close', 'Local', '10:24 AM', 'Hi, I can’t turn on the Spanish version of my store. The language switch is greyed out and half my customers speak Spanish.', 'Codex', 'Local agent', 'Internal note', '10:31 AM',
+    'Spanish was set up but still in Draft, which kept the switch greyed out. It is now live and working.', 'Published Spanish:', 'Store settings › Languages, Spanish changed from Draft to Live', 'Checked the store in Spanish:', 'Home, product and checkout pages load in Spanish',
+    'Hi Maya, done. Spanish is live on your store now. It was still saved as a draft, so we published it and checked your shop and checkout in Spanish. Refresh and the switch is there.', 'Send',
+    'AI', 'Details', 'Work with your local agent', 'Delegate this conversation to Codex or Claude on your computer.', 'Ready', 'Codex on Mina’s Mac is ready for new work.', 'Workspace connection · 0 / 1 active tasks',
+    'Resolve completed', 'Spanish was stuck in Draft. It is now live on Maya’s store.', 'Hola', 'Suggested replies', 'Spanish is live', 'Use', 'Evidence and details', 'Verified']) assert.ok(heroText.includes(text), `hero drawing shows ${text}`);
+  // One consistent state: the finished job and the reply in the composer, never a running task, never a reply shown as sent, no placeholder.
+  for (const text of ['Live progress', 'Working locally', 'Reply sent', 'Cancel', 'Queued', 'Follow-up actions', 'New task', 'Type your reply…', 'Investigate']) assert.ok(!heroText.includes(text), `hero drawing does not show ${text}`);
+  assert.equal(heroText.split('Hi Maya, done.').length, 2, 'the reply text appears once in the hero drawing');
+  assert.equal(await page.locator('.hero-art .callout').count(), 3);
+  assert.deepEqual(await page.locator('.hero-art .callout').evaluateAll(callouts => callouts.map(callout => callout.getAttribute('aria-hidden') + callout.textContent.trim())), ['true1', 'true2', 'true3']);
+  assert.equal(await page.locator('.hero-art .hc-send .d-btn--ink').innerText(), 'Send');
+  assert.deepEqual(await page.locator('.hero-art .d-btn--active, .hero-art .hc-note, .hero-art .hl-job, .hero-art .hl-evidence .d-chip, .hero-art .hc-ring').evaluateAll(els => els.length), 5, 'cyan marks the Local button, the note, the job, Verified and the Send ring');
+  assert.ok(heroText.length >= 700);
+  const billText = (await page.locator('.bill-art').innerText()).replace(/\s+/g, ' ');
+  for (const text of ['Your HappyToHelp bill', 'Software', 'Team seats', 'Resolved conversations', 'Free', 'Hosting', 'Your Cloudflare account', 'AI', 'Your provider, at their price', 'Paid to HappyToHelp:', '$0']) assert.ok(billText.includes(text), `bill drawing shows ${text}`);
+  assert.equal(await page.locator('.bill-art .d-check').count(), 3, 'only the three free rows carry a check');
+  const importText = (await page.locator('.import-art').innerText()).replace(/\s+/g, ' ');
+  for (const text of ['Please choose which helpdesk you would like to import help articles from.', 'Zendesk', 'Intercom', 'Freshdesk', '‹ Choose another helpdesk', 'Import articles from Zendesk', 'Import uses this installation’s configured zendesk credentials. Account credentials cannot be entered here.', 'Subdomain', 'northwind', 'Import', 'Import progress', 'complete', 'Articles: 128 · Categories: 9', 'Refresh status']) assert.ok(importText.includes(text), `import drawing shows ${text}`);
+  assert.equal(await page.locator('.import-front .d-btn--off').innerText(), 'Import', 'the Import button is drawn disabled');
+  assert.equal(await page.locator('.import-art .d-btn--chosen').count(), 1, 'only Zendesk is chosen');
+  const installerText = (await page.locator('.installer-art').innerText()).replace(/\s+/g, ' ');
+  for (const text of ['Workspace', 'Your account', 'Hosting & connections', 'Install to', 'Run locally', 'Publish online with Cloudflare', 'Team workspace address', 'https://northwind-support.example.workers.dev', 'The HTTPS address your team will open to use HappyToHelp.', 'Email service', 'Cloudflare Email Sending', 'Continue']) assert.ok(installerText.includes(text), `installer drawing shows ${text}`);
+  assert.equal(await page.locator('.installer-art .ins-rail .d-check').count(), 2, 'Workspace and Your account are done');
   assert.ok((await page.locator('.offer-art').innerText()).includes('Yes please') && (await page.locator('.offer-art').innerText()).includes('No thanks'));
-  const taskText = await page.locator('.task-art').innerText();
-  for (const text of ['New task', 'Worker', 'Codex (ready)', 'Action', 'Investigate', 'Resolve', 'Resolve & reply', 'Instructions', 'A customer reply is sent only after the worker reports verified work.', 'Send task', 'Follow-up actions', 'Run']) assert.ok(taskText.includes(text), `task drawing shows ${text}`);
-  const heroWords = new Set(heroText.toLowerCase().match(/[a-z’&]+/g)), taskWords = taskText.toLowerCase().match(/[a-z’&]+/g);
-  assert.ok(taskWords.filter(word => heroWords.has(word)).length / taskWords.length < 0.7, 'the handoff detail does not repeat the hero');
   // Drawings mirror the real interface wording.
   const offerText = await page.locator('.offer-art').innerText();
   for (const text of ['Yes please', 'No thanks', 'Casey • Support assistant']) assert.ok(offerText.includes(text), text);
   const inboxNav = await page.locator('.inbox-nav li').allInnerTexts();
   assert.deepEqual(inboxNav.map(text => text.replace(/\s+/g, ' ').trim()), ['Inbox 3', 'Contacts', 'Insights', 'Settings']);
   const widgetText = await page.locator('.parts .product-art').nth(0).innerText();
-  for (const text of ['Casey • Support assistant', 'Responds instantly', 'Message...']) assert.ok(widgetText.includes(text), text);
+  for (const text of ['Casey • Support assistant', 'Responds instantly', 'Hi, how do I add my team to the account?', 'Of course. Go to Settings and choose Invite.', 'Message...', 'We use Happy to Help!']) assert.ok(widgetText.replace(/\s+/g, ' ').includes(text), text);
   const helpText = await page.locator('.parts .product-art').nth(2).innerText();
-  for (const text of ['Search the Help Center', 'Search']) assert.ok(helpText.includes(text), text);
+  for (const text of ['Northwind Help Center', 'Search the Help Center', 'Search', 'Turn on another language', 'Publish your store in Spanish, French and more.', 'Reset your password', 'Invite team members']) assert.ok(helpText.includes(text), text);
+  const inboxText = await page.locator('.inbox-art').innerText();
+  for (const text of ['Maya Chen', 'Can’t turn on Spanish', 'Where do I change my logo?', 'Assigned to Ana', 'Assigned to AI']) assert.ok(inboxText.includes(text), text);
   const replyText = await page.locator('.reply-art').innerText();
-  for (const text of ['Suggestions', 'Use when:', 'Source: Billing FAQ', 'Type your reply…', 'Send']) assert.ok(replyText.includes(text), text);
-  checks.push('eight labelled drawings built from real text mirroring the interface (Local panel, widget insight, inbox, Help Center, suggestions, New task form), no raster images');
+  for (const text of ['Casey’s Suggestions', 'Share the language guide', 'Use when: a customer asks how to add a language', 'You can add a language in Store settings › Languages, then publish it. Your customers can switch to it straight away.', 'Source: Languages guide', 'Type your reply…', 'Send']) assert.ok(replyText.includes(text), text);
+  checks.push('nine labelled drawings built from real text mirroring the interface (hero conversation with Local panel and callouts, bill, widget insight, widget, inbox, Help Center, suggestions, article import, installer), no raster images');
 
   // Layout at every width: no overflow, two-line headline on wide screens, legible drawings, nothing clipped.
   for (const width of [320, 390, 723, 768, 860, 861, 959, 1100, 1200, 1280, 1440, 1920]) {
@@ -207,6 +247,10 @@ try {
     if (heroBoxes.artWidth <= 640) assert.ok(heroBoxes.localTop >= heroBoxes.threadBottom - 16 && Math.abs(heroBoxes.localLeft - heroBoxes.threadLeft) < 20, `Local panel stacks under the conversation at ${width}px`);
     if (width === 390) {
       assert.ok(await page.locator('.hero-local').isVisible(), 'narrow hero still shows the Local panel');
+      for (const selector of ['.hl-job', '.hl-reply', '.hl-evidence']) assert.ok(await page.locator(selector).first().isVisible(), `${selector} stays at 390px`);
+      assert.equal(await page.locator('.hero-art .callout').evaluateAll(els => els.filter(el => el.getBoundingClientRect().width > 0).length), 3, 'all three numerals stay at 390px');
+      assert.ok(!(await page.locator('.hl-connection').isVisible()) && !(await page.locator('.hl-shot').isVisible()), 'the connection card and screenshot are dropped at 390px');
+      assert.ok(!(await page.locator('.import-back').isVisible()) && await page.locator('.import-front').isVisible(), 'only the front import window at 390px');
       assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
     }
     if (width === 1440) assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 4);

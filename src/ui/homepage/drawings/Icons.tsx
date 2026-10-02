@@ -15,11 +15,11 @@ const icons: Record<string, ReactNode> = {
   lock: <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
   monitor: <><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></>,
   chat: <path d="M5 5h14v10H11l-4 4v-4H5z" />,
-  shield: <path d="M12 3 5 6v5c0 4.4 3 8 7 10 4-2 7-5.6 7-10V6z" />,
-  play: <path d="M8 5v14l11-7z" />,
   paperclip: <path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  chevron: <path d="m9 6 6 6-6 6" />,
+  codex: <><rect x="3" y="4" width="18" height="16" rx="4" /><path d="m8 9.5 3 2.5-3 2.5M13 15h3.5" /></>,
   cart: <><path d="M3 4h3l2.5 11h9L20 7H7" /><circle cx="10" cy="19" r="1" /><circle cx="17" cy="19" r="1" /></>,
 };
 

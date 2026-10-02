@@ -1,6 +1,7 @@
 import { Icon } from './Icons';
 
-// The conversation's right-hand panel on the Local tab (DelegationPanel) after an Investigate task has completed.
+// The conversation's right-hand panel on the Local tab (DelegationPanel) once a Resolve task has completed: the job
+// card with its screenshot, the suggested reply (already used) and the collapsed evidence row.
 export function HeroLocal() {
   return <div className="hero-local">
     <ul className="hl-tabs"><li>AI</li><li className="is-active">Local</li><li>Details</li></ul>
@@ -13,15 +14,18 @@ export function HeroLocal() {
       </div>
       <div className="hl-job">
         <Icon name="check" />
-        <span><b>Investigate completed</b>The billing date can be moved to the 15th. An unpaid September invoice blocked the change.</span>
+        <span>
+          <b>Resolve completed</b>Spanish was stuck in Draft. It is now live on Maya’s store.
+          <span className="hl-shot"><b>Hola</b><i className="sk-line w70" /><i className="sk-line w50" /></span>
+        </span>
       </div>
       <b className="hl-heading"><Icon name="chat" />Suggested replies</b>
       <div className="hl-reply">
-        <b>Explain the change</b>
-        <p>Hi Maya, you can move your billing date to the 15th from Settings &gt; Billing. It will apply from your next cycle.</p>
-        <span className="d-btn d-btn--ink">Use</span>
+        <Icon name="chat" />
+        <span><b>Spanish is live</b><i className="sk-line w90" /><i className="sk-line w60" /></span>
+        <span className="d-btn">Use</span>
       </div>
-      <div className="hl-evidence"><span>Evidence and details</span><em className="d-chip"><Icon name="check" />Verified</em></div>
+      <div className="hl-evidence"><span><Icon name="chevron" />Evidence and details</span><em className="d-chip"><Icon name="check" />Verified</em></div>
     </div>
   </div>;
 }

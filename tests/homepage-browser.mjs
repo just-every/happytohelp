@@ -225,7 +225,7 @@ try {
   checks.push('eight labelled drawings built from real text (hero thread of six strings and 27 words, MIT licence card, checkout offer, widget, inbox, Help Center, suggestion, finished import), no raster images, no controls');
 
   // Layout at every width: no overflow, two-line headline on wide screens, legible drawings, nothing clipped.
-  for (const width of [320, 390, 723, 768, 860, 861, 959, 1100, 1200, 1280, 1440, 1920]) {
+  for (const width of [320, 390, 480, 641, 700, 723, 768, 860, 861, 959, 1100, 1200, 1280, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(150);
@@ -285,7 +285,20 @@ try {
       const frame = rect(document.querySelector('.hero-window'));
       const line = underline && rect(underline);
       const steps = rect(document.querySelector('.hero-steps'));
-      const result = { marks, line: line && { left: line.left - frame.left, right: line.right - frame.right, gap: line.top - frame.bottom, toCaptions: steps.top - line.bottom, span: frame.width },
+      // Every text line outside the drawings (headings, numerals, captions), as one rect per rendered line.
+      const lines = [];
+      const walker = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.nodeValue.trim() || node.parentElement.closest('figure.drawing')) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const r of range.getClientRects()) if (r.width && r.height) lines.push({ text: node.nodeValue.trim().slice(0, 28), left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+      }
+      const onText = [...document.querySelectorAll('figure.drawing .d-marks')].flatMap(mark => {
+        const m = rect(mark);
+        return lines.filter(t => t.left < m.right + 2 && t.right > m.left - 2 && t.top < m.bottom + 2 && t.bottom > m.top - 2).map(t => t.text);
+      });
+      const result = { marks, onText, line: line && { left: line.left - frame.left, right: line.right - frame.right, gap: line.top - frame.bottom, toCaptions: steps.top - line.bottom, span: frame.width },
         heroMarkInFrame: document.querySelectorAll('.hero-window > .d-marks').length, heroUnderlineInFrame: document.querySelectorAll('.hero-window > .d-underline').length };
       flat.remove();
       return result;
@@ -297,6 +310,7 @@ try {
       assert.ok(mark.gap >= 2 && mark.gap <= Math.max(18, 0.4 * mark.size), `a mark floats just above its frame corner at ${width}px: ${JSON.stringify(mark)}`);
       assert.ok(Math.abs(mark.across) <= 0.6, `a mark sits over its frame's right corner at ${width}px: ${JSON.stringify(mark)}`);
     }
+    assert.deepEqual(seating.onText, [], `no corner mark touches a heading, numeral or caption at ${width}px`);
     const gaps = seating.marks.map(mark => mark.gap), acrosses = seating.marks.map(mark => mark.across);
     assert.ok(Math.max(...gaps) - Math.min(...gaps) <= 8 && Math.max(...acrosses) - Math.min(...acrosses) <= 0.3, `all eight marks share one corner relation at ${width}px: ${JSON.stringify(seating.marks)}`);
     const slack = Math.max(8, 0.02 * seating.line.span);
@@ -322,7 +336,7 @@ try {
     }
     if (width === 1440) assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 4);
   }
-  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks seated alike on their frames and the hero underline spanning the frame bottom at 12 widths from 320px to 1920px');
+  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks seated alike on their frames and clear of every heading and caption, and the hero underline spanning the frame bottom at 15 widths from 320px to 1920px');
 
   // Motion: marks draw in once; reduced motion removes every animation and transition and smooth scrolling.
   await page.setViewportSize({ width: 1440, height: 900 });

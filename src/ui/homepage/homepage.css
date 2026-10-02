@@ -74,6 +74,10 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .steps b { font-weight: 600; color: var(--ink); }
 .h2h-home .proof { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 16px 32px; margin-top: clamp(40px, 5vw, 72px); padding-top: clamp(24px, 3vw, 36px); border-top: 1px solid var(--rule); font-size: clamp(1.4rem, 2.4vw, 2.1rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
 
+/* The corner marks stand up to 3em of the drawing's 13-14px scale (about 42px) above the first row of desk drawings, so
+   the heading above them keeps at least that much room plus a clear gap at every width (the 5vw space alone is 36px at
+   phone and two-column widths, which put the first drawing's mark on the heading). Rows below already have 56px. */
+.h2h-home .product .section-head { margin-bottom: max(clamp(36px, 5vw, 64px), 60px); }
 .h2h-home .parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 3vw, 44px); }
 .h2h-home .parts > li { display: flex; flex-direction: column; align-items: flex-start; }
 /* The four drawings in a row share one height (the frame stretches), so the numerals and titles under them line up. */

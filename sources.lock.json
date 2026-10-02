@@ -4113,7 +4113,7 @@
       "executable": false
     },
     "src/ui/homepage/homepage.css": {
-      "sha256": "78907efdfe0903a95afb7ce0b39e43e129904a191128975afd1d27651fb8fa8e",
+      "sha256": "c71f6152be7438ae6646ef7681089d5001cccf64d05c41c7a37a28a0bec16395",
       "executable": false
     },
     "src/ui/homepage/Homepage.tsx": {
@@ -4945,7 +4945,7 @@
       "executable": false
     },
     "tests/homepage-browser.mjs": {
-      "sha256": "411ba7dee30c49ad411ab8e15128188f3be66aad0f2a34faebe04c89923b3da7",
+      "sha256": "9ea0976265106c54c2c21784b3cbe0778021596a64b31e5375e5dce77dad9a94",
       "executable": false
     },
     "tests/homepage-source.mjs": {

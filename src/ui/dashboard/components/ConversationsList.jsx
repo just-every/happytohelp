@@ -69,7 +69,7 @@ function ConversationsList({ canTryDemo = false, hideBehindConversation = false 
                 { isInitialLoading && conversations.length === 0 && <p className="text-center" role="status">Loading conversations...</p> }
                 { !isInitialLoading && !refreshError && !hasNextPage && conversations.length === 0 && (
                     <>
-                        <p className={`conversation-empty-state${canTryDemo ? ' d-none d-xl-block' : ''}`}>No conversations match this view.</p>
+                        {!canTryDemo && <p className="conversation-empty-state">No conversations match this view.</p>}
                         {canTryDemo && <div className="conversation-empty-state d-xl-none"><DemoInboxInvitation /></div>}
                     </>
                 ) }

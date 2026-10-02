@@ -33,8 +33,7 @@ export default function DemoInboxInvitation() {
     };
 
     return <div className="demo-inbox-invitation mx-auto">
-        <p>Your inbox is ready for its first conversation.</p>
-        <p>Explore fictional customer conversations in a separate demo project.</p>
+        <p>Explore fictional conversations in a separate demo project.</p>
         <button type="button" className="btn btn-sm btn-primary" disabled={loading} onClick={openDemo}>
             {loading ? 'Opening demo inbox…' : 'Try a demo inbox'}
         </button>

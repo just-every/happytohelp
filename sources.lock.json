@@ -3224,7 +3224,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/ConversationsList.jsx": {
-      "sha256": "55d1446280651933143e9c344cdbf8809204572b1070c66c7ab4ddf4a0357751",
+      "sha256": "87d5be0cf893f61db54fbeb502f2e7cf959be4826b1628746f61e78c29cae5fc",
       "executable": false
     },
     "src/ui/dashboard/components/ConversationSuggestionCard.jsx": {
@@ -3276,7 +3276,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/DemoInboxInvitation.jsx": {
-      "sha256": "a962ab15402da46a35e3bf366e84822d49f96ad8a3a63e982ee156c2acb7d6a6",
+      "sha256": "1335ba86cd653ba483ee926ae1a167a690bcd955d149b12f132ab5d61d7105e4",
       "executable": false
     },
     "src/ui/dashboard/components/dialogTabBoundary.js": {
@@ -4156,7 +4156,7 @@
       "executable": false
     },
     "src/ui/native/pages/knowledge/KnowledgeLists.jsx": {
-      "sha256": "3f3c715fd3752122fc74927365de5418f85213f9f5204a3b6835872f4696b9ac",
+      "sha256": "2743772a4008c718e5c75531b2b52d39eb6dbdac3bde8cbb881a6d180ae23ccc",
       "executable": false
     },
     "src/ui/native/pages/KnowledgePage.jsx": {

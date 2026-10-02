@@ -48,17 +48,19 @@ include breaking changes.
 
 ### Changed
 
-- The homepage skeptic pass (owner direction 2026-10-02) shows what happens when the handoff works
-  well instead of how it is gated. The hero is now a solved case: Maya Chen cannot turn on the
-  Spanish version of her store, Codex on the team's own computer finds Spanish left in Draft,
-  publishes it, checks the store in Spanish and leaves an internal note with its evidence, and the
-  reply is in the composer, so the team presses Send (callouts 1, 2, 3 and caption steps). New
-  sections follow: “Not just better. Free.” (no seats, no fee per resolution, MIT, hosting from
-  about US$5 a month, a bill drawing ending “Paid to HappyToHelp: $0”), “Help before they ask”,
-  “The rest of your support desk”, “Try it beside what you have” (the read-only help-centre
-  article import, drawn from the real import page) and “Yours to run” (the installer drawing and
-  hosted options through Run Edit Run). “How the handoff works”, the New task form drawing, the
-  ownership checklist and the billing example are removed. The page meta description is updated.
+- The homepage clarity pass (owner direction 2026-10-02) keeps the 1, 2, 3 story and cuts everything
+  that stood between a reader and it. The hero drawing is one column: Maya cannot turn on the Spanish
+  version of her store, Codex has fixed it (a cyan note card with a check), and the reply is in the
+  composer with Send circled, with callouts 1, 2, 3 and the caption steps; the subhead is “Your Codex
+  or Claude fixes the problem and writes the reply. You press Send.” and the line under the actions
+  is “100% free and open source.” “Not just better. Free.” now says it plainly (100% free and open
+  source, free as in code and free as in cost, MIT licensed, “No seats. No plans. No fees.”) beside a
+  drawing of the MIT licence. “Help before they ask”, “The rest of your support desk” and “Try it
+  beside what you have” are trimmed to one short line each with smaller drawings, and a short
+  “Ready when you are.” band replaces “Yours to run”. The page no longer mentions prices, hosting,
+  providers or Run Edit Run, and the examples strip, the signals list, the bill, installer and Local
+  panel drawings, and the costs and hosted-options links are removed. The page meta description is
+  updated.
 - The homepage previously led with the local-agent handoff: the hero draws a conversation whose
   task Codex or Claude on the team's own computer has already completed, with the Local panel,
   internal note and drafted reply the team reviews, and a subhead that says who runs it and who

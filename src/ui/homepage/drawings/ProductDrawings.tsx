@@ -2,45 +2,39 @@ import { Icon } from './Icons';
 import { Drawing, SketchMarks, SketchWindow } from './Sketch';
 import { SuggestedReply } from './SuggestedReply';
 
-// The widget as a visitor sees it: the assistant's name and role, a reply time, the conversation and the message box.
+// The widget as a visitor sees it: who they are talking to, the conversation and the message box.
 export function ChatWidgetDrawing() {
-  return <Drawing className="product-art" label="Drawing of the chat widget inside a website: the assistant's name and role and how quickly it responds, a customer asking how to add their team, an answer, and a message box ready to reply.">
+  return <Drawing className="product-art" label="Drawing of the chat widget: a customer asks how to add their team and Casey answers.">
     <SketchMarks variant="spark" />
     <SketchWindow bar={false}>
       <div className="chat-art">
-        <div className="chat-head"><span className="d-avatar">C</span><span><b>Casey • Support assistant</b><small>Responds instantly</small></span></div>
+        <div className="chat-head"><span className="d-avatar">C</span><b>Casey</b></div>
         <div className="chat-thread">
-          <p className="d-bubble chat-visitor">Hi, how do I add my team to the account?</p>
-          <p className="d-bubble chat-agent">Of course. Go to Settings and choose Invite.</p>
+          <p className="d-bubble chat-visitor">How do I add my team?</p>
+          <p className="d-bubble chat-agent">Go to Settings and choose Invite.</p>
         </div>
-        <div className="chat-input"><span>Message...</span><Icon name="paperclip" /><span className="chat-send"><Icon name="send" /></span></div>
-        <p className="chat-foot">We use <b>Happy</b> to <b>Help</b>!</p>
+        <div className="chat-input"><span>Message...</span></div>
       </div>
     </SketchWindow>
   </Drawing>;
 }
 
 const rows = [
-  { initial: 'M', name: 'Maya Chen', time: '10:24', preview: 'Can’t turn on Spanish', tag: 'Assigned to Ana' },
-  { initial: 'T', name: 'Tom Reyes', time: '9:17', preview: 'The widget isn’t loading', tag: 'Assigned to AI' },
-  { initial: 'P', name: 'Priya Shah', time: '8:42', preview: 'Where do I change my logo?' },
+  { initial: 'M', name: 'Maya Chen', preview: 'Can’t turn on Spanish', active: true },
+  { initial: 'T', name: 'Tom Reyes', preview: 'The widget isn’t loading' },
+  { initial: 'P', name: 'Priya Shah', preview: 'Where do I change my logo?' },
 ];
 
 export function InboxDrawing() {
-  return <Drawing className="product-art" label="Drawing of the shared inbox: a sidebar with Inbox, Contacts, Insights and Settings beside a list of conversations that show who each is assigned to, a person or the AI.">
+  return <Drawing className="product-art" label="Drawing of the shared inbox with three conversations.">
     <SketchMarks variant="tick" />
-    <SketchWindow bar={false} className="inbox-window">
+    <SketchWindow bar={false}>
       <div className="inbox-art">
-        <ul className="inbox-nav">
-          <li className="is-active"><Icon name="inbox" />Inbox<em>3</em></li>
-          <li><Icon name="person" />Contacts</li>
-          <li><Icon name="sparkle" />Insights</li>
-          <li><Icon name="gear" />Settings</li>
-        </ul>
+        <b className="inbox-title">Inbox</b>
         <ul className="inbox-list">
-          {rows.map(r => <li key={r.name}>
+          {rows.map(r => <li key={r.name} className={r.active ? 'is-active' : undefined}>
             <span className="d-avatar">{r.initial}</span>
-            <span className="inbox-text"><b>{r.name}<time>{r.time}</time></b><small>{r.preview}</small>{r.tag && <em className="d-tag">{r.tag}</em>}</span>
+            <span className="inbox-text"><b>{r.name}</b><span>{r.preview}</span></span>
           </li>)}
         </ul>
       </div>
@@ -48,28 +42,23 @@ export function InboxDrawing() {
   </Drawing>;
 }
 
-const articles = [
-  { title: 'Turn on another language', summary: 'Publish your store in Spanish, French and more.' },
-  { title: 'Reset your password', summary: 'Get back into your account.' },
-  { title: 'Invite team members', summary: 'Add people and choose their roles.' },
-];
+const articles = ['Turn on another language', 'Reset your password', 'Invite team members'];
 
-// The published Help Center: brand, the search form, then articles with their summaries.
+// The published Help Center: the search field, then articles by title.
 export function HelpCentreDrawing() {
-  return <Drawing className="product-art" label="Drawing of a published Help Center: a Search the Help Center box with a Search button above three articles about languages, passwords and inviting team members.">
+  return <Drawing className="product-art" label="Drawing of a help centre with a search field and three articles.">
     <SketchMarks variant="sparkle" />
     <SketchWindow bar={false}>
       <div className="d-page help-art">
-        <b className="help-brand">Northwind Help Center</b>
-        <div className="help-search"><Icon name="search" /><span>Search the Help Center</span><em>Search</em></div>
-        <ul>{articles.map(a => <li key={a.title}><Icon name="doc" /><span><b>{a.title}</b><small>{a.summary}</small></span></li>)}</ul>
+        <div className="help-search"><Icon name="search" /><span>Search the Help Center</span></div>
+        <ul>{articles.map(title => <li key={title}><Icon name="doc" /><b>{title}</b></li>)}</ul>
       </div>
     </SketchWindow>
   </Drawing>;
 }
 
 export function SuggestedReplyDrawing() {
-  return <Drawing className="product-art reply-art" label="Drawing of an AI-suggested reply in a conversation: a suggestion card with a Use when condition and the reply, citing the Languages guide as its source, and a message box where the team edits and sends it.">
+  return <Drawing className="product-art reply-art" label="Drawing of a suggested reply drafted from the Languages guide, with its source.">
     <SketchMarks variant="spark" />
     <SuggestedReply />
   </Drawing>;

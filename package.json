@@ -39,6 +39,7 @@
     "test:workspace-shell-browser": "node tests/workspace-shell-browser.mjs",
     "test:public-help-center-browser": "node tests/public-help-center-browser.mjs",
     "test:not-found-browser": "node tests/not-found-browser.mjs",
+    "test:dev-smoke": "node tests/dev-smoke.mjs",
     "test:setup-browser": "node tests/setup-browser.mjs",
     "test:identity-browser": "node tests/identity-browser.mjs",
     "test:demo-inbox-browser": "node tests/demo-inbox-browser.mjs",

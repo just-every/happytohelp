@@ -8,18 +8,24 @@ assert.match(html, /<!doctype html>/i)
 const text = html.replace(/<[^>]*>/g, '')
 assert.match(html, /<h1[^>]+id="hero-title"[^>]*>.*Customer Support,.*Solved\./is)
 assert.ok(text.includes('Customer Support, Solved.'), 'the server HTML reads exactly "Customer Support, Solved."')
-assert.ok(text.includes('Hand the conversation to Codex or Claude on your own computer. It finds the cause, fixes it with the tools you already use, confirms it works and writes the reply. You check it and press Send.'))
-assert.ok(text.includes('Free and open source.'))
-for (const label of ['Work with your local agent', 'Internal note', 'Local agent', 'Resolve completed', 'Suggested replies', 'Evidence and details', 'Verified', 'Hi Maya, done. Spanish is live on your store now.', 'The customer asks', 'The agent fixes it', 'You press Send']) assert.ok(text.includes(label), `server-rendered hero shows ${label}`)
-const titles = ['Not just better. Free.', 'Help before they ask', 'The rest of your support desk', 'Try it beside what you have', 'Yours to run']
+assert.ok(text.includes('Your Codex or Claude fixes the problem and writes the reply. You press Send.'))
+assert.ok(text.includes('100% free and open source.'))
+for (const label of ['Maya', 'I can\u2019t turn on the Spanish version of my store.', 'Codex', 'Fixed. Spanish is live on Maya\u2019s store.', 'All done, Maya. Refresh and it\u2019s there.', 'Send', 'The customer asks', 'The agent fixes it', 'You press Send']) assert.ok(text.includes(label), `server-rendered hero shows ${label}`)
+for (const retired of ['Work with your local agent', 'Internal note', 'Local agent', 'Resolve completed', 'Evidence and details', 'Verified', 'The same move for', 'Hand the conversation to']) assert.ok(!text.includes(retired), `server-rendered hero does not show ${retired}`)
+const titles = ['Not just better. Free.', 'Help before they ask', 'The rest of your support desk', 'Try it beside what you have', 'Ready when you are.']
 const positions = titles.map(title => text.indexOf(title))
 assert.ok(positions.every((position, index) => position > 0 && (index === 0 || position > positions[index - 1])), 'sections are in order in the server HTML: ' + positions)
-for (const [id, title] of [['free', 'Not just better. Free.'], ['help-before-they-ask', 'Help before they ask'], ['product', 'The rest of your support desk'], ['move-in', 'Try it beside what you have'], ['yours-to-run', 'Yours to run']]) {
+for (const [id, title] of [['free', 'Not just better. Free.'], ['help-before-they-ask', 'Help before they ask'], ['product', 'The rest of your support desk'], ['move-in', 'Try it beside what you have'], ['get-started', 'Ready when you are.']]) {
   assert.match(html, new RegExp(`<section[^>]+id="${id}"[^>]+aria-labelledby="[^"]+"`, 'i'), id)
   assert.ok(text.includes(title), title)
 }
+assert.doesNotMatch(html, /yours-to-run/, 'the Yours to run section is gone')
+// Free means free: the server HTML carries no price, hosting, provider or Run Edit Run text, in markup or attributes.
+assert.doesNotMatch(html.replace(/<script[\s\S]*?<\/script>/gi, ''), /US\$|\$\d|Cloudflare|\bhosting\b|\bhosted\b|\bproviders?\b|run\s?edit\s?run|runeditrun/i, 'no cost, hosting, provider or Run Edit Run text in the server HTML')
+assert.ok(text.includes('HappyToHelp is 100% free and open source. Free as in code, and free as in cost.'))
+assert.match(html, /<meta[^>]+name="description"[^>]+content="Customer support, solved\. Your Codex or Claude fixes the problem and writes the reply; you press Send\. Chat widget, shared inbox, help centre and suggested replies\. 100% free and open source, MIT licensed\."/)
 assert.doesNotMatch(text, /How the handoff works|billing|invoice/i, 'the retired handoff detail and the billing example are gone')
-assert.equal((html.match(/<figure[^>]+role="img"[^>]+aria-label="[^"]{40,}"/g) || []).length, 9, 'nine labelled drawings in the server-rendered page')
+assert.equal((html.match(/<figure[^>]+role="img"[^>]+aria-label="[^"]{40,}"/g) || []).length, 8, 'eight labelled drawings in the server-rendered page')
 assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic|https?:\/\/[^"]*\.(?:woff2?|css|js)\b/i, 'no third-party font, stylesheet or script')
 assert.match(html, /<link[^>]+rel="preload"[^>]+href="\/fonts\/outfit\/outfit-latin-wght-normal\.woff2"/)
 for (const font of ['/fonts/outfit/outfit-latin-wght-normal.woff2', '/fonts/outfit/outfit-latin-ext-wght-normal.woff2']) {

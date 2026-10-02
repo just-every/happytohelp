@@ -10,15 +10,15 @@ All of the following are owner-generated or owner-supplied and are covered by
 the root MIT licence like the rest of the source:
 
 - **Homepage drawings** (owner approval 2026-10-01, handoff-first order
-  2026-10-01): the hero handoff (a solved conversation with its internal note,
-  the reply in the composer and the Local panel), the bill, the widget offer, the four
-  product drawings, the article import and the installer step are first-party React components, HTML and
+  2026-10-01): the hero handoff (a solved conversation: the customer's
+  message, Codex's note and the reply in the composer), the MIT licence card, the widget offer, the four
+  product drawings and the finished article import are first-party React components, HTML and
   inline SVG in `src/ui/homepage/drawings/` styled by
   `src/ui/homepage/drawings.css`. They were drawn as real DOM text from the
   owner-approved design direction and from this repository's own dashboard and
   widget components (labels, structure and states), not from screenshots; no
   screenshot is distributed. No raster image, third-party illustration or logo
-  is used; Codex, Claude and Cloudflare are named in text only.
+  is used; Codex and Claude are named in text only.
 - **HappyToHelp mark**: `public/homepage/media/brands/happytohelp-favicon.png`
   (homepage favicon) and `public/img/icon.svg` (dashboard mark). The favicon's
   SHA-256, byte count and origin are recorded in

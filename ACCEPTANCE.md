@@ -10,14 +10,15 @@ outside this edition's scope.
 
 The homepage evidence (`tests/homepage-browser.mjs`, `tests/public-site-runtime.mjs`,
 `tests/homepage-source.mjs`) must cover the exact “Customer Support, Solved.”
-headline and the 36-word subhead, the six sections in order (hero, Not just
+headline and the 14-word subhead, the six sections in order (hero, Not just
 better. Free., Help before they ask, The rest of your support desk, Try it beside
-what you have, Yours to run), the hero drawing of a conversation the connected
-Codex or Claude has already solved (Resolve completed and Verified in its Local
-panel, an internal note listing each action with evidence, the reply in the
-composer ready for Send, three numbered callouts and the caption steps), the
-bill, import and installer drawings, the labelled drawings built
-from real text that mirror the interface, the single self-hosted Outfit typeface with no third-party request, the monochrome page chrome
+what you have, Ready when you are.), the one-column hero drawing of a conversation
+the connected Codex or Claude has already fixed (Maya's message, Codex's note, the
+reply in the composer ready for Send, three numbered callouts and the caption
+steps, six strings and at least 15px at 1440), the MIT licence, offer, product and
+import drawings, the absence of any price, hosting, provider or Run Edit Run text,
+the labelled drawings built from real text, the single self-hosted Outfit typeface
+with no third-party request, the monochrome page chrome
 with colour only inside the drawings, repository-derived navigation destinations,
 layout without horizontal overflow from 320px to 1920px, and reduced-motion
 behavior (owner approval 2026-10-01).

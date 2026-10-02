@@ -72,22 +72,20 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   prefix is reserved for inbound claims and refused by the message API.
   Payment, checkout, Stripe and balance behavior are outside this edition.
 - **PUBLIC-001 — Public product source.** The approved
-  “Customer Support, Solved.” homepage (owner approval 2026-10-01, skeptic pass
+  “Customer Support, Solved.” homepage (owner approval 2026-10-01, clarity pass
   2026-10-02) is the real public `/` experience, in this order: the hero, which
-  shows a problem already solved (a customer cannot turn on the Spanish version
-  of her store; Codex or Claude on the team's own computer found Spanish left in
-  Draft, published it, checked the store in Spanish and left an internal note
-  with its evidence, and the suggested reply sits in the composer, so the team
-  only checks it and presses Send) with the caption steps “The customer asks”,
-  “The agent fixes it” and “You press Send”; “Not just better. Free.” (no seats,
-  no fee per resolution, MIT, hosting from about US$5 a month in the owner's own
-  Cloudflare account, AI paid to the owner's provider, and a bill drawing ending
-  “Paid to HappyToHelp: $0”); “Help before they ask”; “The rest of your support
-  desk” (chat widget, shared inbox, help centre, AI-suggested replies that cite
-  their sources); “Try it beside what you have” (install, import help-centre
-  articles and categories from Zendesk, Intercom or Freshdesk by read-only
-  requests, add the widget, demo inbox); “Yours to run” (the installer's Hosting
-  & connections step, and hosted options through Run Edit Run); and the footer.
+  shows a problem already solved in one column (a customer, Maya, cannot turn on
+  the Spanish version of her store; Codex has fixed it and left a note; the reply
+  is in the composer and only Send is left) beside the subhead “Your Codex or
+  Claude fixes the problem and writes the reply. You press Send.”, the line
+  “100% free and open source.” and the caption steps “The customer asks”, “The
+  agent fixes it” and “You press Send”; “Not just better. Free.” (100% free and
+  open source, free as in code and free as in cost, MIT licensed, “No seats. No
+  plans. No fees.”, with the MIT licence drawn); “Help before they ask”; “The rest
+  of your support desk” (chat widget, shared inbox, help centre, suggested
+  replies); “Try it beside what you have” (install, bring the help centre from
+  Zendesk, Intercom or Freshdesk, add the chat widget); “Ready when you are.”; and
+  the footer. The page carries no price, hosting or provider line and no plug for any other service.
   The drawings mirror the real interface and make no claim the product cannot
   back; conversation, ticket-history and automation import, reporting and
   compliance claims are deliberately absent. It is a warm off-white page in one geometric sans-serif

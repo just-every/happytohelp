@@ -160,6 +160,10 @@ against a local native preview:
 `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and
 `node tests/public-site-runtime.mjs` with the same origin, after
 `pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`;
+`pnpm run dev` (`vite dev`) needs the same `pnpm run setup -- --local` first: an unknown one-segment
+path such as `/does-not-exist` looks up a project of that name, so on an unmigrated local D1 it answers 500
+(`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs`
+checks `/`, `/login` and `/does-not-exist` (200, 200, 404) against a running dev server and names that cause.
 `node tests/independent-browser.mjs` runs the homepage and setup checks against
 the delivery artifact after `node scripts/build-delivery-artifact.mjs`.
 `pnpm run test:reproducible-build` (about 90 seconds) checks that the delivery

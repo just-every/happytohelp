@@ -57,10 +57,6 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .hero-sub { margin-top: 28px; max-width: 26em; font-size: clamp(1.05rem, 1.3vw, 1.25rem); line-height: 1.55; color: var(--ink-soft); }
 .h2h-home .hero-copy .actions { margin-top: 32px; }
 .h2h-home .hero-free { margin-top: 22px; font-size: 1rem; font-weight: 500; }
-.h2h-home .hero-examples { margin-top: 14px; font-size: 0.875rem; line-height: 1.6; color: var(--ink-soft); }
-.h2h-home .hero-examples b { font-weight: 500; color: var(--ink); }
-.h2h-home .hero-examples span { white-space: nowrap; }
-.h2h-home .hero-examples i { font-style: normal; }
 .h2h-home .hero-stage { min-width: 0; }
 .h2h-home .hero-steps { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 28px; margin-top: 4px; counter-reset: step; font-size: 1.05rem; }
 .h2h-home .hero-steps li { display: inline-flex; align-items: center; gap: 10px; counter-increment: step; }
@@ -70,11 +66,8 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .section { padding: clamp(56px, 8vw, 120px) 0; }
 .h2h-home .section-head { max-width: 46rem; margin-bottom: clamp(36px, 5vw, 64px); }
 .h2h-home h2 { font-size: clamp(2.2rem, 4.2vw, 3.7rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.03em; text-wrap: balance; }
-.h2h-home .section-head p, .h2h-home .split-copy > p { margin-top: 20px; font-size: clamp(1.1rem, 1.5vw, 1.35rem); line-height: 1.55; color: var(--ink-soft); }
+.h2h-home .split-copy > p { margin-top: 20px; font-size: clamp(1.1rem, 1.5vw, 1.35rem); line-height: 1.55; color: var(--ink-soft); }
 .h2h-home .split-copy > p { max-width: 28em; }
-.h2h-home .split-copy > p + p, .h2h-home .split-copy > .steps + p { margin-top: 28px; }
-.h2h-home .inline-link { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 4px; transition: text-decoration-color 0.18s; }
-.h2h-home .inline-link:hover { text-decoration-color: var(--ink); }
 .h2h-home .steps { display: grid; gap: 18px; margin-top: 26px; counter-reset: move; }
 .h2h-home .steps li { position: relative; padding-left: 46px; max-width: 28em; font-size: 1.05rem; line-height: 1.5; color: var(--ink-soft); counter-increment: move; }
 .h2h-home .steps li::before { content: counter(move); position: absolute; left: 0; top: -1px; display: grid; place-items: center; width: 30px; height: 30px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 0.9rem; font-weight: 500; color: var(--ink); }
@@ -90,9 +83,10 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 
 .h2h-home .split { display: grid; grid-template-columns: minmax(0, 0.44fr) minmax(0, 0.56fr); align-items: center; gap: clamp(32px, 6vw, 96px); }
 .h2h-home .split--reverse .drawing { order: -1; }
-.h2h-home .signals { display: grid; grid-template-columns: repeat(2, auto); justify-content: start; gap: 12px 28px; margin-top: 30px; }
-.h2h-home .signals li { position: relative; padding-left: 22px; font-size: 1.05rem; }
-.h2h-home .signals li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 9px; height: 9px; border: 1.5px solid var(--ink); border-radius: 50%; }
+
+/* Ready when you are: a short centred closing band */
+.h2h-home .get-started { padding: clamp(48px, 7vw, 104px) 0 clamp(24px, 4vw, 56px); text-align: center; }
+.h2h-home .get-started .actions { justify-content: center; margin-top: 32px; }
 
 /* Motion: the only animations are the one-time draw-in of the sketch marks and button colour changes. */
 @media (prefers-reduced-motion: reduce) {
@@ -113,7 +107,6 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
   .h2h-home .hero, .h2h-home .split { grid-template-columns: minmax(0, 1fr); }
   .h2h-home .split--reverse .drawing { order: 0; }
   .h2h-home .hero { padding-top: 24px; }
-  .h2h-home .hero-examples { font-size: 0.9375rem; }
   .h2h-home .site-header { height: 76px; }
 }
 @media (max-width: 640px) {
@@ -124,10 +117,8 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
   .h2h-home .site-header nav .pill { margin-left: auto; }
   .h2h-home { font-size: 17px; }
   .h2h-home .parts { grid-template-columns: minmax(0, 1fr); }
-  .h2h-home .signals { grid-template-columns: minmax(0, 1fr); }
   .h2h-home .proof { grid-template-columns: minmax(0, 1fr); }
   .h2h-home .hero-steps { flex-direction: column; align-items: flex-start; padding-left: 4px; margin-top: 12px; }
-  .h2h-home .hero-examples span { white-space: normal; }
   .h2h-home .pill--large { min-height: 56px; padding: 0 30px; font-size: 18px; }
   .h2h-home .site-footer { flex-direction: column; align-items: flex-start; }
 }

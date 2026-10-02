@@ -44,7 +44,9 @@ test('homepage derives its source and documentation links from package.json', as
   assert.match(module, /import \{ repository \} from '\.\.\/\.\.\/\.\.\/package\.json'/);
   assert.match(module, /sourceUrl = repository\.url/);
   const components = (await readdir(new URL('../src/ui/homepage', import.meta.url), { recursive: true })).filter(file => /\.tsx?$/.test(file)).map(file => `src/ui/homepage/${file}`);
-  assert.ok(components.includes('src/ui/homepage/Hero.tsx') && components.includes('src/ui/homepage/YoursToRun.tsx'));
+  assert.ok(components.includes('src/ui/homepage/Hero.tsx') && components.includes('src/ui/homepage/GetStarted.tsx') && components.includes('src/ui/homepage/drawings/LicenceDrawing.tsx'));
+  assert.ok(!components.some(file => /YoursToRun/.test(file)), 'the retired Yours to run section stays removed');
+  assert.ok(!/costsUrl|hostedUrl|runeditrun/i.test(module), 'the homepage links no costs or hosted-options address');
   for (const file of [...components, 'tests/homepage-browser.mjs']) {
     assert.ok(!/https:\/\/github\.com\/[^'"`\s]+/.test(await read(file)), `${file} must not hard-code a repository URL`);
   }

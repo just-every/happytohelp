@@ -4053,7 +4053,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings.css": {
-      "sha256": "296bf19e8109b29736aba1e600804169c2f67fd6a7be02545d84371a0dadced7",
+      "sha256": "07899b9bbfea9159488bbab350ab6bc69904885e8d768b1c9c8758f0baaff58f",
       "executable": false
     },
     "src/ui/homepage/drawings/Callout.tsx": {
@@ -4089,7 +4089,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings/Sketch.tsx": {
-      "sha256": "eafee9d34321d643d416db20b38935f0e55ff48dea0febd34f793125d219077a",
+      "sha256": "e0872aa3db4f8e986746498a773f7d8e2b4afc2d6fa61f9652ecce4be1e65973",
       "executable": false
     },
     "src/ui/homepage/drawings/SuggestedReply.tsx": {
@@ -4945,7 +4945,7 @@
       "executable": false
     },
     "tests/homepage-browser.mjs": {
-      "sha256": "e8b66266977eda2b4bc93680d03ac33836f4115213a9fedd9855a184dea3f7a2",
+      "sha256": "6c1867b5c6e543aa8bf1009e14f4eb5811d61ee398207dbf376812e402be8d02",
       "executable": false
     },
     "tests/homepage-source.mjs": {

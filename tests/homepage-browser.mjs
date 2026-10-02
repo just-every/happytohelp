@@ -225,6 +225,7 @@ try {
   checks.push('eight labelled drawings built from real text (hero thread of six strings and 27 words, MIT licence card, checkout offer, widget, inbox, Help Center, suggestion, finished import), no raster images, no controls');
 
   // Layout at every width: no overflow, two-line headline on wide screens, legible drawings, nothing clipped.
+  const markOffsets = new Map(); // each mark's origin offset at the first width, to hold every other width to it
   for (const width of [320, 390, 480, 641, 700, 723, 768, 860, 861, 959, 1100, 1200, 1280, 1366, 1440, 1680, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -274,12 +275,31 @@ try {
       flat.textContent = '.hero-window { transform: none !important; }';
       document.head.appendChild(flat);
       const rect = el => { const r = el.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height }; };
+      // Each stroke is sampled along its centre line, through the element's screen matrix. The corner is the frame's top-right
+      // border-box corner; a stroke's inner end is its sample nearest that corner, and the mark's origin is the mean of them.
       const marks = [...document.querySelectorAll('figure.drawing')].map(figure => {
         const mark = figure.querySelector('.d-marks');
         const frame = rect(figure.querySelector('.d-window'));
+        const corner = [frame.right, frame.top];
         const m = rect(mark);
-        const size = Math.max(m.width, m.height);
-        return { name: figure.getAttribute('aria-label').slice(0, 28), size, gap: frame.top - m.bottom, across: ((m.left + m.right) / 2 - frame.right) / size };
+        const strokes = [...mark.querySelectorAll('path')].map(path => {
+          const matrix = path.getScreenCTM(), total = path.getTotalLength();
+          return Array.from({ length: 121 }, (_, i) => { const p = path.getPointAtLength((total * i) / 120); return [matrix.a * p.x + matrix.c * p.y + matrix.e, matrix.b * p.x + matrix.d * p.y + matrix.f]; });
+        });
+        const half = (parseFloat(getComputedStyle(mark).strokeWidth) * mark.getScreenCTM().a) / 2;
+        const near = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+        const inner = strokes.map(points => points.reduce((best, p) => (near(p, corner) < near(best, corner) ? p : best)));
+        const origin = [inner.reduce((sum, p) => sum + p[0], 0) / inner.length, inner.reduce((sum, p) => sum + p[1], 0) / inner.length];
+        const all = strokes.flat();
+        const ink = { left: Math.min(...all.map(p => p[0])) - half, right: Math.max(...all.map(p => p[0])) + half, top: Math.min(...all.map(p => p[1])) - half, bottom: Math.max(...all.map(p => p[1])) + half };
+        // Distance from the ink (less half the stroke) to the frame rectangle; negative means inside it.
+        const clearance = Math.min(...all.map(p => { const out = [frame.left - p[0], p[0] - frame.right, frame.top - p[1], p[1] - frame.bottom]; const dx = Math.max(out[0], out[1], 0), dy = Math.max(out[2], out[3], 0); return (dx || dy ? Math.hypot(dx, dy) : Math.max(...out)) - half; }));
+        const directions = strokes.map((points, i) => {
+          const outer = points.reduce((best, p) => (near(p, origin) > near(best, origin) ? p : best));
+          return { length: near(outer, origin), degrees: (Math.atan2(origin[1] - outer[1], outer[0] - origin[0]) * 180) / Math.PI, innerFromOrigin: near(inner[i], origin) };
+        });
+        return { name: figure.getAttribute('aria-label').slice(0, 28), size: Math.max(ink.right - ink.left, ink.bottom - ink.top), box: Math.max(m.width, m.height),
+          dx: origin[0] - corner[0], dy: corner[1] - origin[1], left: ink.left - corner[0], bottom: ink.bottom - corner[1], clearance, directions };
       });
       const underline = document.querySelector('.hero-window > .d-underline');
       const frame = rect(document.querySelector('.hero-window'));
@@ -306,13 +326,26 @@ try {
     assert.equal(seating.marks.length, 8, `eight framed marks at ${width}px`);
     assert.equal(seating.heroMarkInFrame, 1, 'the hero tick is a child of the tilted frame, so it keeps the frame corner at every tilt');
     assert.equal(seating.heroUnderlineInFrame, 1, 'the hero underline is a child of the tilted frame, so it keeps the frame tilt');
+    // Each mark reads as emphasis lines radiating out of its frame's top-right corner: the strokes' inner ends gather on an
+    // origin 3-6px right of and above the corner (0.5px of slack), every stroke leaves it up, up-right or right, the ink lies
+    // above-and-right of the corner and never touches the frame, and every mark has the same offset at every width.
     for (const mark of seating.marks) {
-      assert.ok(mark.gap >= 2 && mark.gap <= Math.max(18, 0.4 * mark.size), `a mark floats just above its frame corner at ${width}px: ${JSON.stringify(mark)}`);
-      assert.ok(Math.abs(mark.across) <= 0.6, `a mark sits over its frame's right corner at ${width}px: ${JSON.stringify(mark)}`);
+      const where = `${mark.name} at ${width}px: ${JSON.stringify(mark)}`;
+      assert.ok(mark.dx >= 2.5 && mark.dx <= 6.5 && mark.dy >= 2.5 && mark.dy <= 6.5, `the mark's origin sits 3-6px right of and above its frame corner, ${where}`);
+      assert.ok(mark.directions.length >= 2, `a mark has at least two strokes, ${where}`);
+      for (const stroke of mark.directions) {
+        assert.ok(stroke.innerFromOrigin <= 4, `every stroke starts within 4px of the mark's origin, ${where}`);
+        assert.ok(stroke.length < 2.5 || (stroke.degrees >= -5 && stroke.degrees <= 95), `every stroke leaves the origin up, up-right or right, ${where}`);
+      }
+      assert.ok(mark.left >= -4 && mark.bottom <= 4, `the mark's ink lies above and right of the corner, ${where}`);
+      assert.ok(mark.clearance >= 2, `no stroke comes within 2px of the frame, ${where}`);
+      assert.ok(mark.size >= 10, `a mark never shrinks below 10px, ${where}`);
+      const first = markOffsets.get(mark.name) || markOffsets.set(mark.name, { dx: mark.dx, dy: mark.dy, size: mark.size }).get(mark.name);
+      assert.ok(Math.abs(mark.dx - first.dx) <= 2 && Math.abs(mark.dy - first.dy) <= 2, `a mark keeps its corner offset at every width, ${where} against ${JSON.stringify(first)}`);
     }
     assert.deepEqual(seating.onText, [], `no corner mark touches a heading, numeral or caption at ${width}px`);
-    const gaps = seating.marks.map(mark => mark.gap), acrosses = seating.marks.map(mark => mark.across);
-    assert.ok(Math.max(...gaps) - Math.min(...gaps) <= 8 && Math.max(...acrosses) - Math.min(...acrosses) <= 0.3, `all eight marks share one corner relation at ${width}px: ${JSON.stringify(seating.marks)}`);
+    const spread = values => Math.max(...values) - Math.min(...values);
+    assert.ok(spread(seating.marks.map(mark => mark.dx)) <= 2 && spread(seating.marks.map(mark => mark.dy)) <= 2, `all eight marks share one corner offset at ${width}px: ${JSON.stringify(seating.marks.map(({ name, dx, dy }) => ({ name, dx, dy })))}`);
     const slack = Math.max(8, 0.02 * seating.line.span);
     assert.ok(Math.abs(seating.line.left) <= slack && Math.abs(seating.line.right) <= slack, `the hero underline runs from the frame's bottom-left to its bottom-right corner at ${width}px: ${JSON.stringify(seating.line)}`);
     assert.ok(seating.line.gap >= 6 && seating.line.gap <= 36 && seating.line.toCaptions >= 6, `the hero underline sits a steady distance under the frame and clear of the captions at ${width}px: ${JSON.stringify(seating.line)}`);
@@ -354,7 +387,7 @@ try {
   }
   checks.push('the four desk drawings end on one line, with their numerals and titles on one baseline, at every four-up width, and the three hero captions are one row or one per line from 600px to 1366px in 20px steps');
 
-  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks seated alike on their frames and clear of every heading and caption, and the hero underline spanning the frame bottom at 17 widths from 320px to 1920px');
+  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks radiating from the top-right corners of their frames at one offset, scaled only down in narrow gutters, and clear of every heading and caption, and the hero underline spanning the frame bottom at 17 widths from 320px to 1920px');
 
   // Motion: marks draw in once; reduced motion removes every animation and transition and smooth scrolling.
   await page.setViewportSize({ width: 1440, height: 900 });

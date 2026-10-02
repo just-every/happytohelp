@@ -19,15 +19,20 @@
 .h2h-home .d-bar i { width: 0.65em; height: 0.65em; border-radius: 50%; background: var(--d-ink); }
 .h2h-home .d-page { padding: 1.3em; }
 
-/* Marks around the drawings. A mark is seated on the top-right corner of its frame: its box is the tight ink box (see
-   SketchMarks), its bottom edge floats a tenth of its own size above the frame's top edge, and it overshoots the frame's
-   right edge by a tenth. The containing box is the frame itself: the figure (which has no padding of its own) for the
-   desk drawings, the tilted window for the hero (--bw is that window's border, which the padding box leaves out). */
-.h2h-home .d-marks { --unit: 0.1286em; --mark-w: calc(var(--unit) * var(--w)); position: absolute; bottom: calc(100% + var(--bw, 0px) + var(--mark-w) * 0.1); right: calc(var(--mark-w) * -0.1 - var(--bw, 0px)); width: var(--mark-w); height: auto; overflow: visible; color: var(--d-ink); pointer-events: none; }
+/* Marks around the drawings: emphasis strokes radiating out of the frame's top-right corner. The svg is positioned by the
+   mark's ORIGIN (the mean of its strokes' inner ends, see marks.ts): that point sits --mark-off up and right of the corner
+   point, the same for every mark at every width. The containing box is the frame itself: the figure (which has no padding of
+   its own) for the desk drawings, the tilted window for the hero, so the mark rides its tilt (--bw is that window's border,
+   which the padding box leaves out). --unit is the size of one mark unit; it shrinks about the origin, so a narrow gutter
+   only draws the strokes shorter: the mark's reach right of its origin must fit between the corner offset and the page edge. */
+.h2h-home .d-marks {
+  --mark-off: 4.5px; --unit-max: 1.45px;
+  --unit: min(var(--unit-max), calc((var(--gutter) - var(--mark-off) - 3px) / var(--mark-reach)));
+  position: absolute; width: calc(var(--unit) * var(--mark-w)); height: auto; overflow: visible; color: var(--d-ink); pointer-events: none;
+  left: calc(100% + var(--bw, 0px) + var(--mark-off) - var(--unit) * var(--mark-ox));
+  bottom: calc(100% + var(--bw, 0px) + var(--mark-off) - var(--unit) * var(--mark-below));
+}
 .h2h-home .d-marks path { stroke-dasharray: 1; stroke-dashoffset: 0; }
-.h2h-home .d-marks--spark { --w: 21.6; }
-.h2h-home .d-marks--sparkle { --w: 22.6; }
-.h2h-home .d-marks--tick { --w: 25.6; }
 @media (prefers-reduced-motion: no-preference) {
   .h2h-home .d-marks path { animation: h2h-draw 0.9s ease-out 0.2s both; }
 }
@@ -55,7 +60,7 @@
 .h2h-home .hero-window { overflow: visible; font-size: max(2.25cqw, 15.5px); border-width: 2px; border-radius: 1.3em 1.1em 1.2em 1.1em / 1.1em 1.3em 1.1em 1.2em; box-shadow: 0 1.4em 2.4em rgba(20, 20, 20, 0.07), 1px 2px 0 rgba(20, 20, 20, 0.18); --bw: 2px; transform: rotate(-1.5deg); transform-origin: 40% 50%; }
 .h2h-home .hero-window .d-bar { height: 2.9em; border-bottom-width: 2px; padding: 0 1.1em; }
 .h2h-home .hero-window .d-bar i { width: 0.7em; height: 0.7em; }
-.h2h-home .hero-art .d-marks { --unit: calc(clamp(40px, 6cqw, 56px) / 28); }
+.h2h-home .hero-art .d-marks { --unit-max: 1.6px; }
 /* The underline runs the frame's full bottom edge, a fixed distance below it, and tilts with the frame. */
 .h2h-home .d-underline { position: absolute; top: 100%; left: calc(var(--bw) * -1); width: calc(100% + var(--bw) * 2); height: 0.6em; margin-top: calc(var(--bw) + 0.8em); color: #55554f; pointer-events: none; }
 

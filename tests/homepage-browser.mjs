@@ -267,6 +267,42 @@ try {
       flat.remove();
       return measured;
     });
+    // Corner marks and the hero underline are seated on their own frame, the same way at every width. Measured flat so the
+    // hero's tilt does not blur the numbers; the structure check below is what makes them follow the tilt.
+    const seating = await page.evaluate(() => {
+      const flat = document.createElement('style');
+      flat.textContent = '.hero-window { transform: none !important; }';
+      document.head.appendChild(flat);
+      const rect = el => { const r = el.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height }; };
+      const marks = [...document.querySelectorAll('figure.drawing')].map(figure => {
+        const mark = figure.querySelector('.d-marks');
+        const frame = rect(figure.querySelector('.d-window'));
+        const m = rect(mark);
+        const size = Math.max(m.width, m.height);
+        return { name: figure.getAttribute('aria-label').slice(0, 28), size, gap: frame.top - m.bottom, across: ((m.left + m.right) / 2 - frame.right) / size };
+      });
+      const underline = document.querySelector('.hero-window > .d-underline');
+      const frame = rect(document.querySelector('.hero-window'));
+      const line = underline && rect(underline);
+      const steps = rect(document.querySelector('.hero-steps'));
+      const result = { marks, line: line && { left: line.left - frame.left, right: line.right - frame.right, gap: line.top - frame.bottom, toCaptions: steps.top - line.bottom, span: frame.width },
+        heroMarkInFrame: document.querySelectorAll('.hero-window > .d-marks').length, heroUnderlineInFrame: document.querySelectorAll('.hero-window > .d-underline').length };
+      flat.remove();
+      return result;
+    });
+    assert.equal(seating.marks.length, 8, `eight framed marks at ${width}px`);
+    assert.equal(seating.heroMarkInFrame, 1, 'the hero tick is a child of the tilted frame, so it keeps the frame corner at every tilt');
+    assert.equal(seating.heroUnderlineInFrame, 1, 'the hero underline is a child of the tilted frame, so it keeps the frame tilt');
+    for (const mark of seating.marks) {
+      assert.ok(mark.gap >= 2 && mark.gap <= Math.max(18, 0.4 * mark.size), `a mark floats just above its frame corner at ${width}px: ${JSON.stringify(mark)}`);
+      assert.ok(Math.abs(mark.across) <= 0.6, `a mark sits over its frame's right corner at ${width}px: ${JSON.stringify(mark)}`);
+    }
+    const gaps = seating.marks.map(mark => mark.gap), acrosses = seating.marks.map(mark => mark.across);
+    assert.ok(Math.max(...gaps) - Math.min(...gaps) <= 8 && Math.max(...acrosses) - Math.min(...acrosses) <= 0.3, `all eight marks share one corner relation at ${width}px: ${JSON.stringify(seating.marks)}`);
+    const slack = Math.max(8, 0.02 * seating.line.span);
+    assert.ok(Math.abs(seating.line.left) <= slack && Math.abs(seating.line.right) <= slack, `the hero underline runs from the frame's bottom-left to its bottom-right corner at ${width}px: ${JSON.stringify(seating.line)}`);
+    assert.ok(seating.line.gap >= 6 && seating.line.gap <= 36 && seating.line.toCaptions >= 6, `the hero underline sits a steady distance under the frame and clear of the captions at ${width}px: ${JSON.stringify(seating.line)}`);
+
     // One column of three stacked, left-aligned elements with room between them; Send sits inside the composer after the reply.
     assert.ok(hero.message.bottom <= hero.note.top - (width >= 1000 ? 28 : 8) && hero.note.bottom <= hero.composer.top - (width >= 1000 ? 28 : 8), `the thread elements are spaced apart at ${width}px: ${JSON.stringify(hero)}`);
     assert.ok(Math.abs(hero.message.left - hero.note.left) <= 14 && Math.abs(hero.note.left - hero.composer.left) <= 14, `the thread is left-aligned at ${width}px`);
@@ -286,7 +322,7 @@ try {
     }
     if (width === 1440) assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 4);
   }
-  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero) and contained marks at 12 widths from 320px to 1920px');
+  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks seated alike on their frames and the hero underline spanning the frame bottom at 12 widths from 320px to 1920px');
 
   // Motion: marks draw in once; reduced motion removes every animation and transition and smooth scrolling.
   await page.setViewportSize({ width: 1440, height: 900 });

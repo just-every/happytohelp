@@ -76,7 +76,8 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 
 .h2h-home .parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 3vw, 44px); }
 .h2h-home .parts > li { display: flex; flex-direction: column; align-items: flex-start; }
-.h2h-home .parts .drawing { width: 100%; margin-bottom: 30px; }
+/* The four drawings in a row share one height (the frame stretches), so the numerals and titles under them line up. */
+.h2h-home .parts .drawing { flex: 1 0 auto; width: 100%; margin-bottom: 30px; }
 .h2h-home .step { display: inline-grid; place-items: center; width: 32px; height: 32px; margin-bottom: 14px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 15px; font-weight: 500; }
 .h2h-home h3 { font-size: 1.4rem; font-weight: 500; line-height: 1.2; letter-spacing: -0.015em; }
 .h2h-home .parts > li > p { margin-top: 10px; font-size: 1.05rem; line-height: 1.5; color: var(--ink-soft); }

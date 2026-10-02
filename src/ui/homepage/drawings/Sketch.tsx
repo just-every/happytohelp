@@ -4,13 +4,16 @@ import type { ReactNode } from 'react';
 export type MarksVariant = 'spark' | 'sparkle' | 'tick';
 
 // Short hand-drawn strokes. Pure decoration; the draw-in animation is disabled for reduced motion.
+// Each viewBox is the tight box of its own strokes (plus half the 1.6 stroke width), so the svg box is the ink box and
+// CSS can seat every variant on its frame's top-right corner the same way. Keep the --w values in drawings.css in step.
 export function SketchMarks({ variant = 'spark' }: { variant?: MarksVariant }) {
   const paths: Record<MarksVariant, string[]> = {
     spark: ['M2 12 8 4', 'M12 10l6-5', 'M14 20h8'],
     sparkle: ['M10 2c.6 4 2 5.4 6 6-4 .6-5.4 2-6 6-.6-4-2-5.4-6-6 4-.6 5.4-2 6-6z', 'M20 16l5-1'],
     tick: ['M5 15 3 5', 'M13 15l8-7', 'M19 24h8'],
   };
-  return <svg className={`d-marks d-marks--${variant}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+  const viewBox: Record<MarksVariant, string> = { spark: '1.2 3.2 21.6 17.6', sparkle: '3.2 1.2 22.6 15.6', tick: '2.2 4.2 25.6 20.6' };
+  return <svg className={`d-marks d-marks--${variant}`} viewBox={viewBox[variant]} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
     {paths[variant].map(d => <path key={d} d={d} pathLength={1} />)}
   </svg>;
 }

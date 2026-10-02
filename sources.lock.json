@@ -4053,7 +4053,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings.css": {
-      "sha256": "0678ba556d835da6dce48da00d383a8deb158d4f5dde28372037bcdb32a2045b",
+      "sha256": "296bf19e8109b29736aba1e600804169c2f67fd6a7be02545d84371a0dadced7",
       "executable": false
     },
     "src/ui/homepage/drawings/Callout.tsx": {
@@ -4065,7 +4065,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings/HeroHandoff.tsx": {
-      "sha256": "5e0804708f93c1610387d213726c7f724cff595b286c2e1b97819cc94f940f67",
+      "sha256": "726268f2951ee98f14a3cc88c4d1270a12778a23f3b0045228e70311586f8622",
       "executable": false
     },
     "src/ui/homepage/drawings/Icons.tsx": {
@@ -4089,7 +4089,7 @@
       "executable": false
     },
     "src/ui/homepage/drawings/Sketch.tsx": {
-      "sha256": "f643fe1797c2cb3cd1998713b76d8e9692a2cc7f7cf08ecefa087a8938c07a7e",
+      "sha256": "eafee9d34321d643d416db20b38935f0e55ff48dea0febd34f793125d219077a",
       "executable": false
     },
     "src/ui/homepage/drawings/SuggestedReply.tsx": {
@@ -4113,7 +4113,7 @@
       "executable": false
     },
     "src/ui/homepage/homepage.css": {
-      "sha256": "4efd87e2db7869f08e7179b287a70ff54d62abcabd4d7fb501d416a7c691bb19",
+      "sha256": "78907efdfe0903a95afb7ce0b39e43e129904a191128975afd1d27651fb8fa8e",
       "executable": false
     },
     "src/ui/homepage/Homepage.tsx": {
@@ -4945,7 +4945,7 @@
       "executable": false
     },
     "tests/homepage-browser.mjs": {
-      "sha256": "7dd199a2c87431d60220d791f3b887de6a5c0f0ed8d4e9390706c9a10302c6fd",
+      "sha256": "411ba7dee30c49ad411ab8e15128188f3be66aad0f2a34faebe04c89923b3da7",
       "executable": false
     },
     "tests/homepage-source.mjs": {

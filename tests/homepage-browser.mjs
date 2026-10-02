@@ -225,7 +225,7 @@ try {
   checks.push('eight labelled drawings built from real text (hero thread of six strings and 27 words, MIT licence card, checkout offer, widget, inbox, Help Center, suggestion, finished import), no raster images, no controls');
 
   // Layout at every width: no overflow, two-line headline on wide screens, legible drawings, nothing clipped.
-  for (const width of [320, 390, 480, 641, 700, 723, 768, 860, 861, 959, 1100, 1200, 1280, 1440, 1920]) {
+  for (const width of [320, 390, 480, 641, 700, 723, 768, 860, 861, 959, 1100, 1200, 1280, 1366, 1440, 1680, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(150);
@@ -335,8 +335,26 @@ try {
       assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
     }
     if (width === 1440) assert.equal(await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 4);
+    // The desk drawings in a row of four end on one line, so the numerals and titles under them share a baseline.
+    if (await page.locator('.parts').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length) === 4) {
+      const desk = await page.locator('.parts > li').evaluateAll(items => items.map(item => ({ frame: item.querySelector('.d-window').getBoundingClientRect().bottom, numeral: item.querySelector('.step').getBoundingClientRect(), title: item.querySelector('h3').getBoundingClientRect().top })));
+      const spread = values => Math.max(...values) - Math.min(...values);
+      assert.ok(spread(desk.map(item => item.frame)) <= 2, `the four desk frames end on one line at ${width}px: ${desk.map(item => item.frame.toFixed(1))}`);
+      assert.ok(spread(desk.map(item => item.numeral.top)) <= 2 && spread(desk.map(item => item.numeral.bottom)) <= 2, `the four desk numerals share a baseline at ${width}px: ${desk.map(item => `${item.numeral.top.toFixed(1)}-${item.numeral.bottom.toFixed(1)}`)}`);
+      assert.ok(spread(desk.map(item => item.title)) <= 2, `the four desk titles share a baseline at ${width}px`);
+    }
   }
-  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks seated alike on their frames and clear of every heading and caption, and the hero underline spanning the frame bottom at 15 widths from 320px to 1920px');
+  // The hero's three captions are one row or one per line at every width, never two and one.
+  for (let width = 600; width <= 1366; width += 20) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(80);
+    const tops = await page.locator('.hero-steps li').evaluateAll(items => items.map(item => item.getBoundingClientRect().top));
+    const distinct = new Set(tops.map(top => Math.round(top / 3))).size;
+    assert.ok(distinct === 1 || distinct === 3, `the three hero captions are one row or one per line at ${width}px: ${tops.map(top => top.toFixed(1))}`);
+  }
+  checks.push('the four desk drawings end on one line, with their numerals and titles on one baseline, at every four-up width, and the three hero captions are one row or one per line from 600px to 1366px in 20px steps');
+
+  checks.push('no horizontal overflow, headline breaking, drawing text of 12px or more (15px in the hero), contained marks, all eight corner marks seated alike on their frames and clear of every heading and caption, and the hero underline spanning the frame bottom at 17 widths from 320px to 1920px');
 
   // Motion: marks draw in once; reduced motion removes every animation and transition and smooth scrolling.
   await page.setViewportSize({ width: 1440, height: 900 });

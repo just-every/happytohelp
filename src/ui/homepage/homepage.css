@@ -57,10 +57,15 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .hero-sub { margin-top: 28px; max-width: 26em; font-size: clamp(1.05rem, 1.3vw, 1.25rem); line-height: 1.55; color: var(--ink-soft); }
 .h2h-home .hero-copy .actions { margin-top: 32px; }
 .h2h-home .hero-free { margin-top: 22px; font-size: 1rem; font-weight: 500; }
-.h2h-home .hero-stage { min-width: 0; }
+.h2h-home .hero-stage { min-width: 0; container: hero-stage / inline-size; }
 .h2h-home .hero-steps { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 28px; margin-top: 4px; counter-reset: step; font-size: 1.05rem; }
 .h2h-home .hero-steps li { display: inline-flex; align-items: center; gap: 10px; counter-increment: step; }
 .h2h-home .hero-steps li::before { content: counter(step); display: inline-grid; place-items: center; width: 28px; height: 28px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 0.9rem; font-weight: 500; }
+/* The three captions are one row or one per line, never two and one: when the stage is too narrow for the row (the three items
+   and their gaps need about 34rem, set by the caption size in rem), they stack the way they do on phones. */
+@container hero-stage (max-width: 34.5rem) {
+  .h2h-home .hero-steps { flex-direction: column; align-items: flex-start; padding-left: 4px; margin-top: 12px; }
+}
 
 /* Sections */
 .h2h-home .section { padding: clamp(56px, 8vw, 120px) 0; }
@@ -80,7 +85,7 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .product .section-head { margin-bottom: max(clamp(36px, 5vw, 64px), 60px); }
 .h2h-home .parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 3vw, 44px); }
 .h2h-home .parts > li { display: flex; flex-direction: column; align-items: flex-start; }
-/* The four drawings in a row share one height (the frame stretches), so the numerals and titles under them line up. */
+/* Below 1101px each item is a flex column; its drawing grows to fill the row it shares with one neighbour (2-up) or stands alone (1-up). */
 .h2h-home .parts .drawing { flex: 1 0 auto; width: 100%; margin-bottom: 30px; }
 .h2h-home .step { display: inline-grid; place-items: center; width: 32px; height: 32px; margin-bottom: 14px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 15px; font-weight: 500; }
 .h2h-home h3 { font-size: 1.4rem; font-weight: 500; line-height: 1.2; letter-spacing: -0.015em; }
@@ -103,6 +108,13 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 
 @media (max-width: 1100px) {
   .h2h-home .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 56px; }
+}
+/* Four-up: every item spans the same four rows of the list's grid (drawing, numeral, title, text) through a subgrid, so the
+   row tracks are shared. The drawing row is as tall as the tallest drawing and each drawing stretches to fill it, which puts all
+   four frames' bottom edges, and so the numerals and titles under them, on one line whatever the text under each one wraps to. */
+@media (min-width: 1101px) {
+  .h2h-home .parts { row-gap: 0; }
+  .h2h-home .parts > li { display: grid; grid-row: span 4; grid-template-rows: subgrid; align-items: stretch; justify-items: start; }
 }
 @media (min-width: 861px) {
   .h2h-home .hero h1 span { display: block; }

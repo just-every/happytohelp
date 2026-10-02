@@ -4056,6 +4056,14 @@
       "sha256": "85e2da152a12cc220f4bef47ca5eaa89898fa4905cd597fa1f89cb6c571c7e63",
       "executable": false
     },
+    "src/ui/homepage/drawings/BillDrawing.tsx": {
+      "sha256": "0eda2a00484b8af597eb70898fd545cb54630bf9495699212201548b7e3fa348",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/Callout.tsx": {
+      "sha256": "bf5976c532a6b62444698a39c199a2af1b4a4771524d0b9cf4f1bf667470f246",
+      "executable": false
+    },
     "src/ui/homepage/drawings/HeroConversation.tsx": {
       "sha256": "8060b4fd5b10e4402dfb68aff3f706f378774cc803b2fe030bdcfba90a2ac134",
       "executable": false
@@ -4069,7 +4077,15 @@
       "executable": false
     },
     "src/ui/homepage/drawings/Icons.tsx": {
-      "sha256": "8053b6614dd99c0889b82575d24462f0bcc2c4ad78b445521c5a67aff0cb7c4a",
+      "sha256": "d78ecf7492f616929c71a2c1dd3becf83b070496ce3aef6b89a343153b46df65",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/ImportDrawing.tsx": {
+      "sha256": "71627b829d9c781cd3576cdb05fe4be6feac5f927e6a04b8009102c44a9bee9d",
+      "executable": false
+    },
+    "src/ui/homepage/drawings/InstallerDrawing.tsx": {
+      "sha256": "10b5074b4dcaba92885d6090fdb2edf673c99c64747d8cef6e5f5136a1f7f002",
       "executable": false
     },
     "src/ui/homepage/drawings/OfferDrawing.tsx": {
@@ -4088,6 +4104,10 @@
       "sha256": "d9711852978dd4193878e80f5c5da8a194ea7cb787525fc75e92923213b8006e",
       "executable": false
     },
+    "src/ui/homepage/Free.tsx": {
+      "sha256": "5c5e8e17800f274e979f86e621016a1a4fbb1a388a79d24fca516fc4c4794553",
+      "executable": false
+    },
     "src/ui/homepage/HelpBeforeTheyAsk.tsx": {
       "sha256": "03d365f6c9ad4d6178dd5a3322f5deae3c1b4b3691f897aaa9495fea87ceeb66",
       "executable": false
@@ -4097,11 +4117,15 @@
       "executable": false
     },
     "src/ui/homepage/homepage.css": {
-      "sha256": "b6e1c1745b6676aa57baeb343f600299cc2abf04575ea5f8af21fb86d208c51d",
+      "sha256": "0042087429381b7e32280499835bb05be42bc83e244c90c4a6df69374f79ce2d",
       "executable": false
     },
     "src/ui/homepage/Homepage.tsx": {
       "sha256": "3013743f59f18997ac7651100a4ae27478b946366f90777ff91e0ca0b8c30dbb",
+      "executable": false
+    },
+    "src/ui/homepage/MoveIn.tsx": {
+      "sha256": "b530ef3f0ad76175e85f4d8759758081a9bf8ea06b27bc68f34e786cd2990175",
       "executable": false
     },
     "src/ui/homepage/not-found.css": {

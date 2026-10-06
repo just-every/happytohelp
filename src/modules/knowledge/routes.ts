@@ -6,6 +6,7 @@ import { id,requiredString } from '../../platform/db'
 import { refreshDataset,searchKnowledge } from './service'
 import { deleteSemantic } from './providers'
 import { crawlLimitError } from './crawl-limits'
+import { presentArticle } from './article-presentation'
 export const routes=new Hono<AppEnv>()
 routes.use('/public/:projectId/*',async(c,next)=>{const project=await c.env.DB.prepare("SELECT id FROM projects WHERE id=? AND NOT EXISTS(SELECT 1 FROM project_settings s WHERE s.project_id=projects.id AND json_extract(s.settings_json,'$.deleted_at') IS NOT NULL)").bind(c.req.param('projectId')).first();if(!project)return c.json({error:'Not found'},404);await next()})
 routes.get('/public/:projectId/articles',async c=>c.json((await c.env.DB.prepare("SELECT id,slug,title,summary,category_id categoryId FROM knowledge_articles WHERE project_id=? AND status='published' ORDER BY position,title").bind(c.req.param('projectId')).all()).results))
@@ -21,7 +22,11 @@ routes.delete('/:projectId/datasets/:datasetId',async c=>{const dataset=await c.
 routes.get('/:projectId/search',async c=>{const mode=c.req.query('mode')||'lexical';if(!['lexical','semantic'].includes(mode))return c.json({error:'Invalid search mode'},400);try{return c.json({mode,citations:await searchKnowledge({...c.env,APP_ORIGIN:c.env.APP_ORIGIN||new URL(c.req.url).origin},c.req.param('projectId'),requiredString(c.req.query('q'),'query',2000),mode as 'lexical'|'semantic')})}catch(e){return c.json({error:String(e)},503)}})
 routes.get('/:projectId/categories',async c=>c.json((await c.env.DB.prepare('SELECT *,name title,parent_id parentId FROM knowledge_categories WHERE project_id=?').bind(c.req.param('projectId')).all()).results))
 routes.post('/:projectId/categories',async c=>{const b=await c.req.json();b.parentId=b.parent_id??b.parentId;if(b.parentId&&!await c.env.DB.prepare('SELECT id FROM knowledge_categories WHERE id=? AND project_id=?').bind(b.parentId,c.req.param('projectId')).first())return c.json({error:'Parent not found'},400);const categoryId=id();await c.env.DB.prepare('INSERT INTO knowledge_categories(id,project_id,parent_id,name,slug,summary,is_published,position) VALUES(?,?,?,?,?,?,?,?)').bind(categoryId,c.req.param('projectId'),b.parentId||null,requiredString(b.name??b.title,'name',200),requiredString(b.slug||`${String(b.name??b.title).toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${categoryId.slice(0,8)}`,'slug',200),b.summary||'',b.is_published===false?0:1,b.position??0).run();return c.json({id:categoryId},201)})
-routes.get('/:projectId/articles',async c=>{const rows=await c.env.DB.prepare('SELECT a.*,category_id categoryId,(SELECT json_group_array(category_id) FROM knowledge_article_categories WHERE article_id=a.id) categories FROM knowledge_articles a WHERE project_id=? ORDER BY position,updated_at DESC').bind(c.req.param('projectId')).all<any>();return c.json(rows.results.map(row=>({...row,categories:JSON.parse(row.categories),categoryIds:JSON.parse(row.categories),is_published:row.status==='published'})))})
+routes.get('/:projectId/articles',async c=>{
+ const projectId=c.req.param('projectId')
+ const rows=await c.env.DB.prepare('SELECT a.*,category_id categoryId,(SELECT json_group_array(category_id) FROM knowledge_article_categories WHERE article_id=a.id) categories FROM knowledge_articles a WHERE project_id=? ORDER BY position,updated_at DESC').bind(projectId).all<any>()
+ return c.json(await Promise.all(rows.results.map(row=>presentArticle(c.env,projectId,row))))
+})
 routes.post('/:projectId/articles',async c=>{
  const b=await c.req.json();const projectId=c.req.param('projectId');const articleId=b.id||id();const status=b.status||(b.is_published?'published':'draft');
  if(!['draft','published'].includes(status))return c.json({error:'Invalid status'},400);

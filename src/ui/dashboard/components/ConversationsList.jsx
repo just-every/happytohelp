@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useMemo } from 'react';
+import {ActivationChecklist} from '../../native/activation';
 import DemoInboxInvitation from './DemoInboxInvitation';
 import ConversationItem from "./ConversationItem";
 import useInfiniteScroll from 'react-infinite-scroll-hook';
@@ -62,7 +63,6 @@ function ConversationsList({ canTryDemo = false, hideBehindConversation = false 
             <div className="conversation-inbox-header">
                 <InboxSearch query={ searchQuery } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } />
             </div>
-            { !settings.isGlobalInbox && settings.project?.is_demo && <p className="conversation-demo-label mb-0" role="note">Demo inbox · Fictional customers and conversations</p> }
             <div className="conversation-list-items" ref={ setListRefs }>
                 { conversations.map(conversation => <ConversationItem key={ conversation.id } conversation={ conversation } />) }
                 { isInitialLoading && conversations.length === 0 && <p className="text-center" role="status">Loading conversations...</p> }
@@ -71,7 +71,7 @@ function ConversationsList({ canTryDemo = false, hideBehindConversation = false 
                         ? <p className="conversation-empty-state" role="status">No results for “{ searchQuery.trim() }” in { inboxViewPhrase(selectedView) }. Search looks at customer names and email addresses.</p>
                         : <>
                             {!canTryDemo && <p className="conversation-empty-state">No conversations match this view.</p>}
-                            {canTryDemo && <div className="conversation-empty-state d-xl-none"><DemoInboxInvitation /></div>}
+                            {canTryDemo && <div className="conversation-empty-state d-xl-none"><ActivationChecklist projectId={settings.project.id} compact/><DemoInboxInvitation /></div>}
                         </>
                 ) }
                 { refreshError?.status === 400 && <p className="conversation-search-notice" role="alert">{ refreshError.message }</p> }

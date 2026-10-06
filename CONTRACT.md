@@ -34,6 +34,19 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   transcripts/drafts/suggestions, settings and Shadow DOM widget; preserve useful
   desktop/mobile flows, attachment display, collector/privacy controls and errors.
   Native routing/transport replaces baked origins and Laravel bootstrapping.
+- **ACTIVATION-001 — Observed owner setup.** An owner sees the same durable,
+  project-scoped eight-step checklist on the genuinely empty inbox and Setup page.
+  Before explicit validation it is zero of eight, even when installer defaults exist.
+  Checks distinguish saved configuration from observed delivery, sender DNS,
+  authenticated model metadata, an inbound receipt, effective runtime ceilings,
+  current article publication, allowed origin and an authenticated widget ping.
+  GET performs no provider work. Only an explicit owner test-mail action may send,
+  to that owner's mailbox, with durable identity; acceptance/queueing is pending
+  and ambiguous work is never replayed. Missing provider permissions and unsupported
+  status APIs remain unavailable. Configuration changes invalidate observations;
+  model/DNS validation expires after 15 minutes and every observation shows its time.
+  Publication does not assert model retrieval or a cited answer. Provider keys and
+  their fingerprints never enter API responses or browser storage.
 - **AI-001 — Configured model execution.** Retain Ensemble model selection,
   context/tools, streamed events, normalization, raw per-round provider usage,
   attribution, bounded suggestions and reply lifecycle. Missing providers fail

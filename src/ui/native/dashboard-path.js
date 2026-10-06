@@ -1,4 +1,4 @@
-export const dashboardPath = /^\/(?:conversations(?:\/[^/]+)?|projects(?:\/create|\/[^/]+(?:\/(?:conversations(?:\/[^/]+)?|edit|settings|email-settings|widget-settings|github-settings|local-agent|training-runs(?:\/[^/]+)?|insights(?:\/[^/]+)?|(?:ais|macros|contacts|plugins|agents|datasets|articles|categories)(?:\/[^/]+)?))?)?|local-agent\/authorize|delegation\/(?:authorize|settings)|users\/[^/]+|admin(?:\/[^/]+(?:\/[^/]+)?)?)\/?$/;
+export const dashboardPath = /^\/(?:conversations(?:\/[^/]+)?|projects(?:\/create|\/[^/]+(?:\/(?:conversations(?:\/[^/]+)?|activation|edit|settings|email-settings|widget-settings|github-settings|local-agent|training-runs(?:\/[^/]+)?|insights(?:\/[^/]+)?|(?:ais|macros|contacts|plugins|agents|datasets|articles|categories)(?:\/[^/]+)?))?)?|local-agent\/authorize|delegation\/(?:authorize|settings)|users\/[^/]+|admin(?:\/[^/]+(?:\/[^/]+)?)?)\/?$/;
 
 // An emailed invitation is the one public page a person signs in to come back to.
 const invitationPath = /^\/accept-invitation\/?$/;

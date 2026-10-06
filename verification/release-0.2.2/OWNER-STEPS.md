@@ -5,10 +5,13 @@ agent authority; OD-21 licence/public-release approval and the accessibility
 HOLD remain outstanding. No WCAG conformance is claimed. T-022's timed live
 recording remains missing. Local fixtures do not prove hosted/provider behavior.
 
-Read `release.json` first. A failed local release gate blocks the commands below;
-the owner must resolve the stated acceptance conflict and obtain a new passing
-exact-source receipt before publication. The commands deliberately refuse a
-receipt whose `localReleaseGate` is not `pass`.
+Read `release.json` first. T-023b approves the exact 0106/0108 migration
+transformations, the 108-table schema assertion and comparison of spend rows
+without D1 timing metadata; the refreshed receipt records their local results.
+A failed local release gate blocks the commands below. A passing local gate and
+the private `release/0.2.x` push do not authorize publication: the owner must
+separately clear the approvals and HOLD above. The commands deliberately refuse
+a receipt whose `localReleaseGate` is not `pass`.
 
 ## Fast-forward public main and tag (owner only, after approval)
 

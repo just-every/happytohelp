@@ -30,7 +30,7 @@ This document defines the gate; it does not declare that every clause has passed
 
 ## Current qualification status
 
-The local merged baseline is `a78076a822e01af7727d1deaa2dbf0c5dad6f73e`. Its schema is 104 tables and 39 migrations. The historical launch baseline `09d80a7` is 104/38; public v0.2.1 `59c6e2e` is 97/37. The original 97-table assertion stays unchanged, and each schema needs its own exact-revision recovery evidence.
+The local merged baseline is `a78076a822e01af7727d1deaa2dbf0c5dad6f73e`. Its schema is 104 tables and 39 migrations. The historical launch baseline `09d80a7` is 104/38; public v0.2.1 `59c6e2e` is 97/37. The historical public proof used a 97-table assertion. T-023b explicitly approves correcting the current independent-runtime gate to 108 tables plus the exact named inventory; each schema still needs its own exact-revision recovery evidence.
 
 On the merged baseline, the recorded focused run passed 21 checks; the operations descriptor and source check also reported success. Full `pnpm run verify`, every browser suite, the recovery comparison and fresh 1440/390 captures remain pending. Public release, deployment, live-provider proof and production acceptance are not established.
 

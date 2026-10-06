@@ -41,9 +41,14 @@ differences; any failed gate stays failed in the receipt.
 runtime checks, the first-release journey, source check, independent-contract
 and homepage-source checks. It does not invoke `test:upgrade`, the browser
 scripts or `test:independent-runtime`; their outcomes must be read separately.
-The unchanged independent-runtime suite retains its original 97-table restore
-assertion. A head artifact with 108 tables cannot claim that historical proof
-as its own recovery qualification.
+T-023b applies the approved test corrections: exact 0106 secret backfill and
+0108 context-subject backfill/revision assertions, an append-only migration
+ledger/sequence assertion, the exact 108-table inventory (including eleven
+named additions), and spend-row equality without volatile D1 timing metadata.
+The corrected genuine v0.2.1 upgrade comparison and the head artifact native
+D1/R2 export/restore proof pass locally. Unexpected original row changes still
+fail. The release receipt records the current commands and their source; these
+local checks do not clear the owner-held publication or accessibility HOLD.
 
 No public push, tag, release, deployment, live-provider proof or production
 acceptance follows from this preparation. Public v0.2.1 remains the known

@@ -427,7 +427,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "8e8dcb7ecbade51595dc16679b0e8bf98f8d1051467237fdd48b187591cebaec",
+      "sha256": "72230198bb27ce4c85ead3add50e4d058e4c315f464d07acf4c435f3176e7f25",
       "executable": false
     },
     "AGENTS.md": {
@@ -527,7 +527,7 @@
       "executable": false
     },
     "HANDOVER.md": {
-      "sha256": "6c9451cf6a57b1f70a9f6822e246f230748257cc51c41834f52e72d6b3fbd06d",
+      "sha256": "6f1ff178aef29a56bf166d3bb892b58837790f54df03c394ef9bd32bb8c7838e",
       "executable": false
     },
     "LICENSE": {
@@ -5783,7 +5783,7 @@
       "executable": false
     },
     "verification/release-0.2.2/OWNER-STEPS.md": {
-      "sha256": "8e3b4fe34645ae2f5a129668303749cb73546564b83d4bb2eaf89e26dca86623",
+      "sha256": "89c72d8464afdbfdb465155eab55d1f423a1965ddc8709dc0a6ac93480e44c04",
       "executable": false
     },
     "verification/release-0.2.2/release.json": {

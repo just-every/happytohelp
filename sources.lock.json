@@ -4827,7 +4827,7 @@
       "executable": false
     },
     "tests/activation-spend.mjs": {
-      "sha256": "ee3afd47537d34a5aca536a27787d50c8aff39e5a8ac4b4344c6d66a8dde4097",
+      "sha256": "3e8daac1522e056c4768e2d670de2d439f4342c0e287b320e2e444d306354e56",
       "executable": false
     },
     "tests/activation/browser-kit.mjs": {
@@ -5278,6 +5278,10 @@
       "sha256": "3b601ec6d10643497ce427ad0acba8978ebc0fdaafd14c51a8034e80caff1e90",
       "executable": false
     },
+    "tests/helpers/independent-schema.mjs": {
+      "sha256": "9b3a3cdab42759455cecaa028d02b415a652f91d94b3cfdbfd1cf0535230d654",
+      "executable": false
+    },
     "tests/helpers/independent-storage.mjs": {
       "sha256": "4eaa8fc5751eaa3327ff472770f117c73772463c38b3c38a832f4604680b2a29",
       "executable": false
@@ -5324,6 +5328,10 @@
     },
     "tests/helpers/ui-parity.mjs": {
       "sha256": "b0d8361e7322e0851f3d04722e8c6e0cad82373c3657154c8c45e5ecb74d6f31",
+      "executable": false
+    },
+    "tests/helpers/upgrade-exceptions.mjs": {
+      "sha256": "265e4d84c7b32d04a4286ff5b446c7506cde9adea3ffbfffe22d8a4782606971",
       "executable": false
     },
     "tests/helpers/upgrade-snapshot.mjs": {
@@ -5379,7 +5387,7 @@
       "executable": false
     },
     "tests/independent-runtime.mjs": {
-      "sha256": "eed496ab5e3bf0ea3de73b97ca2124bdacaec3e70a52a11a89f7a8eb35be650c",
+      "sha256": "00afc39f9f17756a227420e627a65c23908545df6b055e75ac1c916c2a7016a8",
       "executable": false
     },
     "tests/installer-address.mjs": {
@@ -5679,7 +5687,7 @@
       "executable": false
     },
     "tests/upgrade-from-0.2.1.mjs": {
-      "sha256": "ee0f48f4805bd359507ffaa43db362e908912c2130a7e245ee2ec4c05872377e",
+      "sha256": "7e1c7c9d02769d64b54a29e982aeed3fb49f83a4b369fcb44fcb1fa7f45d8d68",
       "executable": false
     },
     "tests/usage-limits.mjs": {

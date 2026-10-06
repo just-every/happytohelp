@@ -1,0 +1,38 @@
+UTC 2026-10-06T10:00:03Z
+v26.8.1
+✔ continuous clock includes owner password time and disallows overwritten attempts (202.067791ms)
+✔ sleep/wall clock jump and heartbeat gap invalidate recorded time (22.250417ms)
+✔ strict 900 second threshold includes pre-capture wait and rejects short/missing/gapped media (0.637292ms)
+✔ raw output is retained without rewriting; split credential pattern is refused before disk (8.762875ms)
+✔ stopping a started child terminates its process group without a background process (3.735625ms)
+✖ cleanup also kills descendants when their command leader has already exited (44.354791ms)
+✔ mail acceptance and reused/nonempty storage do not qualify (2.546417ms)
+✔ empty checklist needs all eight distinct initial observations in owner project (0.248167ms)
+✔ first answer must follow setup evidence and cite this run article in this conversation (0.747917ms)
+✔ unknown cost cannot silently become zero and usage must join actual generation (0.131833ms)
+✔ missing config is refused without running or fabricating a prerequisite (0.2075ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 360.454417
+
+✖ failing tests:
+
+test at verification/t-022/recorder/custody.test.mjs:79:1
+✖ cleanup also kills descendants when their command leader has already exited (44.354791ms)
+  Error: kill EPERM
+      at process.kill (node:internal/process/per_thread:277:13)
+      at signal (file:///Users/zemaj/www/rer-fleet/4-front-door/wt/t-022-recording/verification/t-022/recorder/processes.mjs:18:53)
+      at stop (file:///Users/zemaj/www/rer-fleet/4-front-door/wt/t-022-recording/verification/t-022/recorder/processes.mjs:24:3)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/zemaj/www/rer-fleet/4-front-door/wt/t-022-recording/verification/t-022/recorder/custody.test.mjs:86:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -1,
+    code: 'EPERM',
+    syscall: 'kill'
+  }

@@ -6,6 +6,13 @@ include breaking changes.
 
 ## Unreleased
 
+### Qualification status — T-020 local merge, 2026-10-06
+
+- The local merged baseline `a78076a822e01af7727d1deaa2dbf0c5dad6f73e` contains launch line `09d80a7` and skeptic line `fc39c52`; `fc39c52` already contains `14ad2bc` and `be715df`. Migration `0106_project_verification_secret.sql` is retained. The merged schema is 104 tables and 39 migrations.
+- Keep revision counts distinct: historical launch artifact `09d80a7` is 104/38; the merged baseline is 104/39; public v0.2.1 at `59c6e2e` is 97/37. The original 97-table recovery assertion remains unchanged. `pnpm run verify` does not invoke the separate `pnpm run test:independent-runtime` command, so that 97/37 assertion is not a merged-line recovery result.
+- The local focused run recorded 21 passing checks, and the operations descriptor and source check reported success on the `a78076a` baseline. Full `pnpm run verify`, all browser suites, exact-revision D1/R2 recovery comparison and fresh 1440/390 captures remain pending. No public release, tag or public push, production deployment, live-provider proof or production acceptance is established.
+- The retained final accessibility disposition is **FAIL / confirmed owner HOLD**. The prior zero-Axe result is bounded and does not clear the checker false accepts or establish WCAG conformance. See [HANDOVER.md](HANDOVER.md) for the exact historical gate and remaining limits.
+
 ### Fixed
 
 - Widget settings (Theme, Texts, Settings) now show what the widget actually renders:
@@ -48,7 +55,7 @@ include breaking changes.
 
 ### Changed
 
-- The homepage clarity pass (owner direction 2026-10-02) keeps the 1, 2, 3 story and cuts everything
+- The owner-approved “Customer Support, Solved.” homepage clarity pass (owner direction 2026-10-02) keeps the 1, 2, 3 story and cuts everything
   that stood between a reader and it. The hero drawing is one column: Maya cannot turn on the Spanish
   version of her store, Codex has fixed it (a cyan note card with a check), and the reply is in the
   composer with Send circled, with callouts 1, 2, 3 and the caption steps; the subhead is “Your Codex
@@ -61,18 +68,13 @@ include breaking changes.
   providers or Run Edit Run, and the examples strip, the signals list, the bill, installer and Local
   panel drawings, and the costs and hosted-options links are removed. The page meta description is
   updated.
-- The homepage previously led with the local-agent handoff: the hero draws a conversation whose
-  task Codex or Claude on the team's own computer has already completed, with the Local panel,
-  internal note and drafted reply the team reviews, and a subhead that says who runs it and who
-  approves sending. “Help before they ask” follows the hero, then the four product parts. The
-  “Your own agent can investigate” section is replaced by a short “How the handoff works” detail
-  built from the New task form. All drawings mirror the real interface wording.
-- The public homepage is now the owner-approved “Customer Support, Solved.” page
-  (approval 2026-10-01): a drawn inbox hero, the four product parts, “Help before
-  they ask”, “Your own agent can investigate” and “Yours to run”, set in Outfit on
-  warm paper with colour only inside labelled HTML/SVG drawings. Outfit is
-  self-hosted from `public/fonts/outfit/` under the SIL Open Font License 1.1, so
-  the homepage makes no third-party request.
+- Historical pre-clarity homepage state: the page then led with the local-agent handoff; its hero drew a conversation whose
+  task Codex or Claude on the team's own computer had already completed, with the Local panel,
+  internal note and drafted reply the team reviewed, and a subhead that said who ran it and who
+  approved sending. “Help before they ask” then followed the hero, followed by the four product parts. The
+  “Your own agent can investigate” section was replaced by a short “How the handoff works” detail
+  built from the New task form. All drawings mirrored the real interface wording.
+- Historical initial homepage approval (owner approval 2026-10-01; superseded by the 2026-10-02 clarity pass): the page at that point was described as the “Customer Support, Solved.” page with a drawn inbox hero, the four product parts, “Help before they ask”, “Your own agent can investigate” and “Yours to run”, set in Outfit on warm paper with colour only inside labelled HTML/SVG drawings. Outfit was self-hosted from public/fonts/outfit/ under the SIL Open Font License 1.1, so the page made no third-party request. This preserves the initial approved state; the current page is described by the clarity-pass entry above.
 
 - The public identity pages (`/login`, `/register`, `/forgot-password`, `/reset-password`,
   `/verify-email`, `/accept-invitation` and the completed-setup state of `/setup`) use the
@@ -127,25 +129,21 @@ public release, tag, deployment or product-acceptance record.
 - The composed usage tests passed 2/2 at that source revision. The receipt is
   local-only: no model/provider was called, and hosted CPU, D1 totals, Durable
   Object duration/storage and actual billing remain unknown.
-- The final f205 accessibility gate remains FAIL / confirmed owner HOLD after
+- The final accessibility gate on historical source f2054 is recorded as FAIL / confirmed owner HOLD after
   two rounds: four independently replicated oracle false accepts and a widget
   timing/background reliability failure. Its 21 passing states, 18 LIMITED
   review nodes and carried parity/demo evidence do not establish conformance.
-  The owner chose to hold the checker and record the limitation; see the
-  [current receipt](verification/rc-0.2.2-rc.1/final-qualification.json).
-- The original v0.2.1 independent runtime proof now passes through an external
+  The owner chose to hold the checker and record the limitation; see the [historical final-qualification receipt](verification/rc-0.2.2-rc.1/final-qualification.json).
+- The original v0.2.1 independent runtime proof is recorded as passing through an external
   port/import-only adapter, replicated by root at 97 tables/37 migrations.
-  The unchanged command remains held; this does not qualify candidate 104 tables.
+  The unchanged command remains held; this historical proof does not qualify f2054's
+  104-table candidate or the later merged line.
 - The separate privately pushed portability-fidelity branch is not integrated.
   After two correction rounds, a resizable ArrayBuffer still restores as fixed
   length 4 instead of preserving maximum length 12 and length tracking. The
   further correction question remains unanswered, default HOLD.
-- Full verify is not claimed: unchanged original 97-table/37-migration inventory
-  differs from candidate 104 tables/38 migrations; owner port/lifecycle exceptions
-  and DO decisions remain unanswered and unapplied.
-- After integrating records at `557cb4e`, root source-lock refresh and source
-  check passed (exit 0), changing only `sources.lock.json`. This validates bytes,
-  not full verify or release acceptance; exact logs are pinned in the current receipt.
+- Historical f2054 qualification did not claim a passing full verification result. Its schema was 104 tables/38 migrations, while the separate unchanged independent-runtime assertion expects the public v0.2.1 inventory of 97/37. In the current package scripts, `pnpm run test:independent-runtime` is separate from `pnpm run verify`; the adapter proof for 97/37 applies only to v0.2.1, not to a later candidate. The historical port/lifecycle exceptions and Durable Object decisions also remained unanswered and unapplied.
+- At `557cb4e`, the root refreshed `sources.lock.json`; `pnpm run source:lock` and `pnpm run source:check` both exited 0, changing only the lock file. That validates recorded source bytes, not full verification or release acceptance. Exact historical command logs are pinned in the receipt.
 
 No public push, tag or deployment is part of this candidate record.
 

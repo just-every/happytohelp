@@ -17,62 +17,29 @@ acceptance: the public source release remains 0.2.1 until a separate owner
 decision. [CONTRACT.md](CONTRACT.md) states the required behavior;
 [ACCEPTANCE.md](ACCEPTANCE.md) states the evidence each requirement needs.
 
-## Private candidate qualification record
+## Private convergence candidate and qualification status
 
-The current source-pinned candidate is `f2054c3b7cd19fcddd9962e418f680f92c89109b`.
-Its final accessibility verdict is **FAIL / confirmed owner HOLD** because the
-checker remains unreliable. After two correction rounds, the owner answered
-question 12: “Hold the checker; record the audit limitation (default)”. No third
-checker correction is authorized. Public release remains **HOLD**.
+The local merged baseline is `a78076a822e01af7727d1deaa2dbf0c5dad6f73e`. It contains the launch line `09d80a7896fa6ca8643516976ca43d9576607c75` and the skeptic line `fc39c52`; the latter already contains `14ad2bc` and `be715df`. Migration `0106_project_verification_secret.sql` is retained. The package remains version 0.2.2-rc.1, a private preservation candidate.
 
-The untouched final gate passed 21 states with zero Axe violations, but the
-independent and root 23-case oracle both reproduced four false accepts:
-pseudo/ancestor opacity text was reported as 8.475:1 or 12.63:1 while actual
-pixels were at most 2.27:1. The root's widget audit failed at 4.36:1; the
-independent timing/background diagnosis measured settled actual glyphs at
-6.324:1. Its exact original animation frame is inferred, since the root capture
-omitted opacity. No remaining steady product defect was established in the
-exercised corrected states. Eighteen review nodes and every covered or
-unsupported pixel remain LIMITED; no complete WCAG conformance is claimed.
+The schema counts refer to different revisions: public v0.2.1 at `59c6e2e1beb321e9f1cb5493efd05e20fc068638` has 97 tables/37 migrations; historical launch `09d80a7` has 104/38; the merged baseline `a78076a` has 104/39. Do not describe the merged line as 38 migrations. Recovery evidence must preserve the original 97-table assertion and separately cover the launch 104/38 artifact and merged 104/39 artifact.
 
-The final gate retains passing build/typecheck, six product correction checks,
-four occlusion regressions, 26 independent keyboard checks and five independent
-runtime checks. Native demo and the ten parity rows carry only from exact
-unchanged verified source and emitted bundles. The historical c7 gate receipt
-is retained as historical evidence, not the current disposition. Exact reports,
-root failures, commands and external SHA-256 references are in the
-[current receipt](verification/rc-0.2.2-rc.1/final-qualification.json).
+The package's `pnpm run verify` command runs operations describe, build, typecheck, module checks, runtime checks, the first-release journey, source check, independent-contract and homepage-source checks. It does not call `pnpm run test:independent-runtime`; that is a separate command whose retained original assertion is 97 tables/37 migrations. The prior adapter-based 97/37 proof applies only to the public v0.2.1 artifact. It does not qualify the merged candidate or prove its D1/R2 recovery.
 
-The original v0.2.1 independent runtime proof now **passes through an external
-port/import-only adapter**, preserving original assertions and runtime semantics.
-Both the independent run and root replication prove 97 tables and 37 migrations
-on artifact `f082bded3dd64470d7283c935934f4a2d7224e69fe540cece7c862a15989b968`.
-The unchanged CLI remains held at HTTP ports 12401/12501 and default inspector
-ports. This does not qualify the candidate's 104-table inventory, DO portable
-storage or complete RER export.
+On the `a78076a` baseline, the recorded focused run passed 21 checks; the operations descriptor reported `ok: true` and the source check reported success. These are partial local results. Full `pnpm run verify`, every browser suite, the exact-revision recovery comparison and fresh 1440/390 captures remain pending. No public release, tag or public push, production deployment, live-provider proof or production acceptance is established. Public main remains v0.2.1 at `59c6e2e1beb321e9f1cb5493efd05e20fc068638`. The S18 tune/polish commit `3e68195` is an accepted default, not approval for public release.
 
-Portability fidelity remains separate at
-`ef8406f654908cf67612a498511f99ce13f8ae12`, privately pushed but not integrated.
-After two rounds, a persisted resizable ArrayBuffer with maximum length 12 still
-restores as a fixed length 4 buffer, losing resizability/length tracking. The
-further narrow correction question remains unanswered, default HOLD.
+## Retained accessibility HOLD and historical qualification evidence
 
-Full `pnpm run verify` is not claimed: its retained original inventory expects
-97 tables/37 migrations; this candidate has 104 tables/38 migrations. Original
-port/lifecycle exceptions and DO decisions remain unanswered and unapplied.
-The root integrated these records at `557cb4e`, then `pnpm run source:lock` and
-`pnpm run source:check` both passed (exit 0); only `sources.lock.json` changed.
-This validates recorded source bytes, not full verify or release acceptance.
-Exact command logs are pinned in the current receipt. Public main remains v0.2.1 at
-`59c6e2e1beb321e9f1cb5493efd05e20fc068638`, as verified by the root. No public
-push, tag, deployment or production cutover is authorized by this record.
+The current accessibility disposition remains **FAIL / confirmed owner HOLD**, carried forward from the final gate on historical source `f2054c3b7cd19fcddd9962e418f680f92c89109b`. After two correction rounds, the owner answered question 12: “Hold the checker; record the audit limitation (default)”. No third checker correction is authorized. Public release remains on HOLD. The [historical exact receipt](verification/rc-0.2.2-rc.1/final-qualification.json) records the original source and evidence; it is not a fresh gate on `a78076a`.
 
-The actual composed usage measurement remains pinned to `c7f0d1b8` and
-[its receipt](verification/rc-0.2.2-rc.1/composed-usage.json): two passing local
-tests, request admissions 201/201/429 and zero actual provider calls. Actual
-paid AI and hosted/billing totals remain unknown. Current UI changes do not
-establish a new measurement. Cost assumptions and limitations remain in
-[OPERATIONS.md](OPERATIONS.md#measured-local-usage-and-cost-scenarios).
+That final gate passed 21 states with zero Axe violations, but the independent and root 23-case oracle both reproduced four false accepts: pseudo/ancestor opacity text was reported as 8.475:1 or 12.63:1 while actual pixels were at most 2.27:1. The root widget audit failed at 4.36:1; the independent timing/background diagnosis measured settled actual glyphs at 6.324:1. Its exact original animation frame is inferred because the root capture omitted opacity. No remaining steady product defect was established in the exercised corrected states. Eighteen review nodes and every covered or unsupported pixel remain LIMITED; no complete WCAG conformance is claimed.
+
+The historical f2054 gate retained passing build/typecheck, six product correction checks, four occlusion regressions, 26 independent keyboard checks and five independent runtime checks. Native demo and the ten parity rows carry only from the exact unchanged source and emitted bundles used in that gate. The historical c7 gate receipt is retained as historical evidence, not the current disposition. Exact reports, root failures, commands and external SHA-256 references are in the receipt above.
+
+The original v0.2.1 independent runtime proof passed through an external port/import-only adapter, preserving the original assertions and runtime semantics. Both the independent run and root replication proved 97 tables/37 migrations on artifact `f082bded3dd64470d7283c935934f4a2d7224e69fe540cece7c862a15989b968`. The unchanged CLI remains held at HTTP ports 12401/12501 and default inspector ports. This does not qualify the merged candidate's 104-table inventory, Durable Object portable storage or complete RER export.
+
+Portability fidelity is separate from this merge. The owner-held portability candidate at `ef8406f654908cf67612a498511f99ce13f8ae12` stays excluded and unintegrated. After two rounds, a persisted resizable ArrayBuffer with maximum length 12 still restores as a fixed length 4 buffer, losing resizability/length tracking. The further narrow correction question remains unanswered; default HOLD.
+
+The earlier root record refresh at `557cb4e` ran source-lock and source-check successfully, changing only sources.lock.json. That validates those recorded source bytes, not full verification or release acceptance. The actual composed usage measurement remains pinned to `c7f0d1b8` and [its receipt](verification/rc-0.2.2-rc.1/composed-usage.json): two passing local tests, request admissions 201/201/429 and zero actual provider calls. Actual paid AI and hosted/billing totals remain unknown. Current UI changes do not establish a new measurement. Cost assumptions and limitations remain in [OPERATIONS.md](OPERATIONS.md#measured-local-usage-and-cost-scenarios).
 
 ## Architecture
 
@@ -110,76 +77,42 @@ establish a new measurement. Cost assumptions and limitations remain in
 
 ## How to verify a change
 
-```sh
-pnpm install --frozen-lockfile
-pnpm run verify
-pnpm exec playwright install chromium   # once
-pnpm run test:widget-browser
-pnpm run test:widget-lifecycle-browser
-pnpm run test:widget-settings-browser
-pnpm run test:ui-browser
-pnpm run test:navigation-browser
-pnpm run test:workspace-shell-browser
-pnpm run test:public-help-center-browser
-pnpm run test:not-found-browser
-pnpm run test:setup-browser
-pnpm run test:identity-browser
-pnpm run test:demo-inbox-browser
-pnpm run test:mobile-inbox-browser
-pnpm run test:conversation-panel-resize-browser
-pnpm run test:inbox-conversation-browser
-pnpm run test:contact-erasure-browser
-```
+Use the declared package commands for the exact source revision under review. The aggregate `pnpm run verify` does not include the separate `pnpm run test:independent-runtime` recovery assertion.
 
-The candidate also exposes these focused commands for its existing tests:
+The package currently declares these browser suites:
 
-```sh
-pnpm run test:accessibility-browser
-pnpm run test:delegation-authority-runtime
-pnpm run test:delegation-scoped-browser
-pnpm run test:computers-delegation-browser
-pnpm run test:usage
-```
+- `pnpm run test:widget-browser`
+- `pnpm run test:widget-settings-browser`
+- `pnpm run test:ui-browser`
+- `pnpm run test:accessibility-browser`
+- `pnpm run test:navigation-browser`
+- `pnpm run test:workspace-shell-browser`
+- `pnpm run test:public-help-center-browser`
+- `pnpm run test:not-found-browser`
+- `pnpm run test:setup-browser`
+- `pnpm run test:identity-browser`
+- `pnpm run test:demo-inbox-browser`
+- `pnpm run test:mobile-inbox-browser`
+- `pnpm run test:conversation-panel-resize-browser`
+- `pnpm run test:inbox-conversation-browser`
+- `pnpm run test:widget-lifecycle-browser`
+- `pnpm run test:contact-erasure-browser`
+- `pnpm run test:management-library-browser`
+- `pnpm run test:delegation-scoped-browser`
+- `pnpm run test:delegation-browser`
+- `pnpm run test:computers-delegation-browser`
 
-They are supplemental qualification commands, not changes to `verify` or the
-existing delegation commands. The accessibility command is bounded to its
-declared browser states; the final checker limitations above remain
-on confirmed owner HOLD. `test:usage` prepares generated migrations, then runs
-the two existing usage tests.
+Install Chromium once with `pnpm exec playwright install chromium`. Each browser command starts its own isolated local Worker. Local tests use provider fixtures only; they do not prove a live provider or deployment.
 
-`pnpm run verify` runs the operations descriptor, build, type check, module
-suites, the emitted-Worker runtime and security-header suites, the first-release
-journey (`pnpm run test:journey`) and the source integrity check. The browser
-suites start their own isolated emitted Worker with local D1, R2 and Durable
-Objects and write evidence to a temporary directory or `H2H_EVIDENCE_DIR`; the
-resize suite also accepts `H2H_RUNTIME_PORT` and `H2H_RUNTIME_INSPECTOR_PORT` to
-fix its server and inspector ports, and the contact-erasure suite accepts
-`H2H_TEST_PORT` (its inspector uses the next port). The identity suite also accepts `H2H_TEST_PORT` for its default
-Worker and runs its sign-up-and-email Worker two ports above; it never sends mail. The homepage and public-site checks run
-against a local native preview:
-`H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and
-`node tests/public-site-runtime.mjs` with the same origin, after
-`pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`;
-`pnpm run dev` (`vite dev`) needs the same `pnpm run setup -- --local` first: an unknown one-segment
-path such as `/does-not-exist` looks up a project of that name, so on an unmigrated local D1 it answers 500
-(`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs`
-checks `/`, `/login` and `/does-not-exist` (200, 200, 404) against a running dev server and names that cause.
-`node tests/independent-browser.mjs` runs the homepage and setup checks against
-the delivery artifact after `node scripts/build-delivery-artifact.mjs`.
-`pnpm run test:reproducible-build` (about 90 seconds) checks that the delivery
-artifact is byte-reproducible. Provider tests use fixtures at the real SDK/HTTP
-boundary and never call a paid provider.
+Other separate focused commands include `pnpm run test:independent-runtime`, `pnpm run test:delegation-authority-runtime`, `pnpm run test:delegation` and `pnpm run test:usage`. These do not expand the `verify` script. The accessibility command is bounded to its declared browser states; the final checker limitations remain on confirmed owner HOLD. `test:usage` prepares generated migrations before running the two existing usage tests.
 
-Continuous integration (`.github/workflows/verify.yml`) runs on pushes to `main`
-and on pull requests with the declared Node and pnpm versions: a frozen install,
-`pnpm run verify`, every browser suite above, and the homepage and public-site
-checks against a local native preview. It needs no secrets. The delivery
-workflow (`.github/workflows/delivery.yml`) also runs the reproducible-build
-check and builds the delivery artifact.
+The `pnpm run verify` script runs operations describe, build, typecheck, module suites, emitted-Worker runtime and security-header checks, the first-release journey (`pnpm run test:journey`), source integrity, independent-contract and homepage-source checks. The browser suites start isolated emitted Workers with local D1, R2 and Durable Objects and write evidence to a temporary directory or `H2H_EVIDENCE_DIR`. The resize suite accepts `H2H_RUNTIME_PORT` and `H2H_RUNTIME_INSPECTOR_PORT`; contact-erasure and identity suites accept `H2H_TEST_PORT`. Identity also starts its sign-up-and-email Worker two ports above; it never sends mail.
 
-After changing tracked source, regenerate the source lock with
-`pnpm run source:lock` and confirm `pnpm run source:check` passes (see
-[docs/AUTHORING.md](docs/AUTHORING.md)).
+Homepage browser/runtime checks are separate from the package `test:*-browser` scripts. Against a local native preview, run `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and `node tests/public-site-runtime.mjs` with the same origin after `pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`. `pnpm run dev` also needs local setup first: an unknown one-segment path such as `/does-not-exist` looks up a project name, so on an unmigrated local D1 it answers 500 (`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs` checks `/`, `/login` and `/does-not-exist` (200, 200, 404). `node tests/independent-browser.mjs` checks homepage and setup against the delivery artifact after `node scripts/build-delivery-artifact.mjs`. Provider tests use fixtures at the real SDK/HTTP boundary and never call a paid provider.
+
+Continuous integration's `.github/workflows/verify.yml` runs on pushes to `main` and pull requests with the declared Node and pnpm versions: a frozen install, `pnpm run verify`, the browser suites above and homepage/public-site checks against a local native preview. It needs no secrets. The delivery workflow (`.github/workflows/delivery.yml`) also runs the reproducible-build check and builds the delivery artifact.
+
+After tracked source changes, regenerate the source lock with `pnpm run source:lock` and confirm `pnpm run source:check` passes (see [docs/AUTHORING.md](docs/AUTHORING.md)).
 
 ## Conventions that matter
 
@@ -214,8 +147,8 @@ in [SECURITY.md](SECURITY.md).
 ## Known gaps
 
 - Accessibility is targeted at WCAG 2.2 AA. The bounded 21-state audit is not a
-  complete conformance review; the final f205 gate remains FAIL / confirmed
-  owner HOLD because of checker false accepts and timing/background reliability.
+  complete conformance review; the retained f2054 gate is FAIL and the owner
+  HOLD remains because of checker false accepts and timing/background reliability.
   Hosted operating costs remain
   unmeasured; local scenarios preserve unknown usage and billing totals
   (`seed.json` and the composed-usage receipt).

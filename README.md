@@ -1,5 +1,9 @@
 # HappyToHelp
 
+**Customer Support, Solved.**
+
+Your Codex or Claude fixes the problem and writes the reply. You press Send.
+
 HappyToHelp is a free, MIT-licensed customer support workspace you run yourself.
 It gives a team a live chat widget for their website, a shared inbox, AI-drafted
 replies from the model providers you choose, a knowledge base with published help

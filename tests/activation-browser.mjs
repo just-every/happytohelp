@@ -3,7 +3,9 @@ import {execFileSync} from 'node:child_process';
 import {mkdir,mkdtemp,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {createRuntime} from './activation/browser-runtime.mjs';
+import {providerFixture} from './activation/browser-provider-fixture.mjs';
+import {providerProbes} from './activation/browser-provider-probes.mjs';
 import {apiKit,setup,snapshot} from './activation/browser-kit.mjs';
 import {spendViews} from './activation/browser-spend.mjs';
 import {widgetProbes} from './activation/browser-widget-probes.mjs';
@@ -16,7 +18,7 @@ const evidence=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR
 await mkdir(evidence,{recursive:true});
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),'','activation browser evidence requires committed source');
-const runtime=await createRuntime();let browser,page,success=false;
+let runtime=await createRuntime();let browser,page,fixture,success=false;
 const errors=[],failed=[],checks=[],artifacts=[];
 try{
  browser=await chromium.launch({headless:true});page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(15000);
@@ -31,8 +33,12 @@ try{
  await demoAndAiViews({page,runtime,projectId,evidence,artifacts,checks});
  await spendViews({runtime,page,projectId,token,evidence,artifacts,checks});
  await widgetProbes({runtime,projectId,token,activation,checks});
+ await runtime.close(true);runtime=null;
+ fixture=await providerFixture({port:Number(process.env.H2H_PROVIDER_FIXTURE_PORT)||0});
+ runtime=await createRuntime({providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'activation-inert-model-key',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'activation-inert-mail-key',EMAIL_FROM:'support@activation.example.test',INBOUND_EMAIL_TOKEN:'activation-inert-inbound-token'}});
+ await providerProbes({runtime,page,fixture,evidence,artifacts,checks});
  assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;
 }finally{
- await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,artifacts},null,2)+'\n');await browser?.close();await runtime.close(success);
+ await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,artifacts},null,2)+'\n');await browser?.close();await runtime?.close(success);await fixture?.close();
 }
 console.log('Activation browser passed:',evidence);

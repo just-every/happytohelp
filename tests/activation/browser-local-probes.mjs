@@ -24,8 +24,8 @@ export async function localProbes({runtime,page,projectId,token,activation,check
  const other=await runtime.seedTenant({name:'Other activation tenant',email:'activation-other@example.test',allowedOrigin:runtime.origin});
  for(const suffix of ['','/check','/test-mail'])await api(activation+suffix,{auth:other.token,...(suffix?{body:{}}:{}),status:403});
  const owner=await api('/api/identity/session');
- await runtime.execute(`UPDATE memberships SET role='operator' WHERE project_id='${projectId}' AND user_id='${owner.id}';`);
+ await runtime.execute(`UPDATE memberships SET role='operator' WHERE project_id='${projectId}' AND user_id='${owner.id}'; UPDATE sessions SET role='operator' WHERE project_id='${projectId}' AND actor_id='${owner.id}';`);
  for(const suffix of ['','/check','/test-mail'])await api(activation+suffix,{...(suffix?{body:{}}:{}),status:403});
- await runtime.execute(`UPDATE memberships SET role='owner' WHERE project_id='${projectId}' AND user_id='${owner.id}';`);
+ await runtime.execute(`UPDATE memberships SET role='owner' WHERE project_id='${projectId}' AND user_id='${owner.id}'; UPDATE sessions SET role='owner' WHERE project_id='${projectId}' AND actor_id='${owner.id}';`);
  checks.push('durable local probes, stale origin/publication, missing providers, anonymous/cross-tenant/operator denial');
 }

@@ -26,7 +26,7 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
   await page.goto(base+'/articles');assert.match(await page.locator('body').innerText(),/Used by AI answers/i);await noOverflow(page,'Knowledge');
   await page.goto(base+'/articles/create');await page.getByRole('heading',{name:'New article',exact:true}).waitFor();
   await page.getByLabel('Title',{exact:true}).fill(`Long activation article ${width}`);await page.getByLabel('Summary',{exact:true}).fill('Long article checks persistent actions.');
-  const content=page.getByLabel('Content',{exact:true});await content.fill(Array.from({length:90},(_,i)=>`Paragraph ${i}: preserve editor actions while reading a long article.`).join('\n\n'));
+  const content=page.getByRole('textbox',{name:'Article content in Markdown',exact:true});await content.fill(Array.from({length:90},(_,i)=>`Paragraph ${i}: preserve editor actions while reading a long article.`).join('\n\n'));
   for(const position of ['top','bottom']){
    await page.evaluate(position=>{const element=document.querySelector('#workspace-main');element?.scrollTo(0,position==='top'?0:element.scrollHeight);window.scrollTo(0,position==='top'?0:document.body.scrollHeight)},position);
    await visibleControl(page.getByRole('button',{name:'Save',exact:true}),`${width} new Save ${position}`);await visibleControl(page.getByRole('button',{name:'Publish',exact:true}),`${width} new Publish ${position}`);

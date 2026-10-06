@@ -5,6 +5,8 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
 import {apiKit,setup,snapshot} from './activation/browser-kit.mjs';
+import {spendViews} from './activation/browser-spend.mjs';
+import {widgetProbes} from './activation/browser-widget-probes.mjs';
 import {localProbes} from './activation/browser-local-probes.mjs';
 import {freshViews,knowledgeViews,demoAndAiViews} from './activation/browser-ui.mjs';
 
@@ -27,6 +29,8 @@ try{
  await localProbes({runtime,page,projectId,token,activation,checks});
  await knowledgeViews({page,runtime,projectId,evidence,artifacts,checks});
  await demoAndAiViews({page,runtime,projectId,evidence,artifacts,checks});
+ await spendViews({runtime,page,projectId,token,evidence,artifacts,checks});
+ await widgetProbes({runtime,projectId,token,activation,checks});
  assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;
 }finally{
  await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,artifacts},null,2)+'\n');await browser?.close();await runtime.close(success);

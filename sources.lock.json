@@ -3833,7 +3833,7 @@
       "executable": false
     },
     "src/ui/dashboard/styles/layouts/_conversation-composer-tools.scss": {
-      "sha256": "ae4483e18a9aea4f920e79927bb24ed5d38a212dbb68cc3ece5cd53a1a5d25ef",
+      "sha256": "a6e5fc46c9928748b42ef131ba015fd28f9467df16590294d60f506f08bba451",
       "executable": false
     },
     "src/ui/dashboard/styles/layouts/_conversation-composer.scss": {

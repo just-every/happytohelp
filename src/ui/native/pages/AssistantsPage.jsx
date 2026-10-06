@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Link } from '@tanstack/react-router';
 import React, { useEffect, useState } from 'react';
 import {ProviderSetupNotice} from '../activation';
+import AiSpendCard from '../activation-spend/AiSpendCard';
 import AvatarUpload from './AvatarUpload';
 import { PageHeaderTabs } from '../PageHeader';
 import { nativeRequest } from '../transport';
@@ -71,6 +72,7 @@ export default function AssistantsPage({ projectId, recordId }) {
             <div className="settings-actions"><button className="btn btn-primary" disabled={busy}>{busy ? 'Saving…' : 'Save'}</button><Link className="btn btn-white ms-2" to={href}>Cancel</Link>{draft.id && <button type="button" className="btn btn-outline-danger ms-2" disabled={busy} onClick={() => ask({ title: deleteCopy.ais.title(draft), body: <p>{deleteCopy.ais.effect}</p>, run: async () => { await nativeRequest(`${base}/ais/${draft.id}`, { method: 'DELETE' }); markSaved(); await navigate({to:href}); } })}>Delete</button>}</div>
         </form>}
         {!recordId && items && settings && <>
+            <AiSpendCard projectId={projectId}/>
             <Section title="Assistants" description="Choose which assistants can respond in this project.">
                 {items.map(item => <section className="settings-section" key={item.id}><div className="row align-items-center g-3"><div className="col"><div className="settings-identity">{item.avatar_url ? <img src={item.avatar_url} className="avatar avatar-sm" alt=""/> : <i className="fe fe-cpu" aria-hidden="true"/>}<div><h3>{item.name}</h3><p className="settings-note mb-0">{item.role}</p></div></div></div><div className="col-auto"><Link className="btn btn-sm btn-white" to={`${href}/${item.id}`}>Customize</Link></div><div className="col-auto"><div className="form-check form-switch"><input className="form-check-input" type="checkbox" checked={Boolean(item.is_enabled)} disabled={busy} aria-label={`Enable ${item.name} assistant`} onChange={() => toggle(item)}/></div></div></div></section>)}
                 {!items.length && <p className="settings-note">No assistants have been added to this project.</p>}

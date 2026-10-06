@@ -149,7 +149,7 @@ try {
 
         await composer.fill('Keep this operator draft while showing the provider error.');
         await page.locator('[data-ai-generate="true"]').click();
-        await page.getByText(/OPENAI_API_KEY/).waitFor();
+        await page.getByText('Add OPENAI_API_KEY', { exact: true }).waitFor();
         assert.equal(await composer.inputValue(), 'Keep this operator draft while showing the provider error.');
         assert.equal(await page.locator('[data-ai-generate="true"]').count(), 1, `${width}px: provider error has no second retry control`);
         assert.equal(await page.locator('.conversation-suggestions__error button').count(), 0, `${width}px: provider error has no contextual retry`);

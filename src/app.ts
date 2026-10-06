@@ -22,6 +22,12 @@ import {consent} from './edition/delegation/consent'
 import {nativeDelegation} from './edition/delegation/launch'
 
 export const app = new Hono<AppEnv>()
+app.use('/api/*',async(c,next)=>{
+ const origin=new URL(c.req.url);
+ // A configured canonical origin wins; otherwise capture the actual app URL for queued work.
+ if(!c.env.APP_ORIGIN)c.env={...c.env,APP_ORIGIN:origin.origin};
+ await next();
+})
 app.use('/api/*', projectCors)
 app.onError((error,c) => {
  // An exception carrying its own response (e.g. 429 with Retry-After) keeps its headers and JSON body.

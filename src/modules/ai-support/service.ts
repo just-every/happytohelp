@@ -16,6 +16,7 @@ export async function handleGeneration(env: Env, job: Job, effects: GenerationEf
     const row = await env.DB.prepare('SELECT * FROM ai_generations WHERE id=? AND project_id=?').bind(job.id, job.projectId).first<Generation>();
     if (!row)
         return true;
+    env={...env,APP_ORIGIN:env.APP_ORIGIN||JSON.parse(row.options_json||'{}').application_origin};
     if (['completed', 'cancelled', 'superseded', 'failed', 'uncertain'].includes(row.state)) {
         await reconcileTerminalAttempt(env, row.id);
         return true;

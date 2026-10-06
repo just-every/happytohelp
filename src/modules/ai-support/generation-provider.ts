@@ -1,3 +1,4 @@
+import {handoffTool} from './handoff';
 import type { Env } from '../../platform/env';
 import type { Generation } from './repository';
 import { replyContext } from './context';
@@ -23,7 +24,8 @@ export async function executeGenerationProvider(
 ) {
   let chunkIndex = 0;
   let usageResult: unknown = null;
-  const context = await replyContext(env, row.project_id, row.conversation_id, row.kind === 'suggestions' ? 'agent' : 'contact');
+  const context = await replyContext(env, row.project_id, row.conversation_id, row.kind === 'suggestions' ? 'agent' : 'contact', row.id);
+  if (row.kind === 'reply') context.tools.push(handoffTool(env,row,effects));
   if (row.instruction) {
     Object.assign(context.assistPacket, { operator_guidance: { content: row.instruction, visibility: 'private-to-operators' } });
     context.packet.trigger.server_instructions.push({ visibility: 'server-trigger', content: row.instruction });
@@ -92,5 +94,5 @@ export async function executeGenerationProvider(
       trace,
     });
   });
-  return { result, usage: usageResult };
+  return { result: row.kind === 'reply' ? {...result, citations: context.selectedCitations} : result, usage: usageResult };
 }

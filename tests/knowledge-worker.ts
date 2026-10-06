@@ -1,3 +1,9 @@
+import conversations from '../migrations/0002_conversations.sql'
+import context from '../migrations/0060_customer_context.sql'
+import contextEngine from '../migrations/0060_customer_context_engine.sql'
+import ai from '../migrations/020_ai_support.sql'
+import delegation from '../migrations/0105_edition_delegation.sql'
+import citations from '../migrations/0108_public_answer_citations.sql'
 import {testDeletedKnowledgeProjects} from './knowledge-deleted-projects'
 import identitySchema from '../migrations/0001_identity.sql'
 import widgetIdentitySchema from '../migrations/0005_widget_identity.sql'
@@ -14,10 +20,11 @@ import type {Env,Job} from '../src/platform/env'
 import schema from '../migrations/0050_knowledge.sql'
 import authoring from '../migrations/0051_knowledge_authoring.sql'
 export default {async fetch(request:Request,env:Env){
+ env={...env,APP_ORIGIN:new URL(request.url).origin};
  if(new URL(request.url).pathname!=='/test')return new Response('test runner');
  let checks=0;const check=(condition:unknown,message:string)=>{if(!condition)throw new Error(message);checks++};
  try{
- for(const sql of `${identitySchema}\n${widgetIdentitySchema}\n${schema}\n${authoring}\n${importsSchema}\n${recoverySchema}\n${managementSchema}`.split(';').map(s=>s.trim()).filter(Boolean))await env.DB.prepare(sql).run();
+ for(const [,sql] of `${identitySchema}\n${widgetIdentitySchema}\n${conversations}\n${schema}\n${authoring}\n${importsSchema}\n${recoverySchema}\n${managementSchema}\n${context}\n${contextEngine}\n${ai}\n${delegation}\n${citations}`.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await env.DB.prepare(sql).run();
  await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://example.com',0); ").run();
  await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('other','Other','other-widget','https://other.example.com',0)").run();
  await env.DB.prepare("INSERT INTO knowledge_datasets(id,project_id,name,created_at) VALUES('dataset','p','Corpus',?)").bind(Date.now()).run();

@@ -11,6 +11,7 @@ export function canonicalActorJson(actor:unknown):string{
  const canonical=(value:unknown):unknown=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical((value as Record<string,unknown>)[key])])):value
  return JSON.stringify(canonical(actor))
 }
+function commandOptions(json:string){try{const options=JSON.parse(json);delete options.application_origin;return JSON.stringify(options)}catch{return null}}
 function storedActorJson(actorJson:string){try{return canonicalActorJson(JSON.parse(actorJson))}catch{return null}}
 export async function requestGeneration(env:Env,input:{projectId:string;conversationId:string;actor:Actor;expectedRevision:number;id?:string;kind?:'reply'|'suggestions';instruction?:string;options?:{tool?:string;message?:string;client_request_id?:string;display_request_version?:number;loading_message?:string}},configurationFailure:'reject'|'record'='reject'){
  const profileSql=input.kind==='suggestions'?assistanceProfileSql:replyProfileSql
@@ -22,12 +23,13 @@ export async function requestGeneration(env:Env,input:{projectId:string;conversa
  if(input.instruction && (input.actor.role==='contact'||input.instruction.length>16000))throw new Error('Operator instruction denied or too long')
  if(input.options?.tool&&!['improve','extend','shorten','complete'].includes(input.options.tool))throw new Error('Unknown assistant editing tool')
  if(input.options&&input.actor.role==='contact')throw new Error('Operator options denied')
- const optionsJson=JSON.stringify(input.options||{})
+ const clientOptions={...input.options};delete (clientOptions as Record<string,unknown>).application_origin
+ const optionsJson=JSON.stringify({...clientOptions,...(env.APP_ORIGIN?{application_origin:new URL(String(env.APP_ORIGIN)).origin}: {})})
  const actorJson=canonicalActorJson(input.actor)
  if(optionsJson.length>40000)throw new Error('Operator options too long')
  const id=input.id||crypto.randomUUID(),now=new Date().toISOString()
  const existing=await env.DB.prepare('SELECT * FROM ai_generations WHERE id=?').bind(id).first<Generation>()
- if(existing){if(existing.project_id!==input.projectId||existing.conversation_id!==input.conversationId||existing.source_revision!==input.expectedRevision||storedActorJson(existing.actor_json)!==actorJson||existing.kind!==(input.kind||'reply')||existing.instruction!==(input.instruction||'')||existing.options_json!==optionsJson)throw new Error('Generation command conflict');return ceilingSkipToday(existing)?{id,state:existing.state,ceilingReached:true}:{id,state:existing.state}}
+ if(existing){if(existing.project_id!==input.projectId||existing.conversation_id!==input.conversationId||existing.source_revision!==input.expectedRevision||storedActorJson(existing.actor_json)!==actorJson||existing.kind!==(input.kind||'reply')||existing.instruction!==(input.instruction||'')||commandOptions(existing.options_json)!==JSON.stringify(clientOptions))throw new Error('Generation command conflict');return ceilingSkipToday(existing)?{id,state:existing.state,ceilingReached:true}:{id,state:existing.state}}
  if(input.kind==='suggestions'&&!input.options?.tool){
   const conversation=await env.DB.prepare('SELECT last_message_id FROM conversations WHERE id=? AND project_id=?').bind(input.conversationId,input.projectId).first<{last_message_id:string|null}>()
   if(!conversation?.last_message_id)throw new Error('CONVERSATION_MESSAGE_REQUIRED: Add a customer message first')

@@ -5,6 +5,7 @@ import {startCrawl,crawlStatus,type CrawlConfig} from './crawl'
 import {stageCorpus,consumePage} from './ingestion'
 import type { Env, Job } from '../../platform/env'
 import { apifyDocuments, collection, embeddings, qdrant, type DocumentInput } from './providers'
+import {articleEligibilitySql,articleCanonicalUrl,readKnowledgeSource} from './public-sources'
 export interface Citation { id:string;sourceVersion:string;url:string;title:string;content:string;score:number }
 export function validateDocuments(value:unknown):DocumentInput[]{
  if(!Array.isArray(value)||value.length===0)throw new Error('Expected nonempty documents');
@@ -49,15 +50,19 @@ export async function searchKnowledge(env:Env,projectId:string,query:string,mode
  await requireActiveProject(env,projectId);
  const versions=await env.DB.prepare('SELECT v.id,v.semantic,v.embedding_model FROM knowledge_datasets d JOIN knowledge_versions v ON v.id=d.published_version WHERE d.project_id=?').bind(projectId).all<{id:string;semantic:number;embedding_model:string}>();
  const rows=await env.DB.prepare('SELECT f.id,f.version_id sourceVersion,f.url,f.title,f.content FROM knowledge_documents f JOIN knowledge_datasets d ON d.published_version=f.version_id WHERE d.project_id=?').bind(projectId).all<Citation>();
+ const articles=await env.DB.prepare(`SELECT id,publication_version sourceVersion,slug,title,content FROM knowledge_articles a WHERE project_id=? AND ${articleEligibilitySql()}`).bind(projectId).all<any>();
+ const native:Citation[]=[];for(const a of articles.results)native.push({...a,id:`article:${a.id}`,url:articleCanonicalUrl(env,projectId,a.slug),score:0});
+ const tokens=[...new Set(query.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t.length>=3))].slice(0,24);
+ const rank=(docs:Citation[])=>docs.map(d=>({...d,score:tokens.reduce((n,t)=>n+(d.title.toLowerCase().includes(t)?6:0)+(d.content.toLowerCase().includes(t)?1:0),0)})).filter(d=>d.score>0).sort((a,b)=>b.score-a.score);
+ const current=async(docs:Citation[])=>{const result:Citation[]=[];for(const d of docs){const row=await readKnowledgeSource(env,projectId,d);if(row)result.push({...d,title:row.title,url:row.url,content:snippet(d.content,tokens,2800)})}return result};
  if(mode==='semantic'){
- if(!versions.results.length)return [];
+ if(!versions.results.length)return current(rank(native).slice(0,3));
  if(versions.results.some(v=>!v.semantic))throw new Error('SEMANTIC_INDEX_UNAVAILABLE: publish all selected datasets with semantic indexing');
  const vectors=new Map<string,number[]>();const hits:any[]=[];
  for(const v of versions.results){await requireActiveProject(env,projectId);if(!vectors.has(v.embedding_model)){const [vector]=await embeddings({...env,KNOWLEDGE_EMBEDDING_MODEL:v.embedding_model},[query]);vectors.set(v.embedding_model,vector)}const vector=vectors.get(v.embedding_model)!;await requireActiveProject(env,projectId);const data=await qdrant(env,`/collections/${collection(v.id)}/points/search`,'POST',{vector,limit:20,with_payload:true,with_vector:true});hits.push(...maximalMarginalRelevance(vector,data.result,1))}
- return hits.sort((a,b)=>b.score-a.score).flatMap(h=>{const row=rows.results.find(r=>r.id===h.payload.documentId);return row?[{...row,content:h.payload.content,score:h.score}]:[]})
+ return current([...rank(native).slice(0,3),...hits.sort((a,b)=>b.score-a.score).flatMap(h=>{const row=rows.results.find(r=>r.id===h.payload.documentId);return row?[{...row,id:`knowledge:${row.id}`,content:h.payload.content,score:h.score}]:[]})])
  }
- const tokens=[...new Set(query.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t.length>=3))].slice(0,24);
- return rows.results.map(d=>({...d,score:tokens.reduce((n,t)=>n+(d.title.toLowerCase().includes(t)?6:0)+(d.content.toLowerCase().includes(t)?1:0),0)})).filter(d=>d.score>0).sort((a,b)=>b.score-a.score).slice(0,3).map(d=>({...d,content:snippet(d.content,tokens,2800)}))
+ return current(rank([...native,...rows.results.map(d=>({...d,id:`knowledge:${d.id}`}))]).slice(0,3))
 }
 
 export async function refreshDueDatasets(env:Env){

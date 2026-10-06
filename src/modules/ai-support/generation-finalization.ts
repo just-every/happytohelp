@@ -13,7 +13,7 @@ export async function finalizeGeneration(env: Env, row: Generation, attemptId: s
         SELECT 1 FROM conversations c
         JOIN ai_profiles a ON a.id=${assistanceProfileSql} AND a.project_id=c.project_id
         WHERE c.id=ai_generations.conversation_id AND c.revision=source_revision
-          AND COALESCE((SELECT revision FROM context_subjects WHERE project_id=c.project_id AND subject_id=c.contact_id),0)=source_context_revision
+          AND (SELECT revision FROM context_subjects WHERE project_id=c.project_id AND subject_id=c.contact_id)=source_context_revision
           AND c.resolved_at IS NULL AND a.id=ai_generations.ai_id AND a.is_enabled=1
           AND a.model=json_extract(ai_profile_json,'$.model')
           AND a.prompt=json_extract(ai_profile_json,'$.prompt')
@@ -34,6 +34,7 @@ export async function finalizeGeneration(env: Env, row: Generation, attemptId: s
     expectedRevision: row.source_revision,
     expectedLastMessageId: row.source_last_message_id,
     generationId: row.id,
+    citations: result.citations,
   });
   if (!admitted.accepted) await transition(env, row.id, 'superseded', admitted.reason);
   await finishAttempt(env, attemptId, admitted.accepted);

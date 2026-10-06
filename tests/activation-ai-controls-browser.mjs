@@ -117,6 +117,7 @@ try {
             await panelEntry.click();
         }
         await page.waitForFunction(() => document.querySelector('#conversation-assistant')?.getAttribute('aria-hidden') === 'false');
+        await panel.getByRole('tab', { name: 'Local', exact: true }).waitFor({ state: 'visible' });
         assert.equal(await panel.getByRole('tab', { name: 'Local', exact: true }).count(), 1, `${width}px: Local appears once as a panel tab`);
         assert.equal(await page.locator('.conversation-header').getByRole('button', { name: 'Local', exact: true }).count(), 0, `${width}px: no duplicate Local header button`);
         assert.equal(await page.locator('[data-ai-generate="true"]').count(), 1, `${width}px: one Generate control with a result`);

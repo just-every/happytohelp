@@ -15,9 +15,7 @@ ConversationHeader.propTypes = {
     conversation: PropTypes.object,
     atTop: PropTypes.bool,
     isPanelVisible: PropTypes.bool,
-    onLocalPanelOpen: PropTypes.func,
     onPanelToggle: PropTypes.func,
-    localPanelToggleRef: PropTypes.object,
     panelToggleRef: PropTypes.object,
 };
 
@@ -25,9 +23,7 @@ export default function ConversationHeader({
     conversation,
     atTop,
     isPanelVisible,
-    onLocalPanelOpen,
     onPanelToggle,
-    localPanelToggleRef,
     panelToggleRef,
 }) {
     const { getProject, isGlobalInbox, resolveConversation, setIsMainVisible } = useContext(ChatContext);
@@ -82,26 +78,16 @@ export default function ConversationHeader({
                         : <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button> }
                     <button
                         type="button"
-                        className="btn btn-white conversation-local-agent-toggle"
-                        ref={ localPanelToggleRef }
-                        title="Delegate to a local agent"
-                        aria-label="Delegate to a local agent"
-                        aria-controls="conversation-assistant"
-                        aria-expanded={ Boolean(isPanelVisible) }
-                        onClick={ onLocalPanelOpen }>
-                        <i className="fe fe-monitor" aria-hidden="true"></i>
-                        <span>Local</span>
-                    </button>
-                    <button
-                        type="button"
                         className="btn btn-white conversation-assistant-toggle"
                         ref={ panelToggleRef }
-                        title={ isPanelVisible ? 'Hide conversation panel' : 'Show conversation panel' }
+                        title={ isPanelVisible ? 'Hide AI and details' : 'Show AI and details' }
                         aria-label={ isPanelVisible ? 'Hide conversation panel' : 'Show conversation panel' }
+                        aria-description="Opens AI replies, Local delegation, and conversation details."
                         aria-controls="conversation-assistant"
                         aria-expanded={ Boolean(isPanelVisible) }
                         onClick={ onPanelToggle }>
-                        <i className="fe fe-star" aria-hidden="true"></i>
+                        <i className="fe fe-message-square" aria-hidden="true"></i>
+                        <span>AI &amp; details</span>
                     </button>
                 </div>
             </div>

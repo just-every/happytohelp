@@ -1,0 +1,2 @@
+# Preserve native command output bytes, including ANSI codes and whitespace.
+*.log binary

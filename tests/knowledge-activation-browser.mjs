@@ -233,6 +233,18 @@ try {
         assert.equal((await actions.getByRole('status').locator('strong').innerText()).trim(), 'Published');
     });
 
+    await record('Unpublish withdraws article retrieval and Publish restores eligibility', async () => {
+        await page.getByRole('button', { name: 'Unpublish', exact: true }).click();
+        await actions.getByRole('status').locator('strong').filter({ hasText: /^Saved as draft$/ }).waitFor();
+        const row = (await request('/api/knowledge/' + projectId + '/articles')).find(item => item.id === articleId);
+        assert.equal(row.status, 'draft');
+        assert.equal(row.aiEligibility, 'not_used');
+        assert.ok(!(await searchFor(ARTICLE_RETRIEVAL_TOKEN)).some(citation => citation.id === 'article:' + articleId));
+        await page.getByRole('button', { name: 'Publish', exact: true }).click();
+        await actions.getByRole('status').locator('strong').filter({ hasText: /^Published$/ }).waitFor();
+        assert.equal((await request('/api/knowledge/' + projectId + '/articles')).find(item => item.id === articleId).aiEligibility, 'used');
+    });
+
     await record('Preview renders the article without the editing toolbar', async () => {
         await page.getByRole('tab', { name: 'Preview', exact: true }).click();
         assert.equal(await page.getByRole('toolbar', { name: 'Markdown formatting' }).count(), 0);
@@ -265,6 +277,8 @@ try {
         const publishedRow = page.getByRole('row').filter({ hasText: 'Unsaved navigation draft' });
         const draftRow = page.getByRole('row').filter({ hasText: 'Unpublished source remains excluded' });
         const publishedLabel = articleReturnedByRetrieval ? 'Used by AI answers' : articleEligibility === 'unknown' ? 'AI use not confirmed' : 'Not used by AI answers';
+        await publishedRow.getByText(publishedLabel, { exact: true }).waitFor();
+        await draftRow.getByText('Not used by AI answers', { exact: true }).waitFor();
         assert.equal(await publishedRow.getByText(publishedLabel, { exact: true }).count(), 1);
         assert.equal(await draftRow.getByText('Not used by AI answers', { exact: true }).count(), 1);
     });
@@ -272,6 +286,7 @@ try {
     await record('failed website refresh remains labelled as used by AI answers', async () => {
         await page.goto(base + '/datasets');
         const sourceRow = page.getByRole('row').filter({ hasText: 'knowledge-fixture.example.test' });
+        await sourceRow.getByText('Used by AI answers', { exact: true }).waitFor();
         assert.equal(await sourceRow.getByText('Used by AI answers', { exact: true }).count(), 1);
         assert.match(await sourceRow.innerText(), /failed/i, 'the failed refresh is visible without discarding the active source');
         assert.ok((await searchFor(DATASET_RETRIEVAL_TOKEN)).some(citation => citation.content.includes(DATASET_RETRIEVAL_TOKEN)));

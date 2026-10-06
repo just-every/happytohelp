@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,readdir} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {chromium} from 'playwright';
@@ -118,5 +120,10 @@ try {
   assert.deepEqual(errors,[]);
   success=true;
   await writeFile(join(evidence,'result.json'),JSON.stringify({success,originalId,demoId,errors,widths:[1440,390]},null,2));
+  const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  const trackedChanges=execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim();
+  const files=[];
+  for(const name of (await readdir(evidence)).filter(name=>name.endsWith('.jpg')||name==='result.json').sort()) files.push({name,sha256:createHash('sha256').update(await readFile(join(evidence,name))).digest('hex')});
+  await writeFile(join(evidence,'manifest.json'),JSON.stringify({sha,trackedChanges,recordedAt:new Date().toISOString(),widths:[1440,390],files},null,2));
   console.log('Demo activation browser passed: persistent banner; desktop/mobile native return; reserved conversation space; unsaved guard; explicit missing/stale origin selection; current membership revocation; deleted origin; published fictional FAQ. Evidence: '+evidence);
 } finally { await browser.close();await runtime.close(success); }

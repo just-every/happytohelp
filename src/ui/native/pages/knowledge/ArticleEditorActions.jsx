@@ -8,7 +8,7 @@ export default function ArticleEditorActions({ isPublished, savedStatus, busy, o
             <span>Status</span>
             <strong>{status}</strong>
         </p>
-        <div className="article-editor-actions__buttons">
+        <div className="article-editor-actions__buttons knowledge-form-actions">
             {onDelete && <button className="btn btn-link text-danger" type="button" disabled={busy} onClick={onDelete}>Delete</button>}
             {isPublished && <button className="btn btn-white" type="button" disabled={busy} onClick={onUnpublish}>Unpublish</button>}
             <button className="btn btn-white" type="submit" disabled={busy}>

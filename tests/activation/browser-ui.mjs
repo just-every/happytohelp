@@ -36,7 +36,7 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
   await page.evaluate(()=>{const element=document.querySelector('#workspace-main');element?.scrollTo(0,element.scrollHeight);window.scrollTo(0,document.body.scrollHeight)});
   await visibleControl(page.getByRole('button',{name:'Save',exact:true}),`${width} edit Save`);
   await visibleControl(page.getByRole('button',{name:'Publish',exact:true}),`${width} edit Publish`);
-  await page.getByRole('button',{name:'Save',exact:true}).click();await noOverflow(page,'article editor');await capture(page,evidence,`${width}-article-actions`,artifacts);
+  const saved=page.waitForResponse(response=>new URL(response.url()).pathname===`/api/knowledge/${projectId}/articles`&&response.request().method()==='POST');await page.getByRole('button',{name:'Save',exact:true}).click();assert.equal((await saved).status(),201);await noOverflow(page,'article editor');await capture(page,evidence,`${width}-article-actions`,artifacts);
  }
  checks.push('one primary Knowledge/AI/Local computers navigation, source status and long new/edit article Save/Publish at both widths');
 }
@@ -46,7 +46,7 @@ export async function demoAndAiViews({page,runtime,projectId,evidence,artifacts,
   await page.setViewportSize({width,height:width===390?844:1000});await page.goto(`${runtime.origin}/projects/${demoId}/articles`);await page.getByText('Back to your workspace',{exact:true}).waitFor();assert.match(await page.locator('body').innerText(),/Demo/i);assert.match(await page.locator('body').innerText(),/Used by AI answers/i);
   await page.reload();await page.getByText('Back to your workspace',{exact:true}).waitFor();await page.goto(`${runtime.origin}/projects/${demoId}/conversations`);
   await page.locator('.conversation-list-items').getByText('Maya Chen (demo)',{exact:true}).click();
-  const trigger=page.getByRole('button',{name:/AI.*Details|AI and details|AI, Local and details/i});await trigger.click();
+  const trigger=page.getByRole('button',{name:/AI.*Details|AI and details|AI, Local and details/i});if(await trigger.getAttribute('aria-expanded')!=='true')await trigger.click();
   const ai=page.getByRole('tab',{name:'AI',exact:true});await ai.waitFor();await ai.click();assert.equal(await page.getByRole('button',{name:/^Generate(?: replies)?$/}).count(),1,'one Generate');assert.equal(await page.getByRole('tab',{name:'Local',exact:true}).count(),1,'one Local');assert.equal(await page.getByRole('button',{name:'Local',exact:true}).count(),0,'no duplicate header Local');
   if(width===390){assert.ok(await ai.evaluate(element=>element===document.activeElement),'AI tab receives focus');await page.keyboard.press('ArrowRight');assert.ok(await page.getByRole('tab',{name:'Local',exact:true}).evaluate(element=>element===document.activeElement));await page.keyboard.press('ArrowLeft');}
   page.expectedProviderFailure=true;await page.getByRole('button',{name:/^Generate(?: replies)?$/}).click();await page.getByText(/OPENAI_API_KEY|ANTHROPIC_API_KEY|installation secret/i).first().waitFor();assert.match(await page.locator('body').innerText(),/secret|key/i);page.expectedProviderFailure=false;

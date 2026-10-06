@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {apiKit,capture,noOverflow} from './browser-kit.mjs';
+export async function spendViews({runtime,page,projectId,token,evidence,artifacts,checks}){
+ const api=apiKit(runtime,token),path=`/api/dashboard/projects/${projectId}/ai-spend`;
+ let data=(await api(path)).data;assert.equal(data.spend.state,'empty');assert.equal(data.spend.knownUsd,null);assert.equal(data.scope,'conversation_generations');assert.ok(data.excluded.includes('training'));assert.ok(data.ceilingDefaults.length);
+ assert.equal(data.automatic.spendUsd.basis,'persisted_cost_counter_may_include_estimates');assert.ok(data.resetsAt.endsWith('T00:00:00.000Z'));
+ // Synthetic persisted diagnostic records are test fixtures, never model/provider proof.
+ const now=new Date().toISOString(),quote=v=>"'"+String(v).replaceAll("'","''")+"'";
+ await runtime.execute(`INSERT INTO ai_generations(id,project_id,conversation_id,state,source_revision,actor_json,model,ai_id,ai_profile_json,created_at,updated_at) VALUES('activation-cost-fixture',${quote(projectId)},'activation-cost-conversation','completed',0,'{}','fixture-model','fixture-ai','{}',${quote(now)},${quote(now)}); INSERT INTO ai_attempts(id,generation_id,state,started_at) VALUES('activation-cost-attempt','activation-cost-fixture','completed',${quote(now)}); INSERT INTO ai_round_usage(attempt_id,request_id,model,usage_json,observed) VALUES('activation-cost-attempt','activation-estimated-cost','fixture-model','{"cost":0.25}',1);`);
+ data=(await api(path)).data;assert.equal(data.spend.state,'unknown');assert.equal(data.spend.knownUsd,null);assert.equal(data.spend.unknownRounds,1);assert.equal(data.spend.unverifiedUsd,0.25);
+ for(const width of [1440,390]){await page.setViewportSize({width,height:width===390?844:1000});await page.goto(`${runtime.origin}/projects/${projectId}/activation`);const card=page.locator('.activation-spend');await card.getByText('Actual provider cost (USD)',{exact:true}).waitFor();assert.match(await card.innerText(),/unknown|not recorded/i);assert.match(await card.innerText(),/Estimated recorded cost.*0.25/s);assert.match(await card.innerText(),/not provider billing caps/i);assert.match(await card.innerText(),/UTC/);assert.doesNotMatch(await card.locator('.activation-spend__amount').innerText(),/^\$0(?:\.00)?$/);await noOverflow(page,'AI spend');await capture(page,evidence,`${width}-spend-unknown`,artifacts);}
+ const other=await runtime.seedTenant({name:'Other spend project',email:'activation-spend-other@example.test',allowedOrigin:runtime.origin});await api(`/api/dashboard/projects/${other.projectId}/ai-spend`,{status:403});await api(path,{auth:null,status:401});
+ checks.push('integrated real spend API/card: UTC bounds, honest scope/default guards and persisted estimate leaves actual cost unknown at both widths');
+}

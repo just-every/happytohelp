@@ -433,7 +433,7 @@
       "executable": false
     },
     "docs/INSTALLER.md": {
-      "sha256": "f51d28deca2dae7d098786cc0eb9c092c288fddd70257a2b5afad1039226c9e0",
+      "sha256": "a5cf32f717c9c701337ba29a8651c4a1e6467649e7700bd7726ba79745fbff5c",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -797,7 +797,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "e12052e3e30945acb87b1e18ac7462b97ac9cd446466cba82f1255e0d9731cc9",
+      "sha256": "ce180617f52f8c53fee661bd879cdcd4de416075014fc528b9fc339777a68083",
       "executable": false
     },
     "package.json": {
@@ -845,7 +845,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "025a44c08fbec17d736bf79a2c406216df94fc81f736708a49e3d62cbc1fbf86",
+      "sha256": "e02c8edc0f9abcd7c3ee49823f5327b088bc092bfa2906593aabb4ccbb39f270",
       "executable": false
     },
     "rer-project.json": {
@@ -1037,7 +1037,7 @@
       "executable": false
     },
     "scripts/deployment/run.mjs": {
-      "sha256": "9254bf781ae71f6b9f414611d4e45a42f58d1243a1b866fd21a052ee2733837d",
+      "sha256": "39125fa255401091940a0c043ac57aa8124609b0fdc2e7347fd334f4edc12bbe",
       "executable": false
     },
     "scripts/deployment/secret-json.mjs": {

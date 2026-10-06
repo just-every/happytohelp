@@ -1,3 +1,4 @@
+import {checkInbound} from './inbound-probe'
 import type {Env} from '../../../platform/env'
 import {aiCeilings} from '../../../platform/limit-config'
 import type {Configuration} from './configuration'
@@ -22,13 +23,6 @@ export async function localProbe(env:Env,config:Configuration,id:StepId):Promise
   const ping=await env.DB.prepare('SELECT * FROM activation_widget_pings WHERE project_id=? AND origin=?').bind(config.projectId,config.project.allowed_origin).first<any>()
   return ping?{state:'done',detail:`Authenticated widget ping observed at ${new Date(ping.checked_at).toISOString()} on ${ping.origin}. This is an installation observation, not a claim a visitor remains online.`,receiptRef:ping.receipt_ref}:{state:'pending',detail:'Visit the configured website with the installed widget. An authenticated contact ping is required; owner preview activity does not count.'}
  }
- if(id==='inbound_address') {
-  const email=config.email
-  if(!email?.is_enabled||!email.inbound_address)return {state:'pending',detail:'Save and enable your receiving address in Email settings.'}
-  if(!env.INBOUND_EMAIL_TOKEN)return {state:'unavailable',detail:'CONFIGURATION_REQUIRED: INBOUND_EMAIL_TOKEN. Configure the authenticated inbound gateway in the installation.'}
-  const inbound=await env.DB.prepare(`SELECT i.id FROM activation_inbound_receipts r JOIN inbound_emails i ON i.id=r.inbound_id AND i.project_id=r.project_id
-   WHERE r.project_id=? AND r.address=? AND r.settings_updated_at=? AND i.state='delivered' AND i.message_id IS NOT NULL ORDER BY i.created_at DESC LIMIT 1`).bind(config.projectId,email.inbound_address.toLowerCase(),email.updated_at).first<{id:string}>()
-  return inbound?{state:'done',detail:`A message was received through the configured inbound gateway for ${email.inbound_address}.`,receiptRef:`inbound:${inbound.id}`}:{state:'pending',detail:`Waiting for an actual message through your configured inbound provider to ${email.inbound_address}. Saving the address alone does not prove receiving. The check sends no email.`}
- }
+ if(id==='inbound_address')return checkInbound(env,config)
  return {state:'unavailable',detail:'This step requires provider validation.'}
 }

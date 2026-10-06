@@ -22,7 +22,7 @@ GET nor `/check` sends email.
 
 Inbound observations capture the enabled mailbox and its settings version at
 native inbound admission, using the migration trigger, then join the actual
-delivered receipt. Old receipts are not backfilled. Checking sends nothing and
+delivered receipt and reconstruct its immutable recipient intent from a plain-text message without attachments. This rejects configuration races that could otherwise misattribute an old-address message. Old receipts are not backfilled. Checking sends nothing and
 cannot trigger an AI/email loop. Widget observations are recorded only for
 accepted authenticated contact `pingActive`/`pingAction` commands carrying the
 current allowed origin, excluding owner preview. Changing origin removes them.

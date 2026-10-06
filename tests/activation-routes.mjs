@@ -4,6 +4,7 @@ import {readFile,readdir} from 'node:fs/promises'
 import {seedWorkspace,sha} from './helpers/identity-db.mjs'
 import {getPlatformProxy} from 'wrangler'
 const {activation}=await import('../src/modules/management/activation.ts')
+const {receiveEmail}=await import('../src/modules/integrations/inbound-service.ts')
 const {widgetEvents}=await import('../src/modules/management/widget-events.ts')
 const proxy=await getPlatformProxy({persist:false,envFiles:[]}),DB=proxy.env.DB
 for(const name of (await readdir(new URL('../migrations/',import.meta.url))).filter(name=>name.endsWith('.sql')).sort()) {
@@ -95,10 +96,13 @@ test('test email is idempotent, queued is pending, wrong identity is unknown and
 test('inbound completion needs a delivered receipt captured under current enabled mailbox, not an address alone',async()=>{
  await DB.prepare('INSERT INTO email_settings VALUES(?,?,?,?,?,?)').bind(primary.projectId,'Support','support@example.test','inbound@example.test',1,100).run()
  assert.equal((await check('inbound_address')).state,'pending')
- await DB.prepare("INSERT INTO inbound_emails(id,project_id,intent_hash,state,created_at,message_id) VALUES(?,?,?,'delivered',?,?)").bind('inbound-1',primary.projectId,'fixture',Date.now(),'message-1').run()
+ await receiveEmail(base,{messageId:'inbound-1',to:'inbound@example.test',from:'visitor@example.test',text:'Plain text activation receipt',evidence:{envelope_from:'visitor@example.test',header_from:'visitor@example.test',subject:'Test',headers:{'auto-submitted':'auto-generated'}}})
  assert.equal((await check('inbound_address')).state,'done')
  await DB.prepare('UPDATE email_settings SET inbound_address=?,updated_at=101 WHERE project_id=?').bind('new@example.test',primary.projectId).run()
  assert.equal(step(await snapshot(),'inbound_address').state,'unknown');assert.equal((await check('inbound_address')).state,'pending')
+ // Even a raced snapshot cannot reattribute an immutable old-address ingress intent.
+ await DB.prepare("UPDATE activation_inbound_receipts SET address='new@example.test',settings_updated_at=101 WHERE inbound_id='inbound-1'").run()
+ assert.equal((await check('inbound_address')).state,'pending')
 })
 test('widget instruction, wrong origin and owner preview do not count; only authenticated contact ping does',async()=>{
  await DB.prepare('INSERT INTO contacts(id,project_id,created_at) VALUES(?,?,?)').bind('contact',primary.projectId,Date.now()).run()

@@ -1,0 +1,6 @@
+{
+  "scope": "Fresh SQLite schema inventory only; not native D1/R2 recovery acceptance",
+  "tables": 104,
+  "migrations": 39,
+  "preserved0106": true
+}

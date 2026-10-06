@@ -1,0 +1,680 @@
+
+> @run-edit-run/happytohelp@0.2.2-rc.1 build /Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-converge
+> node scripts/migrations.mjs && pnpm run build:assets && vite build
+
+{
+  "directory": "/Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-converge/.generated/migrations",
+  "files": [
+    "0001_identity.sql",
+    "0002_conversations.sql",
+    "0003_identity_credentials.sql",
+    "0004_message_intent.sql",
+    "0005_widget_identity.sql",
+    "0006_registration.sql",
+    "0007_conversation_history.sql",
+    "0008_account_sessions.sql",
+    "0050_knowledge.sql",
+    "0051_knowledge_authoring.sql",
+    "0052_knowledge_imports.sql",
+    "0053_knowledge_recovery.sql",
+    "0060_customer_context.sql",
+    "0060_customer_context_engine.sql",
+    "0070_management.sql",
+    "0071_management_preferences.sql",
+    "0080_integrations.sql",
+    "0081_billing_receipts.sql",
+    "0082_github_oauth.sql",
+    "0083_lead_operations.sql",
+    "0084_billing_project_usage.sql",
+    "0085_ai_context_guards.sql",
+    "0095_public_site.sql",
+    "0096_site_preview.sql",
+    "0097_owner_setup.sql",
+    "0098_personal_visual_inspiration.sql",
+    "0099_personal_sidebar_artwork.sql",
+    "0100_inbound_email_claims.sql",
+    "0101_email_mailbox_lifecycle.sql",
+    "0102_public_abuse_limits.sql",
+    "0103_contact_erasure.sql",
+    "0104_inbound_email_classification.sql",
+    "0105_edition_delegation.sql",
+    "0106_project_verification_secret.sql",
+    "020_ai_support.sql",
+    "030_local_computer.sql",
+    "040_training_runs.sql",
+    "041_training_model_usage.sql",
+    "090_legacy_import.sql"
+  ]
+}
+
+> @run-edit-run/happytohelp@0.2.2-rc.1 build:assets /Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-converge
+> node scripts/build-local-agent.cjs && pnpm run build:widget
+
+Built local connector download (29583 bytes).
+
+> @run-edit-run/happytohelp@0.2.2-rc.1 build:widget /Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-converge
+> node scripts/build-widget.mjs
+
+[36mvite v8.2.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 695 modules transformed.
+rendering chunks...
+computing gzip size...
+public/widget.js  969.50 kB │ gzip: 285.34 kB
+
+[32m✓ built in 334ms[39m
+[36mvite v8.2.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+6 │ @import "bootstrap/scss/functions";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    src/ui/dashboard/styles/dashboard.scss 6:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+8 │ @import "./foundation/tokens";
+  │         ^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    src/ui/dashboard/styles/dashboard.scss 8:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+9 │ @import "./foundation/tokens-dark";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    src/ui/dashboard/styles/dashboard.scss 9:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │ @import "bootstrap/scss/variables";
+   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    src/ui/dashboard/styles/dashboard.scss 11:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+12 │ @import "bootstrap/scss/variables-dark";
+   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    src/ui/dashboard/styles/dashboard.scss 12:9  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 58:55  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 58:30  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+177 │   @return if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1 + .05));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 177:11  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                   root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+191 │     $value: if(divide($value, 255) < .04045, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 191:13  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                   root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+217 │   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 217:11  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                   root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+207 │   @return mix(white, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 207:11  tint-color()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 79:12   @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+212 │   @return mix(black, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 212:11  shade-color()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 84:12   @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+342 │ $light-bg-subtle:         mix($gray-100, $white) !default;
+    │                           ^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 342:27  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                              ^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 11:30  -assert-ascending()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 494:1  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                 root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                                                   ^^^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 11:51  -assert-ascending()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 494:1  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                 root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+185 │     "r": red($color),
+    │          ^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 185:10  luminance()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 174:8   contrast-ratio()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 159:22  color-contrast()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:42  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+186 │     "g": green($color),
+    │          ^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 186:10  luminance()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 174:8   contrast-ratio()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 159:22  color-contrast()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:42  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+187 │     "b": blue($color)
+    │          ^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 187:10  luminance()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 174:8   contrast-ratio()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 159:22  color-contrast()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:42  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │           ^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 37:11   to-rgb()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:31  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │                        ^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 37:24   to-rgb()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:31  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+WARNING: 381 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.
+
+✓ 1641 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/.assetsignore                                   0.02 kB
+dist/client/assets/setup-CQNSshTp.css                       4.23 kB │ gzip:     1.48 kB
+dist/client/assets/fields-BbNy78Eh.css                      4.32 kB │ gzip:     1.32 kB
+dist/client/assets/routes-CO3JkRSy.css                     10.66 kB │ gzip:     2.66 kB
+dist/client/assets/DashboardClient-DsI_gGrz.css            25.13 kB │ gzip:     5.61 kB
+dist/client/assets/index-CIgQxskd.css                     650.00 kB │ gzip:    82.58 kB
+dist/client/assets/_dashboard._workspace-BJb2z4DG.js        0.07 kB │ gzip:     0.08 kB
+dist/client/assets/_dashboard._workspace._-SidARVgQ.js      0.07 kB │ gzip:     0.08 kB
+dist/client/assets/_dashboard._workspace-CeIlsESI.js        0.07 kB │ gzip:     0.09 kB
+dist/client/assets/LinkProblem-BZtbP82f.js                  0.77 kB │ gzip:     0.42 kB
+dist/client/assets/hooks-lsWpTn8_.js                        0.92 kB │ gzip:     0.51 kB
+dist/client/assets/fields-BIpvRBh6.js                       1.30 kB │ gzip:     0.60 kB
+dist/client/assets/login-Coo9tzK0.js                        1.61 kB │ gzip:     0.84 kB
+dist/client/assets/forgot-password-Broot7dc.js              1.66 kB │ gzip:     0.81 kB
+dist/client/assets/reset-password-DEdcICgT.js               1.91 kB │ gzip:     0.84 kB
+dist/client/assets/verify-email-Bj-SS4WB.js                 2.11 kB │ gzip:     0.80 kB
+dist/client/assets/register-Dz0brTrW.js                     3.08 kB │ gzip:     1.20 kB
+dist/client/assets/accept-invitation-ChN3EhfS.js            4.80 kB │ gzip:     1.48 kB
+dist/client/assets/setup-RMwiKPIS.js                        8.11 kB │ gzip:     3.00 kB
+dist/client/assets/useStore-VSokMvQT.js                    14.48 kB │ gzip:     5.52 kB
+dist/client/assets/routes-DhmMfwS8.js                      16.20 kB │ gzip:     4.67 kB
+dist/client/assets/index-ByNa5jMh.js                      331.77 kB │ gzip:   107.01 kB
+dist/client/assets/DashboardClient-BFT80vzM.js          3,916.06 kB │ gzip: 1,035.65 kB
+
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 3.51s[39m
+[33m[33m[PLUGIN_TIMINGS] [0mPlugin hooks ran for 3.2s of this 3.5s build (92%).
+2 hooks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - tanstack-start-core:import-protection resolveId (4469 calls)
+  - vite:css transform (22 calls)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+[39m
+[36mvite v8.2.2 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+6 │ @import "bootstrap/scss/functions";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    src/ui/dashboard/styles/dashboard.scss 6:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+8 │ @import "./foundation/tokens";
+  │         ^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    src/ui/dashboard/styles/dashboard.scss 8:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+  ╷
+9 │ @import "./foundation/tokens-dark";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+    src/ui/dashboard/styles/dashboard.scss 9:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │ @import "bootstrap/scss/variables";
+   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    src/ui/dashboard/styles/dashboard.scss 11:9  root stylesheet
+
+DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+12 │ @import "bootstrap/scss/variables-dark";
+   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    src/ui/dashboard/styles/dashboard.scss 12:9  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$value"): $value; else: $arg)
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 58:55  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($arg == "$key"): $key; else: if($arg == "$value", $value, $arg))
+
+More info: https://sass-lang.com/d/if-function
+
+   ╷
+58 │       $_args: append($_args, if($arg == "$key", $key, if($arg == "$value", $value, $arg)));
+   │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 58:30  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                  root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($l1 > $l2): divide($l1 + 0.05, $l2 + 0.05); else: divide($l2 + 0.05, $l1 + 0.05))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+177 │   @return if($l1 > $l2, divide($l1 + .05, $l2 + .05), divide($l2 + .05, $l1 + .05));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 177:11  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                   root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass(divide($value, 255) < 0.04045): divide(divide($value, 255), 12.92); else: nth($_luminance-list, $value + 1))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+191 │     $value: if(divide($value, 255) < .04045, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 191:13  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                   root stylesheet
+
+DEPRECATION WARNING [if-function]: The Sass if() syntax is deprecated in favor of the modern CSS syntax.
+
+Suggestion: if(sass($weight > 0): shade-color($color, $weight); else: tint-color($color, -$weight))
+
+More info: https://sass-lang.com/d/if-function
+
+    ╷
+217 │   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 217:11  @import
+    src/ui/dashboard/styles/dashboard.scss 6:9                                                                   root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+207 │   @return mix(white, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 207:11  tint-color()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 79:12   @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+212 │   @return mix(black, $color, $weight);
+    │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 212:11  shade-color()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 84:12   @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use color.mix instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+    ╷
+342 │ $light-bg-subtle:         mix($gray-100, $white) !default;
+    │                           ^^^^^^^^^^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 342:27  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                              ^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 11:30  -assert-ascending()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 494:1  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                 root stylesheet
+
+DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use math.unit instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+   ╷
+11 │     @if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+   │                                                   ^^^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 11:51  -assert-ascending()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 494:1  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                 root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+185 │     "r": red($color),
+    │          ^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 185:10  luminance()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 174:8   contrast-ratio()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 159:22  color-contrast()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:42  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+186 │     "g": green($color),
+    │          ^^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 186:10  luminance()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 174:8   contrast-ratio()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 159:22  color-contrast()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:42  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+
+color.channel($color, "blue", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+    ╷
+187 │     "b": blue($color)
+    │          ^^^^^^^^^^^^
+    ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 187:10  luminance()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 174:8   contrast-ratio()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 159:22  color-contrast()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:42  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+
+color.channel($color, "red", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │           ^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 37:11   to-rgb()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:31  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+
+color.channel($color, "green", $space: rgb)
+
+More info: https://sass-lang.com/d/color-functions
+
+   ╷
+37 │   @return red($value), green($value), blue($value);
+   │                        ^^^^^^^^^^^^^
+   ╵
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_functions.scss 37:24   to-rgb()
+    node_modules/.pnpm/bootstrap@5.3.8_@popperjs+core@2.11.8/node_modules/bootstrap/scss/_variables.scss 846:31  @import
+    src/ui/dashboard/styles/dashboard.scss 11:9                                                                  root stylesheet
+
+WARNING: 381 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.
+
+✓ 2409 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/server/wrangler.json                                      1.90 kB │ gzip:     0.89 kB
+dist/server/.vite/manifest.json                               14.87 kB │ gzip:     2.05 kB
+dist/server/assets/setup-CQNSshTp.css                          4.23 kB │ gzip:     1.48 kB
+dist/server/assets/fields-BbNy78Eh.css                         4.32 kB │ gzip:     1.32 kB
+dist/server/assets/routes-CO3JkRSy.css                        10.66 kB │ gzip:     2.66 kB
+dist/server/assets/DashboardClient-DsI_gGrz.css               25.13 kB │ gzip:     5.61 kB
+dist/server/assets/router-CIgQxskd.css                       650.00 kB │ gzip:    82.58 kB
+dist/server/assets/_dashboard._workspace-Bn1dZE8W.js           0.20 kB │ gzip:     0.16 kB
+dist/server/assets/_dashboard._workspace._-BI6wkGNY.js         0.22 kB │ gzip:     0.16 kB
+dist/server/assets/_dashboard._workspace-Bji1MOUm.js           0.23 kB │ gzip:     0.16 kB
+dist/server/assets/empty-plugin-adapters-Bl8nN3xg.js           0.28 kB │ gzip:     0.18 kB
+dist/server/assets/start-B28ckTrV.js                           0.28 kB │ gzip:     0.20 kB
+dist/server/assets/agent-CRX2PA5_.js                           0.30 kB │ gzip:     0.21 kB
+dist/server/assets/browser-D1iRHCoJ.js                         0.40 kB │ gzip:     0.29 kB
+dist/server/assets/errors-D1cPeZGq.js                          0.70 kB │ gzip:     0.32 kB
+dist/server/assets/worker-runtime-C7Uy30HM.js                  1.23 kB │ gzip:     0.61 kB
+dist/server/assets/LinkProblem-B2x-NIBg.js                     1.31 kB │ gzip:     0.61 kB
+dist/server/assets/useMatch-Dj1_ZI5m.js                        1.44 kB │ gzip:     0.68 kB
+dist/server/assets/v4-CPFkEhgs.js                              1.72 kB │ gzip:     0.65 kB
+dist/server/assets/manifest-DUc4cwhz.js                        1.96 kB │ gzip:     0.73 kB
+dist/server/assets/hooks-BZLJ4QPF.js                           2.25 kB │ gzip:     0.97 kB
+dist/server/assets/rolldown-runtime-CEgmsyvS.js                2.30 kB │ gzip:     1.03 kB
+dist/server/assets/pause_controller-B_0-L7vS.js                2.36 kB │ gzip:     0.83 kB
+dist/server/assets/fields-NtH4jkxc.js                          2.71 kB │ gzip:     0.94 kB
+dist/server/assets/_tanstack-start-manifest_v-ComO0IqU.js      2.93 kB │ gzip:     0.72 kB
+dist/server/assets/login-B7Nf_j2d.js                           3.24 kB │ gzip:     1.23 kB
+dist/server/assets/forgot-password-BCoK3jzX.js                 3.27 kB │ gzip:     1.16 kB
+dist/server/assets/transport-COTDX_t8.js                       3.54 kB │ gzip:     1.38 kB
+dist/server/assets/reset-password-CWwBTSvZ.js                  3.97 kB │ gzip:     1.23 kB
+dist/server/assets/verify-email-CaGDcajd.js                    4.41 kB │ gzip:     1.18 kB
+dist/server/assets/register-DHFSPw6k.js                        5.95 kB │ gzip:     1.65 kB
+dist/server/assets/quota_tracker-PqL0dRgL.js                   9.12 kB │ gzip:     1.92 kB
+dist/server/assets/summary_utils-CELKaKgM.js                   9.16 kB │ gzip:     2.72 kB
+dist/server/assets/accept-invitation-B2_NsRld.js               9.54 kB │ gzip:     2.04 kB
+dist/server/assets/cost_tracker-C_8T88oa.js                   11.32 kB │ gzip:     2.86 kB
+dist/server/assets/tool_result_processor-Bh_eMNur.js          12.40 kB │ gzip:     3.74 kB
+dist/server/assets/setup-BeIEMGtf.js                          14.96 kB │ gzip:     4.01 kB
+dist/server/assets/dashboard-state-BKRaacHv.js                16.29 kB │ gzip:     5.40 kB
+dist/server/assets/VisualEditBoundary-B5R43jR6.js             16.79 kB │ gzip:     5.36 kB
+dist/server/assets/routes-oJ9uOaxh.js                         30.71 kB │ gzip:     6.13 kB
+dist/server/assets/useStore-DPPDCHtO.js                       32.59 kB │ gzip:     9.00 kB
+dist/server/assets/node-pGJWF5bn.js                           38.30 kB │ gzip:    11.92 kB
+dist/server/assets/Match-C35MtH1Q.js                          49.62 kB │ gzip:    13.24 kB
+dist/server/assets/router-CmFwaYag.js                         60.40 kB │ gzip:    16.03 kB
+dist/server/assets/Matches-OMLIHEgM.js                        94.60 kB │ gzip:    22.57 kB
+dist/server/assets/model_data-CiUzQ8g5.js                    113.28 kB │ gzip:    14.73 kB
+dist/server/assets/client-BAiqw_wI.js                        374.42 kB │ gzip:    83.14 kB
+dist/server/assets/remark-gfm-qx4ETqTF.js                    418.22 kB │ gzip:    93.45 kB
+dist/server/assets/ensemble_request-cx--kVVz.js            1,500.93 kB │ gzip:   258.02 kB
+dist/server/index.js                                       1,877.61 kB │ gzip:   448.78 kB
+dist/server/assets/DashboardClient-D_vNK3Ha.js             5,673.68 kB │ gzip: 1,305.29 kB
+
+[32m✓ built in 2.60s[39m

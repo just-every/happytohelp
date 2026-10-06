@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "edition": "happytohelp",
+  "scope": "local-inputs-only",
+  "ok": true,
+  "commands": [
+    {
+      "name": "setup",
+      "available": true
+    },
+    {
+      "name": "deploy",
+      "available": true
+    },
+    {
+      "name": "verify",
+      "available": true
+    }
+  ],
+  "missingEnvironment": [],
+  "configuration": "valid",
+  "unchecked": [
+    "generated deployment caches and build artifacts",
+    "Cloudflare identity and permissions",
+    "remote resources and deployed health",
+    "provider credentials and delivery",
+    "product acceptance"
+  ],
+  "guidance": "See OPERATIONS.md and the edition setup documentation. Configuration errors are suppressed to avoid disclosing input values."
+}

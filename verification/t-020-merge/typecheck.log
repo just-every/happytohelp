@@ -1,0 +1,4 @@
+
+> @run-edit-run/happytohelp@0.2.2-rc.1 typecheck /Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-converge
+> tsc --noEmit
+

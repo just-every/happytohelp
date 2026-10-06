@@ -1,0 +1,61 @@
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m				You have defined bindings to the following internal Durable Objects:[0m
+
+  				- {"name":"CONVERSATIONS","class_name":"ConversationSocket"}
+  				These will not work in local development, but they should work in production.
+  
+  				If you want to develop these locally, you can define your DO in a separate Worker, with a separate configuration file.
+  				For detailed instructions, refer to the Durable Objects section here: [4mhttps://developers.cloudflare.com/workers/wrangler/api#supported-bindings[0m
+
+
+A DurableObjectNamespace in the config referenced the class "ConversationSocket", but no such Durable Object class is exported from the worker. Please make sure the class name matches, it is exported, and the class extends 'DurableObject'. Attempts to call to this Durable Object class will fail at runtime, but historically this was not a startup-time error. Future versions of workerd may make this a startup-time error.
+Demo inbox D1 passed: concurrent idempotence, owner authorization, tenant separation, real transcripts/counts and history events, edit/read preservation, safe upgrades, no queued side effects, deletion/recreation.
+✔ tests/demo-inbox.mjs (25010.9635ms)
+✔ the village homepage is removed completely (62.405166ms)
+✔ homepage styles are scoped so they cannot leak into the dashboard (4.408333ms)
+✔ one open-licensed typeface is self-hosted and recorded (15.801333ms)
+✔ the page is composed from one component per section (12.852958ms)
+✔ every icon in the drawings is used and the hero drawing draws only its six strings (1.577917ms)
+✔ the homepage source is free of cost, hosting, provider and Run Edit Run text (7.0755ms)
+✔ the 404 page uses the homepage language and its styles stay scoped (0.856208ms)
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m				You have defined bindings to the following internal Durable Objects:[0m
+
+  				- {"name":"CONVERSATIONS","class_name":"ConversationSocket"}
+  				These will not work in local development, but they should work in production.
+  
+  				If you want to develop these locally, you can define your DO in a separate Worker, with a separate configuration file.
+  				For detailed instructions, refer to the Durable Objects section here: [4mhttps://developers.cloudflare.com/workers/wrangler/api#supported-bindings[0m
+
+
+A DurableObjectNamespace in the config referenced the class "ConversationSocket", but no such Durable Object class is exported from the worker. Please make sure the class name matches, it is exported, and the class extends 'DurableObject'. Attempts to call to this Durable Object class will fail at runtime, but historically this was not a startup-time error. Future versions of workerd may make this a startup-time error.
+Inbox search: literal % _ and backslash, name/email matching, bounded terms with a friendly 400 and no database errors passed
+✔ tests/inbox-search.mjs (8241.299291ms)
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m				You have defined bindings to the following internal Durable Objects:[0m
+
+  				- {"name":"CONVERSATIONS","class_name":"ConversationSocket"}
+  				These will not work in local development, but they should work in production.
+  
+  				If you want to develop these locally, you can define your DO in a separate Worker, with a separate configuration file.
+  				For detailed instructions, refer to the Durable Objects section here: [4mhttps://developers.cloudflare.com/workers/wrangler/api#supported-bindings[0m
+
+
+✔ crawl limits accept whole numbers in range and refuse negative, fractional, absurd and non-numeric values (1.106416ms)
+✔ the crawler start refuses stored out-of-range limits before any provider call (0.389209ms)
+✔ dataset form validation reports each field (0.482959ms)
+✔ management form validation: contacts need an identifier, plugin URLs must be https (0.458375ms)
+✔ training run validation names the field and never exposes a parser message (6.483958ms)
+A DurableObjectNamespace in the config referenced the class "ConversationSocket", but no such Durable Object class is exported from the worker. Please make sure the class name matches, it is exported, and the class extends 'DurableObject'. Attempts to call to this Durable Object class will fail at runtime, but historically this was not a startup-time error. Future versions of workerd may make this a startup-time error.
+✔ server: datasets reject negative and absurd crawl limits, contacts reject an empty body (4165.351708ms)
+✔ server secrets are 256-bit lowercase hex and never repeat (6.8105ms)
+✔ the backfill gives every project without a secret its own, and keeps existing secrets (5.617792ms)
+✔ a verified registration creates a project with its own server secret (2965.537792ms)
+✔ text that reads as a number is kept exactly as written (1.083334ms)
+✔ canonical numbers and booleans round-trip and structured values stay structured (1.303916ms)
+✔ a string that looks like JSON is quoted so it comes back as the same string (0.110833ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25018.671916

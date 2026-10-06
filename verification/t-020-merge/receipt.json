@@ -1,0 +1,125 @@
+{
+  "recordedAt": "2026-10-06T03:50:01.628Z",
+  "sourceCommit": "c00b44ccfd5a5f18f9c77f8f60ae69aab201f2ca",
+  "node": "v26.8.1",
+  "pnpm": "10.12.4",
+  "scope": "T-020 merge unit only; full task acceptance remains pending",
+  "commands": [
+    {
+      "command": "node scripts/operations.mjs describe",
+      "exitCode": 0,
+      "log": "operations-describe.log",
+      "completedAt": "2026-10-06T03:47:20.752Z",
+      "sha256": "38bb902bb73ac8db2615b55141fcd89fcff530e9787915ccfffc11d040b627c8"
+    },
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "log": "install.log",
+      "completedAt": "2026-10-06T03:47:28.517Z",
+      "sha256": "bf0bfb6d0336b6caf095d79f21d3261426910d5d3e1586efa252b00539d71d7d"
+    },
+    {
+      "command": "pnpm run source:lock",
+      "exitCode": 0,
+      "log": "source-lock.log",
+      "completedAt": "2026-10-06T03:48:00.645Z",
+      "sha256": "98716eea4ef83b28e4d958386fcba73ed1f95efb9b5c7101e31b1c4281aa7ba9"
+    },
+    {
+      "command": "pnpm run build",
+      "exitCode": 0,
+      "log": "build.log",
+      "completedAt": "2026-10-06T03:48:27.210Z",
+      "sha256": "2b8e7e18ed2e8f51f8d27159a15104fb17a2c3df7f1f50b3edf59535f709c3f4"
+    },
+    {
+      "command": "pnpm run typecheck",
+      "exitCode": 0,
+      "log": "typecheck.log",
+      "completedAt": "2026-10-06T03:48:27.130Z",
+      "sha256": "2cb5aa628356e9bebb4ee6b617bfb7671d43d942a6e0c8d4db30c28888adba87"
+    },
+    {
+      "command": "node --test tests/library-validation.mjs tests/inbox-search.mjs tests/homepage-source.mjs tests/project-verification-secret.mjs tests/demo-inbox.mjs tests/search-codec.mjs",
+      "exitCode": 0,
+      "log": "focused.log",
+      "completedAt": "2026-10-06T03:48:43.802Z",
+      "sha256": "05944b6f96f1d5caf7d1bc9f1f1743369537ca93721d12165eaffbb697b3a43d"
+    },
+    {
+      "command": "pnpm run source:lock; git diff --exit-code -- sources.lock.json",
+      "exitCode": 0,
+      "log": "source-lock-repeat.log",
+      "completedAt": "2026-10-06T03:49:21.681Z",
+      "sha256": "98716eea4ef83b28e4d958386fcba73ed1f95efb9b5c7101e31b1c4281aa7ba9"
+    },
+    {
+      "command": "pnpm run source:check",
+      "exitCode": 0,
+      "log": "source-check-final.log",
+      "completedAt": "2026-10-06T03:49:22.030Z",
+      "sha256": "4715b4d570b8822f45b8babbce00b59c1d6d76838b36736c3d84d3db3f0b6b91"
+    },
+    {
+      "command": "node scripts/operations.mjs check",
+      "exitCode": 0,
+      "log": "operations-check.log",
+      "completedAt": "2026-10-06T03:49:22.137Z",
+      "sha256": "5eb4fba3d9e25fbe73d6696dc504874fcfdd6394eb0ab7490f9acda3551e92d3"
+    },
+    {
+      "command": "pnpm exec playwright install chromium",
+      "exitCode": 143,
+      "log": "browser-install.log",
+      "completedAt": "2026-10-06T03:48:56.492Z",
+      "sha256": "e6047c0ea1721d212b370e009c926c4e67a3b9a5e2c5cffaea28f78bb169c94e"
+    }
+  ],
+  "sourceLockSha256": "b935e59e31a035c40c924cf3e1ef464d2fe798d1c50b3ddd4d97b6c1de451f08",
+  "ancestryParents": [
+    "09d80a7896fa6ca8643516976ca43d9576607c75",
+    "fc39c522efc987c70c17fc24caa601bc08c3a1b1"
+  ],
+  "focusedChecks": {
+    "tests": 21,
+    "pass": 21,
+    "fail": 0,
+    "skipped": 0
+  },
+  "review": {
+    "conflicts": 5,
+    "sourceDifferencesFromSkeptic": [
+      "ConversationsList: preserve literal search and omit duplicate empty guidance with demo",
+      "DemoInboxInvitation: shorter launch copy",
+      "KnowledgePage: preserve field validation and confirmation; replace creation history entry",
+      "KnowledgeLists: single empty Add URL, short copy, secondary Import; preserve stacked tables and RowMenu",
+      "sources.lock.json: regenerate merged source bytes"
+    ],
+    "unchangedFromSkeptic": [
+      "CONTRACT.md (includes approved PUBLIC-001)",
+      "tests including emitted-runtime helper superset",
+      "package.json",
+      "pnpm-lock.yaml",
+      "all migrations including 0106"
+    ]
+  },
+  "recoveryInventory": {
+    "packetRequested": "104 tables / 38 migrations",
+    "merged": "104 tables / 39 migrations",
+    "qualification": "Schema count only; legacy 97/37 and launch 104/38 comparisons plus native merged 104/39 recovery remain separate units"
+  },
+  "limitations": [
+    "No full verify or browser suite fanout run in this unit",
+    "Browser install stopped at disk floor; incomplete private browser directory removed",
+    "Accessibility checker HOLD remains",
+    "Missing seeds audit remains Q-4-0003",
+    "No private main or held ef8406f integrated",
+    "No push, deployment, public remote, provider credentials or live provider calls"
+  ],
+  "isolation": {
+    "build": "env -i plus XDG_CONFIG_HOME inside worktree and inherited sandbox denying owner Wrangler config paths and .env",
+    "focused": "local getPlatformProxy fixtures; no live provider calls; ordinary inherited test environment"
+  },
+  "serversLeftRunning": false
+}

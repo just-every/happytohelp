@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {mkdir,mkdtemp,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
+import {join,resolve,dirname} from 'node:path';
 import {createRuntime} from './activation/browser-runtime.mjs';
 import {providerFixture} from './activation/browser-provider-fixture.mjs';
 import {providerProbes} from './activation/browser-provider-probes.mjs';
@@ -16,13 +17,16 @@ import {freshViews,knowledgeViews,demoAndAiViews} from './activation/browser-ui.
 const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
 const evidence=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-activation-browser-'));
 await mkdir(evidence,{recursive:true});
+const emittedConfig=JSON.parse(await readFile('dist/server/wrangler.json','utf8'));
+const emittedMain=resolve('dist/server',emittedConfig.main);
+const emittedSha256=createHash('sha256').update(await readFile(emittedMain)).digest('hex');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),'','activation browser evidence requires committed source');
 let runtime=await createRuntime();let browser,page,fixture,success=false;
 const errors=[],failed=[],checks=[],artifacts=[];
 try{
  browser=await chromium.launch({headless:true});page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(15000);
- page.on('pageerror',error=>errors.push(error.message));page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')failed.push({url:request.url(),error:request.failure()?.errorText});});
+ page.on('pageerror',error=>errors.push(error.message));page.on('response',response=>{if(response.status()>=400)failed.push({url:response.url(),status:response.status()});});page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')failed.push({url:request.url(),error:request.failure()?.errorText});});
  const projectId=await setup(page,runtime.origin);
  const login=await apiKit(runtime)('/api/identity/login',{body:{email:'activation-browser@example.test',password:'activation-browser-local-password'}}),token=login.token;
  const activation=`/api/management/projects/${projectId}/activation`;
@@ -39,6 +43,6 @@ try{
  await providerProbes({runtime,page,fixture,evidence,artifacts,checks});
  assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;
 }finally{
- await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,artifacts},null,2)+'\n');await browser?.close();await runtime?.close(success);await fixture?.close();
+ await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,nodeVersion:process.version,emittedMain,emittedSha256,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,artifacts},null,2)+'\n');await browser?.close();await runtime?.close(success);await fixture?.close();
 }
 console.log('Activation browser passed:',evidence);

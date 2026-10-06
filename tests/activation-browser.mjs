@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join,resolve,dirname} from 'node:path';
+import {join,resolve} from 'node:path';
 import {createRuntime} from './activation/browser-runtime.mjs';
 import {providerFixture} from './activation/browser-provider-fixture.mjs';
 import {providerProbes} from './activation/browser-provider-probes.mjs';
@@ -24,9 +24,10 @@ const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),'','activation browser evidence requires committed source');
 let runtime=await createRuntime();let browser,page,fixture,success=false;
 const errors=[],failed=[],checks=[],artifacts=[],responseChecks=[],expectedHttp=[];
+const observePage=observed=>{observed.setDefaultTimeout(15000);observed.on('pageerror',error=>errors.push(error.message));observed.on('response',response=>{if(response.status()<400)return;const expected=observed.expectedProviderFailure;responseChecks.push((async()=>{const text=await response.text();const entry={url:response.url(),status:response.status()};if(expected&&/CONFIGURATION_REQUIRED: [A-Z_]+_API_KEY/.test(text))expectedHttp.push(entry);else failed.push(entry);})());});observed.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')failed.push({url:request.url(),error:request.failure()?.errorText});});};
 try{
  browser=await chromium.launch({headless:true});page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(15000);
- page.on('pageerror',error=>errors.push(error.message));page.on('response',response=>{if(response.status()<400)return;const expected=page.expectedProviderFailure;responseChecks.push((async()=>{const text=await response.text();const entry={url:response.url(),status:response.status()};if(expected&&/CONFIGURATION_REQUIRED: [A-Z_]+_API_KEY/.test(text))expectedHttp.push(entry);else failed.push(entry);})());});page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')failed.push({url:request.url(),error:request.failure()?.errorText});});
+ observePage(page);
  const projectId=await setup(page,runtime.origin);
  const login=await apiKit(runtime)('/api/identity/login',{body:{email:'activation-browser@example.test',password:'activation-browser-local-password'}}),token=login.token;
  const activation=`/api/management/projects/${projectId}/activation`;
@@ -37,9 +38,10 @@ try{
  await demoAndAiViews({page,runtime,projectId,evidence,artifacts,checks});
  await spendViews({runtime,page,projectId,token,evidence,artifacts,checks});
  await widgetProbes({runtime,projectId,token,activation,checks});
- await runtime.close(true);runtime=null;
+ await page.context().close();await runtime.close(true);runtime=null;
  fixture=await providerFixture({port:Number(process.env.H2H_PROVIDER_FIXTURE_PORT)||0});
  runtime=await createRuntime({providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'activation-inert-model-key',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'activation-inert-mail-key',EMAIL_FROM:'support@activation.example.test',INBOUND_EMAIL_TOKEN:'activation-inert-inbound-token'}});
+ page=await browser.newPage({viewport:{width:1440,height:1000}});observePage(page);
  await providerProbes({runtime,page,fixture,evidence,artifacts,checks});
  await Promise.all(responseChecks);assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;
 }finally{

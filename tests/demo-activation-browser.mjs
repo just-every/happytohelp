@@ -77,7 +77,11 @@ try {
     await page.waitForURL(`**/projects/${originalId}/conversations`);
     assert.equal((await api('/api/management/bootstrap')).sessionProjectId,originalId);
     assert.equal(await banner.count(),0);
-    assert.equal((await api(`/api/knowledge/${demoId}/articles`))[0].title,articles[0].title,'unsaved demo title was never persisted');
+    const denied=await page.evaluate(async path=>(await fetch(path)).status,`/api/knowledge/${demoId}/articles`);
+    assert.equal(denied,403,'returning withdraws the demo session scope');
+    const persisted=await runtime.execute(`SELECT title FROM knowledge_articles WHERE project_id='${demoId}' AND id='${articles[0].id}'`);
+    assert.ok(persisted.includes(articles[0].title),'saved demo title remains unchanged');
+    assert.ok(!persisted.includes('Unsaved demo article title'),'unsaved demo title was never persisted');
     await page.screenshot({path:join(evidence,`returned-${width}.jpg`),fullPage:true});
   }
   // A direct demo visit has no saved origin: require explicit choice, including

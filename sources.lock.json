@@ -4625,7 +4625,7 @@
       "executable": false
     },
     "tests/conversation-panel-resize-browser.mjs": {
-      "sha256": "c71c865b5a2432f7b7e9165d439958d71f1783cfd3e91417bc79455c9bfee502",
+      "sha256": "37d31a65d6473f7cb965c1bc2f46c662161d696fcb3c4cc65f0578061973acfa",
       "executable": false
     },
     "tests/conversation-socket.mjs": {

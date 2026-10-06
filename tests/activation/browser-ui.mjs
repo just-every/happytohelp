@@ -49,7 +49,7 @@ export async function demoAndAiViews({page,runtime,projectId,evidence,artifacts,
   const trigger=page.getByRole('button',{name:/AI.*Details|AI and details|AI, Local and details/i});await trigger.click();
   const ai=page.getByRole('tab',{name:'AI',exact:true});await ai.waitFor();await ai.click();assert.equal(await page.getByRole('button',{name:/^Generate(?: replies)?$/}).count(),1,'one Generate');assert.equal(await page.getByRole('tab',{name:'Local',exact:true}).count(),1,'one Local');assert.equal(await page.getByRole('button',{name:'Local',exact:true}).count(),0,'no duplicate header Local');
   if(width===390){assert.ok(await ai.evaluate(element=>element===document.activeElement),'AI tab receives focus');await page.keyboard.press('ArrowRight');assert.ok(await page.getByRole('tab',{name:'Local',exact:true}).evaluate(element=>element===document.activeElement));await page.keyboard.press('ArrowLeft');}
-  await page.getByRole('button',{name:/^Generate(?: replies)?$/}).click();await page.getByText(/OPENAI_API_KEY|ANTHROPIC_API_KEY|installation secret/i).first().waitFor();assert.match(await page.locator('body').innerText(),/secret|key/i);
+  page.expectedProviderFailure=true;await page.getByRole('button',{name:/^Generate(?: replies)?$/}).click();await page.getByText(/OPENAI_API_KEY|ANTHROPIC_API_KEY|installation secret/i).first().waitFor();assert.match(await page.locator('body').innerText(),/secret|key/i);page.expectedProviderFailure=false;
   await noOverflow(page,'AI panel');await capture(page,evidence,`${width}-demo-ai`,artifacts);
   if(width===390){await page.keyboard.press('Escape');assert.ok(await trigger.evaluate(element=>element===document.activeElement),'focus restored to AI entry');}
  }

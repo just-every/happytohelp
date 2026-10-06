@@ -23,10 +23,10 @@ const emittedSha256=createHash('sha256').update(await readFile(emittedMain)).dig
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),'','activation browser evidence requires committed source');
 let runtime=await createRuntime();let browser,page,fixture,success=false;
-const errors=[],failed=[],checks=[],artifacts=[];
+const errors=[],failed=[],checks=[],artifacts=[],responseChecks=[],expectedHttp=[];
 try{
  browser=await chromium.launch({headless:true});page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(15000);
- page.on('pageerror',error=>errors.push(error.message));page.on('response',response=>{if(response.status()>=400)failed.push({url:response.url(),status:response.status()});});page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')failed.push({url:request.url(),error:request.failure()?.errorText});});
+ page.on('pageerror',error=>errors.push(error.message));page.on('response',response=>{if(response.status()<400)return;const expected=page.expectedProviderFailure;responseChecks.push((async()=>{const text=await response.text();const entry={url:response.url(),status:response.status()};if(expected&&/CONFIGURATION_REQUIRED: [A-Z_]+_API_KEY/.test(text))expectedHttp.push(entry);else failed.push(entry);})());});page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')failed.push({url:request.url(),error:request.failure()?.errorText});});
  const projectId=await setup(page,runtime.origin);
  const login=await apiKit(runtime)('/api/identity/login',{body:{email:'activation-browser@example.test',password:'activation-browser-local-password'}}),token=login.token;
  const activation=`/api/management/projects/${projectId}/activation`;
@@ -41,8 +41,8 @@ try{
  fixture=await providerFixture({port:Number(process.env.H2H_PROVIDER_FIXTURE_PORT)||0});
  runtime=await createRuntime({providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'activation-inert-model-key',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'activation-inert-mail-key',EMAIL_FROM:'support@activation.example.test',INBOUND_EMAIL_TOKEN:'activation-inert-inbound-token'}});
  await providerProbes({runtime,page,fixture,evidence,artifacts,checks});
- assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;
+ await Promise.all(responseChecks);assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;
 }finally{
- await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,nodeVersion:process.version,emittedMain,emittedSha256,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,artifacts},null,2)+'\n');await browser?.close();await runtime?.close(success);await fixture?.close();
+ await writeFile(join(evidence,'manifest.json'),JSON.stringify({sourceSha:sha,nodeVersion:process.version,emittedMain,emittedSha256,utc:new Date().toISOString(),kind:'local-only emitted Worker/D1/R2 synthetic-owner browser',success,checks,errors,failed,expectedHttp,artifacts},null,2)+'\n');await browser?.close();await runtime?.close(success);await fixture?.close();
 }
 console.log('Activation browser passed:',evidence);

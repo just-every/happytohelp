@@ -222,7 +222,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
             </div> : <form
                 className={'knowledge-form' + (isArticle ? ' knowledge-form-wide' : '')}
                 onSubmit={event => save(event)}
-                noValidate={section !== 'datasets'}
+                noValidate
             >
                 {isArticle && <ArticleEditorActions
                     isPublished={Boolean(draft.is_published)}

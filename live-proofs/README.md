@@ -16,7 +16,7 @@ Four fresh Ubuntu jobs enforce the boundary:
 3. The Environment provider job loads only the trusted controller. Stage
    downloads candidate JSON as untrusted data, verifies its approved digest,
   validates paths/topology, discards build-supplied asset ignore rules, and reconstructs a fixed Wrangler JSON config in
-   a fresh private directory. The separately locked Wrangler 4.129.1 toolchain
+   a fresh private directory. The separately locked Wrangler 4.147.0 toolchain
    is installed with lifecycle scripts disabled before credentials are supplied.
    It applies D1 migrations and runs `wrangler deploy --no-bundle --secrets-file`,
    then checks the native `/health` response for reachable D1 and R2. No selected

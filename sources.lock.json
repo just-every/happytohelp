@@ -388,6 +388,14 @@
       "sha256": "3f8f78fa19a7d019f7180ddef6c50eb64ea25970267a0fbd551f26a4fe3e32f6",
       "executable": false
     },
+    ".github/workflows/deploy-stage.yml": {
+      "sha256": "93e4428f39b6b97cec6ff2c90fed2b4cc75b8308fcc3713e7d172ca142b41ed1",
+      "executable": false
+    },
+    ".github/workflows/live-proof.yml": {
+      "sha256": "4940ded2363fac78180e25e3a2888bde756ea8c7d14e9972820c06a6bfc5267e",
+      "executable": false
+    },
     ".github/workflows/rer-managed.yml": {
       "sha256": "993073767e441e42fa45e1b3371ee125da984d10eaff233e1d6105743bc09cbf",
       "executable": false
@@ -506,6 +514,102 @@
     },
     "LICENSE": {
       "sha256": "75de081fbc3da1ca679dff36ae665709d8c312652527d321511a10f66a17fd7c",
+      "executable": false
+    },
+    "live-proofs/artifact.mjs": {
+      "sha256": "32da2af76e013965c7e2f70caf4164d35471c1393dc65a57017239e9b8723717",
+      "executable": false
+    },
+    "live-proofs/git-store.mjs": {
+      "sha256": "79ff5f6b4e6c5864b3a5ffef75f0b610b267730a43769a20672a1789040e5608",
+      "executable": false
+    },
+    "live-proofs/git.mjs": {
+      "sha256": "a05c182132c7b1a93f0b755648855cd4222de9df1f4858abf7ce9e4fac9824fc",
+      "executable": false
+    },
+    "live-proofs/persist.mjs": {
+      "sha256": "0ff62d79900ab8ff16b867efd9786b0081f773a64b51f48b8c81e98e4e22b4d9",
+      "executable": false
+    },
+    "live-proofs/policy.mjs": {
+      "sha256": "6b6139ea9434b28e29fdf615adcc52cefc9926962d1b5e0585ac7742a8760be6",
+      "executable": false
+    },
+    "live-proofs/README.md": {
+      "sha256": "3184547f169785b2c55976d9bb7940a19a5d74a6a542d23a059fe90ac71ad626",
+      "executable": false
+    },
+    "live-proofs/receipt.mjs": {
+      "sha256": "e152577c9f0538d189c33dddb70463e71e7255fcbf19ad46861c629c91c80943",
+      "executable": false
+    },
+    "live-proofs/run.mjs": {
+      "sha256": "7cd4373742f9fb5e9f251482d8bcddc2e61e128aae52c91cdbf9d60b8e10eddf",
+      "executable": false
+    },
+    "live-proofs/stage-adapter.mjs": {
+      "sha256": "e96d77c7851bb79261344eb628c2e25e73b8293fb68c35f2ead5abebe080f9f5",
+      "executable": false
+    },
+    "live-proofs/target.mjs": {
+      "sha256": "7c28daffe8d7f5b2800d00d73a2de8b9c1ec06edf2fa94720335775b85caeaf4",
+      "executable": false
+    },
+    "live-proofs/tests/artifact.test.mjs": {
+      "sha256": "22733856d8c456b5496688720c5d4b7a8c5611fba71c91d54f9f7237a2faa67d",
+      "executable": false
+    },
+    "live-proofs/tests/fixtures.mjs": {
+      "sha256": "7fad2f141f16b25256a7747ddae4bad3e640c14ef5100dce6905643c0fefa672",
+      "executable": false
+    },
+    "live-proofs/tests/large-artifact.test.mjs": {
+      "sha256": "0edd16eb31f21ac062677326b39f4241fd4dc3bb1cd3e1765a08e622fc045451",
+      "executable": false
+    },
+    "live-proofs/tests/receipt-command.test.mjs": {
+      "sha256": "b790bdcd8d0d17de5561ea4b9e618dab744fb342de441be1c7ba7d9d0bc9aa79",
+      "executable": false
+    },
+    "live-proofs/tests/receipts.test.mjs": {
+      "sha256": "4eea14ff5d66a01cda8364f9d2d91418d1792c944193a2b18070810d515a08ad",
+      "executable": false
+    },
+    "live-proofs/tests/source.test.mjs": {
+      "sha256": "83cb371a9e61492950cbbf7a11a9dea9ec7e25e198d9fb0976442090703d89ae",
+      "executable": false
+    },
+    "live-proofs/tests/toolchain-compatibility.mjs": {
+      "sha256": "0204b3a90a584ed7371412e45725623b883a2e656d0640c8f809f10f9d8cd5ab",
+      "executable": false
+    },
+    "live-proofs/tests/toolchain-security.mjs": {
+      "sha256": "730e227499f8d11f6580b1795262a78e011d00a0319d7d6b7d29612efc46c8b0",
+      "executable": false
+    },
+    "live-proofs/tests/verify-gate.test.mjs": {
+      "sha256": "25f4cd255ad13ce5d66e7a1fc1c9ae961a8420e6a72aaec9ec1b79030d8d6815",
+      "executable": false
+    },
+    "live-proofs/tests/workflows.test.mjs": {
+      "sha256": "5128725418a57fa3eb22a5ff4659c066779ec0074d88b78b1624c7ba08bdfc22",
+      "executable": false
+    },
+    "live-proofs/tests/wrangler-dry-run.mjs": {
+      "sha256": "d2e8c240e201af265450d7d3bc164da42d96bb553e62ebe7ea21368e278529b8",
+      "executable": false
+    },
+    "live-proofs/toolchain/package-lock.json": {
+      "sha256": "96a774f5eef71a8a8fe44ae6670bba3560ea93f109d336922022d1f9fbb24629",
+      "executable": false
+    },
+    "live-proofs/toolchain/package.json": {
+      "sha256": "a32c847f1c70f0b56de899736ee33f88763b96de28246435ff343fca7c645eaf",
+      "executable": false
+    },
+    "live-proofs/validate-source.mjs": {
+      "sha256": "b49229d95131fadc6fd0475938a5fa188909fa9b16ffbb539331fc80f9f4c7a7",
       "executable": false
     },
     "local-agent/bin/h2h-local.mjs": {

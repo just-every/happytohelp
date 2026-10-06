@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
-import { id } from '../../platform/db'
+import { id, serverSecret } from '../../platform/db'
 import { scope } from './common'
 import { ensureDemoInboxRich } from './demo-inbox-rich'
 import { ensureDemoInboxAi } from './demo-inbox-ai'
@@ -37,7 +37,7 @@ demoInbox.post('/demo-inbox', async c => {
     is_contact_tracking_enabled: false, demo_notice: 'Fictional sample conversations. No messages were sent and no AI was run.' })
   const fresh = "EXISTS(SELECT 1 FROM project_settings WHERE project_id=? AND json_extract(settings_json,'$.demo_creation_id')=?)"
   const statements = [
-    c.env.DB.prepare('INSERT OR IGNORE INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES(?,?,?,?,?)').bind(projectId,demoInboxName,id(),'https://demo.invalid',now),
+    c.env.DB.prepare('INSERT OR IGNORE INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) VALUES(?,?,?,?,?,?)').bind(projectId,demoInboxName,id(),'https://demo.invalid',now,serverSecret()),
     c.env.DB.prepare('INSERT OR IGNORE INTO project_settings(project_id,settings_json,updated_at) VALUES(?,?,?)').bind(projectId,settings,now),
     c.env.DB.prepare(`INSERT INTO memberships(project_id,user_id,role) SELECT ?,?,'owner' WHERE ${fresh}`).bind(projectId,actor.id,projectId,creationId),
   ]

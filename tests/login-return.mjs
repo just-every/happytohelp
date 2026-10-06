@@ -13,3 +13,12 @@ test('login refuses external, malformed, normalized, and non-dashboard destinati
         assert.equal(loginDestination(target, origin, true), '/projects/create', String(target));
     }
 });
+test('login returns an invited person to their invitation link', () => {
+    const link = '/accept-invitation?token=abc123';
+    assert.equal(loginDestination(link, origin), link);
+    assert.equal(loginDestination(link, origin, true), link);
+    assert.equal(loginDestination('/accept-invitation', origin), '/accept-invitation');
+    for (const target of ['/accept-invitation/extra', '/accept-invitation%0a', '//accept-invitation?token=1', 'https://evil.example/accept-invitation?token=1', '/register', '/verify-email?token=1']) {
+        assert.equal(loginDestination(target, origin), '/conversations', target);
+    }
+});

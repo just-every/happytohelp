@@ -3,7 +3,7 @@
 HappyToHelp preserves the useful parts of the original HappyToHelp owner
 workspace: customer widget, operator dashboard, AI assistance and reply,
 knowledge, customer context, delegated local work, training and integrations.
-Its public surface is the village homepage and dynamic published help centers.
+Its public surface is the “Customer Support, Solved.” homepage and dynamic published help centers.
 It is editable source that replaces the original PHP/AWS application runtime with
 a Cloudflare Worker stack. These clauses state required behavior; the evidence
 each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
@@ -71,11 +71,30 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   admission and survives recovery and redelivery. The `email:` message local-id
   prefix is reserved for inbound claims and refused by the message API.
   Payment, checkout, Stripe and balance behavior are outside this edition.
-- **PUBLIC-001 — Public product source.** The approved village homepage is the
-  real public `/` experience: the beacon-lit mountain procession, conversation
-  square, knowledge archive, agent handoff and open workshop. Its text and real
-  links remain accessible independently of the art; layered motion respects
-  reduced-motion preferences and does not change document layout. Dynamic published
+- **PUBLIC-001 — Public product source.** The approved
+  “Customer Support, Solved.” homepage (owner approval 2026-10-01, clarity pass
+  2026-10-02) is the real public `/` experience, in this order: the hero, which
+  shows a problem already solved in one column (a customer, Maya, cannot turn on
+  the Spanish version of her store; Codex has fixed it and left a note; the reply
+  is in the composer and only Send is left) beside the subhead “Your Codex or
+  Claude fixes the problem and writes the reply. You press Send.”, the line
+  “100% free and open source.” and the caption steps “The customer asks”, “The
+  agent fixes it” and “You press Send”; “Not just better. Free.” (100% free and
+  open source, free as in code and free as in cost, MIT licensed, “No seats. No
+  plans. No fees.”, with the MIT licence drawn); “Help before they ask”; “The rest
+  of your support desk” (chat widget, shared inbox, help centre, suggested
+  replies); “Try it beside what you have” (install, bring the help centre from
+  Zendesk, Intercom or Freshdesk, add the chat widget); “Ready when you are.”; and
+  the footer. The page carries no price, hosting or provider line and no plug for any other service.
+  The drawings mirror the real interface and make no claim the product cannot
+  back; conversation, ticket-history and automation import, reporting and
+  compliance claims are deliberately absent. It is a warm off-white page in one geometric sans-serif
+  (Outfit, self-hosted from `public/fonts/outfit/`, so the page makes no
+  third-party request) with near-black ink and black pill buttons; colour
+  appears only inside the drawings, which are labelled HTML/SVG rather than raster images. Its text
+  and real links, derived from `package.json` `repository.url`, are ordinary DOM
+  content; the sketch marks draw in once and reduced-motion preferences remove
+  all animation, transitions and smooth scrolling without changing layout. Dynamic published
   help centers retain project scope, canonical links, search and draft/deleted denial. The customer widget
   remains available through owner-configured installation; broader marketing
   routes, pricing, legal, referrer, waitlist and public auto-widget behavior

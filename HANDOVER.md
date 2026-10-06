@@ -78,7 +78,7 @@ establish a new measurement. Cost assumptions and limitations remain in
 
 | Layer | Implementation |
 | --- | --- |
-| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the village homepage (`src/ui/homepage`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
+| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the “Customer Support, Solved.” homepage (`src/ui/homepage`: one component per section, drawings in `drawings/`, scoped `homepage.css` and `drawings.css`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
 | API | Hono (`src/app.ts`, mounted by `src/server.ts`), with identity, project and role checks in `src/platform`. |
 | Records | D1 (`DB`). Schema lives in `migrations/` plus module migrations; `pnpm run migrations:prepare` collects them into `.generated/migrations`. |
 | Files | R2 (`FILES`) for attachments, media and knowledge artifacts. |
@@ -116,13 +116,18 @@ pnpm run verify
 pnpm exec playwright install chromium   # once
 pnpm run test:widget-browser
 pnpm run test:widget-lifecycle-browser
+pnpm run test:widget-settings-browser
 pnpm run test:ui-browser
 pnpm run test:navigation-browser
+pnpm run test:workspace-shell-browser
 pnpm run test:public-help-center-browser
+pnpm run test:not-found-browser
 pnpm run test:setup-browser
+pnpm run test:identity-browser
 pnpm run test:demo-inbox-browser
 pnpm run test:mobile-inbox-browser
 pnpm run test:conversation-panel-resize-browser
+pnpm run test:inbox-conversation-browser
 pnpm run test:contact-erasure-browser
 ```
 
@@ -132,6 +137,7 @@ The candidate also exposes these focused commands for its existing tests:
 pnpm run test:accessibility-browser
 pnpm run test:delegation-authority-runtime
 pnpm run test:delegation-scoped-browser
+pnpm run test:computers-delegation-browser
 pnpm run test:usage
 ```
 
@@ -148,11 +154,16 @@ suites start their own isolated emitted Worker with local D1, R2 and Durable
 Objects and write evidence to a temporary directory or `H2H_EVIDENCE_DIR`; the
 resize suite also accepts `H2H_RUNTIME_PORT` and `H2H_RUNTIME_INSPECTOR_PORT` to
 fix its server and inspector ports, and the contact-erasure suite accepts
-`H2H_TEST_PORT` (its inspector uses the next port). The homepage and public-site checks run
+`H2H_TEST_PORT` (its inspector uses the next port). The identity suite also accepts `H2H_TEST_PORT` for its default
+Worker and runs its sign-up-and-email Worker two ports above; it never sends mail. The homepage and public-site checks run
 against a local native preview:
 `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and
 `node tests/public-site-runtime.mjs` with the same origin, after
 `pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`;
+`pnpm run dev` (`vite dev`) needs the same `pnpm run setup -- --local` first: an unknown one-segment
+path such as `/does-not-exist` looks up a project of that name, so on an unmigrated local D1 it answers 500
+(`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs`
+checks `/`, `/login` and `/does-not-exist` (200, 200, 404) against a running dev server and names that cause.
 `node tests/independent-browser.mjs` runs the homepage and setup checks against
 the delivery artifact after `node scripts/build-delivery-artifact.mjs`.
 `pnpm run test:reproducible-build` (about 90 seconds) checks that the delivery

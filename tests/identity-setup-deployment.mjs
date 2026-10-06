@@ -14,6 +14,7 @@ try {
  const env=proxy.env,db=env.DB,app=new Hono();app.route('/',setup)
  for(const file of ['0001_identity.sql','0003_identity_credentials.sql'])for(const sql of readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8').split(';').filter(s=>s.trim()))await db.prepare(sql).run()
  await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN metadata_json'))).run()
+ await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN verification_secret'))).run()
  for(const statement of readFileSync(new URL('../migrations/0097_owner_setup.sql',import.meta.url),'utf8').split(/;\s*(?=(?:--|CREATE|INSERT)|$)/).filter(s=>s.trim()))await db.prepare(statement).run()
  await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';')[0]).run()
  const entry={name:'First Owner',email:'owner@example.invalid',password:'long-test-password',allowedOrigin:'https://example.invalid'}

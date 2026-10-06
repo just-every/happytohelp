@@ -111,7 +111,7 @@ trusted source custody, not for a clean public snapshot.
 ## Licence
 
 The root [`LICENSE`](../LICENSE) (MIT) covers the whole repository, including
-the homepage and setup artwork. Keep `docs/licenses/` and third-party package
+the homepage drawings and setup artwork. Keep `docs/licenses/` and third-party package
 notices with any redistribution; see [SOURCE-PROVENANCE.md](SOURCE-PROVENANCE.md).
 
 ## Dedicated edition delegation and restored data

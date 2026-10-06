@@ -334,6 +334,8 @@
           "tests/operating-environment.mjs",
           "tests/ui-browser.mjs",
           "tests/navigation-browser.mjs",
+          "tests/workspace-scope.mjs",
+          "tests/workspace-shell-browser.mjs",
           "tests/login-return.mjs",
           "migrations/0084_billing_project_usage.sql",
           "migrations/0097_owner_setup.sql",
@@ -347,6 +349,7 @@
           "docs/INSTALLER.md",
           "src/editor",
           "public/homepage",
+          "public/fonts/outfit",
           "migrations/0098_personal_visual_inspiration.sql",
           "migrations/0099_personal_sidebar_artwork.sql",
           "scripts/setup-link.mjs",
@@ -392,6 +395,12 @@
           "docs/INBOUND-EMAIL-RECOVERY.md",
           "tests/contact-erasure.mjs",
           "tests/contact-erasure-browser.mjs",
+          "tests/widget-settings-browser.mjs",
+          "tests/widget-settings-model.mjs",
+          "tests/project-verification-secret.mjs",
+          "migrations/0106_project_verification_secret.sql",
+          "tests/management-library-browser.mjs",
+          "tests/library-validation.mjs",
           "docs/PRIVACY.md"
         ]
       }

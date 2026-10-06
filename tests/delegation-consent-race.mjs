@@ -11,16 +11,14 @@ export async function consentRace(DB){
  await run("INSERT INTO edition_clients(id,project_id,origin,redirect_uri) VALUES('race-client','consent-race','https://client.example','https://client.example/callback')")
  const app=new Hono().route('/delegation',consent),env={DB,RER_INSTALLATION_ID:'authority-installation'}
  const query=new URLSearchParams({client_id:'race-client',account_id:'consent-race',redirect_uri:'https://client.example/callback',response_type:'code',state:'state',code_challenge:'a'.repeat(43),code_challenge_method:'S256',scope:'knowledge.article.read',targets:JSON.stringify(['projects/consent-race/articles/article'])})
- const get=await app.request('https://h2h.test/delegation/authorize?'+query,{headers:{Cookie:'h2h_session=consent-session'}},env)
+ const get=await app.request('https://h2h.test/delegation/authorize/request?'+query,{headers:{Cookie:'h2h_session=consent-session'}},env)
  assert.equal(get.status,200)
- const badQuery=new URLSearchParams(query);badQuery.set('redirect_uri','https://client.example/callback/extra');assert.equal((await app.request('https://h2h.test/delegation/authorize?'+badQuery,{headers:{Cookie:'h2h_session=consent-session'}},env)).status,400)
- const html=await get.text(),body={decision:'approve'}
- for(const key of ['request','issued','csrf'])body[key]=new RegExp(`name="${key}" value="([^"]*)"`).exec(html)[1].replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+ const badQuery=new URLSearchParams(query);badQuery.set('redirect_uri','https://client.example/callback/extra');assert.equal((await app.request('https://h2h.test/delegation/authorize/request?'+badQuery,{headers:{Cookie:'h2h_session=consent-session'}},env)).status,400)
+ const page=(await get.json()).data,body={decision:'approve',request:JSON.stringify(page.request),issued:String(page.issued),csrf:page.csrf}
  const cancelQuery=new URLSearchParams(query);cancelQuery.set('state','cancel-state')
- const cancelPage=await app.request('https://h2h.test/delegation/authorize?'+cancelQuery,{headers:{Cookie:'h2h_session=consent-session'}},env),cancelHtml=await cancelPage.text(),cancelBody={decision:'deny'}
- for(const key of ['request','issued','csrf'])cancelBody[key]=new RegExp(`name="${key}" value="([^"]*)"`).exec(cancelHtml)[1].replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+ const cancelPage=(await (await app.request('https://h2h.test/delegation/authorize/request?'+cancelQuery,{headers:{Cookie:'h2h_session=consent-session'}},env)).json()).data,cancelBody={decision:'deny',request:JSON.stringify(cancelPage.request),issued:String(cancelPage.issued),csrf:cancelPage.csrf}
  const post=body=>app.request('https://h2h.test/delegation/authorize',{method:'POST',headers:{Cookie:'h2h_session=consent-session',Origin:'https://h2h.test','Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)},env)
- assert.equal((await post(cancelBody)).status,200);assert.equal((await post({...cancelBody,decision:'approve'})).status,400)
+ const cancelled=await post(cancelBody);assert.equal(cancelled.status,303);assert.equal(cancelled.headers.get('location'),'/delegation/settings?account_id=consent-race&cancelled=1');assert.equal((await post({...cancelBody,decision:'approve'})).status,400)
  let batches=0
  const gated={prepare:DB.prepare.bind(DB),async batch(statements){batches++;await run("INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES('consent-race','{\"deleted_at\":1}',1)");return DB.batch(statements)}}
  const response=await app.request('https://h2h.test/delegation/authorize',{method:'POST',headers:{Cookie:'h2h_session=consent-session',Origin:'https://h2h.test','Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)},{...env,DB:gated})

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
@@ -20,6 +20,7 @@ export default function ConversationAssignmentControl({ conversation }) {
     const isAiAssigned = Boolean(conversation.ai_id);
     const assignmentName = (isAiAssigned ? conversation.ai?.name : conversation.agent?.name) || 'Unassigned';
     const dropdownRef = useOnclickOutside(() => setIsOpen(false));
+    const toggleRef = useRef(null);
 
     const assignAgent = agentId => {
         setIsOpen(false);
@@ -35,11 +36,13 @@ export default function ConversationAssignmentControl({ conversation }) {
         updateConversation(conversation.id, { ai, ai_id: aiId, agent_id: aiId });
     };
 
-    const handleMenuKeyDown = event => {
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            setIsOpen(false);
-        }
+    // Focus is on the toggle after a mouse click and on a menu item after keyboard navigation,
+    // so Escape is handled on the wrapper that contains both.
+    const handleKeyDown = event => {
+        if (event.key !== 'Escape' || !isOpen) return;
+        event.preventDefault();
+        setIsOpen(false);
+        toggleRef.current?.focus();
     };
 
     return (
@@ -47,9 +50,10 @@ export default function ConversationAssignmentControl({ conversation }) {
             <div className="conversation-details-section-heading">
                 <h3>Assignment</h3>
             </div>
-            <div className={ `dropdown${isOpen ? ' show' : ''}` }>
+            <div className={ `dropdown${isOpen ? ' show' : ''}` } onKeyDown={ handleKeyDown }>
                 <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-assignment` }>Change assignment</Tooltip> }>
                     <button
+                        ref={ toggleRef }
                         type="button"
                         className="btn btn-white dropdown-toggle"
                         aria-haspopup="menu"
@@ -61,7 +65,7 @@ export default function ConversationAssignmentControl({ conversation }) {
                         <ReplyIcon name="chevron-down" className="conversation-details-assignment__chevron" />
                     </button>
                 </OverlayTrigger>
-                { isOpen && <div className="dropdown-menu p-1 show" ref={ dropdownRef } role="menu" onKeyDown={ handleMenuKeyDown }>
+                { isOpen && <div className="dropdown-menu p-1 show" ref={ dropdownRef } role="menu">
                     <button type="button" className="btn btn-link d-flex align-items-center" role="menuitem" onClick={ () => assignAgent(null) }>
                         Unassign
                     </button>

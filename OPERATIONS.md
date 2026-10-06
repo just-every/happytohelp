@@ -27,7 +27,7 @@ for you. This document is the manual path and the reference for every setting.
    [Optional capabilities](#optional-native-capabilities)). Run `pnpm run dev`,
    open `/setup`, and choose an email and password to create the first owner.
    Setup closes once an owner exists; afterwards use `/login`. Dashboard routes
-   include `/projects` and `/conversations`; `/` is the public village homepage
+   include `/projects` and `/conversations`; `/` is the public “Customer Support, Solved.” homepage
    and published help centers are project-scoped routes. The homepage does not
    load the customer widget: configure a project's exact allowed website origin,
    then install the widget snippet shown in its widget settings on that site.
@@ -159,7 +159,7 @@ fake delivery.
 
 | Capability | Public/runtime configuration | Private secret bindings |
 | --- | --- | --- |
-| Owner access and registration | `APP_ORIGIN` (remote setup derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` for first-owner setup; optional `TURNSTILE_SECRET`; registration/recovery need the email configuration |
+| Owner access and registration | `APP_ORIGIN` (remote setup derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` for first-owner setup; optional `TURNSTILE_SECRET`; registration/recovery need the email configuration; without it `/register` shows that sign-up is closed and `/forgot-password` tells the visitor the workspace owner must reset the password (owners can issue a one-hour link with `POST /api/identity/password-reset`) |
 | Ensemble reply, assist, profiles and monitoring | Models selected in project/AI configuration; `CONTEXT_MODEL` for widget-triggered context work | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`; supplied-content lexical retrieval does not require these providers |
 | Help-center provider import | Explicit platform/subdomain and destination project per import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |

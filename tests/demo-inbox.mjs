@@ -33,6 +33,7 @@ try {
   const demoId = created[0].id;
   assert.equal(new Set(created.map(result=>result.id)).size,1,'concurrent requests reuse one demo');
   assert.equal((await db.prepare("SELECT count(*) n FROM projects WHERE id LIKE 'demo-%'").first()).n,1);
+  assert.match((await db.prepare('SELECT verification_secret FROM projects WHERE id=?').bind(demoId).first()).verification_secret,/^[0-9a-f]{64}$/,'the demo project has a server secret');
   const settings = JSON.parse((await db.prepare('SELECT settings_json FROM project_settings WHERE project_id=?').bind(demoId).first()).settings_json);
   assert.equal(settings.default_visitor_ai_id,`${demoId}-assistant`);
   assert.equal(settings.default_verified_user_ai_id,`${demoId}-assistant`);

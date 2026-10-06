@@ -225,6 +225,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         onContentChange={ updateDraftContent }
                         onAssistantDisabledChange={ setIsAssistantDisabled }
                         files={ draftFiles }
+                        isResolved={ Boolean(conversation.resolved_at) }
                         isEnabled={ isConversationReady && buckets.length > 0 && !isLoading && !isSending }
                     />
                 </div>

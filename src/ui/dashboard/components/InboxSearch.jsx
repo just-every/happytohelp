@@ -2,13 +2,9 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from '@tanstack/react-router';
 
-export default function InboxSearch({ query, viewLabel, onSearch }) {
+export default function InboxSearch({ query, viewPhrase, onSearch }) {
     const [ value, setValue ] = useState(query);
     const router = useRouter();
-    const searchPhrase = viewLabel
-        .split(' ')
-        .map(word => word === 'AI' ? word : word.toLowerCase())
-        .join(' ');
 
     useEffect(() => {
         setValue(query);
@@ -46,8 +42,8 @@ export default function InboxSearch({ query, viewLabel, onSearch }) {
                     value={ value }
                     onChange={ event => setValue(event.target.value) }
                     className="form-control form-control-lg bg-white"
-                    placeholder={ `Search ${ searchPhrase }...` }
-                    aria-label={ `Search ${ searchPhrase }` } />
+                    placeholder="Search by name or email…"
+                    aria-label={ `Search ${ viewPhrase } by customer name or email` } />
                 <div className="input-group-append">
                     <button className="btn btn-lg btn-ico btn-secondary btn-minimal bg-white" type="submit" aria-label="Search conversations">
                         <i className="fe fe-search" aria-hidden="true"></i>
@@ -60,7 +56,7 @@ export default function InboxSearch({ query, viewLabel, onSearch }) {
 
 InboxSearch.propTypes = {
     query: PropTypes.string,
-    viewLabel: PropTypes.string.isRequired,
+    viewPhrase: PropTypes.string.isRequired,
     onSearch: PropTypes.func.isRequired,
 };
 

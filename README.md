@@ -141,6 +141,6 @@ customer reply. Delete the demo project from its settings when you are done.
 ## License
 
 MIT; see [LICENSE](LICENSE). This covers the whole repository, including the
-homepage and setup artwork. Bundled third-party components keep their own
+homepage drawings and setup artwork. Bundled third-party components keep their own
 notices in [docs/licenses](docs/licenses) and in their package metadata; see
 [docs/SOURCE-PROVENANCE.md](docs/SOURCE-PROVENANCE.md).

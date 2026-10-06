@@ -154,6 +154,11 @@ body {
     text-decoration: none;
 }
 
+.help-center-content .help-center-notice a {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
 .help-center-content a:hover {
     color: var(--help-center-link-hover);
     text-decoration: underline;

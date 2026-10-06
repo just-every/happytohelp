@@ -29,10 +29,13 @@ export function withSecurityHeaders(response: Response, surface: HeaderSurface, 
  if (!headers.has('X-Content-Type-Options')) headers.set('X-Content-Type-Options', 'nosniff')
  if (!headers.has('Referrer-Policy')) headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
  if (surface === 'application') {
-  const ancestors = frameAncestors(env), directive = `frame-ancestors ${ancestors.join(' ')}`
   const policy = headers.get('Content-Security-Policy')
+  const stated = policy !== null && /(?:^|;)\s*frame-ancestors\s/i.test(policy)
+  // A response that states both its frame-ancestors and X-Frame-Options (the delegation consent documents deny all framing) owns its framing contract.
+  if (stated && headers.has('X-Frame-Options')) return secured
+  const ancestors = frameAncestors(env), directive = `frame-ancestors ${ancestors.join(' ')}`
   if (!policy) headers.set('Content-Security-Policy', directive)
-  else if (!/(?:^|;)\s*frame-ancestors\s/i.test(policy)) headers.set('Content-Security-Policy', `${policy}; ${directive}`)
+  else if (!stated) headers.set('Content-Security-Policy', `${policy}; ${directive}`)
   // X-Frame-Options cannot name another origin; only send it when no other framer is allowed.
   if (ancestors.length === 1) headers.set('X-Frame-Options', 'SAMEORIGIN')
   else headers.delete('X-Frame-Options')

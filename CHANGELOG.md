@@ -4,6 +4,110 @@ All notable changes to HappyToHelp are recorded here. Versions follow
 [Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
 include breaking changes.
 
+## Unreleased
+
+### Fixed
+
+- Widget settings (Theme, Texts, Settings) now show what the widget actually renders:
+  default colors, default copy and default toggles, with the default copy also shown as
+  each text field's placeholder. Editing one field changes only that value in the form
+  and the live preview, and Save stores only edited fields, so saving without edits no
+  longer blanks the widget copy, turns defaults off or paints colors black. Clearing a
+  text field or restoring a default removes its override. Saving widget settings no longer
+  discards the theme and text when the form includes a `settings` section.
+- Every project now has a server secret (`H2H_SECRET`) for signed-in-user verification.
+  It is generated when a project is created (setup, registration, project creation, demo
+  inbox) and migration `0106_project_verification_secret.sql` backfills existing projects
+  that had none. Owners and admins can reveal and copy it from Widget > Code; other roles
+  see an explanation instead of disabled buttons.
+- `GET /api/identity/projects/:id` returns only the project's id, name, widget key, allowed
+  origin and creation time; the server secret reaches owners and admins only through widget settings.
+- The delegation consent page and Connected applications are served under a strict
+  Content-Security-Policy (same-origin sources, no plugins, `base-uri 'self'`, no framing) and
+  `form-action` limited to this origin plus, on the consent page, the callback registered for
+  the request's client. The consent page keeps `X-Frame-Options: DENY` and `no-store`; the
+  application header layer no longer replaces that `X-Frame-Options` with `SAMEORIGIN`.
+- Every destructive delete in the management and library screens (saved reply,
+  contact, AI assistant, plugin, agent/member, article, category and website
+  dataset) now asks through one shared, accessible confirmation dialog instead
+  of deleting at once or using a native browser prompt; Tab and Shift+Tab stay
+  inside it. Contact erasure uses the
+  same dialog with its exact typed `ERASE` confirmation. The last owner cannot
+  be removed, and removing yourself is called out before it is confirmed.
+- List tables on phones (saved replies, agents, contacts, plugins, websites,
+  articles) stack each row as a captioned card, so no column or row action is
+  hidden behind an unnoticed sideways scroll; row actions that sit in a ⋮ menu on
+  wide screens are shown as visible controls on the card.
+- The evaluation-run form shows field-level messages in place of the browser's
+  JSON parser text, has an empty state, one consistent name (“Evaluation runs”)
+  and explains its limits (a maximum cost of 0 is not accepted; 1 to 32,000
+  tokens).
+- Website datasets refuse crawl depths outside 0 to 100 and page limits outside
+  1 to 10,000 in the form, the API and the crawler start; contacts created from
+  the dashboard or API must have a name, an email or an external ID.
+
+### Changed
+
+- The homepage clarity pass (owner direction 2026-10-02) keeps the 1, 2, 3 story and cuts everything
+  that stood between a reader and it. The hero drawing is one column: Maya cannot turn on the Spanish
+  version of her store, Codex has fixed it (a cyan note card with a check), and the reply is in the
+  composer with Send circled, with callouts 1, 2, 3 and the caption steps; the subhead is “Your Codex
+  or Claude fixes the problem and writes the reply. You press Send.” and the line under the actions
+  is “100% free and open source.” “Not just better. Free.” now says it plainly (100% free and open
+  source, free as in code and free as in cost, MIT licensed, “No seats. No plans. No fees.”) beside a
+  drawing of the MIT licence. “Help before they ask”, “The rest of your support desk” and “Try it
+  beside what you have” are trimmed to one short line each with smaller drawings, and a short
+  “Ready when you are.” band replaces “Yours to run”. The page no longer mentions prices, hosting,
+  providers or Run Edit Run, and the examples strip, the signals list, the bill, installer and Local
+  panel drawings, and the costs and hosted-options links are removed. The page meta description is
+  updated.
+- The homepage previously led with the local-agent handoff: the hero draws a conversation whose
+  task Codex or Claude on the team's own computer has already completed, with the Local panel,
+  internal note and drafted reply the team reviews, and a subhead that says who runs it and who
+  approves sending. “Help before they ask” follows the hero, then the four product parts. The
+  “Your own agent can investigate” section is replaced by a short “How the handoff works” detail
+  built from the New task form. All drawings mirror the real interface wording.
+- The public homepage is now the owner-approved “Customer Support, Solved.” page
+  (approval 2026-10-01): a drawn inbox hero, the four product parts, “Help before
+  they ask”, “Your own agent can investigate” and “Yours to run”, set in Outfit on
+  warm paper with colour only inside labelled HTML/SVG drawings. Outfit is
+  self-hosted from `public/fonts/outfit/` under the SIL Open Font License 1.1, so
+  the homepage makes no third-party request.
+
+- The public identity pages (`/login`, `/register`, `/forgot-password`, `/reset-password`,
+  `/verify-email`, `/accept-invitation` and the completed-setup state of `/setup`) use the
+  homepage's paper, ink and Outfit with the HappyToHelp wordmark, a link home and links to
+  one another, instead of the dashboard-styled form. Invitation, verification and reset links are
+  checked on load and report a missing, invalid, expired or used link with a way forward. A
+  signed-out invitee sees the workspace and email and either creates an account or signs in and
+  returns to the link. Every new-password field states and enforces the 12 to 1024 character rule.
+  `/login` points to `/setup` while no owner exists; sign-up is offered only when it can work and
+  stays closed until setup is done; forgot-password without an email provider still fails closed
+  and says the workspace owner must reset the password.
+
+- Local computers and delegation use the workspace design system. The Connect
+  computer dialog is styled outside the inbox; authorizing a computer shows
+  “Computer approved” or “Request denied” and clears the code; Connected
+  applications and the connection consent screen render in the application
+  shell instead of bare server HTML, cancelling a connection returns to
+  Connected applications, and missing, invalid, unavailable or signed-out
+  requests show friendly pages. The consent form and revocation rules are
+  unchanged. Registering a client whose identifier already exists now answers
+  409 `CLIENT_EXISTS` instead of a server error. URLs keep text that reads as a
+  number (an OAuth `state`, a device code) exactly as written.
+
+### Added
+
+- Pending invitations on Agents can be copied, resent (when email is configured) and revoked by
+  owners and by admins for agent invitations. The routes re-check the caller's role. New public
+  helpers `GET /api/identity/auth-options` and `POST /api/identity/link-status`, with
+  `pnpm run test:identity-browser`, `tests/identity-links.mjs` and `tests/management-invitations.mjs`.
+
+### Removed
+
+- The previous illustrated homepage: its components, styles, scroll-parallax
+  hook, its artwork under `public/homepage` and their provenance entries.
+
 ## 0.2.2-rc.1 - 2026-09-30 (private candidate)
 
 This version marks a private preservation candidate for review. It is not a
@@ -76,7 +180,7 @@ First public source release of the self-hosted edition.
   delegation, training/evaluation runs and integrations (email, GitHub, help
   center imports, brand images and website preview), ported to the native
   runtime.
-- Village public homepage with layered, reduced-motion-aware artwork.
+- Village public homepage with layered, reduced-motion-aware artwork. (Replaced on 2026-10-01 by the “Customer Support, Solved.” homepage; see Unreleased.)
 - Standalone browser installer (`node scripts/install.mjs`) for local or
   Cloudflare installation, with agent-assisted prefill.
 - Fictional demo inbox for trying the workspace without real customer data.

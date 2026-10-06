@@ -1,4 +1,4 @@
 import { withVisualEdits } from '../editor/VisualEditBoundary';
 import { createFileRoute } from '@tanstack/react-router';
-import IdentityPage from '../ui/native/IdentityPage';
-export const Route=createFileRoute('/forgot-password')({component:withVisualEdits(IdentityPage)});
+import ForgotPassword from '../ui/identity/ForgotPassword';
+export const Route=createFileRoute('/forgot-password')({component:withVisualEdits(ForgotPassword)});

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Form } from 'react-bootstrap';
 import WidgetFieldSection from './WidgetFieldSection';
+import { defaultFor } from './settingsModel';
 
 const groups = [
     { title: "AI labels", fields: [
@@ -52,13 +53,15 @@ const groups = [
     ] },
 ];
 
+export const textFieldNames = groups.flatMap(({ fields }) => fields.map(([name]) => name));
+
 export default function WidgetTextFields({ register }) {
     return groups.map(({ title, fields }) => (
         <WidgetFieldSection key={title} title={title}>
             {fields.map(([name, label]) => (
                 <Form.Group key={name} controlId={`widget-${name.replace(/[^a-z0-9]+/gi, "-")}`} className="form-group">
                     <Form.Label>{label}</Form.Label>
-                    <Form.Control type="text" {...register(name)} />
+                    <Form.Control type="text" placeholder={defaultFor(name)} {...register(name)} />
                 </Form.Group>
             ))}
         </WidgetFieldSection>

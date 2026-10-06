@@ -21,7 +21,7 @@ const checks = [], errors = [];
 let success = false;
 let currentPage;
 
-const quote = value => `'${String(value).replaceAll("'", "''")}'`;
+const quote = value => value === null || value === undefined ? 'NULL' : `'${String(value).replaceAll("'", "''")}'`;
 const call = async (origin, path, body, token, method = body === undefined ? 'GET' : 'POST') => {
     const response = await fetch(origin + path, {
         method,

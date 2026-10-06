@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ConversationsList from "./ConversationsList";
 import Conversation from "./Conversation";
+import {ActivationChecklist} from '../../native/activation';
 import DemoInboxInvitation from './DemoInboxInvitation';
-import { useDashboardSettings } from '../../native/dashboard-state';
+import { useDashboardSettings, useDashboardLocation } from '../../native/dashboard-state';
 import InboxViews from './InboxViews';
 import { updateNavigationUnreadBadge } from './navigationInboxBadge';
 import { ChatContext } from "../contexts/ChatContext";
@@ -12,6 +13,7 @@ export default function Chat() {
     const [ isCompactViewport, setIsCompactViewport ] = useState(false);
     const { urlConversationId } = useInboxRoute();
     const settings = useDashboardSettings();
+    const search = useDashboardLocation().search;
     const {
         currentAgent,
         isMainVisible,
@@ -24,7 +26,7 @@ export default function Chat() {
     } = useContext(ChatContext);
 
     const canTryDemo = !settings.isGlobalInbox && settings.project?.role === 'owner'
-        && !settings.project?.is_demo && inboxViewCounts.open === 0 && inboxViewCounts.closed === 0;
+        && !settings.project?.is_demo && !String(search.q||'').trim() && (!search.view || ['mine','open'].includes(search.view)) && inboxViewCounts.open === 0 && inboxViewCounts.closed === 0;
 
     useEffect(() => {
         setActiveConversationId(urlConversationId);
@@ -56,10 +58,10 @@ export default function Chat() {
                         conversationId={ activeConversationId }
                         conversation={ conversationData[activeConversationId] }
                         buckets={ buckets.filter(bucket => bucket.conversation_id === activeConversationId) } />}
-                    {!activeConversationId && <div className="chat flex-column justify-content-center text-center">
+                    {!activeConversationId && <div className={`chat flex-column justify-content-center text-center${canTryDemo ? ' activation-empty-inbox' : ''}`}>
                         <div className="container-xxl">
                             <h4>{ `Hey, ${currentAgent.name}!` }</h4>
-                            {canTryDemo ? <div className="d-none d-xl-block"><DemoInboxInvitation /></div> : <p>Please select a chat to start messaging.</p>}
+                            {canTryDemo ? <div className="d-none d-xl-block"><ActivationChecklist projectId={settings.project.id}/><DemoInboxInvitation /></div> : <p>Please select a chat to start messaging.</p>}
                         </div>
                     </div>}
                 </div>

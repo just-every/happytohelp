@@ -58,7 +58,9 @@
     "test:delegation-scoped-browser": "node tests/delegation-scoped-browser.mjs",
     "test:usage": "pnpm run migrations:prepare && node --test tests/usage-summary.mjs tests/usage-limits.mjs",
     "test:delegation-browser": "node tests/delegation-browser.mjs",
-    "test:computers-delegation-browser": "node tests/computers-delegation-browser.mjs"
+    "test:computers-delegation-browser": "node tests/computers-delegation-browser.mjs",
+    "test:activation": "node --test --test-concurrency=1 tests/activation-routes.mjs tests/activation-migration.mjs",
+    "test:activation-browser": "node tests/activation-browser.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

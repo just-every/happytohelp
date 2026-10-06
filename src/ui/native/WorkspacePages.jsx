@@ -1,4 +1,5 @@
 import React from 'react';
+import {ActivationPage} from './activation';
 import { Link } from '@tanstack/react-router';
 import { useDashboardLocation } from './dashboard-state';
 import GitHubSettings from './pages/GitHubSettings';
@@ -17,7 +18,7 @@ import TrainingRuns from './pages/TrainingRuns';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
 import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
-const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
+const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',activation:'Setup',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
 export default function WorkspacePages({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const segments=pathname.split('/').filter(Boolean);
@@ -29,6 +30,7 @@ export default function WorkspacePages({ settings }) {
     let page;
     if(settings.projectUnavailable)page=<ProjectUnavailable/>;
     else if(section==='projects')page=<ProjectsPage/>;
+    else if(section==='activation')page=<ActivationPage projectId={projectId}/>;
     else if(section==='articles'&&recordId==='import')page=<ArticleImport {...{projectId}}/>;
     else if(['datasets','articles','categories'].includes(section))page=<KnowledgePage {...{projectId,section,recordId}} project={settings.projects?.[projectId]||settings.project}/>;
     else if(['ais','macros','contacts','plugins','agents'].includes(section))page=<ManagementPage {...{projectId,section,recordId}}/>;
@@ -46,7 +48,7 @@ export default function WorkspacePages({ settings }) {
     else page=<PageNotFound/>;
     let title=titles[section]||'HappyToHelp';
     if(section==='projects')title=segments[1]==='create'?'Create Project':'Projects';
-    if(section==='articles')title=recordId==='import'?'Import Articles':recordId?'Articles':'Help Center';
+    if(section==='articles')title=recordId==='import'?'Import articles':recordId==='create'?'New article':recordId?'Edit article':'Knowledge';
     if(section==='macros'&&recordId==='create')title='Save a Reply';
     if(section==='agents'&&recordId==='create')title='Invite Agent';
     if(section==='plugins')title='Plugins';

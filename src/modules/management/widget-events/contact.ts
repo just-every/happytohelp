@@ -1,4 +1,5 @@
 import { HTTPException } from 'hono/http-exception'
+import { validWidgetOrigin } from '../activation/local-probes'
 import { text } from '../common'
 import type { WidgetCommand } from './types'
 
@@ -22,5 +23,14 @@ export async function recordPresence({ c, actor, data, action }: WidgetCommand) 
   if (action === 'instruction') metadata.widget_opened = Boolean(data.opened ?? data.value ?? true)
   await c.env.DB.prepare('UPDATE contacts SET metadata_json=? WHERE id=? AND project_id=?')
     .bind(JSON.stringify(metadata), actor.contactId!, actor.projectId).run()
+  // Only accepted authenticated ping commands on the configured website count. Preview,
+  // instruction/open events and arbitrary last_seen_at values cannot create a receipt.
+  const origin = c.req.header('Origin')
+  if ((action === 'pingActive' || action === 'pingAction') && validWidgetOrigin(origin, c.env.PREVIEW_ORIGIN)) {
+    await c.env.DB.prepare(`INSERT INTO activation_widget_pings(project_id,origin,checked_at,receipt_ref)
+      SELECT id,allowed_origin,?,? FROM projects WHERE id=? AND allowed_origin=?
+      ON CONFLICT(project_id) DO UPDATE SET origin=excluded.origin,checked_at=excluded.checked_at,receipt_ref=excluded.receipt_ref`)
+      .bind(Date.now(), crypto.randomUUID(), actor.projectId, origin).run()
+  }
   return c.json({ recorded: true })
 }

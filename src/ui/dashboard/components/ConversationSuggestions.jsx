@@ -28,7 +28,7 @@ export default function ConversationSuggestions({ hasHiddenAbove, hasHiddenBelow
         currentAI, disabled, projectId, selectSuggestion, selectedSuggestion, suggestions,
     } = useReplySuggestions();
     const isProviderConfigurationError = /^(?:CONFIGURATION_REQUIRED|PROVIDER_NOT_SELECTED):/.test(suggestions.error);
-    const missingSecretName = suggestions.error.match(/^CONFIGURATION_REQUIRED:\s*([A-Z][A-Z0-9_]+)/)?.[1];
+    const missingSecretName = suggestions.error.match(/^CONFIGURATION_REQUIRED:\s*([A-Z][A-Z0-9_]*_API_KEY)$/)?.[1];
     const unselectedProviderId = suggestions.error.match(/^PROVIDER_NOT_SELECTED:\s*([a-z][a-z0-9_-]*)$/i)?.[1]?.toLowerCase();
     const provider = providerBySecret[missingSecretName] || providerById[unselectedProviderId];
 

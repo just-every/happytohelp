@@ -31,7 +31,7 @@ const dialogEvents = [];
 let projectId;
 let token;
 
-const request = async (path, { method = 'GET', body, authToken = token } = {}) => {
+const request = async (path, { body, method = body === undefined ? 'GET' : 'POST', authToken = token } = {}) => {
     const response = await fetch(origin + path, {
         method,
         headers: {

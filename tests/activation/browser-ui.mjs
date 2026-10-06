@@ -23,7 +23,7 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
   assert.equal(await nav.getByRole('link',{name:'Knowledge',exact:true}).count(),1);
   assert.ok(await nav.getByRole('link',{name:'Knowledge',exact:true}).isVisible(),'primary knowledge link is visible');
   assert.ok(await nav.getByRole('link',{name:'AI',exact:true}).isVisible());assert.ok(await nav.getByRole('link',{name:'Local computers',exact:true}).isVisible());
-  await page.goto(base+'/articles');assert.match(await page.locator('body').innerText(),/Used by AI answers/i);const draftRow=page.getByRole('row').filter({hasText:'Activation draft again'});assert.match((await draftRow.innerText()).replace('Activation draft again',''),/\bdraft\b|not used|\bno\b/i,'draft source is explicitly ineligible');await noOverflow(page,'Knowledge');
+  await page.goto(base+'/articles');const draftRow=page.getByRole('row').filter({hasText:'Activation draft again'});await draftRow.getByText('Not used by AI answers',{exact:true}).waitFor();assert.match(await page.locator('body').innerText(),/Used by AI answers/i);assert.match((await draftRow.innerText()).replace('Activation draft again',''),/\bdraft\b|not used|\bno\b/i,'draft source is explicitly ineligible');await noOverflow(page,'Knowledge');
   await page.goto(base+'/articles/create');await page.getByRole('heading',{name:'New article',exact:true}).waitFor();
   await page.getByLabel('Title',{exact:true}).fill(`Long activation article ${width}`);await page.getByLabel('Summary',{exact:true}).fill('Long article checks persistent actions.');
   const content=page.getByRole('textbox',{name:'Article content in Markdown',exact:true});await content.fill(Array.from({length:90},(_,i)=>`Paragraph ${i}: preserve editor actions while reading a long article.`).join('\n\n'));
@@ -43,7 +43,7 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
 export async function demoAndAiViews({page,runtime,projectId,evidence,artifacts,checks}){
  const base=`${runtime.origin}/projects/${projectId}`;await page.goto(base+'/conversations');await page.getByRole('button',{name:'Try a demo inbox',exact:true}).click();await page.waitForURL(/\/projects\/demo-[^/]+\/conversations/);const demoId=new URL(page.url()).pathname.split('/')[2];
  for(const width of [1440,390]){
-  await page.setViewportSize({width,height:width===390?844:1000});await page.goto(`${runtime.origin}/projects/${demoId}/articles`);await page.getByText('Back to your workspace',{exact:true}).waitFor();assert.match(await page.locator('body').innerText(),/Demo/i);assert.match(await page.locator('body').innerText(),/Used by AI answers/i);
+  await page.setViewportSize({width,height:width===390?844:1000});await page.goto(`${runtime.origin}/projects/${demoId}/articles`);await page.getByText('Back to your workspace',{exact:true}).waitFor();await page.getByText('Used by AI answers',{exact:true}).first().waitFor();assert.match(await page.locator('body').innerText(),/Demo/i);assert.match(await page.locator('body').innerText(),/Used by AI answers/i);
   await page.reload();await page.getByText('Back to your workspace',{exact:true}).waitFor();await page.goto(`${runtime.origin}/projects/${demoId}/conversations`);
   await page.locator('.conversation-list-items').getByText('Maya Chen (demo)',{exact:true}).click();
   const trigger=page.locator('.conversation-assistant-toggle');await trigger.waitFor();await trigger.getByText('AI & details',{exact:true}).waitFor();if(await trigger.getAttribute('aria-expanded')!=='true')await trigger.click();

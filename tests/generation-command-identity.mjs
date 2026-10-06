@@ -48,12 +48,13 @@ try{
  assert.equal(failedGeneration.actor_json,'{"contactId":"ct","id":"ct","projectId":"p","role":"contact"}','new commands store the actor canonically')
 
  // A queued generation is replayed by the scheduler before a worker completes it.
- const withProvider={...withoutProvider,OPENAI_API_KEY:'sk-test-never-called'}
+ const withProvider={...withoutProvider,OPENAI_API_KEY:'sk-test-never-called',APP_ORIGIN:'https://support.example'}
  await seedConversation('queued-conv')
  const pendingReply=await deliverEmail(withProvider,'queued-conv','<queued@example.com>')
  assert.deepEqual((await generations('queued-conv')).map(g=>[g.id,g.state]),[[`reply:${pendingReply.message.id}`,'queued']])
  assert.deepEqual(queued.map(job=>job.id),[`reply:${pendingReply.message.id}`])
- await runScheduled(withProvider)
+ assert.equal(JSON.parse((await DB.prepare('SELECT options_json FROM ai_generations WHERE id=?').bind(`reply:${pendingReply.message.id}`).first()).options_json).application_origin,'https://support.example')
+ await runScheduled({...withProvider,APP_ORIGIN:undefined})
  assert.equal(await pendingOutbox('queued-conv'),0,'scheduled replay of a queued email generation is idempotent')
  assert.equal((await generations('queued-conv')).length,1)
 

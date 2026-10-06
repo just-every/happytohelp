@@ -52,7 +52,7 @@ async function seed(){
   "INSERT INTO conversation_notes VALUES('note1','conv1','operator','Alice is a VIP, lives in Sydney',14),('noteOther','convOther','operator','Bob note',32)",
   "INSERT INTO conversation_participants VALUES('part-ct','convOther','ct',33),('part-other','conv1','other',15)",
   "INSERT INTO conversation_reads VALUES('conv1','ct',3),('convOther','other',1),('conv1','operator',3)",
-  `INSERT INTO context_subjects(project_id,subject_id,consent,help_types,bot_enabled) VALUES('p','ct',1,'["billing"]',1),('p','other',1,'[]',1),('q','ct',1,'[]',1),('q','qct',0,'[]',1)`,
+  `INSERT INTO context_subjects(project_id,subject_id,consent,help_types,bot_enabled) VALUES('p','ct',1,'["billing"]',1),('p','other',1,'[]',1),('q','ct',1,'[]',1),('q','qct',0,'[]',1) ON CONFLICT(project_id,subject_id) DO UPDATE SET consent=excluded.consent,help_types=excluded.help_types,bot_enabled=excluded.bot_enabled`,
   "INSERT INTO context_evidence VALUES('ev1','p','ct','customer_message','Alice mentioned order 4471','private',11),('evo','p','other','customer_message','Bob evidence','private',31),('evq','q','ct','customer_message','Same id in another project','private',41)",
   `INSERT INTO context_profiles(project_id,subject_id,type,profile) VALUES('p','ct','contact','{"name":"Alice","city":"Sydney"}'),('p','other','contact','{"name":"Bob"}')`,
   `INSERT INTO context_insights VALUES('in1','p','ct','billing','Alice may want a refund','[]','["ev1"]',12,NULL),('ino','p','other','billing','Bob insight','[]','["evo"]',32,NULL)`,

@@ -1,3 +1,4 @@
+import {senderDomainRoutes} from './sender-domain-routes'
 import {Hono} from 'hono'
 import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
@@ -10,6 +11,7 @@ import {mailbox} from './inbound-routing'
 import {updateEmailSettings} from './mailbox-settings'
 export const integrations=new Hono<AppEnv>()
 integrations.route('/',inboundRecoveryRoutes)
+integrations.route('/',senderDomainRoutes())
 integrations.get('/projects/:projectId/email-settings',async c=>{const a=await scope(c,true),row=await c.env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(a.projectId).first<any>();return c.json({data:row?{...row,email_to_address:row.inbound_address||null}:{email_to_address:null},configured:Boolean(emailConfigured(c.env))})})
 integrations.put('/projects/:projectId/email-settings',async c=>{
  const a=await scope(c,true),b=await c.req.json()

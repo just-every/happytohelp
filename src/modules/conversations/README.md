@@ -11,3 +11,11 @@ in module.json. HTTP routes additionally import the edition's platform auth and
 environment interfaces. Copying those routes without an equivalent integration is
 not a complete adoption. Widget and autonomous AI reply policy are separate sources;
 reviewed-send consumers keep their own mandatory approval rules.
+
+Finalized AI messages carry server-resolved citations in `messages.citations_json`.
+The model selects only public references issued to its generation. Admission
+rechecks current publication identity and project visibility inside the same
+atomic message/outbox/generation batch. Repeated commands return the committed
+message, including after later source changes; they never regenerate it. REST
+and socket replay read the same stored metadata. Widget/inbox anchors use only
+that durable metadata, suppress provisional and erased links, and set noopener.

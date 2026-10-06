@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 // Browser and emitted-Worker checks need a built application and run separately.
 const standalone = [
-  'delegation-sqlite.mjs', 'module-boundaries.mjs', 'generation-command-identity.mjs', 'widget-events.mjs', 'deployment-config-private.mjs', 'email-recovery.mjs', 'email-classification.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
+  'widget-citations.mjs', 'sender-domain.mjs', 'delegation-sqlite.mjs', 'module-boundaries.mjs', 'generation-command-identity.mjs', 'widget-events.mjs', 'deployment-config-private.mjs', 'email-recovery.mjs', 'email-classification.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
   'conversation-socket.mjs', 'customer-context-routes.mjs', 'email-provider.mjs', 'sendgrid-email.mjs', 'sendgrid-inbound.mjs', 'cloudflare-email.mjs', 'email-worker.mjs',
   'github-integration.mjs', 'github-discovery.mjs', 'github-workerd-runtime.mjs', 'identity.mjs', 'identity-setup.mjs', 'identity-links.mjs', 'management-invitations.mjs', 'knowledge-context.mjs',
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs', 'local-computer-revocation.mjs',

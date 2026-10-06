@@ -127,7 +127,8 @@
           "tests/widget-native-lost-response.mjs",
           "tests/widget-browser.mjs",
           "tests/widget-browser-runtime.mjs",
-          "tests/widget-lifecycle-browser.mjs"
+          "tests/widget-lifecycle-browser.mjs",
+          "tests/widget-citations.mjs"
         ]
       }
     },
@@ -401,7 +402,10 @@
           "migrations/0106_project_verification_secret.sql",
           "tests/management-library-browser.mjs",
           "tests/library-validation.mjs",
-          "docs/PRIVACY.md"
+          "docs/PRIVACY.md",
+          "migrations/0108_public_answer_citations.sql",
+          "tests/sender-domain.mjs",
+          "tests/live"
         ]
       }
     },

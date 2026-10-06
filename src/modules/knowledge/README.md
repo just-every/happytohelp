@@ -59,3 +59,13 @@ before staging its bounded pages. Very large individual source exports still
 need a streaming source reader to stay within Worker memory; there is no claim
 that arbitrarily large exports fit one Worker invocation. Article import formats
 and provider availability remain subject to configured-provider acceptance.
+
+AI retrieval includes current published native articles and the last published
+version of each dataset. IDs are `article:<id>` and `knowledge:<id>`; continuations
+require the sourceVersion issued by search. Native publication identities change
+on title/content/slug/status changes, including unpublish/republish, independently
+of timestamps. `isArticleEligibleForAI` is the shared published/active-project
+check for retrieval and the owner's AI-use checklist. Native links use APP_ORIGIN
+and `/help/<projectId>/<slug>`; API requests capture the app origin for queued
+local work when no canonical origin is configured. Private `h2h:` dataset content
+can inform an answer but cannot become a public citation.

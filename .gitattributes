@@ -1,0 +1,2 @@
+# Preserve raw command receipts, including ANSI and whitespace, byte for byte.
+verification/t-020-merge/*.log -text -diff

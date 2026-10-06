@@ -380,6 +380,10 @@
     }
   ],
   "files": {
+    ".gitattributes": {
+      "sha256": "0b09c4032728d4ce4043a100868066327a3ecdb49c182881c39e75dd01f85b9a",
+      "executable": false
+    },
     ".github/workflows/delivery.yml": {
       "sha256": "3f8f78fa19a7d019f7180ddef6c50eb64ea25970267a0fbd551f26a4fe3e32f6",
       "executable": false
@@ -5342,6 +5346,58 @@
     },
     "verification/rc-0.2.2-rc.1/final-qualification.json": {
       "sha256": "9552ea6a405f457dd977e1c0c930a57e665d47f0490c2cf59cf3e8acfdcce1bf",
+      "executable": false
+    },
+    "verification/t-020-merge/browser-install.log": {
+      "sha256": "e6047c0ea1721d212b370e009c926c4e67a3b9a5e2c5cffaea28f78bb169c94e",
+      "executable": false
+    },
+    "verification/t-020-merge/build.log": {
+      "sha256": "2b8e7e18ed2e8f51f8d27159a15104fb17a2c3df7f1f50b3edf59535f709c3f4",
+      "executable": false
+    },
+    "verification/t-020-merge/focused.log": {
+      "sha256": "05944b6f96f1d5caf7d1bc9f1f1743369537ca93721d12165eaffbb697b3a43d",
+      "executable": false
+    },
+    "verification/t-020-merge/install.log": {
+      "sha256": "bf0bfb6d0336b6caf095d79f21d3261426910d5d3e1586efa252b00539d71d7d",
+      "executable": false
+    },
+    "verification/t-020-merge/operations-check.log": {
+      "sha256": "5eb4fba3d9e25fbe73d6696dc504874fcfdd6394eb0ab7490f9acda3551e92d3",
+      "executable": false
+    },
+    "verification/t-020-merge/operations-describe.log": {
+      "sha256": "38bb902bb73ac8db2615b55141fcd89fcff530e9787915ccfffc11d040b627c8",
+      "executable": false
+    },
+    "verification/t-020-merge/receipt.json": {
+      "sha256": "091ba8b8e55ee173eb24c7594eb5030f3c3f0982e18d6b7168ab40d4b820b2af",
+      "executable": false
+    },
+    "verification/t-020-merge/schema-inventory.json": {
+      "sha256": "8243c1fad33f7a118cc92913b002cfed4a8b387d084181e269d2b4a209df5168",
+      "executable": false
+    },
+    "verification/t-020-merge/source-check-final.log": {
+      "sha256": "4715b4d570b8822f45b8babbce00b59c1d6d76838b36736c3d84d3db3f0b6b91",
+      "executable": false
+    },
+    "verification/t-020-merge/source-check.log": {
+      "sha256": "480c37c04fc9fb986acb818ef064642c804e20e71dbfbd2f5bebfc36ded7d11b",
+      "executable": false
+    },
+    "verification/t-020-merge/source-lock-repeat.log": {
+      "sha256": "98716eea4ef83b28e4d958386fcba73ed1f95efb9b5c7101e31b1c4281aa7ba9",
+      "executable": false
+    },
+    "verification/t-020-merge/source-lock.log": {
+      "sha256": "98716eea4ef83b28e4d958386fcba73ed1f95efb9b5c7101e31b1c4281aa7ba9",
+      "executable": false
+    },
+    "verification/t-020-merge/typecheck.log": {
+      "sha256": "2cb5aa628356e9bebb4ee6b617bfb7671d43d942a6e0c8d4db30c28888adba87",
       "executable": false
     },
     "vite.config.ts": {

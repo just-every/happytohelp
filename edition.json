@@ -405,7 +405,20 @@
           "docs/PRIVACY.md",
           "migrations/0108_public_answer_citations.sql",
           "tests/sender-domain.mjs",
-          "tests/live"
+          "tests/live",
+          "migrations/0107_activation_receipts.sql",
+          "tests/activation",
+          "verification/t-022",
+          "tests/demo-activation-browser.mjs",
+          "tests/demo-knowledge-activation.mjs",
+          "tests/knowledge-activation-browser.mjs",
+          "tests/activation-ai-controls-browser.mjs",
+          "tests/activation-browser.mjs",
+          "tests/activation-migration.mjs",
+          "tests/activation-provider-probes.mjs",
+          "tests/activation-routes.mjs",
+          "tests/activation-spend-browser.mjs",
+          "tests/activation-spend.mjs"
         ]
       }
     },

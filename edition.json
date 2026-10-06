@@ -418,7 +418,8 @@
           "tests/activation-provider-probes.mjs",
           "tests/activation-routes.mjs",
           "tests/activation-spend-browser.mjs",
-          "tests/activation-spend.mjs"
+          "tests/activation-spend.mjs",
+          "tests/upgrade-from-0.2.1.mjs"
         ]
       }
     },

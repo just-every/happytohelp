@@ -4,14 +4,34 @@ All notable changes to HappyToHelp are recorded here. Versions follow
 [Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
 include breaking changes.
 
-## Unreleased
+## 0.2.2
 
-### Qualification status — T-020 local merge, 2026-10-06
+### Added — T-021 / T-022
 
-- The local merged baseline `a78076a822e01af7727d1deaa2dbf0c5dad6f73e` contains launch line `09d80a7` and skeptic line `fc39c52`; `fc39c52` already contains `14ad2bc` and `be715df`. Migration `0106_project_verification_secret.sql` is retained. The merged schema is 104 tables and 39 migrations.
-- Keep revision counts distinct: historical launch artifact `09d80a7` is 104/38; the merged baseline is 104/39; public v0.2.1 at `59c6e2e` is 97/37. The original 97-table recovery assertion remains unchanged. `pnpm run verify` does not invoke the separate `pnpm run test:independent-runtime` command, so that 97/37 assertion is not a merged-line recovery result.
-- The local focused run recorded 21 passing checks, and the operations descriptor and source check reported success on the `a78076a` baseline. Full `pnpm run verify`, all browser suites, exact-revision D1/R2 recovery comparison and fresh 1440/390 captures remain pending. No public release, tag or public push, production deployment, live-provider proof or production acceptance is established.
-- The retained final accessibility disposition is **FAIL / confirmed owner HOLD**. The prior zero-Axe result is bounded and does not clear the checker false accepts or establish WCAG conformance. See [HANDOVER.md](HANDOVER.md) for the exact historical gate and remaining limits.
+- AI answers carry publication-bound citations. Retrieval excludes unpublished or
+  withdrawn sources, and stored citations retain the source version used for the answer.
+- The empty inbox and Setup page share an observed, project-scoped eight-step
+  activation checklist. Saved settings alone do not count as delivery, DNS, model,
+  inbound-mail or widget proof; unknown provider outcomes are never replayed.
+- Knowledge authoring exposes article publication, retrieval eligibility and
+  source navigation. Conversation AI controls share one state, demo workspaces
+  retain their context, and the spend card explains effective runtime ceilings.
+- Migration `0107_activation_receipts.sql` adds activation observations;
+  `0108_public_answer_citations.sql` adds publication identities, retained
+  citation sources and customer-context mutation fences. The upgrade also includes
+  `0104_inbound_email_classification.sql`, `0105_edition_delegation.sql` and
+  `0106_project_verification_secret.sql` after public v0.2.1.
+
+### Qualification boundary
+
+- Version 0.2.2 is prepared on the private release line. The exact-source local
+  results and owner handoff belong in `verification/release-0.2.2/`; a version
+  number does not authorize publication or imply hosted/provider acceptance.
+- T-021 and T-022 implementation are merged. T-022's recorder preparation is
+  present; its timed live recording is still missing and is not claimed as passed.
+- Accessibility remains **FAIL / confirmed owner HOLD** because the retained
+  checker has false accepts and timing/background limitations. No WCAG
+  conformance is claimed. Public release remains owner-held.
 
 ### Fixed
 

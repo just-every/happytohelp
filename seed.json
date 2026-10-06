@@ -1,7 +1,7 @@
 {
   "id": "happytohelp",
   "name": "HappyToHelp",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.2",
   "license": "MIT",
   "repository": "https://github.com/just-every/happytohelp",
   "maturity": "Owner-installable MIT source release: install locally or deploy to your own Cloudflare account. Hosted Assisted and Managed options are available through Run Edit Run.",

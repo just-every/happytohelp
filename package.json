@@ -1,6 +1,6 @@
 {
   "name": "@run-edit-run/happytohelp",
-  "version": "0.2.2-rc.1",
+  "version": "0.2.2",
   "description": "Open-source customer support workspace: chat widget, team inbox, AI-assisted replies and help centers on Cloudflare Workers.",
   "license": "MIT",
   "repository": {
@@ -62,7 +62,8 @@
     "test:activation": "node --test --test-concurrency=1 tests/activation-routes.mjs tests/activation-migration.mjs tests/activation-provider-probes.mjs",
     "test:activation-browser": "node tests/activation-browser.mjs",
     "test:activation-spend": "node --test tests/activation-spend.mjs",
-    "test:activation-spend-browser": "node tests/activation-spend-browser.mjs"
+    "test:activation-spend-browser": "node tests/activation-spend-browser.mjs",
+    "test:upgrade": "node tests/upgrade-from-0.2.1.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

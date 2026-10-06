@@ -5,27 +5,51 @@ with [README.md](README.md) to install and run it, then read this page.
 
 ## What it is
 
-HappyToHelp 0.2.2-rc.1 is a private preservation candidate for the native
+HappyToHelp 0.2.2 is prepared on the private release line for the native
 TypeScript rewrite of the original HappyToHelp
 customer support application, which ran on PHP/Laravel and AWS. It keeps the
 original React dashboard and Shadow DOM customer widget, the AI assistance
 pipeline, knowledge ingestion, customer context and local-agent delegation, and
 runs them on a single Cloudflare Worker. Pricing, billing, marketing, waitlist
 and referrer features of the original service are deliberately not part of this
-edition. The `0.2.2-rc.1` version does not mean public release or product
+edition. The `0.2.2` version does not mean public release or product
 acceptance: the public source release remains 0.2.1 until a separate owner
 decision. [CONTRACT.md](CONTRACT.md) states the required behavior;
 [ACCEPTANCE.md](ACCEPTANCE.md) states the evidence each requirement needs.
 
-## Private convergence candidate and qualification status
+## Private 0.2.2 release preparation and qualification status
 
-The local merged baseline is `a78076a822e01af7727d1deaa2dbf0c5dad6f73e`. It contains the launch line `09d80a7896fa6ca8643516976ca43d9576607c75` and the skeptic line `fc39c52`; the latter already contains `14ad2bc` and `be715df`. Migration `0106_project_verification_secret.sql` is retained. The package remains version 0.2.2-rc.1, a private preservation candidate.
+T-021 cited answers and T-022 activation/Knowledge changes are merged on
+`release/0.2.x`. T-022's timed live recording is missing; recorder preparation
+is not a completed recording or live-provider acceptance. Version 0.2.2 is
+finalized in source; public publication and tagging remain owner-held.
 
-The schema counts refer to different revisions: public v0.2.1 at `59c6e2e1beb321e9f1cb5493efd05e20fc068638` has 97 tables/37 migrations; historical launch `09d80a7` has 104/38; the merged baseline `a78076a` has 104/39. Do not describe the merged line as 38 migrations. Recovery evidence must preserve the original 97-table assertion and separately cover the launch 104/38 artifact and merged 104/39 artifact.
+The current schema is 108 tables and 41 migrations. Public v0.2.1 at
+`59c6e2e1beb321e9f1cb5493efd05e20fc068638` has 97 tables/37 migrations;
+historical launch `09d80a7` has 104/38, and merged baseline `a78076a` has
+104/39. Migrations 0107/0108 add activation receipts and publication-bound
+answer citations. Keep each revision's inventory distinct.
 
-The package's `pnpm run verify` command runs operations describe, build, typecheck, module checks, runtime checks, the first-release journey, source check, independent-contract and homepage-source checks. It does not call `pnpm run test:independent-runtime`; that is a separate command whose retained original assertion is 97 tables/37 migrations. The prior adapter-based 97/37 proof applies only to the public v0.2.1 artifact. It does not qualify the merged candidate or prove its D1/R2 recovery.
+[The release receipt](verification/release-0.2.2/release.json) records the exact
+source, artifact digest, row comparison and local test outcomes. The genuine
+v0.2.1 upgrade proof builds archived public source, writes through its setup and
+journey APIs, stops that Worker and applies head migrations to the same D1
+file. Its comparison reports original-column row bytes and explicit migration
+differences; any failed gate stays failed in the receipt.
 
-On the `a78076a` baseline, the recorded focused run passed 21 checks; the operations descriptor reported `ok: true` and the source check reported success. These are partial local results. Full `pnpm run verify`, every browser suite, the exact-revision recovery comparison and fresh 1440/390 captures remain pending. No public release, tag or public push, production deployment, live-provider proof or production acceptance is established. Public main remains v0.2.1 at `59c6e2e1beb321e9f1cb5493efd05e20fc068638`. The S18 tune/polish commit `3e68195` is an accepted default, not approval for public release.
+`pnpm run verify` runs operations describe, build, typecheck, module checks,
+runtime checks, the first-release journey, source check, independent-contract
+and homepage-source checks. It does not invoke `test:upgrade`, the browser
+scripts or `test:independent-runtime`; their outcomes must be read separately.
+The unchanged independent-runtime suite retains its original 97-table restore
+assertion. A head artifact with 108 tables cannot claim that historical proof
+as its own recovery qualification.
+
+No public push, tag, release, deployment, live-provider proof or production
+acceptance follows from this preparation. Public v0.2.1 remains the known
+published baseline. [Owner commands](verification/release-0.2.2/OWNER-STEPS.md)
+are conditional on release approval and a passing local release gate; service,
+site, stage and production work belongs to other lanes.
 
 ## Retained accessibility HOLD and historical qualification evidence
 

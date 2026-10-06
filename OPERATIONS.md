@@ -631,23 +631,28 @@ revision the root run recorded 2/2 passing tests, including real local
 ceilings, with no provider calls. This focused result is separate from
 `pnpm run verify` and hosted acceptance.
 
-## Private 0.2.2-rc.1 qualification boundary
+## Private 0.2.2 qualification boundary
 
-This branch labels a private preservation candidate; public release remains HOLD.
-The current f205 accessibility gate is complete and fails checker reliability,
-with confirmed owner HOLD after two correction rounds. Four oracle false accepts
-and the root widget timing/background false failure remain recorded; 21 passing
-states do not close those limitations or establish complete WCAG conformance.
-See [HANDOVER.md](HANDOVER.md) and the
-[current receipt](verification/rc-0.2.2-rc.1/final-qualification.json) for exact
-source pins, retained failures, LIMITED coverage and the owner direction.
+Version 0.2.2 is finalized in the private release source. T-021 cited answers
+and T-022 activation/Knowledge implementation are merged; the T-022 timed live
+recording remains missing. The current schema is 108 tables/41 migrations.
+[The release receipt](verification/release-0.2.2/release.json) records exact
+source, artifact SHA-256, upgrade comparison and individual local test results.
+Failed checks do not become release approval through a version bump.
 
-The external port/import-adapted original v0.2.1 independent proof now passes
-97 tables/37 migrations and has root replication. Its unchanged command remains
-held at ports 12401/12501/default inspectors; it does not qualify this candidate's
-104 tables/38 migrations. Full verify, original port/lifecycle exceptions
-and separate portable-fidelity acceptance remain held as recorded in HANDOVER.
-The root refreshed and checked the source lock after integrating records at
-`557cb4e`: both commands passed with exit 0, changing only `sources.lock.json`.
-This validates source bytes, not full verify; exact logs are pinned in the current
-receipt. No publication, deployment or production cutover follows from these focused results.
+Public publication remains owner-held (Q-0-0010 / OD-21). The retained f205
+accessibility gate fails checker reliability, with confirmed owner HOLD after
+two correction rounds. Four oracle false accepts and the root widget
+timing/background false failure remain recorded; 21 passing states do not
+close those limitations or establish WCAG conformance. See [HANDOVER.md](HANDOVER.md)
+and the [historical receipt](verification/rc-0.2.2-rc.1/final-qualification.json)
+for exact source pins, retained failures, LIMITED coverage and owner direction.
+
+The original v0.2.1 independent proof applies only to 97 tables/37 migrations.
+Its assertion remains unchanged and is separate from `pnpm run verify` and the
+new upgrade test. It does not qualify a head artifact's 108-table recovery.
+Portable-fidelity acceptance remains held as recorded in HANDOVER.
+
+[OWNER-STEPS.md](verification/release-0.2.2/OWNER-STEPS.md) provides conditional
+public fast-forward/tag commands and the downstream service, pin, stage,
+production and site handoff. None of those external effects is performed here.

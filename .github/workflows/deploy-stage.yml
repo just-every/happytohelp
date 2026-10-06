@@ -1,0 +1,155 @@
+name: deploy-stage
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Exact lowercase commit SHA reachable from release/0.2.x or a vX.Y.Z release tag
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: happytohelp-stage
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - name: Validate dispatch envelope without credentials
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          CONTROL_SHA: ${{ github.workflow_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]] || exit 1
+          [[ "$GITHUB_REPOSITORY" == just-every/support-happytohelp ]] || exit 1
+          [[ "$GITHUB_REF" == refs/heads/release/0.2.x ]] || exit 1
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          [[ "$CONTROL_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Validate fresh allowed refs and immutable controller
+        id: source
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          CONTROL_SHA: ${{ github.workflow_sha }}
+          INPUT_PROOF: ''
+          MODE: stage
+          GH_READ_TOKEN: ${{ github.token }}
+        run: node live-proofs/validate-source.mjs
+
+  prepare:
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    # Selected source can execute ONLY here, without any Environment credentials.
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Install declared package manager
+        run: npm install --global pnpm@10.12.4 --ignore-scripts
+      - name: Verify then package native Worker
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+          pnpm run verify
+          node scripts/build-delivery-artifact.mjs
+          sha256sum delivery-artifact/happytohelp-worker-artifact.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: happytohelp-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: delivery-artifact/happytohelp-worker-artifact.json
+          if-no-files-found: error
+          retention-days: 7
+
+  execute:
+    needs: [validate, prepare]
+    if: ${{ needs.validate.result == 'success' && needs.prepare.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: stage
+    outputs:
+      result: ${{ steps.execute.outputs.result }}
+      artifact_sha256: ${{ steps.execute.outputs.artifact_sha256 }}
+      started: ${{ steps.execute.outputs.started }}
+      finished: ${{ steps.execute.outputs.finished }}
+    steps:
+      # Fresh runner: no source checkout, build cache, package/config from the candidate.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: control
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Install reviewed provider toolchain before credentials
+        working-directory: control/live-proofs/toolchain
+        run: npm ci --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: happytohelp-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/candidate
+      - name: Run reviewed controller with provider credentials only
+        id: execute
+        env:
+          VALIDATED_SHA: ${{ needs.validate.outputs.sha }}
+          INPUT_PROOF: ''
+          MODE: stage
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          H2H_SETUP_TOKEN: ${{ secrets.H2H_SETUP_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          H2H_RESOURCE_PREFIX: ${{ vars.H2H_RESOURCE_PREFIX }}
+          H2H_PUBLIC_ORIGIN: ${{ vars.H2H_PUBLIC_ORIGIN }}
+          H2H_STAGE_POLICY_JSON: ${{ vars.H2H_STAGE_POLICY_JSON }}
+          ARTIFACT_FILE: ${{ runner.temp }}/candidate/happytohelp-worker-artifact.json
+        run: node control/live-proofs/run.mjs
+
+  receipt:
+    # No source or candidate artifacts on the evidence-credential runner.
+    if: ${{ always() && needs.validate.result == 'success' }}
+    needs: [validate, prepare, execute]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: stage
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Persist fixed-schema receipt including failures
+        env:
+          EVIDENCE_WRITE_TOKEN: ${{ secrets.EVIDENCE_WRITE_TOKEN }}
+          VALIDATED_SHA: ${{ needs.validate.outputs.sha }}
+          CONTROL_SHA: ${{ github.workflow_sha }}
+          INPUT_PROOF: ''
+          MODE: stage
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          JOB_RESULT: ${{ needs.execute.result }}
+          EXECUTION_RESULT: ${{ needs.execute.outputs.result }}
+          ARTIFACT_SHA256: ${{ needs.execute.outputs.artifact_sha256 }}
+          STARTED: ${{ needs.execute.outputs.started }}
+          FINISHED: ${{ needs.execute.outputs.finished }}
+        run: node live-proofs/persist.mjs

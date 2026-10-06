@@ -121,6 +121,100 @@ publishes the Worker and assets, deletes the temporary file and waits for
 you leave unset are not revoked: rotate or delete existing Worker secrets with
 Wrangler when you intend to.
 
+If an R2 bucket-list command fails during `setup --remote`, setup has not yet
+created any resources: it lists D1, R2 and Queues before starting provisioning.
+If bucket creation fails instead, D1 may already exist, but queue creation,
+deployment configuration and remote migrations have not run. The setup command
+reports this R2 operation and the required account/token checks without printing
+raw Wrangler output. Enable R2 for the selected account and confirm the token's
+*Workers R2 Storage: Edit* permission, then rerun setup with the same resource
+prefix; setup discovers existing resources by name before creating them. A failed
+command does not imply that Cloudflare rolled back an earlier successful step.
+
+## First hosted proof on a disposable installation
+
+Use a throwaway Cloudflare account and a website origin you control. Keep
+`app.happytohelp.com` and every production account out of this proof. Enable R2
+in the selected account before setup, make its `workers.dev` subdomain available
+or choose an active custom-domain zone in that account, and prepare a verified
+SendGrid sender plus a test mailbox. No AI provider is needed for a human reply.
+
+Start from a fresh checkout of the public `v0.2.1` tag:
+
+```sh
+git clone https://github.com/just-every/happytohelp.git happytohelp
+cd happytohelp
+git checkout --detach v0.2.1
+git rev-parse HEAD
+```
+
+The last command should print
+`59c6e2e1beb321e9f1cb5493efd05e20fc068638`. Install the pinned toolchain and
+dependencies. Then run `pnpm exec wrangler login` and select the throwaway
+account, or provide a scoped `CLOUDFLARE_API_TOKEN`; do not use a production
+credential.
+
+Set the target and first-owner inputs in the shell that will run the commands:
+
+| Name | Value |
+| --- | --- |
+| `CLOUDFLARE_ACCOUNT_ID` | The throwaway account's 32-character account ID. |
+| `H2H_RESOURCE_PREFIX` | A unique lowercase prefix (3–40 characters); it names this Worker and its D1, R2 and queues. |
+| `H2H_PUBLIC_ORIGIN` | `https://<prefix>.<workers.dev-subdomain>.workers.dev`, or an eligible active custom-domain origin. For `workers.dev`, the first hostname label must equal the prefix. |
+| `H2H_SETUP_TOKEN` | A private random value at least 32 characters long. Keep it available for the first claim at `/setup`; never place it in a repository, URL, command argument or receipt. |
+| `H2H_SETUP_OWNER_EMAIL` | Optional. Set to the owner test-mailbox address to limit first-owner setup to that address. |
+| `EMAIL_PROVIDER` | `sendgrid`. |
+| `EMAIL_API_KEY` | A SendGrid API key with the required mail-send access, supplied privately to this shell. |
+| `EMAIL_FROM` | The verified SendGrid sender address, supplied privately to this shell. |
+
+Then run the declared commands in order:
+
+```sh
+node scripts/operations.mjs describe
+node scripts/operations.mjs check
+pnpm install --frozen-lockfile
+pnpm run setup -- --plan
+pnpm run setup -- --remote
+pnpm run deploy -- --remote
+```
+
+`setup -- --plan` only validates the target and prints resource names.
+`setup -- --remote` provisions or finds the named D1, R2 and queues, writes the
+private target configuration and applies the source's migrations; it does not
+publish code. `deploy -- --remote` builds, applies any still-pending migrations,
+publishes the Worker and waits for `/health`. During deploy, the setup credential
+and selected email secrets are passed to Wrangler through the existing private
+secret path. Do not commit `.seed/`, `.dev.vars`, generated state or credentials.
+
+Open `H2H_PUBLIC_ORIGIN/setup`, enter the setup token and, if
+`H2H_SETUP_OWNER_EMAIL` is set, that same owner email. Choose an owner password
+and enter the exact website origin where the widget will be tested. The first
+owner is created once; subsequent setup requests are closed. Sign in at `/login`.
+Fetch `/health` and confirm its response is HTTP
+200 with the native runtime, D1 and R2 marked reachable. This health result says
+nothing about queues, sockets, email receipt or widget behavior.
+
+To prove an actual SendGrid send, use **Forgot your password?** from `/login` and
+request a reset for the owner test mailbox. Confirm the message arrives in that
+mailbox, then use its one-hour link to set the password and sign in. A provider
+acceptance record alone is not mailbox receipt; check both. This exercises
+outbound email only. SendGrid inbound mail needs a separate Inbound Parse route,
+the `INBOUND_EMAIL_TOKEN` secret and a mailbox routed to that endpoint.
+
+For the widget-to-operator loop, open **Widget** in the project workspace and
+copy its generated installation snippet to a page served from the exact website
+origin entered during owner setup. Open that page as a customer and send a test
+message. In the operator workspace, open **Conversations**, select that message,
+and send a manual reply from the **Reply to conversation** composer. Confirm the
+reply appears in the customer widget; this is a hosted human-delivery check and
+does not test AI or email replies. Use only test content and the disposable
+workspace.
+
+Record the source tag/commit and separate observations for deploy health, SendGrid
+provider acceptance, actual mailbox receipt and the widget/operator reply. Local
+fixtures, an install screen, or HTTP 200 from `/health` alone do not establish
+those hosted outcomes.
+
 A fresh installation (one with no owner yet) deploys only with a private
 `H2H_SETUP_TOKEN` of at least 32 characters. Without one, deploy reads the
 remote D1 setup state after applying migrations and, if no owner exists, stops
@@ -333,6 +427,88 @@ know whether a run on that computer actually stopped.
 See `local-agent/README.md` for pairing and the connector.
 
 ## Upgrading an existing installation
+
+### Public source upgrade from v0.2.0 to v0.2.1
+
+This procedure covers only the exact public tags: `v0.2.0`
+(`3b34df590cff61358afc07ab56ea886461ca74fd`) to `v0.2.1`
+(`59c6e2e1beb321e9f1cb5493efd05e20fc068638`). The latter descends from the
+former. The tag diff changes seven files: `CHANGELOG.md`,
+`docs/INDEPENDENT-RELEASE.md`, `package.json`, `rer-project.json`, `seed.json`,
+`sources.lock.json` and `tests/independent-runtime.mjs`. It changes release and
+hosted-build metadata plus the independent-runtime table-count assertion from
+94 to 97; it contains no application-runtime source change and no `.sql`
+migration change. Migrations `0102_public_abuse_limits.sql`,
+`0103_contact_erasure.sql` and `0104_inbound_email_classification.sql` are
+already present in both tags. The 97-table assertion in v0.2.1 therefore
+recognizes schema that v0.2.0 already ships; it is not a new migration.
+
+If this checkout has the official repository as `origin`, fetch its tags with
+`git fetch origin --tags`. If `origin` is your fork, fetch the public repository
+through a remote named `upstream`; add it if needed with
+`git remote add upstream https://github.com/just-every/happytohelp.git`, then
+run `git fetch upstream --tags`. Confirm the tag commits and ancestry:
+
+```sh
+git rev-parse 'v0.2.0^{commit}'
+git rev-parse 'v0.2.1^{commit}'
+git merge-base --is-ancestor v0.2.0 v0.2.1
+```
+
+The first two commands must print the SHAs above; the ancestry check must exit
+successfully. From a clean source branch based on the deployed v0.2.0 code, create
+an upgrade branch and merge the public tag:
+
+```sh
+git switch -c upgrade/happytohelp-v0.2.1
+git merge --no-ff v0.2.1
+git rev-parse HEAD
+```
+
+Review and resolve any merge conflicts while preserving your own source changes.
+Do not replace an owner-edited checkout with generated output; record the final
+`HEAD` SHA that you deploy.
+
+For an installation whose existing remote target configuration is still present,
+run:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm run deploy -- --remote
+```
+
+`deploy -- --remote` collects the migration files from the checked-out source,
+builds, asks Wrangler to apply remote D1 migrations, and only then uploads the
+Worker. Between these exact tags there are no new SQL migrations, so a database
+already migrated by v0.2.0 has no v0.2.1 migration to apply. If this is a fresh
+checkout without `.seed/deployment/<prefix>/wrangler.json`, restore the same
+account, prefix, origin and runtime variables, then run `pnpm run setup --
+--plan` and `pnpm run setup -- --remote` before deploy. Setup reuses resources
+found by their declared names. Confirm the resulting `/health`; it verifies the
+runtime plus D1/R2 reachability, not the rest of the service.
+
+Before deploying, record the source SHA you are replacing and make an independent
+backup under your existing data-retention procedure
+([Updates, backup and recovery](docs/INDEPENDENT-RELEASE.md#updates-backup-and-recovery)).
+If you need to roll back
+this exact code-only update, check out the recorded pre-upgrade SHA (for an
+unmodified v0.2.0 installation, `v0.2.0`), install that revision's frozen
+dependencies, and run `pnpm run deploy -- --remote` with the same target and
+runtime configuration:
+
+```sh
+read -r -p 'Pre-upgrade commit SHA: ' PRE_UPGRADE_SHA
+git switch --detach "$PRE_UPGRADE_SHA"
+pnpm install --frozen-lockfile
+pnpm run deploy -- --remote
+```
+
+Do not delete data, undo or edit applied migration records, or manually reverse
+SQL. The two public tags have no schema delta, so
+this code rollback leaves the v0.2.0 D1 schema and all D1/R2 data in place. This
+rollback statement does not cover a later v0.2.x source revision that added
+migrations or changed stored data; older code may not be compatible with such a
+database.
 
 Deploy applies new migrations before publishing the Worker.
 `0102_public_abuse_limits.sql` only adds the `abuse_counters` table and its index.

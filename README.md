@@ -26,7 +26,7 @@ available through [Run Edit Run](https://runeditrun.com).
 | Node.js 26.8.1 or newer | Declared in `package.json` `engines`. |
 | pnpm 10.12.4 | Declared in `package.json` `packageManager`; for example `npm install --global pnpm@10.12.4`. |
 | Git | To clone the repository. |
-| A Cloudflare account | Only to host it online. HappyToHelp uses Workers, D1, R2, Queues and Durable Objects. Check that your plan includes them: the Workers Paid plan (US$5 per month at the time of writing) covers all of them and is required for Cloudflare Email Sending. Enable R2 in the Cloudflare dashboard before the first deployment. |
+| A Cloudflare account | Only to host it online. HappyToHelp uses Workers, D1, R2, Queues and Durable Objects. Check that your plan includes them: the Workers Paid plan (US$5 per month at the time of writing) covers all of them and is required for Cloudflare Email Sending. Enable R2 for the selected account before the first remote setup or Cloudflare installation; setup provisions the R2 bucket before any Worker deployment. |
 | Email provider (optional) | Resend, SendGrid or Cloudflare Email Sending, with a verified sender, for password recovery, invitations and email replies. Each provider bills you directly; several have free tiers. |
 | AI provider keys (optional) | OpenAI, Anthropic, Google, DeepSeek, xAI or OpenRouter. AI replies and suggestions are billed per use by the provider on your own account. Nothing calls a provider until you configure one. Automatic replies that visitors trigger are capped per day ([docs/PUBLIC-LIMITS.md](docs/PUBLIC-LIMITS.md)). |
 
@@ -104,6 +104,8 @@ Then open `https://…/setup`, enter the setup token and create the owner accoun
 Read [OPERATIONS.md](OPERATIONS.md#remote-setup-and-publication) first: it
 covers the `workers.dev` naming rule, custom domains, the separate preview
 origin, the Cloudflare API token permissions and every optional provider.
+For the end-to-end proof on a disposable installation, follow
+[First hosted proof on a disposable installation](OPERATIONS.md#first-hosted-proof-on-a-disposable-installation).
 
 ## Verify
 

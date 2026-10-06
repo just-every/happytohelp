@@ -106,6 +106,7 @@ try {
 
         const panel = page.locator('#conversation-assistant');
         const panelEntry = page.locator('.conversation-assistant-toggle');
+        await panelEntry.waitFor({ state: 'visible' });
         assert.equal(await panelEntry.count(), 1, `${width}px: one labelled AI and details entry`);
         await panelEntry.getByText('AI & details', { exact: true }).waitFor();
         if (width < 1280) {

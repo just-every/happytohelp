@@ -32,9 +32,34 @@ export async function pluginPrefill(page) {
   if(await settings.getAttribute('aria-expanded')!=='true')await settings.click();
   const more=nav.locator('details.native-extra-settings');if(await more.getAttribute('open')===null)await more.locator('summary').click();
   await nav.getByRole('link',{name:'Integrations',exact:true}).click();
-  await page.getByRole('link',{name:'Enable ChargeDesk',exact:true}).click();
-  await page.getByLabel('Name',{exact:true}).waitFor();
-  assert.equal(await page.getByLabel('Name',{exact:true}).inputValue(),'ChargeDesk');
-  assert.equal(await page.getByLabel('URL',{exact:true}).inputValue(),'https://app.chargedesk.com/installed/happytohelp');
+  const requests=[],origin=new URL(page.url()).origin;
+  const observe=request=>requests.push({method:request.method(),url:request.url()});
+  page.on('request',observe);
+  try {
+    const add=page.getByRole('link',{name:'Add Custom Plugin',exact:true});
+    const target=new URL(await add.getAttribute('href'),page.url());
+    assert.equal(target.origin,origin);
+    assert.match(target.pathname,/\/plugins\/create$/);
+    await add.click();await page.waitForURL(target.href);
+    const name=page.getByLabel('Name',{exact:true}),url=page.getByLabel('URL',{exact:true});
+    await name.waitFor();assert.equal(await name.inputValue(),'');assert.equal(await url.inputValue(),'');
+    target.search=new URLSearchParams({name:'Custom support panel',url:'https://plugins.example.test/support?view=customer'}).toString();
+    await page.goto(target.href);await name.waitFor();
+    assert.equal(await name.inputValue(),target.searchParams.get('name'));
+    assert.equal(await url.inputValue(),target.searchParams.get('url'));
+    assert.equal(await url.evaluate(input=>input.checkValidity()),true);
+    for(const unsafe of ['javascript:alert(1)','data:text/html,unsafe','http://plugins.example.test/support']) {
+      await url.fill(unsafe);await page.getByRole('button',{name:'Add',exact:true}).click();
+      await page.locator('#url-error').waitFor();
+      assert.match(await page.locator('#url-error').innerText(),/https/i);
+      assert.equal(await url.getAttribute('aria-invalid'),'true');
+    }
+    await url.fill(target.searchParams.get('url'));
+    assert.equal(await page.locator('#url-error').count(),0);
+    assert.equal(await url.evaluate(input=>input.checkValidity()),true);
+    assert.deepEqual(requests.filter(request=>!['GET','HEAD','OPTIONS'].includes(request.method)),[],'prefill and validation never save');
+    assert.deepEqual(requests.filter(request=>new URL(request.url).origin!==origin),[],'prefill and validation never access a provider');
+  } finally {page.off('request',observe);}
+  page.once('dialog',dialog=>dialog.accept());
   await nav.getByRole('link',{name:'Inbox',exact:true}).click();await page.locator('.conversation-inbox').waitFor();
 }

@@ -5286,7 +5286,7 @@
       "executable": false
     },
     "tests/helpers/navigation-edges.mjs": {
-      "sha256": "eef2109628f62ae87307f6c9e964a8eee05702dd9787a03ebb54efe5b9ff8dce",
+      "sha256": "eddf6f6e8f5f9bcbdba8a3b32825a90459919fb643dfbf2bee71e02e1ad6d2bb",
       "executable": false
     },
     "tests/helpers/navigation-fixture.mjs": {
@@ -5538,7 +5538,7 @@
       "executable": false
     },
     "tests/navigation-browser.mjs": {
-      "sha256": "9e13bb4f6c23121174fcc521d9759e878e6d334f78d5343b9959a1d565334d00",
+      "sha256": "98fe7268893552048dd0b5ffba116670b8fda0f98e32c7fe20301c08f2f5b7d4",
       "executable": false
     },
     "tests/not-found-browser.mjs": {

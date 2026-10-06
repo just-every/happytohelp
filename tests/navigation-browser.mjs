@@ -143,7 +143,7 @@ try {
   checks.push('saved profile name refreshes the persistent sidebar on return to inbox');
   await switchProject('Navigation Alpha');
   await rapidTenantBack(page,alpha,beta);checks.push('gated Alpha → Beta → Back keeps Alpha data/theme/document after cancelled tenant load');
-  await pluginPrefill(page);checks.push('Enable ChargeDesk internal link prefills local form through search parameters without saving or provider access');
+  await pluginPrefill(page);checks.push('Custom-plugin internal link opens local creation; search parameters prefill the form and unsafe URLs are refused without saving or provider access');
   stamp=await watchShell(page);
   await page.setViewportSize({width:390,height:844});
   await nav.getByRole('button',{name:'Toggle navigation'}).click();await link('Contacts').click();

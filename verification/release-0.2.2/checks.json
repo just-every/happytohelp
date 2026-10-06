@@ -1,0 +1,321 @@
+{
+  "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+  "checks": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 0.23,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/install.log",
+      "logSha256": "7f939e8994646750353d5ae098f0f3cfc5930aaebfe16106815d48ba381c55e4"
+    },
+    {
+      "command": "pnpm run build",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 4.62,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/build.log",
+      "logSha256": "e834d52ccc4c2ecdf40ddcd1d546ddefa70e68fea06ba7e634f546f82d7de49c"
+    },
+    {
+      "command": "pnpm run typecheck",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 1.91,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/typecheck.log",
+      "logSha256": "058a8ba27ea716a7b0598b5aecd87ff4dfbc05b678be78ff81c32476642d0a56"
+    },
+    {
+      "command": "pnpm run test:upgrade",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 1,
+      "status": "fail",
+      "durationSeconds": 18.91,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/upgrade.log",
+      "logSha256": "68182ede1b365c17e97d7fc875574cb4f6fb500a91a72a208908f63f94cb14e3"
+    },
+    {
+      "command": "pnpm run source:check",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 0.33,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/source-check.log",
+      "logSha256": "d117badead49948747bffc874ec1e3e9bd98215badb4c44c6b4be00d6588aa21"
+    },
+    {
+      "command": "pnpm run verify",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 118.43,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/verify.log",
+      "logSha256": "1488c4be32ee9a05935d50fe5db95558682964d10e2c6bd262798684665cc541"
+    },
+    {
+      "command": "node scripts/build-delivery-artifact.mjs",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 0.06,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/artifact-build.log",
+      "logSha256": "d123054dfc6cc6d0137d33ad00c268815fdd6dedafc16655e7438b578ceec06c"
+    },
+    {
+      "command": "node tests/independent-runtime.mjs",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 1,
+      "status": "fail",
+      "durationSeconds": 8.88,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/independent.log",
+      "logSha256": "c4c493ef38a8fc64cfd36d1b88e5f7d045aa2d8f8047cda25e965a38981631a1"
+    }
+  ],
+  "browsers": [
+    {
+      "command": "pnpm run test:widget-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 18.1,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-widget-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-widget-browser/vm-stat.txt",
+      "logSha256": "6f7574ac35e47941cf4c5b3f93255de5716ed6e3fc8fc279d709f21eb227780a",
+      "memoryBeforeSha256": "3b96a95cf224c3355a798fa0ba2e7ec9efe06cc0a7907b3f525c54fed2aad31e"
+    },
+    {
+      "command": "pnpm run test:widget-settings-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 20.68,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-widget-settings-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-widget-settings-browser/vm-stat.txt",
+      "logSha256": "36e4e4bfa31872e220f1ac753763399828c5d45f66f014133d1357f26f32db40",
+      "memoryBeforeSha256": "923fd2b697c78d66edbfa3e5b4324d6c0dc27bd788b940fc26e61b617f9a4af2"
+    },
+    {
+      "command": "pnpm run test:ui-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 47.98,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-ui-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-ui-browser/vm-stat.txt",
+      "logSha256": "dba6b6c0ef0a569b79b1ea307d192b9348236cc09320dfef685e406854043765",
+      "memoryBeforeSha256": "7fd89fcb634a4335aa7f9b5868df023fd962c0c933c31332d384f4a1b2f0eac3"
+    },
+    {
+      "command": "pnpm run test:accessibility-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 43.61,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-accessibility-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-accessibility-browser/vm-stat.txt",
+      "logSha256": "5e3b847ae666e63161fb83a2a23fc55aada28d814c32770d9fc4d770bae0440d",
+      "memoryBeforeSha256": "e6456dac769b3398e185e30710290350b45f50d704ea6a013b4f66aefa005dae"
+    },
+    {
+      "command": "pnpm run test:navigation-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 37.19,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-navigation-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-navigation-browser/vm-stat.txt",
+      "logSha256": "7154014b9562de0a4acbec47a178c4f4c5e641e224ffe3fdaac8b8ae20cd2c95",
+      "memoryBeforeSha256": "3d9cd176248025c084afcc54ef605ed32c2716a0912e5f4e39854049780fd5a5"
+    },
+    {
+      "command": "pnpm run test:workspace-shell-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 64.89,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-workspace-shell-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-workspace-shell-browser/vm-stat.txt",
+      "logSha256": "3e40276bc653530e82321d0e159c7bbe0486bb19dc766280ec7bf99bfdb703d7",
+      "memoryBeforeSha256": "2a3e3b241177740f6ab9afceec2b4e3e382053ae7d5de837b84ef02c32381920"
+    },
+    {
+      "command": "pnpm run test:public-help-center-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 9.99,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-public-help-center-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-public-help-center-browser/vm-stat.txt",
+      "logSha256": "19901cdceb96ffe7bad6264edf004e7bdf7270c11b8f1a82b50ebaa23a8dc34e",
+      "memoryBeforeSha256": "8b79ea078bd349458cbc14136727020316a6a5e659743010212a471c177f5a78"
+    },
+    {
+      "command": "pnpm run test:not-found-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 19.71,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-not-found-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-not-found-browser/vm-stat.txt",
+      "logSha256": "835f8f4f0c2683bb19c50632b2be3a656508e9f09cb27957fb90cd8e04a96e20",
+      "memoryBeforeSha256": "08188cc6cdec5e3f22c6cb589308029f81b62397232c2e1cc1a816f508a4d84d"
+    },
+    {
+      "command": "pnpm run test:setup-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 12.46,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-setup-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-setup-browser/vm-stat.txt",
+      "logSha256": "d24226e65f655c6bf8f9634e744c5b2ef3d824c93d66435d9135f1c6857d4fdc",
+      "memoryBeforeSha256": "7140fe3b76269e9002f2fa7874ac2a28855b1aedf9e3f567a1cb5350b1d88969"
+    },
+    {
+      "command": "pnpm run test:identity-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 52.14,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-identity-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-identity-browser/vm-stat.txt",
+      "logSha256": "ffc5585e9659898138444b0c2be7190e298762167d4256b4fe5cf31b66a1aac0",
+      "memoryBeforeSha256": "bc8fe64b3bb3c9c412b3876132c988a3b78f8009d5eda7d533341a277fb11be3"
+    },
+    {
+      "command": "pnpm run test:demo-inbox-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 14.63,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-demo-inbox-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-demo-inbox-browser/vm-stat.txt",
+      "logSha256": "a498d33fbf7ca0e1f527f5ce4c97755d22f7fcd8da397cfb5b69954eb8fc3b56",
+      "memoryBeforeSha256": "5719f84872c344324ca18306bb0dfbc51255d5eb571444ebfb7a10b64f70aabd"
+    },
+    {
+      "command": "pnpm run test:mobile-inbox-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 11.48,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-mobile-inbox-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-mobile-inbox-browser/vm-stat.txt",
+      "logSha256": "065d260083be53aa415491066d95da1b7ca555d88d0f1dac9668fcd8d222660d",
+      "memoryBeforeSha256": "4c23ed434d225a88fd4e224341df45e099acdee348450c64b108dd2d128c83ef"
+    },
+    {
+      "command": "pnpm run test:conversation-panel-resize-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 13.11,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-conversation-panel-resize-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-conversation-panel-resize-browser/vm-stat.txt",
+      "logSha256": "78393313d67aee98fcf9773d1f9d88455c2facfe918843bd061e9417cf48da23",
+      "memoryBeforeSha256": "8dcbd998a1f3d21f93b1e182f3566924ec94e2a8f82a1e2481d1f7947b7d0b5b"
+    },
+    {
+      "command": "pnpm run test:inbox-conversation-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 29.84,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-inbox-conversation-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-inbox-conversation-browser/vm-stat.txt",
+      "logSha256": "02069a36508e6ca2c0a0e835963e44679bed25b002ad7ee8a1462f396395ed42",
+      "memoryBeforeSha256": "0261fc893623d8771d3efc986be11577bfd99a73a22793506fc392a52f0df989"
+    },
+    {
+      "command": "pnpm run test:widget-lifecycle-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 2.61,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-widget-lifecycle-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-widget-lifecycle-browser/vm-stat.txt",
+      "logSha256": "bd966538025b603e1b78750e6b8b7f28e1dc63cc0bfac88a6c4e28d13393e5d5",
+      "memoryBeforeSha256": "7724eaeb8a7e77ff9947d64627136a5f300e2e5715666839d229f69f04e30a1c"
+    },
+    {
+      "command": "pnpm run test:contact-erasure-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 13.68,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-contact-erasure-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-contact-erasure-browser/vm-stat.txt",
+      "logSha256": "3a6a4e8e19bb2222b8e0f43ed9b610f0af9cb52dbdf9772358e8cced12ed3db9",
+      "memoryBeforeSha256": "1ecbfaf8a621809c663892f8517dd70d3d9a2558d8dca4a9ef6455a21013e8d0"
+    },
+    {
+      "command": "pnpm run test:management-library-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 49.24,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-management-library-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-management-library-browser/vm-stat.txt",
+      "logSha256": "13bd249fdccab5e69c5b7b12b9bf7b370fea849c02681faa445619362f4d9019",
+      "memoryBeforeSha256": "65f67b0c505d7c9e24918523a33616c8c89cf4ee82f71133b1a4957b5cb3fc66"
+    },
+    {
+      "command": "pnpm run test:delegation-scoped-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 14.71,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-delegation-scoped-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-delegation-scoped-browser/vm-stat.txt",
+      "logSha256": "7c0be6eafed815ce64bfb17ca41d392fac8fb907444865389f902cd31da47ed7",
+      "memoryBeforeSha256": "af5fcfa049a0051e2a65233edcba27e7fa6961369ec33453b213ea65527b64a3"
+    },
+    {
+      "command": "pnpm run test:delegation-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 14.17,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-delegation-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-delegation-browser/vm-stat.txt",
+      "logSha256": "10563cc7cf88e68e1eff5a9312ed855aec9ddc83f51a1c0808223caaecaee934",
+      "memoryBeforeSha256": "60aa1a3600354206d665e7370fb2b0e15a946a04b47bb88cab03489c1fc21c66"
+    },
+    {
+      "command": "pnpm run test:computers-delegation-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 42.67,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-computers-delegation-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-computers-delegation-browser/vm-stat.txt",
+      "logSha256": "5aff8c3d17e818d09324505e53a8059aa0269dd87249caa945e1aeaae8021b56",
+      "memoryBeforeSha256": "0688864dab49a2d9e94a0c6543863c5c090878c5e2f9f7931c7ff02a7f9ba223"
+    },
+    {
+      "command": "pnpm run test:activation-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 54.92,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-activation-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-activation-browser/vm-stat.txt",
+      "logSha256": "e0294f5f38934d8ce6f68a5d752fb89ddc887f4ba7aa1327ec78091135cf71df",
+      "memoryBeforeSha256": "d792bcea749d934aca05d84d73a43f6b18d2b171cb325859f725f67cc321c18f"
+    },
+    {
+      "command": "pnpm run test:activation-spend-browser",
+      "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+      "exitCode": 0,
+      "status": "pass",
+      "durationSeconds": 3.06,
+      "log": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-activation-spend-browser/output.log",
+      "memoryBefore": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/browsers/test-activation-spend-browser/vm-stat.txt",
+      "logSha256": "5bcf724e6775e22d6017945f9249c355cf0de142a2c16f99d7878388495ee5da",
+      "memoryBeforeSha256": "8894f0412aea25056ec75ba885277d2731063a156d63cb5a50288e8fe437c1ce"
+    }
+  ]
+}

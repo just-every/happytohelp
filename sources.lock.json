@@ -5770,6 +5770,22 @@
       "sha256": "9552ea6a405f457dd977e1c0c930a57e665d47f0490c2cf59cf3e8acfdcce1bf",
       "executable": false
     },
+    "verification/release-0.2.2/checks.json": {
+      "sha256": "01081f646630b6da06625712b96e06e8fbd87e407e0b576f954b1bc64657b4a7",
+      "executable": false
+    },
+    "verification/release-0.2.2/OWNER-STEPS.md": {
+      "sha256": "8e3b4fe34645ae2f5a129668303749cb73546564b83d4bb2eaf89e26dca86623",
+      "executable": false
+    },
+    "verification/release-0.2.2/release.json": {
+      "sha256": "64120145d5bbf373c9d4501a72ac0a4842a979bc9ec9001da48772c461b0acda",
+      "executable": false
+    },
+    "verification/release-0.2.2/upgrade.json": {
+      "sha256": "9e6846265e91ae905d1305e5c8915659df1a719f624f33a3d99dcbb389e33886",
+      "executable": false
+    },
     "verification/t-020-merge/browser-install.log": {
       "sha256": "e6047c0ea1721d212b370e009c926c4e67a3b9a5e2c5cffaea28f78bb169c94e",
       "executable": false

@@ -1,0 +1,1729 @@
+{
+  "baselineSha": "59c6e2e1beb321e9f1cb5493efd05e20fc068638",
+  "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+  "baselineTables": 97,
+  "baselineMigrations": 37,
+  "finalTables": 108,
+  "finalMigrations": 41,
+  "migrationNames": [
+    "0001_identity.sql",
+    "0002_conversations.sql",
+    "0003_identity_credentials.sql",
+    "0004_message_intent.sql",
+    "0005_widget_identity.sql",
+    "0006_registration.sql",
+    "0007_conversation_history.sql",
+    "0008_account_sessions.sql",
+    "0050_knowledge.sql",
+    "0051_knowledge_authoring.sql",
+    "0052_knowledge_imports.sql",
+    "0053_knowledge_recovery.sql",
+    "0060_customer_context.sql",
+    "0060_customer_context_engine.sql",
+    "0070_management.sql",
+    "0071_management_preferences.sql",
+    "0080_integrations.sql",
+    "0081_billing_receipts.sql",
+    "0082_github_oauth.sql",
+    "0083_lead_operations.sql",
+    "0084_billing_project_usage.sql",
+    "0085_ai_context_guards.sql",
+    "0095_public_site.sql",
+    "0096_site_preview.sql",
+    "0097_owner_setup.sql",
+    "0098_personal_visual_inspiration.sql",
+    "0099_personal_sidebar_artwork.sql",
+    "0100_inbound_email_claims.sql",
+    "0101_email_mailbox_lifecycle.sql",
+    "0102_public_abuse_limits.sql",
+    "0103_contact_erasure.sql",
+    "0104_inbound_email_classification.sql",
+    "0105_edition_delegation.sql",
+    "0106_project_verification_secret.sql",
+    "0107_activation_receipts.sql",
+    "0108_public_answer_citations.sql",
+    "020_ai_support.sql",
+    "030_local_computer.sql",
+    "040_training_runs.sql",
+    "041_training_model_usage.sql",
+    "090_legacy_import.sql"
+  ],
+  "database": "/var/folders/m4/05fy4d295ts77ldyt9qll0vc0000gn/T/h2h-native-runtime-gUPiXr/state/v3/d1/miniflare-D1DatabaseObject/3e358c8fbdb08b84e38ea84addae04cec573b1bd314ae0f13005a4f2aae37e14.sqlite",
+  "originalColumnsOnly": true,
+  "migrationLedger": "d1_migrations intentionally appends applied migration rows; compared separately",
+  "comparison": [
+    {
+      "table": "abuse_counters",
+      "columns": [
+        "key",
+        "window_start",
+        "used",
+        "expires_at"
+      ],
+      "beforeRows": 7,
+      "afterRows": 7,
+      "beforeSha256": "fa1be2d55162f479aecf8f85f993daac0eed2227e85c3132079a5b4251fbe29a",
+      "afterSha256": "fa1be2d55162f479aecf8f85f993daac0eed2227e85c3132079a5b4251fbe29a",
+      "identical": true
+    },
+    {
+      "table": "ai_attempt_events",
+      "columns": [
+        "id",
+        "attempt_id",
+        "type",
+        "event_json",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "ai_attempts",
+      "columns": [
+        "id",
+        "generation_id",
+        "state",
+        "started_at",
+        "finished_at",
+        "error"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "ai_defaults",
+      "columns": [
+        "id",
+        "role",
+        "name",
+        "prompt",
+        "model",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "ai_generations",
+      "columns": [
+        "id",
+        "project_id",
+        "conversation_id",
+        "state",
+        "source_revision",
+        "source_context_revision",
+        "source_last_message_id",
+        "actor_json",
+        "model",
+        "ai_id",
+        "ai_profile_json",
+        "kind",
+        "instruction",
+        "options_json",
+        "created_at",
+        "updated_at",
+        "error",
+        "output_json"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "ai_profiles",
+      "columns": [
+        "id",
+        "project_id",
+        "name",
+        "role",
+        "prompt",
+        "model",
+        "is_enabled",
+        "is_animated",
+        "avatar_url",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "ai_round_usage",
+      "columns": [
+        "attempt_id",
+        "request_id",
+        "model",
+        "usage_json",
+        "observed"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_accounts",
+      "columns": [
+        "project_id",
+        "stripe_customer_id",
+        "currency",
+        "auto_top_up",
+        "top_up_minor",
+        "threshold_minor",
+        "default_payment_method",
+        "auto_state",
+        "usd_conversion_rate"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_ledger",
+      "columns": [
+        "id",
+        "project_id",
+        "kind",
+        "amount_minor",
+        "currency",
+        "provider_id",
+        "created_at",
+        "amount_micros",
+        "receipt_url",
+        "invoice_url",
+        "provider_charge_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_operations",
+      "columns": [
+        "id",
+        "project_id",
+        "kind",
+        "state",
+        "response_json",
+        "error",
+        "created_at",
+        "intent_hash",
+        "request_json",
+        "provider_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_project_usage_checkpoints",
+      "columns": [
+        "source",
+        "source_id",
+        "fingerprint"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_usage_history",
+      "columns": [
+        "id",
+        "project_id",
+        "model",
+        "input_tokens",
+        "output_tokens",
+        "cost_decimal",
+        "currency",
+        "created_at",
+        "source_json"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_usage_receipts",
+      "columns": [
+        "id",
+        "project_id",
+        "attempt_id",
+        "request_id",
+        "state",
+        "provider_cost_micros",
+        "currency",
+        "conversion_rate",
+        "amount_micros",
+        "usage_json",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "billing_webhook_receipts",
+      "columns": [
+        "id",
+        "event_type",
+        "payload_hash",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "brand_assets",
+      "columns": [
+        "id",
+        "project_id",
+        "object_key",
+        "content_type",
+        "filename",
+        "created_by",
+        "created_at",
+        "published_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "brand_generations",
+      "columns": [
+        "id",
+        "project_id",
+        "actor_id",
+        "request_id",
+        "prompt",
+        "model",
+        "size",
+        "quality",
+        "state",
+        "asset_id",
+        "provider_request_id",
+        "usage_json",
+        "revised_prompt",
+        "error",
+        "created_at",
+        "started_at",
+        "completed_at",
+        "expires_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "contact_erasure_objects",
+      "columns": [
+        "project_id",
+        "contact_id",
+        "kind",
+        "source_id",
+        "object_key"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "contact_erasures",
+      "columns": [
+        "project_id",
+        "contact_id",
+        "erased_by",
+        "erased_at",
+        "last_erased_at",
+        "runs",
+        "conversations",
+        "messages",
+        "attachments",
+        "tracked_events",
+        "context_records",
+        "sessions"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "contacts",
+      "columns": [
+        "id",
+        "project_id",
+        "name",
+        "email",
+        "external_id",
+        "created_at",
+        "is_verified",
+        "metadata_json"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "23074bade9e29c46c1ae5e5abff5538533c3e8751ad3aae01651aee44f0ed928",
+      "afterSha256": "23074bade9e29c46c1ae5e5abff5538533c3e8751ad3aae01651aee44f0ed928",
+      "identical": true
+    },
+    {
+      "table": "context_actions",
+      "columns": [
+        "id",
+        "project_id",
+        "subject_id",
+        "local_id",
+        "action",
+        "occurred_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_collectors",
+      "columns": [
+        "project_id",
+        "subject_id",
+        "actions_count",
+        "analysis_actions",
+        "analysis_count",
+        "analysis_since_insight",
+        "job_id",
+        "last_run_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_evidence",
+      "columns": [
+        "id",
+        "project_id",
+        "subject_id",
+        "source",
+        "content",
+        "visibility",
+        "occurred_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_insights",
+      "columns": [
+        "id",
+        "project_id",
+        "subject_id",
+        "help_type",
+        "content",
+        "buttons",
+        "evidence_ids",
+        "created_at",
+        "dismissed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_job_events",
+      "columns": [
+        "id",
+        "job_id",
+        "kind",
+        "payload",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_jobs",
+      "columns": [
+        "id",
+        "project_id",
+        "subject_id",
+        "kind",
+        "state",
+        "source_revision",
+        "packet_json",
+        "model",
+        "created_at",
+        "started_at",
+        "finished_at",
+        "result_json",
+        "error",
+        "provider_started"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_profiles",
+      "columns": [
+        "project_id",
+        "subject_id",
+        "type",
+        "profile",
+        "evidence_fingerprint",
+        "generated_count",
+        "started_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_subjects",
+      "columns": [
+        "project_id",
+        "subject_id",
+        "consent",
+        "revision",
+        "help_types",
+        "bot_enabled"
+      ],
+      "beforeRows": 0,
+      "afterRows": 1,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "43f3630eb00bd6e968a2db2a47a8a4a1780d706503bba2469bcc83b91add2bc2",
+      "identical": false,
+      "removedRowSha256": [],
+      "addedRowSha256": [
+        "40181a366f1b324f94c06b37f135265801420e914ed82dfc7ddc0b5cf696f2fa"
+      ]
+    },
+    {
+      "table": "context_summaries",
+      "columns": [
+        "id",
+        "project_id",
+        "subject_id",
+        "summary",
+        "evidence_ids",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_tracked_events",
+      "columns": [
+        "id",
+        "project_id",
+        "subject_id",
+        "local_id",
+        "type",
+        "payload",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "context_write_guards",
+      "columns": [
+        "id",
+        "result"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "conversation_ai",
+      "columns": [
+        "conversation_id",
+        "ai_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "conversation_buckets",
+      "columns": [
+        "id",
+        "conversation_id",
+        "created_at",
+        "metadata_json"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "conversation_notes",
+      "columns": [
+        "id",
+        "conversation_id",
+        "user_id",
+        "content",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "conversation_outbox",
+      "columns": [
+        "id",
+        "project_id",
+        "conversation_id",
+        "message_id",
+        "created_at",
+        "delivered_at"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "91fd268eec4998f3b77b1ecfee8534076d98ec15697050d288df6a6c6f9414b9",
+      "afterSha256": "91fd268eec4998f3b77b1ecfee8534076d98ec15697050d288df6a6c6f9414b9",
+      "identical": true
+    },
+    {
+      "table": "conversation_participants",
+      "columns": [
+        "id",
+        "conversation_id",
+        "contact_id",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "conversation_reads",
+      "columns": [
+        "conversation_id",
+        "user_id",
+        "revision"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "conversations",
+      "columns": [
+        "id",
+        "project_id",
+        "contact_id",
+        "revision",
+        "last_message_id",
+        "assigned_to",
+        "resolved_at",
+        "created_at",
+        "updated_at"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "ffa9d36ed4614368871271ac5a27e095763bc4b9fd433afcb45300f16474e90d",
+      "afterSha256": "ffa9d36ed4614368871271ac5a27e095763bc4b9fd433afcb45300f16474e90d",
+      "identical": true
+    },
+    {
+      "table": "credentials",
+      "columns": [
+        "user_id",
+        "password_hash",
+        "updated_at"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "308700baaaa2ba10b04074675aa3d90fbee361325854be16dcc43649915452de",
+      "afterSha256": "308700baaaa2ba10b04074675aa3d90fbee361325854be16dcc43649915452de",
+      "identical": true
+    },
+    {
+      "table": "email_deliveries",
+      "columns": [
+        "id",
+        "project_id",
+        "recipient",
+        "subject",
+        "intent_hash",
+        "state",
+        "provider_id",
+        "error",
+        "created_at",
+        "updated_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "email_settings",
+      "columns": [
+        "project_id",
+        "from_name",
+        "from_address",
+        "inbound_address",
+        "is_enabled",
+        "updated_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "github_connections",
+      "columns": [
+        "project_id",
+        "github_user_id",
+        "github_login",
+        "token_cipher",
+        "scopes",
+        "connected_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "github_oauth_states",
+      "columns": [
+        "state_hash",
+        "project_id",
+        "user_id",
+        "redirect_uri",
+        "expires_at",
+        "consumed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "github_settings",
+      "columns": [
+        "project_id",
+        "repositories_json",
+        "allow_agents",
+        "allow_contacts",
+        "updated_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "identity_tokens",
+      "columns": [
+        "token_hash",
+        "user_id",
+        "project_id",
+        "email",
+        "role",
+        "kind",
+        "expires_at",
+        "consumed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "inbound_emails",
+      "columns": [
+        "id",
+        "project_id",
+        "conversation_id",
+        "intent_hash",
+        "state",
+        "error",
+        "created_at",
+        "claim_token",
+        "automatic",
+        "evidence_json",
+        "local_id",
+        "message_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "integration_events",
+      "columns": [
+        "id",
+        "provider",
+        "event_type",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "knowledge_article_categories",
+      "columns": [
+        "article_id",
+        "category_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "knowledge_articles",
+      "columns": [
+        "id",
+        "project_id",
+        "category_id",
+        "slug",
+        "title",
+        "content",
+        "summary",
+        "status",
+        "updated_at",
+        "position"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "90f5f5d154bd5d23e5e79a40ac64997ed0d024fb398ade19abd628c18f5bc912",
+      "afterSha256": "90f5f5d154bd5d23e5e79a40ac64997ed0d024fb398ade19abd628c18f5bc912",
+      "identical": true
+    },
+    {
+      "table": "knowledge_categories",
+      "columns": [
+        "id",
+        "project_id",
+        "parent_id",
+        "name",
+        "slug",
+        "summary",
+        "is_published",
+        "position"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "knowledge_datasets",
+      "columns": [
+        "id",
+        "project_id",
+        "name",
+        "status",
+        "published_version",
+        "ingest_started_at",
+        "ingest_cursor",
+        "claim_token",
+        "source_input",
+        "error",
+        "refresh_mode",
+        "unchanged_count",
+        "next_refresh_at",
+        "last_refreshed_at",
+        "created_at",
+        "url",
+        "excluded_urls",
+        "max_crawl_depth",
+        "max_crawl_pages"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "knowledge_documents",
+      "columns": [
+        "id",
+        "version_id",
+        "url",
+        "title",
+        "content"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "knowledge_imports",
+      "columns": [
+        "id",
+        "project_id",
+        "platform",
+        "status",
+        "cursor",
+        "categories",
+        "articles",
+        "error",
+        "created_at",
+        "processing_started_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "knowledge_versions",
+      "columns": [
+        "id",
+        "dataset_id",
+        "fingerprint",
+        "created_at",
+        "semantic",
+        "embedding_model"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "lead_jobs",
+      "columns": [
+        "id",
+        "lead_id",
+        "state",
+        "provider_started",
+        "usage_json",
+        "error",
+        "created_at",
+        "started_at",
+        "finished_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "leads",
+      "columns": [
+        "id",
+        "name",
+        "email",
+        "website",
+        "created_at",
+        "source",
+        "status",
+        "subject",
+        "content",
+        "website_html",
+        "error",
+        "sent_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "legacy_import_holds",
+      "columns": [
+        "id",
+        "run_id",
+        "source_table",
+        "source_id",
+        "reason",
+        "resolved_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "legacy_import_objects",
+      "columns": [
+        "run_id",
+        "object_key",
+        "sha256",
+        "size"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "legacy_import_rows",
+      "columns": [
+        "run_id",
+        "source_table",
+        "source_id",
+        "row_digest",
+        "source_json",
+        "target_table",
+        "target_key",
+        "status"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "legacy_import_runs",
+      "columns": [
+        "id",
+        "source_json",
+        "bundle_digest",
+        "state",
+        "created_at",
+        "completed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_attachment_grants",
+      "columns": [
+        "attachment_id",
+        "job_id",
+        "device_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_attachments",
+      "columns": [
+        "id",
+        "job_id",
+        "device_id",
+        "storage_key",
+        "mime_type",
+        "filename",
+        "size"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_authorizations",
+      "columns": [
+        "id",
+        "device_hash",
+        "user_code",
+        "name",
+        "client_session_id",
+        "capabilities",
+        "status",
+        "user_id",
+        "expires_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_device_settings",
+      "columns": [
+        "device_id",
+        "project_id",
+        "working_directories"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_devices",
+      "columns": [
+        "id",
+        "user_id",
+        "project_id",
+        "grant_id",
+        "pairing_id",
+        "client_session_id",
+        "token_hash",
+        "name",
+        "provider",
+        "capabilities",
+        "max_concurrent_tasks",
+        "last_seen_at",
+        "worker_ready_at",
+        "worker_mode",
+        "revoked_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_events",
+      "columns": [
+        "job_id",
+        "event_id",
+        "kind",
+        "payload",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_grants",
+      "columns": [
+        "id",
+        "user_id",
+        "project_id",
+        "token_hash",
+        "revoked_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_jobs",
+      "columns": [
+        "id",
+        "project_id",
+        "conversation_id",
+        "operator_id",
+        "device_id",
+        "request_id",
+        "mode",
+        "instructions",
+        "status",
+        "claim_id",
+        "run_id",
+        "context",
+        "expected_last_message_id",
+        "session_id",
+        "result",
+        "cancel_requested",
+        "delivery_state",
+        "parent_delegation_id",
+        "source_proposal_id",
+        "created_at",
+        "started_at",
+        "completed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_pairings",
+      "columns": [
+        "id",
+        "project_id",
+        "user_id",
+        "code_hash",
+        "expires_at",
+        "redeemed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_receipts",
+      "columns": [
+        "job_id",
+        "proposal_id",
+        "kind",
+        "status",
+        "message_id",
+        "child_delegation_id",
+        "review_message",
+        "expected_revision",
+        "expected_last_message_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "local_result_effects",
+      "columns": [
+        "job_id",
+        "event_id",
+        "payload",
+        "state"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "login_attempts",
+      "columns": [
+        "key",
+        "failures",
+        "window_start"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "macros",
+      "columns": [
+        "id",
+        "project_id",
+        "title",
+        "content",
+        "created_by",
+        "created_at",
+        "updated_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "management_audit",
+      "columns": [
+        "id",
+        "project_id",
+        "actor_id",
+        "action",
+        "subject_id",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "media",
+      "columns": [
+        "id",
+        "project_id",
+        "conversation_id",
+        "uploaded_by",
+        "object_key",
+        "filename",
+        "content_type",
+        "size",
+        "message_id",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "memberships",
+      "columns": [
+        "project_id",
+        "user_id",
+        "role"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "8e0575ff2a333ecd91736c0f162aea6beade1bd0e9d11966a26408cf1320e217",
+      "afterSha256": "8e0575ff2a333ecd91736c0f162aea6beade1bd0e9d11966a26408cf1320e217",
+      "identical": true
+    },
+    {
+      "table": "messages",
+      "columns": [
+        "id",
+        "project_id",
+        "conversation_id",
+        "local_id",
+        "actor_id",
+        "actor_role",
+        "content",
+        "revision",
+        "created_at",
+        "intent_hash",
+        "bucket_id",
+        "erased_at"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "afade45d0026f6b9974d23a995cc4dd5f81c6ec71922691dff3a8fe21824b16e",
+      "afterSha256": "afade45d0026f6b9974d23a995cc4dd5f81c6ec71922691dff3a8fe21824b16e",
+      "identical": true
+    },
+    {
+      "table": "owner_setup",
+      "columns": [
+        "singleton",
+        "claim_id"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "dd402da2d2012c1eb4c1b94aa0509d1e67e050e2cf7bb4b7752462ab230b83f9",
+      "afterSha256": "dd402da2d2012c1eb4c1b94aa0509d1e67e050e2cf7bb4b7752462ab230b83f9",
+      "identical": true
+    },
+    {
+      "table": "platform_admins",
+      "columns": [
+        "user_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "plugins",
+      "columns": [
+        "id",
+        "project_id",
+        "name",
+        "url",
+        "sort_order",
+        "is_enabled",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "preview_grants",
+      "columns": [
+        "token_hash",
+        "project_id",
+        "actor_id",
+        "target_origin",
+        "expires_at",
+        "remaining_requests",
+        "public_demo"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "preview_limits",
+      "columns": [
+        "key",
+        "requests",
+        "window_start"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "project_settings",
+      "columns": [
+        "project_id",
+        "settings_json",
+        "updated_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "projects",
+      "columns": [
+        "id",
+        "name",
+        "widget_key",
+        "allowed_origin",
+        "created_at",
+        "verification_secret"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "2384757f17e8b55177e30e86ad7a300bda9a88b722d997a9ef9756377af27ff2",
+      "afterSha256": "137f6210c284e0ab15adf924ca9f94e4003070b53d7129749ac52cd888e6adc3",
+      "identical": false,
+      "removedRowSha256": [
+        "1c6dff92f85641175f25e76c3461da2f2f9f057811bf677eee81d443209cab76"
+      ],
+      "addedRowSha256": [
+        "b26eeeb922968dceaf021878c78211c9396dcaba038714460e149889e88282cd"
+      ]
+    },
+    {
+      "table": "public_project_aliases",
+      "columns": [
+        "slug",
+        "project_id"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "public_waitlist",
+      "columns": [
+        "id",
+        "name",
+        "email",
+        "website_url",
+        "created_at",
+        "request_hash",
+        "notification_status"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "registrations",
+      "columns": [
+        "token_hash",
+        "email",
+        "name",
+        "password_hash",
+        "project_name",
+        "allowed_origin",
+        "expires_at",
+        "consumed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "sessions",
+      "columns": [
+        "token_hash",
+        "actor_id",
+        "project_id",
+        "role",
+        "contact_id",
+        "expires_at",
+        "revoked_at"
+      ],
+      "beforeRows": 2,
+      "afterRows": 2,
+      "beforeSha256": "9cbc16784f93124c3093c06425fe2cd1725cd632d5ef1796f45d38e0a06305ac",
+      "afterSha256": "9cbc16784f93124c3093c06425fe2cd1725cd632d5ef1796f45d38e0a06305ac",
+      "identical": true
+    },
+    {
+      "table": "sqlite_sequence",
+      "columns": [
+        "name",
+        "seq"
+      ],
+      "beforeRows": 2,
+      "afterRows": 2,
+      "beforeSha256": "d9f9fc1b4f49a9d626acba5c74f3de39f80cb5f93a89fd048a1b7e2ca8415425",
+      "afterSha256": "af776463926cbb00c3db5ac0e84de36c556e54824e9594bbe08b472649444462",
+      "identical": false,
+      "removedRowSha256": [
+        "e05db6ec82defba34c6b3b0dad4cd6851df267f577303358a7cfc7826f8ae535"
+      ],
+      "addedRowSha256": [
+        "a5c45b56782d95e5256c548e87ece211669e1170d821e5ed1908d5b9734dac0c"
+      ]
+    },
+    {
+      "table": "training_cases",
+      "columns": [
+        "id",
+        "run_id",
+        "case_id",
+        "model",
+        "variant",
+        "definition",
+        "status",
+        "attempt_id",
+        "output_key",
+        "checks",
+        "usage",
+        "error",
+        "started_at",
+        "completed_at",
+        "lease_expires_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "training_model_events",
+      "columns": [
+        "id",
+        "attempt_id",
+        "project_id",
+        "type",
+        "event_json",
+        "created_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "training_model_rounds",
+      "columns": [
+        "attempt_id",
+        "request_id",
+        "project_id",
+        "model",
+        "usage_json",
+        "observed"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "training_runs",
+      "columns": [
+        "id",
+        "project_id",
+        "operator_id",
+        "request_id",
+        "kind",
+        "status",
+        "config",
+        "case_count",
+        "max_cost",
+        "max_tokens",
+        "spent_cost",
+        "reserved_cost",
+        "created_at",
+        "completed_at"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "training_workspaces",
+      "columns": [
+        "project_id",
+        "namespace",
+        "fixture_digest",
+        "seeded_at",
+        "state"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "user_project_preferences",
+      "columns": [
+        "project_id",
+        "user_id",
+        "is_primary",
+        "is_notified_on_unassigned_activity"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "user_settings",
+      "columns": [
+        "user_id",
+        "timezone",
+        "avatar_url",
+        "is_notifiable_on_conversation_assignment",
+        "visual_inspiration",
+        "sidebar_artwork_id",
+        "sidebar_artwork_enabled"
+      ],
+      "beforeRows": 0,
+      "afterRows": 0,
+      "beforeSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "afterSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "identical": true
+    },
+    {
+      "table": "users",
+      "columns": [
+        "id",
+        "email",
+        "name",
+        "created_at"
+      ],
+      "beforeRows": 1,
+      "afterRows": 1,
+      "beforeSha256": "ddc4c20f507518f120a5660a31ea2388674e355f92247abed9420d7aa5c20505",
+      "afterSha256": "ddc4c20f507518f120a5660a31ea2388674e355f92247abed9420d7aa5c20505",
+      "identical": true
+    }
+  ],
+  "failures": [
+    "context_subjects",
+    "projects",
+    "sqlite_sequence"
+  ],
+  "rawEvidence": {
+    "path": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/upgrade.json",
+    "sha256": "da0a9d1b99d09eff313d5000a0570854081ce986798513416109c98b395b8c9b"
+  },
+  "limitations": [
+    "Original columns are compared because newly added columns have no v0.2.1 value.",
+    "d1_migrations intentionally appends new migration rows; this ledger is checked by final count and unchanged source SQL.",
+    "sqlite_sequence is still included in the strict comparison and its d1_migrations sequence advances.",
+    "The strict acceptance gate is FAILED; no exceptions have been authorized."
+  ]
+}

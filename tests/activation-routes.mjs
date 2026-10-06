@@ -22,6 +22,11 @@ let requests=[],sendCount=0,event='sent',modelStatus=200,dnsStatus='verified',st
 const originalFetch=globalThis.fetch
 globalThis.fetch=async(input,init={})=>{
  const url=String(input),method=init.method||'GET';requests.push({url,method})
+ if(url.startsWith('https://cloudflare-dns.com/dns-query?')){
+  const name=new URL(url).searchParams.get('name')
+  const value=name.startsWith('_dmarc.')?'v=DMARC1; p=none':name.includes('._domainkey.')?'v=DKIM1; p=fixture-public-key':'v=spf1 include:fixture.test ~all'
+  return Response.json({Status:0,Answer:[{type:16,data:JSON.stringify(value)}]})
+ }
  if(url==='https://api.openai.com/v1/models/gpt-5-mini')return Response.json(modelStatus===200?{id:'gpt-5-mini',object:'model'}:{error:'fixture'},{status:modelStatus})
  if(url==='https://api.resend.com/domains')return Response.json({data:[{id:'domain-1',name:'example.test'}],has_more:false})
  if(url==='https://api.resend.com/domains/domain-1')return Response.json({id:'domain-1',name:'example.test',status:dnsStatus,records:[{record:'SPF',status:dnsStatus},{record:'DKIM',status:dnsStatus}]})

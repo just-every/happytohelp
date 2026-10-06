@@ -14,7 +14,7 @@ Provider responses and credential fingerprints are never returned to the client.
 
 Resend status adapters use its documented domain list/detail and sent-email
 retrieval APIs. Domain completion requires matching domain identity plus verified
-SPF/DKIM records. Email send acceptance alone remains pending. Delivery completion
+SPF/DKIM records plus T-021’s shared SPF, DKIM and DMARC TXT checks. Email send acceptance alone remains pending. Delivery completion
 requires a matching message ID, current sender, exact owner recipient and
 `last_event=delivered`; later bounce/failure invalidates it on explicit check.
 A durable sendEmail command fences repeated clicks and uncertain sends. Neither
@@ -40,6 +40,11 @@ Provider API references:
 - https://platform.claude.com/docs/en/api/models/retrieve
 - https://ai.google.dev/api/models
 - https://openrouter.ai/docs/api/api-reference/api-keys/get-current-api-key
+- https://openrouter.ai/docs/api/api-reference/models/list-models-filtered-by-user-provider-preferences-privacy-settings-and-guardrails
+
+OpenRouter completion requires authenticated key metadata and the selected model
+(using the generation registry’s provider ID) in the account-filtered model list.
+It does not prove a paid generation.
 
 Local tests intercept these HTTP boundaries only. They never establish real
 provider permission, DNS propagation, delivery, generation or timed installation.

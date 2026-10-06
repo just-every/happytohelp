@@ -59,7 +59,7 @@
     "test:usage": "pnpm run migrations:prepare && node --test tests/usage-summary.mjs tests/usage-limits.mjs",
     "test:delegation-browser": "node tests/delegation-browser.mjs",
     "test:computers-delegation-browser": "node tests/computers-delegation-browser.mjs",
-    "test:activation": "node --test --test-concurrency=1 tests/activation-routes.mjs tests/activation-migration.mjs",
+    "test:activation": "node --test --test-concurrency=1 tests/activation-routes.mjs tests/activation-migration.mjs tests/activation-provider-probes.mjs",
     "test:activation-browser": "node tests/activation-browser.mjs",
     "test:activation-spend": "node --test tests/activation-spend.mjs",
     "test:activation-spend-browser": "node tests/activation-spend-browser.mjs"

@@ -24,7 +24,7 @@ aiSpend.get('/projects/:projectId/ai-spend', async c => {
    .bind(actor.projectId, start, end).all<SpendRow>(),
   contextRunUsage(c.env, actor.projectId),
  ])
- const raw = c.env.AI_DAILY_CEILINGS?.trim()
+ const raw = typeof c.env.AI_DAILY_CEILINGS === 'string' ? c.env.AI_DAILY_CEILINGS.trim() : ''
  // automaticAiUsage already validates the override object, including unknown keys.
  const configured = raw ? JSON.parse(raw) : {}
  const defaults = Object.keys(aiCeilingDefaults).filter(key => !(key in configured))

@@ -2,6 +2,7 @@ import type {Env} from '../../../platform/env'
 import {hashToken} from '../../../platform/auth'
 import {sendEmail} from '../../integrations/email'
 import {emailAddress} from '../../integrations/inbound-routing'
+import {checkSenderDomain} from '../../integrations/sender-domain'
 import type {Configuration} from './configuration'
 import type {Probe} from './types'
 import {providerJson,bearer} from './provider-http'
@@ -63,5 +64,9 @@ export async function checkSenderDns(env:Env,config:Configuration):Promise<Probe
  if(body.id!==found.id||body.name?.toLowerCase()!==domain||!Array.isArray(body.records))return {state:'unknown',detail:'Provider omitted the expected domain or DNS records.'}
  const records=body.records.filter((record:any)=>['SPF','DKIM'].includes(record.record))
  const valid=body.status==='verified'&&records.some((r:any)=>r.record==='SPF')&&records.some((r:any)=>r.record==='DKIM')&&records.every((r:any)=>r.status==='verified')
+ if(valid){
+  const dns=await checkSenderDomain(domain)
+  if(!dns.ok)return {state:dns.records.some(record=>record.status==='unknown')?'unknown':'pending',detail:dns.records.filter(record=>record.status!=='present').map(record=>record.message).join('. ')}
+ }
  return {state:valid?'done':body.status==='failed'?'failed':'pending',detail:valid?`Provider verified ${domain} and its required SPF/DKIM DNS records.`:`${domain} DNS is not fully verified. Review SPF/DKIM records in the provider and allow propagation.`,receiptRef:`resend:domain:${body.id}`}
 }

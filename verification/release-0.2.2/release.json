@@ -1,20 +1,20 @@
 {
   "schema": 1,
-  "task": "T-023",
+  "task": "T-023b",
   "repository": "just-every/support-happytohelp",
   "branch": "release/0.2.x",
-  "sourceSha": "0fb6efcae1c8b656de3be4806050429778826fe8",
+  "sourceSha": "cde930f1c70ce453f6ec577e7eb3e95d8eea80ba",
   "version": "0.2.2",
-  "recordedAt": "2026-10-06T13:48:04.383708+00:00",
-  "localReleaseGate": "fail",
-  "privatePush": "not performed: strict upgrade acceptance failed",
+  "recordedAt": "2026-10-06T14:03:50.702542+00:00",
+  "localReleaseGate": "pass",
+  "privatePush": "Authorized fast-forward to private origin release/0.2.x only; actual result retained in external t-023b/push.log. Publication remains owner HOLD.",
   "artifact": {
     "sha256": "71e808c9e6ed6464e44aa1bce2bfdf2f430da885134ba87caa9620be5fa413b3",
     "bytes": 25309374,
-    "path": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023/artifact/happytohelp-worker-artifact.json",
+    "path": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023b/artifact/happytohelp-worker-artifact.json",
     "repositoryBuildOutput": "delivery-artifact/happytohelp-worker-artifact.json",
-    "producer": "node scripts/build-delivery-artifact.mjs",
-    "status": "built; head restore qualification failed"
+    "producer": "produceArtifact from scripts/build-delivery-artifact.mjs, explicit retained output path",
+    "status": "built; exact 108-table native D1/R2 export/restore passed"
   },
   "prerequisites": {
     "T-021": {
@@ -36,7 +36,7 @@
   },
   "upgrade": {
     "command": "pnpm run test:upgrade",
-    "status": "fail",
+    "status": "pass",
     "baselineSha": "59c6e2e1beb321e9f1cb5493efd05e20fc068638",
     "baselineTables": 97,
     "baselineMigrations": 37,
@@ -51,11 +51,39 @@
     ],
     "comparisonFile": "upgrade.json",
     "baselineConstruction": "git archive of v0.2.1; frozen dependency install; its own emitted Worker and setup/widget/conversation/Knowledge APIs; no direct fixture INSERTs",
-    "comparison": "exact original-column SQLite storage types and row bytes, sorted without row-order assumptions; same D1 file before and after head migrations",
-    "decisionRequired": "Allow exactly the intended migration transformations with separate assertions, or retain strict byte identity and block release. Default: retain strict gate; no private push."
+    "comparison": "Exact original-column SQLite storage types and row bytes; only the declared 0106/0108 transformations and append-only migration ledger sequence may differ, each with its expected value asserted.",
+    "expectedTransformationTables": 96,
+    "unexpectedChanges": [],
+    "migrationExceptions": [
+      {
+        "migration": "0106_project_verification_secret.sql",
+        "table": "projects",
+        "columns": [
+          "verification_secret"
+        ],
+        "rows": "pre-existing projects whose secret is NULL or empty"
+      },
+      {
+        "migration": "0108_public_answer_citations.sql",
+        "table": "context_subjects",
+        "columns": [
+          "revision"
+        ],
+        "rows": "existing subjects: revision + 1; missing contact subjects: exact defaults and revision 1"
+      },
+      {
+        "migration": "Wrangler migration ledger",
+        "table": "sqlite_sequence",
+        "columns": [
+          "seq"
+        ],
+        "rows": "name = d1_migrations only, advances by the number of newly applied migrations"
+      }
+    ],
+    "approvedCorrection": "T-023b owner-authorized orchestrator test-correction decision; rationale in each correction commit."
   },
   "migrations": {
-    "range": "0105–0108 inclusive, four new migrations after public v0.2.1",
+    "range": "0105\u20130108 inclusive, four new migrations after public v0.2.1",
     "baselineCount": 37,
     "headCount": 41,
     "added": [
@@ -273,16 +301,26 @@
       "passed": 22,
       "failed": [],
       "headless": true,
-      "sequential": true,
-      "vmStatBeforeEach": true,
-      "resultsFile": "checks.json"
+      "sequential": false,
+      "concurrency": 2,
+      "resultsFile": "checks.json",
+      "sourceSha": "4ecf7662c123636f6792614c79157c010a4de024",
+      "sourceEquivalence": "Only handoff documentation and source locks changed after the browser run; emitted artifact is byte-identical."
     },
     "independentRuntime": {
-      "command": "node tests/independent-runtime.mjs",
-      "status": "fail",
-      "reason": "Head has 108 tables; unchanged tests/independent-runtime.mjs:50 requires 97. The artifact journey and application R2 upload/download ran, but failure occurs before D1 export/restore. No head recovery proof is claimed.",
-      "assertionPreserved": true
-    }
+      "command": "pnpm run test:independent-runtime",
+      "status": "pass",
+      "tables": 108,
+      "migrations": 41,
+      "approvedAssertionChange": "97 -> 108 plus exact original inventory and eleven named additions; all other journey, export/restore, row, R2 and authority assertions preserved.",
+      "receipt": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023b/independent/receipt.json",
+      "sourceSha": "4ecf7662c123636f6792614c79157c010a4de024"
+    },
+    "verifyRuns": 2,
+    "verifySources": [
+      "4ecf7662c123636f6792614c79157c010a4de024",
+      "cde930f1c70ce453f6ec577e7eb3e95d8eea80ba"
+    ]
   },
   "limitations": [
     "Accessibility FAIL / confirmed owner HOLD remains; no WCAG conformance claimed.",
@@ -306,10 +344,10 @@
     "performed": false
   },
   "custody": {
-    "evidenceDirectory": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023",
-    "finalCommit": "A subsequent handoff-only commit adds verification/release-0.2.2/ and sources.lock.json; sourceSha identifies the tested source commit, not that later commit.",
-    "protectedPaths": "src/editor/** and tests/independent-runtime.mjs unchanged",
+    "evidenceDirectory": "/Users/zemaj/.orchestrator/evidence/happytohelp/t-023b",
+    "finalCommit": "A subsequent receipt-only handoff commit updates this directory and its source lock; sourceSha identifies the verified source before that receipt commit.",
+    "protectedPaths": "src/editor/** unchanged; only the three approved test corrections and their focused helpers changed test source.",
     "subAgents": 0,
-    "externalEffects": "No deploy, dispatch, public push, tag or release performed."
+    "externalEffects": "Only the authorized private release/0.2.x push; no deploy, dispatch, public push, tag or release."
   }
 }

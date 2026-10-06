@@ -5779,7 +5779,7 @@
       "executable": false
     },
     "verification/release-0.2.2/checks.json": {
-      "sha256": "01081f646630b6da06625712b96e06e8fbd87e407e0b576f954b1bc64657b4a7",
+      "sha256": "d0fc4121a7b35e400bf94c070482071429bbbb9a0b13c1b7fcf1cec8ab37e897",
       "executable": false
     },
     "verification/release-0.2.2/OWNER-STEPS.md": {
@@ -5787,11 +5787,11 @@
       "executable": false
     },
     "verification/release-0.2.2/release.json": {
-      "sha256": "64120145d5bbf373c9d4501a72ac0a4842a979bc9ec9001da48772c461b0acda",
+      "sha256": "8780b71cfd581b95c72b88c396c133f45c03eabf268cfc74ffa5103b5065fb40",
       "executable": false
     },
     "verification/release-0.2.2/upgrade.json": {
-      "sha256": "9e6846265e91ae905d1305e5c8915659df1a719f624f33a3d99dcbb389e33886",
+      "sha256": "10cc8f2dd001480b3743f4d12fb1bea771728051c1d44fdcb1d0ab60ee6465f6",
       "executable": false
     },
     "verification/t-020-merge/browser-install.log": {

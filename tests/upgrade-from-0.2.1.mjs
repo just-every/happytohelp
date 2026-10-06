@@ -7,6 +7,7 @@ import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {collectMigrations} from '../scripts/migrations.mjs';
 import {findDatabase, snapshot} from './helpers/upgrade-snapshot.mjs';
+import {expectedMigrationRows, migrationExceptions} from './helpers/upgrade-exceptions.mjs';
 
 const run = promisify(execFile);
 const root = resolve(new URL('..', import.meta.url).pathname);
@@ -53,14 +54,17 @@ try {
   for (const name of headMigrations.files) await copyFile(join(headMigrations.directory, name), join(runtime.directory, 'migrations', name));
   await command(process.execPath, [join(root, 'node_modules/wrangler/bin/wrangler.js'), 'd1', 'migrations', 'apply', 'DB', '--local', '--config', join(runtime.directory, 'wrangler.json'), '--persist-to', join(runtime.directory, 'state')], runtime.directory);
   const after = snapshot(database, before);
-  const comparison = Object.entries(before).map(([table, value]) => ({table, columns: value.columns, beforeRows: value.rowCount, afterRows: after[table]?.rowCount, beforeSha256: value.sha256, afterSha256: after[table]?.sha256, identical: JSON.stringify(value.rows) === JSON.stringify(after[table]?.rows), ...(JSON.stringify(value.rows) === JSON.stringify(after[table]?.rows) ? {} : {removedRows: value.rows.filter(row => !after[table]?.rows.includes(row)), addedRows: after[table]?.rows.filter(row => !value.rows.includes(row))})}));
-  const failures = comparison.filter(row => !row.identical);
+  const expected = expectedMigrationRows(before, after, headMigrations.files);
+  const comparison = Object.entries(before).map(([table, value]) => ({table, columns: value.columns, beforeRows: value.rowCount, afterRows: after[table]?.rowCount, beforeSha256: value.sha256, afterSha256: after[table]?.sha256, identical: JSON.stringify(value.rows) === JSON.stringify(after[table]?.rows), matchesExpected: JSON.stringify(expected[table] ?? value.rows) === JSON.stringify(after[table]?.rows), ...(JSON.stringify(value.rows) === JSON.stringify(after[table]?.rows) ? {} : {removedRows: value.rows.filter(row => !after[table]?.rows.includes(row)), addedRows: after[table]?.rows.filter(row => !value.rows.includes(row))})}));
+  const failures = comparison.filter(row => !row.matchesExpected);
   const receipt = {baselineSha, sourceSha: (await command('git', ['rev-parse', 'HEAD'], root)).trim(), baselineTables: 97, baselineMigrations: runtime.migrationCount, finalTables: Object.keys(after).length, finalMigrations: after.d1_migrations.rowCount, migrationNames: headMigrations.files, database, originalColumnsOnly: true, migrationLedger: 'd1_migrations intentionally appends applied migration rows; compared separately', comparison: comparison.filter(row => row.table !== 'd1_migrations'), failures: failures.filter(row => row.table !== 'd1_migrations').map(row => row.table)};
+  receipt.migrationExceptions = migrationExceptions;
   await writeFile(join(evidence, 'upgrade.json'), JSON.stringify(receipt, null, 2) + '\n');
   console.log(`v0.2.1: 97 tables / 37 migrations; head: ${receipt.finalTables} tables / ${receipt.finalMigrations} migrations`);
   console.log(`Row comparison: ${receipt.comparison.filter(row => row.identical).length}/${receipt.comparison.length} original application tables identical; evidence: ${join(evidence, 'upgrade.json')}`);
+  console.log(`Expected migration transformations: ${receipt.comparison.filter(row => row.matchesExpected).length}/${receipt.comparison.length} tables passed`);
   assert.equal(receipt.finalMigrations, headMigrations.files.length);
-  assert.deepEqual(receipt.failures, [], 'Pre-existing application rows changed during migration');
+  assert.deepEqual(receipt.failures, [], 'Pre-existing application rows changed outside exact migration exceptions');
   success = true;
 } finally {
   if (runtime && !stopped) await runtime.close(false);

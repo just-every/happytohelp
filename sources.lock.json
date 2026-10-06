@@ -6,7 +6,7 @@
     "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa"
   },
   "edition": "runeditrun/happytohelp",
-  "manifest": "09ac503baefaea4a27b607189f54cb31fac1dd674f24d10b2ab569f4684461fc",
+  "manifest": "3650ad1f6b80bee3dc4c471244af49294af84e438a2fbc890f9150bd1118c36e",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -380,7 +380,8 @@
           "tests/activation-provider-probes.mjs",
           "tests/activation-routes.mjs",
           "tests/activation-spend-browser.mjs",
-          "tests/activation-spend.mjs"
+          "tests/activation-spend.mjs",
+          "tests/upgrade-from-0.2.1.mjs"
         ]
       },
       "baseline": null
@@ -434,7 +435,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "1c5f581371e2d27cb08ada4be09f6cfbe71e5b1b9789a3da16331c415feb3f99",
+      "sha256": "6787c86c28d4a07b91e147b245fd848892af1282f001aedd1c04b9d62f2cf966",
       "executable": false
     },
     "CONTRACT.md": {
@@ -522,11 +523,11 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "09ac503baefaea4a27b607189f54cb31fac1dd674f24d10b2ab569f4684461fc",
+      "sha256": "3650ad1f6b80bee3dc4c471244af49294af84e438a2fbc890f9150bd1118c36e",
       "executable": false
     },
     "HANDOVER.md": {
-      "sha256": "677717ffdb7a273ba8401993d5ed0ae886a31ab7e93ae9fcec53afdab22c020b",
+      "sha256": "6c9451cf6a57b1f70a9f6822e246f230748257cc51c41834f52e72d6b3fbd06d",
       "executable": false
     },
     "LICENSE": {
@@ -926,11 +927,11 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "ce180617f52f8c53fee661bd879cdcd4de416075014fc528b9fc339777a68083",
+      "sha256": "63932c5b564fe04e2f99be6572c50bd516522319894136b8a28ab8a0d3b85965",
       "executable": false
     },
     "package.json": {
-      "sha256": "7da382642e98b33cc306c27492626145dbcc70e76402682ebbdcc4bc39cec8fc",
+      "sha256": "bf13d1c51c199bb06a141cc77b483923897a8889b47bd18a774986738c0084fa",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -1494,7 +1495,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "278e08476623a59e53151aa3a3e6e4772da7c9ea0a6a606887d912f6904930bc",
+      "sha256": "55a418c0fbe5ba948e4bbec547bd8f7792cc6d5ae10749a7968ef7db1955919e",
       "executable": false
     },
     "src/app.ts": {
@@ -5325,6 +5326,10 @@
       "sha256": "b0d8361e7322e0851f3d04722e8c6e0cad82373c3657154c8c45e5ecb74d6f31",
       "executable": false
     },
+    "tests/helpers/upgrade-snapshot.mjs": {
+      "sha256": "81d980981dc401204ca797745ffe6060a27ba29d32fe8e6c745a011ada0956de",
+      "executable": false
+    },
     "tests/helpers/window-room.mjs": {
       "sha256": "32b53e6c39e4cad8f000a87c918899df432f28dafcc0bb11e29c0b54d638f72a",
       "executable": false
@@ -5671,6 +5676,10 @@
     },
     "tests/ui-transport.mjs": {
       "sha256": "6228c977e6ba9d65ee8c874cb25ac622a4e927767b859be067136c1a9d98629c",
+      "executable": false
+    },
+    "tests/upgrade-from-0.2.1.mjs": {
+      "sha256": "ee0f48f4805bd359507ffaa43db362e908912c2130a7e245ee2ec4c05872377e",
       "executable": false
     },
     "tests/usage-limits.mjs": {

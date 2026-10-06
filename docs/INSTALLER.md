@@ -69,6 +69,15 @@ Installation checks again before provisioning and deploying, so a new workspace
 cannot silently reuse a known existing Worker. A concurrent remote creation
 between the check and deployment cannot be excluded by these lookups.
 
+Enable R2 in the selected Cloudflare account before approving a Cloudflare
+installation. The installer shows which phase failed but deliberately hides raw
+provider output. A failed setup is not a rollback of Cloudflare resources: a
+failure while creating the R2 bucket can leave the named D1 database behind.
+Inspect the selected account, enable R2 or correct its token permission, and use
+the same account and resource prefix when resuming so setup can find existing
+resources. The manual commands and their safe R2 diagnostics are in
+[OPERATIONS.md](../OPERATIONS.md#first-hosted-proof-on-a-disposable-installation).
+
 The remote Worker receives a private setup credential and selected owner email
 before publication. Until owner creation is confirmed, that credential remains
 in a target-scoped private file under `.seed/installer/private/` (0600). After a
@@ -84,6 +93,12 @@ Existing-owner installations are never reset. Migrations or deployment may alrea
 have run before owner detection; the wizard preserves owner data and opens login.
 The native `/setup` route remains the protected first-owner fallback for already
 running installations; it is not the primary installer entry point.
+
+For an end-to-end hosted check, use a throwaway account, verified test sender and
+test mailbox. After the installer creates the owner, verify `/health`, request a
+password-reset message to that mailbox, and complete a message from the installed
+widget to an operator reply. See the linked OPERATIONS procedure for what each
+step proves and for the manual setup-token path.
 
 ## Private state and agent assistance
 

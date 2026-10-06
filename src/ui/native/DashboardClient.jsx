@@ -10,6 +10,7 @@ import WorkspacePages from './WorkspacePages';
 import Navigation from './Navigation';
 import { NavigationGuard } from './NavigationGuard';
 import { MobileNavigationProvider } from './MobileNavigation';
+import DemoWorkspaceBanner from './demo/DemoWorkspaceBanner';
 export default function DashboardClient({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
@@ -39,6 +40,7 @@ export default function DashboardClient({ settings }) {
         <Navigation settings={settings} />
         <Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
             <main id="workspace-main" tabIndex={-1}>
+                <DemoWorkspaceBanner settings={settings} />
                 <Outlet />
             </main>
         </Provider>

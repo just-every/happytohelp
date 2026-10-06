@@ -19,6 +19,7 @@ const runtime = await createRuntime({
 const browser = await chromium.launch({ headless: true });
 const checks = [], errors = [];
 let success = false;
+let currentPage;
 
 const quote = value => `'${String(value).replaceAll("'", "''")}'`;
 const call = async (origin, path, body, token, method = body === undefined ? 'GET' : 'POST') => {
@@ -96,6 +97,7 @@ try {
         await addGenerationState('completed', { result: providerFixtureResponse });
         const context = await browser.newContext({ viewport: { width, height } });
         const page = await context.newPage();
+        currentPage = page;
         page.setDefaultTimeout(15000);
         page.on('pageerror', error => errors.push(`${width}px: ${error.message}`));
         await page.goto(runtime.origin + '/login?' + new URLSearchParams({ returnTo: conversationPath }));
@@ -236,6 +238,10 @@ try {
     assert.deepEqual(errors, []);
     success = true;
 } finally {
+    if (!success && currentPage && !currentPage.isClosed()) {
+        await currentPage.screenshot({ path: join(evidence, 'failure.png'), fullPage: true });
+        await writeFile(join(evidence, 'failure.txt'), await currentPage.locator('body').innerText());
+    }
     await writeFile(join(evidence, 'result.json'), JSON.stringify({ success, checks, errors }, null, 2) + '\n');
     await browser.close();
     await runtime.close(success);

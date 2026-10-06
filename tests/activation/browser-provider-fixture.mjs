@@ -9,6 +9,12 @@ export async function providerFixture({port}){
   const json=(value,status=200)=>{response.writeHead(status,{'Content-Type':'application/json'});response.end(JSON.stringify(value));};
   try{
    if(url.hostname==='api.openai.com'&&url.pathname==='/v1/models/gpt-5-mini'){assert.equal(request.method,'GET');assert.equal(request.headers.authorization,'Bearer activation-inert-model-key');if(state.modelGate)await state.modelGate;return json(state.modelBody,state.modelStatus);}
+   if(url.hostname==='cloudflare-dns.com'&&url.pathname==='/dns-query'){
+    assert.equal(request.method,'GET');const name=url.searchParams.get('name');
+    assert.ok(['activation.example.test','resend._domainkey.activation.example.test','_dmarc.activation.example.test'].includes(name));
+    const value=name.startsWith('_dmarc.')?'v=DMARC1; p=none':name.includes('._domainkey.')?'v=DKIM1; p=fixture-public-key':'v=spf1 ~all';
+    return json({Status:0,Answer:[{type:16,data:JSON.stringify(value)}]});
+   }
    if(url.hostname!=='api.resend.com')throw new Error('Unexpected provider '+url);
    assert.equal(request.headers.authorization,'Bearer activation-inert-mail-key');
    if(url.pathname==='/domains')return json({data:[{id:'activation-domain',name:'activation.example.test'}],has_more:false});

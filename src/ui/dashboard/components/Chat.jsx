@@ -10,7 +10,7 @@ import { ChatContext } from "../contexts/ChatContext";
 import useInboxRoute from "../hooks/useInboxRoute";
 
 export default function Chat() {
-    const [ isCompactViewport, setIsCompactViewport ] = useState(false);
+    const [ isCompactViewport, setIsCompactViewport ] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1199.98px)').matches);
     const { urlConversationId } = useInboxRoute();
     const settings = useDashboardSettings();
     const search = useDashboardLocation().search;
@@ -50,7 +50,7 @@ export default function Chat() {
             <InboxViews />
 
             <div className="layout">
-                <ConversationsList canTryDemo={canTryDemo} hideBehindConversation={isMainVisible && isCompactViewport} />
+                <ConversationsList canTryDemo={canTryDemo && isCompactViewport} hideBehindConversation={isMainVisible && isCompactViewport} />
 
                 <div className={ isMainVisible ? 'main main-visible' : 'main' }>
                     {activeConversationId && <Conversation
@@ -61,7 +61,7 @@ export default function Chat() {
                     {!activeConversationId && <div className={`chat flex-column justify-content-center text-center${canTryDemo ? ' activation-empty-inbox' : ''}`}>
                         <div className="container-xxl">
                             <h4>{ `Hey, ${currentAgent.name}!` }</h4>
-                            {canTryDemo ? <div className="d-none d-xl-block"><ActivationChecklist projectId={settings.project.id}/><DemoInboxInvitation /></div> : <p>Please select a chat to start messaging.</p>}
+                            {canTryDemo ? !isCompactViewport && <div><ActivationChecklist projectId={settings.project.id}/><DemoInboxInvitation /></div> : <p>Please select a chat to start messaging.</p>}
                         </div>
                     </div>}
                 </div>

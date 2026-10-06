@@ -26,6 +26,7 @@ export async function visibleControl(locator,label){assert.equal(await locator.c
 export async function capture(page,evidence,name,artifacts){const path=join(evidence,name+'.jpg');await page.screenshot({path,type:'jpeg',quality:85,fullPage:true});artifacts.push({file:name+'.jpg',sha256:createHash('sha256').update(await readFile(path)).digest('hex'),url:page.url(),viewport:page.viewportSize()});}
 export async function axeChecklist(page,evidence,name){
  const axePath=new URL('../../node_modules/axe-core/axe.min.js',import.meta.url).pathname;await page.addScriptTag({path:axePath});
- const result=await page.evaluate(async()=>window.axe.run(document.querySelector('.activation-checklist')||document.querySelector('[aria-label="Activation checklist"]'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+ await page.locator('.activation-checklist').waitFor();assert.equal(await page.locator('.activation-checklist').count(),1,'one checklist audited');
+ const result=await page.evaluate(async()=>window.axe.run(document.querySelector('.activation-checklist')));
  await writeFile(join(evidence,name+'.axe.json'),JSON.stringify(result,null,2));assert.deepEqual(result.violations.filter(v=>['serious','critical'].includes(v.impact)),[],name+' serious/critical checklist issues');
 }

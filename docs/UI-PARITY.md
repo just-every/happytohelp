@@ -1,5 +1,13 @@
 # Original UI restoration and known differences
 
+## Approved public homepage
+
+The public / page is the owner-approved “Customer Support, Solved.” homepage. It is an authored product surface, not a claim of parity with the original Laravel application. The 2026-10-02 clarity pass preserves the 2026-10-01 approval while making the solved-support story immediate.
+
+The hero shows Maya unable to turn on the Spanish version of her store, a connected Codex or Claude that has fixed it and left a note, and the reply ready in the composer with Send as the remaining action. Its subhead is “Your Codex or Claude fixes the problem and writes the reply. You press Send.”, followed by “100% free and open source.” The six sections appear in order: hero; “Not just better. Free.”; “Help before they ask”; “The rest of your support desk”; “Try it beside what you have”; and “Ready when you are.”
+
+The page uses warm paper and monochrome chrome, with colour inside labelled HTML/SVG drawings, and self-hosted Outfit. It has no price, hosting, provider or Run Edit Run copy and makes no claims for unsupported imports or automations. The detailed approved wording and behavior are in [CONTRACT.md](../CONTRACT.md). Copy/design approval is separate from exact-revision browser acceptance, fresh captures and accessibility acceptance.
+
 On 15 September 2026 the native dashboard was compared screen by screen with a
 running instance of the original Laravel application, using separate disposable
 local databases, and the original HappyToHelp presentation was restored. This
@@ -144,9 +152,11 @@ does not invent unsupported data or controls to make the screens appear complete
 | Configured provider journeys | Local accessibility checks make no live provider calls, so delivery, OAuth acceptance and hosted behavior are unqualified. | Qualify the native integrations separately with configured accounts; local boundary fixtures are no substitute for provider acceptance. |
 
 The accessibility audit and its exact route/state limits are recorded in
-[ACCESSIBILITY-AUDIT-2026-09-30.md](ACCESSIBILITY-AUDIT-2026-09-30.md). It qualifies
-keyboard and visual accessibility for the audited native states; it does not close
-the feature/API gaps above.
+[ACCESSIBILITY-AUDIT-2026-09-30.md](ACCESSIBILITY-AUDIT-2026-09-30.md). The retained
+checker verdict is **FAIL / confirmed owner HOLD** because independently reproduced
+false accepts and timing/background reliability remain unresolved. Its bounded states
+do not establish complete WCAG conformance or close the feature/API gaps above; see
+[HANDOVER.md](../HANDOVER.md) for the current disposition.
 
 The comparison screenshots are not part of this repository. The browser suites
 named above (`pnpm run test:ui-browser` and related `test:*-browser` scripts)

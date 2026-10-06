@@ -401,7 +401,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "9fa3dfec36670762c1e4a808cec0d493961c658f010c32a06b5e565fee25be14",
+      "sha256": "8e8dcb7ecbade51595dc16679b0e8bf98f8d1051467237fdd48b187591cebaec",
       "executable": false
     },
     "AGENTS.md": {
@@ -409,7 +409,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "687d36524a62d79463217976cd8ac7246655a5afe69a493e28de761daf474852",
+      "sha256": "1c5f581371e2d27cb08ada4be09f6cfbe71e5b1b9789a3da16331c415feb3f99",
       "executable": false
     },
     "CONTRACT.md": {
@@ -481,7 +481,7 @@
       "executable": false
     },
     "docs/UI-PARITY.md": {
-      "sha256": "22b32e047cf00ab003bf6bdb29718cd8083bcc8a13a643673bd347f4cbe5e827",
+      "sha256": "4d2134edf363d243355e4f7bc7ee76ceb29cfeceb372bc128960f83ea458914e",
       "executable": false
     },
     "docs/usage/measurement-2026-09-29.json": {
@@ -501,7 +501,7 @@
       "executable": false
     },
     "HANDOVER.md": {
-      "sha256": "8506d4c1225445493a3b1b0e96da05ec947ac1959a90c0521a9fb7b0ec235cd1",
+      "sha256": "677717ffdb7a273ba8401993d5ed0ae886a31ab7e93ae9fcec53afdab22c020b",
       "executable": false
     },
     "LICENSE": {
@@ -845,7 +845,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "a28218f55d4667231fe310b6c7622b3470aa4822008e731cce16d529280d1018",
+      "sha256": "025a44c08fbec17d736bf79a2c406216df94fc81f736708a49e3d62cbc1fbf86",
       "executable": false
     },
     "rer-project.json": {
@@ -4928,6 +4928,18 @@
       "sha256": "b3c20820351b49465ee55f34dcdfa7e8b75543ae73ce9fac77cc54061094931f",
       "executable": false
     },
+    "tests/helpers/recovery/journey.mjs": {
+      "sha256": "57083f750c303100f120f4f9e170401a2ea7435ff770069eac59eea2568d188b",
+      "executable": false
+    },
+    "tests/helpers/recovery/runtime.mjs": {
+      "sha256": "df5027ad36d0eafd4b024f69645a7fe82b8ca2cfa20ad1a9733a8fa7d604b50b",
+      "executable": false
+    },
+    "tests/helpers/recovery/snapshot.mjs": {
+      "sha256": "bcbaf6e1af50543eae4e47eb404971948321019814c1cff13fb0fe2576f1638c",
+      "executable": false
+    },
     "tests/helpers/runtime-cors.mjs": {
       "sha256": "556096d9fab37718ad995d089887e8d7c3809d4048f7618f715e7e686fc7099f",
       "executable": false
@@ -5188,6 +5200,18 @@
       "sha256": "88a39d4fac370f0e669fb6cd2d5ccb880843f010f62b61da65c85ebc0bd94fd8",
       "executable": false
     },
+    "tests/recovery-artifact-build.mjs": {
+      "sha256": "48bf2ab60521b3f898f510d1e9d5767e8192823acda8149ebf14ad6202be399b",
+      "executable": false
+    },
+    "tests/recovery-comparison.mjs": {
+      "sha256": "a186be050a22697298a57d119fa87d40c85badc2d2c5503328938b956359832c",
+      "executable": false
+    },
+    "tests/recovery-snapshot.mjs": {
+      "sha256": "90ebe3a217acd69fa794a7c6fd7a229b1bab33d84f53883ac9a2fec19656f824",
+      "executable": false
+    },
     "tests/repository-identity.mjs": {
       "sha256": "f712862e1425c5556458c5ec67c24b895a580b71f0151037067c582a2d98630a",
       "executable": false
@@ -5398,6 +5422,118 @@
     },
     "verification/t-020-merge/typecheck.log": {
       "sha256": "2cb5aa628356e9bebb4ee6b617bfb7671d43d942a6e0c8d4db30c28888adba87",
+      "executable": false
+    },
+    "verification/t-020-recovery/.gitattributes": {
+      "sha256": "2a9dfa5fdb6e6da29c88f8ca7020b2481cd9f70f81dfa2bcbe3eaa2a6423ada5",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-attempt1-command.log": {
+      "sha256": "34e0baf4872ecc79286d774d786c208a4aaa101c33641782e152860f86884750",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-attempt1/source-runtime.log": {
+      "sha256": "dc0039a99049aff0cecc19b5cb7f06d2a72f2f090cd1d79c9f41e0573676ca69",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-attempt2-command.log": {
+      "sha256": "cdab3e0c0a57ce1a179f04e6b1743f9d2183e2cd7d92d807be483d9715efe2fa",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-attempt2/source-runtime.log": {
+      "sha256": "c990076c0894f61ca90ace0894273fbf130dbadbbd43e8da0a962f7abf29b7fd",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-build-command.log": {
+      "sha256": "df7e8dfea3fe479650873d0685291d74f3fe9a8389e71073945540c238cfcc37",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-build.json": {
+      "sha256": "df7e8dfea3fe479650873d0685291d74f3fe9a8389e71073945540c238cfcc37",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-build.log": {
+      "sha256": "e278af03015b1985a3e590c6ef783e55b46b9b129a3a62de77e1e4cb1c18beaa",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-command.log": {
+      "sha256": "19b924371f98fc527b5d9c7315c7fedb405861bf2fa7102f7ba90a4ac2f59bc3",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate-install.log": {
+      "sha256": "a89fefa79d03163d06d0762ecdfc8a4cffdec4bde432d36c413391dabf1e34fd",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate/native-export.sql": {
+      "sha256": "cb6145cdece01d27a5cf2c520fea42debbce8d8f046a7e256f747f5cf90a1c38",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate/receipt.json": {
+      "sha256": "6b785fd587c6de9113169cf9bf76912c0a4f5bc686b543064cbf1ca33c44c843",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate/restored-export.sql": {
+      "sha256": "cb6145cdece01d27a5cf2c520fea42debbce8d8f046a7e256f747f5cf90a1c38",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate/restored-runtime.log": {
+      "sha256": "bd8662a9dd311c00742f76abb01f4ef8bf62155da6005c281ea4583c8a49f2ef",
+      "executable": false
+    },
+    "verification/t-020-recovery/candidate/source-runtime.log": {
+      "sha256": "342534a08800ff1cb2f73474a3d52ed21173edfb2516eebc701ae6768de37694",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch-build-command.log": {
+      "sha256": "1845ea36b914cebdeafe0517190485ec3bf9a8838652ce03f0674daf96fb682c",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch-build.json": {
+      "sha256": "1845ea36b914cebdeafe0517190485ec3bf9a8838652ce03f0674daf96fb682c",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch-build.log": {
+      "sha256": "f23114deb5a03a9b16f2df16ee0636249a9b37ad32c4300d4f796e59113267d4",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch-command.log": {
+      "sha256": "75b3390c503057e48d1b533b8ec4acd98e157c388b571848da699423368c68bc",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch-install.log": {
+      "sha256": "959ce81996658a8ef574973bb8deee4c1d79ccabd0bafa4660844fa4434372bd",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch/native-export.sql": {
+      "sha256": "d198b133faddfef010f36a46ed9252786f4c57c05d986ee803b8a401e17d7320",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch/receipt.json": {
+      "sha256": "b58e4d9286e88ccdc65b3d5cf626709b168821c2eda79fdcd1e8c7515b5af995",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch/restored-export.sql": {
+      "sha256": "d198b133faddfef010f36a46ed9252786f4c57c05d986ee803b8a401e17d7320",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch/restored-runtime.log": {
+      "sha256": "3d8955cf61de1ad50418463a0a2fda34916b6e42585d672ffe257f9b5edfab90",
+      "executable": false
+    },
+    "verification/t-020-recovery/launch/source-runtime.log": {
+      "sha256": "6dd2e9b78dacba283f51a5fa8d342d8d6aef6686fc93c3835d09a533400a725b",
+      "executable": false
+    },
+    "verification/t-020-recovery/README.md": {
+      "sha256": "64b2efe0950ea60bdf2c25d8d2ac7ab510937796f456d9001b3d6678c73b481a",
+      "executable": false
+    },
+    "verification/t-020-recovery/run.json": {
+      "sha256": "cb97f5d06c834171d764b2681d87e527d2c6a3bcd22a35f39c4861247e64e730",
+      "executable": false
+    },
+    "verification/t-020-recovery/snapshot-tests.log": {
+      "sha256": "f37bc34eac40571910c9613c8af39e8914b55aa3aee1711bcdf80bd3dccfdb0f",
       "executable": false
     },
     "vite.config.ts": {

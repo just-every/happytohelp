@@ -19,7 +19,7 @@ include breaking changes.
 - Migration `0107_activation_receipts.sql` adds activation observations;
   `0108_public_answer_citations.sql` adds publication identities, retained
   citation sources and customer-context mutation fences. The upgrade also includes
-  `0104_inbound_email_classification.sql`, `0105_edition_delegation.sql` and
+  `0105_edition_delegation.sql` and
   `0106_project_verification_secret.sql` after public v0.2.1.
 
 ### Qualification boundary

@@ -196,7 +196,7 @@ try {
         assert.ok(row);
         assert.equal(row.status, 'draft');
         assert.equal(row.is_published, false);
-        assert.equal((await actions.getByRole('status').innerText()).trim(), 'Draft');
+        assert.equal((await actions.getByRole('status').locator('strong').innerText()).trim(), 'Draft');
         assert.equal(await page.getByLabel('Published', { exact: true }).count(), 0, 'the old publication checkbox is removed');
     });
 
@@ -213,7 +213,7 @@ try {
         let rows = await request('/api/knowledge/' + projectId + '/articles');
         assert.equal(rows.find(item => item.id === articleId).is_published, true);
         await page.reload();
-        assert.equal((await actions.getByRole('status').innerText()).trim(), 'Published');
+        assert.equal((await actions.getByRole('status').locator('strong').innerText()).trim(), 'Published');
         rows = await request('/api/knowledge/' + projectId + '/articles');
         assert.equal(rows.find(item => item.id === articleId).status, 'published');
     });
@@ -230,7 +230,7 @@ try {
         assert.equal(row.is_published, true);
         await page.reload();
         assert.equal(await page.getByLabel('Title', { exact: true }).inputValue(), title + ' edited');
-        assert.equal((await actions.getByRole('status').innerText()).trim(), 'Published');
+        assert.equal((await actions.getByRole('status').locator('strong').innerText()).trim(), 'Published');
     });
 
     await record('Preview renders the article without the editing toolbar', async () => {

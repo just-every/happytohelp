@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ArticleEditorActions({ isPublished, savedStatus, busy, onPublish, onDelete }) {
+export default function ArticleEditorActions({ isPublished, savedStatus, busy, onPublish, onDelete, onUnpublish }) {
     const status = savedStatus || (isPublished ? 'Published' : 'Draft');
 
     return <div className="article-editor-actions" role="group" aria-label="Article save and publish">
@@ -10,6 +10,7 @@ export default function ArticleEditorActions({ isPublished, savedStatus, busy, o
         </p>
         <div className="article-editor-actions__buttons">
             {onDelete && <button className="btn btn-link text-danger" type="button" disabled={busy} onClick={onDelete}>Delete</button>}
+            {isPublished && <button className="btn btn-white" type="button" disabled={busy} onClick={onUnpublish}>Unpublish</button>}
             <button className="btn btn-white" type="submit" disabled={busy}>
                 {busy ? 'Saving…' : 'Save'}
             </button>

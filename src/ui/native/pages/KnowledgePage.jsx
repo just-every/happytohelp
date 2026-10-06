@@ -102,7 +102,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
         });
     };
 
-    const save = async (event, publishRequested = false) => {
+    const save = async (event, publication = null) => {
         event?.preventDefault();
         setError('');
         setSaved(false);
@@ -118,7 +118,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
         setBusy(true);
         try {
             const isPublished = section === 'articles'
-                ? Boolean(publishRequested || draft.is_published)
+                ? publication ?? Boolean(draft.is_published)
                 : Boolean(draft.is_published);
             const body = { ...draft, is_published: isPublished, status: isPublished ? 'published' : 'draft' };
             delete body.categoryIds;
@@ -229,6 +229,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                     savedStatus={savedStatus}
                     busy={busy}
                     onPublish={event => save(event, true)}
+                    onUnpublish={event => save(event, false)}
                     onDelete={draft.id ? () => remove(draft) : undefined}
                 />}
                 <KnowledgeFields {...{ section, draft, change, categories, fieldErrors }}/>

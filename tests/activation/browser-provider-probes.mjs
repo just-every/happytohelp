@@ -35,6 +35,11 @@ export async function providerProbes({runtime,page,fixture,evidence,artifacts,ch
  for(const body of [{done:true},{recipient:'someone@example.test'}])await api(activation+'/test-mail',{body,status:400});await api(activation+'/check',{body:{done:true},status:400});
  const serialized=JSON.stringify(await api(activation));assert.doesNotMatch(serialized,/activation-inert-(?:model|mail)-key|activation-inert-inbound-token/,'no secrets in response');
  for(const width of [1440,390]){await page.setViewportSize({width,height:width===390?844:1000});await page.goto(`${runtime.origin}/projects/${projectId}/activation`);await page.locator('[data-step="owner_mail"][data-state="unknown"]').waitFor();await noOverflow(page,'provider observation states');await axeChecklist(page,evidence,`${width}-provider-states`);await capture(page,evidence,`${width}-provider-states`,artifacts);}
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:width===390?844:1000});await page.goto(`${runtime.origin}/projects/${projectId}/activation`);
+  let release;fixture.state.modelGate=new Promise(resolve=>{release=resolve});
+  try{const completed=page.waitForResponse(response=>new URL(response.url()).pathname===activation+'/check'&&response.request().method()==='POST');await page.getByRole('button',{name:'Check model key',exact:true}).click();await page.locator('[data-step="model_key"]').getByText('Checking…',{exact:true}).waitFor();assert.equal(step(snapshot(await api(activation)),'model_key').state,'checking');await capture(page,evidence,`${width}-provider-checking`,artifacts);release();assert.equal((await completed).status(),200);}finally{release();fixture.state.modelGate=null;}
+ }
  assert.equal(fixture.state.error,undefined,'HTTP fixture received only expected requests');assert.ok(fixture.state.calls.every(call=>call.method==='GET'||call.url==='https://api.resend.com/emails'),'no model generation or unexpected remote effect');
  checks.push('actual provider HTTP boundary: invalid/revoked model, permission/schema negatives, DNS pending/failed/verified, real authenticated inbound, queue vs bounce/delivery, idempotent and uncertain mail; secrets absent');
 }

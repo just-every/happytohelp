@@ -8,7 +8,7 @@ export async function providerFixture({port}){
   const url=new URL(new URL(request.url,'http://fixture.test').searchParams.get('provider'));state.calls.push({method:request.method,url:url.href});
   const json=(value,status=200)=>{response.writeHead(status,{'Content-Type':'application/json'});response.end(JSON.stringify(value));};
   try{
-   if(url.hostname==='api.openai.com'&&url.pathname==='/v1/models/gpt-5-mini'){assert.equal(request.method,'GET');assert.equal(request.headers.authorization,'Bearer activation-inert-model-key');return json(state.modelBody,state.modelStatus);}
+   if(url.hostname==='api.openai.com'&&url.pathname==='/v1/models/gpt-5-mini'){assert.equal(request.method,'GET');assert.equal(request.headers.authorization,'Bearer activation-inert-model-key');if(state.modelGate)await state.modelGate;return json(state.modelBody,state.modelStatus);}
    if(url.hostname!=='api.resend.com')throw new Error('Unexpected provider '+url);
    assert.equal(request.headers.authorization,'Bearer activation-inert-mail-key');
    if(url.pathname==='/domains')return json({data:[{id:'activation-domain',name:'activation.example.test'}],has_more:false});

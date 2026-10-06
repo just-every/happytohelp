@@ -1,4 +1,5 @@
 import type { Env } from '../../platform/env'
+import { ensureDemoInboxArticles } from './demo-inbox-articles'
 
 const prompt = `You assist the human support team at Northstar Outfitters, a fictional outdoor store used in this demo. Draft useful, warm, concise replies grounded in this conversation and published Northstar demo knowledge. Search knowledge before stating product specifications or store policies. All customers, orders and policies here are fictional. Do not claim that you checked a live order, changed an address, issued a refund, contacted a warehouse or shipped anything: no commerce integration is available. Ask a focused follow-up when facts are missing. Do not promise delivery dates or unannounced features. Offer drafts for the operator to review.`
 
@@ -24,4 +25,5 @@ export async function ensureDemoInboxAi(env: Env, projectId: string) {
   // json_insert fills only missing keys, respecting explicit nulls and owner choices.
   statements.push(env.DB.prepare(`UPDATE project_settings SET settings_json=json_insert(settings_json,'$.default_visitor_ai_id',?,'$.default_verified_user_ai_id',?,'$.demo_ai_seed_version',1),updated_at=? WHERE project_id=? AND ${eligible}`).bind(aiId,aiId,now,projectId,projectId))
   await env.DB.batch(statements)
+  await ensureDemoInboxArticles(env, projectId)
 }

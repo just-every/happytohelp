@@ -196,7 +196,7 @@ try {
             await page.waitForFunction(() => document.querySelector('#conversation-assistant')?.getAttribute('aria-hidden') === 'true');
             await panelEntry.click();
         }
-        await page.getByRole('status').getByText('Add a customer message first.', { exact: true }).waitFor();
+        await page.getByRole('status').filter({ hasText: /^Add a customer message first\.$/ }).waitFor();
         assert.equal(await page.locator('[data-ai-generate="true"]').count(), 1, `${width}px: empty conversation has one Generate control`);
         assert.equal(await page.locator('[data-ai-generate="true"]').isDisabled(), true, `${width}px: empty conversation cannot request generation`);
         checks.push(`${width}px: no-message hint disables the only Generate control`);

@@ -83,9 +83,9 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) test('real D1 spend
   const updated = await read(); assert.equal(updated.spend.knownUsd,.03);assert.equal(updated.spend.rounds,2)
   await seed('unknown',owner.projectId,null)
   assert.equal((await read()).spend.state,'partial')
-  const before = await db.prepare('SELECT * FROM ai_round_usage ORDER BY attempt_id,request_id').all()
+  const before = (await db.prepare('SELECT * FROM ai_round_usage ORDER BY attempt_id,request_id').all()).results
   await read(); await read()
-  assert.deepEqual(await db.prepare('SELECT * FROM ai_round_usage ORDER BY attempt_id,request_id').all(),before)
+  assert.deepEqual((await db.prepare('SELECT * FROM ai_round_usage ORDER BY attempt_id,request_id').all()).results,before)
   const start=Math.floor(Date.now()/86400000)*86400000
   for (const [name,key,count] of [['ai:replies-per-project',owner.projectId,2],['ai:replies-per-installation','installation',3],['ai:reply-spend-micro-usd',owner.projectId,1000000],['ai:reply-ceiling-skips',owner.projectId,4],['ai:context-runs-per-project',owner.projectId,2]]) {
    await db.prepare('INSERT INTO abuse_counters(key,window_start,used,expires_at) VALUES(?,?,?,?)').bind(name+':'+createHash('sha256').update(key).digest('hex'),start,count,start+86400000).run()

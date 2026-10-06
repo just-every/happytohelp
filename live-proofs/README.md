@@ -30,7 +30,16 @@ Receipts are stored under
 `3-foundation/T-002b/just-every--support-happytohelp/<workflow>/<runId>-<attempt>.json`.
 They contain source/controller SHA, UTC timestamps, job results, fixed failure
 status and, after successful stage publication/health, the approved artifact
-SHA-256. No provider response body, free text, secret, arbitrary path or command
+SHA-256. The required `command` is writer-owned: `live-proof` with
+`proof: secrets-present` and `deploy-stage` with `proof: null` both record
+`node control/live-proofs/run.mjs`, the exact execute-job invocation. The mode
+and proof select its native names-only proof or trusted stage adapter. This
+records the controller entrypoint, not a claim that each internal migration,
+publication or health step ran. If preparation fails or execution cannot start,
+it is the planned command; job results, failure status and nullable execution
+timestamps retain that failure. The writer ignores free-form command inputs and
+validation requires the exact mapped command, rejecting missing or altered
+values. No provider response body, free text, secret, arbitrary path or command
 is accepted. Failed prepare, proof, migration, deploy and health outcomes still
 reach this writer. Failure to persist fails the workflow; it is never silently
 replaced by an Actions artifact. Invalid dispatch/source requests stop before

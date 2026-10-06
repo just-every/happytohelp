@@ -7,7 +7,6 @@ const isDesktop = () => typeof window !== 'undefined' && window.matchMedia(deskt
 export default function useConversationAssistant() {
     const [ isVisible, setIsVisible ] = useState(isDesktop);
     const toggleRef = useRef(null);
-    const localToggleRef = useRef(null);
     const closeRef = useRef(null);
     const panelRef = useRef(null);
     const openedFromToggle = useRef(false);
@@ -32,16 +31,6 @@ export default function useConversationAssistant() {
         openedFromToggle.current = true;
         setIsVisible(true);
     }, [ close, isVisible ]);
-
-    const openLocal = useCallback(() => {
-        setRequestedTab('local');
-        // A header request must select Local even when Local was the last
-        // requested tab and the operator has since selected another panel.
-        setRequestedTabVersion(version => version + 1);
-        returnFocusRef.current = localToggleRef.current;
-        openedFromToggle.current = true;
-        setIsVisible(true);
-    }, []);
 
     useEffect(() => {
         const mediaQuery = window.matchMedia(desktopQuery);
@@ -106,10 +95,8 @@ export default function useConversationAssistant() {
         requestedTab,
         requestedTabVersion,
         toggle,
-        openLocal,
         close,
         toggleRef,
-        localToggleRef,
         closeRef,
         panelRef,
     };

@@ -41,8 +41,15 @@ export default function ConversationAIInstructions() {
             disabled={ isBusy || isUnavailable }
         />
         <div className="conversation-ai-instructions__footer">
-            <button type="submit" className="btn btn-primary" disabled={ isBusy || isUnavailable } aria-describedby={ isUnavailable ? 'conversation-ai-instructions-message-required' : undefined }>
-                <i className="fe fe-star" aria-hidden="true" /> Generate
+            <button
+                type="submit"
+                className="btn btn-primary conversation-ai-generate"
+                data-ai-generate="true"
+                disabled={ isBusy || isUnavailable }
+                aria-describedby={ isUnavailable ? 'conversation-ai-instructions-message-required' : undefined }
+                aria-busy={ Boolean(suggestions.loading) }>
+                { suggestions.loading && <span className="spinner-border spinner-border-sm" aria-hidden="true" /> }
+                { suggestions.loading ? 'Generating…' : 'Generate' }
             </button>
             { isUnavailable && <span id="conversation-ai-instructions-message-required" className="conversation-ai-instructions__hint" role="status">Add a customer message first.</span> }
         </div>

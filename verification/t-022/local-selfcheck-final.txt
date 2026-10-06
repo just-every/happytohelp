@@ -1,0 +1,21 @@
+UTC 2026-10-06T10:02:01Z
+v26.8.1
+✔ continuous clock includes owner password time and disallows overwritten attempts (191.467791ms)
+✔ sleep/wall clock jump and heartbeat gap invalidate recorded time (17.752125ms)
+✔ strict 900 second threshold includes pre-capture wait and rejects short/missing/gapped media (0.279458ms)
+✔ raw output is retained without rewriting; split credential pattern is refused before disk (6.589875ms)
+✔ stopping a started child terminates its process group without a background process (3.774375ms)
+✔ supervisor retains group identity and kills descendants after command exit (112.606584ms)
+✔ mail acceptance and reused/nonempty storage do not qualify (2.362167ms)
+✔ empty checklist needs all eight distinct initial observations in owner project (0.197208ms)
+✔ first answer must follow setup evidence and cite this run article in this conversation (0.310208ms)
+✔ unknown cost cannot silently become zero and usage must join actual generation (0.128666ms)
+✔ missing config is refused without running or fabricating a prerequisite (0.199458ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 392.300583

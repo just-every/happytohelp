@@ -9,7 +9,7 @@ test('OpenRouter validates the selected mapped model, never just key metadata',a
  let models={data:[{id:'openai/gpt-oss-120b'}]},keyStatus=200
  const config={assistant:{is_enabled:1},model:'gpt-oss-120b',provider:'openrouter',secretName:'OPENROUTER_API_KEY',key:'fixture-key'}
  globalThis.fetch=async(url,options)=>{
-  requests.push(String(url));assert.equal(options.headers.Authorization,'Bearer fixture-key')
+  requests.push(String(url));assert.equal(options.headers.Authorization,'Bearer fixture-key');assert.equal(options.redirect,'manual')
   if(String(url).endsWith('/key'))return Response.json({data:{label:'fixture'}},{status:keyStatus})
   assert.equal(String(url),'https://openrouter.ai/api/v1/models/user')
   return Response.json(models)
@@ -21,6 +21,7 @@ test('OpenRouter validates the selected mapped model, never just key metadata',a
   models={data:[]};assert.equal((await checkModel(config)).state,'failed')
   models={};assert.equal((await checkModel(config)).state,'unknown')
   keyStatus=401;await assert.rejects(checkModel(config),error=>error.probe.state==='failed')
+  keyStatus=302;await assert.rejects(checkModel(config),error=>error.probe.state==='unknown')
   assert.ok(requests.every(url=>!url.includes('completions')))
  }finally{globalThis.fetch=original}
 })

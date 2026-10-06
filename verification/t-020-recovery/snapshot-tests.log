@@ -1,0 +1,18 @@
+✔ comparison refuses missing row (1.842625ms)
+✔ comparison refuses same count changed row (0.300834ms)
+✔ comparison refuses missing table (0.169333ms)
+✔ comparison refuses changed schema (0.857792ms)
+✔ comparison refuses same size changed R2 bytes (0.21525ms)
+✔ comparison refuses changed R2 HTTP metadata (0.327125ms)
+✔ comparison refuses changed R2 custom metadata (0.272833ms)
+✔ comparison refuses extra R2 object (0.191667ms)
+✔ comparison accepts exact independent snapshots (0.104917ms)
+✔ snapshot follows every R2 page and canonicalizes unordered rows (5.7115ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 77.824084

@@ -1,0 +1,90 @@
+{
+  "createdAt": "2026-10-06T04:14:57.118306+00:00",
+  "node": "v26.8.1",
+  "pnpm": "10.12.4",
+  "baseSourceSha": "a78076a822e01af7727d1deaa2dbf0c5dad6f73e",
+  "harnessSha256": {
+    "tests/helpers/recovery/journey.mjs": "57083f750c303100f120f4f9e170401a2ea7435ff770069eac59eea2568d188b",
+    "tests/helpers/recovery/runtime.mjs": "df5027ad36d0eafd4b024f69645a7fe82b8ca2cfa20ad1a9733a8fa7d604b50b",
+    "tests/helpers/recovery/snapshot.mjs": "bcbaf6e1af50543eae4e47eb404971948321019814c1cff13fb0fe2576f1638c",
+    "tests/recovery-artifact-build.mjs": "48bf2ab60521b3f898f510d1e9d5767e8192823acda8149ebf14ad6202be399b",
+    "tests/recovery-comparison.mjs": "a186be050a22697298a57d119fa87d40c85badc2d2c5503328938b956359832c",
+    "tests/recovery-snapshot.mjs": "90ebe3a217acd69fa794a7c6fd7a229b1bab33d84f53883ac9a2fec19656f824"
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile --store-dir /Users/zemaj/Library/pnpm/store/v10",
+      "workingDirectory": "/Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-recovery",
+      "exit": 0
+    },
+    {
+      "command": "pnpm install --frozen-lockfile --store-dir /Users/zemaj/Library/pnpm/store/v10",
+      "workingDirectory": "/Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-recovery-launch",
+      "exit": 0
+    },
+    {
+      "command": "node tests/recovery-artifact-build.mjs .generated/recovery-candidate-build",
+      "exit": 0
+    },
+    {
+      "command": "node ../t-020-recovery/tests/recovery-artifact-build.mjs ../t-020-recovery/.generated/recovery-launch-build",
+      "workingDirectory": "/Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-recovery-launch",
+      "exit": 0
+    },
+    {
+      "command": "H2H_RECOVERY_PORT=18260 node tests/recovery-comparison.mjs candidate .generated/recovery-candidate-build verification/t-020-recovery/candidate",
+      "exit": 0
+    },
+    {
+      "command": "H2H_RECOVERY_PORT=18260 node tests/recovery-comparison.mjs launch .generated/recovery-launch-build verification/t-020-recovery/launch",
+      "exit": 0
+    },
+    {
+      "command": "node --test tests/recovery-snapshot.mjs",
+      "exit": 0,
+      "tests": 10
+    }
+  ],
+  "environment": "Heavy commands used env -i with explicit Node/Pnpm PATH, CI=1, WRANGLER_SEND_METRICS=false, CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV=false; runtime adds only fixed local test setup token. No provider credentials supplied.",
+  "earlierAttempts": [
+    {
+      "path": "candidate-attempt1-command.log",
+      "result": "Harness failed because nested runtime config was ambiguous with ancestor .wrangler deploy config; new helper fixed by supplying explicit --config."
+    },
+    {
+      "path": "candidate-attempt2-command.log",
+      "result": "Harness failed because installed Wrangler d1 export does not accept --persist-to; command now uses its default .wrangler/state (same explicit path used by migration/import/dev)."
+    }
+  ],
+  "originalFiles": "All pre-existing tracked files are byte-identical to a78076a, including independent-runtime, helpers, fixtures, package/lockfiles and migrations.",
+  "scope": "Local native data-recovery only; all source and restored application processes stopped. Parent must rerun on final integrated SHA; historical launch result is not current-candidate qualification.",
+  "evidenceSha256": {
+    ".gitattributes": "2a9dfa5fdb6e6da29c88f8ca7020b2481cd9f70f81dfa2bcbe3eaa2a6423ada5",
+    "README.md": "64b2efe0950ea60bdf2c25d8d2ac7ab510937796f456d9001b3d6678c73b481a",
+    "candidate/native-export.sql": "cb6145cdece01d27a5cf2c520fea42debbce8d8f046a7e256f747f5cf90a1c38",
+    "candidate/receipt.json": "6b785fd587c6de9113169cf9bf76912c0a4f5bc686b543064cbf1ca33c44c843",
+    "candidate/restored-export.sql": "cb6145cdece01d27a5cf2c520fea42debbce8d8f046a7e256f747f5cf90a1c38",
+    "candidate/restored-runtime.log": "bd8662a9dd311c00742f76abb01f4ef8bf62155da6005c281ea4583c8a49f2ef",
+    "candidate/source-runtime.log": "342534a08800ff1cb2f73474a3d52ed21173edfb2516eebc701ae6768de37694",
+    "candidate-attempt1/source-runtime.log": "dc0039a99049aff0cecc19b5cb7f06d2a72f2f090cd1d79c9f41e0573676ca69",
+    "candidate-attempt1-command.log": "34e0baf4872ecc79286d774d786c208a4aaa101c33641782e152860f86884750",
+    "candidate-attempt2/source-runtime.log": "c990076c0894f61ca90ace0894273fbf130dbadbbd43e8da0a962f7abf29b7fd",
+    "candidate-attempt2-command.log": "cdab3e0c0a57ce1a179f04e6b1743f9d2183e2cd7d92d807be483d9715efe2fa",
+    "candidate-build-command.log": "df7e8dfea3fe479650873d0685291d74f3fe9a8389e71073945540c238cfcc37",
+    "candidate-build.json": "df7e8dfea3fe479650873d0685291d74f3fe9a8389e71073945540c238cfcc37",
+    "candidate-build.log": "e278af03015b1985a3e590c6ef783e55b46b9b129a3a62de77e1e4cb1c18beaa",
+    "candidate-command.log": "19b924371f98fc527b5d9c7315c7fedb405861bf2fa7102f7ba90a4ac2f59bc3",
+    "candidate-install.log": "a89fefa79d03163d06d0762ecdfc8a4cffdec4bde432d36c413391dabf1e34fd",
+    "launch/native-export.sql": "d198b133faddfef010f36a46ed9252786f4c57c05d986ee803b8a401e17d7320",
+    "launch/receipt.json": "b58e4d9286e88ccdc65b3d5cf626709b168821c2eda79fdcd1e8c7515b5af995",
+    "launch/restored-export.sql": "d198b133faddfef010f36a46ed9252786f4c57c05d986ee803b8a401e17d7320",
+    "launch/restored-runtime.log": "3d8955cf61de1ad50418463a0a2fda34916b6e42585d672ffe257f9b5edfab90",
+    "launch/source-runtime.log": "6dd2e9b78dacba283f51a5fa8d342d8d6aef6686fc93c3835d09a533400a725b",
+    "launch-build-command.log": "1845ea36b914cebdeafe0517190485ec3bf9a8838652ce03f0674daf96fb682c",
+    "launch-build.json": "1845ea36b914cebdeafe0517190485ec3bf9a8838652ce03f0674daf96fb682c",
+    "launch-build.log": "f23114deb5a03a9b16f2df16ee0636249a9b37ad32c4300d4f796e59113267d4",
+    "launch-command.log": "75b3390c503057e48d1b533b8ec4acd98e157c388b571848da699423368c68bc",
+    "launch-install.log": "959ce81996658a8ef574973bb8deee4c1d79ccabd0bafa4660844fa4434372bd",
+    "snapshot-tests.log": "f37bc34eac40571910c9613c8af39e8914b55aa3aee1711bcdf80bd3dccfdb0f"
+  }
+}

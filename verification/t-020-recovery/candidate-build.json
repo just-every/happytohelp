@@ -1,0 +1,171 @@
+{
+  "sourceSha": "a78076a822e01af7727d1deaa2dbf0c5dad6f73e",
+  "sourceRoot": "/Users/zemaj/www/rer-fleet/4-front-door/wt/t-020-recovery",
+  "startedAt": "2026-10-06T04:12:01.123Z",
+  "finishedAt": "2026-10-06T04:12:09.193Z",
+  "node": "v26.8.1",
+  "pnpm": "10.12.4",
+  "command": "pnpm run build",
+  "buildExit": 0,
+  "artifactSha256": "e74fa4357f6db7d3e1ee3733cdad16601f2b9b8d0c8951f719aadc6b84f6dfe3",
+  "buildLogSha256": "e278af03015b1985a3e590c6ef783e55b46b9b129a3a62de77e1e4cb1c18beaa",
+  "lockfileSha256": "6dccd258f3a6a2b78c45d1beea82797ca3ccdf15af67a85ed4f815538440a4eb",
+  "migrations": [
+    {
+      "name": "0001_identity.sql",
+      "sha256": "7da302790af3c65a9a3278f763530caa246855e0a44d0d993f7dcfaf691d961b"
+    },
+    {
+      "name": "0002_conversations.sql",
+      "sha256": "cd2234540e10603d4affd62bd2dee96e3fd94674034d21ddbf8c2cc0d3e6724c"
+    },
+    {
+      "name": "0003_identity_credentials.sql",
+      "sha256": "c049d65fccdd1f32b37ebb7ee68f4ac8bcdf9048339a04140b518045651bee9f"
+    },
+    {
+      "name": "0004_message_intent.sql",
+      "sha256": "68940fa5b30c8ec71b88dedb7f934ef4c7e1b85e4d88fb80344e09dc6eb71fe0"
+    },
+    {
+      "name": "0005_widget_identity.sql",
+      "sha256": "c662a9b5c5753400471af2fffe8b8a37d5b53c2d27c9419c9b70caa45d4b3cdd"
+    },
+    {
+      "name": "0006_registration.sql",
+      "sha256": "9f9a04f6d4f0b8489688d3eada410efd9d6fb08c4228d936d0639c2f28e7b502"
+    },
+    {
+      "name": "0007_conversation_history.sql",
+      "sha256": "d6da31fdac779295a96081f9ac7f0e5c15c7d510a68d7386ac46ce81fe7b0fdc"
+    },
+    {
+      "name": "0008_account_sessions.sql",
+      "sha256": "01b7d035a483ffc46a16b8183e7364250f0befe0d2aa6e207957d4caf80bd6fc"
+    },
+    {
+      "name": "0050_knowledge.sql",
+      "sha256": "a2a0fc51109e5af6737a0a2fd45abd9be95554259db2d6f1f33800043c077566"
+    },
+    {
+      "name": "0051_knowledge_authoring.sql",
+      "sha256": "49b144efebdb3e33cb2adad26c25dc31875e7da90e4fafc24b1fdf85a237f747"
+    },
+    {
+      "name": "0052_knowledge_imports.sql",
+      "sha256": "bdba35642bb339146fe188221c04cc1f6b8ab18d94c6661c2c7da4cdd35fde0c"
+    },
+    {
+      "name": "0053_knowledge_recovery.sql",
+      "sha256": "5182e65ab704555c956558a86c717008a652f176bf6b062099cce66c095bd9ca"
+    },
+    {
+      "name": "0060_customer_context.sql",
+      "sha256": "8d1a31b7610a7cf20e0315d17c7b282d47a9a75b484d3d47496a233977cde748"
+    },
+    {
+      "name": "0060_customer_context_engine.sql",
+      "sha256": "91c862ec5c331ccfc33e77033ff0759ad995c416fba1c38b64e4bc1dd21f9b39"
+    },
+    {
+      "name": "0070_management.sql",
+      "sha256": "46c36b150b3124d577472f73217359a60cba24c138309f2bfc386aaf5a39ef71"
+    },
+    {
+      "name": "0071_management_preferences.sql",
+      "sha256": "7e2d7c414da09724ba12762b5f5c1a57c9ffd13c887f8f7d43d574f7aa606133"
+    },
+    {
+      "name": "0080_integrations.sql",
+      "sha256": "7a6b93b889bd665ca8d54901567d13187c1ac8e52a2b369d162b16ad99a6d926"
+    },
+    {
+      "name": "0081_billing_receipts.sql",
+      "sha256": "3c2d1378c41569788eb305b6dc2bc4224f8aaefea165495c98f2e4c216396a3f"
+    },
+    {
+      "name": "0082_github_oauth.sql",
+      "sha256": "66c4ef80397d8dcf77258510b4927c416bc8b989235217893df5eb5c72eeaf40"
+    },
+    {
+      "name": "0083_lead_operations.sql",
+      "sha256": "6c1451c89ae61ac600477043c70734896234d746b9fa760b386a06347963e2d2"
+    },
+    {
+      "name": "0084_billing_project_usage.sql",
+      "sha256": "b6a438646b52e10aa266f124419227b0b658eb777a2c75bef5b3e667eb3e03f2"
+    },
+    {
+      "name": "0085_ai_context_guards.sql",
+      "sha256": "df95fa831824db49ed5dfde6efd6ff0d99e3958e19bde723f3fa6478470c84d6"
+    },
+    {
+      "name": "0095_public_site.sql",
+      "sha256": "1321928bd26a9e49fb090c54fbcbb34fe8db78008a8215856d3bf73efb1c48c7"
+    },
+    {
+      "name": "0096_site_preview.sql",
+      "sha256": "a7113d8a6c510fd49df13dfe5f6989854540745b707ade14d2b76a352850d8e7"
+    },
+    {
+      "name": "0097_owner_setup.sql",
+      "sha256": "fd6c371bc3b78cf2fbb41a69bb86467c7cd6cf257136f8ce0bd467d38d9be9d7"
+    },
+    {
+      "name": "0098_personal_visual_inspiration.sql",
+      "sha256": "26a09d2287b9699769a3392d68ebf7a32d6eb49fee0878cd6c73b6bb02306bdf"
+    },
+    {
+      "name": "0099_personal_sidebar_artwork.sql",
+      "sha256": "4aaa6533722afb636e1600e1cbaf94a10dc0786164aaebc123a7addab9040e03"
+    },
+    {
+      "name": "0100_inbound_email_claims.sql",
+      "sha256": "4f1e4e7f4b786c96aa810f08b11ac76075d1e4f28578cd9d887b138c3240e4e7"
+    },
+    {
+      "name": "0101_email_mailbox_lifecycle.sql",
+      "sha256": "f07adc6af5f95671c6581ddac2e5befdfec105ac3599c6b8871e615e8cd8b09f"
+    },
+    {
+      "name": "0102_public_abuse_limits.sql",
+      "sha256": "62bf0d01d4f96b3d2efc05603cf1c349346a03fdf28dbbf90caf25378503a6d5"
+    },
+    {
+      "name": "0103_contact_erasure.sql",
+      "sha256": "623ab8ac6cb9d3da153b0259353a90ca18526d772eb18a3e8f91ea76ba243084"
+    },
+    {
+      "name": "0104_inbound_email_classification.sql",
+      "sha256": "9659a267f1de1ab3eb4d87665aab70c320c0fa39370bec8f62b5cc05ec7fa7be"
+    },
+    {
+      "name": "0105_edition_delegation.sql",
+      "sha256": "8aa36062042c4dbeacb40b229df6214f1948125d30287189e098a2b2fd5727cd"
+    },
+    {
+      "name": "0106_project_verification_secret.sql",
+      "sha256": "e486873e60988540c09a11500144abd65184208f7459e65a8554d69f7843ed7c"
+    },
+    {
+      "name": "020_ai_support.sql",
+      "sha256": "4ec50c2e9835942005996386397f8c88d4302e01e51d9d5d8ebf3172568e9a74"
+    },
+    {
+      "name": "030_local_computer.sql",
+      "sha256": "8ff39ad08552aed3edb7edb485e74f6365d63386711d08c1ccc4409752978eb5"
+    },
+    {
+      "name": "040_training_runs.sql",
+      "sha256": "548926008bbc4c6a6b013cd796c973d5aaabb13fc77f58b51bec7079f2a0f973"
+    },
+    {
+      "name": "041_training_model_usage.sql",
+      "sha256": "5e87e8ef2f581d86d09829a647c06b73b6931ec3c0c2400038913b571feb81a1"
+    },
+    {
+      "name": "090_legacy_import.sql",
+      "sha256": "4deaa980d50ee87df8d2eb6068db6bc353a50aa3ec82ea788da1de0a46198a07"
+    }
+  ]
+}

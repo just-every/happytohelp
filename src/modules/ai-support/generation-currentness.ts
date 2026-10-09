@@ -16,7 +16,8 @@ export function generationCurrentness(env: Env, row: Generation, abort: AbortCon
       WHERE g.id=?
     `).bind(row.id).first<any>();
     const changed = !current
-      || (current.context_revision || 0) !== row.source_context_revision
+      || current.context_revision === null
+      || current.context_revision !== row.source_context_revision
       || current.ai_id !== row.ai_id
       || current.is_enabled !== 1
       || current.model !== selected.model

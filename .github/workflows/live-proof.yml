@@ -1,0 +1,132 @@
+name: live-proof
+on:
+  workflow_dispatch:
+    inputs:
+      proof:
+        description: Registered proof
+        required: true
+        type: choice
+        options: [secrets-present]
+      sha:
+        description: Exact lowercase commit SHA reachable from main or a vX.Y.Z release tag
+        required: true
+        type: string
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - name: Validate dispatch envelope without credentials
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          CONTROL_SHA: ${{ github.workflow_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]] || exit 1
+          [[ "$GITHUB_REPOSITORY" == just-every/happytohelp ]] || exit 1
+          [[ "$GITHUB_REF" == refs/heads/main ]] || exit 1
+          [[ "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          [[ "$CONTROL_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Validate fresh allowed refs and immutable controller
+        id: source
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          CONTROL_SHA: ${{ github.workflow_sha }}
+          INPUT_PROOF: ${{ inputs.proof }}
+          MODE: proof
+          GH_READ_TOKEN: ${{ github.token }}
+        run: node live-proofs/validate-source.mjs
+
+  prepare:
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    # No Environment or credential exposure in this source identity check.
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Confirm source identity; proof implementation comes only from controller
+        env:
+          VALIDATED_SHA: ${{ needs.validate.outputs.sha }}
+        run: test "$(git rev-parse HEAD)" = "$VALIDATED_SHA"
+
+  execute:
+    needs: [validate, prepare]
+    if: ${{ needs.validate.result == 'success' && needs.prepare.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: live-proof
+    outputs:
+      result: ${{ steps.execute.outputs.result }}
+      artifact_sha256: ${{ steps.execute.outputs.artifact_sha256 }}
+      started: ${{ steps.execute.outputs.started }}
+      finished: ${{ steps.execute.outputs.finished }}
+    steps:
+      # Fresh runner: no source checkout, build cache, package/config from the candidate.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: control
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Run reviewed controller with provider credentials only
+        id: execute
+        env:
+          VALIDATED_SHA: ${{ needs.validate.outputs.sha }}
+          INPUT_PROOF: ${{ inputs.proof }}
+          MODE: proof
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          H2H_SETUP_TOKEN: ${{ secrets.H2H_SETUP_TOKEN }}
+        run: node control/live-proofs/run.mjs
+
+  receipt:
+    # No source or candidate artifacts on the evidence-credential runner.
+    if: ${{ always() && needs.validate.result == 'success' }}
+    needs: [validate, prepare, execute]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: live-proof
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '26.8.1'
+      - name: Persist fixed-schema receipt including failures
+        env:
+          H2H_EVIDENCE_REPOSITORY: ${{ vars.H2H_EVIDENCE_REPOSITORY }}
+          EVIDENCE_WRITE_TOKEN: ${{ secrets.EVIDENCE_WRITE_TOKEN }}
+          VALIDATED_SHA: ${{ needs.validate.outputs.sha }}
+          CONTROL_SHA: ${{ github.workflow_sha }}
+          INPUT_PROOF: ${{ inputs.proof }}
+          MODE: proof
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          JOB_RESULT: ${{ needs.execute.result }}
+          EXECUTION_RESULT: ${{ needs.execute.outputs.result }}
+          ARTIFACT_SHA256: ${{ needs.execute.outputs.artifact_sha256 }}
+          STARTED: ${{ needs.execute.outputs.started }}
+          FINISHED: ${{ needs.execute.outputs.finished }}
+        run: node live-proofs/persist.mjs

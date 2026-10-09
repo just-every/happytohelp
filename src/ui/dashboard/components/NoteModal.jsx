@@ -4,6 +4,7 @@ import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import Api from "../api";
 import { ChatContext } from "../contexts/ChatContext";
+import { trapDialogTab } from './dialogTabBoundary';
 
 function NoteModal({ onHide, conversation }) {
     const { markDirty, markSaved } = useUnsavedChanges();
@@ -36,11 +37,14 @@ function NoteModal({ onHide, conversation }) {
     }
 
     return (
-        <Modal show onHide={ cancel }>
-            <Modal.Header closeButton>
-                <Modal.Title>Add Note</Modal.Title>
+        <Modal show onHide={ cancel } aria-labelledby="add-note-title"
+            onEnter={ dialog => dialog.addEventListener('keydown', trapDialogTab) }
+            onExited={ dialog => dialog.removeEventListener('keydown', trapDialogTab) }>
+            <Modal.Header>
+                <Modal.Title id="add-note-title">Add Note</Modal.Title>
+                <button type="button" className="btn-close" aria-label="Close" disabled={ isLoading } onClick={ cancel } />
             </Modal.Header>
-            <Form onSubmit={ handleSubmit(handleAddNote) } onChange={ () => { markDirty(); setIsValidated(null); setErrors({})} } noValidate validated={ isValidated }>
+            <Form aria-busy={ isLoading } onSubmit={ handleSubmit(handleAddNote) } onChange={ () => { markDirty(); setIsValidated(null); setErrors({})} } noValidate validated={ isValidated }>
                 <Modal.Body>
                     {requestError && <p role="alert" className="alert alert-danger">{requestError}</p>}
                     <Form.Group className="form-group" controlId="form-note-content">
@@ -56,7 +60,7 @@ function NoteModal({ onHide, conversation }) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" disabled={ isLoading } onClick={ cancel }>Close</Button>
-                    <Button variant="primary" disabled={ isLoading } onClick={ handleSubmit(handleAddNote) }>Add</Button>
+                    <Button variant="primary" type="submit" disabled={ isLoading }>Add</Button>
                 </Modal.Footer>
             </Form>
         </Modal>

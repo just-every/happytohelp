@@ -1,0 +1,95 @@
+[
+  {
+    "original": {
+      "key": "6236f3fdbd85825a8824e7b2d81339a5d6756818273abd2577ca7f5be0e41eb6",
+      "sha256": "73efa7700b26b103e7eb6bf2029738ceac68bbb148328cecfa66b9017cb08d40",
+      "digest": "8bcc4b1bf52d4aec8b3277e7fb71cfe462413f80c8b0dffe90c292d87e42c40f",
+      "members": 1
+    },
+    "projection": {
+      "key": "a502a1d9e2bd028fcd6b8b1e2eda5e5eb70d5735b4655df9b470ebfb1e6d23fd",
+      "sha256": "c2500be83fa6b1268175ae7e4d7d0e0ea0d9f4bd7b968b3339cd01aa2384b083",
+      "digest": "8bcc4b1bf52d4aec8b3277e7fb71cfe462413f80c8b0dffe90c292d87e42c40f",
+      "members": 1
+    },
+    "changes": []
+  },
+  {
+    "original": {
+      "key": "99054db9ab23d6dcb1022deb06ab0505bde2af76b9a345b771da52f491665dcd",
+      "sha256": "f901d74a67fd8de755c0beb75035a31b15a40fea2837491a1963a3ca3e45ffcb",
+      "digest": "d22256e35600643109fcd31da468a0b4c6fc030877d1a08b44c18e49e251c804",
+      "members": 32
+    },
+    "projection": {
+      "key": "48ae413cc23c4e4474e3bec54950f3064d9ed72c139c869c56a11467011640ed",
+      "sha256": "181c947c41d2ca6e5ab2c4c4d5b03703e5806b00be18a3a045602f1e2cee1173",
+      "digest": "d22256e35600643109fcd31da468a0b4c6fc030877d1a08b44c18e49e251c804",
+      "members": 32
+    },
+    "changes": []
+  },
+  {
+    "original": {
+      "key": "d21e484252db2a87f8dae9d477c9d8d70e99644ad370e3d64773e6376fd766eb",
+      "sha256": "8849e85e2a9443b5662f97c75a4cdcf7f087814e2d2ac2f7f3e072f4123ea639",
+      "digest": "546300325e981648ce03718102ad7dfd21fbbcf5217e401c6156aba4c62ee118",
+      "members": 13
+    },
+    "projection": {
+      "key": "5928da9aba7b38ea401613ddcbec65c54fd2e5b82a4feda1f45323abc780adff",
+      "sha256": "7eeeeb28a0d8510a0b792b9ae40f174027b73457e6fec8fc374da95ad3fb9bc8",
+      "digest": "6fb2d0a6f9a418c1a42b26a690b892f1f54181a5c2c7cbe6750b6f8dde430135",
+      "members": 13
+    },
+    "changes": [
+      {
+        "path": "edition-authoring/README.md",
+        "before": "2ccb16dd4258821185c6eec806c2455927558803e2c29e5ecb6f24f41e766a08",
+        "after": "80f2557c8503f51f3993ff75f793e681bb2166cf90f33db81fa39192a43af2ec",
+        "operations": [
+          "replace illustrative repository URL with reserved example domain"
+        ]
+      },
+      {
+        "path": "edition-authoring/lifecycle.test.mjs",
+        "before": "2b4ce09c30642e95d41aafef40f8efd72ab4ef5b3d1e2bef2988f83718e67079",
+        "after": "6774400cdba43e72e317bd03ff7b5f7d2d423b6bc6803c21c05b04e086988e5f",
+        "operations": [
+          "use example.test for synthetic Git author email"
+        ]
+      },
+      {
+        "path": "edition-authoring/snapshot-integrity.test.mjs",
+        "before": "4e203a4216c42661907581fa398d053a45498a98343e46b3883ce398e6a6abd2",
+        "after": "6905024cb34c7eda68a89feab86d51f4d7a7cd490d18a56f676481655f1c203f",
+        "operations": [
+          "use example.test for synthetic Git author email"
+        ]
+      },
+      {
+        "path": "edition-authoring/updates.test.mjs",
+        "before": "8268753899b486d8e6e940366b5b15b8e3ba9777155c1eda07909aa52150c1d8",
+        "after": "0eeb28442fb35f2920578d5d1fb1bd335924f7cb9d1eca25c049adec0acce12b",
+        "operations": [
+          "use example.test for synthetic Git author email"
+        ]
+      }
+    ]
+  },
+  {
+    "original": {
+      "key": "f9ed695fd69d51d5c54d1aa14ef3512126a00a49fdcde540889244a333da75ff",
+      "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa",
+      "digest": "f7429a264b43b5dae6e20578590010affe579e0c78db9380d297f3381e2e0d38",
+      "members": 17
+    },
+    "projection": {
+      "key": "ab092d5033f8b9793028da8e63e113be35327092e0044d42b7b09ef2ea518b9e",
+      "sha256": "21746bad1bbbd7d9cbbdde7e7a49f249df396fb7d9a661db0fc4bb63218d7d89",
+      "digest": "f7429a264b43b5dae6e20578590010affe579e0c78db9380d297f3381e2e0d38",
+      "members": 17
+    },
+    "changes": []
+  }
+]

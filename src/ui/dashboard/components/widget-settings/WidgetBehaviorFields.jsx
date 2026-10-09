@@ -19,14 +19,15 @@ const groups = [
     ] },
 ];
 
+export const behaviorFieldNames = groups.flatMap(({ fields }) => fields.map(([name]) => name));
+
 export default function WidgetBehaviorFields({ register }) {
     return groups.map(({ title, fields }) => (
         <WidgetFieldSection key={title} title={title}>
             {fields.map(([name, label]) => (
                 <div key={name}>
-                    <input type="hidden" name={name} value="0" />
                     <Form.Check type="switch" id={`widget-${name.replace(/[^a-z0-9]+/gi, '-')}`}
-                        label={label} value="1" {...register(name)} />
+                        label={label} {...register(name)} />
                 </div>
             ))}
         </WidgetFieldSection>

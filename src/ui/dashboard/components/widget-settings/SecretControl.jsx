@@ -42,6 +42,7 @@ export default function SecretControl() {
                     <span className="widget-code__copy-feedback" role="status" aria-live="polite">{feedback}</span>
                 </div>
             </div>
+            {!isAvailable && <p className="widget-code__secret-unavailable" role="note">The server secret is only available to project owners and admins.</p>}
             <div className="widget-code__secret-note">
                 <span>Environment variable name:</span> <code>{VERIFICATION_SECRET_ENVIRONMENT_VARIABLE}</code>
                 <span className="widget-code__secret-server-only"><i className="fe fe-lock" aria-hidden="true" /> Server only. Never expose this value in client-side code.</span>

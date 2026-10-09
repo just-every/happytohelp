@@ -16,6 +16,14 @@ export function getInboxView(view) {
     return INBOX_VIEWS.find(item => item.id === normalizeInboxView(view));
 }
 
+/** The view's name as it reads inside a sentence ("all open", "AI conversations"). */
+export function inboxViewPhrase(view) {
+    return getInboxView(view).label
+        .split(' ')
+        .map(word => word === 'AI' ? word : word.toLowerCase())
+        .join(' ');
+}
+
 export function inboxViewFilter(view, query = '') {
     const filter = { ...getInboxView(view).filter };
 

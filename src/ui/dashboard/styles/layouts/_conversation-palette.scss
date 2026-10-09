@@ -2,7 +2,7 @@
 body:is(.conversation-workspace, .workspace-themed) {
     --conversation-ink: #19153d;
     --conversation-muted: #536080;
-    --conversation-quiet: #747f9b;
+    --conversation-quiet: #667085;
     --conversation-line: #e7eaf1;
     --conversation-accent: var(--bs-primary);
     --conversation-accent-strong: var(--bs-action);
@@ -35,4 +35,8 @@ body:is(.conversation-workspace, .workspace-themed) {
             font-weight: 600;
         }
     }
+}
+
+body.conversation-workspace #chat .badge.text-bg-secondary-subtle {
+    color: var(--conversation-muted) !important;
 }

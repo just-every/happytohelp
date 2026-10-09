@@ -8,6 +8,7 @@ import FormMedia from './FormMedia';
 import ConversationComposerTools from './ConversationComposerTools';
 import ConversationDraftStatus from './ConversationDraftStatus';
 import ReplyIcon from './reply-icons/ReplyIcon';
+import { insertSavedReply } from '../utils/insertSavedReply';
 
 import '../styles/components/ConversationForm.scss';
 
@@ -16,6 +17,7 @@ ConversationForm.propTypes = {
     conversationId: PropTypes.string,
     files: PropTypes.array,
     isEnabled: PropTypes.bool,
+    isResolved: PropTypes.bool,
     loadingContent: PropTypes.string,
     onAddNote: PropTypes.func,
     onAssistantDisabledChange: PropTypes.func,
@@ -31,6 +33,7 @@ export default function ConversationForm({
     conversationId,
     files,
     isEnabled,
+    isResolved,
     loadingContent,
     onAddNote,
     onAssistantDisabledChange,
@@ -98,6 +101,19 @@ export default function ConversationForm({
         if (isEnabled && !isComposerLocked) setHelper(current => current === 'macros' ? null : 'macros');
     };
 
+    // The textarea stays mounted while the picker is open, so its selection is still the cursor the agent left.
+    const insertReply = reply => {
+        const textarea = textareaRef.current;
+        const draft = content || '';
+        const { text, caret } = insertSavedReply(draft, reply, textarea?.selectionStart ?? draft.length, textarea?.selectionEnd ?? draft.length);
+        onContentChange(text);
+        setHelper(null);
+        window.requestAnimationFrame(() => {
+            textareaRef.current?.focus({ preventScroll: true });
+            textareaRef.current?.setSelectionRange(caret, caret);
+        });
+    };
+
     const handleComposerSurfaceClick = event => {
         const target = event.target;
         if (!(target instanceof Element) || !composerRef.current?.contains(target)) return;
@@ -118,25 +134,23 @@ export default function ConversationForm({
             <div className="chat-entry border-top border-light d-flex flex-row align-items-stretch w-100">
                 <div className="flex-grow-1 d-flex flex-column">
                     <div className={ `chat-entry-form pt-3 pb-1${ loadingContent.length > 0 ? (loadingContent === '-loading-' ? ' loading loading-start' : ' loading') : '' }` }>
-                        { helper === 'macros' && <MacrosPicker projectId={ projectId } onPicked={ newContent => {
-                            onContentChange(newContent);
-                            setHelper(null);
-                        } } /> }
+                        { helper === 'macros' && <MacrosPicker projectId={ projectId } onPicked={ insertReply } /> }
                         { loadingContent.length > 0 && <div className="form-control form-control-flush loading-content" aria-live="polite">
                             <div className="loading-content-bg"></div>
                             <span className="loading-content-text">{ loadingContent === '-loading-' ? '' : loadingContent }</span>
                         </div> }
-                        { !helper && <TextareaAutosize
+                        <TextareaAutosize
                             ref={ textareaRef }
                             className="form-control form-control-flush"
                             placeholder="Type your reply…"
+                            aria-label="Reply to conversation"
                             onKeyDown={ handleKeyDown }
                             onChange={ event => onContentChange(event.target.value) }
                             value={ textareaContent }
                             minRows={ 1 }
                             maxRows={ 10 }
                             readOnly={ isComposerLocked }
-                        /> }
+                        />
                     </div>
 
                     <form className="row chat-buttons" onSubmit={ event => {
@@ -147,7 +161,8 @@ export default function ConversationForm({
                             { files.map(file => <FormMedia key={ file.id } media={ file } onRemove={ onFileRemove } />) }
                         </div> }
                         <div className="col-auto flex-grow-1 d-flex gap-2 justify-content-end">
-                            { !isEnabled && !helper && <span className="btn btn-ico rounded-circle text-gray-600 active" aria-label="Uploading attachment">
+                            { !isEnabled && !helper && <span className="btn btn-ico rounded-circle text-gray-600 active" role="status" aria-live="polite">
+                                <span className="visually-hidden">Uploading attachment</span>
                                 <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
                             </span> }
                             <ConversationDraftStatus />
@@ -156,6 +171,7 @@ export default function ConversationForm({
                                     disabled={ !isEnabled || isComposerLocked }
                                     hasHelper={ Boolean(helper) }
                                     canSend={ canSend }
+                                    canClose={ !isResolved }
                                     onAttach={ handleFileSelect }
                                     onSaved={ toggleMacros }
                                     onNote={ openNoteModal }

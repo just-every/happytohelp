@@ -5,6 +5,8 @@ import ConversationSidebar from './ConversationSidebar';
 import DelegationPanel from './DelegationPanel';
 import useScrollEdge from '../hooks/useScrollEdge';
 
+import './conversation/ai-controls.css';
+
 const tabs = [
     { id: 'ai', label: 'AI', icon: 'fe-star', panelId: 'conversation-ai-panel' },
     { id: 'local', label: 'Local', icon: 'fe-monitor', panelId: 'conversation-local-panel' },

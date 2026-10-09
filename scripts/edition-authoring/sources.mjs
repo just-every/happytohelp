@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {hash, json, git, safe, digest, noLinks} from './files.mjs';
+import {projectedSnapshot, validateProjection} from './projections.mjs';
 
 const environment = {...process.env, GIT_NO_REPLACE_OBJECTS: '1'};
 function raw(root, ...args) {
@@ -31,6 +32,7 @@ function committed(root, ref, archives) {
     if (ref.excludeSnapshots && name.startsWith('.edition/sources/') && /^\.edition\/sources\/[a-f0-9]{64}\.json$/.test(name)) {
       if (type !== 'blob' || mode !== '100644') throw Error('Unsupported comparison archive');
       const archived = JSON.parse(raw(root, 'cat-file', 'blob', object));
+      if (archived.origin?.kind === 'sanitized-public-projection') validateProjection(archived);
       if (archived.key !== path.basename(name, '.json') || archived.key !== hash(json(archived.origin)) || archived.digest !== digest(archived.files)) throw Error('Corrupt ancestor comparison archive');
       archives[archived.key] = archived;
       continue;
@@ -44,6 +46,7 @@ function committed(root, ref, archives) {
   return files;
 }
 export function snapshot(root, ref, retain = false) {
+  if (ref.projection) return projectedSnapshot(root, ref);
   const origin = {repository: ref.repository, revision: ref.revision, path: ref.path || '.', paths: ref.paths || null, excludeSnapshots: !!ref.excludeSnapshots};
   const key = hash(json(origin));
   noLinks(root, '.edition/sources/' + key + '.json');

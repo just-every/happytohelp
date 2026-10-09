@@ -1,7 +1,8 @@
 # Public homepage and Help Center
 
 The public homepage is a native TanStack Start/React route in `src/routes/index.tsx`,
-composed from `src/ui/homepage` and the assets in `public/homepage`.
+composed from `src/ui/homepage` (inline drawings, no raster images) and the favicon in
+`public/homepage/media/brands`.
 It retains links to native workspace, setup and login. This module serves dynamic,
 project-scoped published help centers. Former pricing, resources, legal, waitlist,
 referrer-personalized and public homepage-widget behavior remains retired. The
@@ -19,6 +20,15 @@ maintained Markdown renderer (raw HTML disabled), and draft/deleted projects sta
 private. The importer maps retained legacy project slugs into
 `public_project_aliases` when preserving old help links.
 
+Not-found responses are HTML with HTTP 404 inside the Help Center frame
+(`shell.ts`, `not-found.ts`), never an unstyled plain-text response. A known project with a missing or
+unpublished article gets the project's header and search with "Article not found"; the
+body depends only on the project, so a draft cannot be told from an article that never
+existed. An unknown or deleted project, or an address no route serves (such as
+`/help/a/b/c`), gets the same frame without a project name or search box. Paths under
+`/api/public-site/` keep the plain 404. Unknown application paths outside the Help Center
+render the branded application 404 described in `docs/NAVIGATION.md`.
+
 Knowledge provider imports (Intercom, Freshdesk and Zendesk) remain in the
 knowledge capability and write only through its scoped, durable import jobs.
 They are independent of the public homepage. Authenticated owner/admin site
@@ -32,6 +42,6 @@ shell uses the first-party stylesheet at
 pattern files are not included. See `docs/PUBLIC-SOURCE-PROVENANCE.md` for asset
 provenance and licences.
 
-`tests/public-help-center.mjs`, `tests/public-site-runtime.mjs` and
-`pnpm run test:public-help-center-browser` cover the current homepage and
-help-center routes.
+`tests/public-help-center.mjs`, `tests/public-site-runtime.mjs`,
+`pnpm run test:public-help-center-browser` and `pnpm run test:not-found-browser`
+cover the current homepage, help-center routes and 404 pages.

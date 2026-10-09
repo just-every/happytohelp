@@ -26,6 +26,7 @@ body.conversation-workspace #chat {
         }
 
         .dropdown-menu {
+            animation: none;
             width: min(18rem, calc(100vw - 2rem));
             max-height: min(32rem, calc(100dvh - 7rem));
             overflow-y: auto;

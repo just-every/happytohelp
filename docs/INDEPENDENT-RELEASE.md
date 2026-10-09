@@ -111,5 +111,16 @@ trusted source custody, not for a clean public snapshot.
 ## Licence
 
 The root [`LICENSE`](../LICENSE) (MIT) covers the whole repository, including
-the homepage and setup artwork. Keep `docs/licenses/` and third-party package
+the homepage drawings and setup artwork. Keep `docs/licenses/` and third-party package
 notices with any redistribution; see [SOURCE-PROVENANCE.md](SOURCE-PROVENANCE.md).
+
+## Dedicated edition delegation and restored data
+
+Before distributing a D1 export **or importing any backup**, run
+`python3 scripts/independent/delegation-backup.py private-backup.sql restore.sql`.
+Use only the resulting `restore.sql` for import. It preserves domain records,
+migration history and content-free receipts, but removes dedicated delegation
+grants, code hashes and consent replay material. Every connected Slate member
+must consent again after restore. Native session behavior is otherwise unchanged.
+Raw provider D1 exports contain credentials and must remain private; they are not
+safe interchange exports. Stop writes during export as described above.

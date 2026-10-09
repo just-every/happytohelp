@@ -1,0 +1,51 @@
+// Connected applications and the consent screen render inside the workspace shell.
+body.workspace-themed {
+    .delegation-page { max-width: 760px; }
+    .delegation-page__empty { margin: 0 0 1rem; color: var(--conversation-muted); font-size: 12px; line-height: 1.5; }
+    .delegation-page code { color: var(--conversation-muted); font-size: 11px; overflow-wrap: anywhere; }
+
+    .delegation-grants, .delegation-clients, .delegation-projects { display: grid; gap: .75rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+    .delegation-grant {
+        display: grid;
+        gap: .5rem;
+        padding: .9rem 1rem;
+        border: 1px solid var(--conversation-line);
+        border-radius: .6rem;
+        background: var(--workspace-surface-raised, #fff);
+    }
+    .delegation-grant__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+    .delegation-grant__head h3 { margin: 0; color: var(--conversation-ink); font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+    .delegation-grant__meta { margin: 0; color: var(--conversation-muted); font-size: 12px; }
+    .delegation-grant__status {
+        padding: .1rem .55rem;
+        border-radius: 999px;
+        color: #18785b;
+        background: #edf9f4;
+        font-size: 11px;
+        font-weight: 650;
+        text-transform: capitalize;
+    }
+    .delegation-grant__status.is-revoked, .delegation-grant__status.is-expired { color: #865c27; background: #fff9ef; }
+    .delegation-grant__list { display: grid; gap: .3rem; margin: 0; padding: 0; list-style: none; font-size: 12px; }
+    .delegation-grant__list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .6rem; color: var(--conversation-ink); }
+    .delegation-grant .btn { justify-self: start; }
+
+    .delegation-clients li { color: var(--conversation-muted); font-size: 12px; overflow-wrap: anywhere; }
+    .delegation-clients strong { color: var(--conversation-ink); }
+
+    .delegation-client-form { display: grid; gap: 1rem; max-width: 32rem; }
+    .delegation-client-form .form-group { margin: 0; }
+    .delegation-client-form .form-text { margin-top: .25rem; color: var(--conversation-muted); font-size: 12px; }
+    .delegation-client-form .btn { justify-self: start; }
+
+    .delegation-exits { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    .delegation-projects a { display: inline-block; padding: .35rem 0; }
+    .delegation-consent__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+    .delegation-consent__actions .btn { margin: 0 !important; }
+
+    // Phone-sized screens get finger-sized buttons on these pages.
+    @media (max-width: 575.98px) {
+        .main-content .delegation-page .btn { min-height: 44px; }
+        .delegation-consent__actions .btn { flex: 1 1 7.5rem; }
+    }
+}

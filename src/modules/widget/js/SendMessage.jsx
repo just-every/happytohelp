@@ -126,18 +126,18 @@ export default function SendMessage({ mainView, setView, messages, localContact,
     if( messages.length && mainView !== 'conversation' ) {
         let lastMessageDate = messages[messages.length - 1].created_at ? parseISO(messages[messages.length - 1].created_at) : false;
         content = (
-            <div className="happytohelp-return-to-chat" onClick={setView}>
+            <button type="button" className="happytohelp-return-to-chat" onClick={setView} aria-label={context.text.chat.return_title}>
                 <FontAwesomeIcon icon={fasArrowAltRight} />
-                <div className="happytohelp-return-to-chat-title">
+                <span className="happytohelp-return-to-chat-title">
                     {context.text.chat.return_title}
-                </div>
-                <div className="happytohelp-return-to-chat-content">
+                </span>
+                <span className="happytohelp-return-to-chat-content">
                     { lastMessageDate ?
                         context.text.chat.return_last_message+" "+formatRelative(lastMessageDate, new Date())
                         : context.text.chat.return_active
                     }
-                </div>
-            </div>
+                </span>
+            </button>
         );
     }
     else {
@@ -146,17 +146,18 @@ export default function SendMessage({ mainView, setView, messages, localContact,
                 { showCollector && <CollectCustomer needsNotifyEmail={ needsNotifyEmail } setShowCollector={ setShowCollector } localContact={ localContact } contact={ contact } sendContact={ sendContact } /> }
                 <FileHandlerList files={files} setFiles={setFiles} />
                 <div className="happytohelp-send-message-row">
-                    <TextareaAutosize forwardRef={textareaRef} name="content" value={message} onChange={e => setMessage(e.target.value)} onEnter={handleSend} placeholder={(mainView === 'conversation' ? context.text.message.placeholder_message_chat : context.text.message.placeholder_message)} style={ context.theme.input.message } />
+                <TextareaAutosize forwardRef={textareaRef} name="content" value={message} onChange={e => setMessage(e.target.value)} onEnter={handleSend} aria-label={(mainView === 'conversation' ? context.text.message.placeholder_message_chat : context.text.message.placeholder_message)} placeholder={(mainView === 'conversation' ? context.text.message.placeholder_message_chat : context.text.message.placeholder_message)} style={ context.theme.input.message } />
                 </div>
-                <div className={"happytohelp-send-message-row happytohelp-send-message-row-buttons"+((contact.email || contact.name) ? " happytohelp-send-message-row-larger" : "")} onClick={focusText}>
+                <div className={"happytohelp-send-message-row happytohelp-send-message-row-buttons"+((contact.email || contact.name) ? " happytohelp-send-message-row-larger" : "")} onClick={event => { if (!event.target.closest('button')) focusText(event); }}>
                     { !showCollector && (contact.email || contact.name) && <div className="happytohelp-message-show-contact-container">
-                        <div data-tooltip-id="h2h-tooltip-send"
+                        <button type="button" data-tooltip-id="h2h-tooltip-send"
                              data-tooltip-content={context.text.message.tooltip_contact}
                              className="happytohelp-message-show-contact"
-                             onClick={() => setShowCollector(true)}>
+                            aria-label={context.text.message.tooltip_contact}
+                            onClick={() => setShowCollector(true)}>
                             <FontAwesomeIcon icon={faUser}/>
-                            <div>{contact.email || contact.name}</div>
-                        </div>
+                            <span>{contact.email || contact.name}</span>
+                        </button>
                     </div>}
                     {
                         context.settings.message.collect_screenshot && canTakeScreenshot ?
@@ -180,12 +181,14 @@ export default function SendMessage({ mainView, setView, messages, localContact,
                                 : <FileHandlerButton>
                                 <button data-tooltip-id="h2h-tooltip-send"
                                         data-tooltip-content={context.text.message.tooltip_attach} name="attach"
+                                        aria-label={context.text.message.tooltip_attach}
                                         className="happytohelp-btn"><FontAwesomeIcon icon={falPaperclip} style={ context.theme.input.button }/></button>
                             </FileHandlerButton>
                             : null
                     }
                     <button type="submit" name="submit" className="happytohelp-btn"
                             onClick={handleSend}
+                            aria-label={context.text.message.tooltip_send}
                             data-tooltip-id="h2h-tooltip-send" data-tooltip-content={context.text.message.tooltip_send}  style={ context.theme.input.send }>
                         <FontAwesomeIcon icon={fasArrowAltRight}/></button>
                 </div>

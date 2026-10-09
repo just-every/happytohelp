@@ -18,6 +18,10 @@ not runtime dependencies. A single active embed owns the page collector; destroy
 it before mounting another project. Consent revocation unmounts the socket/UI and
 clears pending collected events and timers.
 
+The values the widget renders when a project saves nothing (theme colors, copy and
+setting switches) live in `js/context/defaults.js`. The dashboard's Widget settings
+editor imports the same file, so what it shows is what the widget renders.
+
 | Original behavior | Native integration |
 | --- | --- |
 | Persisted visitor identity and transcript | Contact session token and conversation ID persist per API origin/widget key; transcript refresh and socket replay |

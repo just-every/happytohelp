@@ -1,4 +1,6 @@
 import React from 'react';
+import {ActivationPage} from './activation';
+import { Link } from '@tanstack/react-router';
 import { useDashboardLocation } from './dashboard-state';
 import GitHubSettings from './pages/GitHubSettings';
 import ArticleImport from './pages/ArticleImport';
@@ -10,18 +12,25 @@ import ManagementPage from './pages/ManagementPage';
 import ProjectSettings from './pages/ProjectSettings';
 import WidgetSettingsPage from './pages/WidgetSettingsPage';
 import ComputersPage from './pages/ComputersPage';
+import DelegationSettings from './pages/DelegationSettings';
+import DelegationAuthorize from './pages/DelegationAuthorize';
 import TrainingRuns from './pages/TrainingRuns';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
-const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'AI Training',articles:'Articles',categories:'Categories',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Training runs'};
+import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
+const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',activation:'Setup',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
 export default function WorkspacePages({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const segments=pathname.split('/').filter(Boolean);
     const projectId=segments[0]==='projects'?segments[1]:settings.project?.id||Object.keys(settings.projects||{})[0];
     const section=settings.accountOnly?'projects':segments[0]==='projects'&&(!segments[1]||segments[1]==='create')?'projects':segments[0]==='projects'?segments[2]||'edit':segments[0];
     const recordId=segments[0]==='projects'?segments[3]:segments[1];
+    // /users/<id> is only the signed-in user's own profile; any other id is not a page.
+    const foreignUser=section==='users'&&recordId!=='profile'&&recordId!==settings.currentAgent?.id;
     let page;
-    if(section==='projects')page=<ProjectsPage/>;
+    if(settings.projectUnavailable)page=<ProjectUnavailable/>;
+    else if(section==='projects')page=<ProjectsPage/>;
+    else if(section==='activation')page=<ActivationPage projectId={projectId}/>;
     else if(section==='articles'&&recordId==='import')page=<ArticleImport {...{projectId}}/>;
     else if(['datasets','articles','categories'].includes(section))page=<KnowledgePage {...{projectId,section,recordId}} project={settings.projects?.[projectId]||settings.project}/>;
     else if(['ais','macros','contacts','plugins','agents'].includes(section))page=<ManagementPage {...{projectId,section,recordId}}/>;
@@ -29,23 +38,29 @@ export default function WorkspacePages({ settings }) {
     else if(section==='github-settings')page=<GitHubSettings {...{projectId}}/>;
     else if(section==='widget-settings')page=<WidgetSettingsPage {...{projectId}}/>;
     else if(section==='local-agent')page=<ComputersPage {...{projectId}} projectName={settings.projects[projectId]?.name}/>;
+    else if(section==='delegation'&&recordId==='authorize')page=<DelegationAuthorize projectId={settings.isGlobalInbox?undefined:settings.project?.id}/>;
+    else if(section==='delegation')page=<DelegationSettings projectId={settings.isGlobalInbox?undefined:settings.project?.id} projects={settings.projects}/>;
     else if(section==='training-runs')page=<TrainingRuns {...{projectId}}/>;
+    else if(foreignUser)page=<PageNotFound action={<Link className="btn btn-primary" to="/users/profile">Go to your profile</Link>}/>;
     else if(section==='users')page=<AccountPage {...{projectId,section}}/>;
-    else if(section==='admin')page=<AdminPage/>;
+    else if(section==='admin')page=settings.isPlatformAdmin?<AdminPage/>:<AdminRequired/>;
     else if(section==='insights')page=<InsightsPage {...{projectId}}/>;
-    else page=<p role="alert">This page was not found.</p>;
+    else page=<PageNotFound/>;
     let title=titles[section]||'HappyToHelp';
     if(section==='projects')title=segments[1]==='create'?'Create Project':'Projects';
-    if(section==='articles')title=recordId==='import'?'Import Articles':recordId?'Articles':'Help Center';
+    if(section==='articles')title=recordId==='import'?'Import articles':recordId==='create'?'New article':recordId?'Edit article':'Knowledge';
     if(section==='macros'&&recordId==='create')title='Save a Reply';
     if(section==='agents'&&recordId==='create')title='Invite Agent';
     if(section==='plugins')title='Plugins';
+    if(section==='delegation')title=recordId==='authorize'?'Connect to Slate':'Connected applications';
     if(section==='github-settings')title='Project';
-    if(section==='admin')title=adminTitles[segments[1]||'projects']||'Admin';
+    if(section==='admin')title=settings.isPlatformAdmin?adminTitles[segments[1]||'projects']||'Admin':'Administration';
+    if(settings.projectUnavailable)title='Project not found';
+    else if(foreignUser)title='Not found';
     return <div className="main-content"><div className="container-fluid workspace-page-container">
         <div className="header workspace-page-header"><div className="header-body">
             <div className="row align-items-end"><div className="col">
-                {section==='users'&&<h6 className="header-pretitle">Overview</h6>}
+                {section==='users'&&!foreignUser&&!settings.projectUnavailable&&<h6 className="header-pretitle">Overview</h6>}
                 <h1 className="header-title display-4">{title}</h1>
             </div><div className="col-auto" id="workspace-header-actions"/></div>
             <div id="workspace-header-tabs"/>

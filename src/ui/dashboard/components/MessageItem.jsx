@@ -1,4 +1,5 @@
 import React from 'react';
+import MessageCitations from '../../native/MessageCitations';
 import PropTypes from 'prop-types';
 import Media from "./Media";
 import ReactMarkdown from "react-markdown";
@@ -26,6 +27,7 @@ function MessageItem({ message, conversation, showActor = true, grouped = false,
         <div className={"message-content transcript-message-content"+( message.content ? " has-content" : "")+( !message.content && message.media && message.media.length ? " image-only" : "")}>
             { message.erased_at && <p className="mb-1 transcript-message-erased"><em>Message erased</em></p> }
             { message.content && <ReactMarkdown remarkPlugins={[gfm, externalLinks]} className="mb-1">{ message.content }</ReactMarkdown> }
+            <MessageCitations message={message} />
             { message.media && message.media.map(media => (
                 <Media key={ media.id } media={ media }/>
             )) }

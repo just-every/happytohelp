@@ -1,7 +1,7 @@
 {
   "id": "happytohelp",
   "name": "HappyToHelp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "repository": "https://github.com/just-every/happytohelp",
   "maturity": "Owner-installable MIT source release: install locally or deploy to your own Cloudflare account. Hosted Assisted and Managed options are available through Run Edit Run.",
@@ -10,7 +10,7 @@
     "id": "happytohelp-conversation",
     "record": "Project-owned customer conversations with durable messages, evidence and explicitly authorized work."
   },
-  "description": "Open-source customer support workspace: editable team dashboard, customer chat widget, configured AI assistance, knowledge and published help centers, customer context, integrations and the village public homepage, running on Cloudflare Workers with D1, R2, Queues and Durable Objects.",
+  "description": "Open-source customer support workspace: editable team dashboard, customer chat widget, configured AI assistance, knowledge and published help centers, customer context, integrations and the “Customer Support, Solved.” public homepage, running on Cloudflare Workers with D1, R2, Queues and Durable Objects.",
   "capabilities": [
     {
       "id": "owner-installation",

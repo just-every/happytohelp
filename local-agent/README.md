@@ -106,7 +106,7 @@ node bin/h2h-local.mjs connect \
   --browser-profile "$HOME/.happytohelp-playwright-profile"
 ```
 
-Pairing starts that MCP process and completes `initialize` plus `tools/list` as a health check. Only a successful check advertises `browser_mcp`. A configured but unhealthy browser MCP prevents a direct runner from claiming work; it never falls back to a pretend browser or a different tool mode.
+Pairing starts that MCP process and completes initialization and MCP tool listing as a health check. Only a successful check advertises `browser_mcp`. A configured but unhealthy browser MCP prevents a direct runner from claiming work; it never falls back to a pretend browser or a different tool mode.
 
 ## Compatibility commands
 

@@ -1,0 +1,781 @@
+{
+  "schemaVersion": 1,
+  "findings": [
+    {
+      "rule": "secret.assignment",
+      "path": "local-agent/test/connector.test.mjs",
+      "blob": "53afed94d5f19d90e29bd974e423e67e0db76d4e",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.url-credentials",
+      "path": "local-agent/test/connector.test.mjs",
+      "blob": "53afed94d5f19d90e29bd974e423e67e0db76d4e",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/base-onboarding/contract.test.mjs",
+      "blob": "169a0351abbfc681ae4dead2068fa291fa58f7a3",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/base-onboarding/failures.test.mjs",
+      "blob": "f37114f36e69213cc2f7c60a6f4c17bc9d3f5f67",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/base-onboarding/private.test.mjs",
+      "blob": "0f81d71fb55c96d5254f5c8cdc5cee14420f7af5",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/installer/ui/model.test.mjs",
+      "blob": "39732b891ba81ce029cc1f5546c345b4e3bbc558",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/usage/measure.mjs",
+      "blob": "110ab82ea38462d0d237b75a46704ae96423a80c",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/abuse-limits.mjs",
+      "blob": "c191540b9fe3726e7be9c18f85b98909971c8ad8",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation-ai-controls-browser.mjs",
+      "blob": "6a72a47259e579a8c1b5f230559d46807bb8044f",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation-browser.mjs",
+      "blob": "d27ad15f4ca94104eb27786386ae48b8bdf240ad",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation-routes.mjs",
+      "blob": "ad79a816fdef42ad6197d7e24985fd64f5af7982",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation-spend-browser.mjs",
+      "blob": "69b137a89508e508c612df4380d106bdf349712f",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation-spend.mjs",
+      "blob": "dbe3c1f00453e108e9ad5ffeb0b86033f977ba9f",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation/browser-provider-probes.mjs",
+      "blob": "861c41ba0df375ee12b1a5516350466ff3009818",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/activation/knowledge-fixtures.mjs",
+      "blob": "62a36ad1e69774673916116767e0f495c3405b00",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/ai-support/public-citations.test.mjs",
+      "blob": "129c00f80eb8473bd07a5201acb94bf321a39465",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/cloudflare-email.mjs",
+      "blob": "51a96b3a4106943516e502a71358217cd9b6dfd0",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/delegation-authority.mjs",
+      "blob": "b294763782866dd5c392916b5d32b4062812ade8",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/delegation-browser.mjs",
+      "blob": "48eb6e55f96614584d8b074652e225dc6238dbf4",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/delegation-scoped-browser.mjs",
+      "blob": "cc6a22ee41adb1b19017ccd8b4b2d4b23f1e0a2f",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/delegation-sqlite.mjs",
+      "blob": "4141b26f8b2b9ab64729e975bf703700962ec8d6",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.authorization",
+      "path": "tests/email-worker.mjs",
+      "blob": "c472466862555c3caf63810e9e0571a8d8eaf41a",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/first-release-journey.mjs",
+      "blob": "12fbd7423ae391a3f398e999127690603dcc5ef4",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/github-discovery.mjs",
+      "blob": "53d275f9fd36ea7123fb409b7e31e9c668251775",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.authorization",
+      "path": "tests/github-discovery.mjs",
+      "blob": "53d275f9fd36ea7123fb409b7e31e9c668251775",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/github-integration.mjs",
+      "blob": "6003533a69064000e7f02113a7929f3e082d3c21",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/accessibility-dashboard-flow.mjs",
+      "blob": "f3b330e99d21e708f6925945e6c53ebdd285f5a4",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/delegation-worker.mjs",
+      "blob": "cf9ae4b1db7998e6a6f31d4e519fb8dfc11858fd",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/identity-browser-default.mjs",
+      "blob": "67689f732366b88a70c5f65d15ce7c135d8357a0",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/identity-browser-email.mjs",
+      "blob": "5c7156e97f7fda95624bc9ce006b516ce1151ead",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/navigation-fixture.mjs",
+      "blob": "3ba55a5210e7263159aa7c672d35fa7156541c95",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/recovery/journey.mjs",
+      "blob": "387f3a1e48e7606004689169600c04e8f83e0e6a",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/helpers/setup-browser-flow.mjs",
+      "blob": "47100b84c06ba9a5bac797837077eac53094a07c",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/identity-browser.mjs",
+      "blob": "c7b656a327371d318d575b9032fcbc766d71bfb6",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/identity-links.mjs",
+      "blob": "eb1675b6ca6ddf9a64d38d71caa4169196aae25b",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/identity-setup-deployment.mjs",
+      "blob": "2d574fe65eba506ea618b4a144b6cdf48a39e229",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/identity.mjs",
+      "blob": "91c8ef29fa269788cab999f2860d07d98dc7c37b",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/independent-runtime.mjs",
+      "blob": "47dc671323da5f0979908c4bd268824238c85495",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/installer-artwork-bridge.mjs",
+      "blob": "54280fa00530d2c3e858f8c035ff49d4c7398109",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.url-credentials",
+      "path": "tests/installer-prefill.mjs",
+      "blob": "a6e7e5f78327c3db684fc64cc5f8f8967023ef59",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/installer-security.mjs",
+      "blob": "a0bd1112c300fc1550fff3cc999eb8d9705b6dc7",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/knowledge-activation-browser.mjs",
+      "blob": "360aca80ec4e117c7c464adfeb5048b8fa040426",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/knowledge-recovery.ts",
+      "blob": "e5c13ad56cedf04c86b45a5872437c87a19b97b4",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/legacy-import.mjs",
+      "blob": "75e72c25d050edab424b9f87ea11a18a98b52834",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/management-invitations.mjs",
+      "blob": "d0b3b177a2d7cf2226dec606845758ee416df0d0",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/management-library-browser.mjs",
+      "blob": "0e3a22bcbb428416fd5a5001981762f411e71f09",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/management.mjs",
+      "blob": "7e1fa57a2364bf7ec8ebc3795f91e15d1d631610",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.authorization",
+      "path": "tests/management.mjs",
+      "blob": "7e1fa57a2364bf7ec8ebc3795f91e15d1d631610",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.url-credentials",
+      "path": "tests/operating-environment.mjs",
+      "blob": "b19e552f1a9382b7e8fd2be0e36d642cb88bfffc",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/security-headers-runtime.mjs",
+      "blob": "49e94ccbffbf3d90bf788895a452336e273f27b9",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/sender-domain.mjs",
+      "blob": "7ba84c3295373ca6d688e250cbb55531e97114e6",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.authorization",
+      "path": "tests/sendgrid-inbound.mjs",
+      "blob": "acb1ecf3386e3e78f25337ae742f63c14c27b6dd",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.authorization",
+      "path": "tests/site-preview.mjs",
+      "blob": "a9b40887ac301dcd08138c492799a7f7e5069a94",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/upgrade-from-0.2.1.mjs",
+      "blob": "6d4a6783e762f46656dd909d12c8a5d6c0fc577e",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/widget-events.mjs",
+      "blob": "05816f524c7019b3fe4b8a5542be5c44c646d753",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/widget-rate-limit.mjs",
+      "blob": "d5fb5a517624db1152a666a4c44b7749e02aa5d9",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "tests/widget-transport.mjs",
+      "blob": "c28082f53a28d24bdcfba44a94c011b5a0a8c056",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "live-proofs/tests/receipt-policy.test.mjs",
+      "blob": "071f41fcb948417ff6d24108ecb3d832e1973be7",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.url-credentials",
+      "path": "live-proofs/tests/receipt-policy.test.mjs",
+      "blob": "071f41fcb948417ff6d24108ecb3d832e1973be7",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "tests/ai-support/repositoryEvidenceContract.test.js",
+      "blob": "e2235d374d27e2a17be777bc03eeac14d5ac921b",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "tests/ai-support/repositoryToolDispatch.test.js",
+      "blob": "380b65e8d9a5b2c2bb38899e185ac22157560600",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "tests/ai-support/repositoryTools.test.js",
+      "blob": "d8b0a0461a76cae0dab9d63e2684f71ce1c3136c",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "tests/github-discovery.mjs",
+      "blob": "53d275f9fd36ea7123fb409b7e31e9c668251775",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "tests/github-integration.mjs",
+      "blob": "6003533a69064000e7f02113a7929f3e082d3c21",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "tests/installer-providers.mjs",
+      "blob": "fff46e964af1ef4bf2e78ca7e72da7bd39ce1396",
+      "reason": "Synthetic GitHub repository input in isolated provider/receipt contract tests. The nonexistent repository is part of the fixture, never a product destination.",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": ".edition/sources/48ae413cc23c4e4474e3bec54950f3064d9ed72c139c869c56a11467011640ed.json",
+      "blob": "78528a6193e0bdd6f3a6563cfcae540227de360c",
+      "reason": "synthetic test value, never a credential",
+      "reviewer": "Public source fixture review",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.local-path",
+      "path": "src/ui/native/Navigation.jsx",
+      "blob": "9136f8ad28923b01616f7d9574a01bb0b77656ca",
+      "reason": "URL route, not a local filesystem path",
+      "reviewer": "Release reviewer + orchestrator path-scoped ruling",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.local-path",
+      "path": "src/ui/native/WorkspacePages.jsx",
+      "blob": "105c83fbe95e98ef303d6c10a8beef964c53cdf5",
+      "reason": "URL route, not a local filesystem path",
+      "reviewer": "Release reviewer + orchestrator path-scoped ruling",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.local-path",
+      "path": "tests/workspace-scope.mjs",
+      "blob": "a5cdbf53b31266e8ae0f2b8b6f50c966d35c19f7",
+      "reason": "URL route, not a local filesystem path",
+      "reviewer": "Release reviewer + orchestrator path-scoped ruling",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.local-path",
+      "path": "tests/workspace-shell-browser.mjs",
+      "blob": "73420aed503f027452dc8edede832768620c77bd",
+      "reason": "URL route, not a local filesystem path",
+      "reviewer": "Release reviewer + orchestrator path-scoped ruling",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": ".edition/sources/5928da9aba7b38ea401613ddcbec65c54fd2e5b82a4feda1f45323abc780adff.json",
+      "blob": "3b7b6702e632c3600e4a32b90efe9e15c5b1754b",
+      "reason": "Git commit/tree terminology in decoded edition-authoring/README.md lines 75 and 96 describes immutable Git objects, not a GitHub repository reference; exact path/blob review under the explicit orchestrator ruling.",
+      "reviewer": "base-5 builder + independent audit",
+      "date": "2026-10-07"
+    },
+    {
+      "rule": "hygiene.github-missing",
+      "path": "live-proofs/tests/source.test.mjs",
+      "blob": "6498c65b4cee3db360931233f939f633dff2642d",
+      "reason": "Synthetic wrong-repository rejection fixture; not a real repository or publication destination",
+      "reviewer": "rel-1 root + independent audit",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": ".edition/sources/a502a1d9e2bd028fcd6b8b1e2eda5e5eb70d5735b4655df9b470ebfb1e6d23fd.json",
+      "blob": "1279c40ea6ac9320743b5166ccbbb39ecf19691c",
+      "reason": "Exact original archive provenance key at origin.original.key, bound to the matching original pin and projection receipt. The selected archive key recomputes from serialized origin metadata and is classified separately by Base. This hexadecimal identity conveys no credential authority; archive payload bytes are not reviewed.",
+      "reviewer": "rel-1 independent exact Source identity assessment under approved Base classifier",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/source-projection/originals.json",
+      "blob": "e9f81ea8f2794a64e816b25847eb54bbe2142225",
+      "reason": "Four exact original archive identity pins used only for private-custody input validation by the source projection tools; each agrees with the retained projection receipt and archive origin.original record. These hexadecimal identities confer no credential authority.",
+      "reviewer": "rel-1 independent exact Source identity assessment under approved Base classifier",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": "scripts/source-projection/projections.json",
+      "blob": "248e071ccdc6e96570112080485d9c461426e6bd",
+      "reason": "Eight exact original/projected archive identity keys in the source projection receipts. Each original pin agrees with originals.json and archive origin.original; each projected key selects the retained archive whose bytes, members and serialized origin identity agree. These receipt identifiers confer no credential authority.",
+      "reviewer": "rel-1 independent exact Source identity assessment under approved Base classifier",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": ".edition/sources/5928da9aba7b38ea401613ddcbec65c54fd2e5b82a4feda1f45323abc780adff.json",
+      "blob": "3b7b6702e632c3600e4a32b90efe9e15c5b1754b",
+      "reason": "Exact original archive provenance key at origin.original.key, bound to the matching original pin and projection receipt. The selected archive key recomputes from serialized origin metadata and is classified separately by Base. This hexadecimal identity conveys no credential authority; archive payload bytes are not reviewed.",
+      "reviewer": "rel-1 independent exact Source identity assessment under approved Base classifier",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "secret.assignment",
+      "path": ".edition/sources/ab092d5033f8b9793028da8e63e113be35327092e0044d42b7b09ef2ea518b9e.json",
+      "blob": "557bb979a91199a24c2e5a3c4043074726c345e8",
+      "reason": "Exact original archive provenance key at origin.original.key, bound to the matching original pin and projection receipt. The selected archive key recomputes from serialized origin metadata and is classified separately by Base. This hexadecimal identity conveys no credential authority; archive payload bytes are not reviewed.",
+      "reviewer": "rel-1 independent exact Source identity assessment under approved Base classifier",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-1-ai-large-color.png",
+      "blob": "de2028b58e6ade8a582138c70f399ecf97036fd4",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-1-ai.png",
+      "blob": "2d9520fbcadce598bc6100b4264747cb73994a0e",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-1-large-color.png",
+      "blob": "188ae9a88fddbd21adab58ae2854cc934d496cc0",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-1-large.png",
+      "blob": "55d2e2859a361079fcbacf7ad134cd922b8a2dc6",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-1.png",
+      "blob": "4f125318de4adec21def4d53ea46fc9d2061907b",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-2-ai-large-color.png",
+      "blob": "5caaf94ae6f4e136d0c77f97728213d6bb9bc9fe",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-2-ai.png",
+      "blob": "3e402e5f941b50232d65670b2fe14a4f261ac70e",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-2-large-color.png",
+      "blob": "24af09e92d320dde70e461e016e2a5dd00f044c3",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-2-large.png",
+      "blob": "be27895fdb59b023d323a68ed7c965bba6c9ab16",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. The 1 additional finding is confined to compressed IDAT image bytes in the validated PNG zlib stream. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/female-2.png",
+      "blob": "d6de524d09785192d64cca4a38f643eeef13d5c6",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-1-ai-large-color.png",
+      "blob": "ff0e21c0569ae3335ca815b521e0fbf119c5f3dd",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-1-ai.png",
+      "blob": "6163792883b2a1f3fed63e6058f6297abb3d9064",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-1-large-color.png",
+      "blob": "099ca1612ab08df3b9e42da26ba3741ab51e840a",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-1-large.png",
+      "blob": "b484c1e4a70a865fdae511c99daf09cdb96e3948",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-1.png",
+      "blob": "9ae4cc76aa61461828bd0b99142bca13c4e2e0c7",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-2-ai-large-color.png",
+      "blob": "92685f3d27aa5f6151e7b2623bacfaaaa53f3980",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-2-ai.png",
+      "blob": "01cb1acae976b44e0f8e3244a4dfd83e482f2b2d",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-2-large-color.png",
+      "blob": "f162bc3d87a51047fce0c798aaf5d82d861e62d4",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-2-large.png",
+      "blob": "3e217fa63edd47964dbab84e5173ad26db1d7c7b",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. The 2 additional findings are confined to compressed IDAT image bytes in the validated PNG zlib stream. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    },
+    {
+      "rule": "hygiene.email",
+      "path": "src/modules/widget/img/avatars/male-2.png",
+      "blob": "48c6a6b23eabf3c04ad13370f7a31746109faccd",
+      "reason": "Exact PNG blob structurally reviewed: the declared public Adobe contact occupies an X.509 subject emailAddress IA5String within the C2PA COSE x5chain. The text matcher appends the adjoining subjectPublicKeyInfo DER SEQUENCE tag 0x30; that byte is not part of the contact value. These exact hygiene.email occurrences contain no personal email; asset bytes and runtime remain unchanged.",
+      "reviewer": "independent-png-email-structural-gate",
+      "date": "2026-10-09"
+    }
+  ]
+}

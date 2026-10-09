@@ -318,7 +318,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-root .happytohelp-agent-avatar.happytohelp-agent-avatar-initials {
   -webkit-font-smoothing: antialiased;
   border: 1px solid #ffffff;
-  color: #ffffff;
+  color: #24384b;
   font-size: 1.1em;
   font-weight: 600;
   align-items: center;
@@ -670,8 +670,15 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 @media (max-height: 600px), (max-width: 500px) {
   #happytohelp-root .happytohelp-interact-container .happytohelp-close {
-    display: block;
     transition: none !important;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 12px;
   }
 }
 #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
@@ -784,7 +791,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info {
   font-size: 0.8em;
-  color: #b9b9b9;
+  color: #667085;
   line-height: 1.6em;
 }
 #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-seperator-tiny {
@@ -792,7 +799,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 @media (max-width: 500px) {
   #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header .happytohelp-insight-agent-info {
-    color: #b9b9b9;
+    color: #667085;
     display: inline;
     font-size: 0.9em;
   }
@@ -817,7 +824,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline, #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-edit-inline-tiny {
   font-size: 16px;
-  color: #8a8a8a;
+  color: #667085;
   vertical-align: -0.1rem;
   padding-left: 0.5rem;
   display: none;
@@ -874,7 +881,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   #happytohelp-root .happytohelp-interact-container .happytohelp-insight-agent .happytohelp-insight-agent-role {
     display: block;
     font-size: 0.8em;
-    color: #b9b9b9;
+    color: #667085;
     line-height: 1.6em;
   }
 }
@@ -1258,13 +1265,13 @@ html.wf-sacramento-n4-active .happytohelp-title {
   top: 12px;
   left: 17px;
   font-size: 14px;
-  color: #c7c8ce;
+  color: #667085;
 }
 #happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon svg.happytohelp-loading {
   animation: happytohelp-spin 1s linear infinite;
 }
 #happytohelp-root .happytohelp-chat-prompt .happytohelp-send-message-row.happytohelp-has-icon .happytohelp-prompt svg {
-  color: #cecece;
+  color: #667085;
   font-size: 16px;
   left: 14px;
 }
@@ -1395,7 +1402,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 #happytohelp-root .happytohelp-collect-customer .happytohelp-collect-notify-email {
   font-size: 0.8em;
-  color: #b9b9b9;
+  color: #526174;
 }
 #happytohelp-root .happytohelp-collect-customer input {
   width: 100%;
@@ -1411,7 +1418,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   top: 13px;
   left: 17px;
   font-size: 14px;
-  color: #c7c8ce;
+  color: #667085;
 }
 #happytohelp-root .happytohelp-collect-customer .happytohelp-send-message-row.happytohelp-has-icon svg.happytohelp-loading {
   animation: happytohelp-spin 1s linear infinite;
@@ -2101,7 +2108,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-root .happytohelp-interact input::placeholder, #happytohelp-root .happytohelp-interact textarea::placeholder {
   font-family: system-ui;
   font-weight: 400;
-  color: #9a9a9a;
+  color: #667085;
 }
 #happytohelp-root .happytohelp-interact .happytohelp-header {
   color: #fff;
@@ -2468,6 +2475,14 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-root .happytohelp-send-message a {
   color: #000;
 }
+#happytohelp-root .happytohelp-files .happytohelp-preview > a {
+  display: inline-block;
+  min-height: 24px;
+  padding-block: 3px;
+  margin-inline-end: 6px;
+  max-width: calc(100% - 6px);
+  box-sizing: border-box;
+}
 #happytohelp-root .happytohelp-send-message.happytohelp-send-message-conversation {
   border-top-left-radius: 0px;
   margin: 0px;
@@ -2508,7 +2523,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   min-width: 0;
 }
 #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact {
-  color: #bbb;
+  color: #667085;
   letter-spacing: 0.01em;
   font-size: 12px;
   line-height: 33px !important;
@@ -2529,7 +2544,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact svg {
   font-size: 14px;
-  color: #cecece;
+  color: #667085;
 }
 @media (hover) {
   #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row.happytohelp-send-message-row-buttons .happytohelp-message-show-contact-container .happytohelp-message-show-contact:hover {
@@ -2551,7 +2566,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   border-color: #eeeeee;
   border-style: dashed;
   background-color: #ffffff;
-  color: #bdbdbd;
+  color: #667085;
 }
 #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row label.error {
   position: absolute;
@@ -2594,7 +2609,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row button.happytohelp-btn {
   background: transparent;
   border: none;
-  color: #cecece;
+  color: #667085;
   padding: 0;
   height: 33px !important;
   line-height: 33px;
@@ -2777,6 +2792,89 @@ html.wf-sacramento-n4-active .happytohelp-title {
   #happytohelp-root .happytohelp-animated-text::before {
     content: none;
   }
+}
+
+/* Keyboard focus remains visible inside the isolated widget surface. */
+#happytohelp-root :focus-visible,
+#happytohelp-modal-preview :focus-visible {
+  outline: 2px solid #005fcc !important;
+  outline-offset: 2px !important;
+}
+
+#happytohelp-root button.happytohelp-close,
+#happytohelp-root button.happytohelp-collect-customer-close,
+#happytohelp-root button.happytohelp-message-show-contact,
+#happytohelp-root button.happytohelp-return-to-chat,
+#happytohelp-root button.happytohelp-preview-close,
+#happytohelp-root button.happytohelp-error-close,
+#happytohelp-root button.happytohelp-chat-header-desc,
+#happytohelp-modal-preview button.happytohelp-modal-preview-close {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  font: inherit;
+}
+
+#happytohelp-root button.happytohelp-close,
+#happytohelp-root button.happytohelp-collect-customer-close,
+#happytohelp-root button.happytohelp-return-to-chat,
+#happytohelp-root button.happytohelp-preview-close,
+#happytohelp-root button.happytohelp-error-close,
+#happytohelp-root button.happytohelp-chat-header-desc,
+#happytohelp-modal-preview button.happytohelp-modal-preview-close {
+  background: transparent;
+}
+
+#happytohelp-root button.happytohelp-return-to-chat {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+#happytohelp-root .happytohelp-return-to-chat-title,
+#happytohelp-root .happytohelp-return-to-chat-content {
+  display: block;
+}
+
+#happytohelp-root button.happytohelp-message-show-contact {
+  background: transparent;
+  text-align: left;
+}
+
+#happytohelp-root .happytohelp-message-show-contact span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#happytohelp-root button.happytohelp-error-close {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 7px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+#happytohelp-root .happytohelp-preview-trigger {
+  display: inline-flex;
+  min-width: 32px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+#happytohelp-modal-preview button.happytohelp-modal-preview-close {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 /*# sourceMappingURL=Root.css.map */

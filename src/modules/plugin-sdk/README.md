@@ -12,6 +12,6 @@ Call `destroy()` when either iframe/client is removed. Host resolve handlers mus
 use the native authenticated conversation route and enforce current operator
 scope; the iframe protocol grants no backend authority.
 
-This ports the original SDK implementation from `happytohelp-plugin-sdk/src`.
+This ports the original plugin SDK implementation.
 The old baked host list and wildcard target origin have been replaced by explicit
 edition configuration. No dashboard dependency is needed by a plugin consumer.

@@ -7,7 +7,7 @@ import {collectFiles} from '../scripts/build-delivery-artifact.mjs';
 import {specInputs} from '../scripts/delivery/spec-inputs.mjs';
 test('independent project declares isolated origins and protected owner setup',async()=>{
  const descriptor=JSON.parse(await readFile('rer-project.json'));
- assert.equal(descriptor.projectId,'runeditrun/happytohelp');
+ assert.equal(descriptor.projectId,'just-every/happytohelp');
  assert.ok(descriptor.operations.setup.includes('setup-build'));
  assert.deepEqual(specInputs.secretNames,['H2H_SETUP_TOKEN']);
  assert.ok(!specInputs.optionalSecretNames.includes('H2H_SETUP_TOKEN'));

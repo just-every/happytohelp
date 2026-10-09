@@ -15,6 +15,7 @@ try {
  const env=proxy.env,db=env.DB,app=new Hono();app.route('/',setup);app.route('/',accounts);app.route('/management',projects)
  for(const file of ['0001_identity.sql','0003_identity_credentials.sql'])for(const sql of readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8').split(';').filter(s=>s.trim()))await db.prepare(sql).run()
  await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN metadata_json'))).run()
+ await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN verification_secret'))).run()
  const migrate=async()=>{const sql=readFileSync(new URL('../migrations/0097_owner_setup.sql',import.meta.url),'utf8');for(const statement of sql.split(/;\s*(?=(?:--|CREATE|INSERT)|$)/).filter(s=>s.trim()))await db.prepare(statement).run()}
  await migrate()
  await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';')[0]).run()
@@ -80,6 +81,7 @@ try {
  assert.equal((await db.prepare('SELECT count(*) n FROM user_settings').first()).n,0)
  assert.equal((await db.prepare('SELECT name FROM users').first()).name,'Actual Owner')
  assert.equal((await db.prepare('SELECT name FROM projects').first()).name,entry.name)
+ assert.match((await db.prepare('SELECT verification_secret FROM projects').first()).verification_secret,/^[0-9a-f]{64}$/,'owner setup gives the first project a server secret')
  assert.deepEqual(JSON.parse((await db.prepare('SELECT settings_json FROM project_settings').first()).settings_json),{primary_color:'#aabbcc'})
  const managedOwner=await managedResponses.find(r=>r.status===201).json()
  const profile=(method='GET',body)=>app.request('http://127.0.0.1/management/profile',{method,headers:{authorization:`Bearer ${managedOwner.token}`,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})},env)

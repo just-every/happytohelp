@@ -3,11 +3,12 @@ import { resolve } from 'node:path';
 import { root, collectMigrations } from './migrations.mjs';
 import { run } from './deployment/run.mjs';
 import { settings } from './deployment/config.mjs';
-import { runtimeVariables } from './deployment/environment.mjs';
+import { runtimeVariables, validateRuntimeEnvironment } from './deployment/environment.mjs';
 import { deployRemote } from './deployment/remote.mjs';
 
 const args = process.argv.slice(2).filter(x => x !== '--');
 if (args.length !== 1 || !['--local', '--remote'].includes(args[0])) throw new Error('Usage: pnpm run deploy -- --local|--remote');
+validateRuntimeEnvironment(process.env);
 await collectMigrations();
 const local = args[0] === '--local';
 const plan = local ? null : settings();
@@ -30,6 +31,6 @@ if (local) {
   await run(['exec', 'wrangler', 'deploy', '--dry-run', '--config', configPath], { env, cwd: root });
   console.log('Local Worker packaging verified; no cloud resources changed.');
 } else {
-  const { setupToken } = await deployRemote({ env, cwd: root, configPath, origin: plan.origin });
-  console.log(`Deployed ${plan.prefix}; resource health responds at ${plan.origin}. ${setupToken === 'configured' ? 'First-owner setup at /setup requires the private H2H_SETUP_TOKEN.' : 'Owner setup was already complete.'} Provider behavior remains separately verifiable.`);
+  const { setupCredentialState } = await deployRemote({ env, cwd: root, configPath, origin: plan.origin });
+  console.log(`Deployed ${plan.prefix}; resource health responds at ${plan.origin}. ${setupCredentialState === 'configured' ? 'First-owner setup at /setup requires the private H2H_SETUP_TOKEN.' : 'Owner setup was already complete.'} Provider behavior remains separately verifiable.`);
 }

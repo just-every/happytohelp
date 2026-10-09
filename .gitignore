@@ -21,3 +21,5 @@ local-agent/.state/
 /delivery-artifact/
 
 .rer-tools/
+
+.local-evidence/

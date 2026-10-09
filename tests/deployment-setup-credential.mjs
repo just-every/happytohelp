@@ -22,12 +22,12 @@ test('fresh remote installation without a setup token is refused before deployme
 
 test('redeploying an installation whose owner exists needs no setup token', async () => {
  const {execute} = remote(0)
- assert.deepEqual(await assertSetupCredential({env: {}, configPath, execute}), {setupToken: 'not-required-owner-exists'})
+ assert.deepEqual(await assertSetupCredential({env: {}, configPath, execute}), {setupCredentialState: 'not-required-owner-exists'})
 })
 
 test('a strong configured setup token deploys without reading remote state', async () => {
  const {calls, execute} = remote(1)
- assert.deepEqual(await assertSetupCredential({env: {H2H_SETUP_TOKEN: 'a'.repeat(64)}, configPath, execute}), {setupToken: 'configured'})
+ assert.deepEqual(await assertSetupCredential({env: {H2H_SETUP_TOKEN: 'a'.repeat(64)}, configPath, execute}), {setupCredentialState: 'configured'})
  assert.equal(calls.length, 0)
 })
 
@@ -57,7 +57,7 @@ test('deploy --remote uploads the setup token with the Worker for a fresh instal
   if (args.includes('--secrets-file')) uploaded.push(JSON.parse(await readFile(args[args.indexOf('--secrets-file') + 1], 'utf8')))
   return {stdout: '', stderr: ''}
  }
- assert.deepEqual(await deployRemote({env: {H2H_SETUP_TOKEN: token}, cwd: '/source', configPath, origin: 'https://help.example.test', execute, waitForHealth: async url => checked.push(url)}), {setupToken: 'configured'})
+ assert.deepEqual(await deployRemote({env: {H2H_SETUP_TOKEN: token}, cwd: '/source', configPath, origin: 'https://help.example.test', execute, waitForHealth: async url => checked.push(url)}), {setupCredentialState: 'configured'})
  assert.deepEqual(calls.map(args => args.slice(0, 4)), [['exec', 'wrangler', 'deploy', '--config']])
  assert.deepEqual(uploaded, [{H2H_SETUP_TOKEN: token}])
  assert.deepEqual(checked, ['https://help.example.test/health'])
@@ -66,6 +66,6 @@ test('deploy --remote uploads the setup token with the Worker for a fresh instal
 test('deploy --remote redeploys an installation whose owner exists without a token', async () => {
  const calls = []
  const execute = async args => { calls.push(args); return {stdout: args.includes('d1') ? JSON.stringify([{results: [{available: 0}]}]) : '', stderr: ''} }
- assert.deepEqual(await deployRemote({env: {}, cwd: '/source', configPath, origin: 'https://help.example.test', execute, waitForHealth: async () => {}}), {setupToken: 'not-required-owner-exists'})
+ assert.deepEqual(await deployRemote({env: {}, cwd: '/source', configPath, origin: 'https://help.example.test', execute, waitForHealth: async () => {}}), {setupCredentialState: 'not-required-owner-exists'})
  assert.deepEqual(calls.map(args => args[2]), ['d1', 'deploy'])
 })

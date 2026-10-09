@@ -1,0 +1,26 @@
+[
+  {
+    "key": "6236f3fdbd85825a8824e7b2d81339a5d6756818273abd2577ca7f5be0e41eb6",
+    "sha256": "73efa7700b26b103e7eb6bf2029738ceac68bbb148328cecfa66b9017cb08d40",
+    "digest": "8bcc4b1bf52d4aec8b3277e7fb71cfe462413f80c8b0dffe90c292d87e42c40f",
+    "members": 1
+  },
+  {
+    "key": "99054db9ab23d6dcb1022deb06ab0505bde2af76b9a345b771da52f491665dcd",
+    "sha256": "f901d74a67fd8de755c0beb75035a31b15a40fea2837491a1963a3ca3e45ffcb",
+    "digest": "d22256e35600643109fcd31da468a0b4c6fc030877d1a08b44c18e49e251c804",
+    "members": 32
+  },
+  {
+    "key": "d21e484252db2a87f8dae9d477c9d8d70e99644ad370e3d64773e6376fd766eb",
+    "sha256": "8849e85e2a9443b5662f97c75a4cdcf7f087814e2d2ac2f7f3e072f4123ea639",
+    "digest": "546300325e981648ce03718102ad7dfd21fbbcf5217e401c6156aba4c62ee118",
+    "members": 13
+  },
+  {
+    "key": "f9ed695fd69d51d5c54d1aa14ef3512126a00a49fdcde540889244a333da75ff",
+    "sha256": "0a8e64ca64d06b42a88df9eee742312fec339649938ac0e5474f1e045f0c4afa",
+    "digest": "f7429a264b43b5dae6e20578590010affe579e0c78db9380d297f3381e2e0d38",
+    "members": 17
+  }
+]

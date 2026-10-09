@@ -1,24 +1,32 @@
-.conversation-item {
-    .show-on-hover {
-        display: none;
-    }
+.conversation-item-wrap {
+    position: relative;
 
-    .action-button {
+    // Close / Reopen sits in its own reserved column of the row, level with the avatar and name
+    // (see the card padding in layouts/_conversation-inbox.scss), so it never covers the time,
+    // avatar or badges.
+    // It stays in the tab order and on touch screens; only mouse users see it on hover.
+    .conversation-item-action {
         position: absolute;
-        top: 5px;
-        right: 5px;
+        top: 14px;
+        right: 8px;
         z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
     }
+}
 
-    &:hover {
-        .show-on-hover {
-            display: block;
-        }
-        .hide-on-hover {
-            display: none;
-        }
-    }
+@media (hover: hover) and (pointer: fine) {
+    .conversation-item-wrap .conversation-item-action { opacity: 0; }
 
+    .conversation-item-wrap:hover .conversation-item-action,
+    .conversation-item-wrap:focus-within .conversation-item-action { opacity: 1; }
+}
+
+.conversation-item {
     h4 {
         line-height: 1.2rem;
     }

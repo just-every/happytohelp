@@ -75,6 +75,8 @@
 @import "./layouts/conversation-transcript";
 @import "./layouts/conversation-assistant";
 @import "./layouts/conversation-delegation";
+@import "./layouts/delegation-computers";
+@import "./layouts/delegation-pages";
 @import "./layouts/conversation-suggestion-card";
 @import "./layouts/conversation-details";
 @import "./layouts/conversation-composer";
@@ -96,3 +98,17 @@
 @import "./layouts/conversation-ai-instructions";
 @import "./layouts/conversation-composer-tools";
 @import "./layouts/workspace-modes";
+
+// Restore a visible keyboard ring after removing the old global focus reset.
+body :is(a[href], button:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--accessibility-focus-ring, #005fcc) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px var(--accessibility-focus-halo, #fff) !important;
+    // A fading halo exposes a low-contrast ring over the dark navigation surface.
+    transition: none !important;
+}
+
+:is([data-bs-theme="dark"], [data-workspace-mode="dark"]) {
+    --accessibility-focus-ring: #cda0fd;
+    --accessibility-focus-halo: #152e4d;
+}

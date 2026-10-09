@@ -19,10 +19,10 @@ export async function assertSetupCredential({ env, configPath, cwd, execute }) {
   const token = typeof env.H2H_SETUP_TOKEN === 'string' ? env.H2H_SETUP_TOKEN.trim() : '';
   if (token) {
     if (token.length < minimumSetupTokenLength) throw new Error(`H2H_SETUP_TOKEN must be at least ${minimumSetupTokenLength} characters. ${setupTokenGuidance}`);
-    return { setupToken: 'configured' };
+    return { setupCredentialState: 'configured' };
   }
   if (await remoteSetupAvailable({ configPath, env, cwd, execute })) {
     throw new Error(`This installation has no owner yet, so H2H_SETUP_TOKEN is required before its Worker is deployed. ${setupTokenGuidance} Nothing was deployed.`);
   }
-  return { setupToken: 'not-required-owner-exists' };
+  return { setupCredentialState: 'not-required-owner-exists' };
 }

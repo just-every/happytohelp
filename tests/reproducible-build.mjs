@@ -19,8 +19,6 @@ const pnpm = process.env.npm_execpath;
 const artifactFile = 'delivery-artifact/happytohelp-worker-artifact.json';
 // Absolute filesystem locations a builder could leak (macOS, Linux and CI).
 const absolutePath = /(?<![\w.@~-])\/(?:Users|home|private|tmp|var\/folders|root)\/[^\s"'`\\]*/g;
-// Product copy: the example workspace folders shown in local computer settings.
-const productExamples = new Set(['/Users/you/projects/web', '/Users/you/projects/api']);
 
 function run(cwd, log, args) {
   return new Promise((resolve, reject) => {
@@ -77,7 +75,7 @@ test('delivery artifact is byte-reproducible across checkout paths and names no 
     for (const [key, content] of entries(first)) {
       const text = key === 'deploymentSpec' ? content : Buffer.from(content, 'base64').toString('latin1');
       for (const path of forbidden) if (text.includes(path)) leaks.push(`${key} names ${path}`);
-      for (const [match] of text.matchAll(absolutePath)) if (!productExamples.has(match)) leaks.push(`${key} names ${match}`);
+      for (const [match] of text.matchAll(absolutePath)) leaks.push(`${key} names ${match}`);
     }
     assert.deepEqual(leaks, []);
     passed = true;

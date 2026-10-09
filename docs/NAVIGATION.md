@@ -2,7 +2,12 @@
 
 HappyToHelp has one authenticated TanStack Router layout. The pathless
 `src/routes/_dashboard.tsx` validates implemented paths on the server so unknown
-documents return HTTP 404. Its nested pathless
+documents return HTTP 404. Every unmatched document, including dashboard-shaped
+paths that fail that check, renders the root route's `notFoundComponent`
+(`src/ui/homepage/NotFound.tsx`): a branded page in the homepage visual language
+with the title "Page not found · HappyToHelp", a short message and links to the
+homepage and the workspace. Help Center addresses have their own 404 pages (see
+`src/modules/public-site/README.md`). Its nested pathless
 `src/routes/_dashboard._workspace.tsx` is the client-only boundary with
 pending/error handling and the persistent shell. The workspace's index and splat
 leaves render `DashboardContent` and attach the bootstrap loader;
@@ -25,6 +30,48 @@ does not use `window.chatSettings` (which remains only a compatibility input
 for embedded legacy components). A 401 redirects to `/login` with a validated
 `returnTo`; a session-version change invalidates the old router cache before a
 new workspace is accepted.
+
+## Workspace scoping
+
+The URL chooses the workspace. When the path names a project
+(`/projects/<id>/...`), `loadDashboard` reads the bootstrap for that project and,
+if the response's `sessionProjectId` differs, posts
+`/api/identity/switch-project` before the workspace renders. Pages and the
+session-scoped APIs they call (knowledge, training, insights, conversation
+media) therefore always agree with the URL, whether the project was opened from
+a deep link, the Projects list or the workspace switcher. The switcher still
+posts the switch itself and then navigates; the loader sees a matching session
+and does nothing more.
+
+The session cookie holds one active project, so tabs on different projects share
+it. After each load the loader announces the session's project on the
+`h2h-session-project` BroadcastChannel (`session-project-sync.ts`). A tab whose
+URL names another project marks itself displaced and, when its window regains
+focus, re-runs the loader, which re-activates its project (or shows the
+unavailable state if access was removed meanwhile). Tabs therefore never ping-pong
+the session while both are open; only the tab the user returns to rebinds it.
+
+A project the account does not belong to, or that does not exist, is not a
+failed load. The bootstrap refuses it with a message-bearing 403, the loader
+reads the account's own bootstrap instead and marks the result
+`projectUnavailable`. The shell stays mounted with the workspace labelled
+"Workspace unavailable", the inbox is not rendered, and the page offers
+"Go to Projects"; no "Sign in" link is shown to a signed-in user. The route
+error boundary offers "Sign in" only for a 401 and otherwise "Try again" and a
+way back to the inbox.
+
+`/local-agent/authorize` has no project in the URL but acts on the session's
+project, so the loader scopes it to that project: the sidebar shows the full
+project navigation with "Local computers" active, and the authorize form names
+the project it approves or denies for. In the Global Inbox the Settings group
+lists "Settings for <project>" per project instead of unlabelled links to the
+session's project.
+
+The bootstrap also carries `isPlatformAdmin`. The account menu offers Admin
+only to platform administrators, and `/admin` pages show an in-shell
+"limited to platform administrators" state, with no tables or forms and no admin
+API calls, to everyone else. `/users/<id>` is the signed-in user's profile only
+for `profile` or their own id; any other id is a not-found page.
 
 `DashboardClient` keeps `Navigation`, `NavigationGuard` and the shell around the
 child outlet while the pathless workspace parent remains mounted. The
@@ -55,6 +102,26 @@ Some transitions deliberately replace or leave the document:
   are document or external-resource transitions by design and should not be
   converted to router links.
 
+## Delegation pages
+
+Connected applications (`/delegation/settings?account_id=<project>`) and the connection
+consent screen (`/delegation/authorize?...`) are dashboard documents like any other: the
+Worker hands only their `GET`/`HEAD` requests to Start (`src/edition/delegation/document.ts`,
+which first redirects a request without a current session to `/login` with its `returnTo`, and
+makes the response `no-store` and unframeable), while every `POST` under `/delegation/`
+and their JSON reads (`/delegation/settings/data`, `/delegation/authorize/request`) stay in
+Hono with their session, origin, CSRF and role checks. `loadDashboard` scopes the shell to
+`account_id`, and loads the consent request before the screen renders so the heading and the
+decision form appear together; a rejected request becomes a page for the user, not JSON. The
+consent decision remains a real form post so approval ends in a redirect to the application;
+cancel returns to Connected applications with a notice. Bare `/delegation/settings` offers the
+user's workspaces and bare `/delegation/authorize` explains that an application starts the
+request.
+
+The router's `parseSearch`/`stringifySearch` (`src/search-codec.ts`) keep text such as `1e3`
+or a device code like `12E4567890` exactly as written; the default would turn it into a
+number and change an OAuth `state` or authorization code.
+
 ## Unsaved editing
 
 `NavigationGuard` is mounted once inside the persistent shell. Editors call
@@ -76,13 +143,26 @@ pnpm run build
 pnpm run test:navigation-browser
 ```
 
+`tests/computers-delegation-browser.mjs` (`pnpm run test:computers-delegation-browser`) covers the
+Local computers dialog and authorization outcomes and the delegation pages above in the emitted
+Worker and a real browser.
+
 `tests/navigation-browser.mjs` starts an isolated local D1/R2/Durable Object
 runtime from the emitted Worker (`dist/server/wrangler.json` and its emitted
 server bundle), seeds real tenants through the Worker APIs, and drives the
 actual browser UI. It exercises delayed loader reads, shell/document identity,
 header portals, search and Back/Forward, project isolation and theme changes,
 dirty conversation and settings edits, widget mount/unmount, mobile navigation,
-direct refresh/not-found recovery, sign-out and expired-session recovery. The
+direct refresh/not-found recovery, sign-out and expired-session recovery.
+`tests/workspace-shell-browser.mjs` (`pnpm run test:workspace-shell-browser`)
+covers the workspace scoping above: deep links and Projects-list navigation
+activating the URL's project, unavailable projects, `/local-agent/authorize`,
+Global Inbox settings labels, sidebar active/visible state, account-menu
+contrast, Admin gating, the Projects list, `/users/<id>` and socket start-up
+without teardown warnings.
+`pnpm run test:not-found-browser` separately drives the application and Help Center
+404 pages at desktop and mobile sizes (status, content type, title, links, axe, and a
+draft article being indistinguishable from a missing one). The navigation
 test writes its result and request evidence under `H2H_EVIDENCE_DIR` (or a
 temporary directory). This document records the contract and command; a test
 run must report its own result and exact source revision.

@@ -31,3 +31,29 @@
     .nav-link { margin:0; padding:10px 16px; color:var(--conversation-nav-muted); font-size:12px; white-space:normal; }
     .nav-link:hover { background:var(--conversation-nav-hover); color:var(--conversation-nav-ink); }
 }
+body.workspace-themed .workspace-skip-link {
+    position: fixed;
+    z-index: 12000;
+    top: 8px;
+    left: 8px;
+    transform: translateY(calc(-100% - 12px));
+    padding: 9px 14px;
+    border: 2px solid #005fcc;
+    border-radius: 6px;
+    background: #fff;
+    color: #163753;
+    font-weight: 600;
+}
+
+body.workspace-themed .workspace-skip-link:focus {
+    transform: translateY(0);
+}
+
+body.workspace-themed #workspace-main:focus {
+    outline: 0;
+}
+
+// Account menu rows read at normal-text AA contrast against the dropdown surface (the stock link grey is 3.8:1 on white).
+.native-shell .native-account-dropdown .dropdown-item { color: var(--bs-body-color); }
+.native-shell .native-account-dropdown .dropdown-item:hover,
+.native-shell .native-account-dropdown .dropdown-item:focus-visible { color: var(--bs-emphasis-color, #000); }

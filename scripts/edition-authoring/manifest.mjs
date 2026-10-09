@@ -1,9 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {safe} from './files.mjs';
+import {projectionReference} from './projections.mjs';
 export const VERSION = '1.1.0';
 const identity = /^[a-zA-Z0-9][a-zA-Z0-9._-]*\/[a-zA-Z0-9][a-zA-Z0-9._-]*$/;
 export function origin(value) {
+  if (value?.projection) {
+    projectionReference(value.projection);
+    if (value.repository || value.revision || value.workspace) throw Error('Projection is derived source, not a Git origin');
+    if (value.path !== undefined && value.path !== '.') safe(value.path);
+    if (value.paths) {
+      if (!Array.isArray(value.paths) || !value.paths.length) throw Error('Origin paths must be nonempty');
+      value.paths.forEach(safe);
+    }
+    return;
+  }
   if (!value || typeof value.repository !== 'string' || !value.repository || value.repository.startsWith('-') || !/^[a-f0-9]{40}$/.test(value.revision)) {
     throw Error('Source requires repository and immutable full commit');
   }
@@ -39,6 +50,7 @@ export function manifest(root) {
         }
       }
     } else if (selected?.kind === 'git') {
+      if (selected.projection) throw Error('Public projections are comparison baselines, not Git components');
       origin(selected);
       paths.push(safe(selected.destination));
       if (selected.workspace && !path.isAbsolute(selected.workspace)) throw Error('Workspace must be an explicit absolute checkout');

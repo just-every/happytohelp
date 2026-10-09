@@ -32,7 +32,6 @@ function restoreSelection(textarea, selectionStart, selectionEnd) {
 
 export default function ArticleMarkdownEditor({ initialMarkdown, inputId, onMarkdownChange, required }) {
     const textareaRef = useRef(null);
-    const previewRef = useRef(null);
     const [ markdown, setMarkdown ] = useState(initialMarkdown);
     const [ error, setError ] = useState(null);
     const [ view, setView ] = useState('write');
@@ -44,8 +43,6 @@ export default function ArticleMarkdownEditor({ initialMarkdown, inputId, onMark
 
     const showWriteView = () => {
         setView('write');
-        if (textareaRef.current) textareaRef.current.hidden = false;
-        if (previewRef.current) previewRef.current.hidden = true;
     };
 
     const applyEdit = edit => {
@@ -109,19 +106,20 @@ export default function ArticleMarkdownEditor({ initialMarkdown, inputId, onMark
     ];
 
     return <div className="article-markdown-editor">
-        <div className="article-markdown-toolbar" role="toolbar" aria-label="Markdown formatting">
-            { toolbar.map(tool => <button
-                key={ tool.label }
-                type="button"
-                className="article-markdown-tool"
-                aria-label={ tool.label }
-                title={ tool.label }
-                onMouseDown={ event => event.preventDefault() }
-                onClick={ tool.action }
-            >
-                <ReplyIcon name={ tool.icon } className="article-markdown-tool__icon" />
-            </button>) }
-            <span className="article-markdown-toolbar__spacer" />
+        <div className="article-markdown-header">
+            { view === 'write' && <div className="article-markdown-toolbar" role="toolbar" aria-label="Markdown formatting">
+                { toolbar.map(tool => <button
+                    key={ tool.label }
+                    type="button"
+                    className="article-markdown-tool"
+                    aria-label={ tool.label }
+                    title={ tool.label }
+                    onMouseDown={ event => event.preventDefault() }
+                    onClick={ tool.action }
+                >
+                    <ReplyIcon name={ tool.icon } className="article-markdown-tool__icon" />
+                </button>) }
+            </div> }
             <div className="article-markdown-tabs" role="tablist" aria-label="Article editor view">
                 <button
                     type="button"
@@ -157,7 +155,6 @@ export default function ArticleMarkdownEditor({ initialMarkdown, inputId, onMark
             spellCheck="true"
         />
         <div
-            ref={ previewRef }
             className="article-markdown-editor__preview"
             hidden={ view !== 'preview' }
             aria-label="Article preview"

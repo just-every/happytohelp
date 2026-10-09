@@ -1,0 +1,170 @@
+/* Drawings: ink linework on paper with soft cyan accents. Colour is allowed only in here. */
+.h2h-home {
+  --d-ink: #141414;
+  --d-ink-soft: #6b6a65;
+  --d-cyan: #8fe3ee;
+  --d-cyan-tint: #d6f5fa;
+  --d-cyan-wash: #e8f9fc;
+  --d-line: rgba(20, 20, 20, 0.14);
+}
+.h2h-home .drawing { position: relative; margin: 0; font-size: 13px; line-height: 1.35; color: var(--d-ink); }
+.h2h-home :where(.drawing ul, .drawing ol) { list-style: none; margin: 0; padding: 0; }
+.h2h-home :where(.drawing p) { margin: 0; color: inherit; }
+.h2h-home .drawing b { font-weight: 500; }
+.h2h-home .d-icon { width: 1.35em; height: 1.35em; flex: none; }
+
+/* Window frame with a doubled, slightly off-register ink stroke */
+.h2h-home .d-window { position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.62); border: 1.5px solid var(--d-ink); border-radius: 0.9em 0.7em 0.8em 0.7em / 0.7em 0.9em 0.7em 0.8em; box-shadow: 1px 2px 0 rgba(20, 20, 20, 0.18); }
+.h2h-home .d-bar { display: flex; align-items: center; gap: 0.5em; height: 2.5em; padding: 0 1em; border-bottom: 1.5px solid var(--d-ink); }
+.h2h-home .d-bar i { width: 0.65em; height: 0.65em; border-radius: 50%; background: var(--d-ink); }
+.h2h-home .d-page { padding: 1.3em; }
+
+/* Marks around the drawings: emphasis strokes radiating out of the frame's top-right corner. The svg is positioned by the
+   mark's ORIGIN (the mean of its strokes' inner ends, see marks.ts): that point sits --mark-off up and right of the corner
+   point, the same for every mark at every width. The containing box is the frame itself: the figure (which has no padding of
+   its own) for the desk drawings, the tilted window for the hero, so the mark rides its tilt (--bw is that window's border,
+   which the padding box leaves out). --unit is the size of one mark unit; it shrinks about the origin, so a narrow gutter
+   only draws the strokes shorter: the mark's reach right of its origin must fit between the corner offset and the page edge. */
+.h2h-home .d-marks {
+  --mark-off: 4.5px; --unit-max: 1.45px;
+  --unit: min(var(--unit-max), calc((var(--gutter) - var(--mark-off) - 3px) / var(--mark-reach)));
+  position: absolute; width: calc(var(--unit) * var(--mark-w)); height: auto; overflow: visible; color: var(--d-ink); pointer-events: none;
+  left: calc(100% + var(--bw, 0px) + var(--mark-off) - var(--unit) * var(--mark-ox));
+  bottom: calc(100% + var(--bw, 0px) + var(--mark-off) - var(--unit) * var(--mark-below));
+}
+.h2h-home .d-marks path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .h2h-home .d-marks path { animation: h2h-draw 0.9s ease-out 0.2s both; }
+}
+@keyframes h2h-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Shared small parts */
+.h2h-home .d-avatar { display: inline-grid; place-items: center; flex: none; width: 2.5em; height: 2.5em; border: 1px solid #a9adae; border-radius: 50%; background: #fff; font-size: 1.1em; font-weight: 400; }
+.h2h-home .d-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 2.3em; padding: 0 1.4em; border: 1px solid #8e9496; border-radius: 999px; background: #fff; white-space: nowrap; }
+.h2h-home .d-btn--ink { background: var(--d-ink); border-color: var(--d-ink); color: #fff; }
+.h2h-home .d-chip { border: 1px solid var(--d-cyan); display: inline-flex; align-items: center; gap: 0.5em; padding: 0.4em 0.9em; border-radius: 999px; background: var(--d-cyan-tint); font-style: normal; }
+.h2h-home .d-chip .d-icon { width: 1.1em; height: 1.1em; }
+.h2h-home .d-bubble { padding: 0.8em 1em; border-radius: 1em; background: var(--d-cyan-tint); }
+.h2h-home .d-message { padding: 0.9em 1.15em; border-radius: 1em; background: #efede7; line-height: 1.55; }
+.h2h-home .sk-line { display: block; height: 0.65em; border-radius: 999px; background: #e3e1da; }
+.h2h-home .sk-line.w50 { width: 50%; }
+.h2h-home .sk-line.w60 { width: 60%; }
+.h2h-home .sk-line.w70 { width: 70%; }
+.h2h-home .sk-line.w90 { width: 90%; }
+.h2h-home .d-check { display: inline-grid; place-items: center; flex: none; width: 1.7em; height: 1.7em; border-radius: 50%; background: var(--d-cyan); color: var(--d-ink); }
+.h2h-home .d-check .d-icon { width: 1.1em; height: 1.1em; }
+
+/* Hero drawing: everything is sized in em from the width of the container, so it scales as one picture */
+/* The margin above holds the tick (outside the figure's own box); the padding below holds the underline between the frame and the 1-2-3 captions. */
+.h2h-home .hero-art { container-type: inline-size; font-size: 14px; margin-top: clamp(44px, 4.4vw, 60px); padding: 0 0 clamp(36px, 3.6vw, 48px); }
+.h2h-home .hero-window { overflow: visible; font-size: max(2.25cqw, 15.5px); border-width: 2px; border-radius: 1.3em 1.1em 1.2em 1.1em / 1.1em 1.3em 1.1em 1.2em; box-shadow: 0 1.4em 2.4em rgba(20, 20, 20, 0.07), 1px 2px 0 rgba(20, 20, 20, 0.18); --bw: 2px; transform: rotate(-1.5deg); transform-origin: 40% 50%; }
+.h2h-home .hero-window .d-bar { height: 2.9em; border-bottom-width: 2px; padding: 0 1.1em; }
+.h2h-home .hero-window .d-bar i { width: 0.7em; height: 0.7em; }
+.h2h-home .hero-art .d-marks { --unit-max: 1.6px; }
+/* The underline runs the frame's full bottom edge, a fixed distance below it, and tilts with the frame. */
+.h2h-home .d-underline { position: absolute; top: 100%; left: calc(var(--bw) * -1); width: calc(100% + var(--bw) * 2); height: 0.6em; margin-top: calc(var(--bw) + 0.8em); color: #55554f; pointer-events: none; }
+
+/* Hero: one column, three elements with space between them. Hand-drawn numerals 1, 2 and 3 sit in the left margin. */
+.h2h-home .hero-thread { display: grid; align-content: start; gap: 2.3em; min-width: 0; padding: 2em 1.6em 2.1em 4.8em; }
+.h2h-home .hero-thread > * { position: relative; max-width: 33.5em; }
+.h2h-home .callout { position: absolute; top: 50%; right: 100%; display: flex; align-items: center; margin-right: 0.3em; transform: translateY(-50%) rotate(-3deg); color: var(--d-ink); pointer-events: none; }
+.h2h-home .hc-message .callout { top: 66%; }
+.h2h-home .callout-ring { position: relative; display: inline-grid; place-items: center; width: 2em; height: 2em; }
+.h2h-home .callout-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.h2h-home .callout-ring b { position: relative; font-weight: 500; line-height: 1; }
+.h2h-home .callout-arrow { width: 1.35em; height: 0.7em; margin-left: -0.15em; overflow: visible; }
+
+.h2h-home .hc-message { display: grid; justify-items: start; gap: 0.5em; }
+.h2h-home .hc-who { font-weight: 500; }
+.h2h-home .hc-message .d-message { max-width: 25em; }
+.h2h-home .hc-note { padding: 0.95em 1.15em 1.1em; border: 1px solid var(--d-ink); border-radius: 0.9em; background: var(--d-cyan-tint); }
+.h2h-home .hc-by { display: flex; align-items: center; gap: 0.6em; }
+.h2h-home .hc-by .d-avatar { width: 2em; height: 2em; font-size: 1em; }
+.h2h-home .hc-glyph .d-icon { width: 1.15em; height: 1.15em; }
+.h2h-home .hc-by > .d-icon { margin-left: auto; width: 1.5em; height: 1.5em; }
+.h2h-home .hc-note p { margin-top: 0.7em; font-size: 1.08em; line-height: 1.45; }
+.h2h-home .hc-composer { display: flex; align-items: center; justify-content: space-between; gap: 0.9em; padding: 0.6em 0.6em 0.6em 1.15em; border: 1.5px solid var(--d-ink); border-radius: 0.9em; background: #fff; }
+.h2h-home .hc-text { flex: 1; min-width: 0; line-height: 1.45; }
+.h2h-home .hc-send { position: relative; display: inline-flex; flex: none; }
+.h2h-home .hc-send .d-btn { position: relative; min-height: 2.5em; padding: 0 1.6em; font-size: 1.05em; font-weight: 600; box-shadow: 1px 2px 0 rgba(20, 20, 20, 0.28); }
+.h2h-home .hc-ring { position: absolute; inset: -0.45em -0.7em; width: calc(100% + 1.4em); height: calc(100% + 0.9em); color: var(--d-cyan); pointer-events: none; overflow: visible; }
+@container (max-width: 640px) {
+  .h2h-home .hero-window { font-size: clamp(13px, 3.9cqw, 17px); transform: rotate(-1deg); }
+  .h2h-home .hero-thread { gap: 1.9em; padding: 1.6em 1.1em 1.7em 3em; }
+  .h2h-home .callout-ring { width: 1.7em; height: 1.7em; }
+  .h2h-home .callout-arrow { display: none; }
+}
+
+/* Product drawings: a fixed 13px scale, sized to a four-column grid */
+.h2h-home .product-art { display: grid; min-height: 15em; }
+.h2h-home .chat-art { display: grid; align-content: start; }
+.h2h-home .chat-head { display: flex; align-items: center; gap: 0.7em; padding: 0.9em 1em; border-bottom: 1px solid var(--d-line); }
+.h2h-home .chat-thread { display: grid; gap: 0.8em; padding: 1.1em 1em 1.4em; }
+.h2h-home .chat-thread .d-bubble { max-width: 88%; line-height: 1.5; }
+.h2h-home .chat-visitor { justify-self: end; background: var(--d-cyan); }
+.h2h-home .chat-agent { justify-self: start; background: #efede7; }
+.h2h-home .chat-input { margin: 0 1em 1em; padding: 0.7em 1em; border: 1px solid var(--d-line); border-radius: 0.8em; background: rgba(255, 255, 255, 0.7); color: var(--d-ink-soft); }
+
+.h2h-home .inbox-art { display: grid; }
+.h2h-home .inbox-title { padding: 0.9em 1em; border-bottom: 1px solid var(--d-line); }
+.h2h-home .inbox-list li { display: flex; align-items: center; gap: 0.7em; padding: 0.8em 1em; border-bottom: 1px solid rgba(20, 20, 20, 0.07); }
+.h2h-home .inbox-list li:last-child { border-bottom: 0; }
+.h2h-home .inbox-list li.is-active { background: var(--d-cyan-wash); }
+.h2h-home .inbox-list li.is-active .d-avatar { border-color: var(--d-cyan); background: var(--d-cyan); }
+.h2h-home .inbox-list .d-avatar { width: 2.1em; height: 2.1em; font-size: 1em; }
+.h2h-home .inbox-text { display: grid; min-width: 0; flex: 1; gap: 0.15em; }
+.h2h-home .inbox-text span { color: var(--d-ink-soft); }
+
+.h2h-home .help-art { display: grid; gap: 1em; }
+.h2h-home .help-search { display: flex; align-items: center; gap: 0.6em; padding: 0.7em 0.9em; border: 1px solid #8e9496; border-radius: 0.7em; background: #fff; color: var(--d-ink-soft); }
+.h2h-home .help-search .d-icon { color: var(--d-ink); }
+.h2h-home .help-art li { display: flex; align-items: center; gap: 0.8em; padding: 0.7em 0; border-bottom: 1px solid rgba(20, 20, 20, 0.07); }
+.h2h-home .help-art li:last-child { border-bottom: 0; padding-bottom: 0; }
+.h2h-home .help-art li .d-icon { width: 1.9em; height: 1.9em; padding: 0.25em; border-radius: 0.45em; background: var(--d-cyan); color: var(--d-ink); }
+
+.h2h-home .sr-panel { display: grid; align-content: start; gap: 1em; padding-bottom: 1em; }
+.h2h-home .sr-head { display: flex; align-items: center; gap: 0.6em; padding: 0.9em 1em; border-bottom: 1px solid var(--d-line); font-weight: 500; }
+.h2h-home .sr-card { display: grid; gap: 0.8em; margin: 0 1em; padding: 0.9em; border: 1.5px solid var(--d-cyan); border-radius: 0.9em; background: var(--d-cyan-wash); line-height: 1.5; }
+.h2h-home .sr-card .d-chip { justify-self: start; padding: 0.25em 0.8em; background: #fff; }
+
+/* Help before they ask: the widget's offer over a checkout page */
+.h2h-home .offer-art { font-size: clamp(13px, 1.25vw, 15px); margin-top: 2em; }
+.h2h-home .offer-page { position: relative; display: grid; min-height: 25em; padding: 1.8em; }
+.h2h-home .offer-checkout { display: grid; align-content: start; gap: 1em; width: 46%; }
+.h2h-home .offer-title { display: flex; align-items: center; gap: 0.6em; font-weight: 500; font-size: 1.15em; }
+.h2h-home .sk-field { display: block; height: 2.6em; border: 1px solid var(--d-line); border-radius: 0.6em; background: rgba(255, 255, 255, 0.7); }
+.h2h-home .sk-pay { display: inline-flex; justify-content: center; align-items: center; height: 2.8em; border-radius: 999px; background: #d9d6ce; color: var(--d-ink); }
+.h2h-home .offer-widget { position: absolute; right: 1.4em; bottom: 1.4em; display: grid; gap: 0.8em; width: 19em; }
+.h2h-home .offer-bubble { padding: 1.1em 1.2em; border: 1.5px solid var(--d-ink); border-radius: 1.1em 1.1em 1.1em 0.3em; background: #fff; box-shadow: 3px 4px 0 var(--d-cyan); font-size: 1.1em; line-height: 1.45; }
+.h2h-home .offer-choices { display: grid; gap: 0.5em; }
+.h2h-home .offer-choices .d-btn { min-height: 2.5em; border-color: var(--d-ink); background: #fff; }
+.h2h-home .offer-choices .d-btn--ink { background: var(--d-ink); }
+
+/* Free: the MIT licence as a paper card */
+.h2h-home .licence-art { font-size: clamp(14px, 1.3vw, 17px); margin-top: 1.5em; }
+.h2h-home .licence-card { display: grid; gap: 0.95em; padding: 1.7em 1.9em 1.9em; background: rgba(255, 255, 255, 0.7); }
+.h2h-home .licence-title { font-size: 1.3em; line-height: 1.2; }
+.h2h-home .licence-line { font-size: 1.1em; line-height: 1.5; }
+.h2h-home .licence-mark { padding: 0.05em 0.3em; margin: 0 -0.1em; border-radius: 0.3em 0.7em 0.4em 0.8em; background: var(--d-cyan); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.h2h-home .licence-rights { display: flex; align-items: center; justify-content: space-between; gap: 0.8em; margin-top: 0.4em; }
+.h2h-home .licence-rights .d-icon { width: 1.6em; height: 1.6em; transform: rotate(-6deg); }
+
+/* Try it beside what you have: the article import, once it has finished */
+.h2h-home .import-art { font-size: clamp(14px, 1.3vw, 16px); margin-top: 1.5em; }
+.h2h-home .import-page { display: grid; gap: 1.1em; padding: 1.7em 1.8em 1.9em; }
+.h2h-home .import-title { font-size: 1.25em; line-height: 1.25; }
+.h2h-home .import-progress { display: grid; justify-items: start; gap: 0.6em; padding-top: 1.1em; border-top: 1px solid var(--d-line); }
+.h2h-home .import-status { display: flex; align-items: center; gap: 0.6em; }
+
+@media (max-width: 1100px) {
+  .h2h-home .product-art { font-size: 14px; max-width: 480px; }
+}
+@media (max-width: 860px) {
+  .h2h-home .offer-art, .h2h-home .licence-art, .h2h-home .import-art { font-size: clamp(14px, 2.1vw, 16px); }
+}
+@media (max-width: 640px) {
+  .h2h-home .offer-art { font-size: 14px; }
+  .h2h-home .offer-page { min-height: 0; padding: 1.4em; }
+  .h2h-home .offer-checkout { width: 100%; }
+  .h2h-home .offer-widget { position: relative; right: auto; bottom: auto; width: auto; margin-top: 1.6em; }
+}

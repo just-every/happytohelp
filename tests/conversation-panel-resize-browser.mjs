@@ -25,6 +25,7 @@ try {
   await page.waitForURL('**/projects/**');
   await page.getByRole('link',{name:/All open/}).click();
   await page.locator('.conversation-list-items').getByText('Alpha Visitor',{exact:true}).click();
+  await page.locator('#chat .main').getByText(fixture.projects[0].message,{exact:true}).waitFor({state:'visible'});
   const panel = page.locator('#conversation-assistant');
   await page.waitForFunction(() => document.querySelector('#conversation-assistant')?.getAttribute('aria-hidden') === 'false');
   await page.screenshot({path:evidence + '/desktop-open.png'});

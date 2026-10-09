@@ -60,7 +60,6 @@ export default function useConversationSuggestions({
     const [ undoStack, setUndoStack ] = useState([]);
     const [ redoStack, setRedoStack ] = useState([]);
     const [ instructions, setInstructions ] = useState('');
-    const [ lastRequestKind, setLastRequestKind ] = useState(null);
     const previousToolResponse = useRef('');
     const assistRequest = useRef(0);
     const activeToolRequest = useRef(null);
@@ -126,7 +125,6 @@ export default function useConversationSuggestions({
 
         const requestId = ++assistRequest.current;
         const clientRequestId = uuidv4();
-        setLastRequestKind(options.tool ? 'tool' : 'suggestions');
         if (options.tool) {
             activeToolRequest.current = {
                 conversationId,
@@ -160,7 +158,9 @@ export default function useConversationSuggestions({
                 loading: false,
                 loading_message: '',
                 status: 'error',
-                error: 'Chat service unavailable.',
+                error: /^(?:CONFIGURATION_REQUIRED|PROVIDER_NOT_SELECTED):/.test(error?.message || '')
+                    ? error.message
+                    : 'Chat service unavailable.',
             });
             if (options.tool) {
                 activeToolRequest.current = null;
@@ -335,12 +335,12 @@ export default function useConversationSuggestions({
         activeTool,
         canGenerateSuggestions,
         disabled,
+        projectId,
         canRunTools: !disabled && !suggestions.loading && Boolean(message?.trim()),
         canRedo: redoStack.length > 0,
         canUndo: undoStack.length > 0,
         currentAI,
         instructions,
-        lastRequestKind,
         regenerate,
         redo,
         runTool,

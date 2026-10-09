@@ -18,15 +18,17 @@ later changes to the originals do not flow into it.
 
 These revisions identify where source came from, not the exact bytes of every
 current file; the source lock (`sources.lock.json`) records the current files.
-The Run Edit Run Base origin repository named in `edition.json` and
-`.edition/sources` is not public; the committed `.edition/sources` snapshots are
-the authoritative copies, so `pnpm run source:check` works offline without it.
+The committed `.edition/sources` archives are distinctly identified sanitized
+public projections of the historical Base inputs. Their receipts bind the exact
+private originals and original Git revisions; the projected bytes have new
+identities. `pnpm run source:check` and all public source comparisons work offline
+without private inputs. See the [derivation and private equivalence contract](../scripts/source-projection/README.md).
 Frozen evaluation comparator files are historical test inputs.
 
 ## Licensing
 
 The whole repository is MIT licensed; see the root [`LICENSE`](../LICENSE). That
-includes the homepage and setup artwork, the HappyToHelp mark and the dashboard
+includes the homepage drawings, the setup artwork, the HappyToHelp mark and the dashboard
 styles, all of which are first-party. The Claude and Codex names, and their logo
 glyphs in `src/ui/dashboard/components/LocalAgentGlyph.jsx` (from Lobe Icons, MIT),
 identify supported local tools; no endorsement is implied.
@@ -43,7 +45,7 @@ Third-party material keeps its own notice:
   nulls through required nullable tool parameters; `model_providers/openrouter.js`
   attributes requests to this open-source project), which are not part of the
   recorded upstream patch.
-- Inter, Feather icons, Lucide reply icons and Font Awesome Free: see
+- Outfit, Inter, Feather icons, Lucide reply icons and Font Awesome Free: see
   [PUBLIC-SOURCE-PROVENANCE.md](PUBLIC-SOURCE-PROVENANCE.md#third-party-components).
   The dashboard's earlier third-party admin theme (its styles, template entry
   files and avatar masks) and its Feather webfont were removed and replaced by
@@ -59,3 +61,12 @@ outputs or runtime state. The local agent packaging script uses an explicit
 allowlist (package metadata, README, `bin`, `lib` and optional skills). Test
 fixtures are synthetic and marked as such; none is a real customer record or a
 paid-provider result.
+
+## Image content credentials
+
+Widget avatars retain their original C2PA content credentials and certificate
+chain. The Adobe CAI operations contact in the signing certificate is a public
+service address, also present in the official
+[Content Authenticity SDK sample](https://github.com/contentauth/c2pa-rs/blob/58b9a092882b4dcbdbfe854073a1021d3fcbf9a9/sdk/src/identity/tests/fixtures/claim_aggregation/adobe_connected_identities.jpg).
+The publication configuration declares that exact service address as public;
+it does not permit arbitrary addresses or remove image provenance.

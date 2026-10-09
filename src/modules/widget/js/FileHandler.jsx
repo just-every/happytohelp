@@ -108,7 +108,7 @@ export function FileHandler(props) {
 
     return (<div className={props.className} {...getRootProps()}>
         <FileHandlerContext.Provider value={{ isDragActive, dragOpen: open }}>
-            <input tabIndex="0" {...getInputProps()} />
+            <input tabIndex="-1" {...getInputProps({ 'aria-label': context.text.message.tooltip_attach })} />
             {props.children}
         </FileHandlerContext.Provider>
     </div>)
@@ -118,6 +118,8 @@ export function FileHandlerList(props) {
     const context = useContext(AppContext);
     const { isDragActive } = React.useContext(FileHandlerContext)
     const [previewFile, setPreviewFile] = useState(false)
+    const previewContainerRef = React.useRef(null);
+    const hidePreview = useCallback(() => setPreviewFile(false), []);
 
     markupFiles(props.files)
     useEffect(() => {
@@ -138,17 +140,20 @@ export function FileHandlerList(props) {
     const fileList = props.files.map(file => (
         <li key={file.path+file.size}>
             <Media key={ file.path+file.size } upload={ true } media={ file } setPreview={ setPreviewFile } />
-            <FontAwesomeIcon className="happytohelp-preview-close" icon={falTimes} onClick={removeFile(file)} />
+            <button type="button" className="happytohelp-preview-close" aria-label={`Remove ${file.name || file.path || 'attachment'}`} onClick={removeFile(file)}>
+                <FontAwesomeIcon icon={falTimes} aria-hidden="true" />
+            </button>
         </li>
     ))
 
     return (<>
         <ModalPreview
             previewFile={previewFile}
-            hide={() => setPreviewFile(false)}
+            hide={hidePreview}
+            containerRef={previewContainerRef}
         />
         {fileList.length ? (
-            <div className="happytohelp-send-message-row">
+            <div className="happytohelp-send-message-row" ref={previewContainerRef}>
                 <ul className="happytohelp-files">{fileList}</ul>
             </div>
         ): null}

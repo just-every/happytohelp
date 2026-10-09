@@ -73,7 +73,7 @@ function EventItem({ conversation, item, showActor = false, actorName = null, in
                                     placement="top"
                                     trigger={[ 'hover', 'focus' ]}
                                     overlay={ renderTooltip }>
-                                    <time className="transcript-message-time" dateTime={ item.created_at } tabIndex={ 0 } aria-label="View note details">
+                                    <time className="transcript-message-time" dateTime={ item.created_at } tabIndex={ 0 }>
                                         <Moment format="LT" date={ item.created_at } />
                                     </time>
                                 </OverlayTrigger>

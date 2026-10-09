@@ -22,7 +22,7 @@
   "dependencyScope": "selectedEditionDependencies records the selected capability graph; edition execution adapters live in src/edition and are selected by the edition component.",
   "consumerIntegration": "Select the documented neutral source paths and supply the consumer authorization, storage and execution contracts. Full route/edition adapters additionally import HappyToHelp platform and may import its message-effects integration.",
   "editionIntegration": {
-    "sourceOwner": "runeditrun/happytohelp",
+    "sourceOwner": "just-every/happytohelp",
     "requiredContracts": [
       "src/platform identity and environment contracts",
       "edition D1 project schema and applied migration history"

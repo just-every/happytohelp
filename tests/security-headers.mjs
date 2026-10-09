@@ -29,6 +29,12 @@ test('an existing response policy gains frame-ancestors instead of being replace
  assert.equal(explicit.headers.get('Referrer-Policy'), 'no-referrer')
 })
 
+test('a response that denies all framing in both CSP and X-Frame-Options keeps both', () => {
+ const denied = withSecurityHeaders(html({'Content-Security-Policy': "default-src 'self'; frame-ancestors 'none'", 'X-Frame-Options': 'DENY'}), 'application', {RER_MANAGEMENT_ORIGIN: 'https://manage.example.test'})
+ assert.equal(denied.headers.get('Content-Security-Policy'), "default-src 'self'; frame-ancestors 'none'")
+ assert.equal(denied.headers.get('X-Frame-Options'), 'DENY')
+})
+
 test('published Help Center pages stay embeddable on customer sites', () => {
  const response = withSecurityHeaders(html(), 'embeddable', {})
  assert.equal(response.headers.get('Content-Security-Policy'), null)

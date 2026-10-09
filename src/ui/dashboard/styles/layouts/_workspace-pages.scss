@@ -55,7 +55,6 @@ body.workspace-page {
         padding-top: 80px;
         .main-content { width: 100%; max-width: 960px; padding-inline: 24px; }
     }
-    &.workspace-entry .display-4 { font-size: 26px; font-weight: 700; color: var(--conversation-ink); }
 
     @media (max-width: 767.98px) {
         .workspace-page-container { padding: 24px 16px; }

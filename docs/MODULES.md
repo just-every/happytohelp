@@ -8,21 +8,21 @@ routes additionally use `src/platform` identity, environment and D1 contracts.
 
 | Component | Useful source / integration contract | Storage and verification inputs |
 | --- | --- | --- |
-| `runeditrun/conversation` | `conversations/admission.ts` conditional writer; `socket.ts` persisted replay and delivery; edition chooses participants, permission and reply policy | 0002, 0004, 0007 migrations; conversation admission/socket tests |
-| `runeditrun/widget` | `widget/index.jsx` mountWidget with API origin, public widget key and target; independent browser source, Shadow DOM and native transport | build-widget script, transport/browser/lost-response tests; compatible conversation/identity API required |
-| `runeditrun/ai-support` | `assist/` evidence packet, history, two-pass suggestions; selected `llm/` and Ensemble text/tool runtime; `service.ts` native generation lifecycle | 020 migration and ai-support tests; generation policy binds to conversation; training adapter is an optional integration entry |
-| `runeditrun/knowledge` | ingestion/publication, search, citations and refresh; project identity plus D1/R2 and configured crawler/embedding/vector adapters | 0050–0053 migrations and knowledge tests; published corpus survives failed refresh |
-| `runeditrun/customer-context` | monitoring and attributed profile builders/validation, durable contextual work and personalization; consumer chooses identities/consent | both 0060 migration files and customer-context tests; configured neutral AI execution |
-| `runeditrun/local-computer` | explicit Integration interface for authorization/context/reply admission; paired real Node connector and existing-session MCP | 030 migration, local-agent tests, native lifecycle test; actual process execution stays on paired host |
-| `runeditrun/training-runs` | durable bounded matrix, artifacts/checks, recovery, explicit TrainingExecutor; original evaluation harnesses | 040–041 migrations, training/eval-harness tests; uncertain provider attempts are retained |
-| `runeditrun/plugin-sdk` | plugin UI message contract, host bridge and policy; consumer owns allowed plugin origins | standalone SDK tests; no provider or conversation database dependency |
-| `runeditrun/site-preview` | isolated preview proxy, project-scoped temporary grant, asset handling and request bounds; consumer supplies auth/origin policy | 0096 migration and preview tests; separate preview origin required |
+| `src/modules/conversations` | `conversations/admission.ts` conditional writer; `socket.ts` persisted replay and delivery; edition chooses participants, permission and reply policy | 0002, 0004, 0007 migrations; conversation admission/socket tests |
+| `src/modules/widget` | `widget/index.jsx` mountWidget with API origin, public widget key and target; independent browser source, Shadow DOM and native transport | build-widget script, transport/browser/lost-response tests; compatible conversation/identity API required |
+| `src/modules/ai-support` | `assist/` evidence packet, history, two-pass suggestions; selected `llm/` and Ensemble text/tool runtime; `service.ts` native generation lifecycle | 020 migration and ai-support tests; generation policy binds to conversation; training adapter is an optional integration entry |
+| `src/modules/knowledge` | ingestion/publication, search, citations and refresh; project identity plus D1/R2 and configured crawler/embedding/vector adapters | 0050–0053 migrations and knowledge tests; published corpus survives failed refresh |
+| `src/modules/customer-context` | monitoring and attributed profile builders/validation, durable contextual work and personalization; consumer chooses identities/consent | both 0060 migration files and customer-context tests; configured neutral AI execution |
+| `src/modules/local-computer` | explicit Integration interface for authorization/context/reply admission; paired real Node connector and existing-session MCP | 030 migration, local-agent tests, native lifecycle test; actual process execution stays on paired host |
+| `src/modules/training-runs` | durable bounded matrix, artifacts/checks, recovery, explicit TrainingExecutor; original evaluation harnesses | 040–041 migrations, training/eval-harness tests; uncertain provider attempts are retained |
+| `src/modules/plugin-sdk` | plugin UI message contract, host bridge and policy; consumer owns allowed plugin origins | standalone SDK tests; no provider or conversation database dependency |
+| `src/modules/site-preview` | isolated preview proxy, project-scoped temporary grant, asset handling and request bounds; consumer supplies auth/origin policy | 0096 migration and preview tests; separate preview origin required |
 
 The remaining identity, management, email/integration, public-site,
 legacy-import, dashboard and bootstrapping paths are edition integration. They
 remain editable source and can be extracted later when a real second use
 establishes a useful boundary. The public-site integration serves dynamic
-published help centers; the village homepage is the React root route in
+published help centers; the “Customer Support, Solved.” homepage is the React root route in
 `src/ui/homepage`. The original service's marketing, pricing, waitlist, referrer
 and homepage-widget paths are not part of this edition.
 The customer widget module remains an independently installable support surface.

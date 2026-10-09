@@ -129,13 +129,13 @@ export default function Interact({ setOpen }) {
                                   scrollRef={nodeRefChatList} agentTyping={agentTyping}/>
                     </div>
                     {errors.map((error, index) =>
-                        <div key={"error-" + index} className="happytohelp-error" onClick={() => {
+                        <div key={"error-" + index} className="happytohelp-error" role="alert">
+                            <span>{error}</span>
+                            <button type="button" className="happytohelp-error-close" aria-label="Dismiss message" onClick={() => {
                             setErrors(errors => errors.splice(index, 1) && [...errors])
                         }}>
-                            {error}
-                            <div className="happytohelp-error-close">
-                                <FontAwesomeIcon icon={falTimes} className="happytohelp-show-opened"/>
-                            </div>
+                                <FontAwesomeIcon icon={falTimes} className="happytohelp-show-opened" aria-hidden="true" />
+                            </button>
                         </div>
                     )}
                     <SendMessage mainView={mainView} setView={() => {

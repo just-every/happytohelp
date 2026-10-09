@@ -9,7 +9,7 @@ const rewriteTools = [
     { name: 'shorten', label: 'Make shorter', icon: 'fe-align-center' },
 ];
 
-export default function ConversationComposerTools({ disabled, hasHelper, canSend, onAttach, onSaved, onNote, onSendAndClose }) {
+export default function ConversationComposerTools({ disabled, hasHelper, canSend, canClose, onAttach, onSaved, onNote, onSendAndClose }) {
     const { canRunTools, canUndo, canRedo, runTool, undo, redo, suggestions } = useReplySuggestions();
     const historyDisabled = disabled || hasHelper || suggestions.loading;
 
@@ -23,38 +23,48 @@ export default function ConversationComposerTools({ disabled, hasHelper, canSend
             <i className="fe fe-plus" aria-hidden="true" />
         </Dropdown.Toggle>
         <Dropdown.Menu role="menu" aria-label="Reply tools">
-            <Dropdown.Header>Add to conversation</Dropdown.Header>
-            <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onAttach } disabled={ hasHelper }>
-                <i className="fe fe-paperclip" aria-hidden="true" /> Attach file
-            </Dropdown.Item>
-            <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onSaved }>
-                <i className="fe fe-bookmark" aria-hidden="true" /> { hasHelper ? 'Back to reply' : 'Saved replies' }
-            </Dropdown.Item>
-            <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onNote } aria-haspopup="dialog">
-                <i className="fe fe-lock" aria-hidden="true" /> Internal note
-            </Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Header>Write with AI</Dropdown.Header>
-            { rewriteTools.map(tool => <Dropdown.Item
-                key={ tool.name }
-                as="button"
-                type="button"
-                role="menuitem"
-                onClick={ () => runTool(tool.name) }
-                disabled={ !canRunTools }>
-                <i className={ `fe ${tool.icon}` } aria-hidden="true" /> { tool.label }
-            </Dropdown.Item>) }
-            <Dropdown.Divider />
-            <Dropdown.Item as="button" type="button" role="menuitem" onClick={ undo } disabled={ historyDisabled || !canUndo }>
-                <i className="fe fe-corner-up-left" aria-hidden="true" /> Undo draft change
-            </Dropdown.Item>
-            <Dropdown.Item as="button" type="button" role="menuitem" onClick={ redo } disabled={ historyDisabled || !canRedo }>
-                <i className="fe fe-corner-up-right" aria-hidden="true" /> Redo draft change
-            </Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onSendAndClose } disabled={ !canSend }>
-                <i className="fe fe-check-circle" aria-hidden="true" /> Send &amp; close
-            </Dropdown.Item>
+            <div role="group" aria-label="Add to conversation">
+                <div className="dropdown-header" aria-hidden="true">Add to conversation</div>
+                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onAttach } disabled={ hasHelper }>
+                    <i className="fe fe-paperclip" aria-hidden="true" /> Attach file
+                </Dropdown.Item>
+                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onSaved }>
+                    <i className="fe fe-bookmark" aria-hidden="true" /> { hasHelper ? 'Back to reply' : 'Saved replies' }
+                </Dropdown.Item>
+                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onNote } aria-haspopup="dialog">
+                    <i className="fe fe-lock" aria-hidden="true" /> Internal note
+                </Dropdown.Item>
+            </div>
+            <Dropdown.Divider role="separator" />
+            <div role="group" aria-label="Write with AI">
+                <div className="dropdown-header" aria-hidden="true">Write with AI</div>
+                { rewriteTools.map(tool => <Dropdown.Item
+                    key={ tool.name }
+                    as="button"
+                    type="button"
+                    role="menuitem"
+                    onClick={ () => runTool(tool.name) }
+                    disabled={ !canRunTools }>
+                    <i className={ `fe ${tool.icon}` } aria-hidden="true" /> { tool.label }
+                </Dropdown.Item>) }
+            </div>
+            <Dropdown.Divider role="separator" />
+            <div role="group" aria-label="Draft history">
+                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ undo } disabled={ historyDisabled || !canUndo }>
+                    <i className="fe fe-corner-up-left" aria-hidden="true" /> Undo draft change
+                </Dropdown.Item>
+                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ redo } disabled={ historyDisabled || !canRedo }>
+                    <i className="fe fe-corner-up-right" aria-hidden="true" /> Redo draft change
+                </Dropdown.Item>
+            </div>
+            { canClose && <>
+                <Dropdown.Divider role="separator" />
+                <div role="group" aria-label="Message actions">
+                    <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onSendAndClose } disabled={ !canSend }>
+                        <i className="fe fe-check-circle" aria-hidden="true" /> Send &amp; close
+                    </Dropdown.Item>
+                </div>
+            </> }
         </Dropdown.Menu>
     </Dropdown>;
 }
@@ -63,6 +73,7 @@ ConversationComposerTools.propTypes = {
     disabled: PropTypes.bool,
     hasHelper: PropTypes.bool,
     canSend: PropTypes.bool,
+    canClose: PropTypes.bool,
     onAttach: PropTypes.func.isRequired,
     onSaved: PropTypes.func.isRequired,
     onNote: PropTypes.func.isRequired,

@@ -1,0 +1,4 @@
+{
+  "version": "0.2.2",
+  "publicReleaseNotes": "HappyToHelp 0.2.2 adds publication-bound citations to AI answers and an observed, project-scoped activation checklist. It also updates knowledge authoring, widget settings, identity and invitation flows, management confirmations, and mobile list views. An upgrade from public v0.2.1 includes migrations 0105 through 0108."
+}

@@ -85,3 +85,10 @@ Cloudflare contracts checked 17 September 2026: [sending guide](https://develope
 SendGrid contracts checked 20 September 2026: [Mail Send API](https://www.twilio.com/docs/sendgrid/api-reference/mail-send/mail-send),
 [Inbound Parse setup](https://www.twilio.com/docs/sendgrid/for-developers/parsing-email/setting-up-the-inbound-parse-webhook),
 and [parse webhook security](https://www.twilio.com/docs/sendgrid/for-developers/parsing-email/securing-your-parse-webhooks).
+
+`checkSenderDomain(domain, resolver, dkimSelector)` checks SPF, DKIM and DMARC TXT
+record presence with an injectable resolver. The owner/admin route
+`GET /api/management/projects/:projectId/email-settings/check-domain?selector=resend`
+uses the project's saved sender address. Each missing record is named; lookup
+errors are unknown, never success. DKIM selectors depend on the provider. This
+is not provider domain verification or a delivered-mail receipt.

@@ -12,6 +12,9 @@ body.conversation-workspace #chat {
     }
 
     .chat-body {
+        .chat-content time { color: var(--conversation-quiet) !important; }
+        .message .chat-box-status { color: var(--conversation-quiet) !important; }
+
         .message-content.transcript-message-content,
         .message-content.message-note.transcript-note-content {
             font-family: inherit;
@@ -183,12 +186,20 @@ body.conversation-workspace #chat {
 
         .transcript-message-time,
         .transcript-event-time {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
             color: var(--conversation-quiet);
-            color: color-mix(in srgb, var(--conversation-quiet) 78%, var(--workspace-surface, #fff));
             margin-left: auto;
             font-size: .75rem;
             font-weight: 500;
             white-space: nowrap;
+        }
+
+        .transcript-message-content .media a.d-block {
+            display: flex !important;
+            align-items: center;
+            min-height: 24px;
         }
 
         .transcript-message-time {
@@ -377,7 +388,7 @@ body.conversation-workspace #chat {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            color: #bd681f;
+            color: #a95812;
             font-size: 0.78rem;
             font-weight: 500;
         }

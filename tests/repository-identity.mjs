@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 
 // package.json "repository" is the one canonical public repository value.
 // Files that cannot import it must carry exactly that value, so renaming the
@@ -29,7 +29,7 @@ test('descriptors agree with the canonical repository and release version', asyn
   assert.equal(seed.version, pkg.version);
   assert.equal(seed.license, 'MIT');
   const descriptor = JSON.parse(await read('rer-project.json'));
-  assert.equal(`https://github.com/${descriptor.sourceRepository}`, canonical);
+  assert.equal(descriptor.sourceRepository, canonical);
   assert.equal(descriptor.license, 'MIT');
   const managementProfile = JSON.parse(await read('management/integration/profile.json'));
   assert.equal(`https://github.com/${managementProfile.sourceRepository}`, canonical);
@@ -43,7 +43,11 @@ test('homepage derives its source and documentation links from package.json', as
   const module = await read('src/ui/homepage/repository.ts');
   assert.match(module, /import \{ repository \} from '\.\.\/\.\.\/\.\.\/package\.json'/);
   assert.match(module, /sourceUrl = repository\.url/);
-  for (const file of ['src/ui/homepage/repository.ts', 'src/ui/homepage/VillageHero.tsx', 'src/ui/homepage/VillageWorkshops.tsx', 'tests/homepage-browser.mjs']) {
+  const components = (await readdir(new URL('../src/ui/homepage', import.meta.url), { recursive: true })).filter(file => /\.tsx?$/.test(file)).map(file => `src/ui/homepage/${file}`);
+  assert.ok(components.includes('src/ui/homepage/Hero.tsx') && components.includes('src/ui/homepage/GetStarted.tsx') && components.includes('src/ui/homepage/drawings/LicenceDrawing.tsx'));
+  assert.ok(!components.some(file => /YoursToRun/.test(file)), 'the retired Yours to run section stays removed');
+  assert.ok(!/costsUrl|hostedUrl|runeditrun/i.test(module), 'the homepage links no costs or hosted-options address');
+  for (const file of [...components, 'tests/homepage-browser.mjs']) {
     assert.ok(!/https:\/\/github\.com\/[^'"`\s]+/.test(await read(file)), `${file} must not hard-code a repository URL`);
   }
 });

@@ -190,10 +190,8 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                     <ConversationHeader
                         conversation={ conversation }
                         onPanelToggle={ assistant.toggle }
-                        onLocalPanelOpen={ assistant.openLocal }
                         isPanelVisible={ assistant.isVisible }
                         panelToggleRef={ assistant.toggleRef }
-                        localPanelToggleRef={ assistant.localToggleRef }
                         isLoading={ isLoading || isLoadingMore }
                         atTop={ atTop }
                     />
@@ -225,6 +223,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         onContentChange={ updateDraftContent }
                         onAssistantDisabledChange={ setIsAssistantDisabled }
                         files={ draftFiles }
+                        isResolved={ Boolean(conversation.resolved_at) }
                         isEnabled={ isConversationReady && buckets.length > 0 && !isLoading && !isSending }
                     />
                 </div>

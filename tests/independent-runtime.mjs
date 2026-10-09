@@ -5,6 +5,7 @@ import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {artifactRuntime} from './helpers/independent-artifact.mjs';
 import {verifyStreamedRejection} from './helpers/streamed-rejection.mjs';
+import {baselineTables, addedTables} from './helpers/independent-schema.mjs';
 const artifact=JSON.parse(await readFile('delivery-artifact/happytohelp-worker-artifact.json'));
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-independent-proof-'));
 const setupToken='local-test-only-installation-credential';
@@ -44,10 +45,9 @@ try{
  await runtime.withStorage(async storage=>{
   await assert.rejects(runtime.start(),/Close native storage/);
   await storage.inspect(object);
-  // Exact schema guard: 97 tables. Migration 0102_public_abuse_limits adds
-  // abuse_counters and 0103_contact_erasure adds contact_erasures and
-  // contact_erasure_objects to the previous 94.
-  before=await snapshot(storage);assert.equal(Object.keys(before).length,97);
+  // Exact 108-table schema: 97 baseline tables and 11 named additions.
+  before=await snapshot(storage);assert.equal(Object.keys(before).length,108);
+  assert.deepEqual(Object.keys(before).sort(),[...baselineTables,...addedTables].sort());
   let cursor;do{const page=await storage.inspect({list:{...(cursor?{cursor}:{})}});for(const o of page.objects)objects.push(await storage.inspect({key:o.key}));cursor=page.truncated?page.cursor:undefined}while(cursor);
   assert.deepEqual(objects.find(o=>o.key===object.key),{key:object.key,bytes:object.bytes,httpMetadata:object.options.httpMetadata,customMetadata:object.options.customMetadata});
   const uploaded=(await storage.inspect({sql:'SELECT object_key FROM media WHERE id=?',values:[media.id]})).results[0];

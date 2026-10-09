@@ -1,0 +1,9 @@
+.confirm-dialog{width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:24px;border:1px solid #d6dce8;border-radius:12px;background:#fff;color:var(--bs-body-color);box-shadow:0 18px 48px #1721453d}
+.confirm-dialog::backdrop{background:#0f1a3a73}
+.confirm-dialog__title{font-size:18px;font-weight:600;margin:0 0 12px;overflow-wrap:anywhere}
+.confirm-dialog__body{line-height:1.5;margin-bottom:20px}.confirm-dialog__body p{margin:0 0 10px}.confirm-dialog__body ul{margin:0 0 10px;padding-left:20px}
+.confirm-dialog .form-group{margin-bottom:16px}
+.confirm-dialog__actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:12px}
+/* Text and fill colours chosen for AA contrast on white (the stock outline and danger buttons fall short). */
+.confirm-dialog .confirm-dialog__cancel{color:#3d4b6b;border-color:#7d8aa6;background:#fff}.confirm-dialog .confirm-dialog__cancel:hover:not(:disabled){color:#fff;background:#3d4b6b;border-color:#3d4b6b}
+.confirm-dialog .confirm-dialog__confirm{color:#fff;background:#b4233f;border-color:#b4233f}.confirm-dialog .confirm-dialog__confirm:hover:not(:disabled){background:#8f1a31;border-color:#8f1a31}

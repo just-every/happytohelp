@@ -21,7 +21,7 @@
     color:#f7f8ff;
     align-self:start;
     padding:24px;
-    background: #07152b4d;
+    background: #07152bf2;
     backdrop-filter: blur(6px);
     border-radius:24px
 }
@@ -100,7 +100,7 @@
     margin:0 0 12px
 }
 .setup-panel>p {
-    color:#61788e;
+    color:#52667d;
     margin:0 0 26px
 }
 .setup-steps {
@@ -110,7 +110,7 @@
     display:flex;
     justify-content:space-between;
     gap:12px;
-    color:#738397;
+    color:#536a82;
     font-size:13px
 }
 .setup-steps li {
@@ -156,7 +156,7 @@
     min-width:0
 }
 .setup-field small,.setup-note {
-    color:#64788e;
+    color:#52667d;
     font-size:13px;
     font-weight:400
 }
@@ -191,7 +191,7 @@
 }
 .setup-primary {
     border:0;
-    background:linear-gradient(120deg,#9255fc,#6537e7);
+    background:linear-gradient(120deg,#884ceb,#6537e7);
     color:#fff;
     box-shadow:0 5px 12px #7949de28
 }
@@ -215,7 +215,7 @@
     border-bottom:1px solid #e0e6ef
 }
 .setup-review dt {
-    color:#64788e
+    color:#52667d
 }
 .setup-review dd {
     margin:0;

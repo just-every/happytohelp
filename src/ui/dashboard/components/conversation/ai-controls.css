@@ -1,0 +1,25 @@
+body.conversation-workspace #chat .conversation-assistant-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+}
+
+body.conversation-workspace #chat .conversation-assistant-toggle:focus-visible {
+    outline: 2px solid var(--conversation-accent);
+    outline-offset: 2px;
+}
+
+body.conversation-workspace #chat .conversation-ai-generate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-width: 6.25rem;
+}
+
+body.conversation-workspace #chat .conversation-ai-generate .spinner-border {
+    width: .9rem;
+    height: .9rem;
+    border-width: .12em;
+}

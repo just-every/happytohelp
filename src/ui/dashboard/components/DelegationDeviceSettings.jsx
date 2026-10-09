@@ -59,7 +59,7 @@ export default function DelegationDeviceSettings({ device, projectId, projectNam
         </div>
         { loading ? <p role="status">Loading settings…</p> : <React.Fragment>
             <label htmlFor="delegation-workspace-folders">Local folder paths</label>
-            <textarea id="delegation-workspace-folders" rows={ 3 } value={ folders } onChange={ event => { setFolders(event.target.value); setSaved(false); } } placeholder={'/Users/you/projects/web\n/Users/you/projects/api'} disabled={ saving } spellCheck={ false } />
+            <textarea id="delegation-workspace-folders" rows={ 3 } value={ folders } onChange={ event => { setFolders(event.target.value); setSaved(false); } } placeholder={'/projects/web\n/projects/api'} disabled={ saving } spellCheck={ false } />
             <p>Optional, one full path per line. These guide the agent; it can work elsewhere or find the project itself. Changes apply to the next task.</p>
             <label htmlFor="delegation-concurrency">Tasks at once on this computer</label>
             <select id="delegation-concurrency" value={ concurrency } onChange={ event => { setConcurrency(event.target.value); setSaved(false); } } disabled={ saving }>

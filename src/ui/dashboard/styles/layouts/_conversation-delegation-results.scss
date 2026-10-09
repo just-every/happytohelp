@@ -42,19 +42,6 @@ body.conversation-workspace {
         .delegation-job__completed-details > summary { color: var(--conversation-muted); }
         .delegation-history-toggle { justify-self: start; padding: .25rem 0; font-size: .7rem; }
     }
-
-    .delegation-computer-settings { display: grid; gap: .45rem; padding-top: .85rem; border-top: 1px solid var(--conversation-line); }
-    .delegation-computer-settings h3 { display: flex; align-items: center; gap: .4rem; margin: 0; color: var(--conversation-ink); font-size: .82rem; font-weight: 700; }
-    .delegation-computer-settings h3 > i { color: var(--conversation-accent); }
-    .delegation-computer-settings p { margin: .2rem 0 .3rem; color: var(--conversation-muted); font-size: .73rem; line-height: 1.5; }
-    .delegation-computer-settings label { margin: .25rem 0 0; color: var(--conversation-ink); font-size: .73rem; font-weight: 650; }
-    .delegation-computer-settings textarea,
-    .delegation-computer-settings select { width: 100%; min-width: 0; padding: .6rem; color: var(--conversation-ink); background: var(--workspace-field-bg, #fff); border: 1px solid var(--conversation-line); border-radius: .5rem; font: inherit; font-size: .75rem; }
-    .delegation-computer-settings textarea { resize: vertical; line-height: 1.5; }
-    .delegation-computer-settings textarea:focus,
-    .delegation-computer-settings select:focus { outline: 2px solid var(--conversation-accent); outline-offset: 1px; }
-    .delegation-computer-settings > button { justify-self: start; }
-    .delegation-computer-settings .delegation-computer-settings__error { color: #a84855; }
 }
 :root { --local-agent-codex-color: #737aff; }
 

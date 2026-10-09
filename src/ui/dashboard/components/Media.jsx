@@ -26,9 +26,9 @@ function Media({ media }) {
             </Modal>
         </>
         : <div className="media mb-1">
-            <a href={ media.url } className="icon-shape me-3" target="_blank" rel="noreferrer">
+            <span className="icon-shape me-3" aria-hidden="true">
                 <i className="fe fe-paperclip"></i>
-            </a>
+            </span>
             <div className="media-body overflow-hidden flex-fill">
                 <a href={ media.url } className="d-block text-truncate font-medium text-reset" target="_blank" rel="noreferrer">{ media.filename_original }</a>
                 <ul className="list-inline small mb-0">

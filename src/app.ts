@@ -17,7 +17,17 @@ import { applyMessageEffects } from './message-effects'
 import { routes as sitePreview,brandMediaRoutes } from './modules/site-preview/routes'
 import { previewRoutes } from './modules/site-preview/proxy'
 
+import {delegation} from './edition/delegation/routes'
+import {consent} from './edition/delegation/consent'
+import {nativeDelegation} from './edition/delegation/launch'
+
 export const app = new Hono<AppEnv>()
+app.use('/api/*',async(c,next)=>{
+ const origin=new URL(c.req.url);
+ // A configured canonical origin wins; otherwise capture the actual app URL for queued work.
+ if(!c.env.APP_ORIGIN)c.env={...c.env,APP_ORIGIN:origin.origin};
+ await next();
+})
 app.use('/api/*', projectCors)
 app.onError((error,c) => {
  // An exception carrying its own response (e.g. 429 with Retry-After) keeps its headers and JSON body.
@@ -31,6 +41,9 @@ app.get('/health',async c=>{
  try { await Promise.all([c.env.DB.prepare('SELECT 1').first(),c.env.FILES.head('_health_probe')]);return c.json({status:'ok',runtime:'native-rer',database:'reachable',files:'reachable'}) }
  catch { return c.json({status:'unavailable',runtime:'native-rer'},503) }
 })
+app.route('/api/delegation/v1',delegation)
+app.route('/api/delegation',nativeDelegation)
+app.route('/delegation',consent)
 app.route('/api/identity',identity)
 app.route('/api/conversations',createConversationRoutes(applyMessageEffects))
 app.route('/api/conversations',widgetEvents)

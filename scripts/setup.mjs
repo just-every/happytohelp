@@ -1,9 +1,11 @@
 import { collectMigrations, root } from './migrations.mjs';
 import { run } from './deployment/run.mjs';
 import { prepareRemote, settings } from './deployment/config.mjs';
+import { validateRuntimeEnvironment } from './deployment/environment.mjs';
 
 const args = process.argv.slice(2).filter(x => x !== '--');
 if (args.length !== 1 || !['--local', '--remote', '--plan'].includes(args[0])) throw new Error('Usage: pnpm run setup -- --local|--remote|--plan');
+validateRuntimeEnvironment(process.env);
 if (args[0] === '--plan') { console.log(JSON.stringify(settings(), null, 2)); process.exit(0); }
 await collectMigrations();
 if (args[0] === '--local') {

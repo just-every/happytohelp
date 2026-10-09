@@ -8,17 +8,19 @@ Base edition-authoring 1.1.0 commands.
 
 The retained tool is selected independently of runtime Base. Base runtime/tool origin is
 `ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1`. `src/base` maps to
-`foundation/runtime`; `scripts/edition-authoring` maps to `edition-authoring`;
+the runtime folder under foundation; `scripts/edition-authoring` maps to `edition-authoring`;
 `scripts/operations.mjs` maps to `operations/operations.mjs`. The parent comparison
-is the committed `foundation/template`. The independently selected onboarding source
+is the committed template folder under foundation. The independently selected onboarding source
 (`scripts/base-onboarding`) records Base comparison commit
 `390328736c8dae82f87c86e5af4c17cca6bb9c00`, path `onboarding`; `edition.json` is
 the authoritative record of every component's comparison revision.
 Local changes are effective source; origin
 mappings never claim current bytes are equal to old bytes.
-The Base origin repository (`https://github.com/runeditrun/base.git`) is not
-public; the committed `.edition/sources` snapshots are the authoritative copies,
-so `pnpm source:check` works offline and never needs to reach it.
+The comparison origins in `edition.json` select distinctly identified public
+projections in `.edition/sources`. Their receipts bind the original Git revisions
+and private archive hashes without distributing private origin text. Public
+checks and comparisons run offline; private originals are used only by the
+separate [projection equivalence proof](../scripts/source-projection/README.md).
 
 Inspect with `pnpm source:inspect`. After the owner freezes the intended tree,
 stage actual inputs, run `pnpm source:lock`, stage sources.lock.json and retained

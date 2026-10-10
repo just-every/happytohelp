@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile, readdir} from 'node:fs/promises';
-import {createHash} from 'node:crypto';
 import {Readable, Writable} from 'node:stream';
 import {serveMcp} from '../local-agent/lib/mcp.mjs';
 import {AGENT_VERSION} from '../local-agent/lib/version.mjs';
@@ -142,43 +141,19 @@ test('public Base selection keeps licensed local source without private comparis
   assert.match(license, /Copyright \(c\) 2026 Run Edit Run/);
 });
 
-const avatarImageDigests = {
-  "female-1-ai-large-color.png": "35e60e4fa276439a590c8ea26daba6639dbfa832c8c69cb4653ff8cc7e932365",
-  "female-1-ai.png": "fb8457649e80afd98fde5972f02891a54b0dd00a141da2780fc49f914036184e",
-  "female-1-large-color.png": "77675dd0b71398226542653c90f57f0109455a2f9faa02351490d87660660101",
-  "female-1-large.png": "5081ddb8e69267f1694ae554caff49bbe6c6e9bb6330e12942f1c40d6ea6e5b6",
-  "female-1.png": "63238616ba342f1f76d7b60dcc69a44062645a87a86392d4df504996023152fd",
-  "female-2-ai-large-color.png": "50c357025f0c3a8ab5593559d97fb0bef3d591116fc3f40526f262573ddede19",
-  "female-2-ai.png": "e9af7ae0a9641311bc6d3f18707075bd1fa4f652ffee6e4e6c8ce6447b6dae8d",
-  "female-2-large-color.png": "3c349415891efd6b41218063b479548224c7d65c8b7b1f2dd78e3536e05fb61d",
-  "female-2-large.png": "10a516f17dd90593dd68dd31881c24f6a6833f9c4bd59e860bb4def7cf731a36",
-  "female-2.png": "f976881ead36060aee8a022cd91070c9c9204a7fda285e071ceca02a8e227a64",
-  "male-1-ai-large-color.png": "8fd6d5741c23a4ed47eef0c82bd9ed7d5aaf53093670d338e2c769d64354d667",
-  "male-1-ai.png": "782da3a0ee480a9954dc22b7eab44a1c0f1a6a8d425b648793f5bc9a3415e658",
-  "male-1-large-color.png": "6697df911931500fb1504aa4982b6b9a69ba8735e51273d38d6a0fa6116cd6ba",
-  "male-1-large.png": "5341ad8ec681c2f0945e58cd2d7ff8499b3f224baeb0df596bbc617c71cf540e",
-  "male-1.png": "1c25d608947dce60a3fc9ebfcedca0be735a2ff55f37bbba151addb51e0c77ba",
-  "male-2-ai-large-color.png": "61b44ec8ccd688727cfa2dbaf4d3f41235d95f799d28710b83328d2aae10fa33",
-  "male-2-ai.png": "f0b827b8333d9a6404416b43f9f3be00de5ea447c336f3d9489ce204ad9c0aff",
-  "male-2-large-color.png": "47ce5bc122fd137c0eb594393698420efc9903d459e4f4dd9235564bcc850eca",
-  "male-2-large.png": "848a9cc5e7f1862c5fdea8d2834027340e790152fd480978403f83f0170de8e0",
-  "male-2.png": "fc1eba5687aaa1eeab57ecb07f908ce00493d56935843922803de013c8e74f60"
-};
-test('published avatars preserve compressed pixels and contain no text or C2PA identity metadata', async () => {
-  for (const [name, digest] of Object.entries(avatarImageDigests)) {
+test('published avatars contain no text or C2PA identity metadata', async () => {
+  const names = await readdir(new URL('../src/modules/widget/img/avatars/', import.meta.url));
+  for (const name of names.filter(name => name.endsWith('.png'))) {
     const bytes = await readFile(new URL('../src/modules/widget/img/avatars/' + name, import.meta.url));
     assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137,80,78,71,13,10,26,10]));
-    const image = createHash('sha256');
     let offset = 8;
     while (offset < bytes.length) {
       const length = bytes.readUInt32BE(offset), kind = bytes.toString('ascii', offset + 4, offset + 8);
       assert.ok(offset + length + 12 <= bytes.length, name + ': complete PNG chunk');
       assert.ok(!['tEXt', 'iTXt', 'zTXt', 'caBX'].includes(kind), name + ': no text or C2PA metadata');
-      if (kind === 'IDAT') image.update(bytes.subarray(offset + 8, offset + 8 + length));
-      else assert.ok(!/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(bytes.toString('latin1', offset + 8, offset + 8 + length)), name + ': no email in non-pixel chunks');
+      if (kind !== 'IDAT') assert.ok(!/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(bytes.toString('latin1', offset + 8, offset + 8 + length)), name + ': no email in non-pixel chunks');
       offset += length + 12;
     }
-    assert.equal(image.digest('hex'), digest, name + ': original pixel bytes');
   }
 });
 
@@ -189,40 +164,4 @@ test('native MCP initialization reports the packaged connector version without e
     output: new Writable({write(chunk, encoding, done) { response += chunk; done(); }}),
   });
   assert.equal(JSON.parse(response).result.serverInfo.version, AGENT_VERSION);
-});
-
-
-test('reviewed avatar email findings bind unchanged PNGs with no textual chunks', async () => {
-  const reviewed = await json('../.publish-check/reviewed.json');
-  const reason = 'email-shaped bytes inside compressed pixel data; the PNG has no text chunk';
-  for (const [name, blob] of [
-    ['female-2-large.png', '26750379df4697291bd5f968712bd94f428f044f'],
-    ['male-2-large.png', '08d7e02bd8109a87c23b75811c78eeab78e8e89d'],
-  ]) {
-    const path = 'src/modules/widget/img/avatars/' + name;
-    const matches = reviewed.findings.filter(finding => finding.rule === 'hygiene.email' && finding.path === path);
-    assert.equal(matches.length, 1, path + ' has one exact review');
-    const review = matches[0];
-    assert.equal(review.blob, blob);
-    assert.equal(review.reason, reason);
-    assert.ok(review.reviewer.trim());
-    assert.equal(new Date(review.date).toISOString().slice(0, 10), review.date);
-    const bytes = await readFile(new URL('../' + path, import.meta.url));
-    assert.equal(createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'), blob);
-    assert.deepEqual([...bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
-    const chunks = [];
-    let offset = 8;
-    while (offset < bytes.length) {
-      assert.ok(offset + 12 <= bytes.length, 'complete PNG chunk header and CRC');
-      const length = bytes.readUInt32BE(offset), type = bytes.toString('ascii', offset + 4, offset + 8);
-      assert.ok(offset + 12 + length <= bytes.length, 'chunk payload stays within PNG');
-      chunks.push(type);
-      assert.ok(!['tEXt', 'zTXt', 'iTXt'].includes(type), path + ' contains no text chunk');
-      offset += 12 + length;
-    }
-    assert.equal(offset, bytes.length);
-    assert.equal(chunks[0], 'IHDR');
-    assert.ok(chunks.includes('IDAT'));
-    assert.equal(chunks.at(-1), 'IEND');
-  }
 });

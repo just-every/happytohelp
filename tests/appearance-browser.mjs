@@ -6,20 +6,14 @@ import {createRuntime} from './helpers/emitted-runtime.mjs';
 import {assertHelpSearchFits,assertHelpSearchReachable} from './helpers/appearance-geometry.mjs';
 import {exerciseLongAppearance} from './helpers/appearance-long-content.mjs';
 import {assertHelpLinksReadable} from './helpers/help-center-link-contrast.mjs';
+import {appearanceAudit} from './helpers/appearance-audit.mjs';
 const directory=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/appearance');await mkdir(directory,{recursive:true});
 const runtime=await createRuntime(),origin=runtime.origin,records=[];let browser,success=false;
 const api=async(path,{token,body,method=body?'POST':'GET'}={})=>{const response=await fetch(origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{})});return response};
 const brand={brand_name:'Orchid Support',logo_url:origin+'/site-assets/images/happytohelp-logo.png',avatar_url:origin+'/site-assets/images/happytohelp-logo.png',welcome_message:'Welcome to Orchid. How can we help?',primary_color:'#204b3a'};
 // Use an actual bundled image; no generated/mocked application content.
 brand.logo_url=brand.avatar_url=origin+'/homepage/media/brands/happytohelp-favicon.png';
-const audit=async(page,name)=>{
- await page.addScriptTag({path:resolve('node_modules/axe-core/axe.min.js')});
- const images=page.locator('.help-center-logo,.help-center-welcome img,.happytohelp-brand-heading img,.happytohelp-welcome img');
- for(const img of await images.all())if(await img.isVisible())await img.evaluate(el=>{if(!el.complete)return new Promise((ok,fail)=>{el.onload=ok;el.onerror=()=>fail(Error('Brand image failed to load'))});if(!el.naturalWidth)throw Error('Brand image has no pixels')});
- const result=await page.evaluate(async()=>{const r=await axe.run();return r.violations.filter(v=>['serious','critical'].includes(v.impact));});
- await page.screenshot({path:join(directory,name+'.png'),fullPage:true});records.push({name,violations:result});await writeFile(join(directory,'axe.json'),JSON.stringify(records,null,2));
- assert.deepEqual(result,[],name+' serious/critical axe violations');assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' no horizontal overflow');
-};
+const audit=appearanceAudit(directory,records);
 try{
  browser=await chromium.launch({headless:true});
  const tenant=await runtime.seedTenant({name:'Orchid',email:'orchid@example.test',allowedOrigin:origin}),other=await runtime.seedTenant({name:'Other tenant',email:'other@example.test',allowedOrigin:origin});

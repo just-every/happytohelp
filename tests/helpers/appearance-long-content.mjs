@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+import {join, resolve} from 'node:path';
 import {assertHelpSearchFits, assertHelpSearchReachable} from './appearance-geometry.mjs';
 
 async function saveAppearance(page, origin, projectId, values) {
@@ -67,6 +69,9 @@ async function tabWithinWidget(page, target, key) {
 async function assertTranscriptKeyboardScroll(page) {
  const transcript = page.getByRole('region', {name: 'Chat transcript', exact: true});
  const composer = page.locator('textarea[name=content]');
+ // The suite keeps several pages open. Native keyboard scrolling needs the
+ // visitor tab active as well as its DOM element focused, especially on macOS.
+ await page.bringToFront();
  await composer.focus();
  await tabWithinWidget(page, transcript, 'Shift+Tab');
  assert.ok(await transcript.evaluate(element => element === element.getRootNode().activeElement), 'Keyboard reaches the transcript from the composer');
@@ -81,7 +86,18 @@ async function assertTranscriptKeyboardScroll(page) {
    await page.keyboard.press('Home');
    await page.waitForFunction(element => element.scrollTop <= 1, element);
    await page.keyboard.press('PageDown');
-   await page.waitForFunction(element => element.scrollTop > 1, element);
+   try {
+    await page.waitForFunction(element => element.scrollTop > 1, element);
+   } catch (error) {
+    const state = await transcript.evaluate(element => ({viewport: {width: innerWidth, height: innerHeight},
+     scrollTop: element.scrollTop, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight,
+     elementFocused: element.getRootNode().activeElement === element, documentFocused: document.hasFocus(),
+     visibility: document.visibilityState, scrollBehavior: getComputedStyle(element).scrollBehavior}));
+    console.error('Transcript keyboard scroll failed:', state);
+    await writeFile(join(resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/appearance'), 'keyboard-failure.json'),
+     JSON.stringify({state, error: error.stack}, null, 2));
+    throw error;
+   }
    await page.keyboard.press('Home');
    await page.waitForFunction(element => element.scrollTop <= 1, element);
   } finally {

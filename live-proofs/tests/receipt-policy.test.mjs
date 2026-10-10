@@ -4,11 +4,11 @@ import { readFileSync } from 'node:fs';
 import { evidenceRepository } from '../policy.mjs';
 
 test('receipt storage requires an explicit credential-free GitHub repository', () => {
-  const url = 'https://github.com/example/receipts.git';
+  const url = 'https://github.com/just-every/happytohelp.git';
   assert.equal(evidenceRepository(url), url);
   for (const value of [undefined, '', '/local/store', 'file:///local/store',
-    'https://user:password@github.com/example/receipts.git',
-    'https://elsewhere.example/example/receipts.git', `${url}?token=test`,
+    'https://user:password@github.com/just-every/happytohelp.git',
+    'https://elsewhere.example/just-every/happytohelp.git', `${url}?token=test`,
     `${url}\n`, 'https://github.com/example/../receipts.git']) {
     assert.throws(() => evidenceRepository(value), /receipt-store-unconfigured/);
   }

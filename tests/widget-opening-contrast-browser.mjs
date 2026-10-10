@@ -122,8 +122,18 @@ try {
             assert.equal(result.accepted, true);
         }
         await page.getByText('Support update 24: Your support conversation remains available while you compose a reply.', {exact: true}).waitFor();
+        const transcript = await page.locator('.happytohelp-chatlist-container').elementHandle();
+        try {
+            await transcript.evaluate(element => {element.scrollTop = element.scrollHeight;});
+            // scroll-behavior is smooth: assignment starts motion, so sample
+            // the real bottom only once that motion has finished.
+            await page.waitForFunction(element => element.scrollTop > 0 &&
+                Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) <= 1,
+                transcript, {timeout: 15000});
+        } finally {
+            await transcript.dispose();
+        }
         const scroll = await page.locator('.happytohelp-chatlist-container').evaluate(element => {
-            element.scrollTop = element.scrollHeight;
             return {top: element.scrollTop, height: element.scrollHeight, viewport: element.clientHeight};
         });
         assert.ok(scroll.top > 0 && scroll.height > scroll.viewport, 'real transcript must scroll');

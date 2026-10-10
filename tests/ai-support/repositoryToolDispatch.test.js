@@ -61,20 +61,20 @@ test('required nullable values distinguish omitted, disallowed, and explicit nul
 test('repository read dispatch accepts the nullable default arguments and records evidence', async () => {
     const originalFetch = globalThis.fetch;
     globalThis.fetch = async url => {
-        assert.equal(String(url), 'https://api.github.com/repos/org/repo/contents/README.md');
+        assert.equal(String(url), 'https://api.github.com/repos/just-every/happytohelp/contents/README.md');
         return Response.json({
             type: 'file',
             encoding: 'base64',
             size: 24,
             sha: 'sha-readme',
-            html_url: 'https://github.com/org/repo/blob/sha-readme/README.md',
+            html_url: 'https://github.com/just-every/happytohelp/blob/sha-readme/README.md',
             content: btoa('Product README evidence.\n'),
         });
     };
     try {
         const evidenceIds = new Set();
         const env = {
-            DB: { prepare: sql => ({ bind: () => ({ first: async () => sql.includes('github_connections') ? null : ({ repositories_json: '["org/repo"]', allow_agents: 1, allow_contacts: 1 }) }) }) },
+            DB: { prepare: sql => ({ bind: () => ({ first: async () => sql.includes('github_connections') ? null : ({ repositories_json: '["just-every/happytohelp"]', allow_agents: 1, allow_contacts: 1 }) }) }) },
             GITHUB_TOKENS: JSON.stringify({ project: 'mapped-token' }),
         };
         const tools = await repositoryTools(env, 'project', 'agent', evidenceIds);
@@ -85,17 +85,17 @@ test('repository read dispatch accepts the nullable default arguments and record
             type: 'function',
             function: {
                 name: 'repo_read_file',
-                arguments: JSON.stringify({ repository: 'org/repo', path: 'README.md', ref: null, start_offset: 0, expected_sha: null }),
+                arguments: JSON.stringify({ repository: 'just-every/happytohelp', path: 'README.md', ref: null, start_offset: 0, expected_sha: null }),
             },
         }, tool, { agent_id: 'test-agent', tools: [tool], modelSettings: {} });
 
         const output = JSON.parse(result);
-        assert.equal(output.repository, 'org/repo');
+        assert.equal(output.repository, 'just-every/happytohelp');
         assert.equal(output.path, 'README.md');
         assert.equal(output.ref, null);
-        assert.equal(output.evidence_id, 'repo:org/repo:sha-readme:README.md');
-        assert.deepEqual(output.evidence_ids, ['repo:org/repo:sha-readme:README.md']);
-        assert.deepEqual([...evidenceIds], ['repo:org/repo:sha-readme:README.md']);
+        assert.equal(output.evidence_id, 'repo:just-every/happytohelp:sha-readme:README.md');
+        assert.deepEqual(output.evidence_ids, ['repo:just-every/happytohelp:sha-readme:README.md']);
+        assert.deepEqual([...evidenceIds], ['repo:just-every/happytohelp:sha-readme:README.md']);
     } finally {
         globalThis.fetch = originalFetch;
     }

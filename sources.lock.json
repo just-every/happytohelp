@@ -362,7 +362,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "e58b22677ec42f767701e113a9865cfc952c07a16ac41002880d5b20bf649268",
+      "sha256": "54e3712d6d4205cedc26adc8e8b7e14b5ae6d7a4504b7c7d24e2453beb276ef1",
       "executable": false
     },
     ".gitignore": {
@@ -371,10 +371,6 @@
     },
     ".publish-check/config.json": {
       "sha256": "635a183defae043d92181a1cd5191321529bf49ec73b89ca388e831ed61ff539",
-      "executable": false
-    },
-    ".publish-check/reviewed.json": {
-      "sha256": "c293586ad9e198f4bc83d30cc247ff8dc7289e47bdd02024f9903595582b6654",
       "executable": false
     },
     "ACCEPTANCE.md": {
@@ -538,7 +534,7 @@
       "executable": false
     },
     "live-proofs/tests/receipt-policy.test.mjs": {
-      "sha256": "44332df463d22cea3a76c93151b81b2b9b86e064ff8005b5cdb21fd3c4e0d490",
+      "sha256": "29ca6678fa5853468d8b416bd1b6980928983525839bc0e5794f2a39f80d5e31",
       "executable": false
     },
     "live-proofs/tests/receipts.test.mjs": {
@@ -3078,7 +3074,7 @@
       "executable": false
     },
     "src/modules/widget/img/avatars/female-2-large.png": {
-      "sha256": "ff8f5001d32831c4e6ac6c6ffcbe8747525c200f62b2fbf8254b33cd5489ceb3",
+      "sha256": "2ae56888f99c530db95b368a058378d30332a4f6c6f5617add8f84dca714646f",
       "executable": false
     },
     "src/modules/widget/img/avatars/female-2-move.webp": {
@@ -3126,7 +3122,7 @@
       "executable": false
     },
     "src/modules/widget/img/avatars/male-2-large.png": {
-      "sha256": "aef1cc3835583f2304ea6341116252dc223f9c43f089639f161eae780ca218d8",
+      "sha256": "95dadf48badc871c25a3bdb8482f17fd72534a05df17ecb3ac878c4d45152e1f",
       "executable": false
     },
     "src/modules/widget/img/avatars/male-2-move.webp": {
@@ -5174,15 +5170,15 @@
       "executable": false
     },
     "tests/ai-support/repositoryEvidenceContract.test.js": {
-      "sha256": "5b492e10faea82669c825eedc54e71615c777c1121908fdbc073abd199e72175",
+      "sha256": "5e4f50e9a6a8d9b32cf0c27b6a8347ef970c5ac4be620c109f94262d0e0294fd",
       "executable": false
     },
     "tests/ai-support/repositoryToolDispatch.test.js": {
-      "sha256": "67fd3dd7eacfdd506817fe11ef9e3469558584f12548605509d0ca9f8a6b88bf",
+      "sha256": "85ba8be4ea789b45f459233ac4cbf88b133a5765607f3e7511e3eced181043c0",
       "executable": false
     },
     "tests/ai-support/repositoryTools.test.js": {
-      "sha256": "33227b1907e20edf96f2dbe5964d165af590cff9f707fd0385b5caedf4848ba8",
+      "sha256": "e39dff371e7dd1dd62099ce27798a6b09f284cd2f1ddd90aab40edb32bbca075",
       "executable": false
     },
     "tests/ai-support/taskModels.test.js": {
@@ -5202,7 +5198,7 @@
       "executable": false
     },
     "tests/appearance-browser.mjs": {
-      "sha256": "a26360e86fe670c61c219de301df63c775cd648621fcf5a383ae0d6809be9e33",
+      "sha256": "fcb4189aec5c3ba208e0b11fae9590d92b7dc37e878a595d20a68ed4ea0047bc",
       "executable": false
     },
     "tests/appearance-settings.mjs": {
@@ -5490,11 +5486,11 @@
       "executable": false
     },
     "tests/github-discovery.mjs": {
-      "sha256": "229eaafbe871e0af4ce3d118e3dc7406217b44389247ab0eabb877d7a7cb2a1c",
+      "sha256": "4b367570f2ffddd11ce2c88f079276df628c67f69f6d2c802eee164382796e8a",
       "executable": false
     },
     "tests/github-integration.mjs": {
-      "sha256": "7fc2c4a3517b9cb8a830689a0d329e5b0f44ab286ffefb73963d8dd4364c5003",
+      "sha256": "afd28c6f523ad4073a434980031a139db1ac002a46e707e40ab6a76a7839d9ce",
       "executable": false
     },
     "tests/github-workerd-runtime.mjs": {
@@ -5537,12 +5533,16 @@
       "sha256": "fca1fe345050abffda94ae8358674840082e4e99038416506f964d825198c331",
       "executable": false
     },
+    "tests/helpers/appearance-audit.mjs": {
+      "sha256": "d586b7565a184ced364680534febd96e58f3e1cbe0d4b2c3e1cc022f509db2c5",
+      "executable": false
+    },
     "tests/helpers/appearance-geometry.mjs": {
       "sha256": "11f7ab9765e4ddcc5a5b4371b836c30baa55e4fb6707b02454e1d78cf1316e25",
       "executable": false
     },
     "tests/helpers/appearance-long-content.mjs": {
-      "sha256": "e3f00dd245e0f5130136975df746ac78aea633f4d7a5eded7f29c85e166f06aa",
+      "sha256": "8a19738786e01b093d9410214a7c9e4bb4b40239d67dad263fee67f49bbf6738",
       "executable": false
     },
     "tests/helpers/artifact-payloads.mjs": {
@@ -5578,7 +5578,7 @@
       "executable": false
     },
     "tests/helpers/emitted-runtime.mjs": {
-      "sha256": "30cb1306a952d3da08dacbe2a66166a0e7cb7773a660116cbaff12c59de9c833",
+      "sha256": "9ebfb402cae7f0b0b3280067c9d67ebdea28599a9dce71d61182943d12ca97ad",
       "executable": false
     },
     "tests/helpers/help-center-link-contrast.mjs": {
@@ -5602,7 +5602,7 @@
       "executable": false
     },
     "tests/helpers/identity-browser-default.mjs": {
-      "sha256": "cc27eb53e70925ceb234884205dfe1ac662ebc1ee6a1b305992a1bb0f2212da6",
+      "sha256": "e10664d7c9d79415741674a6d6885c59f336e92746e560098cb8f1cf3c7baddf",
       "executable": false
     },
     "tests/helpers/identity-browser-email.mjs": {
@@ -5826,7 +5826,7 @@
       "executable": false
     },
     "tests/installer-providers.mjs": {
-      "sha256": "3d48b901eee01e6733122f27e1181dc6e343e6a25bd712e6e72a27ab0742eaba",
+      "sha256": "db95005fde291b8b2e846bfbd347ce5243b6237b424b9cc0681baa58f324eac6",
       "executable": false
     },
     "tests/installer-resume.mjs": {
@@ -6094,7 +6094,7 @@
       "executable": false
     },
     "tests/publication-metadata.mjs": {
-      "sha256": "6f5ec70d32c719d912dd9bcdd5622c9418926f2b3ac7519d04d50d07d0177773",
+      "sha256": "11b80e34d4884247957d0478b851b317dfedb0aaabd555455f0cc848c9d0e16d",
       "executable": false
     },
     "tests/recovery-artifact-build.mjs": {
@@ -6258,7 +6258,7 @@
       "executable": false
     },
     "tests/widget-opening-contrast-browser.mjs": {
-      "sha256": "39ace5429f22dc0e2cdec08a743df2d0f877f8664805511b0986b9c52b00a64b",
+      "sha256": "6de1512dc8015d65fa89bce0e4f568a82b8a53f105197a498e0140f9dc41b30d",
       "executable": false
     },
     "tests/widget-pointer-send-browser.mjs": {

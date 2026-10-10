@@ -32,8 +32,8 @@ test('discovery parses safe account and repository metadata without exposing com
     if (args[0] === 'whoami') return { code: 0, stdout: 'Account Name: Example\nAccount ID: 0123456789abcdef0123456789abcdef\n', stderr: '' };
     if (args[0] === 'auth') return { code: 0, stdout: 'Logged in\n', stderr: '' };
     if (args[0] === 'api') return { code: 0, stdout: '{"login":"octocat","id":583231,"name":"The Octocat"}\n', stderr: '' };
-    if (args[0] === 'config') return { code: 0, stdout: 'git@github.com:example-org/support-app.git\n', stderr: '' };
-    if (args[0] === 'repo') return { code: 0, stdout: '{"nameWithOwner":"example-org/support-app","isPrivate":true,"defaultBranchRef":{"name":"main"},"pushedAt":"2026-09-16T00:00:00Z"}\n', stderr: '' };
+    if (args[0] === 'config') return { code: 0, stdout: 'git@github.com:just-every/happytohelp.git\n', stderr: '' };
+    if (args[0] === 'repo') return { code: 0, stdout: '{"nameWithOwner":"just-every/happytohelp","isPrivate":true,"defaultBranchRef":{"name":"main"},"pushedAt":"2026-09-16T00:00:00Z"}\n', stderr: '' };
     throw new Error(`Unexpected command ${args.join(' ')}`);
   };
   const result = await discoverProviders(directory, { env, run });
@@ -41,7 +41,7 @@ test('discovery parses safe account and repository metadata without exposing com
   assert.deepEqual(result.providers.cloudflare.accounts, [{ id: '0123456789abcdef0123456789abcdef', name: 'Example' }]);
   assert.deepEqual(result.providers.github.account, { login: 'octocat', id: '583231', name: 'The Octocat' });
   assert.deepEqual(result.providers.github.repository, {
-    nameWithOwner: 'example-org/support-app', isPrivate: true, defaultBranch: 'main', pushedAt: '2026-09-16T00:00:00Z',
+    nameWithOwner: 'just-every/happytohelp', isPrivate: true, defaultBranch: 'main', pushedAt: '2026-09-16T00:00:00Z',
   });
   assert.equal('stdout' in result.providers.cloudflare, false);
   assert.equal('stderr' in result.providers.github, false);

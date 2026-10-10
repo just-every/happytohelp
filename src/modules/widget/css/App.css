@@ -465,7 +465,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   will-change: opacity;
   line-height: 60px;
   text-align: center;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1037,7 +1037,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 
 #happytohelp-root .happytohelp-chat-box {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1456,7 +1456,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   display: inline-block;
   margin: 0;
   cursor: pointer;
-  font-family: "Quicksand", cursive;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   background-color: rgba(243, 243, 243, 0.7);
@@ -1489,7 +1489,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   transition: width 0.4s ease 0.1s;
 }
 #happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-text {
-  font-family: "Quicksand", cursive;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 600;
   letter-spacing: -0.4px;
@@ -1558,7 +1558,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   max-height: calc(var(--vh) * 100 - 114px);
   text-align: left;
   line-height: 1.45em;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1809,7 +1809,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   display: inline-block;
   margin: 0;
   cursor: pointer;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;
@@ -1857,7 +1857,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 
 #happytohelp-root .happytohelp-tooltip {
   z-index: 2147483621;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1914,7 +1914,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   scroll-behavior: initial !important;
 }
 #happytohelp-root input, #happytohelp-root textarea {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1944,7 +1944,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   box-shadow: none;
   font-weight: 400;
   line-height: 41px;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -2038,7 +2038,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   }
 }
 #happytohelp-root .happytohelp-interact {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -2470,7 +2470,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   z-index: 1;
 }
 #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;

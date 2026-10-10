@@ -1,6 +1,6 @@
 # Source origins and licensing
 
-HappyToHelp 0.2.0 is a native port of the original HappyToHelp service. The
+HappyToHelp 0.3.0 is a native port of the original HappyToHelp service. The
 original repositories were read, not modified, when the port began on
 14 September 2026. This repository contains the retained and ported source; it
 does not wrap or require any original PHP, Lambda, MySQL or Python service, and
@@ -8,7 +8,10 @@ later changes to the originals do not flow into it.
 
 | Origin | Observed revision | Role in this repository |
 | --- | --- | --- |
-| Run Edit Run Base | `d840a75b4c41ddc1feae99695d6632c8b0a451d2` | Runtime foundation and retained authoring tool (see `edition.json` for the exact per-component revisions) |
+| Run Edit Run Base template | `d840a75b4c41ddc1feae99695d6632c8b0a451d2` | Initial application template ancestry |
+| Run Edit Run Base runtime and authoring | `ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1` | Retained runtime foundation, edition-authoring tool and operations command |
+| Run Edit Run Base onboarding | `390328736c8dae82f87c86e5af4c17cca6bb9c00` | Retained local onboarding source |
+| Run Edit Run Base SendGrid email | `d1343b638afd254679bc2b35819fc1d268bb6cc7` | Retained email sender source |
 | HappyToHelp main | `7c733f7b4204c7af7b5422953dea1be67d4fca78` | React dashboard and local Node connector; PHP behavior ported to native services |
 | HappyToHelp Chat | `bce98c897ec5743dcf243311b6c1886b1057f5e3` | Assistance, replies, monitoring, profiles, evaluation and model orchestration |
 | HappyToHelp Widget | `69f6152963d0c89d6495d1adbedb73eab9ce1d62` | React/Shadow DOM widget, now on native transport |
@@ -18,11 +21,15 @@ later changes to the originals do not flow into it.
 
 These revisions identify where source came from, not the exact bytes of every
 current file; the source lock (`sources.lock.json`) records the current files.
-The committed `.edition/sources` archives are distinctly identified sanitized
-public projections of the historical Base inputs. Their receipts bind the exact
-private originals and original Git revisions; the projected bytes have new
-identities. `pnpm run source:check` and all public source comparisons work offline
-without private inputs. See the [derivation and private equivalence contract](../scripts/source-projection/README.md).
+The Base donor repository is private. The public edition retains its licensed
+local source and the observed revisions above, without a private repository URL
+or a remote comparison baseline. `edition.json` selects those existing local
+files under their original capability identities. The optional parent/origin
+selections and their unused donor snapshots were removed; no retained Base
+implementation or license bytes were changed by this publication cleanup.
+`pnpm run source:check` verifies the locked local source and authoring tool bytes
+offline. Comparing against a future Base revision requires a new authorized
+source selection; these historical revisions do not assert a public donor URL.
 Frozen evaluation comparator files are historical test inputs.
 
 ## Licensing
@@ -64,9 +71,9 @@ paid-provider result.
 
 ## Image content credentials
 
-Widget avatars retain their original C2PA content credentials and certificate
-chain. The Adobe CAI operations contact in the signing certificate is a public
-service address, also present in the official
-[Content Authenticity SDK sample](https://github.com/contentauth/c2pa-rs/blob/58b9a092882b4dcbdbfe854073a1021d3fcbf9a9/sdk/src/identity/tests/fixtures/claim_aggregation/adobe_connected_identities.jpg).
-The publication configuration declares that exact service address as public;
-it does not permit arbitrary addresses or remove image provenance.
+Widget avatar PNGs have their text metadata and C2PA `caBX` content-credential
+chunks removed for publication because those chunks contained contact email
+metadata. Their original compressed image pixels and rendering chunks are
+preserved. The published files no longer carry the original signed C2PA
+credentials or certificate chain. `tests/publication-metadata.mjs` checks the
+original IDAT hashes and rejects email, text and C2PA identity metadata.

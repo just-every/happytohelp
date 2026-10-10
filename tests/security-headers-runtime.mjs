@@ -18,7 +18,7 @@ const unframed=(response,label)=>{
 try{
  const {origin}=runtime
  const call=(path,{body,token,method=body===undefined?'GET':'POST',headers={}}={})=>fetch(origin+path,{method,redirect:'manual',headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)})
- for(const path of ['/','/login','/setup']){const response=await call(path);assert.equal(response.status,200,path);assert.match(response.headers.get('content-type'),/text\/html/,path);application(response,path)}
+ for(const path of ['/','/login','/setup','/docs','/docs/install']){const response=await call(path);assert.equal(response.status,200,path);assert.match(response.headers.get('content-type'),/text\/html/,path);application(response,path)}
  const created=await call('/api/identity/bootstrap',{body:{password:'security-header-password-123',name:'Header project',email:'header-owner@example.com',allowedOrigin:customer},headers:{Origin:origin}})
  assert.equal(created.status,201);application(created,'bootstrap API')
  const owner=await created.json()
@@ -28,6 +28,7 @@ try{
  const denied=await call('/api/identity/session');assert.equal(denied.status,401);application(denied,'rejected API')
  const health=await call('/health');assert.equal(health.status,200);application(health,'health')
  const missing=await call('/this-document-does-not-exist');assert.equal(missing.status,404);application(missing,'missing document')
+ const missingDocs=await call('/docs/does-not-exist');assert.equal(missingDocs.status,404);assert.match(missingDocs.headers.get('content-type'),/text\/html/);application(missingDocs,'missing docs page')
 
  // Customer widget: static script plus cross-origin API with its CORS contract intact.
  const script=await call('/widget.js');assert.equal(script.status,200);assert.match(script.headers.get('content-type'),/javascript/);unframed(script,'widget.js')
@@ -47,5 +48,5 @@ try{
  }
  const preview=await call(`/preview/${owner.projectId}/not-a-grant/`);assert.equal(preview.status,404);unframed(preview,'preview on app origin')
  success=true
- console.log('Security headers passed: /, /login, /setup, dashboard document, APIs, health and 404 carry frame-ancestors/X-Frame-Options/nosniff/Referrer-Policy; widget script, widget CORS API, published Help Center and preview remain embeddable.')
+ console.log('Security headers passed: /, /login, /setup, /docs, /docs/install, dashboard document, APIs, health, the 404 and the docs 404 carry frame-ancestors/X-Frame-Options/nosniff/Referrer-Policy; widget script, widget CORS API, published Help Center and preview remain embeddable.')
 }finally{await runtime.close(success)}

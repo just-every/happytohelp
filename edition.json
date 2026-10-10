@@ -5,13 +5,6 @@
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0"
   },
-  "parent": {
-    "path": "foundation/template",
-    "projection": {
-      "key": "ab092d5033f8b9793028da8e63e113be35327092e0044d42b7b09ef2ea518b9e",
-      "sha256": "21746bad1bbbd7d9cbbdde7e7a49f249df396fb7d9a661db0fc4bb63218d7d89"
-    }
-  },
   "components": [
     {
       "id": "runeditrun/base",
@@ -22,32 +15,6 @@
           "src/base",
           "scripts/edition-authoring",
           "scripts/operations.mjs"
-        ],
-        "origin": {
-          "path": ".",
-          "paths": [
-            "foundation/runtime",
-            "edition-authoring",
-            "operations/operations.mjs"
-          ],
-          "projection": {
-            "key": "5928da9aba7b38ea401613ddcbec65c54fd2e5b82a4feda1f45323abc780adff",
-            "sha256": "7eeeeb28a0d8510a0b792b9ae40f174027b73457e6fec8fc374da95ad3fb9bc8"
-          }
-        },
-        "mappings": [
-          {
-            "path": "src/base",
-            "originPath": "foundation/runtime"
-          },
-          {
-            "path": "scripts/edition-authoring",
-            "originPath": "edition-authoring"
-          },
-          {
-            "path": "scripts/operations.mjs",
-            "originPath": "operations/operations.mjs"
-          }
         ]
       }
     },
@@ -61,14 +28,7 @@
         "kind": "local",
         "paths": [
           "scripts/base-onboarding"
-        ],
-        "origin": {
-          "path": "onboarding",
-          "projection": {
-            "key": "48ae413cc23c4e4474e3bec54950f3064d9ed72c139c869c56a11467011640ed",
-            "sha256": "181c947c41d2ca6e5ab2c4c4d5b03703e5806b00be18a3a045602f1e2cee1173"
-          }
-        }
+        ]
       }
     },
     {
@@ -81,22 +41,6 @@
         "kind": "local",
         "paths": [
           "src/modules/sendgrid-email"
-        ],
-        "origin": {
-          "path": ".",
-          "paths": [
-            "modules/sendgrid-email/src"
-          ],
-          "projection": {
-            "key": "a502a1d9e2bd028fcd6b8b1e2eda5e5eb70d5735b4655df9b470ebfb1e6d23fd",
-            "sha256": "c2500be83fa6b1268175ae7e4d7d0e0ea0d9f4bd7b968b3339cd01aa2384b083"
-          }
-        },
-        "mappings": [
-          {
-            "path": "src/modules/sendgrid-email",
-            "originPath": "modules/sendgrid-email/src"
-          }
         ]
       }
     },
@@ -215,7 +159,9 @@
           "tests/local-computer-runtime.mjs",
           "tests/local-computer-revocation.mjs",
           "tests/local-computer-sweep-worker.ts",
-          "tests/local-agent-archive.mjs"
+          "tests/local-agent-archive.mjs",
+          "tests/provider-errors.mjs",
+          "tests/provider-helpers"
         ]
       }
     },
@@ -327,6 +273,10 @@
           "tests/public-help-center.mjs",
           "tests/public-help-center-browser.mjs",
           "tests/public-site-runtime.mjs",
+          "docs/site.json",
+          "tests/docs-site.mjs",
+          "tests/docs-dev-sync.mjs",
+          "tests/docs-browser.mjs",
           "tests/runtime.mjs",
           "tests/ui-transport.mjs",
           "scripts/deploy.mjs",
@@ -342,6 +292,7 @@
           "migrations/0008_account_sessions.sql",
           "tests/operating-environment.mjs",
           "tests/ui-browser.mjs",
+          "tests/note-busy-focus-browser.mjs",
           "tests/navigation-browser.mjs",
           "tests/workspace-scope.mjs",
           "tests/workspace-shell-browser.mjs",

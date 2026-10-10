@@ -29,7 +29,7 @@ const completionNotices = {
 const isActive = job => [ 'queued', 'running', 'needs_input' ].includes(job.status);
 const formatEvidence = evidence => Array.isArray(evidence) ? evidence.join(', ') : evidence;
 
-export default function DelegationJob({ job, onCancel, onInsertDraft, onSendInput, onRunFollowUp }) {
+export default function DelegationJob({ job, isDraftDisabled, onCancel, onInsertDraft, onSendInput, onRunFollowUp }) {
     const [ input, setInput ] = useState('');
     const [ hasReviewedFreshness, setHasReviewedFreshness ] = useState(false);
     const [ isCancelling, setIsCancelling ] = useState(false);
@@ -100,7 +100,7 @@ export default function DelegationJob({ job, onCancel, onInsertDraft, onSendInpu
                 <span>{ replyWasSent ? 'Reply sent' : 'Reply draft' }</span>
                 <p>{ result.reply_draft }</p>
             </div>
-            { canInsertDraft && <button type="button" className="btn btn-white" onClick={ () => onInsertDraft(result.reply_draft) }>
+            { canInsertDraft && <button type="button" className="btn btn-white" disabled={ isDraftDisabled } onClick={ () => onInsertDraft(result.reply_draft, result.attachments, { jobId: job.id, proposalId: null }) }>
                 <i className="fe fe-edit-3" aria-hidden="true" /> Use
             </button> }
             { replyWasSent && <span className="delegation-job__sent"><i className="fe fe-check-circle" aria-hidden="true" /> Reply sent</span> }
@@ -118,7 +118,7 @@ export default function DelegationJob({ job, onCancel, onInsertDraft, onSendInpu
                 </div>
             </div>
             <DelegationAttachments attachments={ result?.attachments } />
-            <DelegationResultOptions job={ job } onInsertDraft={ onInsertDraft } onRunFollowUp={ onRunFollowUp } />
+            <DelegationResultOptions job={ job } isDraftDisabled={ isDraftDisabled } onInsertDraft={ onInsertDraft } onRunFollowUp={ onRunFollowUp } />
             { resultDetails && <details className="delegation-job__disclosure delegation-job__completed-details">
                 <summary>Evidence and details</summary>
                 { resultDetails }
@@ -183,12 +183,17 @@ export default function DelegationJob({ job, onCancel, onInsertDraft, onSendInpu
 
         { result && <div className="delegation-job__result">
             { result.summary && <p className="delegation-job__summary">{ result.summary }</p> }
+            { result.provider_error && <div className="delegation-job__provider-error" role="status">
+                <strong>Model provider error{ result.provider_error.http_status !== null ? ` · HTTP ${result.provider_error.http_status}` : ' · HTTP status unavailable' }</strong>
+                <p>{ result.provider_error.message }</p>
+            </div> }
             { resultDetails }
         </div> }
     </section>;
 }
 
 DelegationJob.propTypes = {
+    isDraftDisabled: PropTypes.bool,
     job: PropTypes.shape({
         cancel_requested: PropTypes.bool,
         delivery_state: PropTypes.string,

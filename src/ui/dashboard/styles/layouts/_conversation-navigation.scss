@@ -22,7 +22,6 @@ body:is(.conversation-workspace, .workspace-themed) {
         --bs-navbar-border-color: transparent;
         color: var(--conversation-nav-ink);
 
-        .navbar-workspace-toggle > .navbar-workspace-platform-icon,
         .navbar-workspace-toggle > .navbar-workspace-brand--transparent,
         .navbar-toggler-icon { filter: brightness(0) invert(1); }
     }
@@ -44,9 +43,10 @@ body:is(.conversation-workspace, .workspace-themed) {
         text-align: left;
 
         &:hover, &[aria-expanded=true] { background: var(--conversation-nav-hover, var(--conversation-hover, #f5f8f8)); border-color: var(--conversation-nav-line, var(--conversation-line, #e8eeee)); }
-        > .navbar-workspace-platform-icon,
         > .navbar-workspace-brand { flex: 0 0 28px; width: 28px; height: 28px; }
-        > .navbar-workspace-platform-icon { object-fit: contain; }
+        // The platform-admin rail draws the HappyToHelp mark (BrandMark.tsx) inline: its ink is the nav's ink through
+        // currentColor, so it needs no filter, and its aqua sparks stay aqua.
+        > .brand-mark { flex: none; width: auto; height: 28px; overflow: visible; }
         > .navbar-workspace-brand {
             flex-basis: 32px;
             width: 32px;
@@ -202,7 +202,6 @@ body:is(.conversation-workspace, .workspace-themed) {
         .navbar-scroll { display: flex; flex: 1 1 auto; flex-direction: column; width: 100%; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--conversation-nav-line) transparent; }
         .navbar-nav-primary { flex: 0 0 auto; min-height: 0; }
         .navbar-user { flex-shrink: 0; justify-content: flex-start; }
-        #sidebarUser .dropdown-menu { left: 0; transform: none; }
     }
 }
 
@@ -225,4 +224,9 @@ body:is(.conversation-workspace, .workspace-themed) {
  body .navbar-refined .navbar-workspace-toggle { width: auto; min-width: 0; min-height: 24px; font-size: 12px; }
  body .navbar-refined .navbar-workspace-toggle img { width: 24px; height: 24px; }
  body .navbar-refined .navbar-collapse { grid-column: 1 / -1; }
+}
+// Theme changes replace the background immediately. Interpolating only the
+// link's ink can leave readable navigation below contrast until it catches up.
+.navbar-refined .nav-link {
+    transition: box-shadow .15s ease-in-out;
 }

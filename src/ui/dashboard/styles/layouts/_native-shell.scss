@@ -4,7 +4,10 @@
     .native-profile-avatar img { width:100%; height:100%; border-radius:inherit; object-fit:cover; }
     .native-profile-status { position:absolute; right:2px; bottom:2px; width:8px; height:8px; border-radius:50%; background:#00d97e; }
     .native-account-dropdown { right:0; left:auto; }
-    #sidebarUser .native-account-dropdown { bottom:calc(100% + 10px); top:auto; }
+    // Reserve the desktop menu's space in the footer rather than covering the
+    // Settings button in the independently scrolling navigation above it.
+    #sidebarUser .navbar-account-menu { display:flex; flex-direction:column-reverse; }
+    #sidebarUser .native-account-dropdown { position:static; margin-bottom:10px; }
     .navbar-workspace-menu { z-index:1050; }
     #sidebarSettings[hidden] { display:none; }
 }
@@ -57,3 +60,13 @@ body.workspace-themed #workspace-main:focus {
 .native-shell .native-account-dropdown .dropdown-item { color: var(--bs-body-color); }
 .native-shell .native-account-dropdown .dropdown-item:hover,
 .native-shell .native-account-dropdown .dropdown-item:focus-visible { color: var(--bs-emphasis-color, #000); }
+// The load-error screen's heading is the HappyToHelp lockup (BrandLockup.tsx) in the heading's ink, sized and spaced as in
+// the homepage header (src/ui/homepage/homepage.css); the heading is named by the lockup's visually hidden text.
+.dashboard-error-brand {
+    font-size: 28px;
+    margin-bottom: 1.5rem;
+    .brand { position: relative; display: inline-flex; align-items: center; gap: 0.3em; color: inherit; text-decoration: none; }
+    .brand-mark { flex: none; width: auto; height: 1.58em; overflow: visible; }
+    .brand-word { flex: none; overflow: visible; }
+    .brand-name { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+}

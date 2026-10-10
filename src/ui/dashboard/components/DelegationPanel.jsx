@@ -13,7 +13,7 @@ const isSkillListening = device => Boolean(isSkillDevice(device) && device.worke
 const isStandaloneReady = device => !isSkillDevice(device) && isWorkerReady(device);
 const workspaceNameFor = projectId => typeof window === 'undefined' ? null : window.chatSettings?.projects?.[projectId]?.name;
 
-export default function DelegationPanel({ conversation, onInsertDraft, onConversationChanged }) {
+export default function DelegationPanel({ conversation, draftError, isDraftDisabled, onInsertDraft, onConversationChanged }) {
     const [ isSubmitting, setIsSubmitting ] = useState(false);
     const [ isSkillSetupOpen, setIsSkillSetupOpen ] = useState(false);
     const [ isWorkerSetupOpen, setIsWorkerSetupOpen ] = useState(false);
@@ -129,9 +129,9 @@ export default function DelegationPanel({ conversation, onInsertDraft, onConvers
             </button>
         </section>
 
-        { error && <div className="delegation-panel__error" role="alert">
+        { (draftError || error) && <div className="delegation-panel__error" role="alert">
             <i className="fe fe-alert-circle" aria-hidden="true" />
-            <span>{ error }</span>
+            <span>{ draftError || error }</span>
         </div> }
 
         { isLoading && !delegations.length && !devices.length && <div className="delegation-panel__loading" role="status">
@@ -141,6 +141,7 @@ export default function DelegationPanel({ conversation, onInsertDraft, onConvers
         { visibleJobs.map(job => <DelegationJob
             key={ job.id }
             job={ job }
+            isDraftDisabled={ isDraftDisabled }
             onCancel={ cancelDelegation }
             onInsertDraft={ onInsertDraft }
             onSendInput={ sendInput }
@@ -201,5 +202,7 @@ DelegationPanel.propTypes = {
         project_id: PropTypes.string.isRequired,
     }).isRequired,
     onInsertDraft: PropTypes.func.isRequired,
+    draftError: PropTypes.string,
+    isDraftDisabled: PropTypes.bool,
     onConversationChanged: PropTypes.func.isRequired,
 };

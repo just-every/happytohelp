@@ -13,7 +13,7 @@ export async function happytohelpPlan({ installationId, environment, variables, 
   if (typeof installationId !== 'string' || !installationId.trim()) throw new Error('installationId required');
   if (!['production', 'preview'].includes(environment)) throw new Error('Invalid environment');
   const config = JSON.parse(await readFile(new URL('wrangler.jsonc', root), 'utf8'));
-  const { specInputs } = await import(new URL('scripts/delivery/spec-inputs.mjs', root));
+  const {artifact:{specInputs}} = JSON.parse(await readFile(new URL('scripts/delivery/base/packaging.json',root),'utf8'));
   const resources = [...(config.d1_databases ?? []).map(x => ({kind:'d1',binding:x.binding})), ...(config.r2_buckets ?? []).map(x => ({kind:'r2',binding:x.binding})), ...(config.queues?.producers ?? []).map(x => ({kind:'queue',binding:x.binding}))];
   const suffixes = {DB:'db',FILES:'files',JOBS:'jobs',JOBS_DEAD_LETTER:'jobs-dead'};
   if (resources.some(x => !suffixes[x.binding]) || resources.length !== 4) throw new Error('HappyToHelp resource topology changed; refresh the managed binding contract');

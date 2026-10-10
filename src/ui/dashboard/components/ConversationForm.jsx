@@ -16,6 +16,7 @@ ConversationForm.propTypes = {
     content: PropTypes.string,
     conversationId: PropTypes.string,
     files: PropTypes.array,
+    focusRequest: PropTypes.number,
     isEnabled: PropTypes.bool,
     isResolved: PropTypes.bool,
     loadingContent: PropTypes.string,
@@ -32,6 +33,7 @@ export default function ConversationForm({
     content,
     conversationId,
     files,
+    focusRequest,
     isEnabled,
     isResolved,
     loadingContent,
@@ -59,6 +61,19 @@ export default function ConversationForm({
     useEffect(() => {
         setHelper(null);
     }, [ conversationId ]);
+
+    useEffect(() => {
+        if (!focusRequest) return undefined;
+        // Wait for the committed draft and the compact panel's focus-trap cleanup.
+        // The keyed form cancels this frame when its conversation is replaced.
+        const frame = window.requestAnimationFrame(() => {
+            const textarea = textareaRef.current;
+            if (!textarea?.isConnected) return;
+            textarea.focus({ preventScroll: true });
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        });
+        return () => window.cancelAnimationFrame(frame);
+    }, [ conversationId, focusRequest ]);
 
     const sendMessage = sendAndClose => {
         if (!canSend) return;

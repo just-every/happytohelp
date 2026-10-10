@@ -1,8 +1,45 @@
 # Changelog
 
-All notable changes to HappyToHelp are recorded here. Versions follow
-[Semantic Versioning](https://semver.org/); before 1.0.0, minor versions may
-include breaking changes.
+What changed in each HappyToHelp release, newest first.
+
+Versions follow [Semantic Versioning](https://semver.org/). Before 1.0.0, a
+minor version (for example 0.2 to 0.3) may include breaking changes, so when you
+upgrade, read the notes for every version between yours and the new one. For
+updating and backing up an installation, see
+[Updates and recovery](docs/INDEPENDENT-RELEASE.md).
+
+## 0.3.0 — 2026-10-10
+
+- Hand assistant replies and attachments to the editable composer, close compact
+  panels and focus the draft; keep desktop columns open and Send explicit.
+- Adopt completed local reply attachments as the current operator's
+  native media before filling the composer. Repeated Use keeps one file; revoked
+  authority, changed conversations and incomplete copies leave a visible error.
+  Ordinary Send preserves the copied bytes through the native message path.
+
+- Make delegated Codex structured output strict at every object, including unused
+  reply and attachment fields, while preserving authorized legacy reply delivery.
+- Keep native model-provider HTTP status and a bounded, redacted error excerpt
+  on failed delegations so operators can inspect the failure after reload.
+  Provider failures remain terminal and never send a reply or replay work.
+
+- Persist shared public appearance through native settings, with widget/Help Center
+  parity and visible loading, error, offline and recovery states. Long public
+  names, multiline greetings and unbroken article text wrap within their surfaces;
+  wide article code and semantic tables scroll within named, keyboard-focusable
+  regions with visible focus rings inside the content column.
+- Let keyboard users focus and scroll the chat transcript, including long welcome
+  greetings, with a visible focus ring and a tab path back to the composer.
+- Add explicit, scanner-safe native email sign-in with hashed short-lived one-use
+  tokens, current authority checks and safe native return destinations.
+- Exercise the real paired connector through native repair, a reviewed draft and
+  operator Send, including visitor socket delivery and stable reload identity.
+- Adopt the unchanged Base delivery producer pinned at
+  `d6a1bd83ee80ec3d603ded2c067d4c504d8a2bf5`; builds emit schema-2 manifests and raw
+  payloads. Preserve exact candidate payload bytes and deployment policy.
+
+Real provider and hosted acceptance remain separate; the historical
+accessibility checker HOLD remains in force.
 
 ## 0.2.2
 
@@ -21,6 +58,10 @@ include breaking changes.
   citation sources and customer-context mutation fences. The upgrade also includes
   `0105_edition_delegation.sql` and
   `0106_project_verification_secret.sql` after public v0.2.1.
+- Pending invitations on Agents can be copied, resent (when email is configured) and revoked by
+  owners and by admins for agent invitations. The routes re-check the caller's role. New public
+  helpers `GET /api/identity/auth-options` and `POST /api/identity/link-status`, with
+  `pnpm run test:identity-browser`, `tests/identity-links.mjs` and `tests/management-invitations.mjs`.
 
 ### Qualification boundary
 
@@ -118,68 +159,32 @@ include breaking changes.
   409 `CLIENT_EXISTS` instead of a server error. URLs keep text that reads as a
   number (an OAuth `state`, a device code) exactly as written.
 
-### Added
-
-- Pending invitations on Agents can be copied, resent (when email is configured) and revoked by
-  owners and by admins for agent invitations. The routes re-check the caller's role. New public
-  helpers `GET /api/identity/auth-options` and `POST /api/identity/link-status`, with
-  `pnpm run test:identity-browser`, `tests/identity-links.mjs` and `tests/management-invitations.mjs`.
-
 ### Removed
 
 - The previous illustrated homepage: its components, styles, scroll-parallax
   hook, its artwork under `public/homepage` and their provenance entries.
 
-## 0.2.2-rc.1 - 2026-09-30 (private candidate)
-
-This version marks a private preservation candidate for review. It is not a
-public release, tag, deployment or product-acceptance record.
-
-### Added
-
-- Focused commands for the existing scoped-delegation browser and authority
-  runtime checks, plus the local usage-summary and request-limit checks. The
-  original `verify`, `test:delegation` and browser commands remain unchanged.
-- A local usage meter and synthetic regression input for conversation requests,
-  attachment operations and socket recovery. Provider and total billing values
-  remain unknown when unmeasured.
-
-### Retained qualification limits
-
-- Historical local usage checks passed without calling a model provider. Hosted
-  CPU, complete D1 usage, Durable Object duration/storage and billing are unknown.
-- The accessibility checker remains held after four independently reproduced
-  false accepts and a widget timing/background reliability failure. A bounded
-  run's 21 passing states and 18 LIMITED nodes do not establish conformance.
-- Historical recovery evidence for version 0.2.1 applies to 97 tables and 37
-  migrations. The current recovery command separately requires the exact current
-  inventory; an earlier proof never qualifies a later schema automatically.
-- Portable-storage fidelity remains pending: the separate unintegrated approach
-  restored a resizable ArrayBuffer as fixed length 4 rather than preserving
-  maximum length 12 and length tracking. Default HOLD remains in force.
-- Source-lock checks establish recorded source integrity, not complete product
-  verification or release acceptance. Historical command and failure records
-  remain in maintainer custody.
-
-## 0.2.1 - 2026-09-27
+## 0.2.1 — 2026-09-27
 
 ### Fixed
 
-- Hosted Assisted and Managed builds no longer fail with `pnpm: not found`.
-  Run Edit Run's trusted project build provides Node but no global pnpm, and the
-  package scripts that `build` and `verify` run call `pnpm`. The
-  `rer-project.json` build and verify commands now put the pnpm 10.12.4 that
-  `scripts/independent/setup-build.mjs` installs in `.rer-tools` first on
-  `PATH`. Standalone installation and the `pnpm run` scripts are unchanged.
+- Hosted Assisted and Managed builds (the hosted options from Run Edit Run) no
+  longer fail with `pnpm: not found`. Run Edit Run's trusted project build
+  provides Node but no global pnpm, and the package scripts that `build` and
+  `verify` run call `pnpm`. The `rer-project.json` build and verify commands now
+  put the pnpm 10.12.4 that `scripts/independent/setup-build.mjs` installs in
+  `.rer-tools` first on `PATH`. Standalone installation and the `pnpm run`
+  scripts are unchanged.
 - The `rer-project.json` artifact check no longer fails with `97 !== 94`.
   `tests/independent-runtime.mjs` still requires an exact table count, now 97:
   migrations `0102_public_abuse_limits` (`abuse_counters`) and
   `0103_contact_erasure` (`contact_erasures`, `contact_erasure_objects`) in
   0.2.0 added three tables that the expected count had not been updated for.
 
-## 0.2.0 - 2026-09-25
+## 0.2.0 — 2026-09-25
 
-First public source release of the self-hosted edition.
+First public source release of the self-hosted edition: the version of
+HappyToHelp you install and run yourself.
 
 ### Added
 
@@ -190,32 +195,35 @@ First public source release of the self-hosted edition.
 - The original dashboard, customer widget, AI assistance and suggestions,
   knowledge base with published help centers, customer context, local-agent
   delegation, training/evaluation runs and integrations (email, GitHub, help
-  center imports, brand images and website preview), ported to the native
-  runtime.
-- Village public homepage with layered, reduced-motion-aware artwork. (Replaced on 2026-10-01 by the “Customer Support, Solved.” homepage; see Unreleased.)
+  center imports, brand images and website preview), ported to the new
+  Cloudflare runtime.
+- Village public homepage with layered, reduced-motion-aware artwork. (Replaced
+  on 2026-10-01 by the “Customer Support, Solved.” homepage; see
+  [0.2.2](#022).)
 - Standalone browser installer (`node scripts/install.mjs`) for local or
   Cloudflare installation, with agent-assisted prefill.
 - Fictional demo inbox for trying the workspace without real customer data.
 - Local importer for exports from the original HappyToHelp service.
 - Contact erasure for owners and admins, from the dashboard (**Erase personal
   data…**) or `POST /api/management/projects/:projectId/contacts/:contactId/erase`.
-  It removes the contact's identity, messages' content, attachments (including R2
-  objects), customer context, AI and delegated-work text, inbound email evidence
-  and legacy import copies, keeps transcript order, and records a non-identifying
-  `contact_erasures` tombstone. [docs/PRIVACY.md](docs/PRIVACY.md) describes what
-  is stored, what goes to which provider, and what erasure cannot reach.
+  It removes the contact's identity, messages' content, attachments (including
+  R2 objects), customer context, AI and delegated-work text, inbound email
+  evidence and legacy import copies, keeps transcript order, and records a
+  non-identifying `contact_erasures` tombstone. [docs/PRIVACY.md](docs/PRIVACY.md)
+  describes what is stored, what goes to which provider, and what erasure cannot
+  reach.
 
 ### Security
 
 - First-owner setup fails closed. Only loopback development may create the first
   owner without a private `H2H_SETUP_TOKEN`. A remote deploy of a fresh
-  installation refuses to publish without a token of at least 32 characters, and
-  a Worker reached any other way answers owner setup with HTTP 503 until one is
-  configured.
+  installation refuses to publish without a token of at least 32 characters,
+  and a Worker reached any other way answers owner setup with HTTP 503 until one
+  is configured.
 - Operator pages and API responses send `Content-Security-Policy:
   frame-ancestors`, `X-Content-Type-Options: nosniff` and
-  `Referrer-Policy: strict-origin-when-cross-origin`; published Help Center pages
-  stay embeddable.
+  `Referrer-Policy: strict-origin-when-cross-origin`; published Help Center
+  pages stay embeddable.
 - The dashboard parses user agents with `ua-parser-js` 1.0.41 directly,
   replacing a wrapper that pinned a release affected by a high-severity ReDoS
   advisory (GHSA-fhg7-m89q-25r3).
@@ -226,15 +234,15 @@ First public source release of the self-hosted edition.
 - Public widget, registration and project-creation requests are rate limited
   per visitor, conversation, client address and account, with counters in D1
   (`RATE_LIMITS`). Per-project ceilings on widget sessions, conversations and
-  attachments bound what rotating client addresses can create. A refused request
-  gets HTTP 429 with `Retry-After`.
+  attachments bound what rotating client addresses can create. A refused
+  request gets HTTP 429 with `Retry-After`.
 - Automatic AI work that visitors can trigger has daily ceilings per project
   (replies, estimated spend, context runs) and across the installation
   (`AI_DAILY_CEILINGS`). Past a ceiling, visitor messages still reach operators,
-  the skipped reply is shown in the transcript, a visitor's explicit reply request
-  gets HTTP 429 until 00:00 UTC without the operator-only reason or spend, and
-  `GET /api/dashboard/projects/:projectId/ai-usage` reports the day's usage. See
-  [docs/PUBLIC-LIMITS.md](docs/PUBLIC-LIMITS.md).
+  the skipped reply is shown in the transcript, a visitor's explicit reply
+  request gets HTTP 429 until 00:00 UTC without the operator-only reason or
+  spend, and `GET /api/dashboard/projects/:projectId/ai-usage` reports the day's
+  usage. See [docs/PUBLIC-LIMITS.md](docs/PUBLIC-LIMITS.md).
 - A reply request's `requestId` (widget `request` command, dashboard `request`
   action) must be a UUID, or the request gets HTTP 400, so no caller-chosen text
   becomes a generation ID that contact erasure keeps.
@@ -254,7 +262,7 @@ First public source release of the self-hosted edition.
   the `feather-icons` package (MIT); no commercial theme, font or image is used.
 - The delivery artifact is byte-reproducible from a commit with the declared
   Node and pnpm versions (`pnpm run test:reproducible-build`).
-- `pnpm run verify` includes a first-release journey test against a local
-  emitted Worker, and continuous integration runs it with every browser suite
-  and the homepage and public-site checks on pushes to `main` and on pull
-  requests.
+- `pnpm run verify` includes a first-release journey test against a Worker
+  built from the source and run locally, and continuous integration runs it with
+  every browser suite and the homepage and public-site checks on pushes to
+  `main` and on pull requests.

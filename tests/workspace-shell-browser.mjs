@@ -45,7 +45,7 @@ try {
   await check('deep link to another member project activates it before data loads',async()=>{
     await bindSession(bound.id);
     await page.goto(`${runtime.origin}/projects/${other.id}/conversations/${other.conversationId}`);await ready();
-    await page.getByText(other.message,{exact:true}).waitFor();
+    await page.locator('.transcript-message-content').getByText(other.message,{exact:true}).waitFor();
     await shot('deep-link-conversation');
     assert.equal(await api(`/api/conversations/${other.conversationId}/messages`),200,'conversation reads follow the URL project');
     assert.equal(await api(`/api/knowledge/${other.id}/articles`),200,'knowledge reads follow the URL project');
@@ -147,6 +147,7 @@ try {
     const adminContext=await browser.newContext({viewport:{width:1440,height:900}});
     await adminContext.addCookies([{name:'h2h_session',value:platformAdmin.token,url:runtime.origin}]);
     const adminPage=await adminContext.newPage();adminPage.setDefaultTimeout(15000);
+    const adminRequests=[];adminPage.on('request',request=>adminRequests.push(new URL(request.url()).pathname));
     try{
       await adminPage.goto(runtime.origin+'/conversations');
       await adminPage.locator('#sidebarUser').getByRole('button',{name:'Account menu'}).click();
@@ -156,7 +157,37 @@ try {
       await adminPage.waitForLoadState('networkidle');
       assert.equal(await adminPage.locator('#workspace-main [role=alert]').count(),0);
       await adminPage.getByText('Platform admin tenant').first().waitFor();
+      // The administration rail is HappyToHelp's own: it draws the mark inline in the nav's ink, aqua sparks kept, no filter.
+      const toggle=adminPage.getByRole('navigation',{name:'Administration navigation'}).locator('.navbar-workspace-toggle');
+      assert.equal(await toggle.locator('svg.brand-mark[aria-hidden="true"]').count(),1,'one decorative mark');
+      assert.equal(await toggle.locator('img').count(),0,'no image mark');
+      assert.equal(await adminPage.getByRole('link',{name:'HappyToHelp Administration',exact:true}).count(),1,'the toggle is named HappyToHelp Administration');
+      const mark=await toggle.evaluate(link=>{const svg=link.querySelector('svg.brand-mark'),box=svg.getBoundingClientRect(),outer=link.getBoundingClientRect(),paths=[...svg.querySelectorAll('path')];return {ink:getComputedStyle(link).color,bubble:getComputedStyle(paths[0]).stroke,sparks:[...new Set(paths.slice(4).map(path=>getComputedStyle(path).stroke))],filter:getComputedStyle(svg).filter,height:box.height,inside:box.left>=outer.left&&box.right<=outer.right&&box.top>=outer.top&&box.bottom<=outer.bottom}});
+      assert.equal(mark.ink,'rgb(250, 248, 255)','the balanced nav\'s light ink');
+      assert.equal(mark.bubble,mark.ink,'the bubble is drawn in the nav\'s ink');
+      assert.deepEqual(mark.sparks,['rgb(143, 227, 238)'],'aqua sparks');
+      assert.equal(mark.filter,'none','no filter recolours the mark');
+      assert.ok(Math.abs(mark.height-28)<=1,`the mark is 28px tall (${mark.height})`);
+      assert.ok(mark.inside,'the mark sits inside the toggle');
+      assert.equal(adminRequests.filter(path=>path==='/img/icon.svg').length,0,'the old icon is never requested');
+      await adminPage.screenshot({path:join(evidence,'admin-nav.png')});
     }finally{await adminContext.close()}
+  });
+  await check('the dashboard load-error screen is headed by the HappyToHelp lockup',async()=>{
+    const failing=await context.newPage();
+    try{
+      // Fail the workspace's API calls for one load: the route's error screen shows.
+      await failing.route('**/api/**',route=>route.abort());
+      await failing.goto(runtime.origin+'/conversations');
+      const heading=failing.getByRole('heading',{level:1,name:'HappyToHelp'});
+      await heading.waitFor();
+      assert.equal(await heading.count(),1,'one heading named HappyToHelp');
+      assert.deepEqual(await heading.locator('a.brand').evaluateAll(links=>links.map(link=>[link.getAttribute('href'),[...link.children].map(child=>`${child.localName}.${child.getAttribute('class')}`)])),[['/',['svg.brand-mark','svg.brand-word','span.brand-name']]],'the lockup links home');
+      assert.ok(await heading.locator('.brand-name').evaluate(name=>{const box=name.getBoundingClientRect();return box.width<=1&&box.height<=1}),'the lockup\'s name is visually hidden');
+      assert.equal(await failing.getByRole('button',{name:'Try again'}).count(),1,'a way to retry');
+      await failing.screenshot({path:join(evidence,'dashboard-load-error.png')});
+      await failing.unroute('**/api/**');
+    }finally{await failing.close()}
   });
   await check('Projects list: owner reads Owner, Name is not a fake sort control, row actions are tappable',async()=>{
     await bindSession(bound.id);
@@ -172,7 +203,7 @@ try {
     await shot('projects-mobile');
     await page.setViewportSize({width:1440,height:900});
   });
-  await check('/users/<other-id> is not a page; own profile routes still work',async()=>{
+  await check('another user ID has no profile page; own profile routes still work',async()=>{
     const ownId=await page.evaluate(async()=>(await (await fetch('/api/management/bootstrap')).json()).currentAgent.id);
     await page.goto(`${runtime.origin}/users/${unknownId}`);await ready();
     await page.getByText('This page was not found.').waitFor();
@@ -203,18 +234,19 @@ try {
   });
   await check('dashboard loads open project sockets without teardown warnings',async()=>{
     const fresh=await context.newPage();const lines=[];let sockets=[];
+    const profilePath=new URL('users/profile',runtime.origin).pathname;
     fresh.on('console',message=>lines.push(`${message.type()}: ${message.text()}`));
     fresh.on('websocket',socket=>sockets.push(socket));
     // A socket closed while still connecting is the browser warning this check guards against.
     await fresh.addInitScript(()=>{const close=WebSocket.prototype.close;window.__closedWhileConnecting=0;WebSocket.prototype.close=function(...args){if(this.readyState===0)window.__closedWhileConnecting++;return close.apply(this,args)}});
     try{
-      for(const path of ['/projects','/users/profile',`/projects/${bound.id}/conversations`]){
+      for(const path of ['/projects',profilePath,`/projects/${bound.id}/conversations`]){
         sockets=[];
         await fresh.goto(runtime.origin+path);await fresh.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:/Switch workspace:/}).waitFor();
         await fresh.waitForTimeout(1500);
         const open=sockets.filter(socket=>!socket.isClosed()&&/\/api\/projects\/[^/]+\/socket/.test(socket.url()));
         assert.equal(await fresh.evaluate(()=>window.__closedWhileConnecting),0,`${path}: no socket is closed before its handshake completes`);
-        assert.equal(open.length,path==='/projects'||path==='/users/profile'?fixture.projects.length:1,`${path}: one live project socket per connected project`);
+        assert.equal(open.length,path==='/projects'||path===profilePath?fixture.projects.length:1,`${path}: one live project socket per connected project`);
       }
       const noisy=lines.filter(line=>/closed before the connection is established|Live connection unavailable/.test(line));
       assert.deepEqual(noisy,[],'no WebSocket teardown or false reconnect warnings');

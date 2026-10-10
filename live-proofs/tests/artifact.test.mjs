@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { validateArtifact, materializeArtifact, digest } from '../artifact.mjs';
+import { validateArtifact as validateRawArtifact, materializeArtifact, digest } from '../artifact.mjs';
 import { targetPolicy } from '../target.mjs';
 import { deployStage, health } from '../stage-adapter.mjs';
-import { candidate, policy, sha, env } from './fixtures.mjs';
+import { packageCandidate, writeCandidate, candidate, policy, sha, env } from './fixtures.mjs';
 
 test('target policy binds exact source/digest and forbids production/custom domains', () => {
   assert.equal(targetPolicy(JSON.stringify(policy()),sha).sourceSha,sha);
@@ -35,7 +35,7 @@ test('adapter materializes data only, invokes migrations then unbundled deploy; 
   try {
     const a=candidate();
     a.modules[0].contentBase64=Buffer.from('throw new Error("must never execute locally"); export default {}; export class ConversationSocket {}').toString('base64');
-    const raw=JSON.stringify(a), p=policy(a), file=join(root,'artifact.json');await writeFile(file,raw);
+    const raw=JSON.stringify(a), p=policy(a), file=join(root,'artifact.json');await writeCandidate(file,a);
     const e=env({RUNNER_TEMP:root,H2H_STAGE_POLICY_JSON:JSON.stringify(p),EVIDENCE_WRITE_TOKEN:'test-store-token',NODE_OPTIONS:'--import=evil'});
     const calls=[];
     const invoke=(tool,args,cwd,childEnv)=> {
@@ -53,7 +53,7 @@ test('adapter materializes data only, invokes migrations then unbundled deploy; 
     assert.equal(checked,false);
     assert.equal((await deployStage({sha,artifact:file,env:e,invoke:()=>true,checkHealth:async()=>false})).result,'health-failed');
     await symlink(file,join(root,'link.json'));
-    await assert.rejects(materializeArtifact(join(root,'link.json'),join(root,'out'),digest(raw)));
+    await assert.rejects(materializeArtifact(join(root,'link.json'),join(root,'out'),digest(packageCandidate(a).raw)));
     await assert.rejects(deployStage({sha,artifact:file,env:{...e,H2H_RESOURCE_PREFIX:'wrong'},invoke:()=>assert.fail('provider called')}));
   } finally {await rm(root,{recursive:true,force:true});}
 });
@@ -63,3 +63,10 @@ test('health requires full native DB/R2 response and rejects redirects and misle
   assert.equal(await health('https://fixture.example',async(_url,options)=>{assert.equal(options.redirect,'manual');return new Response(null,{status:302})}),false);
   assert.equal(await health('https://fixture.example',async()=>Response.json({status:'ok',runtime:'native-rer',database:'reachable',files:'reachable'})),true);
 });
+
+// Existing fixture bodies remain byte-for-byte; exercise the current raw-payload validator.
+function validateArtifact(raw,expected) {
+ const {raw:manifest,payloads}=packageCandidate(JSON.parse(raw));
+ if(digest(raw)!==expected)throw Error('invalid-artifact');
+ return validateRawArtifact(manifest,digest(manifest),payloads);
+}

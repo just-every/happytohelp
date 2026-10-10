@@ -1,9 +1,30 @@
 [
   {
+    "source": "homepage/media/brands/happytohelp-mark.svg",
+    "sha256": "211d1f291d7fff772fa5a729e8d244175d84448504005917f4c5e683ce1f5c45",
+    "bytes": 625,
+    "origin": "Drawn by hand as SVG paths from the owner-chosen 12ui logo direction (speech bubble, closed-eye smile, three sparks); exactly markSvg() from src/ui/homepage/brand-mark.ts, the geometry the header lockup draws",
+    "license": "MIT (see LICENSE); first-party HappyToHelp mark"
+  },
+  {
+    "source": "homepage/media/brands/happytohelp-favicon.svg",
+    "sha256": "5e3f99c91fdb29edfc772fefed3bebd47b5dfac3aac2ee8204747d24ed8ca06c",
+    "bytes": 738,
+    "origin": "The bubble and face alone, without the sparks, tuned for 16 and 32px tabs (the bubble fills the square viewBox with a heavier outline and a paper fill; the mark's face strokes, each placed by its own transform: the smile twice as wide and 2.75 times as deep as the mark's, the eyes at 84% with a lighter stroke); exactly faviconSvg() from src/ui/homepage/brand-mark.ts",
+    "license": "MIT (see LICENSE); first-party HappyToHelp mark"
+  },
+  {
     "source": "homepage/media/brands/happytohelp-favicon.png",
-    "sha256": "a10803603a265e99bb3706d2e0f2c8cb562baee30c705dca2cf48d56abd3d60b",
-    "bytes": 82657,
-    "origin": "Owner-supplied happytohelp-favicon.png, copied unchanged with no conversion or colour changes",
-    "license": "MIT (see LICENSE); owner-supplied HappyToHelp mark"
+    "sha256": "1c1feb67ea7ae45b4b95ebe2b1b20dece8898441ecee1f67cd82e963685842b9",
+    "bytes": 22948,
+    "origin": "Rendered from happytohelp-favicon.svg at 512x512 in Chromium (Playwright) on a transparent background; the PNG favicon fallback",
+    "license": "MIT (see LICENSE); first-party HappyToHelp mark"
+  },
+  {
+    "source": "homepage/media/brands/happytohelp-apple-touch-icon.png",
+    "sha256": "9f18b4e3ac51715ae0280da025c19ca92a30652802bc8345833e4a57eb0b5c45",
+    "bytes": 5769,
+    "origin": "Rendered from happytohelp-mark.svg at 180x180 in Chromium (Playwright), inset 22px on the page's paper colour #f6f2ea",
+    "license": "MIT (see LICENSE); first-party HappyToHelp mark"
   }
 ]

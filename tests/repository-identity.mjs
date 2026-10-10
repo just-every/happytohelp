@@ -52,13 +52,24 @@ test('homepage derives its source and documentation links from package.json', as
   }
 });
 
+test('the docs pages take their GitHub links from package.json, through the docs build', async () => {
+  const docs = (await readdir(new URL('../src/ui/docs', import.meta.url), { recursive: true })).filter(file => /\.(tsx?|css)$/.test(file)).map(file => `src/ui/docs/${file}`);
+  assert.ok(docs.includes('src/ui/docs/DocsPager.tsx') && docs.includes('src/ui/docs/build/site.ts'));
+  for (const file of [...docs, 'tests/docs-browser.mjs']) {
+    assert.ok(!/https:\/\/github\.com\/[^'"`\s]+/.test(await read(file)), `${file} must not hard-code a repository URL`);
+  }
+  assert.match(await read('src/ui/docs/build/site.ts'), /readFileSync\(join\(root, 'package\.json'\), 'utf8'\)/, 'the docs build reads the repository from package.json');
+});
+
 test('files that cannot import package.json carry exactly the canonical repository', async () => {
   const literalHolders = [
     'README.md',
     'SECURITY.md',
     'seed.json',
-    'src/modules/widget/js/context/AppContext.jsx',
     'src/modules/ai-support/vendor/ensemble/model_providers/openrouter.js',
   ];
   for (const file of literalHolders) assert.ok((await read(file)).includes(canonical), `${file} must reference ${canonical}`);
+  // The widget's removed "We use HappyToHelp" attribution was the only reason its context held the repository; customers'
+  // widgets now carry no repository address at all.
+  assert.ok(!/https:\/\/github\.com\/[^'"`\s]+/.test(await read('src/modules/widget/js/context/AppContext.jsx')), 'src/modules/widget/js/context/AppContext.jsx must not hard-code a repository URL');
 });

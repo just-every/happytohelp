@@ -1,6 +1,8 @@
 import {createServer} from 'node:http';
 import {readFile,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
+import {widgetRecoveryBrowser} from './helpers/widget-recovery-browser.mjs';
+import {widgetFailedSendBrowser} from './helpers/widget-failed-send-browser.mjs';
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const api=process.env.WIDGET_TEST_API, origin=process.env.WIDGET_TEST_ORIGIN, widgetKey=process.env.WIDGET_TEST_KEY, ownerToken=process.env.WIDGET_TEST_OWNER_TOKEN;
 if(!api||!origin||!widgetKey||!ownerToken)throw new Error('WIDGET_TEST_API, WIDGET_TEST_ORIGIN, WIDGET_TEST_KEY, WIDGET_TEST_OWNER_TOKEN required');
@@ -41,6 +43,8 @@ try{
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
  const panel=await page.locator('.happytohelp-interact').boundingBox();assert.ok(panel.width<=390);await page.screenshot({path:`${evidence}/mobile.png`});
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
- const proof={checks:['cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
+ const recoveryChecks=await widgetRecoveryBrowser({browser,origin,api,widgetKey,ownerToken});
+ const failedSendChecks=await widgetFailedSendBrowser({browser,origin,api,widgetKey,ownerToken,evidence});
+ const proof={checks:[...recoveryChecks,...failedSendChecks,'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
  await writeFile(`${evidence}/browser.json`,JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));
 }catch(error){console.error(JSON.stringify({error:error.message,errors,failed}));await page.screenshot({path:`${evidence}/failed-attempt.png`});throw error;}finally{await browser.close();server.close();}

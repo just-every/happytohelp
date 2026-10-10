@@ -1,3 +1,4 @@
+import { AGENT_VERSION } from './version.mjs';
 import readline from 'node:readline';
 import { userMessage } from './errors.mjs';
 
@@ -113,7 +114,7 @@ export async function serveMcp(runner, { input = process.stdin, output = process
       send(response(message.id, {
         protocolVersion: PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: 'happytohelp-local-agent', version: '0.2.1' },
+        serverInfo: { name: 'happytohelp-local-agent', version: AGENT_VERSION },
       }));
       continue;
     }

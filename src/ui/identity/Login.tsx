@@ -7,6 +7,8 @@ import { postJson, useAuthOptions, useHydrated } from './hooks';
 
 export default function Login() {
     const ready = useHydrated();
+    const [magicPath,setMagicPath]=useState('/login/magic');
+    useEffect(()=>{const destination=new URLSearchParams(location.search).get('returnTo');if(destination)setMagicPath('/login/magic?returnTo='+encodeURIComponent(loginDestination(destination,location.origin)));},[]);
     const { options } = useAuthOptions();
     const [error, setError] = useState(''), [busy, setBusy] = useState(false);
     useEffect(() => {
@@ -39,6 +41,7 @@ export default function Login() {
         </form>
         <div className="id-links">
             <a href="/forgot-password">Forgot your password?</a>
+            {options?.recoveryAvailable && <a href={magicPath}>Email me a sign-in link</a>}
             {options?.registrationAvailable && <a href="/register">Create an account</a>}
         </div>
     </IdentityFrame>;

@@ -28,6 +28,13 @@ try {
   }
   const noOverflow = page => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
   const helpPages = {}
+  // The tab icons and the drawn mark and wordmark as the page carries them, to compare the no-project Help Center page with the app 404.
+  const headIcons = page => page.locator('head link[rel="icon"], head link[rel="apple-touch-icon"]').evaluateAll(links => links.map(link => ['rel', 'type', 'sizes', 'href'].map(name => link.getAttribute(name))))
+  const drawnLockup = (page, selector) => page.locator(selector).evaluate(lockup => [...lockup.querySelectorAll(':scope > svg')].map(svg => ({
+    attributes: [...svg.attributes].filter(attribute => !['class', 'xmlns'].includes(attribute.name)).map(attribute => [attribute.name, attribute.value]).sort(),
+    paths: [...svg.querySelectorAll('path')].map(path => [path.getAttribute('d'), path.getAttribute('transform'), getComputedStyle(path).stroke, getComputedStyle(path).strokeWidth]),
+  })))
+  let appIcons, appLockup
 
   for (const viewport of [{ id: 'desktop', width: 1440, height: 900 }, { id: 'mobile', width: 390, height: 844 }]) {
     const context = await browser.newContext({ viewport })
@@ -39,7 +46,7 @@ try {
     }
 
     // Application 404: the same page for mistyped, deep and dashboard-shaped paths, still HTTP 404.
-    for (const path of ['/this-page-does-not-exist', '/foo/bar/baz', '/does-not-exist']) {
+    for (const path of ['/this-page-does-not-exist', '/foo/bar/baz', '/does-not-exist', '/docs/does-not-exist']) {
       const response = await open(path)
       const label = `${viewport.id} ${path}`
       assert.equal(response.status(), 404, label)
@@ -51,11 +58,16 @@ try {
       assert.equal(await page.getByRole('link', { name: 'Back to the homepage' }).getAttribute('href'), '/', label)
       assert.equal(await page.getByRole('link', { name: 'Open your workspace' }).getAttribute('href'), '/projects', label)
       assert.equal(await page.locator('.site-header .brand').getAttribute('href'), '/', label)
+      assert.deepEqual(await page.locator('.site-header .brand').evaluate(brand => [[...brand.childNodes].map(node => node.nodeName.toLowerCase()), [...brand.querySelectorAll('svg')].map(svg => [svg.getAttribute('class'), svg.getAttribute('aria-hidden'), svg.getAttribute('focusable')]), brand.textContent]), [['svg', 'svg', 'span'], [['brand-mark', 'true', 'false'], ['brand-word', 'true', 'false']], 'HappyToHelp'], `${label} lockup`)
+      assert.equal(await page.locator('.site-header').getByRole('link', { name: 'HappyToHelp', exact: true }).count(), 1, `${label} lockup name`)
+      assert.deepEqual(await page.locator('head link[rel="icon"], head link[rel="apple-touch-icon"]').evaluateAll(links => links.map(link => `${link.rel} ${link.getAttribute('href')}`)), ['icon /homepage/media/brands/happytohelp-favicon.png', 'icon /homepage/media/brands/happytohelp-favicon.svg', 'apple-touch-icon /homepage/media/brands/happytohelp-apple-touch-icon.png'], `${label} favicons`)
       assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.h2h-home')).fontFamily.startsWith('Outfit')), true, `${label} Outfit`)
       assert.equal(await page.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(246, 242, 234)', `${label} paper background`)
       assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.pill--large')).backgroundColor), 'rgb(20, 20, 20)', `${label} black pill`)
       assert.ok(await noOverflow(page), `${label} overflow`)
       assert.deepEqual(await axeViolations(page), [], `${label} axe`)
+      appIcons ??= await headIcons(page)
+      appLockup ??= await drawnLockup(page, '.site-header .brand')
     }
     await page.screenshot({ path: join(evidence, `${viewport.id}-app-404.png`), fullPage: true })
     // The way back works.
@@ -81,6 +93,24 @@ try {
       assert.deepEqual(await axeViolations(page), [], `${label} axe`)
       if (known) assert.equal(await page.locator('.help-center-content a').getAttribute('href'), projectBase, `${label} link to the article list`)
       else assert.equal(await page.locator('.help-center-content a').getAttribute('href'), '/', `${label} link home`)
+      if (known) {
+        // A project's pages carry the project's brand only, never HappyToHelp's lockup or tab icons.
+        assert.equal(await page.locator('.help-center-lockup, .help-center-brand svg').count(), 0, `${label} no HappyToHelp lockup`)
+        assert.deepEqual(await headIcons(page), [], `${label} no HappyToHelp tab icons`)
+      } else {
+        // No project owns the page, so it is HappyToHelp's: the homepage's mark and drawn wordmark, and the application's tab icons.
+        const brand = page.locator('.help-center-brand')
+        assert.equal(await brand.getAttribute('href'), '/', `${label} brand links home`)
+        assert.equal(await page.getByRole('link', { name: 'HappyToHelp Help Center', exact: true }).count(), 1, `${label} brand name`)
+        assert.deepEqual(await brand.evaluate(link => [...link.querySelectorAll('.help-center-lockup')].map(lockup => [lockup.getAttribute('aria-hidden'), lockup.querySelectorAll(':scope > svg').length])), [['true', 2]], `${label} one decorative lockup of two drawings`)
+        const lockup = await drawnLockup(page, '.help-center-lockup')
+        assert.deepEqual(lockup.map(svg => svg.paths.map(([d, transform]) => [d, transform])), appLockup.map(svg => svg.paths.map(([d, transform]) => [d, transform])), `${label} the same mark and wordmark paths as the homepage lockup`)
+        assert.deepEqual(lockup[1].attributes, appLockup[1].attributes, `${label} the same wordmark element as the homepage lockup`)
+        assert.deepEqual([...new Set(lockup.flatMap(svg => svg.paths.map(([, , stroke]) => stroke)))].sort(), ['rgb(143, 227, 238)', 'rgb(255, 255, 255)'], `${label} white ink on the dark nav, aqua sparks`)
+        assert.ok(await page.locator('.help-center-sr').evaluate(name => { const box = name.getBoundingClientRect(); return box.width <= 1 && box.height <= 1 }), `${label} the name is visually hidden`)
+        assert.deepEqual(await headIcons(page), appIcons, `${label} the application's tab icons`)
+        for (const [, , , href] of appIcons) assert.equal((await fetch(runtime.origin + href)).status, 200, `${label} ${href}`)
+      }
       helpPages[`${viewport.id}/${id}`] = await (await fetch(runtime.origin + path)).text()
       await page.screenshot({ path: join(evidence, `${viewport.id}-help-${id.replace(/ /g, '-')}.png`), fullPage: true })
     }
@@ -88,7 +118,7 @@ try {
     await context.close()
   }
   success = true
-  console.log('Not-found pages: branded application 404 (3 paths, 2 viewports), Help Center 404s without draft disclosure, axe clean')
+  console.log('Not-found pages: branded application 404 (4 paths including an unknown docs page, 2 viewports), Help Center 404s without draft disclosure, axe clean')
 } finally {
   await browser.close()
   await runtime.close(success)

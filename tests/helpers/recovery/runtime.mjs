@@ -1,3 +1,4 @@
+import {payloadBytes} from '../artifact-payloads.mjs';
 import {spawn} from 'node:child_process';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {dirname, join, resolve} from 'node:path';
@@ -11,7 +12,7 @@ export async function recoveryRuntime(artifact, {directory, port, inspectorPort,
     for (const entry of entries) {
       const path = join(directory, folder, entry[key]);
       await mkdir(dirname(path), {recursive: true});
-      await writeFile(path, Buffer.from(entry.contentBase64, 'base64'));
+      await writeFile(path, await payloadBytes(artifact, entry));
     }
   }
   const spec = artifact.deploymentSpec;
@@ -31,7 +32,7 @@ export async function recoveryRuntime(artifact, {directory, port, inspectorPort,
   };
   await writeFile(join(directory, 'wrangler.json'), JSON.stringify(config));
   const wrangler = resolve('node_modules/wrangler/bin/wrangler.js');
-  const env = {PATH: process.env.PATH, CI: '1', WRANGLER_SEND_METRICS: 'false', CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV: 'false', WRANGLER_LOG_PATH: join(directory, 'wrangler.log')};
+  const env = {PATH: process.env.PATH, TMPDIR:process.env.TMPDIR, CI: '1', WRANGLER_SEND_METRICS: 'false', CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV: 'false', WRANGLER_LOG_PATH: process.env.WRANGLER_LOG_PATH || join(directory, 'wrangler.log')};
   let child, storageOpen = false, logs = '';
   function launch(args) {
     const processRun = spawn(process.execPath, [wrangler, ...args, '--config', join(directory, 'wrangler.json')], {cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe']});

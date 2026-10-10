@@ -11,7 +11,9 @@ Four fresh Ubuntu jobs enforce the boundary:
 
 1. Validate dispatch and source with a read-only GitHub token, without an Environment.
 2. Prepare without secrets or Environment. Stage runs frozen pnpm install,
-   `pnpm run verify`, then the existing `scripts/build-delivery-artifact.mjs`.
+   `pnpm run verify`, whose build calls the pinned Base producer. The whole
+   schema-2 `delivery-artifact/` directory is uploaded, including raw payloads; the
+   credentialed controller verifies their sizes and SHA-256 hashes before materialization.
    Failed verification prevents packaging and prevents the provider job.
 3. The Environment provider job loads only the trusted controller. Stage
    downloads candidate JSON as untrusted data, verifies its approved digest,

@@ -12,7 +12,9 @@
     "tests/local-computer-runtime.mjs",
     "tests/local-computer-revocation.mjs",
     "tests/local-computer-sweep-worker.ts",
-    "tests/local-agent-archive.mjs"
+    "tests/local-agent-archive.mjs",
+    "tests/provider-errors.mjs",
+    "tests/provider-helpers"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

@@ -17,11 +17,12 @@ function ConversationsList({ canTryDemo = false, hideBehindConversation = false 
         setConversationLists,
         fetchConversationList,
         inboxDataVersion,
+        inboxViewCounts,
     } = useContext(ChatContext);
     const settings = useDashboardSettings();
     const searchParams = useDashboardLocation().search;
     const navigate = useNavigate();
-    const selectedView = normalizeInboxView(searchParams.view);
+    const selectedView = normalizeInboxView(searchParams.view, inboxViewCounts);
     const searchQuery = searchParams.q == null ? '' : String(searchParams.q);
     const filter = useMemo(() => inboxViewFilter(selectedView, searchQuery), [ selectedView, searchQuery ]);
     const listKey = JSON.stringify(filter);

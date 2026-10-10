@@ -3,12 +3,15 @@ import { HTTPException } from 'hono/http-exception';
 export type LocalEnv = { DB: D1Database; FILES: R2Bucket };
 export type Principal = { userId: string; projectId: string };
 export type Mode = 'investigate' | 'resolve' | 'resolve_reply';
+export type DraftInput = { projectId: string; conversationId: string; operatorId: string; jobId: string;
+  proposalId: string | null; expectedRevision: number; expectedLastMessageId: string | null };
 export interface Integration {
   authorize(c: Context<any>, projectId: string): Promise<Principal>;
   hasAccess(db: D1Database, userId: string, projectId: string): Promise<boolean>;
   context(db: D1Database, projectId: string, conversationId: string): Promise<Record<string, any>>;
   recordResult(env:LocalEnv, job:Record<string,any>,result:Record<string,any>):Promise<void>;
   deliveryRevision(env:LocalEnv,projectId:string,conversationId:string):Promise<number>;
+  prepareDraft(env: LocalEnv, input: DraftInput): Promise<{ body: string; attachments: Record<string, unknown>[] }>;
   deliver(env: LocalEnv, input: { projectId: string; conversationId: string; operatorId: string; requestId: string; expectedRevision:number; expectedLastMessageId: string | null; body: string; attachmentIds: string[]; resolve: boolean }): Promise<{ messageId: string }>;
 }
 export type App = Hono<any>;

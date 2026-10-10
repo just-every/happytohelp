@@ -9,7 +9,7 @@
   max-height: calc(var(--vh) * 100 - 114px);
   text-align: left;
   line-height: 1.45em;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -260,7 +260,7 @@
   display: inline-block;
   margin: 0;
   cursor: pointer;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;

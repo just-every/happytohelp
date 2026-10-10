@@ -47,7 +47,7 @@ export const Provider = (props) => {
     const [ unreadMessages, setUnreadMessages ] = useState([]);
     const isWindowFocused = useWindowFocus();
     const pluginsRef = useRef([]);
-    const favicon = useRef(new Favcount("/img/icon.svg", "/img/icon.svg"));
+    const favicon = useRef(new Favcount("/homepage/media/brands/happytohelp-favicon.svg", "/homepage/media/brands/happytohelp-favicon.svg"));
     const provisionalReplies = useRef(new Map());
     const queuedReadMessageIds = useRef(new Set());
 

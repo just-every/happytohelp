@@ -9,10 +9,6 @@ let defaultAppContext = {
     page: {},
     contact: {},
     theme: defaultTheme,
-    app_logo: {
-        show: true,
-        url: "https://github.com/just-every/happytohelp",
-    },
     settings: defaultSettings,
     text: defaultText,
 };

@@ -37,6 +37,8 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
     const [ atTop, setAtTop ] = useState(true);
     const [ files, setFiles ] = useState([]);
     const [ content, setContent ] = useState('');
+    const [ draftFocusRequest, setDraftFocusRequest ] = useState(null);
+    const [ draftError, setDraftError ] = useState('');
     const [ loadingContent, setLoadingContent ] = useState('');
     const [ isAssistantDisabled, setIsAssistantDisabled ] = useState(false);
     const [ isNoteModalVisible, setIsNoteModalVisible ] = useState(false);
@@ -46,6 +48,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
     }, [content, files.length, loadingContent, isSending, setDirty]);
     const draftConversationIdRef = useRef(conversationId);
     const activeConversationIdRef = useRef(conversationId);
+    const draftAdoptionRef = useRef(null);
 
     activeConversationIdRef.current = conversationId;
 
@@ -75,8 +78,16 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
         lastConnected,
     });
     const visibleTranscriptError = transcriptError?.conversationId === conversationId;
+    const isComposerEnabled = isConversationReady && buckets.length > 0 && !isLoading && !isSending;
+    const cancelDraftAdoption = () => {
+        if (draftAdoptionRef.current) {
+            draftAdoptionRef.current = null;
+            setIsSending(false);
+        }
+    };
 
     const handleSendFile = selectedFiles => {
+        cancelDraftAdoption();
         const uploadConversationId = conversationId;
         setIsSending(true);
 
@@ -100,6 +111,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
     };
 
     const handleRemoveFile = file => {
+        cancelDraftAdoption();
         setFiles(currentFiles => currentFiles.filter(item => item.id !== file.id));
     };
 
@@ -135,20 +147,62 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
 
     useEffect(() => {
         draftConversationIdRef.current = conversationId;
+        draftAdoptionRef.current = null;
+        setDraftError('');
         setContent('');
+        setDraftFocusRequest(null);
         setLoadingContent('');
         setFiles([]);
         setIsSending(false);
         setIsAssistantDisabled(false);
         setIsNoteModalVisible(false);
+        return () => { draftAdoptionRef.current = null; };
     }, [ conversationId ]);
 
     const updateDraftContent = (nextContent, attachments) => {
+        cancelDraftAdoption();
         draftConversationIdRef.current = conversationId;
         setContent(nextContent);
         if (Array.isArray(attachments)) {
             setFiles(currentFiles => Array.from(new Map([ ...currentFiles, ...attachments ].map(file => [ file.id, file ])).values()));
         }
+    };
+    const insertAssistantDraft = async (nextContent, attachments, localResult) => {
+        // A handoff must land in a composer whose reply controls are available.
+        // Otherwise native Tab skips its disabled tools and Send into the panel.
+        if (!isComposerEnabled || activeConversationIdRef.current !== conversationId) return;
+        if (draftAdoptionRef.current) return;
+        setDraftError('');
+        // Local upload ids are evidence ids, not native composer media ids.
+        // Adopt the stored result before changing the draft or releasing focus.
+        if (localResult) {
+            const request = {};
+            draftAdoptionRef.current = request;
+            setIsSending(true);
+            try {
+                const response = await Api.create(`/projects/${conversationProjectId}/conversations/${conversationId}/delegations/${localResult.jobId}/result/draft`, {
+                    proposal_id: localResult.proposalId,
+                    expected_revision: conversation.revision,
+                    expected_last_message_id: conversation.last_message_id,
+                });
+                if (activeConversationIdRef.current !== conversationId || draftAdoptionRef.current !== request) return;
+                nextContent = response.data.body;
+                attachments = response.data.attachments;
+            } catch (error) {
+                if (activeConversationIdRef.current === conversationId && draftAdoptionRef.current === request) {
+                    setDraftError(error.message || 'Could not prepare the reply attachments. Review the result before trying again.');
+                }
+                return;
+            } finally {
+                if (draftAdoptionRef.current === request) {
+                    draftAdoptionRef.current = null;
+                    setIsSending(false);
+                }
+            }
+        }
+        updateDraftContent(nextContent, attachments);
+        assistant.releaseDraft();
+        setDraftFocusRequest(previous => ({ conversationId, version: (previous?.version || 0) + 1 }));
     };
     const isDraftCurrent = draftConversationIdRef.current === conversationId;
     const draftContent = isDraftCurrent ? content : '';
@@ -210,9 +264,11 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         </p> }
                     </ScrollToBottom>
 
+                    { draftError && <p className="conversation-load-error px-2 py-2" role="alert">{ draftError }</p> }
                     <ConversationForm
                         key={ conversationId }
                         content={ draftContent }
+                        focusRequest={ draftFocusRequest?.conversationId === conversationId ? draftFocusRequest.version : 0 }
                         conversationId={ conversationId }
                         projectId={ conversationProjectId }
                         loadingContent={ draftLoadingContent }
@@ -224,18 +280,20 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         onAssistantDisabledChange={ setIsAssistantDisabled }
                         files={ draftFiles }
                         isResolved={ Boolean(conversation.resolved_at) }
-                        isEnabled={ isConversationReady && buckets.length > 0 && !isLoading && !isSending }
+                        isEnabled={ isComposerEnabled }
                     />
                 </div>
 
                 { assistant.isVisible && <button type="button" className="conversation-assistant-backdrop" onClick={ assistant.close } aria-label="Close conversation panel overlay" tabIndex={ -1 } /> }
                 <ConversationAssistant
                     closeButtonRef={ assistant.closeRef }
+                    draftError={ draftError }
+                    isDraftDisabled={ !isComposerEnabled }
                     conversation={ conversation }
                     conversationId={ conversationId }
                     isVisible={ assistant.isVisible }
                     onClose={ assistant.close }
-                    onInsertDraft={ updateDraftContent }
+                    onInsertDraft={ insertAssistantDraft }
                     onConversationChanged={ refreshConversation }
                     panelRef={ assistant.panelRef }
                     requestedTab={ assistant.requestedTab }

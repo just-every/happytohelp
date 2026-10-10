@@ -36,7 +36,7 @@ try {
   checks.push('real unread count is present and Inbox remains addressable by its complete accessible name');
   await nav.getByRole('link',{name:/All open/}).click();
   await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
-  await page.getByText(alpha.message,{exact:true}).waitFor();
+  await page.locator('.transcript-message-content').getByText(alpha.message,{exact:true}).waitFor();
   let stamp=await watchShell(page);
   // Forward real GETs with latency so a transient shell replacement is observable.
   await page.route('**/api/management/**',async route=>{if(route.request().method()==='GET')await new Promise(resolve=>setTimeout(resolve,200));await route.continue();});

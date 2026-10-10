@@ -1,4 +1,5 @@
 import { ConnectorError } from './errors.mjs';
+import { normalizeProviderError, providerFailureSummary, redactDiagnostic } from './provider-error.mjs';
 
 const MAX_ACTIONS = 50;
 const MAX_FIELD_LENGTH = 12_000;
@@ -29,8 +30,8 @@ export const AGENT_OUTPUT_SCHEMA = {
       type: 'array', maxItems: MAX_PROPOSALS,
       items: {
         type: 'object', additionalProperties: false,
-          properties: { id: { type: 'string' }, title: { type: 'string' }, body: { type: 'string' }, attachment_ids: { type: 'array', maxItems: 10, items: { type: 'string' } } },
-        required: ['id', 'title', 'body'],
+        properties: { id: { type: 'string' }, title: { type: 'string' }, body: { type: 'string' }, attachment_ids: { type: 'array', maxItems: 10, items: { type: 'string' } } },
+        required: ['id', 'title', 'body', 'attachment_ids'],
       },
     },
     follow_up_actions: {
@@ -41,13 +42,13 @@ export const AGENT_OUTPUT_SCHEMA = {
           id: { type: 'string' }, title: { type: 'string' }, instructions: { type: 'string' },
           mode: { type: 'string', enum: ['investigate', 'resolve', 'resolve_reply'] }, attachment_ids: { type: 'array', maxItems: 10, items: { type: 'string' } },
         },
-        required: ['id', 'title', 'instructions', 'mode'],
+        required: ['id', 'title', 'instructions', 'mode', 'attachment_ids'],
       },
     },
     verified: { type: 'boolean' },
     question: { type: ['string', 'null'] },
   },
-  required: ['status', 'summary', 'actions', 'verified', 'question'],
+  required: ['status', 'summary', 'actions', 'reply_draft', 'attachment_ids', 'replies', 'follow_up_actions', 'verified', 'question'],
 };
 
 function nonEmptyString(value, field, { required = true } = {}) {
@@ -60,7 +61,7 @@ function nonEmptyString(value, field, { required = true } = {}) {
   }
 }
 
-export function validateAgentOutput(output) {
+export function validateAgentOutput(output, { mode } = {}) {
   if (!output || typeof output !== 'object' || Array.isArray(output)) {
     throw new ConnectorError('Runtime did not return a structured result object.', { code: 'INVALID_RESULT' });
   }
@@ -130,7 +131,7 @@ export function validateAgentOutput(output) {
       actions: output.actions.map((action) => ({ description: action.description, evidence: action.evidence })),
       ...(output.reply_draft !== undefined ? { reply_draft: output.reply_draft } : {}),
       ...(output.attachment_ids !== undefined ? { attachment_ids: output.attachment_ids } : {}),
-      ...(output.replies !== undefined ? { replies: output.replies.map(({ id, title, body, attachment_ids }) => ({ id, title, body, ...(attachment_ids !== undefined ? { attachment_ids } : {}) })) } : {}),
+      ...(output.replies !== undefined && !(mode === 'resolve_reply' && output.replies.length === 0) ? { replies: output.replies.map(({ id, title, body, attachment_ids }) => ({ id, title, body, ...(attachment_ids !== undefined ? { attachment_ids } : {}) })) } : {}),
       ...(output.follow_up_actions !== undefined ? { follow_up_actions: output.follow_up_actions.map(({ id, title, instructions, mode, attachment_ids }) => ({ id, title, instructions, mode, ...(attachment_ids !== undefined ? { attachment_ids } : {}) })) } : {}),
       verified: output.verified,
       ...(output.question ? { question: output.question } : {}),
@@ -178,9 +179,11 @@ function uuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-export function failureResult(message) {
+export function failureResult(message, providerError) {
+  const provider = normalizeProviderError(providerError);
   return {
-    summary: message,
+    summary: provider ? providerFailureSummary(provider) : redactDiagnostic(message),
+    ...(provider ? { provider_error: provider } : {}),
     actions: [],
     reply_draft: '',
     verified: false,

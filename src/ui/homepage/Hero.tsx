@@ -1,3 +1,4 @@
+import { Flourish } from './drawings/Flourish';
 import { HeroHandoff } from './drawings/HeroHandoff';
 import { docsUrl, sourceUrl } from './repository';
 
@@ -10,6 +11,7 @@ export function Hero() {
       <p className="hero-sub">Your Codex or Claude fixes the problem and writes the reply. You press Send.</p>
       <div className="actions"><a className="pill pill--ink pill--large" href={sourceUrl}>Get the code</a><a className="text-link" href={docsUrl}>Read the docs</a></div>
       <p className="hero-free">100% free and open source.</p>
+      <Flourish />
     </div>
     <div className="hero-stage">
       <HeroHandoff />

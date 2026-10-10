@@ -6,10 +6,12 @@ export const INBOX_VIEWS = [
     { id: 'closed', label: 'Closed', filter: { status: 'resolved', assigned_to: 'anyone' } },
 ];
 
-export const DEFAULT_INBOX_VIEW = 'mine';
+export function defaultInboxView(inboxViewCounts) {
+    return inboxViewCounts?.mine > 0 ? 'mine' : 'open';
+}
 
-export function normalizeInboxView(view) {
-    return INBOX_VIEWS.some(item => item.id === view) ? view : DEFAULT_INBOX_VIEW;
+export function normalizeInboxView(view, inboxViewCounts) {
+    return INBOX_VIEWS.some(item => item.id === view) ? view : defaultInboxView(inboxViewCounts);
 }
 
 export function getInboxView(view) {

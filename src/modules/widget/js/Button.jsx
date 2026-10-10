@@ -81,11 +81,11 @@ export default function Button(props) {
         <button type="button" className={classes.join(" ")} onMouseOver={props.onMouseOver} onClick={props.onClick}
                 aria-label={props.open ? 'Close chat' : 'Open chat'} aria-expanded={props.open}
                 style={ props.open ? context.theme.button.open : context.theme.button.closed }>
-            {workspaceBrand
+            {!props.open && (workspaceBrand
                 ? <WorkspaceBrandAvatar brand={workspaceBrand} />
                 : launcherAgent && (launcherAgent.is_ai
                     ? <AIAvatar ai={launcherAgent} canAnimate={!props.open && props.insightOpen} />
-                    : <AgentAvatar agent={launcherAgent} />)}
+                    : <AgentAvatar agent={launcherAgent} />))}
             <FontAwesomeIcon icon={fasComment} flip="horizontal" className="happytohelp-show-closed" />
             <FontAwesomeIcon icon={falTimes} className="happytohelp-show-opened" />
         </button>

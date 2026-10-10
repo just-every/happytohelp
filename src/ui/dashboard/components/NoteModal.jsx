@@ -1,5 +1,5 @@
 import { useUnsavedChanges } from '../../native/NavigationGuard';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import Api from "../api";
@@ -7,6 +7,7 @@ import { ChatContext } from "../contexts/ChatContext";
 import { trapDialogTab } from './dialogTabBoundary';
 
 function NoteModal({ onHide, conversation }) {
+    const modalRef = useRef(null);
     const { markDirty, markSaved } = useUnsavedChanges();
     const cancel = () => { if (isLoading) return; markSaved(); onHide(); };
     const { fetchBucket } = useContext(ChatContext);
@@ -17,6 +18,9 @@ function NoteModal({ onHide, conversation }) {
     const { register, handleSubmit, getValues } = useForm({ });
 
     const handleAddNote = values => {
+        // Move focus before disabling the active control. Bootstrap's deferred
+        // enforceFocus otherwise leaves native Tab outside the dialog until it runs.
+        modalRef.current.dialog.focus();
         setRequestError('');
         setIsLoading(true);
         setIsValidated(null);
@@ -37,7 +41,7 @@ function NoteModal({ onHide, conversation }) {
     }
 
     return (
-        <Modal show onHide={ cancel } aria-labelledby="add-note-title"
+        <Modal ref={ modalRef } show onHide={ cancel } aria-labelledby="add-note-title"
             onEnter={ dialog => dialog.addEventListener('keydown', trapDialogTab) }
             onExited={ dialog => dialog.removeEventListener('keydown', trapDialogTab) }>
             <Modal.Header>

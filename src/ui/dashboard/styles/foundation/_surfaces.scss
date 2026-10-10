@@ -176,20 +176,6 @@ tbody td {
   mask-image: url("../../../../../node_modules/feather-icons/dist/icons/chevron-up.svg");
 }
 
-.dropdown-menu {
-  animation: dashboard-menu-in .15s;
-}
-
-@keyframes dashboard-menu-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
 [data-bs-theme="dark"] .dropdown-menu {
   --bs-dropdown-bg: #{$gray-800-dark};
   --bs-dropdown-border-color: var(--bs-black);
@@ -202,20 +188,32 @@ tbody td {
 
 .modal {
   padding: 1%;
-}
 
-.modal-dialog {
-  .modal.fade & {
-    transform: translate(0, -150px);
-  }
+  // Dialog controls are interactive as soon as they mount. Keep their ink,
+  // surface and hit areas intact while Bootstrap runs its lifecycle callbacks.
+  &.fade {
+    opacity: 1;
+    transition: none;
 
-  .modal.show & {
-    transform: translate(0, 0);
+    .modal-dialog {
+      transform: none;
+      transition: none;
+    }
   }
 }
 
 .modal-header .btn-close {
   margin: -1.5rem -1.5rem -1.5rem auto;
+}
+
+// Secondary dialog actions use the same blue-grey palette at text contrast.
+.modal .btn-secondary {
+  --bs-btn-bg: #{$gray-800};
+  --bs-btn-border-color: #{$gray-800};
+  --bs-btn-hover-bg: #{$gray-900};
+  --bs-btn-hover-border-color: #{$gray-900};
+  --bs-btn-active-bg: #{$gray-900};
+  --bs-btn-active-border-color: #{$gray-900};
 }
 
 [data-bs-theme="dark"] .modal {

@@ -72,12 +72,11 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm exec playwright install --with-deps chromium
           pnpm run verify
-          node scripts/build-delivery-artifact.mjs
           sha256sum delivery-artifact/happytohelp-worker-artifact.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: happytohelp-candidate-${{ github.run_id }}-${{ github.run_attempt }}
-          path: delivery-artifact/happytohelp-worker-artifact.json
+          path: delivery-artifact/
           if-no-files-found: error
           retention-days: 7
 

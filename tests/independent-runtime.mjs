@@ -1,3 +1,4 @@
+import {readArtifact} from './helpers/artifact-payloads.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -6,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {artifactRuntime} from './helpers/independent-artifact.mjs';
 import {verifyStreamedRejection} from './helpers/streamed-rejection.mjs';
 import {baselineTables, addedTables} from './helpers/independent-schema.mjs';
-const artifact=JSON.parse(await readFile('delivery-artifact/happytohelp-worker-artifact.json'));
+const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-independent-proof-'));
 const setupToken='local-test-only-installation-credential';
 const runtime=await artifactRuntime(artifact,{variables:{H2H_SETUP_TOKEN:setupToken}});let restored;
@@ -45,9 +46,14 @@ try{
  await runtime.withStorage(async storage=>{
   await assert.rejects(runtime.start(),/Close native storage/);
   await storage.inspect(object);
-  // Exact 108-table schema: 97 baseline tables and 11 named additions.
-  before=await snapshot(storage);assert.equal(Object.keys(before).length,108);
+  // Exact 109-table schema: 97 baseline tables and 12 named additions.
+  before=await snapshot(storage);assert.equal(Object.keys(before).length,109);
   assert.deepEqual(Object.keys(before).sort(),[...baselineTables,...addedTables].sort());
+  assert.equal(before.d1_migrations.length,42);
+  assert.ok(before.d1_migrations.some(row=>JSON.parse(row).name==='0109_magic_signins.sql'));
+  const magicColumns=(await storage.inspect({sql:'PRAGMA table_info(magic_signins)'})).results;
+  assert.deepEqual(magicColumns.map(row=>row.name),['token_hash','user_id','project_id','email','expires_at','consumed_at']);
+  assert.ok((await storage.inspect({sql:"SELECT name FROM sqlite_master WHERE type='index' AND name='magic_signins_expiry'"})).results.length===1);
   let cursor;do{const page=await storage.inspect({list:{...(cursor?{cursor}:{})}});for(const o of page.objects)objects.push(await storage.inspect({key:o.key}));cursor=page.truncated?page.cursor:undefined}while(cursor);
   assert.deepEqual(objects.find(o=>o.key===object.key),{key:object.key,bytes:object.bytes,httpMetadata:object.options.httpMetadata,customMetadata:object.options.customMetadata});
   const uploaded=(await storage.inspect({sql:'SELECT object_key FROM media WHERE id=?',values:[media.id]})).results[0];

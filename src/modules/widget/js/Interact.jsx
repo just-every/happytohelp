@@ -3,6 +3,8 @@ import AppContext from './context/AppContext';
 import ChatHeader from './ChatHeader';
 import ChatList from './ChatList';
 import SendMessage from './SendMessage';
+import ConversationWelcome from './ConversationWelcome';
+import ConnectionNotice from './ConnectionNotice';
 
 
 
@@ -43,6 +45,7 @@ export default function Interact({ setOpen }) {
     const nodeRefChatList = useRef(null);
     const [ headerExpanded, setHeaderExpanded ] = useState(false);
     const [ headerExpandedAnimate, setHeaderExpandedAnimate ] = useState(false);
+    const [headerHeight,setHeaderHeight]=useState(null);
     const [ showing, setShowing ] = useState(false);
 
     const sendContact = (state) => {
@@ -84,7 +87,7 @@ export default function Interact({ setOpen }) {
     };
 
     useEffect(() => {
-        if(connectErrors.length > 0) displayError(connectErrors);
+        setErrors(connectErrors);
     }, [ connectErrors ]);
 
     useEffect(() => {
@@ -116,15 +119,18 @@ export default function Interact({ setOpen }) {
     }
 
     return (
-        <div className={containerClass.join(" ")}>
+        <div className={containerClass.join(" ")} style={headerHeight?{"--happytohelp-header-height":`${headerHeight}px`}:undefined}>
             <div className="happytohelp-interact" onClick={() => {
                 headerExpanded && setHeaderExpanded(false)
             }}>
-                <ChatHeader setOpen={setOpen} headerExpanded={headerExpanded} setHeaderExpanded={setHeaderExpanded}/>
+                <ChatHeader onHeightChange={setHeaderHeight} setOpen={setOpen} headerExpanded={headerExpanded} setHeaderExpanded={setHeaderExpanded}/>
                 <div className={overlayClass.join(" ")}/>
                 <div
                     className={"happytohelp-content" + (mainView === 'conversation' ? " happytohelp-content-full" : "")}>
-                    <div className="happytohelp-chatlist-container" ref={nodeRefChatList}>
+                    <ConnectionNotice />
+                    <div className="happytohelp-chatlist-container" ref={nodeRefChatList}
+                         role="region" aria-label="Chat transcript" tabIndex={0}>
+                        <ConversationWelcome empty={!messages.length} />
                         <ChatList messages={messages} contact={contact} sendContact={sendContact}
                                   scrollRef={nodeRefChatList} agentTyping={agentTyping}/>
                     </div>

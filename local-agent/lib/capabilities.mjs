@@ -1,3 +1,4 @@
+import { AGENT_VERSION } from './version.mjs';
 import { spawn } from 'node:child_process';
 import { isAbsolute } from 'node:path';
 import { commandExists, waitForExit } from './util.mjs';
@@ -139,7 +140,7 @@ export async function probeBrowserMcp(browserMcp, { timeoutMs = 10_000 } = {}) {
       params: {
         protocolVersion: '2025-03-26',
         capabilities: {},
-        clientInfo: { name: 'happytohelp-local-agent', version: '0.2.1' },
+        clientInfo: { name: 'happytohelp-local-agent', version: AGENT_VERSION },
       },
     })}\n`);
   });

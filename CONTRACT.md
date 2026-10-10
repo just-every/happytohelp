@@ -3,7 +3,7 @@
 HappyToHelp preserves the useful parts of the original HappyToHelp owner
 workspace: customer widget, operator dashboard, AI assistance and reply,
 knowledge, customer context, delegated local work, training and integrations.
-Its public surface is the “Customer Support, Solved.” homepage and dynamic published help centers.
+Its public surface is the “Customer Support, Solved.” homepage, the documentation at `/docs` built from the repository's Markdown, and dynamic published help centers.
 It is editable source that replaces the original PHP/AWS application runtime with
 a Cloudflare Worker stack. These clauses state required behavior; the evidence
 each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
@@ -86,28 +86,51 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   Payment, checkout, Stripe and balance behavior are outside this edition.
 - **PUBLIC-001 — Public product source.** The approved
   “Customer Support, Solved.” homepage (owner approval 2026-10-01, clarity pass
-  2026-10-02) is the real public `/` experience, in this order: the hero, which
-  shows a problem already solved in one column (a customer, Maya, cannot turn on
-  the Spanish version of her store; Codex has fixed it and left a note; the reply
-  is in the composer and only Send is left) beside the subhead “Your Codex or
+  2026-10-02, hero redesign 2026-10-08) is the real public `/` experience, in
+  this order: the hero, which shows a problem already solved as three staggered,
+  hand-outlined bubbles on a pale aqua blob, joined by ink arrows (a customer,
+  Maya, cannot turn on the Spanish version of her store; the untitled agent bubble,
+  beside a code glyph, says it is fixed; the reply to Maya, beside a person glyph,
+  carries Send inside it, the only step left) beside the subhead “Your Codex or
   Claude fixes the problem and writes the reply. You press Send.”, the line
-  “100% free and open source.” and the caption steps “The customer asks”, “The
-  agent fixes it” and “You press Send”; “Not just better. Free.” (100% free and
+  “100% free and open source.”, an aqua pen-stroke flourish under the calls to
+  action that draws itself in once, and the caption steps “The customer asks”,
+  “The agent fixes it” and “You press Send” on filled aqua number discs; “Not just better. Free.” (100% free and
   open source, free as in code and free as in cost, MIT licensed, “No seats. No
-  plans. No fees.”, with the MIT licence drawn); “Help before they ask”; “The rest
-  of your support desk” (chat widget, shared inbox, help centre, suggested
-  replies); “Try it beside what you have” (install, bring the help centre from
-  Zendesk, Intercom or Freshdesk, add the chat widget); “Ready when you are.”; and
-  the footer. The page carries no price, hosting or provider line and no plug for any other service.
+  plans. No fees.”, each promise after a line icon in a pale aqua circle, with the MIT licence drawn as an ink card
+  over a wordless code editor, “free of charge” and the rights highlighted in aqua); “Help before they ask” (the
+  checkout page in its window, and the widget's offer floating over it with the speech-bubble mark as its avatar);
+  “The rest of your support desk” (chat widget, shared inbox, help centre, suggested
+  replies, as frameless ink cards numbered on filled aqua discs); “Try it beside what you have” (install, bring the
+  help centre from Zendesk, Intercom or Freshdesk, add the chat widget, on filled aqua discs, beside the finished
+  import in its window); “Ready when you are.”, as big as the hero headline with an aqua pen line drawn under it;
+  and the footer, signed with the header's lockup. Below the hero the drawings carry the hero's language: each
+  floats on a pale aqua blob, the mark's three aqua sparks spring from the corner of four of its cards, a window
+  frame stays only for the code editor, the checkout and the import, the text links carry the hero's aqua
+  underline, and a full-width aqua pen line with one loop divides Free from Help before they ask and the desk
+  from Try it beside what you have. The page carries no price, hosting or provider line and no plug for any other service.
   The drawings mirror the real interface and make no claim the product cannot
   back; conversation, ticket-history and automation import, reporting and
   compliance claims are deliberately absent. It is a warm off-white page in one geometric sans-serif
   (Outfit, self-hosted from `public/fonts/outfit/`, so the page makes no
-  third-party request) with near-black ink and black pill buttons; colour
-  appears only inside the drawings, which are labelled HTML/SVG rather than raster images. Its text
+  third-party request, over a metric-matched local fallback, so no text moves
+  when it loads) with near-black ink and black pill buttons; colour
+  appears only inside the drawings, which are labelled HTML/SVG rather than raster images,
+  and in aqua accents outside them (the hero's and the desk's number discs, the promises' circles, link underlines, the
+  hero flourish, the dividers, the closing line) and in the sparks of the speech-bubble mark beside the header and
+  footer wordmark. The wordmark is not set in Outfit: it is drawn by hand as round-capped SVG strokes following
+  Nunito's letter shapes (SIL OFL), with no font data embedded, and the link it sits in is named HappyToHelp by
+  visually hidden text. The page's text
   and real links, derived from `package.json` `repository.url`, are ordinary DOM
-  content; the sketch marks draw in once and reduced-motion preferences remove
-  all animation, transitions and smooth scrolling without changing layout. Dynamic published
+  content; the hero flourish draws in once as the page appears, and each moment below the hero (a drawing, the
+  promises, the steps, a desk card, a divider, the closing line) plays once, in under 1.8s, as it scrolls into view
+  (an IntersectionObserver), moving only opacity, transforms, clipping and strokes, so nothing shifts; reduced-motion
+  preferences remove all animation, transitions and smooth scrolling without
+  changing layout, leaving every drawing in its final state and every stroke fully drawn. `/docs` renders, at build
+  time, the Markdown files listed in `docs/site.json`, in the homepage's paper,
+  ink and Outfit, with section navigation, page contents and GitHub links for
+  everything unpublished; an unknown page gets the branded 404. Every build
+  renders the current files, and an unlisted Markdown file fails verification. Dynamic published
   help centers retain project scope, canonical links, search and draft/deleted denial. The customer widget
   remains available through owner-configured installation; broader marketing
   routes, pricing, legal, referrer, waitlist and public auto-widget behavior
@@ -126,11 +149,7 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   source with inspect/check/lock/release commands. Shared capabilities include
   substantial implementation, migrations and meaningful tests; a second consumer
   preserves its own policy. Release excludes credentials/private fixtures and
-  retains asset provenance/licensing obligations. Original work is preserved in
-  digest-pinned private custody when sanitation is required. Public comparison
-  archives have distinct reproducible identities; public verification requires
-  no private input. Release qualification separately proves every archive
-  comparison and retained test has equivalent original/projected semantics.
+  retains asset provenance/licensing obligations. Original work is preserved.
 
 A source manifest, a compiling bundle or a provider fixture is not by itself
 evidence that a clause is met.

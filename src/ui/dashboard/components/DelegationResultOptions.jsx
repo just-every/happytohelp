@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import DelegationAttachments from './DelegationAttachments';
 
-function ResultOption({ option, kind, onAction, onUse, verified }) {
+function ResultOption({ option, kind, isDraftDisabled, onAction, onUse, verified }) {
     const [ pending, setPending ] = useState(false);
     const inFlight = useRef(false);
     const isReply = kind === 'reply';
@@ -40,8 +40,8 @@ function ResultOption({ option, kind, onAction, onUse, verified }) {
             { isReply ? <button
                 type="button"
                 className="btn btn-sm btn-primary"
-                onClick={ () => onUse(option.body, option.attachments) }
-                disabled={ used || uncertain }
+                onClick={ () => onUse(option.body, option.attachments, option.id) }
+                disabled={ used || uncertain || isDraftDisabled }
                 aria-label={ 'Use ' + option.title }
             >
                 <i className={ used ? 'fe fe-check' : 'fe fe-edit-2' } aria-hidden="true" />
@@ -60,14 +60,15 @@ function ResultOption({ option, kind, onAction, onUse, verified }) {
     </article>;
 }
 
-export default function DelegationResultOptions({ job, onInsertDraft, onRunFollowUp }) {
+export default function DelegationResultOptions({ job, isDraftDisabled, onInsertDraft, onRunFollowUp }) {
     const replies = Array.isArray(job.result?.replies) ? job.result.replies : [];
     const followUps = Array.isArray(job.result?.follow_up_actions) ? job.result.follow_up_actions : [];
 
     return <div className="delegation-result-options">
         { replies.length > 0 && <section aria-label="Suggested replies">
             <h3><i className="fe fe-message-circle" aria-hidden="true" /> Suggested replies</h3>
-            { replies.map(reply => <ResultOption key={ reply.id } option={ reply } kind="reply" verified={ job.result.verified === true } onUse={ onInsertDraft } />) }
+            { replies.map(reply => <ResultOption key={ reply.id } option={ reply } kind="reply" isDraftDisabled={ isDraftDisabled } verified={ job.result.verified === true }
+                onUse={ (body, attachments, proposalId) => onInsertDraft(body, attachments, { jobId: job.id, proposalId }) } />) }
         </section> }
         { followUps.length > 0 && <section aria-label="Follow-up actions">
             <h3><i className="fe fe-zap" aria-hidden="true" /> Follow-up actions</h3>
@@ -77,6 +78,7 @@ export default function DelegationResultOptions({ job, onInsertDraft, onRunFollo
 }
 
 ResultOption.propTypes = {
+    isDraftDisabled: PropTypes.bool,
     option: PropTypes.object.isRequired,
     kind: PropTypes.string.isRequired,
     onAction: PropTypes.func,
@@ -85,6 +87,7 @@ ResultOption.propTypes = {
 };
 
 DelegationResultOptions.propTypes = {
+    isDraftDisabled: PropTypes.bool,
     job: PropTypes.object.isRequired,
     onInsertDraft: PropTypes.func.isRequired,
     onRunFollowUp: PropTypes.func.isRequired,

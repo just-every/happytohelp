@@ -1,157 +1,247 @@
 # Personal data in HappyToHelp
 
-This note is for the operator of a HappyToHelp installation: the person or team
-that deploys it and answers customers with it. It describes what the code stores
-and sends. It is not a privacy policy for your customers and is not legal advice.
+This page is for whoever runs a HappyToHelp installation: you and your team, the
+people who deploy it and answer customers with it. It explains what HappyToHelp
+stores about your customers, what it sends to other services, and how to erase or
+hand over one customer's data when they ask.
 
-## Where the data lives
+This page describes what the code does. It is not a privacy policy for your
+customers, and it is not legal advice.
 
-Everything below is stored in the installation's own Cloudflare account:
+A few words used on this page: a **workspace** is one support space with its own
+inbox, widget and team (the API calls it a *project*, so paths below say
+`projectId`); **owners**, **admins** and **operators** are the roles on a
+workspace's team (the dashboard shows the operator role as **Agent**).
 
-- **D1** (`DB` binding): accounts, projects, contacts, conversations, messages,
-  customer context, AI and email records.
-- **R2** (`FILES` binding): uploaded files: conversation attachments, inbound email
-  attachments, screenshots from paired computers, brand images and knowledge
-  import staging files.
+## The short version
 
-HappyToHelp has no central service that receives your customers' data. Data leaves
-your account only through the providers you configure (see below).
+- Everything is stored in your own Cloudflare account. HappyToHelp has no central
+  service that receives your customers' data.
+- Data leaves your account only through the providers you configure, such as an
+  AI model or an email service.
+- Customer data is kept until someone erases it. Nothing deletes it on a schedule,
+  apart from the few exceptions in [How long data is kept](#how-long-data-is-kept).
+- To remove a customer's personal data, use **Erase personal data…**, not
+  **Delete**. **Delete** only hides and blocks the contact.
+- Erase contacts **before** you delete a workspace. Once a workspace is deleted,
+  nobody can sign in to erase them.
 
-## What is stored about a customer ("contact")
+## Where your data is stored
 
-| Data | Where | Collected when |
+Everything on this page is stored in the installation's own Cloudflare account, in
+two places:
+
+- **D1**, Cloudflare's database (the Worker reaches it through the `DB` binding):
+  accounts, workspaces, contacts, conversations, messages, customer context, and AI
+  and email records.
+- **R2**, Cloudflare's file storage (the `FILES` binding): uploaded files, namely
+  conversation attachments, attachments on inbound email, screenshots from paired
+  computers, brand images and files staged while importing knowledge.
+
+Your own accounts, and those of your teammates, are stored in the same database:
+name, email, password hash, sessions and settings.
+
+## What HappyToHelp stores about each customer
+
+HappyToHelp calls each customer a **contact**. The tables below list everything it
+keeps about a contact, which D1 table holds it, and when it is collected. Table
+names are given so you can find the data yourself if you need to.
+
+### Identity and conversations
+
+| What | Stored in | When it is collected |
 | --- | --- | --- |
-| Name, email, verified identifier (`external_id`) | `contacts` | The widget or your site supplies them, a contact edits them in the widget, an inbound email arrives, or an operator enters them. |
-| Provided name/email, phone, blocked flag, last seen, widget open state, and any metadata your site signs with the verification secret (for example country, IP address, browser) | `contacts.metadata_json` | Widget session and presence events; operator edits. |
-| Widget sessions | `sessions` (token hash, 30-day expiry) | Each widget session. |
-| Messages | `messages` | Every message in a conversation, including operator and AI replies. |
-| Attachments | `media` rows plus R2 objects | Widget, dashboard and inbound email uploads. |
-| Page visits | `context_tracked_events` (`PAGE_VIEW` URLs) | The widget sends them when contact tracking is on for the project; they are stored only when the contact's customer-context consent is recorded (`context_subjects.consent`, set through the customer-context API or a legacy import). |
-| Widget activity | `context_actions` | Same consent rule, and the bot must be enabled for the contact. Summarised and then deleted once a context model has analysed it. |
-| Customer context: evidence, profiles, insights, activity summaries, context jobs | `context_*` tables | Built from the messages and activity above, by the configured context model. |
-| Internal notes, participants, read state | `conversation_notes`, `conversation_participants`, `conversation_reads` | Operator actions and widget read receipts. |
-| AI generations | `ai_generations` (instructions, the operator's draft and assist instructions in `options_json`, generated text), `ai_attempt_events` (provider event logs), `ai_round_usage` (token usage only) | AI replies, suggestions and draft assist. |
-| Delegated work | `local_jobs`, `local_events`, `local_attachments` | When an operator sends a conversation to a paired computer. |
-| Email delivery log | `email_deliveries` (recipient, subject, state; no message body) | Notification and transcript emails. |
-| Inbound email evidence | `inbound_emails.evidence_json` (envelope sender, header From, subject and a fixed set of headers; the body becomes a message) | Each inbound email, to classify automatic mail. |
-| Request counters | `abuse_counters` (limit name, a SHA-256 of the limited subject such as a visitor ID, conversation ID, client address or account ID, and a count; no raw address) | Visitor, registration and project-creation requests. Removed by the scheduled job once the window ends (at most one day). |
-| Imported conversation buckets | `conversation_buckets.metadata_json` (the original bucket record, including any conversation summary) | Only if you imported data from the original HappyToHelp service. |
-| Legacy import archive | `legacy_import_rows` (verbatim source rows) | Only if you imported data from the original HappyToHelp service. |
+| Name, email and verified identifier (`external_id`, the ID your site passes when it verifies a visitor) | `contacts` | Your site or the widget supplies them, the contact edits them in the widget, an inbound email arrives, or an operator enters them. |
+| The name and email the contact typed, phone, blocked flag, last seen, whether the widget is open, and any extra details your site signs with the workspace's verification secret (for example country, IP address or browser) | `contacts.metadata_json` | Widget sessions and presence events, and operator edits. |
+| Widget sessions | `sessions` (a hash of the session token, with a 30-day expiry) | Each widget session. |
+| Messages | `messages` | Every message in a conversation, including replies from operators and the AI. |
+| Attachments | Rows in `media`, with the files in R2 | Uploads from the widget, the dashboard and inbound email. |
+| Internal notes, conversation participants and read state | `conversation_notes`, `conversation_participants`, `conversation_reads` | Operator actions and widget read receipts. |
 
-Operator accounts (name, email, password hash, sessions and settings) are stored in
-the same database.
+### Activity and customer context
 
-## What goes to providers you configure
+**Customer context** is the feature that builds a picture of a contact (evidence,
+profiles, insights and summaries) from their messages and activity. The work is done
+by the **context model**, the AI model you name in `CONTEXT_MODEL`. Page visits and
+widget activity are stored only once the contact's consent is recorded in
+`context_subjects.consent`, either through the customer-context API
+(`PUT /api/customer-context/{projectId}/{subjectId}/consent`) or by a legacy import.
 
-Nothing is sent to a provider unless you set its credentials.
+| What | Stored in | When it is collected |
+| --- | --- | --- |
+| Page visits | `context_tracked_events` (`PAGE_VIEW` URLs) | The widget sends them when contact tracking is on for the workspace. They are stored only if the contact's consent is recorded. |
+| Widget activity | `context_actions` | The same consent rule applies, and the bot must also be enabled for the contact. Once a context model has analysed the activity, it is summarised and the raw records are deleted. |
+| Evidence, profiles, insights, activity summaries and context jobs | The `context_*` tables | Built by the context model from the messages and activity above. |
+
+### AI, email and delegated work
+
+| What | Stored in | When it is collected |
+| --- | --- | --- |
+| AI generations | `ai_generations` (the instructions, the generated text, and in `options_json` the operator's draft and any instructions they gave the drafting assistant), `ai_attempt_events` (provider event logs) and `ai_round_usage` (token usage only) | AI replies, suggestions and draft assist. |
+| Delegated work | `local_jobs`, `local_events`, `local_attachments` | When an operator sends a conversation to a paired computer (see [Local agent](../local-agent/README.md)). |
+| Email delivery log | `email_deliveries` (recipient, subject and delivery state; no message body) | Notification and transcript emails. |
+| Inbound email evidence | `inbound_emails.evidence_json` (envelope sender, header From, subject and a fixed set of headers; the body itself becomes a message) | Each inbound email, so HappyToHelp can tell automatic mail from mail a person sent. |
+
+### Request counters and imports
+
+| What | Stored in | When it is collected |
+| --- | --- | --- |
+| Request counters | `abuse_counters` (the limit's name, a SHA-256 hash of what is being limited, such as a visitor ID, conversation ID, client address or account ID, and a count; never the raw address) | Visitor, registration and workspace-creation requests. The scheduled job removes each counter once its window ends, which is at most one day. See [Limits and AI ceilings](PUBLIC-LIMITS.md). |
+| Imported conversation buckets | `conversation_buckets.metadata_json` (the original bucket record, including any conversation summary) | Only if you [imported data from the original HappyToHelp service](../OPERATIONS.md#import-data-from-the-original-happytohelp-service). |
+| Legacy import archive | `legacy_import_rows` (the source rows exactly as imported) | Only if you imported data from the original HappyToHelp service. |
+
+## What is sent to outside services
+
+Nothing is sent to a provider unless you set its credentials. Each provider keeps
+what it receives under its own terms.
 
 - **AI models** (OpenAI, Anthropic, Google, DeepSeek, xAI or OpenRouter, chosen per
   AI profile): to draft replies and suggestions, HappyToHelp sends the conversation
   transcript, the contact's name and email, internal notes, customer-context
-  evidence (when consent is recorded) and the knowledge or conversation history its
-  tools look up.
-- **Context model** (`CONTEXT_MODEL`): contact messages, widget activity, evidence
-  and existing profiles, to build profiles, summaries and insights.
-- **Semantic knowledge search** (OpenAI embeddings and `QDRANT_URL`): search queries,
-  which may contain text from a conversation. Indexed content is your published
-  knowledge, not customer data.
-- **GitHub** (when repositories are connected): repository searches made by the AI,
-  which may contain text from a conversation.
-- **Email** (`EMAIL_PROVIDER`: Resend, Cloudflare Email or SendGrid): reply
-  notifications to contacts include the message text; operator notifications
-  include the customer's message; transcript emails include the whole transcript.
-  Inbound email is received through your configured mailbox.
-- **Paired computers**: delegated work sends the conversation transcript, contact
-  name and email, and internal notes to the operator's own paired computer. The
-  agent running there may pass it to its own model provider.
+  evidence (when consent is recorded), and whatever knowledge or conversation
+  history the AI's tools look up.
+- **Context model** (`CONTEXT_MODEL`): the contact's messages, widget activity,
+  evidence and existing profiles, to build profiles, summaries and insights.
+- **Semantic knowledge search** (OpenAI embeddings and `QDRANT_URL`): search
+  queries, which may contain text from a conversation. What gets indexed is your
+  published knowledge, not customer data.
+- **GitHub** (when repositories are connected): searches the AI makes in your
+  repositories, which may contain text from a conversation.
+- **Email** (`EMAIL_PROVIDER`: Resend, Cloudflare Email or SendGrid):
+  - reply notifications to contacts include the message text
+  - notifications to operators include the customer's message
+  - transcript emails include the whole transcript
 
-Each provider keeps what it receives under its own terms. Erasure in HappyToHelp
-does not reach copies already held by a provider or sent by email.
+  Inbound email arrives through the mailbox you configure. See
+  [Email and integrations](../src/modules/integrations/README.md).
+- **Paired computers**: when an operator delegates a conversation, HappyToHelp sends
+  the transcript, the contact's name and email, and internal notes to that
+  operator's own paired computer. The agent running there may pass it on to its own
+  model provider.
 
-## Retention
+Erasing a contact in HappyToHelp does not reach copies a provider already holds or
+anything already sent by email.
+
+## How long data is kept
 
 HappyToHelp does not delete customer data on a schedule. Records stay until an
-operator erases them. Exceptions: raw widget activity is replaced by summaries
-once a context model has analysed it, and widget sessions stop working after
-30 days (the row remains until erasure).
+owner or admin erases them. There are two exceptions:
 
-Deleting a project keeps its history ("retained history"), blocks its contacts and
-removes all memberships, so nobody can sign in to erase contacts afterwards.
-**Erase contacts before deleting a project**, or remove the data directly from your
-D1 database and R2 bucket.
+- Raw widget activity is replaced by summaries once a context model has analysed it.
+- Widget sessions stop working after 30 days. The session row stays until the
+  contact is erased.
 
-The existing **Delete** button on a contact only hides and blocks it. It does not
-remove personal data.
+Request counters are also short-lived; see the table above.
 
-## Erasing a contact
+## Before you delete a contact or a workspace
 
-Owners and admins of the contact's project can erase it. Operators cannot.
+**Deleting a contact does not erase it.** The **Delete** button on a contact only
+hides and blocks it. It does not remove any personal data. To remove personal data,
+[erase the contact](#erase-a-contacts-personal-data) instead.
 
-- **Dashboard:** Contacts → select the contact → **Erase personal data…**, type
-  `ERASE`, then **Permanently erase**.
-- **API:** `POST /api/management/projects/{projectId}/contacts/{contactId}/erase`
-  with an owner or admin session. The response is the erasure record.
+**Erase contacts before you delete a workspace.** Deleting a workspace keeps its history
+(HappyToHelp calls this "retained history"), blocks its contacts and removes every
+membership. After that, nobody can sign in to erase those contacts. If you have
+already deleted the workspace, you have to remove the data directly from your D1
+database and R2 bucket.
 
-Erasure works only inside the contact's own project and removes:
+## Erase a contact's personal data
+
+Only the **owners** and **admins** of the contact's workspace can erase a contact.
+**Operators** cannot.
+
+**In the dashboard:**
+
+1. Go to **Contacts** and select the contact.
+2. Choose **Erase personal data…**.
+3. Type `ERASE` to confirm.
+4. Choose **Permanently erase**.
+
+**With the API:** send
+`POST /api/management/projects/{projectId}/contacts/{contactId}/erase` with an owner
+or admin session. The response is the erasure record described in
+[What is kept](#what-is-kept).
+
+### What is removed
+
+Erasure works only inside the contact's own workspace. It removes:
 
 - the contact's name, email, identifier, verified flag and all metadata
 - its widget sessions
 - the content of every message in its conversations (customer, operator and AI
-  messages) and any message it wrote elsewhere in the project, and each such
-  message's client-supplied local ID, which becomes `erased:<message ID>` (the
-  hashed `email:` ID of an inbound email, and the `generation:` ID linking an AI
-  reply to its kept generation record, stay; a reply request's ID must be a UUID,
-  so neither holds text a visitor or operator chose)
-- their attachments, including the R2 objects, and screenshots from delegated work
-  on those conversations
+  messages), and of any message it wrote elsewhere in the workspace
+- each of those messages' client-supplied local ID, which becomes
+  `erased:<message ID>`. Two IDs are kept: the hashed `email:` ID of an
+  inbound email, and the `generation:` ID that links an AI reply to its kept
+  generation record. Neither can hold text a visitor or operator chose, because the
+  email ID is a hash and a reply request's ID must be a UUID.
+- attachments in its conversations, on those messages or uploaded by the contact,
+  including the files in R2, and screenshots from delegated work on those
+  conversations
 - page visits, widget activity, evidence, profiles, insights, summaries, context
   jobs and their provider logs
-- internal notes on its conversations, its participant and read records
-- AI instructions, the operator drafts and assist instructions sent with them,
-  generated text and provider event logs for its conversations (token usage and
-  the editing tool and request IDs are kept); queued or running AI replies are
-  cancelled
+- internal notes on its conversations, and its participant and read records
+- for its conversations: AI instructions, the operator drafts and assist
+  instructions sent with them, generated text and provider event logs. Token usage,
+  the editing tool and request IDs are kept. Queued or running AI replies are
+  cancelled.
 - imported bucket summaries for its conversations (bucket IDs and times are kept)
-- delegated-work instructions, context, results and progress for its conversations;
-  active delegated work is cancelled
+- delegated-work instructions, context, results and progress for its conversations.
+  Active delegated work is cancelled.
 - its address in the email delivery log
-- inbound email evidence on its conversations and messages or sent from its
-  addresses (sender, subject and headers; only the automatic-mail classifier's
-  reason names are kept)
-- the verbatim legacy import copy of those records (the row digest is kept, so a
-  repeated import of the same bundle does not restore them)
+- inbound email evidence (sender, subject and headers) on its conversations and
+  messages, or sent from its addresses. Only the names of the reasons the
+  automatic-mail classifier gave are kept.
+- the verbatim legacy import copy of those records. The row digest is kept, so
+  importing the same bundle again does not bring them back.
 
-What remains: the contact row with only an ID and an "erased" flag, the
-conversations (IDs, timestamps, assignment, status) and each message's ID, author
-role, revision and time, with the content removed and marked erased. This keeps
-conversation counts and transcript order intact for operators. A
-`contact_erasures` row records who erased the contact, when, how many times, and
-how many conversations, messages, attachments, tracked events, context records and
-sessions were removed.
+### What is kept
 
-Request counters are not erased: they hold only a count under a SHA-256 key,
-no name, email, address or content, and they expire within a day. Daily AI
-ceiling counters are keyed by project or installation, not by contact.
+- The contact row, with only an ID and an "erased" flag.
+- The conversations: IDs, timestamps, assignment and status.
+- Each message's ID, author role, revision and time, with the content removed and
+  the message marked erased. This keeps conversation counts and transcript order
+  intact for operators.
+- An erasure record in `contact_erasures`: who erased the contact, when, how many
+  times, and how many conversations, messages, attachments, tracked events, context
+  records and sessions were removed.
+- Request counters. They hold only a count under a SHA-256 key (no name, email,
+  address or content), and they expire within a day.
+- Daily AI ceiling counters, which are kept per workspace or per installation, not per
+  contact.
+
+### Running it again
 
 Erasing the same contact again is safe. It removes anything added since, for
-example an operator reply sent after the erasure, and adds to the counts. If an
-erasure stops partway through, run it again to finish it. Objects to delete are
-recorded in `contact_erasure_objects` until the database changes are committed.
+example an operator reply sent after the erasure, and adds to the counts in the
+erasure record.
 
-Erasure cannot reach Cloudflare's own backups (D1 Time Travel keeps up to 30 days
-of history) or anything already sent to a provider, an email inbox or a paired
-computer.
+If an erasure stops partway through, run it again to finish it. Files waiting to be
+deleted are listed in `contact_erasure_objects` until the database changes are
+committed, so a repeat run picks them up.
 
-## Exporting a contact's data
+### What erasure cannot reach
 
-There is no single-click export. To answer an access request, a member of the project can:
+- Cloudflare's own backups: D1 Time Travel keeps up to 30 days of history.
+- Anything already sent to a provider, an email inbox or a paired computer.
 
-- read the contact record: `GET /api/management/projects/{projectId}/contacts/{contactId}`
-- find the contact's conversations (search matches name or email):
-  `GET /api/dashboard/projects/{projectId}/conversations?view=all&q={email}`, then read
-  each transcript with attachment metadata: `GET /api/conversations/{conversationId}/messages`
-- download attachments: `GET /api/conversations/{conversationId}/media/{mediaId}`
-- email a transcript from the conversation's contact menu (**Email conversation**)
-- query D1 directly (`wrangler d1 execute`, filtering on the contact's
-  `project_id` and `id`/`subject_id` in the tables above), or take a full copy with
-  `wrangler d1 export`.
+## Give a customer a copy of their data
+
+When a customer asks for a copy of their data (an access request), there is no
+single-click export. Any member of the contact's workspace can put one together:
+
+1. Read the contact record:
+   `GET /api/management/projects/{projectId}/contacts/{contactId}`
+2. Find the contact's conversations. Search matches name or email:
+   `GET /api/dashboard/projects/{projectId}/conversations?view=all&q={email}`
+3. Read each conversation's transcript, with attachment details:
+   `GET /api/conversations/{conversationId}/messages`
+4. Download each attachment:
+   `GET /api/conversations/{conversationId}/media/{mediaId}`
+
+Two other ways to get the data:
+
+- **Email a transcript** from the conversation's contact menu (**Email conversation**).
+- **Query D1 directly** with `wrangler d1 execute`, filtering on the contact's
+  `project_id` and `id`/`subject_id` in the tables listed above, or take a full
+  copy of the database with `wrangler d1 export`.

@@ -60,3 +60,40 @@ test('the preview receives edits laid over defaults, never blanks or black',()=>
  assert.equal(preview.text.message.button_send,defaultText.message.button_send)
  assert.equal(model.previewSettings({},{'text[message][button_send]':''}).text.message.button_send,defaultText.message.button_send)
 })
+
+ test('workspace accent stays inherited in editor and preview through unrelated edits',()=>{
+ const brand={color:'#204b3a'},field='theme[input][send][background]';
+ assert.equal(model.effectiveSettings({},[field],brand).theme.input.send.background,brand.color);
+ const changes={'theme[avatar][background]':'#112233'};
+ assert.deepEqual(model.settingsToSave({},changes,brand),{theme:{avatar:{background:'#112233'}}});
+ assert.equal(model.previewSettings({},changes,brand).theme.input.send.background,brand.color);
+ assert.equal(model.effectiveSettings({theme:{input:{send:{background:'#123456'}}}},[field],brand).theme.input.send.background,'#123456');
+ assert.deepEqual(model.settingsToSave({theme:{input:{send:{background:'#123456'}}}},{[field]:brand.color},brand),{});
+ });
+
+test('preview and reloaded editor retain explicit overrides and inherit untouched workspace colors',()=>{
+ const brand={color:'#204b3a'},saved={theme:{input:{send:{background:'#123456'}}}};
+ const changes={'theme[chat][agent][background]':'#f2e8d4'};
+ const stored=model.settingsToSave(saved,changes,brand);
+ assert.deepEqual(stored,{theme:{input:{send:{background:'#123456'}},chat:{agent:{background:'#f2e8d4'}}}});
+ for(const view of [model.previewSettings(saved,changes,brand),model.effectiveSettings(stored,[],brand)]){
+  assert.equal(view.theme.input.send.background,'#123456');
+  assert.equal(view.theme.button.closed.background,brand.color);
+  assert.equal(view.theme.chat.agent.background,'#f2e8d4');
+  assert.equal(view.brand.color,brand.color);
+ }
+ assert.deepEqual(saved,{theme:{input:{send:{background:'#123456'}}}},'preview and save leave the original settings intact');
+});
+
+test('restoring an inherited color removes its override in preview and follows later workspace changes',()=>{
+ const brand={color:'#204b3a'},saved={theme:{input:{send:{background:'#123456'}}}};
+ const changes={'theme[input][send][background]':brand.color};
+ const stored=model.settingsToSave(saved,changes,brand);
+ assert.deepEqual(stored,{});
+ const preview=model.previewSettings(saved,changes,brand);
+ assert.equal(preview.theme.input.send.background,brand.color);
+ assert.equal(preview.theme.button.closed.background,brand.color);
+ const reloaded=model.effectiveSettings(stored,[],{color:'#f2e8d4'});
+ assert.equal(reloaded.theme.input.send.background,'#f2e8d4');
+ assert.equal(reloaded.theme.button.closed.background,'#f2e8d4');
+});

@@ -1,3 +1,4 @@
+import { Divider } from './Divider';
 import { Free } from './Free';
 import { GetStarted } from './GetStarted';
 import { Hero } from './Hero';
@@ -9,12 +10,14 @@ import { SiteHeader } from './SiteHeader';
 import './outfit.css';
 import './homepage.css';
 import './drawings.css';
+import './section-drawings.css';
+import './motion.css';
 
 export default function Homepage() {
   return <div className="h2h-home">
     <a className="skip-link" href="#product">Skip to the product</a>
     <SiteHeader />
-    <main><Hero /><Free /><HelpBeforeTheyAsk /><Product /><MoveIn /><GetStarted /></main>
+    <main><Hero /><Free /><Divider /><HelpBeforeTheyAsk /><Product /><Divider /><MoveIn /><GetStarted /></main>
     <SiteFooter />
   </div>;
 }

@@ -1,3 +1,4 @@
+import { widgetAppearance } from '../../../../modules/widget/appearance.js';
 import { defaultSettings, defaultText, defaultTheme } from '../../../../modules/widget/js/context/defaults';
 
 // The editor shows what the widget actually renders: the saved overrides laid over the widget defaults.
@@ -48,8 +49,8 @@ const asSwitch = value => value === true || value === '1' || value === 'true';
 const asColor = value => (typeof value === 'string' && /^#[0-9a-f]{3}$/i.test(value) ? `#${[...value.slice(1)].map(c => c + c).join('')}`.toLowerCase() : value);
 
 /** The effective value of every field the editor offers, ready to seed the form. */
-export function effectiveSettings(saved, fieldNames) {
-    const effective = mergeSettings(widgetDefaults, saved);
+export function effectiveSettings(saved, fieldNames, brand = {}) {
+    const effective = mergeSettings(widgetDefaults, widgetAppearance(brand, saved));
     for (const name of fieldNames) {
         const path = fieldPath(name), value = getIn(effective, path);
         if (typeof getIn(widgetDefaults, path) === 'boolean') setIn(effective, path, asSwitch(value));
@@ -64,17 +65,18 @@ export const defaultFor = name => getIn(widgetDefaults, fieldPath(name));
 export const fieldValue = (name, value) => (value === '' ? defaultFor(name) : value);
 
 /** What to store after the person edited `changes` ({ fieldName: value }): saved overrides plus those edits. */
-export function settingsToSave(saved, changes) {
+export function settingsToSave(saved, changes, brand = {}) {
     const result = structuredClone(saved || {});
+    const inherited = mergeSettings(widgetDefaults, widgetAppearance(brand));
     for (const [name, raw] of Object.entries(changes)) {
         const path = fieldPath(name), value = fieldValue(name, raw);
-        if (value === defaultFor(name)) unsetIn(result, path);
+        if (value === getIn(inherited, path)) unsetIn(result, path);
         else setIn(result, path, value);
     }
     return result;
 }
 
-/** Settings pushed to the live preview: the saved overrides with the edits applied, over the widget defaults. */
-export function previewSettings(saved, changes) {
-    return mergeSettings(widgetDefaults, settingsToSave(saved, changes));
+/** Settings pushed to the live preview: defaults, inherited appearance, then saved overrides and edits. */
+export function previewSettings(saved, changes, brand = {}) {
+    return mergeSettings(widgetDefaults, widgetAppearance(brand, settingsToSave(saved, changes, brand)));
 }

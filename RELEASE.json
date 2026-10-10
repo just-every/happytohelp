@@ -1,4 +1,38 @@
 {
-  "version": "0.2.2",
-  "publicReleaseNotes": "HappyToHelp 0.2.2 adds publication-bound citations to AI answers and an observed, project-scoped activation checklist. It also updates knowledge authoring, widget settings, identity and invitation flows, management confirmations, and mobile list views. An upgrade from public v0.2.1 includes migrations 0105 through 0108."
+  "version": "0.3.0",
+  "previousVersion": "0.2.2",
+  "date": "2026-10-10",
+  "contractChanges": {},
+  "proseChanges": [
+    {
+      "document": "README.md",
+      "section": "Develop locally without the installer",
+      "change": "changed",
+      "date": "2026-10-10",
+      "summary": "Existing accounts can also request a one-time email sign-in link when native email and APP_ORIGIN are configured.",
+      "was": "Create the first owner with an email and password at /setup, then use /login after setup closes.",
+      "now": "The password and setup path remains available; configured installations also offer an email sign-in link that requires an explicit Sign in confirmation.",
+      "ownerAction": "Apply 0109_magic_signins.sql before running the updated Worker; configure the native email provider and APP_ORIGIN to offer email sign-in."
+    },
+    {
+      "document": "README.md",
+      "section": "Verify",
+      "change": "changed",
+      "date": "2026-10-10",
+      "summary": "The connector requires strict structured output and retains bounded, redacted provider failure diagnostics, with a dedicated browser check.",
+      "was": "Local application and browser verification use provider fixtures and do not establish live-provider or deployment acceptance.",
+      "now": "Those acceptance limits remain; test:provider-errors-browser additionally checks native pairing, the runner, durable provider failure records and operator reload at desktop and mobile widths, while failed work neither sends a customer reply nor restarts automatically.",
+      "ownerAction": "Preserve strict delegated result validation and redaction; run the provider error checks when changing connector or provider integration behavior."
+    }
+  ],
+  "extensionPointChanges": [],
+  "migrations": [
+    {
+      "id": "0109_magic_signins.sql",
+      "buyerSteps": "Back up the selected D1 database, then apply migrations/0109_magic_signins.sql through the existing setup/migration path before starting the updated Worker. It adds only the magic_signins table and magic_signins_expiry index, storing hashed, expiring, single-use email sign-in capabilities; it does not rewrite existing rows, create accounts, send email or configure a provider. Keep applied migration names and bytes unchanged. Include magic_signins records in backup and restore so expiry and consumption state survive recovery. Email sign-in requires the configured native email provider and APP_ORIGIN; password sign-in remains available."
+    }
+  ],
+  "breaking": true,
+  "agentUpdateInstructions": "Update from 0.2.2 with owner customizations, current actor/project authority, explicit operator Send and resolve-versus-resolve-and-reply boundaries preserved. CONTRACT.md clause meanings and the published extension-point lists are unchanged; preserve their existing obligations when adopting the implementation changes. The breaking flag records the required D1 migration step: apply 0109_magic_signins.sql before the updated Worker serves traffic, retain all earlier migration names and bytes, and verify backup/restore includes magic_signins with expiry and consumption state. Keep password sign-in available; enable email sign-in only with a configured native mail adapter and APP_ORIGIN, preserving hashed tokens, the explicit confirmation POST and current membership checks. Preserve native media ownership and copied attachment bytes when adopting local drafts; failures and uncertain provider outcomes must not replay work or send a reply automatically. Keep package and connector protocol versions aligned. Delivery now uses the pinned Base producer with schema-2 manifests and raw payload sidecars: preserve the whole artifact directory and its hashes, and verify artifact consumers and a restored copy before switching traffic. Run source integrity and the relevant local upgrade, recovery, identity, draft/media and connector checks on the adopted source. Local results do not establish hosted, real-provider, production-import, portable-storage fidelity or full accessibility acceptance; retain the documented accessibility checker HOLD and other HANDOVER.md limits.",
+  "publicReleaseNotes": "Assistant replies and attachments enter the operator composer for explicit Send. Adopted local attachments retain native media authority and copied bytes.\n\nPublic appearance persists through native project settings across the widget and Help Center, with visible loading, error, offline and recovery states. Long names, multiline greetings and unbroken article text wrap within their surfaces; wide article code and tables scroll within the content column.\n\nNative email sign-in uses hashed, expiring single-use capabilities with explicit browser confirmation and current membership checks. Apply additive migration 0109_magic_signins.sql before starting the updated Worker; preserve its records in backup and restore.\n\nLocal-agent package, MCP server and Codex/MCP client identities report 0.3.0. Delegation output is strict and provider failures retain bounded redacted diagnostics without replay or automatic Send.\n\nThe pinned Base producer packages schema-2 manifests and raw payload sidecars. Preserve the whole artifact directory, migration identities and owner customizations; validate a restored copy before switching traffic.\n\nHosted and real-provider acceptance remain independent of local tests. The retained accessibility checker HOLD remains in force; this release does not claim complete WCAG conformance."
 }

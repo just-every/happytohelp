@@ -1,3 +1,4 @@
+import {readArtifact} from './helpers/artifact-payloads.mjs';
 import {readFile,mkdtemp} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -5,7 +6,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {artifactRuntime} from './helpers/independent-artifact.mjs';
 import {checkSetupBrowser} from './helpers/setup-browser-flow.mjs';
-const artifact=JSON.parse(await readFile('delivery-artifact/happytohelp-worker-artifact.json'));
+const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-independent-browser-'));
 const runtime=await artifactRuntime(artifact);
 try{

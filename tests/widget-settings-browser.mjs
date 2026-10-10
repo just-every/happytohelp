@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {mkdir,mkdtemp} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
-import {tmpdir} from 'node:os';
 const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
+import {assertLauncherAvatarFits} from './helpers/widget-launcher-geometry.mjs';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
 
 // Widget settings must show what the widget renders, edit one value at a time, save only edits,
@@ -15,7 +15,7 @@ const themeDefaults=Object.fromEntries(Object.entries(defaults.theme).map(([name
 const textDefaults={'text[message][placeholder_message]':'Send a message...','text[message][button_send]':'Send','text[chat][return_title]':'Continue Conversation','text[chat][return_last_message]':'Last message','text[chat][sending_images]':'Sending images...','text[errors][connection]':'Sorry we could not connect to the server. Please check your connection and try again.','text[prompt][email_prompt]':'Receive an email when {agent_name} replies!','text[ai][human_response]':'Responds within 24 hours'};
 const switchDefaults={'settings[show_glow][on_insight]':true,'settings[show_glow][on_insight_reply]':true,'settings[show_glow][on_ai_typing]':false,'settings[show_glow][on_human_typing]':false,'settings[message][collect_screenshot]':true,'settings[message][collect_attachments]':true,'settings[collect][require_name]':false,'settings[collect][require_email]':false};
 
-const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-widget-settings-evidence-')),'widget-settings');
+const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(resolve('../widget-settings-evidence-')),'widget-settings');
 await mkdir(evidenceDir,{recursive:true});console.log('Widget settings evidence:',evidenceDir);
 const runtime=await createRuntime({port:Number(process.env.H2H_TEST_PORT||0)});const origin=runtime.origin;let success=false;
 const call=async(path,body,token,method=body===undefined?'GET':'POST')=>{const r=await fetch(origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(r.ok,`${path}: ${r.status}`);return r.json()};
@@ -61,7 +61,9 @@ try{
  await tab('Theme');await assertThemeDefaults();await page.screenshot({path:join(evidenceDir,'desktop-theme-defaults.png'),fullPage:true});checks.push('all 18 theme swatches show widget defaults');
  // The preview renders the same defaults in both its Conversation and Launcher views.
  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(72, 71, 72)');
- await previewState('Launcher');assert.equal(await launcher.evaluate(element=>element.classList.contains('happytohelp-avatar')),false,'the preview launcher is the themed icon button');
+ await previewState('Launcher');await preview.locator('.happytohelp-button.happytohelp-avatar').waitFor();assert.ok(initial.previewAgent?.id,'the preview uses the actual workspace responder');assert.equal(await preview.locator('.happytohelp-button .happytohelp-agent-avatar').count()>0,true,'closed preview launcher shows the real responder avatar');
+ for(const width of [1440,390]){await page.setViewportSize({width,height:900});await page.waitForTimeout(400);await assertLauncherAvatarFits(launcher)}
+ await page.setViewportSize({width:1440,height:900});
  await launcherBackground('rgb(72, 71, 72)');await page.screenshot({path:join(evidenceDir,'desktop-theme-launcher.png'),fullPage:true});
  await previewState('Conversation');checks.push('preview renders the default theme in Conversation and Launcher views');
 
@@ -77,7 +79,7 @@ try{
  assert.deepEqual(await save(),{});assert.deepEqual((await settingsApi()).settings,{});checks.push('save without edits stores no overrides');
  await open();await tab('Theme');await assertThemeDefaults();
 
- // One edit changes one value in the form; the preview (which has no agent avatar) keeps its default colours.
+ // One edit changes one value in the form; the preview composer keeps its default colours.
  await tab('Theme');await page.locator(color('avatar][background')).fill('#ff0000');
  await assertThemeDefaults({[color('avatar][background')]:'#ff0000'});
  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(72, 71, 72)');
@@ -109,5 +111,52 @@ try{
  assert.equal(await page.getByRole('button',{name:'Reveal server secret'}).isEnabled(),true);
  await page.screenshot({path:join(evidenceDir,'mobile-code-secret.png'),fullPage:true});
  await tab('Theme');await assertThemeDefaults();await page.screenshot({path:join(evidenceDir,'mobile-theme-defaults.png'),fullPage:true});checks.push('mobile layout shows the secret and default theme');
+ // The preview uses the actual workspace responder, without a fabricated conversation.
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:width===1440?900:844});await open();await tab('Theme');
+  assert.equal(await preview.locator('.happytohelp-chat-header .happytohelp-insight-agent-name').innerText(),initial.previewAgent.first_name??initial.previewAgent.name);
+  const responseInfo=preview.locator('.happytohelp-chat-header .happytohelp-insight-agent-info');
+  // The existing mobile header places its visible separator inside the response-copy container.
+  const separator=responseInfo.locator('.happytohelp-insight-agent-seperator-tiny');
+  assert.equal(await separator.textContent(),'•');assert.equal(await separator.isVisible(),width===390);
+  assert.equal(await responseInfo.innerText(),width===390?'•Responds within 24 hours':'Responds within 24 hours');
+ }
+ checks.push('real workspace responder name and response copy appear in settings preview at desktop and mobile widths');
+
+ // Workspace accent is an effective default: display it without storing it as an override.
+ await call(`/api/management/projects/${setup.projectId}/settings`,{primary_color:'#204b3a'},owner.token,'PUT');
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:width===1440?900:844});await open();await tab('Theme');
+  assert.equal(await value(color('input][send][background')),'#204b3a');
+  assert.equal(await value(color('button][closed][background')),'#204b3a');
+  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(32, 75, 58)');
+  await page.locator(color('avatar][background')).fill('#112233');
+  assert.equal(await value(color('input][send][background')),'#204b3a');
+  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(32, 75, 58)');
+  const stored=await save();assert.deepEqual(stored,{settings:{show_glow:{on_insight:false}},theme:{avatar:{background:'#112233'}}});
+  await open();await tab('Theme');assert.equal(await value(color('input][send][background')),'#204b3a');
+  await page.locator(color('input][send][background')).fill('#123456');await save();
+  await open();await tab('Theme');assert.equal(await value(color('input][send][background')),'#123456');
+  assert.equal(await previewStyle('button[name=submit]','backgroundColor'),'rgb(18, 52, 86)');
+  await page.locator(color('input][send][background')).fill('#204b3a');
+  assert.deepEqual(await save(),{settings:{show_glow:{on_insight:false}},theme:{avatar:{background:'#112233'}}});
+ }
+ checks.push('workspace inherited swatches match preview, one-field save and reload, and explicit override removal at desktop and mobile widths');
+ // Additional real image case after the unchanged settings/initials fixture checks.
+ const responderAvatar=origin+'/homepage/media/brands/happytohelp-favicon.png';
+ await runtime.execute(`INSERT INTO user_settings(user_id,avatar_url) VALUES('${initial.previewAgent.id}','${responderAvatar}') ON CONFLICT(user_id) DO UPDATE SET avatar_url=excluded.avatar_url`);
+ for(const background of [{name:'default',accent:'',color:defaults.theme['button][closed][background']},{name:'themed',accent:'#204b3a',color:'#204b3a'}]){
+  await call(`/api/management/projects/${setup.projectId}/settings`,{primary_color:background.accent},owner.token,'PUT');
+  const expectedBackground=`rgb(${background.color.slice(1).match(/../g).map(channel=>parseInt(channel,16)).join(', ')})`;
+  for(const width of [1440,390]){
+   await page.setViewportSize({width,height:width===1440?900:844});await open();await tab('Theme');await previewState('Launcher');
+   assert.equal(await value(color('button][closed][background')),background.color,`${background.name} launcher swatch at ${width}`);await launcherBackground(expectedBackground);
+   const image=launcher.locator('.happytohelp-agent-avatar img');await image.waitFor();assert.equal(await image.getAttribute('src'),responderAvatar);await image.evaluate(image=>image.decode());
+   await page.waitForTimeout(400);const geometry=await assertLauncherAvatarFits(launcher);assert.equal(geometry.images.length,1,'the real responder image fills all four launcher edges');
+   assert.equal(await launcher.evaluate(element=>getComputedStyle(element).backgroundColor),expectedBackground,`${background.name} launcher background at ${width}`);
+   await page.screenshot({path:join(evidenceDir,`${width}-launcher-image-${background.name}-edges.png`),fullPage:true});
+  }
+ }
+ checks.push('real responder initials and image fill all four launcher edges within half a pixel with a round clip at 1440 and 390, with image coverage on default and themed backgrounds');
  assert.deepEqual(errors,[]);success=true;
 }finally{await browser.close();await runtime.close(success);console.log(JSON.stringify({checks,errors}))}

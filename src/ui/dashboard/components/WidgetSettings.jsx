@@ -1,3 +1,4 @@
+import {widgetAppearance} from '../../../modules/widget/appearance';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
@@ -18,7 +19,7 @@ export default function WidgetSettings({ projectId }) {
     const { settings, csrfToken, previewAgent, previewBrand } = useContext(WidgetSettingsContext);
     // The form shows the effective widget (saved overrides over the widget defaults). Only fields the
     // person edits are tracked, so saving without edits stores nothing new and one edit touches one value.
-    const { register, getValues } = useForm({ defaultValues: useMemo(() => effectiveSettings(settings, fieldNames), []) });
+    const { register, getValues } = useForm({ defaultValues: useMemo(() => effectiveSettings(settings, fieldNames, previewBrand), []) });
     const savedSettings = useRef(settings);
     const editedFields = useRef(new Set());
     const edits = () => Object.fromEntries([...editedFields.current].map(name => [name, getValues(name)]));
@@ -26,7 +27,7 @@ export default function WidgetSettings({ projectId }) {
     const [saved, setSaved] = useState(false);
     const save = async event => {
         event.preventDefault(); setSaveError(''); setSaved(false);
-        const body = settingsToSave(savedSettings.current, edits());
+        const body = settingsToSave(savedSettings.current, edits(), previewBrand);
         try {
             await nativeRequest(`/api/management/projects/${projectId}/widget-settings`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
             savedSettings.current = body; editedFields.current.clear();
@@ -36,7 +37,7 @@ export default function WidgetSettings({ projectId }) {
     const changed = event => {
         if (fieldNames.includes(event.target.name)) editedFields.current.add(event.target.name);
         markDirty(); setSaved(false);
-        window.h2h('settings', previewSettings(savedSettings.current, edits()));
+        window.h2h('settings', previewSettings(savedSettings.current, edits(), previewBrand));
     };
     const [activeTab, setActiveTab] = useState('code');
     const [previewOpen, setPreviewOpen] = useState(true);
@@ -46,7 +47,7 @@ export default function WidgetSettings({ projectId }) {
         // Wait until React finishes committing before creating the separate widget root.
         const mount = setTimeout(() => {
             preview = window.h2h('preview', {
-                ...settings,
+                ...widgetAppearance(previewBrand, settings),
                 targetElementId: 'happytohelp',
                 inline: true,
                 inlineSettings: true,
@@ -74,7 +75,7 @@ export default function WidgetSettings({ projectId }) {
         <div className={`widget-settings-layout${activeTab === 'code' ? ' widget-settings-layout--code' : ''}`}>
             <form onChange={changed} onSubmit={save}>
                 {saveError && <p role="alert">{saveError}</p>}{saved && <p role="status">Saved.</p>}
-                <Tabs activeKey={activeTab} onSelect={setActiveTab} id="widget-settings-tabs">
+                <Tabs activeKey={activeTab} onSelect={setActiveTab} id="widget-settings-tabs" transition={false}>
                     <Tab eventKey="code" title="Code"><WidgetInstallationCode /></Tab>
                     <Tab eventKey="theme" title="Theme"><WidgetAppearanceFields register={register} /></Tab>
                     <Tab eventKey="settings" title="Settings"><WidgetBehaviorFields register={register} /></Tab>

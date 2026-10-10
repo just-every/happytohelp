@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { candidate } from './fixtures.mjs';
-import { validateArtifact, digest } from '../artifact.mjs';
+import { packageCandidate, candidate } from './fixtures.mjs';
+import { validateArtifact as validateRawArtifact, digest } from '../artifact.mjs';
 
 test('large native assets and Vite metadata remain data; build ignore rules cannot suppress approved assets',()=>{
   const a=candidate();
@@ -17,3 +17,10 @@ test('large native assets and Vite metadata remain data; build ignore rules cann
     assert.throws(()=>validateArtifact(body,digest(body)));
   }
 });
+
+// Existing fixture bodies remain byte-for-byte; exercise the current raw-payload validator.
+function validateArtifact(raw,expected) {
+ const {raw:manifest,payloads}=packageCandidate(JSON.parse(raw));
+ if(digest(raw)!==expected)throw Error('invalid-artifact');
+ return validateRawArtifact(manifest,digest(manifest),payloads);
+}

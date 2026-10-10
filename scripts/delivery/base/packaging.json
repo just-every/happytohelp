@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "project": {
+    "schema": 1,
+    "projectId": "just-every/happytohelp",
+    "name": "HappyToHelp",
+    "sourceRepository": "just-every/happytohelp",
+    "license": "MIT",
+    "deployment": {
+      "target": "cloudflare-workers",
+      "artifactFile": "happytohelp-worker-artifact.json"
+    },
+    "operations": {
+      "setup": "node scripts/independent/setup-build.mjs",
+      "build": "export PATH=\"$PWD/.rer-tools/node_modules/.bin:$PATH\" && pnpm run build",
+      "verify": "export PATH=\"$PWD/.rer-tools/node_modules/.bin:$PATH\" && pnpm run verify",
+      "artifact": "node tests/independent-runtime.mjs",
+      "recovery": "Retain exact source, D1 SQL and all R2 bytes; preserve applied migration identities. Follow docs/INDEPENDENT-RELEASE.md. Stop jobs before a consistent backup, restore to fresh isolated resources, reconcile uncertain provider attempts, and verify owner authority and data before switching traffic. Complete automatic RER export requires Durable Object support; do not describe a D1/R2-only backup as complete."
+    }
+  },
+  "managed": {
+    "workflowRef": "runeditrun/delivery/.github/workflows/trusted-build.yml@bf7a25abb44bec1457a7bc738ff63921d90fb52e",
+    "artifactFile": "happytohelp-worker-artifact.json",
+    "buildProfile": "project",
+    "verificationProfiles": [
+      "full"
+    ]
+  },
+  "artifact": {
+    "specInputs": {
+      "providerEffects": [
+        "ai",
+        "outbound-mail",
+        "knowledge-crawl",
+        "knowledge-vector-store",
+        "support-imports",
+        "github",
+        "website-fetch",
+        "turnstile"
+      ],
+      "publicVariableNames": [
+        "APP_ORIGIN",
+        "EMAIL_PROVIDER",
+        "EMAIL_ACCOUNT_ID",
+        "RER_INSTALLATION_ID",
+        "RER_MANAGEMENT_ORIGIN",
+        "H2H_SETUP_OWNER_EMAIL",
+        "REGISTRATION_ENABLED",
+        "LEAD_MODEL",
+        "CONTEXT_MODEL",
+        "KNOWLEDGE_EMBEDDING_MODEL",
+        "QDRANT_URL",
+        "APIFY_CRAWLER_ACTOR_ID",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_PROJECT_ID",
+        "PREVIEW_ORIGIN",
+        "BRAND_IMAGE_MODEL",
+        "BRAND_IMAGE_SIZE",
+        "BRAND_IMAGE_QUALITY",
+        "TRAINING_PRICE_CEILINGS",
+        "ENABLE_SYNTHETIC_EVALUATION",
+        "RATE_LIMITS",
+        "AI_DAILY_CEILINGS"
+      ],
+      "secretNames": [
+        "H2H_SETUP_TOKEN"
+      ],
+      "optionalSecretNames": [
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "GOOGLE_API_KEY",
+        "GEMINI_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "XAI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "APIFY_TOKEN",
+        "QDRANT_API_KEY",
+        "INTERCOM_TOKEN",
+        "FRESHDESK_TOKEN",
+        "ZENDESK_TOKEN",
+        "ZENDESK_EMAIL",
+        "EMAIL_API_KEY",
+        "EMAIL_FROM",
+        "INBOUND_EMAIL_TOKEN",
+        "INTEGRATION_ENCRYPTION_KEY",
+        "GITHUB_CLIENT_SECRET",
+        "GITHUB_TOKEN",
+        "GITHUB_TOKENS",
+        "TURNSTILE_SECRET"
+      ],
+      "surfaces": {
+        "app": {
+          "path": "/",
+          "originVariable": "APP_ORIGIN"
+        },
+        "websitePreview": {
+          "path": "/preview/",
+          "originVariable": "PREVIEW_ORIGIN",
+          "readiness": [
+            {
+              "path": "/preview/invalid/invalid/",
+              "statuses": [
+                403
+              ]
+            }
+          ]
+        }
+      },
+      "initialSetup": {
+        "path": "/api/identity/setup-status",
+        "pendingStatus": 409,
+        "completeStatus": 200
+      },
+      "recovery": "Retain source, D1 backups and R2 objects. Preserve applied migration history and reconcile uncertain provider jobs before resuming. Restore data into separate resources and verify before switching traffic."
+    },
+    "mainModule": "index.js"
+  },
+  "edition": {
+    "manifestFile": "edition.json",
+    "componentId": "just-every/happytohelp"
+  }
+}

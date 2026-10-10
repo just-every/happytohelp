@@ -2,6 +2,7 @@ import { withVisualEdits } from '../../editor/VisualEditBoundary';
 import { EditorLauncher } from '../../editor/EditorLauncher';
 import { lazy, Suspense, useEffect } from 'react';
 import { Link, useMatches, useRouter } from '@tanstack/react-router';
+import { BrandLockup } from '../homepage/BrandLockup';
 import { DashboardSettingsContext, useDashboardSessionVersion, invalidateDashboardSession } from './dashboard-state';
 import '../dashboard/styles/dashboard.scss';
 import '../dashboard/styles/layouts/_native-shell.scss';
@@ -17,7 +18,7 @@ export function DashboardError({ error }: { error: unknown }) {
     useEffect(() => { delete (window as any).chatSettings; }, []);
     // Only an expired session offers sign-in; any other failure leaves a signed-in user a way to retry or leave.
     const expired = (error as { status?: number } | null)?.status === 401;
-    return <main className="container py-5"><h1>HappyToHelp</h1>
+    return <main className="container py-5"><h1 className="dashboard-error-brand"><BrandLockup home="/" /></h1>
         <p role="alert">{error instanceof Error ? error.message : 'The workspace could not be loaded.'}</p>
         {expired ? <Link to="/login">Sign in</Link>
             : <p><button type="button" className="btn btn-primary me-3" onClick={() => { void router.invalidate(); }}>Try again</button><Link to="/">Back to the inbox</Link></p>}

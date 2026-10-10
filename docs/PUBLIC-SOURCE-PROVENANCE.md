@@ -6,12 +6,18 @@ third-party components keep their own licences, listed at the end of this page.
 
 ## First-party artwork and branding (MIT)
 
+The twenty female-1, female-2, male-1 and male-2 widget avatar variants
+retain their original PNG image data and MIT coverage. Publication removes
+only ancillary text metadata containing an authoring-machine contact address;
+image dimensions, palette, transparency and compressed pixel bytes are unchanged.
+
 All of the following are owner-generated or owner-supplied and are covered by
 the root MIT licence like the rest of the source:
 
 - **Homepage drawings** (owner approval 2026-10-01, handoff-first order
-  2026-10-01): the hero handoff (a solved conversation: the customer's
-  message, Codex's note and the reply in the composer), the MIT licence card, the widget offer, the four
+  2026-10-01, hero redesign 2026-10-08): the hero handoff (a solved conversation:
+  the customer's message, the agent's fix and the reply with Send, on a pale aqua
+  blob) and the hero flourish, the MIT licence card, the widget offer, the four
   product drawings and the finished article import are first-party React components, HTML and
   inline SVG in `src/ui/homepage/drawings/` styled by
   `src/ui/homepage/drawings.css`. They were drawn as real DOM text from the
@@ -19,10 +25,34 @@ the root MIT licence like the rest of the source:
   widget components (labels, structure and states), not from screenshots; no
   screenshot is distributed. No raster image, third-party illustration or logo
   is used; Codex and Claude are named in text only.
-- **HappyToHelp mark**: `public/homepage/media/brands/happytohelp-favicon.png`
-  (homepage favicon) and `public/img/icon.svg` (dashboard mark). The favicon's
-  SHA-256, byte count and origin are recorded in
+- **HappyToHelp mark** (owner choice 2026-10-08): a speech bubble with its tail
+  at the lower left, a closed-eye smile and three cyan sparks, drawn by hand as
+  SVG paths from the owner-chosen 12ui logo direction. Its geometry lives once, in
+  `src/ui/homepage/brand-mark.ts`: the public header and footer draw it inline
+  beside the wordmark, and `public/homepage/media/brands/happytohelp-mark.svg` and
+  `happytohelp-favicon.svg` (the bubble and face alone, without the sparks so the
+  bubble fills the tab, with heavier strokes for 16 and 32px tabs) are generated
+  from it. `happytohelp-favicon.png` (512x512, transparent,
+  the favicon fallback) and `happytohelp-apple-touch-icon.png` (180x180 on the
+  page's paper) are rendered from those SVG files in Chromium. Every application
+  page (`src/routes/__root.tsx`) uses them as its tab icon, and the dashboard draws
+  its unread count on the SVG. The identity pages, the platform-admin sidebar, the
+  dashboard's load-error screen and the no-project Help Center page draw the same
+  mark inline (the Help Center page through `markSvg()`). The earlier smiley-circle
+  mark, `public/img/icon.svg` (SHA-256
+  `93f377cffc031d58b27e9911737717f1d1b76b8456dd9cc06510c4a660ee9e4e`, 1,200 bytes),
+  and the widget's unused copies of it and of the old horizontal logo were removed.
+  Each file's SHA-256, byte count and origin are recorded in
   [`src/ui/homepage/asset-provenance.json`](../src/ui/homepage/asset-provenance.json).
+- **HappyToHelp wordmark** (owner choice 2026-10-09): the word "HappyToHelp"
+  beside the mark, drawn by hand as SVG strokes following the letter shapes of
+  Nunito (SIL Open Font License 1.1): monoline centre-line strokes with round caps
+  and joins, at the mark's pen weight, letters set a little tighter
+  than Nunito's own spacing. No font data is embedded or served; the strokes are
+  the whole of it. Its geometry lives once, in `src/ui/homepage/brand-word.ts`,
+  and the public header and footer draw it inline (`BrandWord.tsx`) as a
+  decorative SVG, the link named by visually hidden text; the no-project Help
+  Center page draws the same element from `wordSvg()`.
 - **Installer and setup background**: `public/setup/ocean.webp` (SHA-256
   `a3dfb0d036ce7e773acdf1aaac2c3863cc4948f299c5bd0e6220a3d620165a09`,
   1,207,294 bytes, 3072x2048), used by the standalone installer and the in-app
@@ -62,7 +92,7 @@ Its source and documentation links derive from the `repository` field in
 | Component | Where | Licence and notice |
 | --- | --- | --- |
 | Outfit typeface (Copyright 2021 The Outfit Project Authors, <https://github.com/Outfitio/Outfit-Fonts>) | `public/fonts/outfit/`: the variable-weight latin and latin-ext WOFF2 files, copied unchanged from the npm package `@fontsource-variable/outfit` 5.3.0 (built from <https://github.com/google/fonts>) and declared in `src/ui/homepage/outfit.css`. The homepage serves them itself and makes no request to a font host. Chosen over Plus Jakarta Sans, Manrope, Urbanist, Figtree, Lexend, Albert Sans and Sora as the closest match to the approved headline by rendering them side by side | SIL Open Font License 1.1, `public/fonts/outfit/LICENSE.txt` |
-| Inter typeface | `public/fonts/inter/` | SIL Open Font License, `public/fonts/inter/LICENSE.txt` |
+| Inter typeface | `public/fonts/inter/`; the customer widget embeds `InterVariable.woff2` through `src/modules/widget/js/includes/widgetFont.js` | SIL Open Font License, `public/fonts/inter/LICENSE.txt` |
 | Feather icons (`feather-icons` 4.29.2, Cole Bemis) | npm package; its SVGs are inlined as CSS masks in the built dashboard stylesheet (`src/ui/dashboard/styles/foundation/_icons.scss`) | MIT, [`docs/licenses/FEATHER-ICONS.md`](licenses/FEATHER-ICONS.md) |
 | Font Awesome Free | npm packages used by the widget and dashboard | MIT code and CC BY 4.0 icons, [`docs/licenses/FONT-AWESOME-FREE.md`](licenses/FONT-AWESOME-FREE.md) |
 | Lobe Icons (Claude and Codex logo paths) | `src/ui/dashboard/components/LocalAgentGlyph.jsx` | MIT, [`docs/licenses/LOBE-ICONS.md`](licenses/LOBE-ICONS.md) |
@@ -77,8 +107,8 @@ No Font Awesome Pro package or asset is included.
 ## External requests
 
 The homepage makes no third-party request: its Outfit font files are served
-from `public/fonts/outfit/`. The customer widget loads Open Sans from Google
-Fonts on the page that embeds it. The Help
+from `public/fonts/outfit/`. The customer widget embeds its licensed Inter font
+in `/widget.js` and makes no external font request on the page that embeds it. The Help
 Center stylesheet makes no external font or image request. The homepage does not
 load the customer widget, analytics or any tracking script, and no public page
 embeds an operator token, widget secret or tracking ID. The customer widget is a

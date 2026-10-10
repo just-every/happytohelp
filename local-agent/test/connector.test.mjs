@@ -1073,7 +1073,7 @@ test('MCP stdio exposes assignment tools without fabricating desktop capabilitie
   await serving;
   const messages = wire.trim().split('\n').map(JSON.parse);
   assert.equal(messages[0].result.serverInfo.name, 'happytohelp-local-agent');
-  assert.equal(messages[0].result.serverInfo.version, '0.2.1');
+  assert.equal(messages[0].result.serverInfo.version, '0.3.0');
   assert(messages[1].result.tools.some((tool) => tool.name === 'h2h_context'));
   assert(messages[1].result.tools.some((tool) => tool.name === 'h2h_recover'));
   assert.deepEqual(JSON.parse(messages[2].result.content[0].text), { id: 'job-1' });

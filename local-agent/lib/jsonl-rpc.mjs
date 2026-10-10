@@ -1,21 +1,20 @@
 import { spawn } from 'node:child_process';
-import { boundedText, stopChild, waitForExit } from './util.mjs';
+import { ConnectorError } from './errors.mjs';
+import { codexProviderError } from './providers/codex-error.mjs';
+import { stopChild, waitForExit } from './util.mjs';
 
 export class JsonlRpc {
-  constructor(command, args, { onStderr, env, cwd } = {}) {
+  constructor(command, args, { env, cwd } = {}) {
     this.nextId = 1;
     this.pending = new Map();
     this.handlers = new Set();
     this.buffer = '';
-    this.stderr = '';
     this.child = spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true, env, cwd });
     this.child.once('error', (error) => this.failAll(error));
-    this.child.once('exit', (code, signal) => this.failAll(new Error(`app-server exited (${code ?? signal ?? 'unknown'}).`)));
+    this.child.once('close', (code, signal) => this.failAll(new Error(`app-server exited (${code ?? signal ?? 'unknown'}).`)));
     this.child.stdout.on('data', (chunk) => this.consume(chunk));
-    this.child.stderr.on('data', (chunk) => {
-      this.stderr = `${this.stderr}${chunk.toString('utf8')}`.slice(-8_000);
-      onStderr?.(boundedText(chunk.toString('utf8'), 400));
-    });
+    // stderr is private diagnostic output, never progress or durable evidence.
+    this.child.stderr.resume();
   }
 
   consume(chunk) {
@@ -35,7 +34,7 @@ export class JsonlRpc {
         const pending = this.pending.get(message.id);
         this.pending.delete(message.id);
         clearTimeout(pending.timer);
-        if (message.error) pending.reject(new Error(message.error.message || 'Codex app-server request failed.'));
+        if (message.error) pending.reject(new ConnectorError('Codex app-server request failed.', { providerError: codexProviderError({ ...message.error.data, message: message.error.data?.message || message.error.message }) || codexProviderError(message.error) }));
         else pending.resolve(message.result);
       } else if (message.method) {
         for (const handler of this.handlers) handler(message);
@@ -44,6 +43,7 @@ export class JsonlRpc {
   }
 
   request(method, params, timeoutMs = 30_000) {
+    if (this.closing) return Promise.reject(new Error('Codex app-server is closing.'));
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -75,10 +75,19 @@ export class JsonlRpc {
     }
   }
 
-  async close() {
+  close() {
+    this.closing ||= this.closeChild();
+    return this.closing;
+  }
+
+  async closeChild() {
+    this.failAll(new Error('Codex app-server is closing.'));
+    // EOF lets the native runtime finish shutdown and flush its own records.
+    // A completed turn does not mean that the process has finished that work.
+    if (this.child.stdin.writable) this.child.stdin.end();
+    if (await waitForExit(this.child, 10_000)) return;
     stopChild(this.child);
-    await waitForExit(this.child, 1_000);
-    if (this.child.exitCode === null && this.child.signalCode === null) {
+    if (!await waitForExit(this.child, 1_000)) {
       stopChild(this.child, 'SIGKILL');
       await waitForExit(this.child, 1_000);
     }

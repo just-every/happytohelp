@@ -4,9 +4,11 @@
 
 The public / page is the owner-approved “Customer Support, Solved.” homepage. It is an authored product surface, not a claim of parity with the original Laravel application. The 2026-10-02 clarity pass preserves the 2026-10-01 approval while making the solved-support story immediate.
 
-The hero shows Maya unable to turn on the Spanish version of her store, a connected Codex or Claude that has fixed it and left a note, and the reply ready in the composer with Send as the remaining action. Its subhead is “Your Codex or Claude fixes the problem and writes the reply. You press Send.”, followed by “100% free and open source.” The six sections appear in order: hero; “Not just better. Free.”; “Help before they ask”; “The rest of your support desk”; “Try it beside what you have”; and “Ready when you are.”
+The hero shows Maya unable to turn on the Spanish version of her store, a connected Codex or Claude that has fixed it, and the reply to Maya with Send inside it as the remaining action, as three staggered bubbles on a pale aqua blob. Its subhead is “Your Codex or Claude fixes the problem and writes the reply. You press Send.”, followed by “100% free and open source.” The six sections appear in order: hero; “Not just better. Free.”; “Help before they ask”; “The rest of your support desk”; “Try it beside what you have”; and “Ready when you are.”
 
-The page uses warm paper and monochrome chrome, with colour inside labelled HTML/SVG drawings, and self-hosted Outfit. It has no price, hosting, provider or Run Edit Run copy and makes no claims for unsupported imports or automations. The detailed approved wording and behavior are in [CONTRACT.md](../CONTRACT.md). Copy/design approval is separate from exact-revision browser acceptance, fresh captures and accessibility acceptance.
+The page uses warm paper and monochrome chrome, with colour inside labelled HTML/SVG drawings and in aqua accents (number discs, link underlines, a hero flourish that draws itself in, two dividers and a closing line, and the sparks of the header and footer lockup), and self-hosted Outfit. Below the hero each drawing floats on a pale aqua blob, a window frame stays only for the code editor, the checkout and the import, the desk cards are frameless ink cards, and each moment plays once as it scrolls into view; reduced motion shows every final drawing at once. It has no price, hosting, provider or Run Edit Run copy and makes no claims for unsupported imports or automations. The detailed approved wording and behavior are in [CONTRACT.md](../CONTRACT.md). Copy/design approval is separate from exact-revision browser acceptance, fresh captures and accessibility acceptance.
+
+The documentation at `/docs` is an authored surface in the same homepage language (its header, footer, paper, ink and Outfit), rendered from the repository's Markdown listed in `docs/site.json`. It is not a parity claim: the original application had no such pages.
 
 On 15 September 2026 the native dashboard was compared screen by screen with a
 running instance of the original Laravel application, using separate disposable
@@ -58,7 +60,7 @@ not a replacement for dynamic workspace names, user data or original vector asse
 `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/accept-invitation` and the
 "already set up" state of `/setup` are public pages, so they use the homepage visual language
 (`src/ui/identity`, with Outfit from `src/ui/homepage`): warm paper, ink text, black pill actions, the HappyToHelp
-wordmark linking home, and links to one another. They replace the original centered Laravel-era frame and no longer load the
+lockup (the speech-bubble mark and the drawn wordmark, as in the homepage header) linking home, and links to one another. They replace the original centered Laravel-era frame and no longer load the
 dashboard stylesheet or its purple. The dashboard itself keeps its own design system.
 
 - Sign in, sign-up and recovery read `GET /api/identity/auth-options` (install not set up, sign-up possible, recovery

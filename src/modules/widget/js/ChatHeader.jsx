@@ -7,7 +7,7 @@ import AgentAvatar from "./AgentAvatar";
 import {ConnectContext} from "./context/ConnectContext";
 import AppContext from "./context/AppContext";
 import {faTimes as falTimes} from "@fortawesome/free-solid-svg-icons";
-export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}) {
+export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded, onHeightChange}) {
     const context = useContext(AppContext);
     const {
         thinking,
@@ -51,10 +51,15 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
     };
 
     useLayoutEffect(() => {
-        if(contentEl.current) {
-            setLastHeight(contentEl.current.scrollHeight);
-        }
-    }, [headerExpanded]);
+        const element = contentEl.current;
+        if (!element) return;
+        // Layout height excludes the entrance animation scale. Header and body
+        // must reserve the same space throughout that animation.
+        const measure = () => {const height = element.offsetHeight;setLastHeight(height);onHeightChange?.(height);};
+        measure();const observer = new ResizeObserver(measure);observer.observe(element);
+        return () => observer.disconnect();
+    }, [headerExpanded, onHeightChange, context.brand?.logo_url, context.brand?.name, !!currentAgent]);
+
 
     let content;
     if(headerExpanded) {
@@ -139,6 +144,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded}
             <FontAwesomeIcon icon={falTimes} aria-hidden="true"/>
         </button>
         <div ref={contentEl}>
+            {context.brand?.logo_url && <div className="happytohelp-brand-heading"><img src={context.brand.logo_url} alt="" /><span>{context.brand.name}</span></div>}
             {content}
         </div>
     </div>;

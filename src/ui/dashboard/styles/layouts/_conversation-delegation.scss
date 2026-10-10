@@ -285,6 +285,8 @@ body.conversation-workspace {
         .delegation-job__freshness-review strong { display: block; font-weight: 700; }
         .delegation-job__last-input { padding-top: .5rem; color: var(--conversation-quiet) !important; font-size: .6875rem !important; }
 
+        .delegation-job__provider-error { margin-top: .6rem; overflow-wrap: anywhere; }
+        .delegation-job__provider-error p { margin: .2rem 0 0; font-size: .75rem; line-height: 1.5; }
         .delegation-job__result-details { margin-top: .6rem; }
         .delegation-job__result-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
         .delegation-job__result-heading > span { display: inline-flex; align-items: center; gap: .25rem; font-size: .6875rem; font-weight: 650; }

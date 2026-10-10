@@ -1,0 +1,115 @@
+/* The drawings below the hero, in the hero's language: hand-drawn ink cards on pale aqua blobs, the logo's sparks on a corner,
+   aqua for what matters. A frame stays only where it helps: the code editor behind the licence, the checkout page and the
+   import page. Every figure is its own stacking context with padding round the drawing, so its blob (filling the figure)
+   shows on every side and swells to one, and a card's sparks stay inside the figure. This file is the final drawing;
+   motion.css says how each one arrives. */
+.h2h-home .licence-art, .h2h-home .offer-art, .h2h-home .import-art, .h2h-home .product-art { display: grid; isolation: isolate; }
+
+/* Not just better. Free.: the MIT License card over the code it licenses, on a blob that swells up and left. */
+.h2h-home .licence-art { font-size: clamp(14px, 1.2vw, 17px); padding: 3.4em 2.6em 3em 3.6em; }
+.h2h-home .licence-editor { width: 76%; }
+.h2h-home .code-lines { display: grid; gap: 0.8em; padding: 1.3em 1.4em 5.5em; }
+.h2h-home .code-line { display: flex; align-items: center; gap: 0.55em; }
+.h2h-home .code-number { flex: none; width: 1.1em; height: 0.55em; margin-right: 0.4em; border-radius: 999px; background: #d9d6ce; }
+.h2h-home .code-run { height: 0.55em; border-radius: 999px; background: #e3e1da; }
+.h2h-home .code-run.is-aqua { background: var(--d-cyan); }
+.h2h-home .licence-card { justify-self: end; display: grid; gap: 0.95em; width: 82%; margin-top: -7.2em; padding: 1.5em 1.7em 1.7em; transform: rotate(-1.2deg); transform-origin: 0 100%; }
+.h2h-home .licence-title { display: flex; align-items: center; gap: 0.5em; font-size: 1.3em; line-height: 1.2; }
+.h2h-home .licence-title .d-icon { width: 1.15em; height: 1.15em; }
+.h2h-home .licence-line { font-size: 1.08em; line-height: 1.55; }
+/* The two highlights are painted as a background image, so motion.css can sweep them in by its size alone. */
+.h2h-home .d-sweep { background: linear-gradient(var(--sweep), var(--sweep)) no-repeat 0 0 / 100% 100%; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.h2h-home .licence-mark { --sweep: var(--d-cyan); padding: 0.05em 0.3em; margin: 0 -0.1em; border-radius: 0.3em 0.7em 0.4em 0.8em; }
+.h2h-home .licence-rights { display: flex; align-items: center; justify-content: space-between; gap: 0.8em; margin-top: 0.2em; }
+.h2h-home .licence-grant { --sweep: var(--d-cyan-tint); padding: 0.15em 0.35em; margin-left: -0.35em; border-radius: 0.5em 0.3em 0.6em 0.4em; }
+
+/* Help before they ask: the checkout, still in its window, and the widget's offer floating over its lower right corner on a
+   blob that swells right; on phones the offer sits under the page, overlapping its foot. */
+.h2h-home .offer-art { position: relative; font-size: clamp(13px, 1.15vw, 15px); padding: 2.4em 3.4em 3.6em 2.2em; }
+.h2h-home .offer-window { width: 62%; }
+.h2h-home .offer-checkout { display: grid; align-content: start; gap: 0.9em; width: 68%; padding: 1.5em 1.6em 2.2em; }
+.h2h-home .offer-title { display: flex; align-items: center; gap: 0.6em; font-weight: 500; font-size: 1.15em; }
+.h2h-home .sk-field { display: block; height: 2.6em; border: 1.5px solid var(--d-line); border-radius: 0.6em; background: #fbfaf7; }
+.h2h-home .sk-pay { display: inline-flex; justify-content: center; align-items: center; height: 2.8em; margin-top: 0.3em; border-radius: 999px; background: #d9d6ce; color: var(--d-ink); }
+.h2h-home .offer-widget { position: absolute; right: 1.4em; bottom: 1.1em; display: grid; gap: 0.8em; width: 20.5em; }
+.h2h-home .offer-message { display: flex; align-items: flex-end; gap: 0.6em; }
+.h2h-home .offer-avatar { display: grid; place-items: center; flex: none; width: 3.3em; height: 3.3em; border: 2px solid var(--d-ink); border-radius: 50%; background: #fff; box-shadow: 1px 1.5px 0 rgba(20, 20, 20, 0.55); }
+.h2h-home .offer-avatar .brand-mark { height: 2.05em; margin: -0.15em 0 0 0.1em; padding: 0; }
+.h2h-home .offer-say { position: relative; flex: 1; min-width: 0; }
+.h2h-home .offer-bubble { padding: 1em 1.15em; border: 2px solid var(--d-ink); border-radius: 1.1em 1.15em 1.1em 0.3em; background: #fff; box-shadow: 1px 1.5px 0 rgba(20, 20, 20, 0.55); font-size: 1.08em; line-height: 1.45; }
+/* The typing dots hold the bubble's place before it speaks: they sit on its foot, and rest hidden in the final drawing. */
+.h2h-home .offer-typing { position: absolute; left: 0; bottom: 0; display: flex; gap: 0.35em; padding: 0.95em 1.1em; border: 2px solid var(--d-ink); border-radius: 1.1em 1.1em 1.1em 0.3em; background: #fff; opacity: 0; }
+.h2h-home .offer-typing i { width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--d-ink-soft); }
+.h2h-home .offer-choices { display: flex; gap: 0.5em; padding-left: 3.9em; }
+.h2h-home .offer-choices .d-btn { flex: 1; min-height: 2.5em; padding: 0 1em; border: 1.5px solid var(--d-ink); background: #fff; }
+.h2h-home .offer-choices .d-btn--ink { background: var(--d-ink); }
+
+/* The rest of your support desk: four frameless cards, a fixed 13px scale sized to a four-column grid. */
+.h2h-home .product-art { padding: 2em 2em 1.9em 1.3em; }
+.h2h-home .product-art > .d-card { min-height: 15em; }
+.h2h-home .product-art .d-sparks { --spark: 0.75px; }
+.h2h-home .chat-art { display: grid; align-content: start; }
+.h2h-home .chat-head { display: flex; align-items: center; gap: 0.7em; padding: 0.8em 1em; border-bottom: 1.5px solid var(--d-line); }
+.h2h-home .chat-thread { display: grid; gap: 0.8em; padding: 1.1em 1em 1.3em; }
+.h2h-home .chat-thread .d-bubble { max-width: 88%; line-height: 1.5; }
+.h2h-home .chat-visitor { justify-self: end; background: var(--d-cyan); }
+.h2h-home .chat-agent { justify-self: start; background: #efede7; }
+.h2h-home .chat-input { margin: 0 1em 1em; padding: 0.7em 1em; border: 1.5px solid var(--d-line); border-radius: 0.8em; color: var(--d-ink-soft); }
+
+.h2h-home .inbox-art { display: grid; align-content: start; }
+.h2h-home .inbox-title { padding: 0.8em 1em; border-bottom: 1.5px solid var(--d-line); }
+.h2h-home .inbox-list li { display: flex; align-items: center; gap: 0.7em; padding: 0.75em 1em; border-bottom: 1px solid rgba(20, 20, 20, 0.07); }
+.h2h-home .inbox-list li:last-child { border-bottom: 0; }
+.h2h-home .inbox-list li.is-active { background: var(--d-cyan-wash); }
+.h2h-home .inbox-list li.is-active .d-avatar { border-color: var(--d-cyan); background: var(--d-cyan); }
+.h2h-home .inbox-list .d-avatar { width: 2.1em; height: 2.1em; font-size: 1em; }
+.h2h-home .inbox-text { display: grid; min-width: 0; flex: 1; gap: 0.15em; }
+.h2h-home .inbox-text span { color: var(--d-ink-soft); }
+
+.h2h-home .help-art { display: grid; align-content: start; gap: 1em; padding: 1.2em; }
+.h2h-home .help-search { display: flex; align-items: center; gap: 0.6em; padding: 0.7em 0.9em; border: 1.5px solid var(--d-ink); border-radius: 0.7em; color: var(--d-ink-soft); }
+.h2h-home .help-search .d-icon { color: var(--d-ink); }
+/* The query is typed by clipping, so the field keeps its size. The clip is an inset() at rest too, so the typing steps through
+   it letter by letter. The caret takes no room: it is the right edge of a box as wide as the query, moved back by up to its
+   width, so it rides the clip's edge as the letters appear, and the clip reaches 2px left to show it before the first one. It
+   is drawn only while it types; the query's small right padding keeps it clear of the last letter. */
+.h2h-home .help-query { position: relative; min-width: 0; padding-right: 0.2em; clip-path: inset(0 0 0 -2px); }
+.h2h-home .help-query::after { content: ''; position: absolute; top: 0.1em; bottom: 0.05em; left: 0; width: 100%; box-sizing: border-box; border-right: 1.5px solid var(--d-ink); opacity: 0; pointer-events: none; }
+.h2h-home .help-art li { display: flex; align-items: center; gap: 0.8em; padding: 0.65em 0; border-bottom: 1px solid rgba(20, 20, 20, 0.07); }
+.h2h-home .help-art li:last-child { border-bottom: 0; padding-bottom: 0; }
+.h2h-home .help-art li .d-icon { width: 1.9em; height: 1.9em; padding: 0.25em; border-radius: 0.45em; background: var(--d-cyan); color: var(--d-ink); }
+
+.h2h-home .sr-panel { display: grid; align-content: start; gap: 1em; padding-bottom: 1em; }
+.h2h-home .sr-head { display: flex; align-items: center; gap: 0.6em; padding: 0.8em 1em; border-bottom: 1.5px solid var(--d-line); font-weight: 500; }
+.h2h-home .sr-card { display: grid; gap: 0.8em; margin: 0 1em; padding: 0.9em; border: 1.5px solid var(--d-cyan); border-radius: 0.9em; background: var(--d-cyan-wash); line-height: 1.5; }
+.h2h-home .sr-card .d-chip { justify-self: start; padding: 0.25em 0.8em; background: #fff; }
+
+/* Try it beside what you have: the finished import, in its window, on a pebble blob. Its ten progress ticks are all filled. */
+.h2h-home .import-art { font-size: clamp(14px, 1.2vw, 16px); padding: 3.2em 3.2em 3em 2.8em; }
+.h2h-home .import-page { display: grid; gap: 1.1em; padding: 1.6em 1.8em 1.9em; }
+.h2h-home .import-title { font-size: 1.25em; line-height: 1.25; }
+.h2h-home .import-progress { display: grid; justify-items: start; gap: 0.75em; padding-top: 1.1em; border-top: 1.5px solid var(--d-line); }
+.h2h-home .import-ticks { display: flex; gap: 0.35em; width: 100%; margin: 0.1em 0 0.2em; }
+.h2h-home .import-ticks i { flex: 1; height: 0.75em; border-radius: 999px; background: var(--d-cyan); }
+.h2h-home .import-status { display: flex; align-items: center; gap: 0.6em; font-weight: 500; }
+
+/* Side by side, each card's blob reaches a little past its figure into the gaps of the row, so it shows round the card. */
+@media (min-width: 641px) {
+  .h2h-home .product-art .d-blob { top: -0.5em; left: -1.1em; width: calc(100% + 2.2em); height: calc(100% + 0.9em); }
+}
+@media (max-width: 1100px) {
+  .h2h-home .product-art { font-size: 14px; max-width: 520px; }
+}
+@media (max-width: 860px) {
+  .h2h-home .offer-art, .h2h-home .licence-art, .h2h-home .import-art { font-size: clamp(14px, 2.1vw, 16px); }
+}
+@media (max-width: 640px) {
+  .h2h-home .licence-art { padding: 2.8em 2.4em 2.4em 1.2em; }
+  .h2h-home .licence-editor { width: 86%; }
+  .h2h-home .licence-card { width: 92%; padding: 1.3em 1.3em 1.4em; }
+  .h2h-home .offer-art { font-size: 14px; padding: 1.6em 1.2em 2em; }
+  .h2h-home .offer-window { width: 100%; }
+  .h2h-home .offer-checkout { width: 100%; padding: 1.3em 1.3em 4.2em; }
+  .h2h-home .offer-widget { position: relative; right: auto; bottom: auto; justify-self: end; width: min(100% - 0.6em, 21em); margin-top: -3.2em; }
+  .h2h-home .import-art { padding: 2.8em 2.8em 2.4em 1.2em; }
+}

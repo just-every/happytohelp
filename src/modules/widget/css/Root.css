@@ -41,19 +41,6 @@
     opacity: 0;
   }
 }
-@keyframes happytohelp-in-zoom {
-  0% {
-    transform: translateY(40px) scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(0px) scale(1);
-    opacity: 1;
-  }
-}
 @keyframes happytohelp-out-zoom {
   0% {
     transform: scale(1);
@@ -75,6 +62,16 @@
   100% {
     transform: translateY(0px) scale(1);
   }
+}
+/* The composer is readable and interactive as soon as it opens. Keep its
+   entrance motion without fading the text through inaccessible contrast. */
+@keyframes happytohelp-panel-in-slide {
+  from { transform: translateY(20px) scale(0.98); }
+  to { transform: translateY(0px) scale(1); }
+}
+@keyframes happytohelp-panel-in-zoom {
+  from { transform: translateY(40px) scale(0.8); }
+  to { transform: translateY(0px) scale(1); }
 }
 @keyframes happytohelp-out-slide {
   from {
@@ -465,7 +462,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   will-change: opacity;
   line-height: 60px;
   text-align: center;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -555,8 +552,26 @@ html.wf-sacramento-n4-active .happytohelp-title {
   transition: opacity 0.1s ease-in-out 0s, transform 0.2s ease-out 0s !important;
 }
 #happytohelp-root .happytohelp-button.happytohelp-avatar {
-  background: #fff !important;
+  overflow: hidden;
 }
+#happytohelp-root .happytohelp-button .happytohelp-ai-avatar-container {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+#happytohelp-root .happytohelp-button .happytohelp-ai-avatar,
+#happytohelp-root .happytohelp-button .happytohelp-agent-avatar {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+#happytohelp-root .happytohelp-button .happytohelp-ai-avatar img,
+#happytohelp-root .happytohelp-button .happytohelp-agent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The launcher theme owns its background, including when it shows an avatar. */
 #happytohelp-root .happytohelp-button.happytohelp-avatar .happytohelp-ai-avatar,
 #happytohelp-root .happytohelp-button.happytohelp-avatar .happytohelp-workspace-brand {
   opacity: 1;
@@ -573,7 +588,6 @@ html.wf-sacramento-n4-active .happytohelp-title {
   transition-duration: 0.3s;
 }
 #happytohelp-root .happytohelp-button.happytohelp-workspace-brand-launcher {
-  background: #fff !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 #happytohelp-root .happytohelp-button:focus-visible {
@@ -710,7 +724,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   width: 100%;
   border-top-left-radius: 8px;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 1px 0px;
-  transition: box-shadow 1s ease-in-out, height 100ms ease-out;
+  transition: box-shadow 1s ease-in-out;
 }
 @media (max-height: 400px) {
   #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container {
@@ -750,7 +764,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   }
 }
 #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container.happytohelp-chat-header-container-expanded {
-  transition: box-shadow 1s ease-in-out, height 300ms ease-out;
+  transition: box-shadow 1s ease-in-out;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
@@ -1071,7 +1085,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 
 #happytohelp-root .happytohelp-chat-box {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1461,126 +1475,6 @@ html.wf-sacramento-n4-active .happytohelp-title {
   background: transparent;
 }
 
-#happytohelp-root .happytohelp-footer {
-  position: fixed;
-  bottom: 0px;
-  right: 0px;
-  width: clamp(430px, 50vw + 30px, 530px);
-  height: 85px;
-  z-index: 2147483603;
-  padding: 18px 0px;
-  box-sizing: border-box;
-  display: none;
-}
-@media (max-height: 800px) {
-  #happytohelp-root .happytohelp-footer {
-    width: 515px;
-    height: 80px;
-  }
-}
-@media (max-height: 600px), (max-width: 500px) {
-  #happytohelp-root .happytohelp-footer {
-    display: none !important;
-  }
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo {
-  opacity: 0.4;
-  font-size: 13px;
-  line-height: 20px;
-  display: inline-block;
-  margin: 0;
-  cursor: pointer;
-  font-family: "Quicksand", cursive;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  background-color: rgba(243, 243, 243, 0.7);
-  padding: 4px 12px 6px 2px;
-  border-radius: 25px;
-  color: #6d6e77;
-  transition: opacity 0.4s ease 0.1s, color 0.6s ease 0.1s, background-color 0.4s ease 0.1s;
-  will-change: opacity, background-color;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-pre {
-  font-weight: 400;
-  width: 0;
-  overflow: hidden;
-  display: inline-block;
-  white-space: nowrap;
-  vertical-align: top;
-  transition: width 0.4s ease 0.1s;
-  box-sizing: content-box;
-  padding-left: 3px;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-post {
-  font-weight: 400;
-  width: 0;
-  overflow: hidden;
-  display: inline-block;
-  white-space: nowrap;
-  vertical-align: top;
-  font-size: 13px;
-  padding-left: 2px;
-  transition: width 0.4s ease 0.1s;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-text {
-  font-family: "Quicksand", cursive;
-  font-optical-sizing: auto;
-  font-weight: 600;
-  letter-spacing: -0.4px;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-text strong {
-  font-weight: 600;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-icon {
-  width: 19px;
-  height: 19px;
-  display: inline-block;
-  position: relative;
-  margin: 0 6px;
-  vertical-align: middle;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-icon svg {
-  fill: #6d6e77;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 19px;
-  height: 19px;
-  transform: scaleX(1) scaleY(1) rotate(0deg);
-  will-change: fill, transform;
-  transition: fill 0.3s ease-in-out 0.05s, transform 0.3s ease-in-out 0.05s;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo .happytohelp-logo-icon svg.happytohelp-logo-circle-top {
-  transform: scaleX(1) scaleY(1) rotate(180deg);
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover {
-  opacity: 1;
-  background-color: #ffffff;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover .happytohelp-logo-pre {
-  width: 48px;
-  transition: width 0.5s ease-in-out 0.2s;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover .happytohelp-logo-post {
-  width: 6px;
-  transition: width 0.3s ease-in-out 0.5s;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg {
-  transition: fill 5s ease-in-out 1s, transform 0.6s ease-in-out 0.2s;
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg.happytohelp-logo-circle-top {
-  fill: #d83e6e;
-  transform: scaleX(1.15) scaleY(1.15) rotate(360deg);
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg.happytohelp-logo-circle-bottom {
-  fill: #5f57ca;
-  transform: scaleX(1.15) scaleY(1.15) rotate(180deg);
-}
-#happytohelp-root .happytohelp-footer .happytohelp-logo:hover svg.happytohelp-logo-smile {
-  fill: #5f57ca;
-  transform: scaleX(1.2) scaleY(1.2) rotate(0deg);
-}
-
 #happytohelp-root .happytohelp-insight-container {
   position: fixed;
   bottom: 100px;
@@ -1592,7 +1486,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   max-height: calc(var(--vh) * 100 - 114px);
   text-align: left;
   line-height: 1.45em;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1850,7 +1744,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   display: inline-block;
   margin: 0;
   cursor: pointer;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;
@@ -1907,7 +1801,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
 
 #happytohelp-root .happytohelp-tooltip {
   z-index: 2147483621;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1964,7 +1858,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   scroll-behavior: initial !important;
 }
 #happytohelp-root input, #happytohelp-root textarea {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -1994,7 +1888,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   box-shadow: none;
   font-weight: 400;
   line-height: 41px;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -2088,7 +1982,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   }
 }
 #happytohelp-root .happytohelp-interact {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -2187,7 +2081,8 @@ html.wf-sacramento-n4-active .happytohelp-title {
   margin-top: -50px;
   padding: 50px 0 0;
   box-sizing: border-box;
-  overflow: hidden;
+  /* Clip tilted background decoration without creating a focus-scroll container. */
+  overflow: clip;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -2199,7 +2094,8 @@ html.wf-sacramento-n4-active .happytohelp-title {
   position: relative;
   z-index: 20;
   will-change: transform, padding;
-  transition: transform 0.7s cubic-bezier(0.01, 0.98, 0.2, 0.99) 0s, padding 0.3s ease-out 0s, min-height 0.3s ease-out 0s;
+  /* Header height and body padding update together to prevent covered content. */
+  transition: transform 0.7s cubic-bezier(0.01, 0.98, 0.2, 0.99) 0s, min-height 0.3s ease-out 0s;
 }
 @media (max-height: 600px), (max-width: 500px) {
   #happytohelp-root .happytohelp-interact .happytohelp-content {
@@ -2303,11 +2199,11 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 #happytohelp-root.happytohelp-opened .happytohelp-interact-container {
   display: block;
-  animation: happytohelp-in-slide 1.5s cubic-bezier(0, 0.99, 0, 0.99);
+  animation: happytohelp-panel-in-slide 1.5s cubic-bezier(0, 0.99, 0, 0.99);
 }
 @media (max-height: 600px), (max-width: 500px) {
   #happytohelp-root.happytohelp-opened .happytohelp-interact-container {
-    animation: happytohelp-in-zoom 0.3s cubic-bezier(0, 0.99, 0, 0.99);
+    animation: happytohelp-panel-in-zoom 0.3s cubic-bezier(0, 0.99, 0, 0.99);
   }
 }
 #happytohelp-root.happytohelp-opened .happytohelp-interact-container.happytohelp-thinking::after {
@@ -2316,7 +2212,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   filter: blur(5px);
   animation-play-state: running;
 }
-#happytohelp-root.happytohelp-opened .happytohelp-interact, #happytohelp-root.happytohelp-opened .happytohelp-footer {
+#happytohelp-root.happytohelp-opened .happytohelp-interact {
   display: block;
 }
 #happytohelp-root.happytohelp-closed .happytohelp-interact-container, #happytohelp-root.happytohelp-insight-opened .happytohelp-interact-container {
@@ -2578,7 +2474,7 @@ html.wf-sacramento-n4-active .happytohelp-title {
   z-index: 1;
 }
 #happytohelp-root .happytohelp-send-message .happytohelp-send-message-row textarea {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -2801,6 +2697,12 @@ html.wf-sacramento-n4-active .happytohelp-title {
   outline-offset: 2px !important;
 }
 
+/* Keep transcript focus inside the clipped panel and above its decoration. */
+#happytohelp-root .happytohelp-chatlist-container:focus-visible {
+  z-index: 2;
+  outline-offset: -2px !important;
+}
+
 #happytohelp-root button.happytohelp-close,
 #happytohelp-root button.happytohelp-collect-customer-close,
 #happytohelp-root button.happytohelp-message-show-contact,
@@ -2878,3 +2780,19 @@ html.wf-sacramento-n4-active .happytohelp-title {
 }
 
 /*# sourceMappingURL=Root.css.map */
+
+#happytohelp-root .happytohelp-welcome { padding: 20px; display: flex; align-items: center; gap: 12px; color: #24384b; }
+#happytohelp-root .happytohelp-welcome p { min-width: 0; margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+#happytohelp-root .happytohelp-welcome img { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
+#happytohelp-root .happytohelp-brand-heading { display: flex; align-items: center; gap: 8px; padding: 12px 48px 0 16px; color: #24384b; }
+#happytohelp-root .happytohelp-brand-heading img { width: 28px; height: 28px; flex: 0 0 auto; object-fit: contain; }
+#happytohelp-root .happytohelp-brand-heading span { min-width: 0; overflow-wrap: anywhere; }
+#happytohelp-root .happytohelp-connection-state { flex: 0 0 auto; margin: 12px; padding: 12px; border: 1px solid #94a3b8; border-radius: 8px; background: #f8fafc; color: #24384b; font-size: 14px; }
+#happytohelp-root .happytohelp-connection-state button { display: block; margin-top: 8px; min-height: 36px; padding: 4px 12px; border: 1px solid #475569; border-radius: 6px; background: #fff; color: #24384b; cursor: pointer; font: inherit; }
+
+#happytohelp-root .happytohelp-welcome, #happytohelp-root .happytohelp-connection-state { position:relative; z-index:2; }
+#happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container { background:#fff; max-height:none; }
+#happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full { padding-top:calc(var(--happytohelp-header-height, 90px) + 50px); }
+@media (max-height:600px), (max-width:500px) {
+ #happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full { padding-top:var(--happytohelp-header-height,75px); }
+}

@@ -1,9 +1,14 @@
+import { Icon } from './drawings/Icons';
 import { LicenceDrawing } from './drawings/LicenceDrawing';
 import { sourceUrl } from './repository';
+import { useReveal } from './reveal/useReveal';
 
 const proof = ['No seats.', 'No plans.', 'No fees.'];
+// One line icon for each promise, in an aqua circle: people for seats, a plan sheet for plans, a struck-through tag for fees.
+const proofIcons = [<Icon name="people" />, <Icon name="plans" />, <Icon name="fees" />];
 
 export function Free() {
+  const reveal = useReveal<HTMLUListElement>();
   return <section className="section free" id="free" aria-labelledby="free-title">
     <div className="split">
       <div className="split-copy">
@@ -13,6 +18,6 @@ export function Free() {
       </div>
       <LicenceDrawing />
     </div>
-    <ul className="proof">{proof.map(item => <li key={item}>{item}</li>)}</ul>
+    <ul className="proof" ref={reveal}>{proof.map((item, index) => <li key={item}><span className="proof-icon">{proofIcons[index]}</span>{item}</li>)}</ul>
   </section>;
 }

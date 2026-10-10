@@ -33,4 +33,6 @@ export const addedTables = [
   'activation_receipts', 'activation_widget_pings', 'activation_inbound_receipts',
   // 0108_public_answer_citations.sql
   'ai_generation_sources',
+  // 0109_magic_signins.sql
+  'magic_signins',
 ];

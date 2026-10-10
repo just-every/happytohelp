@@ -50,7 +50,7 @@ export default function SendMessage({ mainView, setView, messages, localContact,
 
         if(textareaRef.current) {
             // Ensure focus is retained
-            textareaRef.current.focus();
+            textareaRef.current.focus({preventScroll: true});
         }
     }
 
@@ -103,7 +103,7 @@ export default function SendMessage({ mainView, setView, messages, localContact,
         // Focus on the textarea once the component is loaded
         // Only run this on large screens as it can be annoying on mobile
         if (open && textarea && !window.matchMedia("(max-width: 768px)").matches) {
-            textarea.focus();
+            textarea.focus({preventScroll: true});
         }
 
         // Cleanup function to remove event listeners
@@ -118,7 +118,7 @@ export default function SendMessage({ mainView, setView, messages, localContact,
     const focusText = event => {
         event.preventDefault();
         if(textareaRef) {
-            textareaRef.current.focus();
+            textareaRef.current.focus({preventScroll: true});
         }
     }
 

@@ -5,6 +5,9 @@ CONTRACT.md and ACCEPTANCE.md first for scope, architecture and evidence.
 
 Use the TanStack Start/React/Hono/TypeScript Worker runtime and the common
 `pnpm run dev`, `build`, `verify`, `setup`, `deploy` and `source:*` commands.
+The site's `/docs` pages are built from the Markdown listed in `docs/site.json`.
+List any new Markdown file at the root or under `docs/` there as published or
+GitHub-only (`tests/docs-site.mjs` enforces it).
 Modules under `src/modules` own reusable capabilities and are integrated through
 ordinary imports. Module boundaries save work; they do not restrict product
 changes. Keep modules coherent and files split by responsibility, and remove

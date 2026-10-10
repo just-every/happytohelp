@@ -1,2 +1,1 @@
-export const dashboardPath: RegExp;
-export function loginDestination(returnTo: unknown, origin: string, accountOnly?: boolean): string;
+export {dashboardPath,loginDestination} from '../../platform/dashboard-path.js';

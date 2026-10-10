@@ -6,7 +6,7 @@ import { mkdtemp, writeFile, rm, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { candidate, policy } from './fixtures.mjs';
+import { candidate, policy, writeCandidate } from './fixtures.mjs';
 import { materializeArtifact } from '../artifact.mjs';
 import { configuration } from '../stage-adapter.mjs';
 
@@ -16,7 +16,7 @@ test('real Wrangler accepts controller topology and packages malicious module as
     const marker=join(root,'must-not-exist');
     const a=candidate();
     a.modules[0].contentBase64=Buffer.from(`import {writeFileSync} from 'node:fs';writeFileSync(${JSON.stringify(marker)},'executed');export default {fetch(){return new Response('ok')}};export class ConversationSocket {}`).toString('base64');
-    const p=policy(a);await writeFile(join(root,'a.json'),JSON.stringify(a));
+    const p=policy(a);await writeCandidate(join(root,'a.json'),a);
     await materializeArtifact(join(root,'a.json'),join(root,'out'),p.artifactSha256);
     await writeFile(join(root,'out/wrangler.json'),JSON.stringify(configuration(p)));
     await writeFile(join(root,'out/secrets.json'),JSON.stringify({H2H_SETUP_TOKEN:'test-private-setup-token-with-32-characters'}));

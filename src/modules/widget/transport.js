@@ -27,9 +27,29 @@ export class WidgetTransport {
     return result;
   }
   async connect(contact = {}) {
+    if (this.closed) throw new Error('Widget connection is closed');
+    if (this.revoked) throw this.revoked;
     if (this.connecting) return this.connecting;
     this.connecting = this.initialize(contact).catch(error => { this.connecting = null; throw error; });
     return this.connecting;
+  }
+  async reconnect(contact = {}) {
+    if (this.reconnecting) return this.reconnecting;
+    clearTimeout(this.timer);
+    this.reconnecting = (async () => {
+      const socket = this.socket;
+      const session = await this.connect(contact);
+      // Initialization already opens its socket. An admitted session needs a
+      // new handshake even when the browser still reports its old socket open.
+      if (this.socket === socket || !this.socket || this.socket.readyState >= 2) {
+        await this.refresh();
+        if (this.closed) throw new Error('Widget connection is closed');
+        if (this.revoked) throw this.revoked;
+        this.openSocket();
+      }
+      return session;
+    })();
+    try { return await this.reconnecting; } finally { this.reconnecting = null; }
   }
   async initialize(contact) {
     const configuration = await this.request(`/api/widget/settings?widgetKey=${encodeURIComponent(this.widgetKey)}${contact?.preview_token ? `&previewToken=${encodeURIComponent(contact.preview_token)}` : ""}`);
@@ -50,7 +70,10 @@ export class WidgetTransport {
     }
     this.conversationId = this.session.conversationId;
     await this.refresh();
-    if (!this.closed) this.openSocket();
+    if (!this.closed) {
+      this.onEvent({type: 'session', session: this.session});
+      this.openSocket();
+    }
     return this.session;
   }
   async refresh() {
@@ -73,29 +96,42 @@ export class WidgetTransport {
     return {...message, ...(agent ? {agent} : {}), created_at: typeof message.created_at === 'number' ? new Date(message.created_at).toISOString() : message.created_at, local_id: message.local_id || message.localId, contact_id: message.actor_role === 'contact' ? this.session.contactId : message.contact_id, agent_id: message.actor_role && message.actor_role !== 'contact' ? message.actor_id : message.agent_id, media};
   }
   openSocket() {
-    if (this.closed) return;
+    if (this.closed || this.revoked) return;
+    clearTimeout(this.timer);
+    const previous = this.socket;
     const url = new URL(`/api/conversations/${this.conversationId}/socket`, this.origin);
     url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     url.searchParams.set('token', this.session.token); url.searchParams.set('after', String(this.eventId));
     const socket = new WebSocket(url); this.socket = socket;
-    socket.onopen = () => { this.retry = 0; this.onEvent({type: 'connected'}); this.refresh().then(() => this.replayPending()).catch(this.onError); };
+    const active = () => this.socket === socket && !this.closed && !this.revoked;
+    previous?.close();
+    socket.onopen = () => {
+      if (!active()) return;
+      this.retry = 0; this.onEvent({type: 'connected'});
+      this.refresh().then(() => { if (active()) return this.replayPending(); }).catch(error => { if (active()) this.onError(error); });
+    };
     socket.onmessage = event => this.inbound = Promise.resolve(this.inbound).then(async () => {
-      if (this.socket !== socket || this.closed) return;
+      if (!active()) return;
       try {
         const payload = JSON.parse(event.data);
         if (payload.eventId && payload.eventId <= this.eventId) return;
         if (payload.message) payload.message = await this.message(payload.message);
+        if (!active()) return;
         this.onEvent(payload);
         if (payload.eventId) this.eventId = payload.eventId;
-      } catch(error) { this.onError(error); }
+      } catch(error) { if (active()) this.onError(error); }
     });
     socket.onclose = event => {
-      if (this.socket !== socket || this.closed) return;
+      if (!active()) return;
+      this.socket = null;
       this.onEvent({type: 'disconnected'});
-      if (event?.code === 1008) { this.onError(new Error('Conversation session was revoked')); return; }
+      if (event?.code === 1008) {
+        this.revoked = new Error('Conversation session was revoked');
+        clearTimeout(this.timer); this.onError(this.revoked); return;
+      }
       this.timer = setTimeout(() => this.openSocket(), Math.min(1000 * 2 ** (this.retry = (this.retry || 0) + 1), 15000));
     };
-    socket.onerror = () => this.onError(new Error('Conversation connection interrupted'));
+    socket.onerror = () => { if (active()) this.onError(new Error('Conversation connection interrupted')); };
   }
   async send(data) {
     await this.connect();
@@ -145,7 +181,7 @@ export class WidgetTransport {
   }
   async replayPending() {
     for (const command of Object.values(this.session.pendingCommands || {})) {
-      if (this.closed) return;
+      if (this.closed || this.revoked) return;
       try { await this.send({local_id: command.localId, content: command.content, media_ids: command.mediaIds}); }
       catch(error) { this.onError(error); if (!error.definitiveRejection) throw error; }
     }

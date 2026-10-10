@@ -19,6 +19,13 @@ export default function useConversationAssistant() {
         returnFocusRef.current?.focus();
     }, []);
 
+    // Draft handoff leaves the permanent column in place and closes only the
+    // compact sheet. The composer owns the next focus, not the panel toggle.
+    const releaseDraft = useCallback(() => {
+        openedFromToggle.current = false;
+        if (!isDesktop()) setIsVisible(false);
+    }, []);
+
     const toggle = useCallback(() => {
         if (isVisible) {
             close();
@@ -96,6 +103,7 @@ export default function useConversationAssistant() {
         requestedTabVersion,
         toggle,
         close,
+        releaseDraft,
         toggleRef,
         closeRef,
         panelRef,

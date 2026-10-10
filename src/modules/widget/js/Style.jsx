@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {loadWidgetFont} from './includes/widgetFont';
 
 /* eslint import/no-webpack-loader-syntax: off */
 import styles from '../css/Root.css?inline';
@@ -10,6 +11,7 @@ import fontawesome from '@fortawesome/fontawesome-svg-core/styles.css?inline';
 //config.autoAddCss = false;
 
 export default function Style(props) {
+    useEffect(() => { loadWidgetFont(); }, []);
     return (
         <>
             <style type="text/css">{styles}</style>

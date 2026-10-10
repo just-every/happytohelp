@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { lstat, readFile, mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join,dirname } from 'node:path';
 
 export const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = () => { throw new Error('invalid-artifact'); };
@@ -12,18 +12,10 @@ export function safePath(value) {
       /(?:^|\/)(?:package\.json|wrangler\.[^/]+|node_modules)(?:\/|$)/i.test(value)) fail();
   return value;
 }
-function bytes(value) {
-  if (typeof value !== 'string' || value.length > Math.ceil(25 * 1024 * 1024 / 3) * 4) fail();
-  const data = Buffer.from(value, 'base64');
-  // Canonical round-trip rejects forgiving decoder inputs without a repeated
-  // regex whose engine stack can overflow on real multi-megabyte assets.
-  if (data.length > 25 * 1024 * 1024 || data.toString('base64') !== value) fail();
-  return data;
-}
-export function validateArtifact(raw, expectedDigest) {
+export function validateArtifact(raw, expectedDigest, payloads) {
   if (raw.length > 200 * 1024 * 1024 || digest(raw) !== expectedDigest) fail();
   const artifact = JSON.parse(raw);
-  if (artifact.schema !== 1 || artifact.mainModule !== 'index.js') fail();
+  if (artifact.schema !== 2 || artifact.mainModule !== 'index.js') fail();
   const spec = artifact.deploymentSpec;
   // This adapter supports the documented native H2H topology. An added binding
   // or changed execution contract needs a reviewed controller change.
@@ -35,7 +27,7 @@ export function validateArtifact(raw, expectedDigest) {
       !equal(spec.schedules, ['* * * * *']) ||
       !equal(spec.queueConsumers, [{binding:'JOBS',maxBatchSize:1,maxBatchTimeout:5,maxRetries:0,deadLetterBinding:'JOBS_DEAD_LETTER'}]) ||
       !equal(spec.publicVariables, {}) || spec.healthPath !== '/health') fail();
-  const collected = [];
+  const collected = [], payloadNames = new Set(); let totalBytes=0;
   for (const [kind, files] of [['modules', artifact.modules], ['assets', artifact.assets]]) {
     if (!Array.isArray(files) || !files.length || files.length > 20000) fail();
     const seen = new Set();
@@ -45,7 +37,13 @@ export function validateArtifact(raw, expectedDigest) {
       if (kind === 'modules' && (file.type !== (path.endsWith('.js') ? 'esm' : path.endsWith('.wasm') ? 'compiled-wasm' : 'text'))) fail();
       if (seen.has(path)) fail();
       seen.add(path);
-      const content = bytes(file.contentBase64);
+      if (!/^payload\/(modules|assets)\/[0-9]{6}$/.test(file.payload) || !file.payload.startsWith(`payload/${kind}/`) ||
+          file.role !== (kind === 'modules' ? 'module' : 'asset') || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > 25 * 1024 * 1024 ||
+          !/^[a-f0-9]{64}$/.test(file.sha256) || 'contentBase64' in file) fail();
+      if(payloadNames.has(file.payload))fail();payloadNames.add(file.payload);
+      totalBytes+=file.size;if(totalBytes>200*1024*1024)fail();
+      const content = payloads?.get(file.payload);
+      if (!Buffer.isBuffer(content) || content.length !== file.size || digest(content) !== file.sha256) fail();
       // A source-generated ignore file may not change which approved assets
       // Wrangler publishes. Asset inclusion belongs to this controller.
       if (kind !== 'assets' || path !== '.assetsignore') collected.push({path: `${kind}/${path}`, bytes: content});
@@ -66,7 +64,22 @@ export function validateArtifact(raw, expectedDigest) {
 export async function materializeArtifact(file, output, expectedDigest) {
   const stat = await lstat(file);
   if (!stat.isFile() || stat.size > 200 * 1024 * 1024) fail();
-  const collected = validateArtifact(await readFile(file), expectedDigest);
+  const raw = await readFile(file);
+  if (digest(raw) !== expectedDigest) fail();
+  const manifest = JSON.parse(raw), payloads = new Map(); let total = 0;
+  for (const entry of [...(manifest.modules || []), ...(manifest.assets || [])]) {
+    if (typeof entry.payload !== 'string' || !/^payload\/(modules|assets)\/[0-9]{6}$/.test(entry.payload) || payloads.has(entry.payload)) fail();
+    let path = dirname(file);
+    const parts = entry.payload.split('/');
+    for (const [i,part] of parts.entries()) {
+      path = join(path,part); const info = await lstat(path);
+      if (info.isSymbolicLink() || (i < parts.length - 1 ? !info.isDirectory() : !info.isFile())) fail();
+      if (i === parts.length - 1 && (info.size !== entry.size || info.size > 25 * 1024 * 1024)) fail();
+    }
+    const content = await readFile(path); total += content.length;
+    if (total > 200 * 1024 * 1024) fail(); payloads.set(entry.payload,content);
+  }
+  const collected = validateArtifact(raw, expectedDigest, payloads);
   // output is a new private directory created by the controller, never extracted
   // from an archive. There are no build-supplied links or configuration files.
   for (const entry of collected) {

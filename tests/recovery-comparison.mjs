@@ -1,3 +1,4 @@
+import {readArtifact} from './helpers/artifact-payloads.mjs';
 import assert from 'node:assert/strict';
 import {readFile, writeFile, mkdir, rm, copyFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
@@ -10,11 +11,13 @@ assert.ok(['launch', 'candidate'].includes(profile), 'Usage: node tests/recovery
 assert.ok(buildDirectory && outputDirectory, 'Build and output directories are required');
 const buildRoot = resolve(buildDirectory), output = resolve(outputDirectory);
 const build = JSON.parse(await readFile(join(buildRoot, 'build.json')));
-const bytes = await readFile(join(buildRoot, 'artifact.json'));
+const bytes = await readFile(join(buildRoot, 'delivery-artifact/artifact.json'));
 assert.equal(sha256(bytes), build.artifactSha256, 'Artifact does not match build receipt');
-const artifact = JSON.parse(bytes);
+const artifact = await readArtifact(join(buildRoot, 'delivery-artifact/artifact.json'));
 if (profile === 'launch') assert.equal(build.sourceSha, '09d80a7896fa6ca8643516976ca43d9576607c75');
-const expectedMigrations = profile === 'launch' ? 38 : 39;
+const candidateAdditions=['0107_activation_receipts.sql','0108_public_answer_citations.sql','0109_magic_signins.sql'];
+const expectedMigrations = profile === 'launch' ? 38 : 42;
+if(profile==='candidate'){assert.equal(artifact.deploymentSpec.migrations.filter(m=>!candidateAdditions.includes(m.name)).length,39);assert.deepEqual(artifact.deploymentSpec.migrations.filter(m=>candidateAdditions.includes(m.name)).map(m=>m.name),candidateAdditions);}
 assert.equal(artifact.deploymentSpec.migrations.length, expectedMigrations);
 const verificationMigration = artifact.deploymentSpec.migrations.find(m => m.name === '0106_project_verification_secret.sql');
 assert.equal(Boolean(verificationMigration), profile === 'candidate', 'Preserve candidate migration 0106');

@@ -31,11 +31,10 @@ jobs:
       - run: pnpm verify
       - run: pnpm test:mobile-inbox-browser
       - run: pnpm test:reproducible-build
-      - run: node scripts/build-delivery-artifact.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: happytohelp-worker-${{ github.sha }}
-          path: delivery-artifact/happytohelp-worker-artifact.json
+          path: delivery-artifact/
           if-no-files-found: error
           retention-days: 14
       - name: Preserve failed native runtime diagnostics

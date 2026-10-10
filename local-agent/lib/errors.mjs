@@ -1,8 +1,12 @@
+import { normalizeProviderError } from './provider-error.mjs';
+
 export class ConnectorError extends Error {
-  constructor(message, { code = 'CONNECTOR_ERROR', cause } = {}) {
+  constructor(message, { code = 'CONNECTOR_ERROR', cause, providerError } = {}) {
     super(message, { cause });
     this.name = 'ConnectorError';
     this.code = code;
+    const provider = normalizeProviderError(providerError);
+    if (provider) this.provider_error = provider;
   }
 }
 

@@ -1,7 +1,8 @@
 # Public homepage and Help Center
 
 The public homepage is a native TanStack Start/React route in `src/routes/index.tsx`,
-composed from `src/ui/homepage` (inline drawings, no raster images) and the favicon in
+composed from `src/ui/homepage` (inline drawings and the inline HappyToHelp mark and drawn
+wordmark, no raster images). The mark's SVG and favicon files, and the PNGs rendered from them, are in
 `public/homepage/media/brands`.
 It retains links to native workspace, setup and login. This module serves dynamic,
 project-scoped published help centers. Former pricing, resources, legal, waitlist,
@@ -15,7 +16,9 @@ React router.
 `/{project}/{article_slug}` and `/help/{project}` aliases. Only persisted project
 IDs or explicitly granted slugs resolve. Project owners/admins can claim an
 unused slug via PUT `/api/public-site/projects/:projectId/alias`; reserved app
-paths cannot be claimed. Published project-scoped articles are rendered with the
+paths cannot be claimed. `docs` is reserved, so no alias can shadow the
+documentation at `/docs`; an alias named `docs` from before the reservation stays
+reachable at `/help/docs`. Published project-scoped articles are rendered with the
 maintained Markdown renderer (raw HTML disabled), and draft/deleted projects stay
 private. The importer maps retained legacy project slugs into
 `public_project_aliases` when preserving old help links.
@@ -25,7 +28,9 @@ Not-found responses are HTML with HTTP 404 inside the Help Center frame
 unpublished article gets the project's header and search with "Article not found"; the
 body depends only on the project, so a draft cannot be told from an article that never
 existed. An unknown or deleted project, or an address no route serves (such as
-`/help/a/b/c`), gets the same frame without a project name or search box. Paths under
+`/help/a/b/c`), gets the same frame as HappyToHelp's own page: HappyToHelp's mark,
+drawn wordmark and tab icons (`platform-brand.ts`) and no search box. Project pages
+never carry HappyToHelp's brand; they show the project's own name, logo and colour. Paths under
 `/api/public-site/` keep the plain 404. Unknown application paths outside the Help Center
 render the branded application 404 described in `docs/NAVIGATION.md`.
 
@@ -43,5 +48,6 @@ pattern files are not included. See `docs/PUBLIC-SOURCE-PROVENANCE.md` for asset
 provenance and licences.
 
 `tests/public-help-center.mjs`, `tests/public-site-runtime.mjs`,
-`pnpm run test:public-help-center-browser` and `pnpm run test:not-found-browser`
-cover the current homepage, help-center routes and 404 pages.
+`pnpm run test:public-help-center-browser`, `pnpm run test:not-found-browser` and
+`tests/docs-browser.mjs` cover the current homepage, the documentation pages,
+help-center routes and 404 pages.

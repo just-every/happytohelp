@@ -6,12 +6,14 @@ import { RUN_KINDS, TRAINING_LIMITS, validateTrainingRun } from './training-run-
 const initial = {kind: 'evaluation', models: '', cases: '', variants: '', max_cost: '', max_tokens: ''};
 const order = ['kind', 'models', 'cases', 'variants', 'max_cost', 'max_tokens'];
 /** Form to start an evaluation or simulation. Problems are shown beside the field and nothing is sent until the input is valid. */
-export default function TrainingRunForm({ onCreate }) {
+export default function TrainingRunForm({ onCreate, disabled = false }) {
     const {markDirty}=useUnsavedChanges();
     const [draft, setDraft] = useState(initial), [errors, setErrors] = useState({}), [error, setError] = useState(''), [busy, setBusy] = useState(false);
     const change = (name, value) => { markDirty(); setDraft(current => ({...current, [name]: value})); setErrors(({[name]: _, ...rest}) => rest); };
     const submit = async event => {
-        event.preventDefault(); setError('');
+        event.preventDefault();
+        if (disabled || busy) return;
+        setError('');
         const result = validateTrainingRun(draft);
         if (result.errors) {
             setErrors(result.errors);
@@ -33,5 +35,5 @@ export default function TrainingRunForm({ onCreate }) {
             {field('max_tokens', 'Maximum tokens', {type: 'number', required: true, min: 1, max: TRAINING_LIMITS.maxTokens, step: 1, hint: `The longest reply each model may write, from 1 to ${TRAINING_LIMITS.maxTokens.toLocaleString('en-US')} tokens.`})}
         </div>
         {error && <div role="alert" className="alert alert-danger">{error}</div>}
-    </Section><button className="btn btn-primary" disabled={busy}>{busy ? 'Creating…' : 'Create run'}</button></form>;
+    </Section><button className="btn btn-primary" disabled={disabled || busy}>{busy ? 'Creating…' : 'Create run'}</button></form>;
 }

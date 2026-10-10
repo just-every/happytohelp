@@ -7,6 +7,7 @@ import {v4 as uuidv4} from 'uuid';
 import {emptyTypingState, normalizeTypingState, insightTypingState} from './typingState';
 import {cancelReplyStream, clearMatchingReplyTyping, isCancelledReply, removePartialReply} from './replyStream';
 import {closeUnclosedMarkdown} from '../includes/markdown';
+import {widgetAppearance} from '../../appearance';
 
 export const ConnectContext = createContext({});
 export function ConnectProvider({children, open, setOpen, setInsightOpen, onSettingsUpdated}) {
@@ -22,13 +23,14 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   const [messages, setMessages] = useState([]);
   const [agentTyping, setAgentTyping] = useState(emptyTypingState);
   const [connectErrors, setConnectErrors] = useState([]);
+  const [connectionState, setConnectionState] = useState('connecting');
   const [mainView, setMainView] = useState('conversation');
   const [insight, setInsight] = useState(null);
   const [thinking, setThinking] = useState(false);
   const [lastResponse, setLastResponse] = useState(null);
   const [lastConnected, setLastConnected] = useState(0);
   const [conversationSettings, setConversationSettings] = useState({ais: [], human: null, is_human_response_enabled: true, ...context.conversationSettings});
-  const fail = useCallback(error => setConnectErrors(current => [...current.slice(-4), error.message || String(error)]), []);
+  const fail = useCallback(error => {setConnectionState(navigator.onLine ? 'interrupted' : 'offline');setConnectErrors(current => [...new Set([...current.slice(-4), error.message || String(error)])]);}, []);
   const setFilteredMessages = useCallback(incoming => {
     setMessages(current => {
       const next = [...current];
@@ -51,17 +53,24 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
         const value = event.configuration;
         setCollectorReady(value.collectorEnabled === true && context.settings.collector.enabled && !(context.settings.collector.disable_bots && isBot));
         const brand = value.brand?.name || value.project?.name;
-        setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), workspace_brand: {name: brand, avatar_url: value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
-        onSettingsUpdated?.({...value.settings, settings: {...value.settings?.settings, collector: {...value.settings?.settings?.collector, enabled: value.collectorEnabled === true}}});
+        setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), workspace_brand: {name: brand, avatar_url: value.brand?.avatar_url || value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
+        onSettingsUpdated?.({...widgetAppearance(value.brand, value.settings), settings: {...value.settings?.settings, collector: {...value.settings?.settings?.collector, enabled: value.collectorEnabled === true}}});
         break;
       }
+      case 'session':
+        setContactAuth({id: event.session.contactId, token: event.session.token});
+        setConversationId(event.session.conversationId);
+        setContact(current => ({...current, id: event.session.contactId}));
+        if (event.session.settings) setConversationSettings(current => ({...current, ...event.session.settings}));
+        break;
       case 'transcript': setFilteredMessages(event.messages); break;
       case 'message':
         setFilteredMessages([event.message || payload]); setThinking(false);
         if (chunks.current[(event.message || payload).local_id]) chunks.current[(event.message || payload).local_id].complete = true;
         setAgentTyping(current => clearMatchingReplyTyping(current, (event.message || payload).local_id));
         break;
-      case 'connected': setLastConnected(Date.now()); break;
+      case 'connected': setLastConnected(Date.now()); setConnectionState('connected'); setConnectErrors([]); break;
+      case 'disconnected': setConnectionState(navigator.onLine ? 'interrupted' : 'offline'); break;
       case 'typing': if (!isCancelledReply(cancelled.current, payload.local_id)) setAgentTyping(normalizeTypingState(payload)); break;
       case 'chunk': {
         const localId = payload.localId || payload.local_id;
@@ -85,18 +94,32 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   }, [setFilteredMessages, setInsightOpen, fail, onSettingsUpdated]);
   const eventHandler = useRef(processEvent); eventHandler.current = processEvent;
   useEffect(() => {
-    const client = new WidgetTransport({apiOrigin: context.apiOrigin, widgetKey: context.widgetKey, onEvent: event => eventHandler.current(event), onError: fail});
+    const active = () => transport.current === client && !client.closed;
+    const onError = error => { if (active()) fail(error); };
+    const client = new WidgetTransport({apiOrigin: context.apiOrigin, widgetKey: context.widgetKey, onEvent: event => { if (active()) eventHandler.current(event); }, onError});
     transport.current = client;
-    setMessages([]); setContactAuth({}); setConversationId(null);
-    client.connect({...localContact, ...context.contact}).then(session => {
-      if (client.closed) return;
-      setContactAuth({id: session.contactId, token: session.token}); setConversationId(client.conversationId);
-      setContact(current => ({...current, id: session.contactId}));
-      if (session.settings) setConversationSettings(current => ({...current, ...session.settings}));
-    }).catch(fail);
+    setMessages([]); setContactAuth({}); setConversationId(null); setConnectionState('connecting');
+    client.connect({...localContact, ...context.contact}).catch(onError);
     return () => { client.close(); Collector.setCollectorEnabled(false); Collector.setMessageHandler(null); };
   }, [context.apiOrigin, context.widgetKey, context.contact?.hash, context.contact?.identifier, fail]);
   const assertConnected = useCallback(() => transport.current ? transport.current.connect(localContact) : Promise.reject(new Error('Widget is initializing')), [localContact]);
+  const retryConnection = useCallback(async () => {
+    const client = transport.current;
+    setConnectionState(navigator.onLine ? 'connecting' : 'offline');
+    try {
+      if (!client) throw new Error('Widget is initializing');
+      await client.reconnect(localContact);
+    } catch(error) {
+      if (transport.current === client && !client?.closed) fail(error);
+      throw error;
+    }
+  }, [localContact, fail]);
+  useEffect(() => {
+    const offline = () => setConnectionState('offline');
+    const online = () => {retryConnection().catch(() => {});};
+    window.addEventListener('offline', offline); window.addEventListener('online', online);
+    return () => {window.removeEventListener('offline', offline);window.removeEventListener('online', online);};
+  }, [retryConnection]);
   const sendMessage = useCallback((action, data) => {
     if (['collector','pingActive'].includes(action) && !context.settings.collector.enabled) return Promise.resolve();
     const client = transport.current;
@@ -148,5 +171,5 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
       setFilteredMessages([{...contact_message, sending: true, failed_send: true}]); setAgentTyping(emptyTypingState()); setThinking(false);
     });
   };
-  return <ConnectContext.Provider value={{open, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;
+  return <ConnectContext.Provider value={{open, connectionState, retryConnection, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;
 }

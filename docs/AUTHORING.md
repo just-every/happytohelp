@@ -6,21 +6,20 @@ existing paths; it does not generate application files or restrict owner changes
 to configuration. First-party work, owner forks and other publishers use the same
 Base edition-authoring 1.1.0 commands.
 
-The retained tool is selected independently of runtime Base. Base runtime/tool origin is
-`ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1`. `src/base` maps to
-the runtime folder under foundation; `scripts/edition-authoring` maps to `edition-authoring`;
-`scripts/operations.mjs` maps to `operations/operations.mjs`. The parent comparison
-is the committed template folder under foundation. The independently selected onboarding source
-(`scripts/base-onboarding`) records Base comparison commit
-`390328736c8dae82f87c86e5af4c17cca6bb9c00`, path `onboarding`; `edition.json` is
-the authoritative record of every component's comparison revision.
-Local changes are effective source; origin
-mappings never claim current bytes are equal to old bytes.
-The comparison origins in `edition.json` select distinctly identified public
-projections in `.edition/sources`. Their receipts bind the original Git revisions
-and private archive hashes without distributing private origin text. Public
-checks and comparisons run offline; private originals are used only by the
-separate [projection equivalence proof](../scripts/source-projection/README.md).
+The retained tool is selected independently of runtime Base. The observed Base
+runtime/tool revision is `ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1`:
+`src/base` came from the foundation/runtime directory,
+`scripts/edition-authoring` from `edition-authoring`, and `scripts/operations.mjs`
+from `operations/operations.mjs`.
+The template ancestry and independently selected onboarding and email revisions
+are recorded in [SOURCE-PROVENANCE.md](SOURCE-PROVENANCE.md).
+
+`edition.json` selects retained local files. Its optional private donor origins,
+parent comparison and unused donor archives are absent from the public edition.
+The source lock binds the current local source and exact tool bytes, so
+`pnpm source:check` works offline without accessing the private donor. Historical
+revision attribution does not claim current bytes equal upstream bytes. A future
+comparison needs a separately authorized source selection and retained baseline.
 
 Inspect with `pnpm source:inspect`. After the owner freezes the intended tree,
 stage actual inputs, run `pnpm source:lock`, stage sources.lock.json and retained
@@ -40,8 +39,8 @@ Migrations apply once in the consumer's existing ledger; source adoption never
 resets existing data or rewrites applied migration history.
 
 Neutral AI assistance entry points can be selected without an inbox, provider,
-training runner or D1 schema. `ai-support/module.json` lists the context-only
-selection; `tests/module-boundaries.mjs` copies it outside the checkout and
+training runner or D1 schema. `src/modules/ai-support/module.json` lists the
+context-only selection; `tests/module-boundaries.mjs` copies it outside the checkout and
 exercises it there. After a source commit exists, a recipient may use the standard
 Git selector and `materialize` to produce a build workspace, then normal install,
 build and product verification. `extract`, `compare` and `changes` inform a future

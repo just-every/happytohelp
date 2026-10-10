@@ -55,11 +55,14 @@ export function waitForExit(child, timeoutMs = 3_000) {
       resolve({ code: child.exitCode, signal: child.signalCode });
       return;
     }
-    const timer = setTimeout(() => resolve(null), timeoutMs);
-    child.once('exit', (code, signal) => {
+    const finish = (result) => {
       clearTimeout(timer);
-      resolve({ code, signal });
-    });
+      child.removeListener('exit', exited);
+      resolve(result);
+    };
+    const exited = (code, signal) => finish({ code, signal });
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    child.once('exit', exited);
   });
 }
 

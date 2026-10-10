@@ -2,6 +2,8 @@ body.workspace-page {
     .main-content,
     .modal {
         .btn {
+            // Keep theme foreground/background pairs together during loading.
+            transition: box-shadow .15s ease-in-out;
             min-height: 38px;
             padding: .5rem .875rem;
             border-radius: 8px;
@@ -63,6 +65,7 @@ body.workspace-page {
             --bs-nav-tabs-link-active-border-color: transparent transparent rgb(var(--bs-primary-rgb));
 
             .nav-link {
+                transition: box-shadow .15s ease-in-out;
                 color: var(--conversation-quiet, #747f9b);
                 font-size: 13px;
                 font-weight: 500;

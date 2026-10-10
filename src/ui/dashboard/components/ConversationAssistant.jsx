@@ -17,6 +17,8 @@ ConversationAssistant.propTypes = {
     closeButtonRef: PropTypes.object,
     conversation: PropTypes.object.isRequired,
     conversationId: PropTypes.string,
+    draftError: PropTypes.string,
+    isDraftDisabled: PropTypes.bool,
     isVisible: PropTypes.bool,
     onClose: PropTypes.func,
     onInsertDraft: PropTypes.func.isRequired,
@@ -30,6 +32,8 @@ export default function ConversationAssistant({
     closeButtonRef,
     conversation,
     conversationId,
+    draftError,
+    isDraftDisabled,
     isVisible,
     onClose,
     onInsertDraft,
@@ -133,6 +137,8 @@ export default function ConversationAssistant({
                     hidden={ activeTab !== 'local' }
                     ref={ localScrollEdge.ref }>
                     { activeTab === 'local' && <DelegationPanel
+                        draftError={ draftError }
+                        isDraftDisabled={ isDraftDisabled }
                         conversation={ conversation }
                         onInsertDraft={ onInsertDraft }
                         onConversationChanged={ onConversationChanged }

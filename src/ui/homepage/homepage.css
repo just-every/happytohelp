@@ -1,4 +1,7 @@
-/* Homepage chrome: paper, ink and one geometric sans-serif. Colour lives only inside the drawings (drawings.css). */
+/* Homepage chrome: paper, ink and one geometric sans-serif. Colour lives inside the drawings (drawings.css); outside them only
+   the aqua accents borrow its tokens: the hero's caption discs and the desk's number discs, the circles behind the three
+   promises, the text links' underlines, the pen lines (the hero flourish, the dividers, the closing line) and the sparks of
+   the header and footer mark. Nothing else has a hue. */
 body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home {
   --paper: #f6f2ea;
@@ -9,7 +12,7 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font-family: Outfit, 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: Outfit, 'Outfit Fallback', 'Avenir Next', 'Segoe UI', sans-serif;
   font-size: 18px;
   line-height: 1.5;
   background-color: var(--paper);
@@ -34,9 +37,19 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 /* Header and footer */
 .h2h-home .site-header, .h2h-home .site-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1536px; margin: 0 auto; padding: 0 var(--gutter); }
 .h2h-home .site-header { height: 100px; }
-.h2h-home .site-header nav .pill { min-height: 40px; padding: 0 20px; font-size: 15px; }
 .h2h-home .site-header nav, .h2h-home .site-footer nav { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 32px; font-size: 16px; }
-.h2h-home .brand { font-size: clamp(26px, 2.6vw, 34px); font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+.h2h-home .site-header nav { gap: 8px 40px; font-size: 17px; font-weight: 500; }
+.h2h-home .site-header nav .pill { min-height: 48px; padding: 0 24px; font-size: 17px; }
+/* The lockup: the mark (BrandMark.tsx) left of the drawn wordmark (BrandWord.tsx), sized and spaced as in the owner-chosen logo.
+   The wordmark is SVG strokes, not text: its box is 0.96em tall with 0.56em capitals centred in it, so centring the two boxes
+   lines the capitals' middle up with the mark's. Its sparks are the one touch of the drawings' cyan outside them, set as a
+   stroke so the chrome's text and boxes stay ink. The lockup's em tops out at 32px, so the bubble stands as tall as the Get the
+   code pill. The mark is nudged right by the headline's left side bearing, so the bubble's ink and the headline's first letter
+   share one left edge. The link is named by visually hidden text. The footer signs off with the same lockup. */
+.h2h-home .site-header .brand, .h2h-home .site-footer .brand { position: relative; display: inline-flex; align-items: center; gap: 0.3em; font-size: clamp(26px, 2.2vw, 32px); }
+.h2h-home .brand-mark { flex: none; width: auto; height: 1.58em; margin-left: 0.07em; overflow: visible; }
+.h2h-home .brand-word { flex: none; overflow: visible; }
+.h2h-home .brand-name { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 .h2h-home .site-footer { padding-top: 56px; padding-bottom: 56px; margin-top: 40px; border-top: 1px solid var(--rule); max-width: calc(1536px - 2 * var(--gutter)); padding-left: 0; padding-right: 0; width: calc(100% - 2 * var(--gutter)); }
 
 /* Buttons and links */
@@ -49,22 +62,29 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .text-link { font-size: 19px; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 6px; transition: text-decoration-color 0.18s; }
 .h2h-home .text-link:hover { text-decoration-color: var(--ink); }
 .h2h-home .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px 34px; margin-top: 36px; }
+/* Below the hero, the text links carry the hero's aqua underline too. */
+.h2h-home .section .text-link { font-weight: 600; text-decoration-color: var(--d-cyan-deep); text-decoration-thickness: 3px; text-underline-offset: 9px; }
+.h2h-home .section .text-link:hover { text-decoration-color: var(--ink); }
 
-/* Hero */
-.h2h-home .hero { display: grid; grid-template-columns: minmax(0, 0.465fr) minmax(0, 0.535fr); align-items: center; gap: clamp(24px, 3vw, 48px); padding: clamp(8px, 1.4vw, 24px) 0 clamp(72px, 9vw, 150px); }
-.h2h-home .hero h1 { font-size: clamp(2.5rem, 4.7vw, 4.7rem); font-weight: 500; line-height: 1.12; letter-spacing: -0.035em; text-wrap: balance; }
+/* Hero: the copy column (with the flourish under it) and the drawing, both hung from one top line. */
+.h2h-home .hero { display: grid; grid-template-columns: minmax(0, 0.475fr) minmax(0, 0.525fr); align-items: start; gap: clamp(24px, 2.6vw, 40px); padding: clamp(24px, 7.8vw, 120px) 0 clamp(40px, 4.5vw, 72px); }
+.h2h-home .hero-copy { padding-top: clamp(0px, 2.3vw, 36px); }
+.h2h-home .hero h1 { font-size: clamp(2.5rem, 5.2vw, 5rem); font-weight: 600; line-height: 1.08; letter-spacing: -0.035em; text-wrap: balance; }
 .h2h-home .hero h1 span { display: inline-block; }
-.h2h-home .hero-sub { margin-top: 28px; max-width: 26em; font-size: clamp(1.05rem, 1.3vw, 1.25rem); line-height: 1.55; color: var(--ink-soft); }
-.h2h-home .hero-copy .actions { margin-top: 32px; }
-.h2h-home .hero-free { margin-top: 22px; font-size: 1rem; font-weight: 500; }
+.h2h-home .hero-sub { margin-top: 26px; max-width: 25.5em; font-size: clamp(1.1rem, 1.5vw, 1.4375rem); line-height: 1.6; color: #2b2a27; }
+.h2h-home .hero-copy .actions { margin-top: 44px; gap: 20px 42px; }
+.h2h-home .hero-copy .pill--large { min-height: 74px; padding: 0 50px; font-size: 22px; }
+.h2h-home .hero-copy .text-link { font-size: 21px; font-weight: 600; text-decoration-color: var(--d-cyan-deep); text-decoration-thickness: 3px; text-underline-offset: 10px; }
+.h2h-home .hero-copy .text-link:hover { text-decoration-color: var(--ink); }
+.h2h-home .hero-free { margin-top: 28px; font-size: 18px; }
 .h2h-home .hero-stage { min-width: 0; container: hero-stage / inline-size; }
-.h2h-home .hero-steps { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 28px; margin-top: 4px; counter-reset: step; font-size: 1.05rem; }
-.h2h-home .hero-steps li { display: inline-flex; align-items: center; gap: 10px; counter-increment: step; }
-.h2h-home .hero-steps li::before { content: counter(step); display: inline-grid; place-items: center; width: 28px; height: 28px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 0.9rem; font-weight: 500; }
+.h2h-home .hero-steps { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 32px; margin-top: 22px; counter-reset: step; font-size: 1.125rem; }
+.h2h-home .hero-steps li { display: inline-flex; align-items: center; gap: 14px; counter-increment: step; }
+.h2h-home .hero-steps li::before { content: counter(step); display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--d-cyan); font-size: 1.1rem; font-weight: 600; }
 /* The three captions are one row or one per line, never two and one: when the stage is too narrow for the row (the three items
-   and their gaps need about 34rem, set by the caption size in rem), they stack the way they do on phones. */
-@container hero-stage (max-width: 34.5rem) {
-  .h2h-home .hero-steps { flex-direction: column; align-items: flex-start; padding-left: 4px; margin-top: 12px; }
+   and their gaps need about 40rem, set by the caption size in rem), they stack the way they do on phones. */
+@container hero-stage (max-width: 40rem) {
+  .h2h-home .hero-steps { flex-direction: column; align-items: flex-start; padding-left: 4px; }
 }
 
 /* Sections */
@@ -74,31 +94,45 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .split-copy > p { margin-top: 20px; font-size: clamp(1.1rem, 1.5vw, 1.35rem); line-height: 1.55; color: var(--ink-soft); }
 .h2h-home .split-copy > p { max-width: 28em; }
 .h2h-home .steps { display: grid; gap: 18px; margin-top: 26px; counter-reset: move; }
-.h2h-home .steps li { position: relative; padding-left: 46px; max-width: 28em; font-size: 1.05rem; line-height: 1.5; color: var(--ink-soft); counter-increment: move; }
-.h2h-home .steps li::before { content: counter(move); position: absolute; left: 0; top: -1px; display: grid; place-items: center; width: 30px; height: 30px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+.h2h-home .steps li { position: relative; padding-left: 48px; max-width: 28em; font-size: 1.05rem; line-height: 1.5; color: var(--ink-soft); counter-increment: move; }
+.h2h-home .steps li::before { content: counter(move); position: absolute; left: 0; top: -2px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--d-cyan); font-size: 0.95rem; font-weight: 600; color: var(--ink); }
 .h2h-home .steps b { font-weight: 600; color: var(--ink); }
-.h2h-home .proof { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 16px 32px; margin-top: clamp(40px, 5vw, 72px); padding-top: clamp(24px, 3vw, 36px); border-top: 1px solid var(--rule); font-size: clamp(1.4rem, 2.4vw, 2.1rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+/* The three promises, each after a line icon in a pale aqua circle. */
+.h2h-home .proof { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 20px 32px; margin-top: clamp(40px, 5vw, 72px); font-size: clamp(1.4rem, 2.4vw, 2.1rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.h2h-home .proof li { display: flex; align-items: center; gap: 0.55em; }
+.h2h-home .proof-icon { display: grid; place-items: center; flex: none; width: 2.1em; height: 2.1em; border-radius: 50%; background: var(--d-cyan-tint); }
+.h2h-home .proof-icon .d-icon { width: 1.05em; height: 1.05em; }
 
-/* The corner marks stand up to 3em of the drawing's 13-14px scale (about 42px) above the first row of desk drawings, so
-   the heading above them keeps at least that much room plus a clear gap at every width (the 5vw space alone is 36px at
-   phone and two-column widths, which put the first drawing's mark on the heading). Rows below already have 56px. */
-.h2h-home .product .section-head { margin-bottom: max(clamp(36px, 5vw, 64px), 60px); }
 .h2h-home .parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, 3vw, 44px); }
 .h2h-home .parts > li { display: flex; flex-direction: column; align-items: flex-start; }
 /* Below 1101px each item is a flex column; its drawing grows to fill the row it shares with one neighbour (2-up) or stands alone (1-up). */
-.h2h-home .parts .drawing { flex: 1 0 auto; width: 100%; margin-bottom: 30px; }
-.h2h-home .step { display: inline-grid; place-items: center; width: 32px; height: 32px; margin-bottom: 14px; border: 1.5px solid var(--ink); border-radius: 50%; font-size: 15px; font-weight: 500; }
+.h2h-home .parts .drawing { flex: 1 0 auto; width: 100%; margin-bottom: 18px; }
+.h2h-home .step { display: inline-grid; place-items: center; width: 36px; height: 36px; margin-bottom: 14px; border-radius: 50%; background: var(--d-cyan); font-size: 16px; font-weight: 600; }
 .h2h-home h3 { font-size: 1.4rem; font-weight: 500; line-height: 1.2; letter-spacing: -0.015em; }
 .h2h-home .parts > li > p { margin-top: 10px; font-size: 1.05rem; line-height: 1.5; color: var(--ink-soft); }
 
 .h2h-home .split { display: grid; grid-template-columns: minmax(0, 0.44fr) minmax(0, 0.56fr); align-items: center; gap: clamp(32px, 6vw, 96px); }
+.h2h-home .split--reverse { grid-template-columns: minmax(0, 0.56fr) minmax(0, 0.44fr); }
 .h2h-home .split--reverse .drawing { order: -1; }
 
-/* Ready when you are: a short centred closing band */
+/* Ready when you are: a short centred closing band that echoes the hero, its big headline underlined by an aqua pen line
+   with one loop. The line's box is reserved from the first paint (its aspect ratio), so drawing it in moves nothing. */
 .h2h-home .get-started { padding: clamp(48px, 7vw, 104px) 0 clamp(24px, 4vw, 56px); text-align: center; }
-.h2h-home .get-started .actions { justify-content: center; margin-top: 32px; }
+.h2h-home .get-started h2 { font-size: clamp(2.5rem, 5.2vw, 5rem); font-weight: 600; line-height: 1.08; letter-spacing: -0.035em; }
+.h2h-home .ready-line { display: block; width: min(100%, 8.4em); height: auto; aspect-ratio: 620 / 64; margin: 0.06em auto 0; color: var(--d-cyan-deep); overflow: visible; }
+.h2h-home .get-started .actions { justify-content: center; margin-top: 28px; }
 
-/* Motion: the only animations are the one-time draw-in of the sketch marks and button colour changes. */
+/* The dividers: a full-width aqua pen line with one loop between two sections, the long line on wide layouts and the short
+   one on phones, each in its own aspect ratio so the loop stays round. They tuck into the sections' padding. The line the
+   width does not show is folded away to nothing and hidden, not taken out with display: none, so both lines are drawn in
+   together once and a rotated phone or a resized window never draws a divider in again. */
+.h2h-home .divider { margin: calc(-1 * clamp(20px, 4vw, 64px)) 0; color: var(--d-cyan-deep); pointer-events: none; }
+.h2h-home .divider-line { display: block; width: 100%; height: auto; overflow: visible; }
+.h2h-home .divider-line--wide { aspect-ratio: 1400 / 110; }
+.h2h-home .divider-line--short { aspect-ratio: 400 / 110; position: absolute; width: 0; height: 0; visibility: hidden; }
+
+/* Motion: the hero flourish draws in as the page appears, each moment below it plays once as it scrolls into view
+   (motion.css), and buttons change colour. Reduced motion removes all of it and leaves every final drawing in place. */
 @media (prefers-reduced-motion: reduce) {
   .h2h-home *, .h2h-home *::before, .h2h-home *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
@@ -118,12 +152,12 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 }
 @media (min-width: 861px) {
   .h2h-home .hero h1 span { display: block; }
-  .h2h-home .hero-stage { width: calc(100% + var(--gutter) * 0.3); margin-left: calc(var(--gutter) * -0.3); }
 }
 @media (max-width: 860px) {
   .h2h-home .hero, .h2h-home .split { grid-template-columns: minmax(0, 1fr); }
   .h2h-home .split--reverse .drawing { order: 0; }
   .h2h-home .hero { padding-top: 24px; }
+  .h2h-home .hero-copy { padding-top: 0; }
   .h2h-home .site-header { height: 76px; }
 }
 @media (max-width: 640px) {
@@ -135,7 +169,14 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
   .h2h-home { font-size: 17px; }
   .h2h-home .parts { grid-template-columns: minmax(0, 1fr); }
   .h2h-home .proof { grid-template-columns: minmax(0, 1fr); }
-  .h2h-home .hero-steps { flex-direction: column; align-items: flex-start; padding-left: 4px; margin-top: 12px; }
+  .h2h-home .divider-line--wide { position: absolute; width: 0; height: 0; visibility: hidden; }
+  .h2h-home .divider-line--short { position: static; width: 100%; height: auto; visibility: visible; }
+  .h2h-home .hero-steps { flex-direction: column; align-items: flex-start; padding-left: 4px; }
   .h2h-home .pill--large { min-height: 56px; padding: 0 30px; font-size: 18px; }
+  .h2h-home .hero-copy .pill--large { min-height: 58px; padding: 0 32px; font-size: 18px; }
+  .h2h-home .hero-copy .text-link { font-size: 18px; }
+  .h2h-home .hero-copy .actions { margin-top: 32px; gap: 20px 32px; }
+  .h2h-home .site-header nav { font-size: 16px; }
+  .h2h-home .site-header nav .pill { min-height: 44px; padding: 0 20px; font-size: 15px; }
   .h2h-home .site-footer { flex-direction: column; align-items: flex-start; }
 }

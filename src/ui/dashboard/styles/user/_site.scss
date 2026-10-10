@@ -16,12 +16,6 @@
     --bs-primary-border-subtle: rgba(255, 255, 255, 0.5);
     --bs-primary-bg-subtle: var(--workspace-primary-soft, rgba(var(--bs-primary-rgb), 0.05));
 
-    .logo {
-        path {
-            fill: rgba(var(--bs-primary-rgb), 1) !important;
-        }
-    }
-
     .header-bg-theme {
         background-color: rgba(var(--bs-primary-rgb), 1);
     }

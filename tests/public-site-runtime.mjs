@@ -35,6 +35,21 @@ for (const font of ['/fonts/outfit/outfit-latin-wght-normal.woff2', '/fonts/outf
 }
 assert.doesNotMatch(html, /village|parallax|<img\b|Support\. Free\. Yours\./i)
 for (const route of ['/projects', '/login', '/setup']) assert.ok(html.includes(`href="${route}"`), route)
+// The documentation is served by the site itself, built from the repository's Markdown (docs/site.json).
+for (const route of ['/docs', '/docs/install']) assert.ok(html.includes(`href="${route}"`), `the homepage links ${route}`)
+for (const [path, title] of [['/docs', 'HappyToHelp'], ['/docs/install', 'Install HappyToHelp']]) {
+ const docs = await fetch(origin + path)
+ assert.equal(docs.status, 200, path)
+ assert.match(docs.headers.get('content-type') || '', /^text\/html/, path)
+ const page = await docs.text()
+ assert.match(page, new RegExp(`<h1[^>]*class="docs-title"[^>]*>${title}</h1>`), `${path} h1`)
+ assert.match(page, /class="h2h-home h2h-docs"/, `${path} uses the homepage frame`)
+}
+for (const path of ['/docs/does-not-exist', '/docs/Install']) {
+ const missing = await fetch(origin + path)
+ assert.equal(missing.status, 404, path)
+ assert.match(await missing.text(), /<title>Page not found · HappyToHelp<\/title>/, path)
+}
 assert.doesNotMatch(html, /waitlist|pricing|widget\.js|stripe|<\?php|@extends\(/i)
 for (const asset of html.matchAll(/(?:src|href)="(\/(?:site-assets|homepage)\/[^"?]+)/g)) {
  assert.equal((await fetch(origin + asset[1])).status, 200, asset[1])
@@ -75,4 +90,4 @@ if (process.env.H2H_TEST_PROJECT_ID) {
   assert.match(page, /type="search"/, path)
  }
 }
-console.log('Native homepage: workspace entry, retired-route denial, local assets and no public widget passed. Published Help Center checks: ' + (process.env.H2H_TEST_PROJECT_ID ? 'passed' : 'not requested'))
+console.log('Native homepage: workspace entry, /docs pages and their 404s, retired-route denial, local assets and no public widget passed. Published Help Center checks: ' + (process.env.H2H_TEST_PROJECT_ID ? 'passed' : 'not requested'))

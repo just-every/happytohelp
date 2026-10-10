@@ -1,0 +1,124 @@
+/* How each moment below the hero arrives. A moment is an element with data-reveal (reveal/useReveal.ts): "wait" until it
+   first scrolls into view, then "play", once. While it waits, each moving part holds its first frame; when it plays, each part
+   runs one short, eased animation from that frame to its final drawing (the styles in section-drawings.css and
+   homepage.css). The animations fill backwards only, so once one ends its part is simply the final drawing again. Only
+   opacity, transforms, clipping, background size, colour and stroke dashes move, so nothing is laid out again. Every moment
+   ends within 1.8s of being seen. Nothing here applies under reduced motion, in print or before the script runs, so the page
+   is then simply its final drawing. */
+.h2h-home { --ease-out: cubic-bezier(0.22, 1, 0.36, 1); --ease-pop: cubic-bezier(0.34, 1.5, 0.64, 1); --ease-pen: cubic-bezier(0.55, 0.05, 0.35, 1); }
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* First frames, held while a moment waits. Each matches the "from" of the animation its part plays below. */
+  .h2h-home [data-reveal="wait"] :is(.d-blob) { opacity: 0; scale: 0.9; }
+  .h2h-home [data-reveal="wait"] :is(.d-window, .d-card, .chat-visitor, .chat-agent, .sr-card, .help-art li, .import-status, .import-counts) { opacity: 0; translate: 0 18px; }
+  .h2h-home [data-reveal="wait"].proof li, .h2h-home .parts > li[data-reveal="wait"] { opacity: 0; translate: 0 18px; }
+  .h2h-home [data-reveal="wait"] :is(.proof-icon, .d-check, .offer-avatar, .offer-bubble, .d-chip, .step), .h2h-home [data-reveal="wait"].steps li::before, .h2h-home [data-reveal="wait"] .offer-choices .d-btn { opacity: 0; scale: 0.5; }
+  .h2h-home [data-reveal="wait"] .inbox-list li { opacity: 0; translate: -14px 0; }
+  .h2h-home [data-reveal="wait"] .d-sweep { background-size: 0% 100%; }
+  .h2h-home [data-reveal="wait"] .help-query { clip-path: inset(0 100% 0 -2px); }
+  .h2h-home [data-reveal="wait"] .import-ticks i { background-color: #e3e1da; scale: 1 0.6; }
+  /* A pen line is dashed only while it is drawn in: one dash as long as the path (each path is measured as length 1), pushed
+     just past its end. At rest it is a plain stroke. */
+  .h2h-home [data-reveal="wait"] :is(.d-sparks, .ready-line, .divider-line) path { stroke-dasharray: 1 2; stroke-dashoffset: 1.02; }
+
+  /* The sparks spring out one after another, as from the mark. */
+  .h2h-home .d-sparks path:nth-child(1) { --burst: 0; }
+  .h2h-home .d-sparks path:nth-child(2) { --burst: 1; }
+  .h2h-home .d-sparks path:nth-child(3) { --burst: 2; }
+
+  /* Not just better. Free.: the blob swells, the editor rises, the licence card lands on it, "free of charge" and the rights
+     are highlighted in turn, then the check and the sparks. 1.65s. */
+  .h2h-home .licence-art[data-reveal="play"] .d-blob { animation: h2h-bloom 0.7s var(--ease-out) backwards; }
+  .h2h-home .licence-art[data-reveal="play"] .licence-editor { animation: h2h-rise 0.6s var(--ease-out) 0.08s backwards; }
+  .h2h-home .licence-art[data-reveal="play"] .licence-card { --rise: 28px; animation: h2h-rise 0.65s var(--ease-out) 0.28s backwards; }
+  .h2h-home .licence-art[data-reveal="play"] .licence-mark { animation: h2h-sweep 0.45s var(--ease-out) 0.75s backwards; }
+  .h2h-home .licence-art[data-reveal="play"] .licence-grant { animation: h2h-sweep 0.5s var(--ease-out) 0.95s backwards; }
+  .h2h-home .licence-art[data-reveal="play"] .d-check { animation: h2h-pop 0.35s var(--ease-pop) 1.3s backwards; }
+  .h2h-home .licence-art[data-reveal="play"] .d-sparks path { animation: h2h-pen 0.3s var(--ease-out) calc(1.15s + var(--burst) * 0.08s) backwards; }
+  /* The three promises pop in one after another. 0.83s. */
+  .h2h-home .proof[data-reveal="play"] li { animation: h2h-rise 0.5s var(--ease-out) calc(var(--promise) * 0.14s + 0.05s) backwards; }
+  .h2h-home .proof[data-reveal="play"] .proof-icon { animation: h2h-pop 0.5s var(--ease-pop) calc(var(--promise) * 0.14s) backwards; }
+  .h2h-home .proof li:nth-child(1) { --promise: 0; }
+  .h2h-home .proof li:nth-child(2) { --promise: 1; }
+  .h2h-home .proof li:nth-child(3) { --promise: 2; }
+
+  /* A divider is drawn left to right like the hero flourish. Both its lines are drawn together, the one the width shows and
+     the one folded away, so crossing the phone breakpoint later shows a line already drawn. 1.3s. */
+  .h2h-home .divider[data-reveal="play"] .divider-line path { animation: h2h-pen 1.3s var(--ease-pen) backwards; }
+
+  /* Help before they ask: the checkout settles, the widget's mark pops up, typing dots hold the bubble's place, then the offer
+     and its two choices. 1.68s. */
+  .h2h-home .offer-art[data-reveal="play"] .d-blob { animation: h2h-bloom 0.7s var(--ease-out) backwards; }
+  .h2h-home .offer-art[data-reveal="play"] .d-window { animation: h2h-rise 0.6s var(--ease-out) 0.05s backwards; }
+  .h2h-home .offer-art[data-reveal="play"] .offer-avatar { animation: h2h-pop 0.45s var(--ease-pop) 0.4s backwards; }
+  .h2h-home .offer-art[data-reveal="play"] .offer-typing { transform-origin: 0 100%; animation: h2h-typing 0.6s ease-in-out 0.5s backwards; }
+  .h2h-home .offer-art[data-reveal="play"] .offer-typing i { animation: h2h-dot 0.4s ease-in-out calc(0.62s + var(--dot) * 0.09s) backwards; }
+  .h2h-home .offer-typing i:nth-child(1) { --dot: 0; }
+  .h2h-home .offer-typing i:nth-child(2) { --dot: 1; }
+  .h2h-home .offer-typing i:nth-child(3) { --dot: 2; }
+  .h2h-home .offer-art[data-reveal="play"] .offer-bubble { transform-origin: 0 100%; animation: h2h-pop 0.4s var(--ease-pop) 1s backwards; }
+  .h2h-home .offer-art[data-reveal="play"] .offer-choices .d-btn { animation: h2h-pop 0.4s var(--ease-pop) 1.2s backwards; }
+  .h2h-home .offer-art[data-reveal="play"] .offer-choices .d-btn + .d-btn { animation-delay: 1.28s; }
+
+  /* The rest of your support desk: each card rises in with its blob, staggered across its row, its number disc pops, and the
+     small thing in it happens. At most 1.66s. */
+  /* --col is the card's place in its row: four up, two up or one. */
+  .h2h-home .parts > li { --col: 0; }
+  .h2h-home .parts > li[data-reveal="play"] { animation: h2h-rise 0.65s var(--ease-out) calc(var(--col) * 0.1s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .d-blob { animation: h2h-bloom 0.7s var(--ease-out) calc(var(--col) * 0.1s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .step { animation: h2h-pop 0.4s var(--ease-pop) calc(var(--col) * 0.1s + 0.35s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .d-sparks path { animation: h2h-pen 0.3s var(--ease-out) calc(var(--col) * 0.1s + 0.55s + var(--burst) * 0.08s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .chat-visitor { animation: h2h-rise 0.45s var(--ease-out) calc(var(--col) * 0.1s + 0.35s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .chat-agent { animation: h2h-rise 0.45s var(--ease-out) calc(var(--col) * 0.1s + 0.75s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .inbox-list li { animation: h2h-slide 0.45s var(--ease-out) calc(var(--col) * 0.1s + 0.35s + var(--row) * 0.12s) backwards; }
+  .h2h-home .inbox-list li:nth-child(1) { --row: 0; }
+  .h2h-home .inbox-list li:nth-child(2) { --row: 1; }
+  .h2h-home .inbox-list li:nth-child(3) { --row: 2; }
+  /* The help-centre search types its query, one of its 22 letters at a time over 0.7s. The caret shows at the start of the
+     field 0.15s before, rides the edge of the typing in the same 22 steps, waits 0.3s at the end and fades. 0.2s to 1.45s. */
+  .h2h-home .parts > li[data-reveal="play"] .help-query { animation: h2h-type 0.7s steps(22, end) calc(var(--col) * 0.1s + 0.35s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .help-query::after { animation: h2h-caret 1.25s steps(22, end) calc(var(--col) * 0.1s + 0.2s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .help-art li { animation: h2h-rise 0.4s var(--ease-out) calc(var(--col) * 0.1s + 0.9s + var(--row) * 0.08s) backwards; }
+  .h2h-home .help-art li:nth-child(1) { --row: 0; }
+  .h2h-home .help-art li:nth-child(2) { --row: 1; }
+  .h2h-home .help-art li:nth-child(3) { --row: 2; }
+  .h2h-home .parts > li[data-reveal="play"] .sr-card { animation: h2h-rise 0.45s var(--ease-out) calc(var(--col) * 0.1s + 0.35s) backwards; }
+  .h2h-home .parts > li[data-reveal="play"] .d-chip { transform-origin: 0 50%; animation: h2h-pop 0.4s var(--ease-pop) calc(var(--col) * 0.1s + 0.8s) backwards; }
+
+  /* Try it beside what you have: the three discs pop in turn. 0.69s. */
+  .h2h-home .steps[data-reveal="play"] li::before { animation: h2h-pop 0.45s var(--ease-pop) calc(var(--step) * 0.12s) backwards; }
+  .h2h-home .steps li:nth-child(1) { --step: 0; }
+  .h2h-home .steps li:nth-child(2) { --step: 1; }
+  .h2h-home .steps li:nth-child(3) { --step: 2; }
+  /* The import window settles, its ten ticks fill one by one, it lands on "complete" with the counts, and the sparks. 1.7s. */
+  .h2h-home .import-art[data-reveal="play"] .d-blob { animation: h2h-bloom 0.7s var(--ease-out) backwards; }
+  .h2h-home .import-art[data-reveal="play"] .d-window { animation: h2h-rise 0.6s var(--ease-out) 0.05s backwards; }
+  .h2h-home .import-art[data-reveal="play"] .import-ticks i { animation: h2h-tick 0.14s var(--ease-out) calc(0.45s + var(--tick) * 0.07s) backwards; }
+  .h2h-home .import-art[data-reveal="play"] .import-status { --rise: 8px; animation: h2h-rise 0.35s var(--ease-out) 1.15s backwards; }
+  .h2h-home .import-art[data-reveal="play"] .d-check { animation: h2h-pop 0.35s var(--ease-pop) 1.2s backwards; }
+  .h2h-home .import-art[data-reveal="play"] .import-counts { animation: h2h-rise 0.4s var(--ease-out) 1.3s backwards; }
+  .h2h-home .import-art[data-reveal="play"] .d-sparks path { animation: h2h-pen 0.3s var(--ease-out) calc(1.25s + var(--burst) * 0.08s) backwards; }
+
+  /* Ready when you are.: as in the hero, the headline stands still and the aqua line is drawn in under it. 1.2s. */
+  .h2h-home .get-started h2[data-reveal="play"] .ready-line path { animation: h2h-pen 1.1s var(--ease-pen) 0.1s backwards; }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) and (min-width: 641px) {
+  .h2h-home .parts > li:nth-child(even) { --col: 1; }
+}
+@media screen and (prefers-reduced-motion: no-preference) and (min-width: 1101px) {
+  .h2h-home .parts > li:nth-child(3) { --col: 2; }
+  .h2h-home .parts > li:nth-child(4) { --col: 3; }
+}
+
+@keyframes h2h-rise { from { opacity: 0; translate: 0 var(--rise, 18px); } }
+@keyframes h2h-pop { from { opacity: 0; scale: 0.5; } }
+@keyframes h2h-bloom { from { opacity: 0; scale: 0.9; } }
+@keyframes h2h-slide { from { opacity: 0; translate: -14px 0; } }
+@keyframes h2h-pen { from { stroke-dasharray: 1 2; stroke-dashoffset: 1.02; } to { stroke-dasharray: 1 2; stroke-dashoffset: 0; } }
+@keyframes h2h-sweep { from { background-size: 0% 100%; } }
+@keyframes h2h-type { from { clip-path: inset(0 100% 0 -2px); } to { clip-path: inset(0 0 0 -2px); } }
+@keyframes h2h-tick { from { background-color: #e3e1da; scale: 1 0.6; } }
+@keyframes h2h-caret { 0%, 12% { opacity: 1; translate: -100% 0; } 68% { opacity: 1; translate: 0 0; } 92% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: 0 0; } }
+@keyframes h2h-typing { 0% { opacity: 0; scale: 0.7; } 20%, 80% { opacity: 1; scale: 1; } 100% { opacity: 0; scale: 1; } }
+@keyframes h2h-dot { 0%, 100% { translate: 0 0; } 50% { translate: 0 -0.35em; } }

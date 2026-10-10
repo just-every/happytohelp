@@ -45,6 +45,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
     const [busy, setBusy] = useState(false);
     const [tab, setTab] = useState('overview');
     const [fieldErrors, setFieldErrors] = useState({});
+    const articleReady = Boolean(draft && (recordId === 'create' ? !draft.id : draft.id === recordId));
 
     const load = async () => {
         const response = await nativeRequest(path);
@@ -104,6 +105,9 @@ export default function KnowledgePage({ projectId, section, recordId, project })
 
     const save = async (event, publication = null) => {
         event?.preventDefault();
+        // The persistent article actions are visible before its record arrives.
+        // Never submit an empty or stale record, including a programmatic submit.
+        if (!draft || busy || (section === 'articles' && !articleReady)) return;
         setError('');
         setSaved(false);
         setSavedStatus('');
@@ -191,7 +195,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
         <Feedback error={error} saved={saved && !isArticle}/>
         {!items && !error && <p role="status">Loading…</p>}
         {!recordId && items && <KnowledgeLists {...{ section, items, projectId, categories, remove }}/>}
-        {draft && <>
+        {(draft || (isArticle && recordId)) && <>
             {existingDataset && <>
                 <h2 className="knowledge-website-title">{draft.url || draft.name}</h2>
                 <ul className="nav nav-tabs mb-4">
@@ -225,14 +229,15 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                 noValidate={section === 'datasets'}
             >
                 {isArticle && <ArticleEditorActions
-                    isPublished={Boolean(draft.is_published)}
-                    savedStatus={savedStatus}
+                    isPublished={articleReady && Boolean(draft.is_published)}
+                    savedStatus={!articleReady ? (error ? 'Unavailable' : 'Loading…') : savedStatus}
                     busy={busy}
+                    unavailable={!articleReady}
                     onPublish={event => save(event, true)}
                     onUnpublish={event => save(event, false)}
-                    onDelete={draft.id ? () => remove(draft) : undefined}
+                    onDelete={articleReady && draft.id ? () => remove(draft) : undefined}
                 />}
-                <KnowledgeFields {...{ section, draft, change, categories, fieldErrors }}/>
+                {draft && (!isArticle || articleReady) && <KnowledgeFields {...{ section, draft, change, categories, fieldErrors }}/>}
                 {!isArticle && <div className="knowledge-form-actions">
                     <button className="btn btn-primary" disabled={busy}>
                         {busy ? 'Saving…' : draft.id ? 'Save' : section === 'datasets' ? 'Add URL' : 'Create'}

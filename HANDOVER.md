@@ -5,24 +5,50 @@ with [README.md](README.md) to install and run it, then read this page.
 
 ## Product and current scope
 
-HappyToHelp 0.2.2 is the native TypeScript edition of the original customer
+HappyToHelp 0.3.0 is the native TypeScript edition of the original customer
 support application. It preserves the React dashboard, Shadow DOM widget, AI
 assistance, knowledge ingestion, customer context and local-computer delegation
 on a Cloudflare Worker. Pricing, billing, waitlist and referrer features are
 outside this edition. [CONTRACT.md](CONTRACT.md) defines required behavior and
 [ACCEPTANCE.md](ACCEPTANCE.md) defines the evidence needed to qualify it.
 
-The current schema has 108 tables and 41 migrations. Version 0.2.1 has 97 tables
-and 37 migrations. Keep the inventories separate when testing upgrades. New
-migrations include project verification secrets, activation observations and
-publication-bound answer citations. Applied migration names and bytes are part
-of the data contract: never rewrite them.
+The current schema has 109 tables and 42 migrations. Version 0.2.1 has 97 tables
+and 37 migrations. Keep each revision’s inventory separate when testing upgrades.
+Applied migration names and bytes are part of the data contract: never rewrite
+them.
+
+## Version 0.3.0 changes
+
+Version 0.3.0 includes:
+
+- Shared logo, accent, greeting and support avatar are saved through the existing
+  Appearance settings and rendered in widget, settings preview and public Help Center.
+  Help Center navigation retains server-rendered routes while showing loading,
+  network error and offline states with explicit recovery. Widget recovery keeps
+  its durable conversation identity.
+- Email sign-in uses the configured native mail adapter, a 15-minute hashed,
+  atomic single-use capability, an explicit Sign in POST and the existing native
+  session/return destination policy. Link-scanner GETs cannot consume the fragment
+  token. Account discovery and provider work run after the neutral response;
+  uncertain mail is recorded and never replayed automatically. Migration 0109 adds
+  only `magic_signins` and its expiry index: 109 tables, 42 migrations.
+- `pnpm run build` calls Base delivery-producer exported at
+  `d6a1bd83ee80ec3d603ded2c067d4c504d8a2bf5`. Product policy lives in
+  `scripts/delivery/base/packaging.json`; the runtime export is unchanged.
+  Schema 2 retains raw payloads with verified hashes/sizes. The superseded product
+  producer is removed; its test-only oracle preserves historical assertions.
+- `test:hero-connector-browser` pairs and runs the actual local connector child,
+  publishes an existing native support guide from 404 to 200, uses its proposed
+  reply, presses Send and checks the visitor socket/reload identity at both widths.
+  Only the Codex app-server boundary is a fixture. `resolve` never sends itself.
+  Existing resolve-and-reply authority/revocation/frontier suites remain required.
+
 
 The common verification command covers the local application. Upgrade,
 independent recovery, browser and configured-provider checks are separate.
 The upgrade comparison preserves original-column row bytes and permits only
 the explicitly asserted secret and citation backfills. The independent recovery
-check requires the exact 108-table inventory and native D1/R2 export/restore.
+check requires the exact revision-specific table inventory and native D1/R2 export/restore.
 Any failed gate stays failed; a source version or lock is not acceptance.
 
 ## Acceptance limits and outstanding work
@@ -63,7 +89,7 @@ provider or full accessibility acceptance.
 
 | Layer | Implementation |
 | --- | --- |
-| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the “Customer Support, Solved.” homepage (`src/ui/homepage`: one component per section, drawings in `drawings/`, scoped `homepage.css` and `drawings.css`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
+| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the “Customer Support, Solved.” homepage (`src/ui/homepage`: one component per section, drawings in `drawings/`, scoped `homepage.css` and `drawings.css`); `/docs`: repository Markdown rendered at build time (`src/ui/docs`, `docs/site.json`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
 | API | Hono (`src/app.ts`, mounted by `src/server.ts`), with identity, project and role checks in `src/platform`. |
 | Records | D1 (`DB`). Schema lives in `migrations/` plus module migrations; `pnpm run migrations:prepare` collects them into `.generated/migrations`. |
 | Files | R2 (`FILES`) for attachments, media and knowledge artifacts. |
@@ -72,7 +98,7 @@ provider or full accessibility acceptance.
 | Customer widget | `src/modules/widget`, built to `public/widget.js` by `pnpm run build:widget`. |
 | Local agent | `local-agent/`, packaged to `public/downloads/happytohelp-local-agent.tar.gz`; pairs a computer that runs delegated work. |
 | Installer | `scripts/install.mjs` with shared onboarding in `scripts/base-onboarding/` and HappyToHelp adapters in `scripts/installer/`. |
-| Deployment | `scripts/setup.mjs`, `scripts/deploy.mjs` and `scripts/deployment/`; hosted delivery artifacts via `scripts/build-delivery-artifact.mjs`. |
+| Deployment | `scripts/setup.mjs`, `scripts/deploy.mjs` and `scripts/deployment/`; hosted delivery artifacts via `scripts/delivery/build.mjs`. |
 
 ## Where things live
 
@@ -91,7 +117,8 @@ provider or full accessibility acceptance.
 - `docs/`: operator and developer documentation; `docs/licenses/` holds
   third-party notices. [docs/PRIVACY.md](docs/PRIVACY.md) is the operator-facing
   privacy note and [docs/PUBLIC-LIMITS.md](docs/PUBLIC-LIMITS.md) the public
-  request limits and daily AI ceilings.
+  request limits and daily AI ceilings. The pages listed in `docs/site.json` are
+  published on the site at `/docs`; the rest stay on GitHub.
 
 ## How to verify a change
 
@@ -128,13 +155,9 @@ Other separate focused commands include `pnpm run test:independent-runtime`, `pn
 
 The `pnpm run verify` script runs operations describe, build, typecheck, module suites, emitted-Worker runtime and security-header checks, the first-release journey (`pnpm run test:journey`), source integrity, independent-contract and homepage-source checks. The browser suites start isolated emitted Workers with local D1, R2 and Durable Objects and write evidence to a temporary directory or `H2H_EVIDENCE_DIR`. The resize suite accepts `H2H_RUNTIME_PORT` and `H2H_RUNTIME_INSPECTOR_PORT`; contact-erasure and identity suites accept `H2H_TEST_PORT`. Identity also starts its sign-up-and-email Worker two ports above; it never sends mail.
 
-Homepage browser/runtime checks are separate from the package `test:*-browser` scripts. Against a local native preview, run `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and `node tests/public-site-runtime.mjs` with the same origin after `pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`. `pnpm run dev` also needs local setup first: an unknown one-segment path such as `/does-not-exist` looks up a project name, so on an unmigrated local D1 it answers 500 (`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs` checks `/`, `/login` and `/does-not-exist` (200, 200, 404). `node tests/independent-browser.mjs` checks homepage and setup against the delivery artifact after `node scripts/build-delivery-artifact.mjs`. Provider tests use fixtures at the real SDK/HTTP boundary and never call a paid provider.
+Homepage browser/runtime checks are separate from the package `test:*-browser` scripts. Against a local native preview, run `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and `node tests/public-site-runtime.mjs` with the same origin after `pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`. `pnpm run dev` also needs local setup first: an unknown one-segment path such as `/does-not-exist` looks up a project name, so on an unmigrated local D1 it answers 500 (`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs` checks `/`, `/login` and `/does-not-exist` (200, 200, 404). `node tests/independent-browser.mjs` checks homepage and setup against the delivery artifact after `pnpm run build`. Provider tests use fixtures at the real SDK/HTTP boundary and never call a paid provider.
 
 Continuous integration's `.github/workflows/verify.yml` runs on pushes to `main` and pull requests with the declared Node and pnpm versions: a frozen install, `pnpm run verify`, the browser suites above and homepage/public-site checks against a local native preview. It needs no secrets. The delivery workflow (`.github/workflows/delivery.yml`) also runs the reproducible-build check and builds the delivery artifact.
-
-Source archives use distinct sanitized public projection identities. Public checks
-run without private originals; release qualification also requires the separate
-[private equivalence proof](scripts/source-projection/README.md).
 
 After tracked source changes, regenerate the source lock with `pnpm run source:lock` and confirm `pnpm run source:check` passes (see [docs/AUTHORING.md](docs/AUTHORING.md)).
 
@@ -156,9 +179,9 @@ After tracked source changes, regenerate the source lock with `pnpm run source:l
 
 The canonical public repository URL is declared once, in `package.json`
 `repository.url`. The homepage links derive from it; `tests/repository-identity.mjs`
-checks that `seed.json`, `README.md`, `SECURITY.md` and the two runtime defaults
-that cannot import it (the widget's default logo link and the OpenRouter referer
-header) carry the same URL, and that `rer-project.json` and
+checks that `seed.json`, `README.md`, `SECURITY.md` and the one runtime default
+that cannot import it (the OpenRouter referer header) carry the same URL, that the
+widget's context carries no repository URL, and that `rer-project.json` and
 `management/integration/{profile,recipe}.json` carry its GitHub owner and repository name. Other
 tests read the value from `package.json`. To rename the repository, change
 `package.json`, substitute the old URL and GitHub repository identity in the files that test

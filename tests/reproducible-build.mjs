@@ -1,3 +1,4 @@
+import {readArtifact,payloadBytes} from './helpers/artifact-payloads.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn, execFileSync} from 'node:child_process';
@@ -41,14 +42,16 @@ async function buildAt(checkout, files, {sourceTime, startDelay}) {
   try {
     await run(checkout, log, [pnpm, 'install', '--frozen-lockfile', '--offline']);
     await run(checkout, log, [pnpm, 'run', 'build']);
-    await run(checkout, log, ['scripts/build-delivery-artifact.mjs']);
   } finally { log.end(); }
-  return readFile(join(checkout, artifactFile));
+  return {bytes:await readFile(join(checkout,artifactFile)),artifact:await readArtifact(join(checkout,artifactFile))};
 }
 
-function entries(bytes) {
-  const artifact = JSON.parse(bytes.toString('utf8'));
-  return new Map([...artifact.modules.map(x => [`module:${x.name}`, x.contentBase64]), ...artifact.assets.map(x => [`asset:${x.path}`, x.contentBase64]), ['deploymentSpec', JSON.stringify(artifact.deploymentSpec)]]);
+async function entries({artifact}) {
+ const values=[];
+ for(const [group,key,prefix] of [['modules','name','module'],['assets','path','asset']]) {
+  for(const entry of artifact[group])values.push([prefix+':'+entry[key],(await payloadBytes(artifact,entry)).toString('base64')]);
+ }
+ return new Map([...values,['deploymentSpec',JSON.stringify(artifact.deploymentSpec)]]);
 }
 
 test('delivery artifact is byte-reproducible across checkout paths and names no builder path', {timeout: 15 * 60_000}, async () => {
@@ -63,16 +66,16 @@ test('delivery artifact is byte-reproducible across checkout paths and names no 
       buildAt(checkouts[0], files, {startDelay: 0}),
       buildAt(checkouts[1], files, {sourceTime: new Date('2001-02-03T04:05:06Z'), startDelay: 3000}),
     ]);
-    const digests = [first, second].map(bytes => createHash('sha256').update(bytes).digest('hex'));
+    const digests = [first, second].map(({bytes}) => createHash('sha256').update(bytes).digest('hex'));
     console.log(`artifact sha256 ${digests[0]} ${digests[1]}`);
     if (digests[0] !== digests[1]) {
-      const [a, b] = [entries(first), entries(second)];
+      const [a, b] = await Promise.all([entries(first), entries(second)]);
       const differing = [...new Set([...a.keys(), ...b.keys()])].filter(key => a.get(key) !== b.get(key));
       assert.fail(`Artifacts differ in: ${differing.join(', ')}`);
     }
     const forbidden = [...new Set([...checkouts, base, root.replace(/\/$/, ''), await realpath(tmpdir()), tmpdir(), homedir()])];
     const leaks = [];
-    for (const [key, content] of entries(first)) {
+    for (const [key, content] of await entries(first)) {
       const text = key === 'deploymentSpec' ? content : Buffer.from(content, 'base64').toString('latin1');
       for (const path of forbidden) if (text.includes(path)) leaks.push(`${key} names ${path}`);
       for (const [match] of text.matchAll(absolutePath)) leaks.push(`${key} names ${match}`);

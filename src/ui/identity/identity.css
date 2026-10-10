@@ -27,7 +27,12 @@ body:has(.h2h-identity) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-identity a:focus-visible, .h2h-identity button:focus-visible, .h2h-identity input:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 8px; }
 
 .h2h-identity .id-header { display: flex; align-items: center; height: 100px; max-width: 1536px; width: 100%; margin: 0 auto; }
-.h2h-identity .brand { font-size: clamp(26px, 2.6vw, 34px); font-weight: 600; letter-spacing: -0.03em; line-height: 1; text-decoration: none; }
+/* The homepage header's lockup (BrandLockup.tsx): its proportions mirror src/ui/homepage/homepage.css (.h2h-home .brand and its
+   mark, word and hidden name), so the two headers draw the same lockup at the same width. */
+.h2h-identity .brand { position: relative; display: inline-flex; align-items: center; gap: 0.3em; font-size: clamp(26px, 2.2vw, 32px); line-height: 1; text-decoration: none; }
+.h2h-identity .brand-mark { flex: none; width: auto; height: 1.58em; margin-left: 0.07em; overflow: visible; }
+.h2h-identity .brand-word { flex: none; overflow: visible; }
+.h2h-identity .brand-name { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 .h2h-identity .id-main { display: flex; flex: 1; justify-content: center; align-items: flex-start; padding: clamp(8px, 3vw, 40px) 0 64px; }
 .h2h-identity .id-panel { width: 100%; max-width: 480px; }
 /* Longer forms (sign-up) pair related fields on wider screens so the whole form and its action fit a laptop screen. */

@@ -421,7 +421,7 @@ async function execute(config, api, save, {
       return;
     }
     const parsed = parseLastJson(providerResult.rawText);
-    const output = validateAgentOutput(parsed);
+    const output = validateAgentOutput(parsed, { mode: active.job.mode });
     const submitted = await submitResult(config, api, output.status, output.result, providerResult.sessionId, save, active);
     await save();
     if (submitted.pending || submitted.terminal) return;
@@ -436,7 +436,7 @@ async function execute(config, api, save, {
     } else if (runtimeAbort.signal.aborted) {
       await submitResult(config, api, 'cancelled', failureResult('Delegated local runtime was cancelled.'), active.providerIdentity?.providerSessionId, save, active);
     } else {
-      await submitResult(config, api, 'failed', failureResult(userMessage(error)), active.providerIdentity?.providerSessionId, save, active);
+      await submitResult(config, api, 'failed', failureResult(userMessage(error), error.provider_error), active.providerIdentity?.providerSessionId, save, active);
     }
     await save();
     throw error;

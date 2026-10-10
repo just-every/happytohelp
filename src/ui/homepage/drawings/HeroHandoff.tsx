@@ -1,15 +1,14 @@
 import { HeroConversation } from './HeroConversation';
-import { Drawing, SketchMarks, SketchWindow } from './Sketch';
+import { Drawing } from './Sketch';
 
-// The hero: one conversation the connected agent has already solved, drawn in a tilted ink frame. The problem is fixed
-// and the reply is in the composer, so the team's only step left is Send. The tick and the underline are children of
-// that frame, so they keep its tilt and sit on its own corner and bottom edge at every width.
+// The hero: one conversation the connected agent has already solved, floating on a pale aqua blob. The problem is fixed
+// and the reply is written, so the team's only step left is Send. The blob fills the figure's own box, so it never
+// reaches past the drawing at any width; its right side stays broad down to the reply, so both glyphs sit inside it.
 export function HeroHandoff() {
-  return <Drawing className="hero-art" label="Drawing of a HappyToHelp conversation. Maya can't turn on the Spanish version of her store. Codex has fixed it: Spanish is live on her store. The reply is ready, and the next step is to press Send.">
-    <SketchWindow className="hero-window">
-      <HeroConversation />
-      <SketchMarks variant="tick" />
-      <svg className="d-underline" viewBox="0 0 100 6" preserveAspectRatio="none" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true" focusable="false"><path d="M0 2c20 1 40 3 62 3 14 0 26-1 38-2" vectorEffect="non-scaling-stroke" /></svg>
-    </SketchWindow>
+  return <Drawing className="hero-art" label="Drawing of a HappyToHelp conversation. Maya can't turn on the Spanish version of her store. The agent fixes it: Spanish is live on her store. The reply to Maya is ready, and the next step is to press Send.">
+    <svg className="hero-blob" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M5 38C12 22 24 10 36 6 46 3 56 1 65 .5 70 .3 75 1.5 78 4 86 10 92 20 96 30 100 40 100 56 100 68 100 82 99 92 92 97 84 101 50 101 30 99 14 97 0 88 0 73 0 60 1 48 5 38Z" />
+    </svg>
+    <HeroConversation />
   </Drawing>;
 }

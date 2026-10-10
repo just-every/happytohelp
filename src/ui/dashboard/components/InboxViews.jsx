@@ -13,7 +13,7 @@ export default function InboxViews() {
     const {setOpen} = useMobileNavigation();
     const searchParams = location.search;
     const { inboxViewCounts, setIsMainVisible } = useContext(ChatContext);
-    const selectedView = normalizeInboxView(searchParams.view);
+    const selectedView = normalizeInboxView(searchParams.view, inboxViewCounts);
     if (!target) {
         return null;
     }

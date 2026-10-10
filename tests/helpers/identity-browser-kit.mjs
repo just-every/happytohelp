@@ -45,10 +45,13 @@ export function createKit({ browser, evidenceDir, errors }) {
             await page.getByLabel('Password', { exact: true }).fill(password);
             await page.getByRole('button', { name: 'Login', exact: true }).click();
         },
-        // The page must read as the homepage's sibling: wordmark home, paper, Outfit ink heading, black pill, no dashboard purple.
+        // The page must read as the homepage's sibling: the lockup home, paper, Outfit ink heading, black pill, no dashboard purple.
         async assertHomepageLook(page, label, { action = true } = {}) {
             const wordmark = page.getByRole('link', { name: 'HappyToHelp', exact: true });
             assert.equal(await wordmark.getAttribute('href'), '/', `${label}: wordmark links home`);
+            // The header link is the homepage's lockup: the mark, then the drawn wordmark, named by visually hidden text.
+            assert.deepEqual(await page.locator('header.id-header a.brand').evaluateAll(links => links.map(link => [...link.children].map(child => [`${child.localName}.${child.getAttribute('class')}`, child.getAttribute('aria-hidden'), child.getAttribute('focusable')]))), [[['svg.brand-mark', 'true', 'false'], ['svg.brand-word', 'true', 'false'], ['span.brand-name', null, null]]], `${label}: the header link is the mark and the drawn wordmark`);
+            assert.ok(await page.locator('header.id-header .brand-name').evaluate(name => { const box = name.getBoundingClientRect(); return box.width <= 1 && box.height <= 1; }), `${label}: the lockup's name is visually hidden`);
             const look = await page.evaluate(() => {
                 const style = element => getComputedStyle(element);
                 const heading = document.querySelector('h1'), pill = document.querySelector('.pill--ink');

@@ -1,6 +1,9 @@
+import { AGENT_VERSION } from '../version.mjs';
 import { JsonlRpc } from '../jsonl-rpc.mjs';
 import { ConnectorError } from '../errors.mjs';
-import { boundedText, runtimeFailure, stopChild, waitForExit } from '../util.mjs';
+import { runtimeFailure } from '../util.mjs';
+import { codexProviderError } from './codex-error.mjs';
+import { providerFailureSummary } from '../provider-error.mjs';
 import { AGENT_OUTPUT_SCHEMA } from '../result.mjs';
 
 function tomlString(value) {
@@ -33,7 +36,7 @@ function appServerArgs(browserMcp) {
 }
 
 export async function runCodex({ prompt, identity, onIdentity, onProgress, signal, browserMcp, workingDirectory, model }) {
-  const rpc = new JsonlRpc('codex', appServerArgs(browserMcp), { onStderr: (line) => onProgress?.(`Codex: ${line}`) });
+  const rpc = new JsonlRpc('codex', appServerArgs(browserMcp));
   let threadId = identity?.providerThreadId || null;
   let providerSessionId = identity?.providerSessionId || null;
   let turnId = null;
@@ -41,16 +44,31 @@ export async function runCodex({ prompt, identity, onIdentity, onProgress, signa
   let deltaText = '';
   let turnStatus = null;
   let interrupted = false;
+  let providerError = null;
+  let terminal = false;
+  const earlyNotifications = [];
   let complete;
   const turnDone = new Promise((resolve) => { complete = resolve; });
   const completeFailedTurn = (error) => {
+    if (terminal) return;
+    terminal = true;
     turnStatus = 'failed';
     complete(error);
   };
-  rpc.child.once('exit', () => completeFailedTurn(new Error('Codex app-server exited before completing the turn.')));
+  rpc.child.once('close', () => completeFailedTurn(new Error('Codex app-server exited before completing the turn.')));
 
-  const unsubscribe = rpc.onNotification((message) => {
+  const notification = (message) => {
+    // Raw accounting is observable on the native protocol by the local caller;
+    // response contents never become progress, result evidence or buffered text.
+    if (message.method === 'rawResponse/completed' || message.method === 'rawResponseItem/completed') return;
     const params = message.params || {};
+    if (!turnId) { earlyNotifications.push(message); return; }
+    if (params.threadId !== threadId && params.turn?.threadId !== threadId) return;
+    const eventTurnId = params.turnId || params.turn?.id;
+    if (eventTurnId && eventTurnId !== turnId) return;
+    if (message.method === 'error' && !params.willRetry && !terminal) {
+      providerError = codexProviderError(params.error) || providerError;
+    }
     if (message.method === 'item/agentMessage/delta') {
       deltaText += extractText(params);
       if (deltaText.length % 4_000 < 600) onProgress?.('Codex is working.');
@@ -60,10 +78,14 @@ export async function runCodex({ prompt, identity, onIdentity, onProgress, signa
       if (text) completedText = text;
     }
     if (message.method === 'turn/completed' && (!threadId || params.threadId === threadId || params.turn?.threadId === threadId)) {
+      if (terminal) return;
+      terminal = true;
       turnStatus = params.turn?.status || 'completed';
+      providerError = codexProviderError(params.turn?.error) || providerError;
       complete();
     }
-  });
+  };
+  const unsubscribe = rpc.onNotification(notification);
 
   const interrupt = async () => {
     if (interrupted) return;
@@ -80,13 +102,15 @@ export async function runCodex({ prompt, identity, onIdentity, onProgress, signa
 
   try {
     await rpc.request('initialize', {
-      clientInfo: { name: 'happytohelp-local-agent', title: 'HappyToHelp local agent', version: '0.2.1' },
+      clientInfo: { name: 'happytohelp-local-agent', title: 'HappyToHelp local agent', version: AGENT_VERSION },
+      capabilities: { experimentalApi: true },
     });
     rpc.notify('initialized', {});
     const response = threadId
       ? await rpc.request('thread/resume', { threadId })
       : await rpc.request('thread/start', {
         cwd: workingDirectory,
+        experimentalRawEvents: true,
         approvalPolicy: 'never',
         sandbox: 'danger-full-access',
         ...(model ? { model } : {}),
@@ -112,6 +136,7 @@ export async function runCodex({ prompt, identity, onIdentity, onProgress, signa
     });
     turnId = turn?.turn?.id;
     if (!turnId) runtimeFailure('Codex', 'app-server did not return a turn identity.');
+    for (const message of earlyNotifications.splice(0)) notification(message);
     onProgress?.('Codex session started.');
 
     const finished = await Promise.race([
@@ -134,7 +159,19 @@ export async function runCodex({ prompt, identity, onIdentity, onProgress, signa
       rawText: completedText || deltaText,
     };
   } catch (error) {
-    runtimeFailure('Codex', `${error.message}${rpc.stderr ? ` (${boundedText(rpc.stderr, 400)})` : ''}`);
+    providerError ||= error.provider_error;
+    if (!providerError && !turnId) {
+      // A failed turn/start can close before its response establishes a turn ID.
+      // Preserve the last native, non-retrying error from this exact thread.
+      for (const message of earlyNotifications) {
+        if (message.method === 'error' && message.params?.threadId === threadId && !message.params.willRetry) {
+          providerError = codexProviderError(message.params.error) || providerError;
+        }
+      }
+    }
+    if (providerError) throw new ConnectorError(providerFailureSummary(providerError), { code: 'RUNTIME_FAILED', providerError });
+    // Arbitrary app-server errors may echo the assignment or credentials.
+    runtimeFailure('Codex', 'The local runtime failed before returning a usable result. Inspect the local runtime privately.');
   } finally {
     unsubscribe();
     signal?.removeEventListener('abort', interrupt);

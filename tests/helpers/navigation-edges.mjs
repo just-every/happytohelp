@@ -14,8 +14,21 @@ export async function rapidTenantBack(page,alpha,beta) {
     const request=await pending;
     await page.waitForURL(url=>url.pathname===`/projects/${beta.id}/conversations`);
     assert.equal(await nav.getByRole('button',{name:'Switch workspace: Navigation Alpha',exact:true}).count(),1,'pending tenant keeps committed Alpha scope');
+    // The retained Alpha shell is already visible while Back restores the
+    // session that the Beta switch changed. Let that real identity response
+    // finish before another navigation can cancel its dashboard loader.
+    const restored=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/identity/switch-project'
+      &&response.request().method()==='POST'&&response.request().postDataJSON()?.projectId===alpha.id);
     await page.goBack();await page.waitForURL(before);release();
     await request.response().catch(()=>null);
+    const restoredResponse=await restored;
+    assert.equal(restoredResponse.status(),200,'Back restores the Alpha session');
+    assert.equal(await restoredResponse.finished(),null,'Alpha identity restoration completes');
+    const session=await page.evaluate(async()=>{
+      const response=await fetch('/api/identity/session');
+      return {status:response.status,projectId:(await response.json()).projectId};
+    });
+    assert.deepEqual(session,{status:200,projectId:alpha.id},'Back binds the actual session to Alpha before the next journey');
     await nav.getByRole('button',{name:'Switch workspace: Navigation Alpha',exact:true}).waitFor();
     await page.waitForFunction(()=>document.body.dataset.workspaceMode==='light');
     await page.keyboard.press('Escape');

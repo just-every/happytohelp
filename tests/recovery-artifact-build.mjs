@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {readFile, writeFile, mkdir, rm} from 'node:fs/promises';
-import {resolve, join} from 'node:path';
+import {resolve, join, relative} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {sha256} from './helpers/recovery/snapshot.mjs';
 
@@ -22,8 +22,8 @@ await rm(resolve('dist'), {recursive: true, force: true});
 const build = spawnSync('pnpm', ['run', 'build'], {encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 await writeFile(join(output, 'build.log'), `${build.stdout || ''}${build.stderr || ''}`);
 assert.equal(build.status, 0, 'Build failed; inspect build.log');
-const {produceArtifact} = await import(pathToFileURL(resolve('scripts/build-delivery-artifact.mjs')));
-const artifactPath = await produceArtifact({output: join(output, 'artifact.json')});
+const {produceArtifact} = await import(pathToFileURL(resolve('scripts/delivery/build.mjs')));
+const artifactPath = await produceArtifact({output: relative(process.cwd(),join(output, 'delivery-artifact/artifact.json'))});
 const artifactBytes = await readFile(artifactPath);
 const artifact = JSON.parse(artifactBytes);
 assert.equal(command('git', ['diff', 'HEAD', '--name-only']), '', 'Build modified tracked source');

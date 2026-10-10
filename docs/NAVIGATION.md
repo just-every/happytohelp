@@ -7,7 +7,11 @@ paths that fail that check, renders the root route's `notFoundComponent`
 (`src/ui/homepage/NotFound.tsx`): a branded page in the homepage visual language
 with the title "Page not found · HappyToHelp", a short message and links to the
 homepage and the workspace. Help Center addresses have their own 404 pages (see
-`src/modules/public-site/README.md`). Its nested pathless
+`src/modules/public-site/README.md`). `/docs` and `/docs/<slug>`
+(`src/routes/docs.index.tsx`, `src/routes/docs.$slug.tsx`) are public document
+routes outside the dashboard layout, rendering the repository Markdown listed in
+`docs/site.json`; an unknown slug throws `notFound()` in the loader and renders the
+same branded 404. The dashboard layout's nested pathless
 `src/routes/_dashboard._workspace.tsx` is the client-only boundary with
 pending/error handling and the persistent shell. The workspace's index and splat
 leaves render `DashboardContent` and attach the bootstrap loader;

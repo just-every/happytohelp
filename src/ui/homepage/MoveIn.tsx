@@ -1,5 +1,6 @@
 import { ImportDrawing } from './drawings/ImportDrawing';
 import { installerUrl } from './repository';
+import { useReveal } from './reveal/useReveal';
 
 const steps = [
   ['Install it.', 'Codex or Claude can help.'],
@@ -8,11 +9,12 @@ const steps = [
 ];
 
 export function MoveIn() {
-  return <section className="section split split--reverse" id="move-in" aria-labelledby="move-in-title">
+  const reveal = useReveal<HTMLOListElement>();
+  return <section className="section split" id="move-in" aria-labelledby="move-in-title">
     <div className="split-copy">
       <h2 id="move-in-title">Try it beside what you have</h2>
       <p>Keep your current helpdesk running while you try it.</p>
-      <ol className="steps">{steps.map(([lead, text]) => <li key={lead}><b>{lead}</b> {text}</li>)}</ol>
+      <ol className="steps" ref={reveal}>{steps.map(([lead, text]) => <li key={lead}><b>{lead}</b> {text}</li>)}</ol>
       <div className="actions"><a className="text-link" href={installerUrl}>Read the installation guide</a></div>
     </div>
     <ImportDrawing />

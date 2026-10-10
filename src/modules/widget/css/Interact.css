@@ -1,6 +1,6 @@
 #happytohelp-root .happytohelp-tooltip {
   z-index: 2147483621;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -57,7 +57,7 @@
   scroll-behavior: initial !important;
 }
 #happytohelp-root input, #happytohelp-root textarea {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -87,7 +87,7 @@
   box-shadow: none;
   font-weight: 400;
   line-height: 41px;
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -181,7 +181,7 @@
   }
 }
 #happytohelp-root .happytohelp-interact {
-  font-family: "Open Sans", serif;
+  font-family: "HappyToHelp Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;

@@ -1,21 +1,3 @@
-// Loads fonts needed onto page.
-
-function addHeadLink(rel, href, crossorigin) {
-    const linkElement = document.createElement('link');
-    linkElement.rel = rel;
-    linkElement.href = href;
-    if (crossorigin) {
-        linkElement.crossOrigin = crossorigin;
-    }
-    document.head.appendChild(linkElement);
-}
-
-function fontHelper() {
-    addHeadLink('preconnect', 'https://fonts.googleapis.com');
-    addHeadLink('preconnect', 'https://fonts.gstatic.com', 'anonymous');
-    addHeadLink('stylesheet', 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&display=swap');
-}
-
 // Simple animation timing helper. Will need to use a better react animation library for more advanced work.
 function animationHelper() {
     var startsWith = function(str, search, rawPos) {
@@ -72,7 +54,6 @@ function styleHelper(shadowHost) {
 };
 
 export function initHelpers(shadowHost) {
-    fontHelper();
     animationHelper();
     styleHelper(shadowHost);
 };
@@ -89,6 +70,8 @@ export function openMetaTags() {
     document.body.style.zoom = 1;
     window.scrollTo({ left: 0, behavior: 'instant' });
 
+    originalViewportContent = null;
+    originalThemeContent = null;
     let viewportMeta = document.querySelector("meta[name=viewport]");
     if (!viewportMeta) {
         // If no viewport meta tag exists, create one and mark that it didn’t originally exist
@@ -99,7 +82,7 @@ export function openMetaTags() {
         // Save the original content and mark that a tag did exist
         originalViewportContent = viewportMeta.content;
     }
-    viewportMeta.content = "width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content";
+    viewportMeta.content = "width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, interactive-widget=resizes-content";
 
     let themeMeta = document.querySelector("meta[name=theme-color]");
     if (!themeMeta) {

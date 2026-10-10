@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { candidate, policy } from './fixtures.mjs';
+import { candidate, policy, writeCandidate } from './fixtures.mjs';
 import { materializeArtifact } from '../artifact.mjs';
 import { configuration } from '../stage-adapter.mjs';
 
@@ -30,7 +30,7 @@ test('pinned Wrangler packages the fixed native topology offline without evaluat
     // Opaque bytes are legal static assets; deployment must not invoke an image decoder.
     artifact.assets.push({path:'/opaque.avif', contentBase64:Buffer.from('not an image').toString('base64'), contentType:'image/avif'});
     const target = policy(artifact), output = join(root, 'artifact');
-    await writeFile(join(root, 'input.json'), JSON.stringify(artifact));
+    await writeCandidate(join(root, 'input.json'), artifact);
     await materializeArtifact(join(root, 'input.json'), output, target.artifactSha256);
     await writeFile(join(output, 'wrangler.json'), JSON.stringify(configuration(target)));
     await writeFile(join(output, 'secrets.json'), JSON.stringify({H2H_SETUP_TOKEN:'test-setup-token-that-is-at-least-32-characters'}));

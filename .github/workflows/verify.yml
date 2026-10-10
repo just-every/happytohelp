@@ -2,7 +2,7 @@ name: Verify
 
 on:
   push:
-    branches: [main, release/0.2.x]
+    branches: [main, release/0.3.x]
   pull_request:
   workflow_dispatch:
 
@@ -42,23 +42,39 @@ jobs:
       - id: verify
         run: pnpm run verify
 
+      - name: Native HTTP transport and proxy cause regression
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:runtime-transport
+
       # Every browser suite runs after a passing verify, even when an earlier
       # browser suite fails, so one run reports every browser regression.
       - name: Widget browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:widget-browser
+      - name: Launcher pointer send and inbox defaults
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:widget-pointer-send-browser && pnpm run test:inbox-default-browser
+      - name: Widget opening contrast browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: H2H_EVIDENCE_DIR="$H2H_EVIDENCE_DIR/widget-opening-contrast" pnpm run test:widget-opening-contrast-browser
       - name: Widget lifecycle browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:widget-lifecycle-browser
       - name: UI browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:ui-browser
+      - name: Busy note synchronous focus browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: H2H_EVIDENCE_DIR="$H2H_EVIDENCE_DIR/note-busy-focus" pnpm run test:note-busy-focus-browser
       - name: Navigation browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:navigation-browser
       - name: Public Help Center browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:public-help-center-browser
+      - name: Docs browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: H2H_EVIDENCE_DIR="$H2H_EVIDENCE_DIR/docs" pnpm run test:docs-browser
       - name: Setup browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:setup-browser
@@ -74,6 +90,34 @@ jobs:
       - name: Contact erasure browser suite
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: pnpm run test:contact-erasure-browser
+
+      - name: Real local connector hero browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:hero-connector-browser
+      - name: Assistant draft handoff browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: H2H_EVIDENCE_DIR="$H2H_EVIDENCE_DIR/assistant-draft-handoff" pnpm run test:assistant-draft-handoff-browser
+      - name: Native local draft adoption browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: H2H_EVIDENCE_DIR="$H2H_EVIDENCE_DIR/local-draft-adoption" pnpm run test:local-draft-adoption-browser
+      - name: Assistant draft readiness browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: H2H_EVIDENCE_DIR="$H2H_EVIDENCE_DIR/assistant-draft-readiness" pnpm run test:assistant-draft-readiness-browser
+      - name: Durable provider error browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:provider-errors-browser
+      - name: Shared appearance and recovery browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:appearance-browser
+      - name: Article readiness and workspace transition browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:ui-readiness-browser
+      - name: Training readiness browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:training-readiness-browser
+      - name: Explicit magic sign-in browser suite
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: pnpm run test:magic-link-browser
 
       - name: Start local native preview
         id: preview

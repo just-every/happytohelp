@@ -1,7 +1,9 @@
 import { spawn } from 'node:child_process';
 import { ConnectorError } from '../errors.mjs';
 import { AGENT_OUTPUT_SCHEMA } from '../result.mjs';
-import { MAX_RUNTIME_OUTPUT, boundedText, runtimeFailure, stopChild, uuid, waitForExit } from '../util.mjs';
+import { claudeProviderError } from './claude-error.mjs';
+import { providerFailureSummary } from '../provider-error.mjs';
+import { MAX_RUNTIME_OUTPUT, runtimeFailure, stopChild, uuid, waitForExit } from '../util.mjs';
 
 function browserMcpConfig(browserMcp) {
   if (!browserMcp) return null;
@@ -72,7 +74,8 @@ export async function runClaude({ prompt, identity, onIdentity, onProgress, sign
     env: { ...process.env, CLAUDE_CODE_SIMPLE: '1' },
   });
   let output = '';
-  let stderr = '';
+  let providerError = null;
+  let retryErrorCode = null;
   let buffer = '';
   let sessionId = initialSessionId;
   let resultText = '';
@@ -87,8 +90,9 @@ export async function runClaude({ prompt, identity, onIdentity, onProgress, sign
 
   const done = await new Promise((resolve, reject) => {
     child.once('error', reject);
-    child.once('exit', (code, signalName) => resolve({ code, signalName }));
-    child.stderr.on('data', (chunk) => { stderr = `${stderr}${chunk.toString('utf8')}`.slice(-8_000); });
+    child.once('close', (code, signalName) => resolve({ code, signalName }));
+    // Drain stderr privately; it can contain credentials or the full assignment.
+    child.stderr.resume();
     child.stdout.on('data', (chunk) => {
       output += chunk.toString('utf8');
       if (output.length > MAX_RUNTIME_OUTPUT) {
@@ -110,6 +114,13 @@ export async function runClaude({ prompt, identity, onIdentity, onProgress, sign
           sessionId = event.session_id;
           void onIdentity?.({ provider: 'claude', providerSessionId: sessionId });
         }
+        const observedError = claudeProviderError(event);
+        if (observedError) {
+          const sameFailure = event.type === 'assistant' && event.error === retryErrorCode;
+          providerError = { ...observedError, http_status: sameFailure ? providerError?.http_status ?? null : observedError.http_status };
+          if (event.type === 'system') retryErrorCode = event.error;
+        }
+        if (event.type === 'assistant' && !event.error) { providerError = null; retryErrorCode = null; }
         if (event.type === 'assistant') {
           const text = textFromContent(event.message?.content);
           if (text) onProgress?.('Claude is working.');
@@ -127,15 +138,16 @@ export async function runClaude({ prompt, identity, onIdentity, onProgress, sign
   if (signal?.aborted || terminated || done.signalName) {
     return { cancelled: true, sessionId, rawText: '' };
   }
-  if (done.code !== 0) {
-    runtimeFailure('Claude', stderr || `process exited with code ${done.code}`);
+  if (providerError && (done.code !== 0 || resultSubtype !== 'success')) {
+    throw new ConnectorError(providerFailureSummary(providerError), { code: 'RUNTIME_FAILED', providerError });
   }
+  if (done.code !== 0) runtimeFailure('Claude', `process exited with code ${done.code}.`);
   if (resultSubtype && resultSubtype !== 'success') {
-    runtimeFailure('Claude', stderr || `stream-json completed with subtype ${resultSubtype}`);
+    runtimeFailure('Claude', 'The local runtime did not complete successfully.');
   }
   if (!resultText) {
-    runtimeFailure('Claude', stderr || 'stream-json output did not contain a result event.');
+    runtimeFailure('Claude', 'stream-json output did not contain a result event.');
   }
   await onIdentity?.({ provider: 'claude', providerSessionId: sessionId });
-  return { cancelled: false, sessionId, rawText: resultText, diagnostics: boundedText(stderr, 600) };
+  return { cancelled: false, sessionId, rawText: resultText };
 }

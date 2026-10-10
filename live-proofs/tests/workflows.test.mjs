@@ -20,7 +20,7 @@ for (const workflow of ['deploy-stage','live-proof']) test(`${workflow}: isolate
   for (const use of source.matchAll(/uses: (\S+)/g)) assert.match(use[1],/@[0-9a-f]{40}$/);
   assert.equal((source.match(/EVIDENCE_WRITE_TOKEN: \$\{\{ secrets\.EVIDENCE_WRITE_TOKEN \}\}/g)||[]).length,1);
   if(workflow==='deploy-stage') {
-    assert.match(prepare,/pnpm run verify\n          node scripts\/build-delivery-artifact\.mjs/);
+    assert.match(prepare,/pnpm run verify\n          sha256sum delivery-artifact\/happytohelp-worker-artifact\.json/);
     // Bash errexit (the Actions default) must stop before packaging/deploy.
     const result=spawnSync('bash',['-e','-c','false\nprintf unsafe-deploy'],{encoding:'utf8'});
     assert.equal(result.status,1);assert.equal(result.stdout,'');

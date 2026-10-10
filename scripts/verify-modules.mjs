@@ -5,17 +5,18 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 // Browser and emitted-Worker checks need a built application and run separately.
 const standalone = [
-  'deployment-mail-readiness.mjs',
-  'widget-citations.mjs', 'sender-domain.mjs', 'delegation-sqlite.mjs', 'module-boundaries.mjs', 'generation-command-identity.mjs', 'widget-events.mjs', 'deployment-config-private.mjs', 'email-recovery.mjs', 'email-classification.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
+  'verify-workflow.mjs', 'provider-errors.mjs', 'publication-metadata.mjs', 'help-center-link-contrast.mjs',
+  'deployment-mail-readiness.mjs', 'appearance-settings.mjs', 'article-capability.mjs',
+  'widget-meta-tags.mjs', 'widget-citations.mjs', 'sender-domain.mjs', 'delegation-sqlite.mjs', 'module-boundaries.mjs', 'generation-command-identity.mjs', 'widget-events.mjs', 'deployment-config-private.mjs', 'email-recovery.mjs', 'email-classification.mjs', 'deleted-background.mjs', 'conversation-admission.mjs',
   'conversation-socket.mjs', 'customer-context-routes.mjs', 'email-provider.mjs', 'sendgrid-email.mjs', 'sendgrid-inbound.mjs', 'cloudflare-email.mjs', 'email-worker.mjs',
-  'github-integration.mjs', 'github-discovery.mjs', 'github-workerd-runtime.mjs', 'identity.mjs', 'identity-setup.mjs', 'identity-links.mjs', 'management-invitations.mjs', 'knowledge-context.mjs',
+  'github-integration.mjs', 'github-discovery.mjs', 'github-workerd-runtime.mjs', 'identity.mjs', 'identity-setup.mjs', 'identity-links.mjs', 'magic-link.mjs', 'management-invitations.mjs', 'knowledge-context.mjs',
   'knowledge-workerd.mjs', 'lead-operations.mjs', 'legacy-import.mjs', 'local-computer-runtime.mjs', 'local-computer-revocation.mjs',
-  'operating-environment.mjs', 'management.mjs', 'library-validation.mjs', 'contact-erasure.mjs', 'demo-inbox.mjs', 'demo-transcript-events.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
-  'site-preview.mjs', 'workspace-artwork.mjs', 'not-found-response.mjs', 'error-response.mjs', 'provider-effects.mjs', 'delivery-deployment-spec.mjs', 'delivery-migration-order.mjs',
-  'ui-transport.mjs', 'workspace-scope.mjs', 'dashboard-styles.mjs', 'login-return.mjs', 'abuse-limits.mjs', 'widget-rate-limit.mjs', 'local-agent-archive.mjs', 'reproducible-output.mjs', 'local-owner-login.mjs', 'widget-transport.mjs', 'installer-secret-scopes.mjs',
+  'local-draft-adoption.mjs', 'operating-environment.mjs', 'management.mjs', 'library-validation.mjs', 'contact-erasure.mjs', 'demo-inbox.mjs', 'demo-transcript-events.mjs', 'plugin-sdk.mjs', 'public-help-center.mjs',
+  'site-preview.mjs', 'workspace-artwork.mjs', 'not-found-response.mjs', 'error-response.mjs', 'provider-effects.mjs', 'delivery-deployment-spec.mjs', 'delivery-base.mjs', 'delivery-migration-order.mjs',
+  'ui-transport.mjs', 'workspace-scope.mjs', 'dashboard-styles.mjs', 'login-return.mjs', 'abuse-limits.mjs', 'widget-rate-limit.mjs', 'local-agent-archive.mjs', 'reproducible-output.mjs', 'local-owner-login.mjs', 'widget-transport.mjs', 'widget-connection-recovery.mjs', 'installer-secret-scopes.mjs',
   'project-verification-secret.mjs', 'widget-settings-model.mjs', 'deployment-setup-credential.mjs', 'identity-setup-deployment.mjs', 'security-headers.mjs', 'search-codec.mjs', 'delegation-documents.mjs', 'user-agent-parser.mjs', 'repository-identity.mjs', 'inbox-search.mjs', 'contact-timezone.mjs', 'saved-reply-insertion.mjs',
 ].map(name => `tests/${name}`);
-const groups = ['scripts/source-projection', 'tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test', 'live-proofs/tests', 'tests/live/recorder'];
+const groups = ['tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test', 'live-proofs/tests', 'tests/live/recorder'];
 for (const group of groups) {
   const files = await readdir(new URL(`../${group}/`, import.meta.url));
   standalone.push(...files.filter(name => /\.test\.(?:mjs|cjs|js)$/.test(name)).map(name => `${group}/${name}`));

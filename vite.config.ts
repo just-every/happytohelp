@@ -3,6 +3,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { reproducibleOutput } from './scripts/delivery/reproducible-output.ts'
+import { docsSite } from './src/ui/docs/build/plugin.ts'
 
 export default defineConfig(({ command, isPreview }) => {
  const localOwnerLogin = command === 'serve' && !isPreview && process.env.H2H_LOCAL_OWNER_LOGIN === '1';
@@ -28,5 +29,5 @@ export default defineConfig(({ command, isPreview }) => {
       next()
     })
   },
-}, cloudflare({ ...(localOwnerLogin ? { remoteBindings: false } : {}), configPath: process.env.H2H_WRANGLER_CONFIG, viteEnvironment: { name: 'ssr' } }), tanstackStart(), react(), reproducibleOutput()] };
+}, cloudflare({ ...(localOwnerLogin ? { remoteBindings: false } : {}), configPath: process.env.H2H_WRANGLER_CONFIG, viteEnvironment: { name: 'ssr' } }), docsSite(), tanstackStart(), react(), reproducibleOutput()] };
 })

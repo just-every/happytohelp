@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {manifest} from './manifest.mjs';
 import {snapshot} from './sources.mjs';
-import {comparisonIdentities, validateProjection} from './projections.mjs';
 import {hash, json, git, tracked, fresh, writeTree} from './files.mjs';
 
 function diff(before, after) {
@@ -42,24 +41,16 @@ function identities(files) {
   return Object.fromEntries(Object.entries(files).map(([name, file]) => [name,
     {sha256: hash(Buffer.from(file.data, 'base64')), executable: file.executable}]));
 }
-export function compare(root, id, candidate, comparisonProjection, editionFiles = tracked(root)) {
+export function compare(root, id, candidate) {
   const {component, ref, saved} = baseline(root, id);
-  if (comparisonProjection) {
-    validateProjection(comparisonProjection);
-    if (comparisonProjection.origin.original.key !== saved.key || comparisonProjection.origin.original.digest !== saved.digest || comparisonProjection.origin.original.sha256 !== hash(json(saved))) throw Error('Comparison projection does not derive from selected original');
-  }
+  if (!component) throw Error('Compare selects a component; extract parent for whole-edition comparisons');
   const repository = fs.realpathSync(candidate);
   if (fs.realpathSync(git(repository, 'rev-parse', '--show-toplevel')) !== repository) throw Error('Candidate must be a Git repository root');
   if (git(repository, 'status', '--porcelain', '--untracked-files=all')) throw Error('Candidate must be clean and committed');
-  const {projection: _projection, ...selection} = ref;
-  const incoming = snapshot(root, {...selection, repository, revision: git(repository, 'rev-parse', 'HEAD')});
-  return component ? compareFiles(component, saved, incoming, editionFiles, comparisonProjection || saved)
-    : compareParentFiles(saved, incoming, editionFiles, comparisonProjection || saved);
-}
-export function compareFiles(component, saved, incoming, editionFiles, projection = saved) {
-  const id = component.id;
+  const incoming = snapshot(root, {...ref, repository, revision: git(repository, 'rev-parse', 'HEAD')});
   const selected = component.source;
   if (selected.workspace) throw Error('Promote or commit workspace source before comparing immutable selections');
+  const editionFiles = tracked(root);
   const local = Object.create(null);
   const mappings = selected.kind === 'git' ? [] : selected.mappings || [];
   // Never guess correspondence for dispersed or deeply rewritten local source.
@@ -72,26 +63,13 @@ export function compareFiles(component, saved, incoming, editionFiles, projectio
   }
   const owned = selected.kind === 'local' ? Object.fromEntries(Object.entries(editionFiles)
     .filter(([name]) => selected.paths.some(p => name === p || name.startsWith(p + '/')))) : saved.files;
-  const before = comparisonIdentities(saved.files, projection);
+  const before = identities(saved.files);
   const mappedBefore = Object.fromEntries(Object.entries(before).filter(([name]) => mappings.some(m => name === m.originPath || name.startsWith(m.originPath + '/'))));
   return {component: id, baseline: {origin: saved.origin, digest: saved.digest},
     incoming: {origin: incoming.origin, digest: incoming.digest},
-    upstreamChanges: diff(before, comparisonIdentities(incoming.files, projection)),
-    localChanges: selected.kind === 'git' ? [] : mappings.length ? diff(mappedBefore, comparisonIdentities(local, projection)) : null,
+    upstreamChanges: diff(before, identities(incoming.files)),
+    localChanges: selected.kind === 'git' ? [] : mappings.length ? diff(mappedBefore, identities(local)) : null,
     currentFiles: identities(owned), mappings,
-    comparisonPolicy: projection.origin?.kind === 'sanitized-public-projection' ? projection.origin.policy : null,
-    meaning: 'Authorized original/projected member pairs are equivalent only at their recorded digests. Current source may intentionally differ. Local comparison uses explicit mappings only. This does not judge compatibility, owner intent, or adoption.',
-  };
-}
-
-export function compareParentFiles(saved, incoming, editionFiles, projection = saved) {
-  const before = comparisonIdentities(saved.files, projection);
-  return {component: 'parent', baseline: {origin: saved.origin, digest: saved.digest},
-    incoming: {origin: incoming.origin, digest: incoming.digest},
-    upstreamChanges: diff(before, comparisonIdentities(incoming.files, projection)),
-    localChanges: diff(before, comparisonIdentities(editionFiles, projection)),
-    currentFiles: identities(editionFiles), mappings: null,
-    comparisonPolicy: projection.origin?.kind === 'sanitized-public-projection' ? projection.origin.policy : null,
-    meaning: 'Whole-parent comparison includes every retained and effective member; exact authorized sanitation pairs are equivalent, all other bytes and modes remain compared.',
+    meaning: 'Current source may intentionally differ. Local comparison uses explicit mappings only. This does not judge compatibility, owner intent, or adoption.',
   };
 }

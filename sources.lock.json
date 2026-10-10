@@ -5198,7 +5198,7 @@
       "executable": false
     },
     "tests/appearance-browser.mjs": {
-      "sha256": "fcb4189aec5c3ba208e0b11fae9590d92b7dc37e878a595d20a68ed4ea0047bc",
+      "sha256": "4fe63687e4f0d4242c0743813c4dbdeab065151ad2efcbf9da01f8b28079c3d6",
       "executable": false
     },
     "tests/appearance-settings.mjs": {

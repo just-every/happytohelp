@@ -1,9 +1,9 @@
 import {DatabaseSync} from 'node:sqlite';
-import {readdir} from 'node:fs/promises';
+import {readdir, readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 
-export async function findDatabase(directory) {
+async function sqliteFiles(directory) {
   const found = [];
   async function visit(path) {
     for (const entry of await readdir(path, {withFileTypes: true})) {
@@ -13,6 +13,10 @@ export async function findDatabase(directory) {
     }
   }
   await visit(directory);
+  return found;
+}
+export async function findDatabase(directory) {
+  const found = await sqliteFiles(directory);
   if (found.length !== 1) throw new Error(`Expected one D1 database, found ${found.length}`);
   return found[0];
 }
@@ -39,4 +43,28 @@ export function snapshot(filename, baseline) {
     }
     return result;
   } finally { db.close(); }
+}
+// Every table, index, trigger and view definition, keyed by name.
+export function schema(filename) {
+  const db = new DatabaseSync(filename, {readOnly: true});
+  try { return Object.fromEntries(db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE '_cf_%' AND name NOT LIKE 'sqlite_autoindex_%' ORDER BY name").all().map(row => [row.name, {...row}])); }
+  finally { db.close(); }
+}
+// Local R2: Miniflare's object index plus the sha256 of every stored blob.
+export async function bucketSnapshot(directory) {
+  const objects = [], blobs = [];
+  for (const file of await sqliteFiles(directory)) {
+    const db = new DatabaseSync(file, {readOnly: true});
+    try { objects.push(...db.prepare('SELECT key,blob_id,version,size,etag,uploaded,http_metadata,custom_metadata FROM _mf_objects ORDER BY key').all().map(row => JSON.stringify(row))); }
+    finally { db.close(); }
+  }
+  async function visit(path) {
+    for (const entry of await readdir(path, {withFileTypes: true})) {
+      const child = join(path, entry.name);
+      if (entry.isDirectory()) await visit(child);
+      else if (path.endsWith('blobs')) blobs.push(createHash('sha256').update(await readFile(child)).digest('hex'));
+    }
+  }
+  await visit(directory);
+  return {objects: objects.sort(), blobs: blobs.sort()};
 }

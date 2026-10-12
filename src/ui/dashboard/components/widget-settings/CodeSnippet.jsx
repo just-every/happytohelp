@@ -35,7 +35,7 @@ export default function CodeSnippet({
                 </div>
                 <span className="widget-code__copy-feedback" role="status" aria-live="polite">{feedback}</span>
             </div>
-            <pre><code ref={codeElement} className={`language-${language}`}>{code}</code></pre>
+            <pre tabIndex={0} aria-label={`${language} code`}><code ref={codeElement} className={`language-${language}`}>{code}</code></pre>
         </div>
     );
 }

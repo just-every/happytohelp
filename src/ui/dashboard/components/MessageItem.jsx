@@ -9,6 +9,7 @@ import externalLinks from 'remark-external-links';
 import '../styles/components/MessageItem.scss';
 import LocalAgentBadge from './LocalAgentBadge';
 import MessageTimestamp from './MessageTimestamp';
+import {visibleMessageContent} from '../../../modules/conversations/citations.js';
 
 function MessageItem({ message, conversation, showActor = true, grouped = false, showHeader = true }) {
     const isCustomer = Boolean(message.contact_id);
@@ -26,7 +27,7 @@ function MessageItem({ message, conversation, showActor = true, grouped = false,
     const content = (
         <div className={"message-content transcript-message-content"+( message.content ? " has-content" : "")+( !message.content && message.media && message.media.length ? " image-only" : "")}>
             { message.erased_at && <p className="mb-1 transcript-message-erased"><em>Message erased</em></p> }
-            { message.content && <ReactMarkdown remarkPlugins={[gfm, externalLinks]} className="mb-1">{ message.content }</ReactMarkdown> }
+            { message.content && <ReactMarkdown remarkPlugins={[gfm, externalLinks]} className="mb-1">{ visibleMessageContent(message.content) }</ReactMarkdown> }
             <MessageCitations message={message} />
             { message.media && message.media.map(media => (
                 <Media key={ media.id } media={ media }/>

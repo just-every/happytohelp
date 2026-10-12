@@ -1,3 +1,4 @@
+import {rateResolution} from '../outcomes/rating'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
@@ -26,6 +27,7 @@ widgetEvents.post('/:id/widget-events', async c => {
   const data = body.data || {}
   const command = { c, actor, conversation, action, data }
   switch (action) {
+    case 'rateResolution': return rateResolution(command)
     case 'contact': return updateContact(command)
     case 'pingActive':
     case 'pingAction':

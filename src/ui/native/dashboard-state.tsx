@@ -74,6 +74,9 @@ export async function loadDashboard({ location, abortController }: {
         settings = await bootstrap();
     }
     const delegationConsent = await loadConsent(location, signal);
+    if(location.pathname==='/projects' && (location.search as Record<string,unknown>).onboarding==='setup' && settings.project?.id){
+        throw redirect({to:'/$',params:{_splat:`projects/${settings.project.id}/activation`},search:{},replace:true});
+    }
     if (version !== sessionVersion) throw new Error('Your session changed. Reload the workspace.');
     announceSessionProject(settings.sessionProjectId);
     const search = location.search as Record<string, unknown>;

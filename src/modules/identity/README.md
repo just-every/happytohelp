@@ -17,3 +17,30 @@ Public helpers for the signed-out pages:
 Accepting one invitation link retires the other links issued for the same email in that workspace. Pending
 invitation management (copy link, resend, revoke) lives in the management module.
 Tests: `tests/identity.mjs`, `tests/identity-setup.mjs`, `tests/identity-links.mjs`.
+
+`GET /widget/profile` hydrates the widget's saved contact into React memory on
+reload. It accepts an explicit live visitor Bearer capability and returns only
+the owning contact's id, name, email, and existing verification status with
+`Cache-Control: no-store`. The SQL that reads these fields also checks current
+session ownership, project membership, expiration, revocation, workspace deletion,
+and contact deletion/erasure fences. It performs no writes and returns no metadata.
+The entry guard rejects cookie-only and native `int_` credentials before CORS can
+query D1. The widget never adds the returned profile to local storage. Tests live
+in `tests/first-run/profile.mjs`, `profile-transport.mjs`, and `profile-browser.mjs`.
+
+The collector stores visitor-entered name/email as `provided_name` and
+`provided_email` metadata for operator context and erasure. For unsigned contacts
+these also update the displayed canonical fields. Existing verified identities
+keep their canonical name/email, external identifier and verification state;
+collector input cannot promote or demote verification. The guarded write returns
+the current canonical fields and verification state atomically, including when
+verification changes after admission. Session, workspace, conversation ownership
+and privacy fences are checked again at the write. Owner/API contact editing
+remains a separate authorized path. `verified` describes the existing signed
+contact identity, not a separate attestation of a visitor-provided email address.
+Later signed business-metadata refreshes retain existing collected aliases,
+including explicit nulls, and recheck current contact privacy fences. The other
+signed metadata fields keep their existing replacement semantics.
+`tests/first-run/profile-trust.mjs` covers actual HMAC admission through collector
+writes and repeated sessions, profile readback, unsigned controls, owner edits,
+erasure and write races.

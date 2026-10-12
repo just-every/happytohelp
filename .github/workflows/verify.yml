@@ -2,7 +2,7 @@ name: Verify
 
 on:
   push:
-    branches: [main, release/0.3.x]
+    branches: [main, release/0.3.x, release/0.4.x]
   pull_request:
   workflow_dispatch:
 
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     # Verification needs no repository secrets or deployment credentials.
     env:
       WRANGLER_SEND_METRICS: 'false'
@@ -33,9 +33,16 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 26.8.1
+          node-version: 22.20.0
           cache: pnpm
-      - run: node scripts/operations.mjs describe
+      - name: Prepare space for native server verification
+        # This Node/Worker app does not use the preinstalled Android SDK.
+        # Keep the real rer disk guard on this ephemeral runner.
+        run: |
+          df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
+          sudo rm -rf -- /usr/local/lib/android
+          df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
+      - run: node scripts/rer.mjs describe
       - run: node scripts/edition-authoring/cli.mjs check
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
@@ -146,9 +153,9 @@ jobs:
         id: preview
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: |
-          pnpm run setup -- --local
-          nohup node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 5186 --strictPort > "$RUNNER_TEMP/native-preview.log" 2>&1 &
-          echo $! > "$RUNNER_TEMP/native-preview.pid"
+          node --input-type=module -e 'import {mkdir,writeFile} from "node:fs/promises"; import {randomBytes} from "node:crypto"; await mkdir(".seed",{recursive:true,mode:0o700}); await writeFile(".seed/native-preview-answers.json",JSON.stringify({WORKSPACE_NAME:"CI preview",WIDGET_ORIGIN:"https://example.test",PRIMARY_COLOR:"#7c3aed",OWNER_NAME:"CI owner",OWNER_PASSWORD:randomBytes(24).toString("base64url"),EMAIL_PROVIDER:"later"}),{mode:0o600});'
+          node scripts/rer.mjs setup --owner-email ci-preview@example.test --answers .seed/native-preview-answers.json --port 5186 --non-interactive
+          nohup node scripts/rer.mjs preview --port 5186 --non-interactive > "$RUNNER_TEMP/native-preview.log" 2>&1 &
           for _ in $(seq 1 60); do
             if curl -fsS "$H2H_PREVIEW_ORIGIN/health"; then exit 0; fi
             sleep 2
@@ -166,7 +173,7 @@ jobs:
       - name: Stop local native preview
         if: ${{ always() && steps.preview.outcome != 'skipped' }}
         run: |
-          if [ -f "$RUNNER_TEMP/native-preview.pid" ]; then kill "$(cat "$RUNNER_TEMP/native-preview.pid")" || true; fi
+          node scripts/rer.mjs preview --stop --non-interactive
 
       - name: Confirm verification preserves source
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}

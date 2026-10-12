@@ -8,6 +8,7 @@ export function activityStatus(container, { request, clipboard = container.owner
     return element;
   };
   container.className = 'agent-activity known-group';
+  container.hidden = true;
   const header = node('div', 'known-group-header');
   const title = node('h2', 'known-group-title', 'Preparing setup');
   header.append(title);
@@ -58,9 +59,13 @@ export function activityStatus(container, { request, clipboard = container.owner
   };
   close.onclick = () => dialog.close();
   let historySignature = '', latestId = -1;
-  return (activity, agent) => {
+  return (activity, agent, { showManual = false } = {}) => {
     const attached = agent?.mode === 'connected' && agent.attached === true;
     const manual = agent?.mode === 'manual';
+    const connectingAgent = agent?.mode === 'connecting';
+    const visible = attached || connectingAgent || (manual && showManual);
+    container.hidden = !visible;
+    if (!visible) { working.hidden = true; latest.hidden = true; history.hidden = true; return; }
     const heading = attached ? 'Agent status' : manual ? 'Manual setup' : 'Preparing setup';
     if (title.textContent !== heading) { title.textContent = heading; container.setAttribute('aria-label', heading); }
     connect.hidden = !manual; latest.hidden = !attached && !manual && agent?.mode !== 'connecting';

@@ -23,3 +23,5 @@ local-agent/.state/
 .rer-tools/
 
 .local-evidence/
+
+.rer/

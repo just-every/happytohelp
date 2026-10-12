@@ -13,8 +13,8 @@ export async function artifactRuntime(artifact,{directory,port=12401,variables={
  for(const migration of spec.migrations)await writeFile(join(migrations,migration.name),migration.sql);
  const config={name:'h2h-independent-test',main:'server/'+artifact.mainModule,no_bundle:true,rules:[{type:'ESModule',globs:['**/*.js','**/*.mjs']}],compatibility_date:spec.compatibilityDate,compatibility_flags:spec.compatibilityFlags,assets:{directory:'public'},d1_databases:[{binding:'DB',database_name:'independent-db',database_id:'independent-local-only',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:'independent-files'}],durable_objects:{bindings:spec.durableObjects.map(x=>({name:x.binding,class_name:x.className}))},migrations:spec.durableObjectMigrations.map(x=>({tag:x.tag,new_sqlite_classes:x.newSqliteClasses})),queues:{producers:[{binding:'JOBS',queue:'independent-jobs'},{binding:'JOBS_DEAD_LETTER',queue:'independent-dead'}]},vars:{...spec.publicVariables,...variables}};
  await writeFile(join(directory,'wrangler.json'),JSON.stringify(config));
- const wrangler=resolve('node_modules/wrangler/bin/wrangler.js'),env={PATH:process.env.PATH,TMPDIR:process.env.TMPDIR,WRANGLER_LOG_PATH:process.env.WRANGLER_LOG_PATH,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'};let logs='';
- const run=args=>new Promise((done,reject)=>{const p=spawn(process.execPath,[wrangler,...args],{cwd:directory,env,stdio:['ignore','pipe','pipe']});p.stdout.on('data',b=>logs+=b);p.stderr.on('data',b=>logs+=b);p.on('error',reject);p.on('exit',code=>code===0?done():reject(new Error(logs)))});
+ const wrangler=resolve('node_modules/wrangler/bin/wrangler.js'),env={PATH:process.env.PATH,TMPDIR:process.env.TMPDIR,WRANGLER_LOG_PATH:process.env.WRANGLER_LOG_PATH,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'};let logs='';const redact=bytes=>{let value=String(bytes);for(const [key,secret] of Object.entries(variables))if(/token|secret|key|password/i.test(key)&&typeof secret==='string'&&secret)value=value.replaceAll(secret,'[REDACTED]');return value};
+ const run=args=>new Promise((done,reject)=>{const p=spawn(process.execPath,[wrangler,...args],{cwd:directory,env,stdio:['ignore','pipe','pipe']});p.stdout.on('data',b=>logs+=redact(b));p.stderr.on('data',b=>logs+=redact(b));p.on('error',reject);p.on('exit',(code,signal)=>{if(code===0){done();return;}const error=new Error(`Native Wrangler command failed: exit ${code??'none'}, signal ${signal??'none'}\n${logs}`);writeFile(join(directory,'runtime.log'),logs).then(()=>reject(error),reject);})});
  if(restoreFile)await run(['d1','execute','DB','--local','--persist-to','.wrangler/state','--file',restoreFile]);else await run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
  let child;let storageOpen=false;
  const origin=`http://127.0.0.1:${port}`;
@@ -30,8 +30,8 @@ export async function artifactRuntime(artifact,{directory,port=12401,variables={
  const startRuntime=async()=>{
   if(storageOpen)throw new Error('Close native storage before starting the application');
   if(child&&child.exitCode===null&&child.signalCode===null)throw new Error('Artifact runtime is already running');
-  child=spawn(process.execPath,[wrangler,'dev','--local','--port',String(port),'--ip','127.0.0.1','--persist-to','.wrangler/state'],{cwd:directory,env,stdio:['ignore','pipe','pipe']});
-  child.stdout.on('data',b=>{logs+=b;process.stderr.write(b)});child.stderr.on('data',b=>{logs+=b;process.stderr.write(b)});
+  child=spawn(process.execPath,[wrangler,'dev','--local','--log-level','error','--port',String(port),'--ip','127.0.0.1','--persist-to','.wrangler/state'],{cwd:directory,env,stdio:['ignore','pipe','pipe']});
+  child.stdout.on('data',b=>{logs+=redact(b);process.stderr.write(redact(b))});child.stderr.on('data',b=>{logs+=redact(b);process.stderr.write(redact(b))});
   for(let i=0;i<160;i++){
    try{const response=await fetch(origin+'/health');const health=await response.json();if(response.ok&&health.database==='reachable'&&health.files==='reachable')return;}catch{}
    if(child.exitCode!==null||child.signalCode!==null||i===159){await close();throw new Error(logs);}

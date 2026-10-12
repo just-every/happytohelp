@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import ConversationsList from "./ConversationsList";
 import Conversation from "./Conversation";
 import {ActivationChecklist} from '../../native/activation';
-import DemoInboxInvitation from './DemoInboxInvitation';
+import InboxNextSteps from './InboxNextSteps';
 import { useDashboardSettings, useDashboardLocation } from '../../native/dashboard-state';
 import InboxViews from './InboxViews';
 import { updateNavigationUnreadBadge } from './navigationInboxBadge';
@@ -61,7 +61,7 @@ export default function Chat() {
                     {!activeConversationId && <div className={`chat flex-column justify-content-center text-center${canTryDemo ? ' activation-empty-inbox' : ''}`}>
                         <div className="container-xxl">
                             <h4>{ `Hey, ${currentAgent.name}!` }</h4>
-                            {canTryDemo ? !isCompactViewport && <div><ActivationChecklist projectId={settings.project.id}/><DemoInboxInvitation /></div> : <p>Please select a chat to start messaging.</p>}
+                            {canTryDemo ? !isCompactViewport && <div><ActivationChecklist projectId={settings.project.id}/><InboxNextSteps /></div> : <p>Please select a chat to start messaging.</p>}
                         </div>
                     </div>}
                 </div>

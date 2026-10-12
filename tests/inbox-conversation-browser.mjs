@@ -125,6 +125,22 @@ try{
   for(const length of [48,49,200]) assert.equal((await page.request.get(runtime.origin+api+'a'.repeat(length))).status(),200,`${length} characters`)
   for(const length of [201,400,6000]){const response=await page.request.get(runtime.origin+api+'a'.repeat(length));assert.equal(response.status(),400);assert.match((await response.json()).error,/too long/i)}
   check('search API: literal wildcards, 200 up to the limit, friendly 400 beyond it')
+  const tagged=await fx.api(`/api/dashboard/projects/${fx.projectId}/conversations/${fx.contacts.percent.id}/tags`,{method:'POST',body:{name:'Search scope'}})
+  await page.goto(runtime.origin+inboxPath({tag:tagged.data.id}))
+  await page.getByRole('combobox',{name:'Filter conversations by tag'}).waitFor()
+  await page.waitForFunction(()=>document.querySelectorAll('.conversation-list-items .conversation-item').length===1)
+  await input.fill('x'.repeat(400));await input.press('Enter');await page.getByText(/too long/i).waitFor()
+  await input.fill('   ');await input.press('Enter')
+  await page.waitForFunction(()=>document.querySelectorAll('.conversation-list-items .conversation-item').length===1)
+  assert.equal(await rows.getByText('Rate 100% Rhea',{exact:true}).isVisible(),true)
+  const cleared=new URL(page.url())
+  assert.equal(cleared.pathname,`/projects/${fx.projectId}/conversations`)
+  assert.equal(cleared.searchParams.get('q'),null)
+  assert.equal(cleared.searchParams.get('view'),'open')
+  assert.equal(cleared.searchParams.get('tag'),tagged.data.id)
+  assert.equal(await page.getByRole('combobox',{name:'Filter conversations by tag'}).inputValue(),tagged.data.id)
+  assert.equal(await page.getByText(/too long/i).count(),0)
+  check('clearing a rejected search preserves its workspace, open status and native tag filter')
   await context.close()
  }
 

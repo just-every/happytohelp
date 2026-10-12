@@ -4,6 +4,7 @@ import gfm from "h2h-widget-gfm";
 import externalLinks from "h2h-widget-external-links";
 
 import MessageCitations from './MessageCitations';
+import {visibleMessageContent} from '../../conversations/citations.js';
 import AppContext from "./context/AppContext";
 
 // Check if a message only contains image media
@@ -122,7 +123,7 @@ export default function ChatMessage({ children: media, message, moveHeight = 0 }
             { media }
             <div ref={messageRef} className={messageClasses.join(" ")} style={ messageStyle }>
                 {expand && <div className={fadeClasses.join(" ")}></div> }
-                <ReactMarkdown remarkPlugins={[gfm, externalLinks]}>{message.content}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[gfm, externalLinks]}>{visibleMessageContent(message.content)}</ReactMarkdown>
                 <MessageCitations message={message} />
             </div>
         </div>

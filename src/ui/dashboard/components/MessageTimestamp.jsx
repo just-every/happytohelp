@@ -14,8 +14,9 @@ export default function MessageTimestamp({ message, conversation, relatedMessage
                 const timestampFormat = new Date().getFullYear().toString() === moment(item.created_at).format('YYYY')
                     ? 'D MMM (LT)' : 'D MMM, YYYY (LT)';
                 return <div key={ item.id || item.local_id || index } className={ index ? 'mt-2' : undefined }>
-                    { !item.contact_id && <p className="m-0"><i className="fe fe-check"></i> Sent on <Moment format={ timestampFormat } date={ item.created_at } className="text-nowrap" /></p> }
-                    { item.contact_id && <p className="m-0"><i className="fe fe-check"></i> Received on <Moment format={ timestampFormat } date={ item.created_at } className="text-nowrap" />{ item.content_raw ? ' via email' : ' via chat' }</p> }
+                    { item.source_time_provenance==='conversation-created-context'&&<p className="m-0">Conversation created on <Moment format={timestampFormat} date={item.created_at}/>; original message timestamp unavailable.</p>}
+                    { item.source_time_provenance!=='conversation-created-context'&&!item.contact_id && <p className="m-0"><i className="fe fe-check"></i> Sent on <Moment format={ timestampFormat } date={ item.created_at } className="text-nowrap" /></p> }
+                    { item.source_time_provenance!=='conversation-created-context'&&item.contact_id && <p className="m-0"><i className="fe fe-check"></i> Received on <Moment format={ timestampFormat } date={ item.created_at } className="text-nowrap" />{ item.content_raw ? ' via email' : ' via chat' }</p> }
                     { item.agent_id && item.notified_at && item.notified_by && <p className="m-0"><i className="fe fe-mail"></i> Notified on <Moment format={ timestampFormat } date={ item.notified_at } className="text-nowrap" /></p> }
                     { item.read_by_contacts && conversation?.contact_id && item.read_by_contacts[conversation.contact_id] && <p className="m-0"><i className="fe fe-eye"></i> Read on <Moment format={ timestampFormat } date={ item.read_by_contacts[conversation.contact_id] } className="text-nowrap" /></p> }
                 </div>;
@@ -29,7 +30,7 @@ export default function MessageTimestamp({ message, conversation, relatedMessage
             trigger={[ 'hover', 'focus' ]}
             overlay={ renderTooltip }>
             <time className="transcript-message-time" dateTime={ message.created_at } tabIndex={ 0 }>
-                <Moment format="LT" date={ message.created_at } />
+                {message.source_time_provenance==='conversation-created-context'?'Conversation creation time':<Moment format="LT" date={ message.created_at } />}
             </time>
         </OverlayTrigger>
     );

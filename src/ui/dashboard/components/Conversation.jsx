@@ -37,6 +37,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
     const [ atTop, setAtTop ] = useState(true);
     const [ files, setFiles ] = useState([]);
     const [ content, setContent ] = useState('');
+    const [ draftOrigin, setDraftOrigin ] = useState(null);
     const [ draftFocusRequest, setDraftFocusRequest ] = useState(null);
     const [ draftError, setDraftError ] = useState('');
     const [ loadingContent, setLoadingContent ] = useState('');
@@ -124,6 +125,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
         setIsSending(true);
         const message = {
             content: messageContent,
+            authoring: draftOrigin || {kind: 'human'},
             conversation_id: conversationId,
             media_ids: files.map(file => file.id),
             local_id: uuidv4(),
@@ -134,6 +136,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
 
         try {
             await sendAction('sendMessage', message, conversationProjectId);
+            setDraftOrigin(null);
             setFiles([]);
         } finally {
             setIsSending(false);
@@ -150,6 +153,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
         draftAdoptionRef.current = null;
         setDraftError('');
         setContent('');
+        setDraftOrigin(null);
         setDraftFocusRequest(null);
         setLoadingContent('');
         setFiles([]);
@@ -159,10 +163,12 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
         return () => { draftAdoptionRef.current = null; };
     }, [ conversationId ]);
 
-    const updateDraftContent = (nextContent, attachments) => {
+    const updateDraftContent = (nextContent, attachments, origin) => {
         cancelDraftAdoption();
         draftConversationIdRef.current = conversationId;
         setContent(nextContent);
+        if (origin !== undefined) setDraftOrigin(origin);
+        else if (!nextContent.trim()) setDraftOrigin(null);
         if (Array.isArray(attachments)) {
             setFiles(currentFiles => Array.from(new Map([ ...currentFiles, ...attachments ].map(file => [ file.id, file ])).values()));
         }
@@ -173,6 +179,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
         if (!isComposerEnabled || activeConversationIdRef.current !== conversationId) return;
         if (draftAdoptionRef.current) return;
         setDraftError('');
+        let origin;
         // Local upload ids are evidence ids, not native composer media ids.
         // Adopt the stored result before changing the draft or releasing focus.
         if (localResult) {
@@ -188,6 +195,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                 if (activeConversationIdRef.current !== conversationId || draftAdoptionRef.current !== request) return;
                 nextContent = response.data.body;
                 attachments = response.data.attachments;
+                origin = response.data.authoring;
             } catch (error) {
                 if (activeConversationIdRef.current === conversationId && draftAdoptionRef.current === request) {
                     setDraftError(error.message || 'Could not prepare the reply attachments. Review the result before trying again.');
@@ -200,7 +208,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                 }
             }
         }
-        updateDraftContent(nextContent, attachments);
+        updateDraftContent(nextContent, attachments, origin);
         assistant.releaseDraft();
         setDraftFocusRequest(previous => ({ conversationId, version: (previous?.version || 0) + 1 }));
     };
@@ -233,6 +241,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
             key={ conversationId }
             conversationId={ conversationId }
             message={ draftContent }
+            draftOrigin={ draftOrigin }
             disabled={ isAssistantDisabled || !isConversationReady || isLoading || isSending }
             onMessageChange={ updateDraftContent }
             onLoadingMessageChange={ nextLoadingContent => {

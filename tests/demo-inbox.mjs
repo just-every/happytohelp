@@ -1,3 +1,4 @@
+import {migrationStatements} from './helpers/migration-statements.mjs';
 import { registerHooks } from 'node:module';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -12,8 +13,8 @@ const { getPlatformProxy } = await import('wrangler');
 const proxy = await getPlatformProxy({persist: false});
 try {
   const env = proxy.env, db = env.DB;
-  for (const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql']) {
-    for (const [,sql] of (await readFile(new URL('../migrations/' + file, import.meta.url), 'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)) await db.prepare(sql).run();
+  for (const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0103_contact_erasure.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql']) {
+    for (const sql of migrationStatements(await readFile(new URL('../migrations/' + file, import.meta.url), 'utf8'))) await db.prepare(sql).run();
   }
   await db.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('original','Original','original-widget','https://original.test',1)").run();
   for (const [user, role] of [['owner','owner'],['other','owner'],['operator','operator'],['admin','admin']]) {

@@ -1,12 +1,15 @@
 # Delivery packaging
 
-`build.mjs` calls the unchanged Base delivery producer exported from
-the modules/delivery-producer directory at `d6a1bd83ee80ec3d603ded2c067d4c504d8a2bf5`.
+`build.mjs` calls the Base delivery producer at the current selected origin
+`995225ee695bb57b3cfbf8dbf293ee48070dcbe9`. The previously documented origin
+`6047b4cf5c2312f834f113497974dd5947db69cb` is historical. All 19 portable files
+are unchanged from the preceding `0d6a92fbdcb65c5f63033d15f28222fa47e5ed3e` export.
 `base/packaging.json` is HappyToHelp policy; Base runtime files in `base/` are
-maintained upstream. Re-export from that pinned source to update them.
+maintained upstream. Use the official exporter when a selected producer change
+requires an update.
 
-The pinned producer requires `project.sourceRepository` as a GitHub owner and
-repository pair in its packaging input. HappyToHelp uses `just-every/happytohelp`; the public
+The producer accepts a canonical GitHub HTTPS source URL and retains a GitHub
+owner and repository pair as legacy packaging input. HappyToHelp uses `just-every/happytohelp`; the public
 `rer-project.json` descriptor records the corresponding HTTPS destination
 `https://github.com/just-every/happytohelp`. Publication identity checks exercise
 the actual generator and compare these two representations of the same source.
@@ -19,3 +22,9 @@ Packaging neither deploys nor authorizes provider effects. D1/R2 recovery does
 not cover Durable Object storage. `tests/delivery-base.mjs` compares the same
 emitted candidate with the test-only pre-adoption oracle; the only expected MIME
 changes are the two font LICENSE.txt files, now text/plain.
+
+The export contains 12 root runtime files, four generators and three setup-schema
+files. The upstream exporter changes only the setup-validator import and schema
+URL in `base/setup-manifest.mjs` to their exported locations. This generated
+projection is tracked in the source origin mapping and excluded from the record
+of verbatim copies. Packaging policy remains edition-owned.

@@ -1,5 +1,7 @@
 export type SetupDraft = { ownerName: string; email: string; password: string; name: string; allowedOrigin: string; primaryColor: string; setupToken: string };
 export const emptyDraft: SetupDraft = { ownerName: '', email: '', password: '', name: '', allowedOrigin: '', primaryColor: '#7c3aed', setupToken: '' };
+/** The colour the picker and the drawing show: the draft's while it is a full #rrggbb hex, the default while one is being typed. */
+export const shownColour = (value: string) => /^#[0-9a-f]{6}$/i.test(value) ? value : emptyDraft.primaryColor;
 const keys = ['ownerName', 'email', 'name', 'allowedOrigin', 'primaryColor'] as const;
 const storageKey = 'h2h-setup-draft-v1';
 export function loadDraft(): SetupDraft {

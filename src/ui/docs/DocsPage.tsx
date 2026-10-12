@@ -9,6 +9,7 @@ import { assignTitleStrokes } from './title-strokes';
 import type { DocsView } from './types';
 import { useCurrentDocs } from './useCurrentDocs';
 import '../homepage/outfit.css';
+import '../homepage/brand-tokens.css';
 import '../homepage/homepage.css';
 import '../homepage/drawings.css';
 import './docs.css';

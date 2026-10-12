@@ -1,3 +1,5 @@
+import ResolutionSummary from './conversation/ResolutionSummary';
+import ConversationTags from './conversation/ConversationTags';
 import SlateInquiryLink from '../../native/SlateInquiryLink';
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -55,6 +57,8 @@ export default function ConversationSidebar({ conversation }) {
 
     return <div className="conversation-details">
         <SlateInquiryLink conversation={ conversation } />
+        <ConversationTags conversation={conversation}/>
+        <ResolutionSummary resolution={conversation.resolution} history={conversation.resolutionHistory}/>
         <ConversationAssignmentControl conversation={ conversation } />
         <ConversationParticipantsControl conversation={ conversation } />
         <ConversationContactDetails

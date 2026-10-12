@@ -1,47 +1,43 @@
 # Author this edition and select its modules
 
-HappyToHelp is an edition-owned application. Its complete UI, integrations,
-schema, operation commands and policy live here. The source graph records real
-existing paths; it does not generate application files or restrict owner changes
-to configuration. First-party work, owner forks and other publishers use the same
-Base edition-authoring 1.1.0 commands.
+HappyToHelp owns its complete UI, integrations, schema, commands and policy.
+`edition.json` records selected licensed source, immutable origins/mappings and
+retained comparison archives; it does not generate the product or restrict owner
+changes to configuration. `base-copies.json` records byte-exact Base copies and
+Git modes. [Source origins](SOURCE-PROVENANCE.md) retains attribution/licensing.
 
-The retained tool is selected independently of runtime Base. The observed Base
-runtime/tool revision is `ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1`:
-`src/base` came from the foundation/runtime directory,
-`scripts/edition-authoring` from `edition-authoring`, and `scripts/operations.mjs`
-from `operations/operations.mjs`.
-The template ancestry and independently selected onboarding and email revisions
-are recorded in [SOURCE-PROVENANCE.md](SOURCE-PROVENANCE.md).
+Run the app through `node scripts/rer.mjs`. The self-contained CLI export contains
+the shared operations implementation. Setup reads `rer-setup.json` with the
+maintained manifest reader, while native owner/password identity stays in this
+edition's adapter. Do not patch copied Base files or create another setup schema,
+secret generator, process runner, readiness loop or archive engine.
 
-`edition.json` selects retained local files. Its optional private donor origins,
-parent comparison and unused donor archives are absent from the public edition.
-The source lock binds the current local source and exact tool bytes, so
-`pnpm source:check` works offline without accessing the private donor. Historical
-revision attribution does not claim current bytes equal upstream bytes. A future
-comparison needs a separately authorized source selection and retained baseline.
+Stage intentional changes, refresh the lock and verify it:
 
-Inspect with `pnpm source:inspect`. After the owner freezes the intended tree,
-stage actual inputs, run `pnpm source:lock`, stage sources.lock.json and retained
-.edition/sources, commit, then run `pnpm source:check`. The check binds effective
-files and exact tool bytes. Do not lock during parallel edits. `source:release`
-takes an absent output directory and requires a clean committed source check;
-its adjacent receipt is distributed separately from the portable repository.
-No command here deploys, pushes, tags or replaces another edition.
+```sh
+pnpm run source:inspect
+pnpm run source:lock
+pnpm run source:check
+node scripts/edition-authoring/cli.mjs verify-base --offline
+```
 
-Each reusable capability's module.json lists its source paths, including useful
-migrations/tests. To reuse one, select the required paths at an immutable source
-commit and choose a destination in the consuming edition. Use ordinary imports
-and edition adapters. Paths outside that capability listed as dependencies remain
-explicit choices. Hono adapters using this edition's platform/auth contract need a
-consumer-owned authorization adapter; copying them alone is not integration.
-Migrations apply once in the consumer's existing ledger; source adoption never
-resets existing data or rewrites applied migration history.
+Local source locks and offline copy checks prove local byte/mode custody. They
+do not authenticate origin records or qualify the app. Tests use committed Git
+origin fixtures to exercise refusal of drift, forged hashes, missing paths,
+unrecorded copies and modes. Before merging a Base refresh, fetch its selected
+immutable official commit and run the stronger origin checks:
 
-Neutral AI assistance entry points can be selected without an inbox, provider,
-training runner or D1 schema. `src/modules/ai-support/module.json` lists the
-context-only selection; `tests/module-boundaries.mjs` copies it outside the checkout and
-exercises it there. After a source commit exists, a recipient may use the standard
-Git selector and `materialize` to produce a build workspace, then normal install,
-build and product verification. `extract`, `compare` and `changes` inform a future
-update; they do not choose its merge method or infer behavioral acceptance.
+```sh
+pnpm run source:verify-base-origin -- --base /absolute/base-checkout
+pnpm run test:base-origin -- --base /absolute/base-checkout
+```
+
+Use maintained `record-base` for new official copies. Preserve the selected
+archives and dependency closure, asset provenance and immutable applied SQL.
+Native passwords, tenant authority, privacy and import/undo equality remain
+product requirements. Public projection identities preserve approved original
+bytes separately from public source; never waive a publication scanner finding.
+
+Local, exact-head CI, hosted installation, configured providers, accessibility
+and public release are separate acceptance surfaces. Keep qualification evidence
+outside product source and retain [the owner holds](../HANDOVER.md#acceptance-boundaries).

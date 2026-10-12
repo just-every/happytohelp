@@ -16,7 +16,7 @@ export async function sendCommand(projectId, conversationId, action, data) {
         return nativeRequest(`/api/conversations/${encodeURIComponent(conversationId)}/messages`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ localId: data.local_id, content: data.content, expectedRevision: frontier.revision,
-                expectedLastMessageId: frontier.lastMessageId, mediaIds: data.media_ids, resolve: data.resolve }),
+                expectedLastMessageId: frontier.lastMessageId, mediaIds: data.media_ids, resolve: data.resolve, authoring: data.authoring }),
         });
     }
     return nativeRequest(`/api/dashboard/projects/${encodeURIComponent(projectId)}/conversations/${encodeURIComponent(conversationId)}/actions`, {

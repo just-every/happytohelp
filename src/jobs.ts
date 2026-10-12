@@ -1,3 +1,5 @@
+import {dispatchIntegrations} from './modules/api-integrations/dispatch'
+import {advanceImport,getWorkRun} from './modules/move-in/service'
 import {generationEffects} from './edition/ai/generation-effects'
 import {requestContextModel} from './edition/ai/customer-context-provider'
 import {isProjectActive} from './platform/project-status'
@@ -17,6 +19,8 @@ import type { Actor } from './platform/env'
 
 export async function consumeJob(job:Job,env:Env) {
  if(job.type!=='lead.process'&&!await isProjectActive(env,job.projectId))return
+ if(job.type==='integrations'){await dispatchIntegrations(env,job.projectId);return}
+ if(job.type==='move-in'){const run=await getWorkRun(env,job.id);if(run&&run.project_id===job.projectId)await advanceImport(env,run);return}
  if(await handleGeneration(env,job,generationEffects))return
  if(await consumeKnowledge(job,env))return
  if(await consumeContextJob(job,env,requestContextModel))return
@@ -29,6 +33,7 @@ export async function consumeJob(job:Job,env:Env) {
  throw new Error(`Unknown persisted job type: ${job.type}`)
 }
 export async function runScheduled(env:Env) {
+ await dispatchIntegrations(env)
  const pending=await env.DB.prepare("SELECT project_id,conversation_id,MAX(id) last_id FROM conversation_outbox WHERE delivered_at IS NULL AND EXISTS(SELECT 1 FROM projects p WHERE p.id=conversation_outbox.project_id) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=conversation_outbox.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL) GROUP BY project_id,conversation_id LIMIT 100").all<{project_id:string;conversation_id:string;last_id:number}>()
  for(const row of pending.results){
   if(!await isProjectActive(env,row.project_id))continue

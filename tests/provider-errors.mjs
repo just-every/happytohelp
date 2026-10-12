@@ -10,6 +10,7 @@ import { newConfig } from '../local-agent/lib/config.mjs';
 import { LocalAgentApi } from '../local-agent/lib/api.mjs';
 import { providerFixture, strictOutput } from './provider-helpers/fixture.mjs';
 import { checkUnmarkedFailures } from './provider-helpers/unmarked-failures.mjs';
+import { migrationStatements } from './helpers/migration-statements.mjs';
 const packages = await readdir('node_modules/.pnpm');
 const { Miniflare, convertV4MiniflareOptions } = await import('../node_modules/.pnpm/' + packages.find(x => x.startsWith('miniflare@')) + '/node_modules/miniflare/dist/src/index.js');
 
@@ -19,8 +20,8 @@ test('real runner and native D1 persist provider errors; malicious payloads are 
   const mf = new Miniflare(convertV4MiniflareOptions({ modules: true, script: await readFile(join(directory, 'worker.mjs'), 'utf8'), compatibilityDate: '2026-09-01', compatibilityFlags: ['nodejs_compat'], d1Databases: ['DB'], r2Buckets: ['FILES'], queueProducers: { JOBS: 'test-only' } }));
   try {
     const db = await mf.getD1Database('DB');
-    for (const file of ['0001_identity.sql', '0002_conversations.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '030_local_computer.sql', '0070_management.sql', '0050_knowledge.sql']) {
-      for (const sql of (await readFile('migrations/' + file, 'utf8')).split(';').map(s => s.trim()).filter(Boolean)) await db.prepare(sql).run();
+    for (const file of ['0001_identity.sql', '0002_conversations.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '030_local_computer.sql', '0070_management.sql', '0050_knowledge.sql', '020_ai_support.sql', '112_conversation_outcomes.sql']) {
+      for (const sql of migrationStatements(await readFile('migrations/' + file, 'utf8'))) await db.prepare(sql).run();
     }
     await db.batch([
       db.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','http://localhost',1)"),

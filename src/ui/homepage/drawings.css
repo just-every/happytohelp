@@ -1,15 +1,6 @@
 /* Drawings: ink linework on paper with soft cyan accents. The aqua family is the only colour on the page: the drawings use
-   it here (this file has the tokens, the shared parts and the hero; section-drawings.css the drawings below it), and the
-   page's discs, links, dividers and closing line (homepage.css) borrow the same tokens. */
-.h2h-home {
-  --d-ink: #141414;
-  --d-ink-soft: #6b6a65;
-  --d-cyan: #8fe3ee;
-  --d-cyan-deep: #5ad8ec;
-  --d-cyan-tint: #d6f5fa;
-  --d-cyan-wash: #e8f9fc;
-  --d-line: rgba(20, 20, 20, 0.14);
-}
+   it here (this file has the shared parts and the hero; section-drawings.css the drawings below it), and the page's discs,
+   links, dividers and closing line (homepage.css) borrow the same tokens, which brand-tokens.css defines. */
 .h2h-home .drawing { position: relative; margin: 0; font-size: 13px; line-height: 1.35; color: var(--d-ink); }
 .h2h-home :where(.drawing ul, .drawing ol) { list-style: none; margin: 0; padding: 0; }
 .h2h-home :where(.drawing p) { margin: 0; color: inherit; }

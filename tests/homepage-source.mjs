@@ -37,7 +37,7 @@ test('the HappyToHelp mark has one geometry: the header draws it and the brand f
     assert.deepEqual([...svg.matchAll(/<path d="([^"]+)"/g)].map(match => match[1]), favicon ? [mark.bubble, ...mark.face] : [mark.bubble, ...mark.face, ...mark.sparks], favicon ? 'a bubble, two eyes and a smile: the favicon leaves the sparks out' : 'a bubble, two eyes, a smile and three sparks');
     assert.deepEqual([...new Set([...svg.matchAll(/(?:stroke|fill)="(#[0-9a-f]{6})"/g)].map(match => match[1]))].sort(), favicon ? ['#141414', '#f6f2ea'] : ['#8fe3ee'], favicon ? 'ink and paper only: no aqua in the favicon' : 'the drawings\' cyan sparks only');
   }
-  assert.match(await read('src/ui/homepage/drawings.css'), new RegExp(`--d-cyan: ${mark.sparkColour};`), 'the sparks use the drawings\' existing cyan');
+  assert.match(await read('src/ui/homepage/brand-tokens.css'), new RegExp(`--d-cyan: ${mark.sparkColour};`), 'the sparks use the drawings\' existing cyan');
   const png = async path => { const bytes = await readFile(url(path)); return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20), colourType: bytes[25] }; };
   assert.deepEqual(await png('public/homepage/media/brands/happytohelp-favicon.png'), { width: 512, height: 512, colourType: 6 }, 'the PNG fallback is square, 512px and transparent');
   assert.deepEqual(await png('public/homepage/media/brands/happytohelp-apple-touch-icon.png'), { width: 180, height: 180, colourType: 2 }, 'the home-screen icon is 180px on an opaque background');
@@ -88,7 +88,7 @@ test('homepage styles are scoped so they cannot leak into the dashboard', async 
 test('one open-licensed typeface is self-hosted and recorded', async () => {
   const route = await read('src/routes/index.tsx');
   assert.match(route, /rel: 'preload', href: '\/fonts\/outfit\/outfit-latin-wght-normal\.woff2', as: 'font'/);
-  assert.doesNotMatch(route, /Inter|https?:\/\//);
+  assert.doesNotMatch(route, /\bInter\b|https?:\/\//, 'no Inter typeface (Intercom in the meta description is the product it replaces) and no remote URL');
   const homepageSource = await Promise.all((await readdir(url('src/ui/homepage'), { recursive: true })).filter(file => /\.(tsx?|css)$/.test(file)).map(file => read(`src/ui/homepage/${file}`)));
   for (const text of homepageSource) assert.doesNotMatch(text, /fonts\.googleapis|fonts\.gstatic|cdn\.|unpkg|typekit/i);
   const faces = await read('src/ui/homepage/outfit.css');
@@ -135,7 +135,7 @@ test('the page is composed from one component per section', async () => {
   assert.ok(!(await exists('src/ui/homepage/drawings/Callout.tsx')), 'the hero callouts stay removed');
   const heroSource = await read('src/ui/homepage/Hero.tsx');
   assert.match(heroSource, /<HeroHandoff \/>/);
-  assert.match(heroSource, /<p className="hero-free">100% free and open source\.<\/p>\s*<Flourish \/>\s*<\/div>/, 'the flourish follows the copy column, under the calls to action');
+  assert.match(heroSource, /<p className="hero-free">100% free, open source alternative to <strong>Zendesk<\/strong>, <strong>Intercom<\/strong>, <strong>Help&nbsp;Scout<\/strong> and <strong>Freshdesk<\/strong><\/p>\s*<Flourish \/>\s*<\/div>/, 'the flourish follows the copy column, under the calls to action');
   const ids = [['Hero', 'top'], ['Free', 'free'], ['HelpBeforeTheyAsk', 'help-before-they-ask'], ['Product', 'product'], ['MoveIn', 'move-in'], ['GetStarted', 'get-started']];
   for (const [name, id] of ids) assert.match(await read(`src/ui/homepage/${name}.tsx`), new RegExp(`id="${id}"`), `${name} keeps the anchor #${id}`);
   assert.match(home, /href="#product"/, 'the skip link still targets #product');
@@ -145,7 +145,7 @@ test('the page is composed from one component per section', async () => {
   assert.match(repository, /^export const installerUrl = '\/docs\/install';$/m, 'Read the installation guide opens its docs page');
   assert.match(repository, /^export const licenseUrl = `\$\{sourceUrl\}\/blob\/main\/LICENSE`;$/m, 'MIT licence stays the repository\'s LICENSE');
   const route = await read('src/routes/index.tsx');
-  assert.match(route, /Customer support, solved\. Your Codex or Claude fixes the problem and writes the reply; you press Send\. Chat widget, shared inbox, help centre and suggested replies\. 100% free and open source, MIT licensed\./);
+  assert.match(route, /Customer support, solved\. Your Codex or Claude fixes the problem and writes the reply; you press Send\. Chat widget, shared inbox, help centre and suggested replies\. 100% free, open source alternative to Zendesk, Intercom, Help Scout and Freshdesk\. MIT licensed\./);
   assert.match(route, /withVisualEdits\(Homepage\)/);
   for (const file of await readdir(url('src/ui/homepage'))) {
     if (/\.tsx$/.test(file)) assert.ok((await read(`src/ui/homepage/${file}`)).split('\n').length < 60, `${file} stays small`);
@@ -264,7 +264,8 @@ test('the homepage source is free of cost, hosting, provider and Run Edit Run te
   for (const file of files) assert.doesNotMatch(await read(file), banned, `${file} carries no cost, hosting, provider or Run Edit Run text`);
   const hero = await read('src/ui/homepage/Hero.tsx');
   assert.match(hero, /Your Codex or Claude fixes the problem and writes the reply\. You press Send\./);
-  assert.match(hero, /100% free and open source\./);
+  assert.match(hero, /100% free, open source alternative to <strong>Zendesk<\/strong>, <strong>Intercom<\/strong>, <strong>Help&nbsp;Scout<\/strong> and <strong>Freshdesk<\/strong>/);
+  assert.match(await read('src/ui/homepage/homepage.css'), /\.hero-free strong \{ font-weight: 600; \}/, 'the company names take the page\'s bold weight');
   const free = await read('src/ui/homepage/Free.tsx');
   assert.match(free, /HappyToHelp is 100% free and open source\. Free as in code, and free as in cost\. It’s MIT licensed, so it’s yours to use, change and run however you like\./);
   assert.match(free, /\['No seats\.', 'No plans\.', 'No fees\.'\]/);

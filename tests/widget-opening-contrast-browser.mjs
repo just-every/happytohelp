@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {chromium} from 'playwright';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {createLocalMailRuntime} from './helpers/local-mail-runtime.mjs';
 import {decodePng, measureContrastInRegions} from './helpers/accessibility-contrast.mjs';
 
 const evidence = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/widget-opening-contrast');
 await mkdir(evidence, {recursive: true});
-const runtime = await createRuntime();
+const runtime = await createLocalMailRuntime();
 const records = [];
 let browser, success = false;
 const call = async (path, body, token) => {
@@ -125,8 +125,7 @@ try {
         const transcript = await page.locator('.happytohelp-chatlist-container').elementHandle();
         try {
             await transcript.evaluate(element => {element.scrollTop = element.scrollHeight;});
-            // scroll-behavior is smooth: assignment starts motion, so sample
-            // the real bottom only once that motion has finished.
+            // Wait for the real smooth scroll to reach its bottom before sampling.
             await page.waitForFunction(element => element.scrollTop > 0 &&
                 Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) <= 1,
                 transcript, {timeout: 15000});

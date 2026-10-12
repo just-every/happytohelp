@@ -4,6 +4,7 @@ import { rateLimits, type RateLimitName } from './limit-config'
 import { consumeCounter, refundCounter, type CounterPosition } from './usage-counters'
 
 const windows: Record<RateLimitName, number> = {
+ apiRequestsPerTokenMinute: 60,
  widgetSessionsPerIpHour: 3600,
  widgetSessionsPerProjectHour: 3600,
  conversationsPerContactHour: 3600,
@@ -22,6 +23,7 @@ const windows: Record<RateLimitName, number> = {
 }
 
 const messages: Record<RateLimitName, string> = {
+ apiRequestsPerTokenMinute: 'API token request limit exceeded. Try again shortly.',
  widgetSessionsPerIpHour: 'Too many chat sessions were started from this network. Please try again later.',
  widgetSessionsPerProjectHour: 'This chat is very busy right now. Please try again later.',
  conversationsPerContactHour: 'Too many new conversations. Please continue an existing conversation or try again later.',

@@ -5,9 +5,10 @@ import {candidateRoot, checkedPath, outputLocation, relativePath} from './paths.
 import {keys, string} from './bindings.mjs';
 import {generateProjectDescriptor} from './generators/project.mjs';
 import {generateManagedWorkflow} from './generators/managed.mjs';
+import {loadSetupManifest, setupSelection} from './setup-manifest.mjs';
 
 export function packagingConfig(config) {
-  keys(config, ['schema','project','managed','artifact','edition'], 'packaging configuration');
+  keys(config, ['schema','project','managed','artifact','edition','setup'], 'packaging configuration');
   if (config.schema !== 1) throw Error('Packaging configuration schema must be 1');
   const project = generateProjectDescriptor(config.project);
   if (project.deployment.target !== 'cloudflare-workers') throw Error('Packaging requires the cloudflare-workers target');
@@ -20,7 +21,7 @@ export function packagingConfig(config) {
     relativePath(config.edition.manifestFile, 'edition manifest');
     string(config.edition.componentId, 'edition component');
   }
-  return {project, workflow};
+  return {project, workflow, setup: setupSelection(config.setup)};
 }
 
 export async function checkEdition(root, selection) {
@@ -34,17 +35,24 @@ export async function checkEdition(root, selection) {
 /** Single source policy produces all three files. Output is fresh, credential-free data. */
 export async function producePackage({root = process.cwd(), config, output = 'rer-package'} = {}) {
   root = await candidateRoot(root);
-  const {project, workflow} = packagingConfig(config);
+  const {project, workflow, setup} = packagingConfig(config);
   await checkEdition(root, config.edition);
+  const selectedSetup = await loadSetupManifest(root, setup);
+  const descriptor = selectedSetup
+    ? {...project, setup: {path: selectedSetup.path, sha256: selectedSetup.sha256}}
+    : project;
   relativePath(output, 'package output');
   const destination = await outputLocation(root, `${output}/rer-project.json`);
   await mkdir(destination.directory, {recursive:true});
   try {
     const artifact = await produceArtifact({...config.artifact, root, output:`${output}/delivery-artifact/${project.deployment.artifactFile}`});
     await mkdir(join(destination.directory, '.github/workflows'), {recursive:true});
-    await writeFile(destination.manifest, `${JSON.stringify(project, null, 2)}\n`, {flag:'wx'});
+    await writeFile(destination.manifest, `${JSON.stringify(descriptor, null, 2)}\n`, {flag:'wx'});
+    if (selectedSetup) await writeFile(join(destination.directory, selectedSetup.path), selectedSetup.bytes, {flag:'wx'});
     await writeFile(join(destination.directory, '.github/workflows/rer-managed.yml'), workflow, {flag:'wx'});
-    return {artifact, project:destination.manifest, workflow:join(destination.directory, '.github/workflows/rer-managed.yml')};
+    const result = {artifact, project:destination.manifest, workflow:join(destination.directory, '.github/workflows/rer-managed.yml')};
+    if (selectedSetup) result.setup = join(destination.directory, selectedSetup.path);
+    return result;
   } catch (error) {
     // The destination was checked empty; clean only this call's package.
     await rm(destination.directory, {recursive:true, force:true});
@@ -55,7 +63,8 @@ export async function producePackage({root = process.cwd(), config, output = 're
 /** Seed-owned thin callers use exactly the same artifact implementation. */
 export async function produceSeedArtifact({root = process.cwd(), config, output} = {}) {
   root = await candidateRoot(root);
-  const {project} = packagingConfig(config);
+  const {project, setup} = packagingConfig(config);
   await checkEdition(root, config.edition);
+  await loadSetupManifest(root, setup);
   return produceArtifact({...config.artifact, root, output:output ?? `delivery-artifact/${project.deployment.artifactFile}`});
 }

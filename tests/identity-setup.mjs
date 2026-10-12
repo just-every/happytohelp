@@ -1,3 +1,4 @@
+import {randomBytes} from 'node:crypto'
 import {registerHooks} from 'node:module'
 import {existsSync,readFileSync} from 'node:fs'
 import assert from 'node:assert/strict'
@@ -21,7 +22,7 @@ try {
  await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';')[0]).run()
  await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('CREATE TABLE user_settings'))).run()
  await db.prepare(readFileSync(new URL('../migrations/0098_personal_visual_inspiration.sql',import.meta.url),'utf8')).run()
- const entry={name:'First Owner',email:'Owner@Example.invalid',password:'long-test-password',allowedOrigin:'https://example.invalid/page'}
+ const entry={name:'First Owner',email:'Owner@Example.invalid',password:randomBytes(24).toString('base64url'),allowedOrigin:'https://example.invalid/page'}
  const submit=(body=entry,headers={})=>app.request('http://127.0.0.1/bootstrap',{method:'POST',headers:{'content-type':'application/json',origin:'http://127.0.0.1',...headers},body:typeof body==='string'?body:JSON.stringify(body)},env)
  const state=async()=>(await app.request('http://127.0.0.1/setup',{},env)).json()
  assert.deepEqual(await state(),{available:true})
@@ -75,7 +76,8 @@ try {
  // The managed credential shares the permanent atomic claim, even after owner deletion.
  await db.prepare('DELETE FROM owner_setup').run()
  env.RER_INSTALLATION_ID='managed-fixture';env.H2H_SETUP_TOKEN='private-owner-setup-fixture';env.H2H_SETUP_OWNER_EMAIL='OWNER@example.invalid'
- const managedEntry={...entry,setupToken:env.H2H_SETUP_TOKEN,ownerName:'  Actual Owner  ',primaryColor:'#AABBCC'}
+ const mapped={ownerName:'  Actual Owner  ',email:entry.email,password:entry.password,allowedOrigin:entry.allowedOrigin,primaryColor:'#AABBCC'};
+ const managedEntry={...entry,setupToken:env.H2H_SETUP_TOKEN,...Object.fromEntries(['ownerName','email','password','allowedOrigin','primaryColor'].map(key=>[key,mapped[key]]))}
  const managedResponses=await Promise.all([submit(managedEntry),submit(managedEntry)])
  assert.deepEqual(managedResponses.map(r=>r.status).sort(),[201,409])
  assert.equal((await db.prepare('SELECT count(*) n FROM user_settings').first()).n,0)
@@ -84,6 +86,8 @@ try {
  assert.match((await db.prepare('SELECT verification_secret FROM projects').first()).verification_secret,/^[0-9a-f]{64}$/,'owner setup gives the first project a server secret')
  assert.deepEqual(JSON.parse((await db.prepare('SELECT settings_json FROM project_settings').first()).settings_json),{primary_color:'#aabbcc'})
  const managedOwner=await managedResponses.find(r=>r.status===201).json()
+ assert(await verifyPassword(entry.password,(await db.prepare('SELECT password_hash FROM credentials').first()).password_hash))
+ assert.equal((await app.request('http://127.0.0.1/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:mapped.email,password:entry.password})},env)).status,200)
  const profile=(method='GET',body)=>app.request('http://127.0.0.1/management/profile',{method,headers:{authorization:`Bearer ${managedOwner.token}`,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})},env)
  assert.equal('visual_inspiration' in (await (await profile()).json()).data,false)
  assert.equal((await app.request('http://127.0.0.1/management/profile',{},env)).status,401)

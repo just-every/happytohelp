@@ -39,7 +39,8 @@ body.workspace-page .widget-code {
     &__secret-frame { min-width: 0; border: 1px solid #29292e; border-radius: 8px; background: #0d0d0f; color: #e4e4e7; color-scheme: dark; }
     &__snippet { overflow: hidden; }
     &__snippet pre { margin: 0; max-height: 360px; padding: 4px 16px 16px; overflow: auto; }
-    &__snippet code { display: block; padding: 0; background: transparent; color: #e4e4e7; font-size: 12px; line-height: 1.6; tab-size: 4; }
+    &__snippet pre:focus-visible { outline: 2px solid #c4b5fd; outline-offset: -2px; }
+    &__snippet code { display: block; overflow: visible; padding: 0; background: transparent; color: #e4e4e7; font-size: 12px; line-height: 1.6; tab-size: 4; }
     // Reset the inherited VS2015 tokens before applying one complete palette.
     &__snippet code span { color: inherit; background: transparent; }
     &__snippet-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; padding: 10px 12px; }

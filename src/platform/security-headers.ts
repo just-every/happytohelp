@@ -7,8 +7,8 @@ type FramingEnv = { RER_MANAGEMENT_ORIGIN?: unknown; [binding: string]: unknown 
  *   own sites; they carry no framing restriction.
  * preview: the website-preview proxy on PREVIEW_ORIGIN owns its sandbox CSP and
  *   its framing contract (framed by the app origin), so it is left untouched.
- * The widget script and other static assets are served by the asset layer and
- * never pass through the Worker.
+ * The widget script and other built files are answered first by the Worker
+ * entry (staticAssetResponse) and carry no application headers.
  */
 export type HeaderSurface = 'application' | 'embeddable' | 'preview'
 

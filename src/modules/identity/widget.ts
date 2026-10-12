@@ -3,7 +3,9 @@ import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
 import { id,requiredString } from '../../platform/db'
+import {contactWritable} from '../../platform/contact-state'
 import { clientAddress,enforceRateLimits } from '../../platform/rate-limits'
+import {updateSignedWidgetMetadata} from './widget-metadata'
 async function verify(secret:string,value:string,signature:string){if(!/^[a-f0-9]{64}$/i.test(signature))return false;const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['verify']);return crypto.subtle.verify('HMAC',key,Uint8Array.from(signature.match(/../g)!,x=>parseInt(x,16)),new TextEncoder().encode(value))}
 export const widget=new Hono<AppEnv>()
 widget.post('/widget/session',async c=>{
@@ -18,6 +20,6 @@ widget.post('/widget/session',async c=>{
  const contactId=existing?.id||id(),token=id()+id(),now=Date.now();const statements=[]
  if(!existing)statements.push(c.env.DB.prepare('INSERT INTO contacts(id,project_id,name,email,external_id,created_at,is_verified) VALUES(?,?,?,?,?,?,?) ON CONFLICT(project_id,external_id) DO NOTHING').bind(contactId,project.id,typeof b.name==='string'?b.name:null,typeof b.email==='string'?b.email:null,verified?identifier:null,now,verified?1:0))
  await c.env.DB.batch(statements.length?statements:[c.env.DB.prepare('SELECT 1')]);const actual=verified?await c.env.DB.prepare('SELECT id,metadata_json FROM contacts WHERE project_id=? AND external_id=? AND is_verified=1').bind(project.id,identifier).first<{id:string}>():{id:contactId};if(!actual)throw new HTTPException(409,{message:'Verified contact identity conflict'})
- if(b.metadata&&typeof b.metadata==='object'&&!Array.isArray(b.metadata)&&b.metadata.hash){const {hash,...metadata}=b.metadata;const encoded=JSON.stringify(metadata).replaceAll('/','\\/').replace(/[\u007f-\uffff]/g,char=>'\\u'+char.charCodeAt(0).toString(16).padStart(4,'0'));if(!project.verification_secret||!await verify(project.verification_secret,encoded,hash))throw new HTTPException(403,{message:'Metadata signature invalid'});await c.env.DB.prepare('UPDATE contacts SET metadata_json=? WHERE id=? AND project_id=?').bind(JSON.stringify(metadata),actual.id,project.id).run()}
- await c.env.DB.prepare("INSERT INTO sessions VALUES(?,?,?,'contact',?,?,NULL)").bind(await hashToken(token),actual.id,project.id,actual.id,now+2592000000).run();return c.json({token,contactId:actual.id,projectId:project.id,verified},201)
+ if(b.metadata&&typeof b.metadata==='object'&&!Array.isArray(b.metadata)&&b.metadata.hash){const {hash,...metadata}=b.metadata;const encoded=JSON.stringify(metadata).replaceAll('/','\\/').replace(/[\u007f-\uffff]/g,char=>'\\u'+char.charCodeAt(0).toString(16).padStart(4,'0'));if(!project.verification_secret||!await verify(project.verification_secret,encoded,hash))throw new HTTPException(403,{message:'Metadata signature invalid'});const updated=await updateSignedWidgetMetadata(c.env,project.id,actual.id,metadata);if(!updated.meta.changes)throw new HTTPException(403)}
+ const admitted=await c.env.DB.prepare(`INSERT INTO sessions SELECT ?,?,?,'contact',?,?,NULL WHERE EXISTS(SELECT 1 FROM contacts WHERE id=? AND project_id=? AND ${contactWritable} AND coalesce(json_extract(metadata_json,'$.is_blocked'),0)!=1)`).bind(await hashToken(token),actual.id,project.id,actual.id,now+2592000000,actual.id,project.id).run();if(!admitted.meta.changes)throw new HTTPException(403);return c.json({token,contactId:actual.id,projectId:project.id,verified},201)
 })

@@ -14,7 +14,49 @@
         "paths": [
           "src/base",
           "scripts/edition-authoring",
-          "scripts/operations.mjs"
+          "public/fonts/outfit"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "default-seed/public/fonts/outfit/LICENSE.txt",
+            "default-seed/public/fonts/outfit/outfit-latin-ext-wght-normal.woff2",
+            "default-seed/public/fonts/outfit/outfit-latin-wght-normal.woff2",
+            "edition-authoring/README.md",
+            "edition-authoring/base-copies.mjs",
+            "edition-authoring/cli.mjs",
+            "edition-authoring/files.mjs",
+            "edition-authoring/manifest.mjs",
+            "edition-authoring/parent-comparison.mjs",
+            "edition-authoring/projection-lock.mjs",
+            "edition-authoring/release.mjs",
+            "edition-authoring/sources.mjs",
+            "edition-authoring/updates.mjs",
+            "foundation/runtime/deployment-health.ts",
+            "foundation/runtime/dispatch.ts",
+            "foundation/runtime/font-head.ts",
+            "foundation/runtime/font-response.ts",
+            "foundation/runtime/page-style.ts",
+            "foundation/runtime/rejected-response.ts",
+            "foundation/runtime/setup.ts",
+            "foundation/runtime/static-assets.ts",
+            "foundation/runtime/theme-frame.ts"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/base",
+            "originPath": "foundation/runtime"
+          },
+          {
+            "path": "scripts/edition-authoring",
+            "originPath": "edition-authoring"
+          },
+          {
+            "path": "public/fonts/outfit",
+            "originPath": "default-seed/public/fonts/outfit"
+          }
         ]
       }
     },
@@ -28,6 +70,90 @@
         "kind": "local",
         "paths": [
           "scripts/base-onboarding"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "onboarding/README.md",
+            "onboarding/activity.mjs",
+            "onboarding/adapter-auth.mjs",
+            "onboarding/adapter-hosting.mjs",
+            "onboarding/adapter-labels.mjs",
+            "onboarding/adapter-settings.mjs",
+            "onboarding/adapter.mjs",
+            "onboarding/agent-handoff.mjs",
+            "onboarding/app-processes.mjs",
+            "onboarding/archive-output.d.mts",
+            "onboarding/archive-output.mjs",
+            "onboarding/command-custody.mjs",
+            "onboarding/command-recovery.mjs",
+            "onboarding/commands.mjs",
+            "onboarding/dependency-approval.mjs",
+            "onboarding/dev-identity.mjs",
+            "onboarding/email.mjs",
+            "onboarding/failures.mjs",
+            "onboarding/input-limits.mjs",
+            "onboarding/installer-inputs.mjs",
+            "onboarding/launcher.mjs",
+            "onboarding/local/build-files.mjs",
+            "onboarding/local/build.mjs",
+            "onboarding/local/environment.mjs",
+            "onboarding/local/files.mjs",
+            "onboarding/local/operation.mjs",
+            "onboarding/local/owner.mjs",
+            "onboarding/local/process-table.mjs",
+            "onboarding/local/recovery.mjs",
+            "onboarding/local/state.mjs",
+            "onboarding/metadata.mjs",
+            "onboarding/operator-install.mjs",
+            "onboarding/operator-installer.mjs",
+            "onboarding/operator-prerequisites.mjs",
+            "onboarding/package.json",
+            "onboarding/prefill.mjs",
+            "onboarding/private-files.mjs",
+            "onboarding/private.mjs",
+            "onboarding/process-cleanup.mjs",
+            "onboarding/process-diagnostics.mjs",
+            "onboarding/process-scope.mjs",
+            "onboarding/process-table.mjs",
+            "onboarding/process-tree.mjs",
+            "onboarding/production-modules.mjs",
+            "onboarding/production-options.mjs",
+            "onboarding/production-runtime.mjs",
+            "onboarding/providers.mjs",
+            "onboarding/queue.mjs",
+            "onboarding/queued-entry.mjs",
+            "onboarding/readiness.mjs",
+            "onboarding/redaction-jwt.mjs",
+            "onboarding/redaction.mjs",
+            "onboarding/schema/SETUP.schema.json",
+            "onboarding/schema/dependencies.mjs",
+            "onboarding/schema/json-schema.mjs",
+            "onboarding/schema/setup-validation.mjs",
+            "onboarding/secrets.mjs",
+            "onboarding/server.mjs",
+            "onboarding/setup-manifest.mjs",
+            "onboarding/state.mjs",
+            "onboarding/theme-files.mjs",
+            "onboarding/theme.mjs",
+            "onboarding/ui/activity.js",
+            "onboarding/ui/address-client.mjs",
+            "onboarding/ui/app.js",
+            "onboarding/ui/index.html",
+            "onboarding/ui/model-core.mjs",
+            "onboarding/ui/model.mjs",
+            "onboarding/ui/style.css",
+            "onboarding/ui/theme.css",
+            "onboarding/ui/workspace-art.js",
+            "onboarding/wrangler-auth.mjs"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "scripts/base-onboarding",
+            "originPath": "onboarding"
+          }
         ]
       }
     },
@@ -40,7 +166,115 @@
       "source": {
         "kind": "local",
         "paths": [
-          "src/modules/sendgrid-email"
+          "src/vendor/base/modules/sendgrid-email"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "modules/sendgrid-email/LICENSE",
+            "modules/sendgrid-email/README.md",
+            "modules/sendgrid-email/src/sender.ts"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/vendor/base/modules/sendgrid-email/src/sender.ts",
+            "originPath": "modules/sendgrid-email/src/sender.ts"
+          },
+          {
+            "path": "src/vendor/base/modules/sendgrid-email/README.md",
+            "originPath": "modules/sendgrid-email/README.md"
+          },
+          {
+            "path": "src/vendor/base/modules/sendgrid-email/LICENSE",
+            "originPath": "modules/sendgrid-email/LICENSE"
+          }
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/mail",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/vendor/base/modules/mail",
+          "migrations/117_development_outbox.sql"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "modules/mail/.gitignore",
+            "modules/mail/LICENSE",
+            "modules/mail/README.md",
+            "modules/mail/doctor.mjs",
+            "modules/mail/index.mjs",
+            "modules/mail/live-proof/README.md",
+            "modules/mail/live-proof/run.mjs",
+            "modules/mail/package.json",
+            "modules/mail/pnpm-lock.yaml",
+            "modules/mail/src/adapters/cloudflare/README.md",
+            "modules/mail/src/adapters/cloudflare/headers.mjs",
+            "modules/mail/src/adapters/cloudflare/index.mjs",
+            "modules/mail/src/adapters/cloudflare/response.mjs",
+            "modules/mail/src/adapters/resend/README.md",
+            "modules/mail/src/adapters/resend/index.mjs",
+            "modules/mail/src/adapters/resend/response.mjs",
+            "modules/mail/src/adapters/resend/serialize.mjs",
+            "modules/mail/src/adapters/resend/size.mjs",
+            "modules/mail/src/adapters/sendgrid/README.md",
+            "modules/mail/src/adapters/sendgrid/index.mjs",
+            "modules/mail/src/adapters/sendgrid/serialize.mjs",
+            "modules/mail/src/core/errors.mjs",
+            "modules/mail/src/core/transport.mjs",
+            "modules/mail/src/core/validation.mjs",
+            "modules/mail/src/development/index.d.mts",
+            "modules/mail/src/development/index.mjs",
+            "modules/mail/src/development/outbox.mjs",
+            "modules/mail/src/development/schema.sql",
+            "modules/mail/src/development/viewer-html.mjs",
+            "modules/mail/src/development/viewer.mjs",
+            "modules/mail/src/doctor/README.md",
+            "modules/mail/src/doctor/common.mjs",
+            "modules/mail/src/doctor/dns.mjs",
+            "modules/mail/src/doctor/index.mjs",
+            "modules/mail/src/doctor/probe.mjs",
+            "modules/mail/src/doctor/receive.mjs",
+            "modules/mail/src/doctor/records.mjs",
+            "modules/mail/src/events/README.md",
+            "modules/mail/src/events/index.mjs",
+            "modules/mail/src/events/intake.mjs",
+            "modules/mail/src/events/storage.mjs",
+            "modules/mail/src/events/verify.mjs",
+            "modules/mail/src/inbound/README.md",
+            "modules/mail/src/inbound/bytes.mjs",
+            "modules/mail/src/inbound/headers.mjs",
+            "modules/mail/src/inbound/index.mjs",
+            "modules/mail/src/inbound/mime.mjs",
+            "modules/mail/src/inbound/multipart.mjs",
+            "modules/mail/src/inbound/resend-attachment.mjs",
+            "modules/mail/src/inbound/resend.mjs",
+            "modules/mail/src/inbound/sendgrid.mjs",
+            "modules/mail/src/sender.mjs",
+            "modules/mail/src/sendgrid-email/index.d.mts",
+            "modules/mail/src/sendgrid-email/index.mjs",
+            "modules/mail/src/unsubscribe/index.mjs"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/vendor/base/modules/mail",
+            "originPath": "modules/mail"
+          },
+          {
+            "path": "migrations/117_development_outbox.sql",
+            "originPath": "modules/mail/src/development/schema.sql"
+          }
         ]
       }
     },
@@ -48,7 +282,9 @@
       "id": "runeditrun/conversation",
       "role": "module",
       "requires": [
-        "runeditrun/base"
+        "runeditrun/base",
+        "happytohelp/outcomes",
+        "runeditrun/integrations-core"
       ],
       "source": {
         "kind": "local",
@@ -228,13 +464,17 @@
         "runeditrun/plugin-sdk",
         "runeditrun/site-preview",
         "runeditrun/onboarding",
-        "runeditrun/sendgrid-email"
+        "runeditrun/sendgrid-email",
+        "runeditrun/mail",
+        "runeditrun/import-kit",
+        "happytohelp/outcomes",
+        "happytohelp/reports",
+        "happytohelp/api-integrations"
       ],
       "source": {
         "kind": "local",
         "paths": [
           "src/platform",
-          "src/development",
           "src/ui",
           "src/routes",
           "src/server.ts",
@@ -279,12 +519,9 @@
           "tests/docs-browser.mjs",
           "tests/runtime.mjs",
           "tests/ui-transport.mjs",
-          "scripts/deploy.mjs",
           "scripts/deployment",
           "scripts/import-legacy.mjs",
           "scripts/migrations.mjs",
-          "scripts/operations-config.mjs",
-          "scripts/setup.mjs",
           "scripts/verify-modules.mjs",
           "src/app.ts",
           "src/jobs.ts",
@@ -301,45 +538,23 @@
           "migrations/0097_owner_setup.sql",
           "tests/identity-setup.mjs",
           "tests/setup-browser.mjs",
-          "scripts/install.mjs",
-          "scripts/installer-fill.mjs",
-          "scripts/installer-artwork.mjs",
           "scripts/installer",
           "public/setup",
           "docs/INSTALLER.md",
           "src/editor",
           "public/homepage",
-          "public/fonts/outfit",
           "migrations/0098_personal_visual_inspiration.sql",
           "migrations/0099_personal_sidebar_artwork.sql",
-          "scripts/setup-link.mjs",
           "tests/demo-inbox.mjs",
           "tests/demo-inbox-browser.mjs",
           "tests/demo-transcript-events.mjs",
           "tests/workspace-artwork.mjs",
-          "tests/local-owner-login.mjs",
           "tests/cloudflare-email.mjs",
           "tests/sendgrid-inbound.mjs",
           "tests/ai-instructions-keyboard.mjs",
-          "tests/installer-address.mjs",
-          "tests/installer-artwork-bridge.mjs",
-          "tests/installer-blank.mjs",
-          "tests/installer-collision.mjs",
-          "tests/installer-prefill.mjs",
-          "tests/installer-presentation.mjs",
-          "tests/installer-providers.mjs",
-          "tests/installer-resume.mjs",
-          "tests/installer-secret-scopes.mjs",
-          "tests/installer-security.mjs",
-          "tests/installer-summary.mjs",
-          "tests/installer-ui-fixtures.mjs",
-          "tests/installer-workspace-art.mjs",
-          "tests/installer-wrangler-auth.mjs",
-          "tests/installer.mjs",
           "src/edition",
           "tests/module-boundaries.mjs",
           "tests/widget-events.mjs",
-          "tests/deployment-config-private.mjs",
           "tests/email-recovery.mjs",
           "tests/email-classification.mjs",
           "migrations/0100_inbound_email_claims.sql",
@@ -377,7 +592,49 @@
           "tests/activation-routes.mjs",
           "tests/activation-spend-browser.mjs",
           "tests/activation-spend.mjs",
-          "tests/upgrade-from-0.2.1.mjs"
+          "tests/upgrade.mjs",
+          "src/modules/sendgrid-email/module.json",
+          "tests/base-latest-integration.mjs",
+          "tests/base-copy-verification.mjs",
+          "tests/base-origin-verification.mjs",
+          "tests/recovery-m9.mjs",
+          "scripts/build.mjs",
+          "tests/first-run",
+          "live-proofs/git.mjs",
+          "RUN-LOCALLY.md"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "live-proofs/git.mjs",
+            "modules/editor/src/widget/editor-surface.ts",
+            "modules/editor/src/widget/live-edit-contracts.ts",
+            "modules/editor/src/widget/live-edit-dom.ts",
+            "modules/editor/src/widget/visual-style.ts"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "live-proofs/git.mjs",
+            "originPath": "live-proofs/git.mjs"
+          },
+          {
+            "path": "src/editor/editor-surface.ts",
+            "originPath": "modules/editor/src/widget/editor-surface.ts"
+          },
+          {
+            "path": "src/editor/live-edit-contracts.ts",
+            "originPath": "modules/editor/src/widget/live-edit-contracts.ts"
+          },
+          {
+            "path": "src/editor/live-edit-dom.ts",
+            "originPath": "modules/editor/src/widget/live-edit-dom.ts"
+          },
+          {
+            "path": "src/editor/visual-style.ts",
+            "originPath": "modules/editor/src/widget/visual-style.ts"
+          }
         ]
       }
     },
@@ -388,6 +645,3006 @@
         "kind": "local",
         "paths": [
           "management"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/delivery-producer",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "scripts/delivery/base/artifact.mjs",
+          "scripts/delivery/base/bindings.mjs",
+          "scripts/delivery/base/capabilities.mjs",
+          "scripts/delivery/base/cli.mjs",
+          "scripts/delivery/base/declarations.mjs",
+          "scripts/delivery/base/export.mjs",
+          "scripts/delivery/base/generators/integration.mjs",
+          "scripts/delivery/base/generators/managed.mjs",
+          "scripts/delivery/base/generators/project.mjs",
+          "scripts/delivery/base/generators/validation.mjs",
+          "scripts/delivery/base/migrations.mjs",
+          "scripts/delivery/base/package.mjs",
+          "scripts/delivery/base/paths.mjs",
+          "scripts/delivery/base/payloads.mjs",
+          "scripts/delivery/base/schema/SETUP.schema.json",
+          "scripts/delivery/base/schema/dependencies.mjs",
+          "scripts/delivery/base/schema/json-schema.mjs",
+          "scripts/delivery/base/schema/setup-validation.mjs",
+          "scripts/delivery/base/setup-manifest.mjs",
+          "scripts/delivery/base/spec.mjs"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "modules/delivery-producer/artifact.mjs",
+            "modules/delivery-producer/bindings.mjs",
+            "modules/delivery-producer/capabilities.mjs",
+            "modules/delivery-producer/cli.mjs",
+            "modules/delivery-producer/declarations.mjs",
+            "modules/delivery-producer/export.mjs",
+            "modules/delivery-producer/generators/integration.mjs",
+            "modules/delivery-producer/generators/managed.mjs",
+            "modules/delivery-producer/generators/project.mjs",
+            "modules/delivery-producer/generators/validation.mjs",
+            "modules/delivery-producer/migrations.mjs",
+            "modules/delivery-producer/package.mjs",
+            "modules/delivery-producer/paths.mjs",
+            "modules/delivery-producer/payloads.mjs",
+            "modules/delivery-producer/setup-manifest.mjs",
+            "modules/delivery-producer/spec.mjs",
+            "schema/SETUP.schema.json",
+            "schema/dependencies.mjs",
+            "schema/json-schema.mjs",
+            "schema/setup-validation.mjs"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "scripts/delivery/base/artifact.mjs",
+            "originPath": "modules/delivery-producer/artifact.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/bindings.mjs",
+            "originPath": "modules/delivery-producer/bindings.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/capabilities.mjs",
+            "originPath": "modules/delivery-producer/capabilities.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/cli.mjs",
+            "originPath": "modules/delivery-producer/cli.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/declarations.mjs",
+            "originPath": "modules/delivery-producer/declarations.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/export.mjs",
+            "originPath": "modules/delivery-producer/export.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/generators/integration.mjs",
+            "originPath": "modules/delivery-producer/generators/integration.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/generators/managed.mjs",
+            "originPath": "modules/delivery-producer/generators/managed.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/generators/project.mjs",
+            "originPath": "modules/delivery-producer/generators/project.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/generators/validation.mjs",
+            "originPath": "modules/delivery-producer/generators/validation.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/migrations.mjs",
+            "originPath": "modules/delivery-producer/migrations.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/package.mjs",
+            "originPath": "modules/delivery-producer/package.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/paths.mjs",
+            "originPath": "modules/delivery-producer/paths.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/payloads.mjs",
+            "originPath": "modules/delivery-producer/payloads.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/schema/dependencies.mjs",
+            "originPath": "schema/dependencies.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/schema/json-schema.mjs",
+            "originPath": "schema/json-schema.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/schema/setup-validation.mjs",
+            "originPath": "schema/setup-validation.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/schema/SETUP.schema.json",
+            "originPath": "schema/SETUP.schema.json"
+          },
+          {
+            "path": "scripts/delivery/base/setup-manifest.mjs",
+            "originPath": "modules/delivery-producer/setup-manifest.mjs"
+          },
+          {
+            "path": "scripts/delivery/base/spec.mjs",
+            "originPath": "modules/delivery-producer/spec.mjs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/import-kit",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/import-kit"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "modules/import-kit/CONTRACT.md",
+            "modules/import-kit/FIXTURES.md",
+            "modules/import-kit/README.md",
+            "modules/import-kit/schema/importer-verification-receipt.schema.json",
+            "modules/import-kit/schema/importers.schema.json",
+            "modules/import-kit/src/d1/README.md",
+            "modules/import-kit/src/d1/apply.ts",
+            "modules/import-kit/src/d1/budget.ts",
+            "modules/import-kit/src/d1/compressed-plan.ts",
+            "modules/import-kit/src/d1/creation.ts",
+            "modules/import-kit/src/d1/custody-state-schema.ts",
+            "modules/import-kit/src/d1/database.ts",
+            "modules/import-kit/src/d1/erased-artifacts.ts",
+            "modules/import-kit/src/d1/erased-custody.ts",
+            "modules/import-kit/src/d1/erased-plan.ts",
+            "modules/import-kit/src/d1/erased-reversal.ts",
+            "modules/import-kit/src/d1/erasure-bounded.ts",
+            "modules/import-kit/src/d1/erasure-claims.ts",
+            "modules/import-kit/src/d1/erasure-compiler.ts",
+            "modules/import-kit/src/d1/erasure-disposition.ts",
+            "modules/import-kit/src/d1/erasure-fragments.ts",
+            "modules/import-kit/src/d1/erasure-index.ts",
+            "modules/import-kit/src/d1/erasure-pages.ts",
+            "modules/import-kit/src/d1/erasure-report.ts",
+            "modules/import-kit/src/d1/erasure-schema.ts",
+            "modules/import-kit/src/d1/erasure-snapshot.ts",
+            "modules/import-kit/src/d1/erasure-values.ts",
+            "modules/import-kit/src/d1/erasure-writes.ts",
+            "modules/import-kit/src/d1/erasure.ts",
+            "modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts",
+            "modules/import-kit/src/d1/expected-state.ts",
+            "modules/import-kit/src/d1/guards.ts",
+            "modules/import-kit/src/d1/history.ts",
+            "modules/import-kit/src/d1/index.ts",
+            "modules/import-kit/src/d1/integrity.ts",
+            "modules/import-kit/src/d1/inventory-snapshot.ts",
+            "modules/import-kit/src/d1/jobs.ts",
+            "modules/import-kit/src/d1/native-staging-admission.ts",
+            "modules/import-kit/src/d1/native-staging-context.ts",
+            "modules/import-kit/src/d1/native-staging-lifecycle.ts",
+            "modules/import-kit/src/d1/native-staging-publication.ts",
+            "modules/import-kit/src/d1/native-staging-rows.ts",
+            "modules/import-kit/src/d1/native-staging-schema.ts",
+            "modules/import-kit/src/d1/native-staging-state.ts",
+            "modules/import-kit/src/d1/native-staging.ts",
+            "modules/import-kit/src/d1/original-copies.ts",
+            "modules/import-kit/src/d1/original-storage.ts",
+            "modules/import-kit/src/d1/originals.ts",
+            "modules/import-kit/src/d1/plan-dictionary.ts",
+            "modules/import-kit/src/d1/plans.ts",
+            "modules/import-kit/src/d1/preparation-fingerprint.ts",
+            "modules/import-kit/src/d1/preparation-header.ts",
+            "modules/import-kit/src/d1/preparation-reader.ts",
+            "modules/import-kit/src/d1/preparation-schema.ts",
+            "modules/import-kit/src/d1/preparation-state.ts",
+            "modules/import-kit/src/d1/preparations.ts",
+            "modules/import-kit/src/d1/preserved-reverse.ts",
+            "modules/import-kit/src/d1/provenance-set.ts",
+            "modules/import-kit/src/d1/publication-fence.ts",
+            "modules/import-kit/src/d1/publication-receipt-schema.ts",
+            "modules/import-kit/src/d1/published-stream.ts",
+            "modules/import-kit/src/d1/read-fence.ts",
+            "modules/import-kit/src/d1/read-results.ts",
+            "modules/import-kit/src/d1/retained-values.ts",
+            "modules/import-kit/src/d1/reverse.ts",
+            "modules/import-kit/src/d1/reviewed-source.ts",
+            "modules/import-kit/src/d1/sets.ts",
+            "modules/import-kit/src/d1/staging-admission.ts",
+            "modules/import-kit/src/d1/staging-control.ts",
+            "modules/import-kit/src/d1/staging-erasure.ts",
+            "modules/import-kit/src/d1/staging-lifecycle.ts",
+            "modules/import-kit/src/d1/staging-plan.ts",
+            "modules/import-kit/src/d1/staging-privacy.ts",
+            "modules/import-kit/src/d1/staging-publication.ts",
+            "modules/import-kit/src/d1/staging-schema.ts",
+            "modules/import-kit/src/d1/staging-statements.ts",
+            "modules/import-kit/src/d1/staging-transport.ts",
+            "modules/import-kit/src/d1/stream-boundary.ts",
+            "modules/import-kit/src/d1/stream-create.ts",
+            "modules/import-kit/src/d1/stream-identity-admission.ts",
+            "modules/import-kit/src/d1/stream-input.ts",
+            "modules/import-kit/src/d1/stream-layout.ts",
+            "modules/import-kit/src/d1/stream-origin.ts",
+            "modules/import-kit/src/d1/stream-page-integrity.ts",
+            "modules/import-kit/src/d1/stream-partition.ts",
+            "modules/import-kit/src/d1/stream-plan.ts",
+            "modules/import-kit/src/d1/stream-receipt.ts",
+            "modules/import-kit/src/d1/stream-revision-schema.ts",
+            "modules/import-kit/src/d1/stream-snapshot.ts",
+            "modules/import-kit/src/d1/stream-stage.ts",
+            "modules/import-kit/src/d1/stream-state.ts",
+            "modules/import-kit/src/d1/stream-working-set.ts",
+            "modules/import-kit/src/d1/streams.ts",
+            "modules/import-kit/src/d1/target-guards.ts",
+            "modules/import-kit/src/d1/target-identities.ts",
+            "modules/import-kit/src/d1/transport.ts",
+            "modules/import-kit/src/d1/types.ts",
+            "modules/import-kit/src/d1/undo-observations.ts",
+            "modules/import-kit/src/d1/undo-report.ts",
+            "modules/import-kit/src/d1/undo-snapshot.ts",
+            "modules/import-kit/src/d1/undo-state.ts",
+            "modules/import-kit/src/d1/undo-types.ts",
+            "modules/import-kit/src/journal/authority.ts",
+            "modules/import-kit/src/plan/budget.ts",
+            "modules/import-kit/src/plan/index.ts",
+            "modules/import-kit/src/plan/size.ts",
+            "modules/import-kit/src/provenance/canonical-hash.ts",
+            "modules/import-kit/src/provenance/canonical-stream.ts",
+            "modules/import-kit/src/provenance/credentials.ts",
+            "modules/import-kit/src/provenance/identity.ts",
+            "modules/import-kit/src/provenance/json-snapshot.ts",
+            "modules/import-kit/src/provenance/validate-json.ts",
+            "modules/import-kit/src/readers/README.md",
+            "modules/import-kit/src/storage/originals.ts",
+            "modules/import-kit/src/storage/provenance.ts",
+            "modules/import-kit/src/storage/schema.ts",
+            "modules/import-kit/src/types.ts"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/modules/import-kit/CONTRACT.md",
+            "originPath": "modules/import-kit/CONTRACT.md"
+          },
+          {
+            "path": "src/modules/import-kit/FIXTURES.md",
+            "originPath": "modules/import-kit/FIXTURES.md"
+          },
+          {
+            "path": "src/modules/import-kit/README.md",
+            "originPath": "modules/import-kit/README.md"
+          },
+          {
+            "path": "src/modules/import-kit/schema/importer-verification-receipt.schema.json",
+            "originPath": "modules/import-kit/schema/importer-verification-receipt.schema.json"
+          },
+          {
+            "path": "src/modules/import-kit/schema/importers.schema.json",
+            "originPath": "modules/import-kit/schema/importers.schema.json"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/README.md",
+            "originPath": "modules/import-kit/src/d1/README.md"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/apply.ts",
+            "originPath": "modules/import-kit/src/d1/apply.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/budget.ts",
+            "originPath": "modules/import-kit/src/d1/budget.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/compressed-plan.ts",
+            "originPath": "modules/import-kit/src/d1/compressed-plan.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/creation.ts",
+            "originPath": "modules/import-kit/src/d1/creation.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/custody-state-schema.ts",
+            "originPath": "modules/import-kit/src/d1/custody-state-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/database.ts",
+            "originPath": "modules/import-kit/src/d1/database.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erased-plan.ts",
+            "originPath": "modules/import-kit/src/d1/erased-plan.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erased-reversal.ts",
+            "originPath": "modules/import-kit/src/d1/erased-reversal.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-bounded.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-bounded.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-claims.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-claims.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-compiler.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-compiler.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-disposition.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-disposition.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-fragments.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-fragments.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-index.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-index.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-pages.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-pages.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-report.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-report.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-schema.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-snapshot.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-snapshot.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-values.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-values.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure-writes.ts",
+            "originPath": "modules/import-kit/src/d1/erasure-writes.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erasure.ts",
+            "originPath": "modules/import-kit/src/d1/erasure.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts",
+            "originPath": "modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/expected-state.ts",
+            "originPath": "modules/import-kit/src/d1/expected-state.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/guards.ts",
+            "originPath": "modules/import-kit/src/d1/guards.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/history.ts",
+            "originPath": "modules/import-kit/src/d1/history.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/index.ts",
+            "originPath": "modules/import-kit/src/d1/index.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/integrity.ts",
+            "originPath": "modules/import-kit/src/d1/integrity.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/inventory-snapshot.ts",
+            "originPath": "modules/import-kit/src/d1/inventory-snapshot.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/jobs.ts",
+            "originPath": "modules/import-kit/src/d1/jobs.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-admission.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-admission.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-context.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-context.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-lifecycle.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-lifecycle.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-publication.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-publication.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-rows.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-rows.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-schema.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging-state.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging-state.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/native-staging.ts",
+            "originPath": "modules/import-kit/src/d1/native-staging.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/original-copies.ts",
+            "originPath": "modules/import-kit/src/d1/original-copies.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/original-storage.ts",
+            "originPath": "modules/import-kit/src/d1/original-storage.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/originals.ts",
+            "originPath": "modules/import-kit/src/d1/originals.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/plan-dictionary.ts",
+            "originPath": "modules/import-kit/src/d1/plan-dictionary.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/plans.ts",
+            "originPath": "modules/import-kit/src/d1/plans.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preparation-fingerprint.ts",
+            "originPath": "modules/import-kit/src/d1/preparation-fingerprint.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preparation-header.ts",
+            "originPath": "modules/import-kit/src/d1/preparation-header.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preparation-reader.ts",
+            "originPath": "modules/import-kit/src/d1/preparation-reader.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preparation-schema.ts",
+            "originPath": "modules/import-kit/src/d1/preparation-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preparation-state.ts",
+            "originPath": "modules/import-kit/src/d1/preparation-state.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preparations.ts",
+            "originPath": "modules/import-kit/src/d1/preparations.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/preserved-reverse.ts",
+            "originPath": "modules/import-kit/src/d1/preserved-reverse.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/provenance-set.ts",
+            "originPath": "modules/import-kit/src/d1/provenance-set.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/publication-fence.ts",
+            "originPath": "modules/import-kit/src/d1/publication-fence.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/publication-receipt-schema.ts",
+            "originPath": "modules/import-kit/src/d1/publication-receipt-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/published-stream.ts",
+            "originPath": "modules/import-kit/src/d1/published-stream.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/read-fence.ts",
+            "originPath": "modules/import-kit/src/d1/read-fence.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/read-results.ts",
+            "originPath": "modules/import-kit/src/d1/read-results.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/retained-values.ts",
+            "originPath": "modules/import-kit/src/d1/retained-values.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/reverse.ts",
+            "originPath": "modules/import-kit/src/d1/reverse.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/reviewed-source.ts",
+            "originPath": "modules/import-kit/src/d1/reviewed-source.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/sets.ts",
+            "originPath": "modules/import-kit/src/d1/sets.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-admission.ts",
+            "originPath": "modules/import-kit/src/d1/staging-admission.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-control.ts",
+            "originPath": "modules/import-kit/src/d1/staging-control.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-erasure.ts",
+            "originPath": "modules/import-kit/src/d1/staging-erasure.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-lifecycle.ts",
+            "originPath": "modules/import-kit/src/d1/staging-lifecycle.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-plan.ts",
+            "originPath": "modules/import-kit/src/d1/staging-plan.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-privacy.ts",
+            "originPath": "modules/import-kit/src/d1/staging-privacy.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-publication.ts",
+            "originPath": "modules/import-kit/src/d1/staging-publication.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-schema.ts",
+            "originPath": "modules/import-kit/src/d1/staging-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-statements.ts",
+            "originPath": "modules/import-kit/src/d1/staging-statements.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/staging-transport.ts",
+            "originPath": "modules/import-kit/src/d1/staging-transport.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-boundary.ts",
+            "originPath": "modules/import-kit/src/d1/stream-boundary.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-create.ts",
+            "originPath": "modules/import-kit/src/d1/stream-create.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-identity-admission.ts",
+            "originPath": "modules/import-kit/src/d1/stream-identity-admission.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-input.ts",
+            "originPath": "modules/import-kit/src/d1/stream-input.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-layout.ts",
+            "originPath": "modules/import-kit/src/d1/stream-layout.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-origin.ts",
+            "originPath": "modules/import-kit/src/d1/stream-origin.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-page-integrity.ts",
+            "originPath": "modules/import-kit/src/d1/stream-page-integrity.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-partition.ts",
+            "originPath": "modules/import-kit/src/d1/stream-partition.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-plan.ts",
+            "originPath": "modules/import-kit/src/d1/stream-plan.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-receipt.ts",
+            "originPath": "modules/import-kit/src/d1/stream-receipt.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-revision-schema.ts",
+            "originPath": "modules/import-kit/src/d1/stream-revision-schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-snapshot.ts",
+            "originPath": "modules/import-kit/src/d1/stream-snapshot.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-stage.ts",
+            "originPath": "modules/import-kit/src/d1/stream-stage.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-state.ts",
+            "originPath": "modules/import-kit/src/d1/stream-state.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/stream-working-set.ts",
+            "originPath": "modules/import-kit/src/d1/stream-working-set.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/streams.ts",
+            "originPath": "modules/import-kit/src/d1/streams.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/target-guards.ts",
+            "originPath": "modules/import-kit/src/d1/target-guards.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/target-identities.ts",
+            "originPath": "modules/import-kit/src/d1/target-identities.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/transport.ts",
+            "originPath": "modules/import-kit/src/d1/transport.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/types.ts",
+            "originPath": "modules/import-kit/src/d1/types.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/undo-observations.ts",
+            "originPath": "modules/import-kit/src/d1/undo-observations.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/undo-report.ts",
+            "originPath": "modules/import-kit/src/d1/undo-report.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/undo-snapshot.ts",
+            "originPath": "modules/import-kit/src/d1/undo-snapshot.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/undo-state.ts",
+            "originPath": "modules/import-kit/src/d1/undo-state.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/undo-types.ts",
+            "originPath": "modules/import-kit/src/d1/undo-types.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/journal/authority.ts",
+            "originPath": "modules/import-kit/src/journal/authority.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/plan/budget.ts",
+            "originPath": "modules/import-kit/src/plan/budget.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/plan/index.ts",
+            "originPath": "modules/import-kit/src/plan/index.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/plan/size.ts",
+            "originPath": "modules/import-kit/src/plan/size.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/provenance/canonical-hash.ts",
+            "originPath": "modules/import-kit/src/provenance/canonical-hash.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/provenance/canonical-stream.ts",
+            "originPath": "modules/import-kit/src/provenance/canonical-stream.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/provenance/identity.ts",
+            "originPath": "modules/import-kit/src/provenance/identity.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/provenance/json-snapshot.ts",
+            "originPath": "modules/import-kit/src/provenance/json-snapshot.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/provenance/validate-json.ts",
+            "originPath": "modules/import-kit/src/provenance/validate-json.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/readers/README.md",
+            "originPath": "modules/import-kit/src/readers/README.md"
+          },
+          {
+            "path": "src/modules/import-kit/src/storage/originals.ts",
+            "originPath": "modules/import-kit/src/storage/originals.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/storage/provenance.ts",
+            "originPath": "modules/import-kit/src/storage/provenance.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/storage/schema.ts",
+            "originPath": "modules/import-kit/src/storage/schema.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/types.ts",
+            "originPath": "modules/import-kit/src/types.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/provenance/credentials.ts",
+            "originPath": "modules/import-kit/src/provenance/credentials.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erased-artifacts.ts",
+            "originPath": "modules/import-kit/src/d1/erased-artifacts.ts"
+          },
+          {
+            "path": "src/modules/import-kit/src/d1/erased-custody.ts",
+            "originPath": "modules/import-kit/src/d1/erased-custody.ts"
+          }
+        ]
+      }
+    },
+    {
+      "id": "happytohelp/outcomes",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/integrations-core"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/outcomes",
+          "migrations/112_conversation_outcomes.sql",
+          "migrations/113_outcomes_history.sql",
+          "tests/reports/outcomes.mjs",
+          "tests/reports/ratings.mjs",
+          "tests/reports/migration.mjs",
+          "tests/reports/upgrade.mjs",
+          "tests/reports/widget-races.mjs",
+          "tests/reports/import-inertness.mjs",
+          "tests/reports/operator-feedback.mjs"
+        ]
+      }
+    },
+    {
+      "id": "happytohelp/reports",
+      "role": "module",
+      "requires": [
+        "happytohelp/outcomes"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/reports",
+          "docs/reports.md",
+          "tests/reports/calendar.mjs",
+          "tests/reports/figures.mjs",
+          "tests/reports/browser.mjs",
+          "tests/reports/harness.mjs",
+          "tests/reports/worker.ts"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/integrations-core",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/vendor/base/modules/integrations",
+          "migrations/114_integrations_core.sql"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "modules/integrations/README.md",
+            "modules/integrations/core/CONTRACT.md",
+            "modules/integrations/core/README.md",
+            "modules/integrations/core/crypto.ts",
+            "modules/integrations/core/database.ts",
+            "modules/integrations/core/delivery.ts",
+            "modules/integrations/core/destination.ts",
+            "modules/integrations/core/index.ts",
+            "modules/integrations/core/node-transport.ts",
+            "modules/integrations/core/public-address.ts",
+            "modules/integrations/core/repository.ts",
+            "modules/integrations/core/schema.sql",
+            "modules/integrations/core/sqlite.ts",
+            "modules/integrations/core/timestamped-body-signature.ts",
+            "modules/integrations/core/tokens.ts",
+            "modules/integrations/core/types.ts",
+            "modules/integrations/core/upgrade-token-usage-context.sql",
+            "modules/integrations/core/webhook.ts",
+            "modules/integrations/egress/README.md",
+            "modules/integrations/egress/configuration.ts",
+            "modules/integrations/egress/declaration.ts",
+            "modules/integrations/egress/index.ts",
+            "modules/integrations/index.ts",
+            "modules/integrations/receiver.md",
+            "modules/integrations/slack/README.md",
+            "modules/integrations/slack/classify.ts",
+            "modules/integrations/slack/index.ts",
+            "modules/integrations/slack/message.ts",
+            "modules/integrations/slack/notifier.ts",
+            "modules/integrations/slack/protocol.ts"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/vendor/base/modules/integrations",
+            "originPath": "modules/integrations"
+          },
+          {
+            "path": "migrations/114_integrations_core.sql",
+            "originPath": "modules/integrations/core/schema.sql"
+          }
+        ]
+      }
+    },
+    {
+      "id": "happytohelp/api-integrations",
+      "role": "module",
+      "requires": [
+        "runeditrun/base",
+        "runeditrun/integrations-core",
+        "runeditrun/conversation",
+        "happytohelp/outcomes",
+        "runeditrun/knowledge"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/modules/api-integrations",
+          "migrations/115_native_integrations.sql",
+          "docs/api.md",
+          "tests/connections"
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/base-cli",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "SEED-COMMAND-CONTRACT.md",
+          "scripts/base-cli/bin/rer.mjs",
+          "scripts/base-cli/cli/README.md",
+          "scripts/base-cli/cli/adapter.mjs",
+          "scripts/base-cli/cli/archive-path.mjs",
+          "scripts/base-cli/cli/archive-vite.mjs",
+          "scripts/base-cli/cli/archive.mjs",
+          "scripts/base-cli/cli/auth-copy.mjs",
+          "scripts/base-cli/cli/bounded.mjs",
+          "scripts/base-cli/cli/container-transfer.mjs",
+          "scripts/base-cli/cli/container.mjs",
+          "scripts/base-cli/cli/contract.mjs",
+          "scripts/base-cli/cli/dependencies.mjs",
+          "scripts/base-cli/cli/dependency-approval.mjs",
+          "scripts/base-cli/cli/dependency-doctor.mjs",
+          "scripts/base-cli/cli/dependency-input.mjs",
+          "scripts/base-cli/cli/deploy.mjs",
+          "scripts/base-cli/cli/dev-identity.mjs",
+          "scripts/base-cli/cli/errors.mjs",
+          "scripts/base-cli/cli/export.mjs",
+          "scripts/base-cli/cli/font-cache.mjs",
+          "scripts/base-cli/cli/independent.mjs",
+          "scripts/base-cli/cli/inspect.mjs",
+          "scripts/base-cli/cli/jsonc.mjs",
+          "scripts/base-cli/cli/lifecycle.mjs",
+          "scripts/base-cli/cli/local.mjs",
+          "scripts/base-cli/cli/main.mjs",
+          "scripts/base-cli/cli/managed-server.mjs",
+          "scripts/base-cli/cli/node-runtime-cache.mjs",
+          "scripts/base-cli/cli/node-runtime-discovery.mjs",
+          "scripts/base-cli/cli/node-runtime-download.mjs",
+          "scripts/base-cli/cli/node-runtime.mjs",
+          "scripts/base-cli/cli/output.mjs",
+          "scripts/base-cli/cli/parse.mjs",
+          "scripts/base-cli/cli/portability-worker.mjs",
+          "scripts/base-cli/cli/portability.mjs",
+          "scripts/base-cli/cli/preview-cache.mjs",
+          "scripts/base-cli/cli/project.mjs",
+          "scripts/base-cli/cli/release.mjs",
+          "scripts/base-cli/cli/runtime-front-door.mjs",
+          "scripts/base-cli/cli/scheduled.mjs",
+          "scripts/base-cli/cli/server-activity.mjs",
+          "scripts/base-cli/cli/server-proxy.mjs",
+          "scripts/base-cli/cli/server-registry.mjs",
+          "scripts/base-cli/cli/server-resources.mjs",
+          "scripts/base-cli/cli/settings.mjs",
+          "scripts/base-cli/cli/setup-answers.mjs",
+          "scripts/base-cli/cli/setup-input.mjs",
+          "scripts/base-cli/cli/shared.mjs",
+          "scripts/base-cli/cli/transfers.mjs",
+          "scripts/base-cli/composition/git-source.mjs",
+          "scripts/base-cli/edition-authoring/files.mjs",
+          "scripts/base-cli/edition-authoring/manifest.mjs",
+          "scripts/base-cli/inventory.json",
+          "scripts/base-cli/modules/container/README.md",
+          "scripts/base-cli/modules/container/adapters/d1.mjs",
+          "scripts/base-cli/modules/container/adapters/egress.mjs",
+          "scripts/base-cli/modules/container/adapters/jobs.mjs",
+          "scripts/base-cli/modules/container/adapters/objects.mjs",
+          "scripts/base-cli/modules/container/adapters/retained.mjs",
+          "scripts/base-cli/modules/container/adapters/sqlite-error.mjs",
+          "scripts/base-cli/modules/container/adapters/sqlite-worker.mjs",
+          "scripts/base-cli/modules/container/assets.mjs",
+          "scripts/base-cli/modules/container/bindings.mjs",
+          "scripts/base-cli/modules/container/boundary.mjs",
+          "scripts/base-cli/modules/container/build.mjs",
+          "scripts/base-cli/modules/container/deploy-input.mjs",
+          "scripts/base-cli/modules/container/entrypoint.sh",
+          "scripts/base-cli/modules/container/host.mjs",
+          "scripts/base-cli/modules/container/ingress.mjs",
+          "scripts/base-cli/modules/container/lock.mjs",
+          "scripts/base-cli/modules/container/migrations.mjs",
+          "scripts/base-cli/modules/container/node-engine.mjs",
+          "scripts/base-cli/modules/container/portability-schema.mjs",
+          "scripts/base-cli/modules/container/runner.mjs",
+          "scripts/base-cli/modules/container/ssh.mjs",
+          "scripts/base-cli/modules/container/transfer.mjs",
+          "scripts/base-cli/modules/container/worker-engine.mjs",
+          "scripts/base-cli/modules/dependencies/README.md",
+          "scripts/base-cli/modules/dependencies/approval.mjs",
+          "scripts/base-cli/modules/dependencies/auth.mjs",
+          "scripts/base-cli/modules/dependencies/authority.mjs",
+          "scripts/base-cli/modules/dependencies/crypto.mjs",
+          "scripts/base-cli/modules/dependencies/index.d.mts",
+          "scripts/base-cli/modules/dependencies/index.mjs",
+          "scripts/base-cli/modules/dependencies/logout.mjs",
+          "scripts/base-cli/modules/dependencies/protocol.mjs",
+          "scripts/base-cli/modules/dependencies/schema/approval-attempt.sql",
+          "scripts/base-cli/modules/dependencies/schema/dependencies.sql",
+          "scripts/base-cli/modules/dependencies/store.mjs",
+          "scripts/base-cli/modules/deploy-kit/README.md",
+          "scripts/base-cli/modules/deploy-kit/artifact.mjs",
+          "scripts/base-cli/modules/deploy-kit/build-modules.mjs",
+          "scripts/base-cli/modules/deploy-kit/check.mjs",
+          "scripts/base-cli/modules/deploy-kit/cli.mjs",
+          "scripts/base-cli/modules/deploy-kit/default-stage.mjs",
+          "scripts/base-cli/modules/deploy-kit/deploy.mjs",
+          "scripts/base-cli/modules/deploy-kit/health-request.mjs",
+          "scripts/base-cli/modules/deploy-kit/health.mjs",
+          "scripts/base-cli/modules/deploy-kit/index.mjs",
+          "scripts/base-cli/modules/deploy-kit/migrations.mjs",
+          "scripts/base-cli/modules/deploy-kit/owner-cli.mjs",
+          "scripts/base-cli/modules/deploy-kit/owner.mjs",
+          "scripts/base-cli/modules/deploy-kit/prepare.mjs",
+          "scripts/base-cli/modules/deploy-kit/provider.mjs",
+          "scripts/base-cli/modules/deploy-kit/queue-consumer.mjs",
+          "scripts/base-cli/modules/deploy-kit/receipt.mjs",
+          "scripts/base-cli/modules/deploy-kit/render.mjs",
+          "scripts/base-cli/modules/deploy-kit/resources.mjs",
+          "scripts/base-cli/modules/deploy-kit/sql-safety.mjs",
+          "scripts/base-cli/modules/deploy-kit/sql-tokens.mjs",
+          "scripts/base-cli/modules/deploy-kit/teardown.mjs",
+          "scripts/base-cli/modules/deploy-kit/templates.mjs",
+          "scripts/base-cli/modules/deploy-kit/validation.mjs",
+          "scripts/base-cli/modules/deploy-kit/worker.mjs",
+          "scripts/base-cli/modules/integrations/core/CONTRACT.md",
+          "scripts/base-cli/modules/integrations/core/README.md",
+          "scripts/base-cli/modules/integrations/core/crypto.ts",
+          "scripts/base-cli/modules/integrations/core/database.ts",
+          "scripts/base-cli/modules/integrations/core/delivery.ts",
+          "scripts/base-cli/modules/integrations/core/destination.ts",
+          "scripts/base-cli/modules/integrations/core/index.ts",
+          "scripts/base-cli/modules/integrations/core/node-transport.ts",
+          "scripts/base-cli/modules/integrations/core/public-address.ts",
+          "scripts/base-cli/modules/integrations/core/repository.ts",
+          "scripts/base-cli/modules/integrations/core/schema.sql",
+          "scripts/base-cli/modules/integrations/core/sqlite.ts",
+          "scripts/base-cli/modules/integrations/core/timestamped-body-signature.ts",
+          "scripts/base-cli/modules/integrations/core/tokens.ts",
+          "scripts/base-cli/modules/integrations/core/types.ts",
+          "scripts/base-cli/modules/integrations/core/upgrade-token-usage-context.sql",
+          "scripts/base-cli/modules/integrations/core/webhook.ts",
+          "scripts/base-cli/modules/job-queue/README.md",
+          "scripts/base-cli/modules/job-queue/cli.mjs",
+          "scripts/base-cli/modules/job-queue/command.mjs",
+          "scripts/base-cli/modules/job-queue/config.mjs",
+          "scripts/base-cli/modules/job-queue/identity.mjs",
+          "scripts/base-cli/modules/job-queue/index.mjs",
+          "scripts/base-cli/modules/job-queue/membership.mjs",
+          "scripts/base-cli/modules/job-queue/module.json",
+          "scripts/base-cli/modules/job-queue/policy.mjs",
+          "scripts/base-cli/modules/job-queue/processes.mjs",
+          "scripts/base-cli/modules/job-queue/resources.mjs",
+          "scripts/base-cli/modules/job-queue/storage.mjs",
+          "scripts/base-cli/modules/job-queue/supervisor.mjs",
+          "scripts/base-cli/modules/mail/.gitignore",
+          "scripts/base-cli/modules/mail/LICENSE",
+          "scripts/base-cli/modules/mail/README.md",
+          "scripts/base-cli/modules/mail/doctor.mjs",
+          "scripts/base-cli/modules/mail/index.mjs",
+          "scripts/base-cli/modules/mail/live-proof/README.md",
+          "scripts/base-cli/modules/mail/live-proof/run.mjs",
+          "scripts/base-cli/modules/mail/package.json",
+          "scripts/base-cli/modules/mail/pnpm-lock.yaml",
+          "scripts/base-cli/modules/mail/src/adapters/cloudflare/README.md",
+          "scripts/base-cli/modules/mail/src/adapters/cloudflare/headers.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/cloudflare/index.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/cloudflare/response.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/resend/README.md",
+          "scripts/base-cli/modules/mail/src/adapters/resend/index.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/resend/response.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/resend/serialize.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/resend/size.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/sendgrid/README.md",
+          "scripts/base-cli/modules/mail/src/adapters/sendgrid/index.mjs",
+          "scripts/base-cli/modules/mail/src/adapters/sendgrid/serialize.mjs",
+          "scripts/base-cli/modules/mail/src/core/errors.mjs",
+          "scripts/base-cli/modules/mail/src/core/transport.mjs",
+          "scripts/base-cli/modules/mail/src/core/validation.mjs",
+          "scripts/base-cli/modules/mail/src/development/index.d.mts",
+          "scripts/base-cli/modules/mail/src/development/index.mjs",
+          "scripts/base-cli/modules/mail/src/development/outbox.mjs",
+          "scripts/base-cli/modules/mail/src/development/schema.sql",
+          "scripts/base-cli/modules/mail/src/development/viewer-html.mjs",
+          "scripts/base-cli/modules/mail/src/development/viewer.mjs",
+          "scripts/base-cli/modules/mail/src/doctor/README.md",
+          "scripts/base-cli/modules/mail/src/doctor/common.mjs",
+          "scripts/base-cli/modules/mail/src/doctor/dns.mjs",
+          "scripts/base-cli/modules/mail/src/doctor/index.mjs",
+          "scripts/base-cli/modules/mail/src/doctor/probe.mjs",
+          "scripts/base-cli/modules/mail/src/doctor/receive.mjs",
+          "scripts/base-cli/modules/mail/src/doctor/records.mjs",
+          "scripts/base-cli/modules/mail/src/events/README.md",
+          "scripts/base-cli/modules/mail/src/events/index.mjs",
+          "scripts/base-cli/modules/mail/src/events/intake.mjs",
+          "scripts/base-cli/modules/mail/src/events/storage.mjs",
+          "scripts/base-cli/modules/mail/src/events/verify.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/README.md",
+          "scripts/base-cli/modules/mail/src/inbound/bytes.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/headers.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/index.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/mime.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/multipart.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/resend-attachment.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/resend.mjs",
+          "scripts/base-cli/modules/mail/src/inbound/sendgrid.mjs",
+          "scripts/base-cli/modules/mail/src/sender.mjs",
+          "scripts/base-cli/modules/mail/src/sendgrid-email/index.d.mts",
+          "scripts/base-cli/modules/mail/src/sendgrid-email/index.mjs",
+          "scripts/base-cli/modules/mail/src/unsubscribe/index.mjs",
+          "scripts/base-cli/modules/operator-auth/README.md",
+          "scripts/base-cli/modules/operator-auth/accounts/adapter.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/admin.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/credentials.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/editor-owner.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/index.d.mts",
+          "scripts/base-cli/modules/operator-auth/accounts/index.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/oa.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/provider-control.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/provider-pin.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/roles.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/dependency-setup.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/dev-sessions.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/domain-rules-step-up.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/invitation-cancellation.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/operator-auth.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/provider-control.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/schema/provider-pins.sql",
+          "scripts/base-cli/modules/operator-auth/accounts/settings-page.mjs",
+          "scripts/base-cli/modules/operator-auth/accounts/store.mjs",
+          "scripts/base-cli/modules/operator-auth/branding.mjs",
+          "scripts/base-cli/modules/operator-auth/config.mjs",
+          "scripts/base-cli/modules/operator-auth/conformance/README.md",
+          "scripts/base-cli/modules/operator-auth/conformance/index.d.mts",
+          "scripts/base-cli/modules/operator-auth/conformance/index.mjs",
+          "scripts/base-cli/modules/operator-auth/conformance/presentation.mjs",
+          "scripts/base-cli/modules/operator-auth/crypto.mjs",
+          "scripts/base-cli/modules/operator-auth/dev-admission.d.mts",
+          "scripts/base-cli/modules/operator-auth/dev-admission.mjs",
+          "scripts/base-cli/modules/operator-auth/dev-gate.mjs",
+          "scripts/base-cli/modules/operator-auth/dev/badge.mjs",
+          "scripts/base-cli/modules/operator-auth/dev/index.d.mts",
+          "scripts/base-cli/modules/operator-auth/dev/index.mjs",
+          "scripts/base-cli/modules/operator-auth/dev/personas.mjs",
+          "scripts/base-cli/modules/operator-auth/dev/sign-in-as.d.mts",
+          "scripts/base-cli/modules/operator-auth/dev/sign-in-as.mjs",
+          "scripts/base-cli/modules/operator-auth/docs/README.md",
+          "scripts/base-cli/modules/operator-auth/docs/tanstack-start.md",
+          "scripts/base-cli/modules/operator-auth/docs/vite-spa.md",
+          "scripts/base-cli/modules/operator-auth/errors.mjs",
+          "scripts/base-cli/modules/operator-auth/http.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/admission.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/email-link/confirmation.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/email-link/message.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/index.d.mts",
+          "scripts/base-cli/modules/operator-auth/identity/index.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/README.md",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/client-auth.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/config.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/crypto.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/errors.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/index.d.mts",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/index.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/jwt.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/network.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/presets.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/schema/oidc.sql",
+          "scripts/base-cli/modules/operator-auth/identity/oidc/store.mjs",
+          "scripts/base-cli/modules/operator-auth/identity/principal.mjs",
+          "scripts/base-cli/modules/operator-auth/index.d.mts",
+          "scripts/base-cli/modules/operator-auth/index.mjs",
+          "scripts/base-cli/modules/operator-auth/input.mjs",
+          "scripts/base-cli/modules/operator-auth/local-cli.mjs",
+          "scripts/base-cli/modules/operator-auth/page.mjs",
+          "scripts/base-cli/modules/operator-auth/policy.mjs",
+          "scripts/base-cli/modules/operator-auth/routes.mjs",
+          "scripts/base-cli/modules/operator-auth/service.mjs",
+          "scripts/base-cli/modules/operator-auth/signin/index.mjs",
+          "scripts/base-cli/modules/owner-claim/README.md",
+          "scripts/base-cli/modules/owner-claim/idp.mjs",
+          "scripts/base-cli/modules/owner-claim/index.d.mts",
+          "scripts/base-cli/modules/owner-claim/index.mjs",
+          "scripts/base-cli/modules/owner-claim/page.mjs",
+          "scripts/base-cli/modules/owner-claim/schema/idp.sql",
+          "scripts/base-cli/modules/owner-claim/schema/owner-claim.sql",
+          "scripts/base-cli/modules/owner-claim/transaction.mjs",
+          "scripts/base-cli/modules/owner-claim/verify.mjs",
+          "scripts/base-cli/modules/portability/README.md",
+          "scripts/base-cli/modules/portability/catalogue.mjs",
+          "scripts/base-cli/modules/portability/cli-options.mjs",
+          "scripts/base-cli/modules/portability/cli.mjs",
+          "scripts/base-cli/modules/portability/copies.mjs",
+          "scripts/base-cli/modules/portability/dev-data.mjs",
+          "scripts/base-cli/modules/portability/diff.mjs",
+          "scripts/base-cli/modules/portability/export.mjs",
+          "scripts/base-cli/modules/portability/files.mjs",
+          "scripts/base-cli/modules/portability/format.mjs",
+          "scripts/base-cli/modules/portability/generated.mjs",
+          "scripts/base-cli/modules/portability/hash.mjs",
+          "scripts/base-cli/modules/portability/http.mjs",
+          "scripts/base-cli/modules/portability/import.mjs",
+          "scripts/base-cli/modules/portability/index.d.mts",
+          "scripts/base-cli/modules/portability/index.mjs",
+          "scripts/base-cli/modules/portability/journal.mjs",
+          "scripts/base-cli/modules/portability/lines.mjs",
+          "scripts/base-cli/modules/portability/payloads.mjs",
+          "scripts/base-cli/modules/portability/provider-data.mjs",
+          "scripts/base-cli/modules/portability/restore-safety.mjs",
+          "scripts/base-cli/modules/portability/schema/portability.sql",
+          "scripts/base-cli/modules/portability/storage.mjs",
+          "scripts/base-cli/modules/release/README.md",
+          "scripts/base-cli/modules/release/catalogue.mjs",
+          "scripts/base-cli/modules/release/export.mjs",
+          "scripts/base-cli/modules/release/produce.mjs",
+          "scripts/base-cli/modules/release/public-child-transport-state.cjs",
+          "scripts/base-cli/modules/release/public-child.mjs",
+          "scripts/base-cli/modules/release/public-git.mjs",
+          "scripts/base-cli/modules/release/publication-scan.mjs",
+          "scripts/base-cli/modules/release/publish-handoff.mjs",
+          "scripts/base-cli/modules/release/source.mjs",
+          "scripts/base-cli/modules/release/test-summary.mjs",
+          "scripts/base-cli/operations/README.md",
+          "scripts/base-cli/operations/operations.mjs",
+          "scripts/base-cli/operations/project-operations.mjs",
+          "scripts/base-cli/scripts/publish-check.mjs",
+          "scripts/base-cli/scripts/publish-check/README.md",
+          "scripts/base-cli/scripts/publish-check/checksum_maps.py",
+          "scripts/base-cli/scripts/publish-check/cli.py",
+          "scripts/base-cli/scripts/publish-check/command_arguments.py",
+          "scripts/base-cli/scripts/publish-check/command_shell_quotes.py",
+          "scripts/base-cli/scripts/publish-check/command_source_quotes.py",
+          "scripts/base-cli/scripts/publish-check/content_identities.py",
+          "scripts/base-cli/scripts/publish-check/copy_identities.py",
+          "scripts/base-cli/scripts/publish-check/destination.py",
+          "scripts/base-cli/scripts/publish-check/env_values.py",
+          "scripts/base-cli/scripts/publish-check/font_licence.py",
+          "scripts/base-cli/scripts/publish-check/git_history.py",
+          "scripts/base-cli/scripts/publish-check/github_refs.py",
+          "scripts/base-cli/scripts/publish-check/gitleaks.py",
+          "scripts/base-cli/scripts/publish-check/gitleaks.toml",
+          "scripts/base-cli/scripts/publish-check/history_scan.py",
+          "scripts/base-cli/scripts/publish-check/hit_location.py",
+          "scripts/base-cli/scripts/publish-check/hygiene_config.py",
+          "scripts/base-cli/scripts/publish-check/hygiene_text.py",
+          "scripts/base-cli/scripts/publish-check/identity-recipe.mjs",
+          "scripts/base-cli/scripts/publish-check/json_identity.py",
+          "scripts/base-cli/scripts/publish-check/license-exceptions.json",
+          "scripts/base-cli/scripts/publish-check/licenses.py",
+          "scripts/base-cli/scripts/publish-check/policy.py",
+          "scripts/base-cli/scripts/publish-check/project_identity.py",
+          "scripts/base-cli/scripts/publish-check/provenance.py",
+          "scripts/base-cli/scripts/publish-check/provenance_pins.py",
+          "scripts/base-cli/scripts/publish-check/public_base.py",
+          "scripts/base-cli/scripts/publish-check/public_hygiene.py",
+          "scripts/base-cli/scripts/publish-check/publication-config.json",
+          "scripts/base-cli/scripts/publish-check/publication_config.py",
+          "scripts/base-cli/scripts/publish-check/report.py",
+          "scripts/base-cli/scripts/publish-check/repository_commands.py",
+          "scripts/base-cli/scripts/publish-check/repository_intent.py",
+          "scripts/base-cli/scripts/publish-check/reviewed.py",
+          "scripts/base-cli/scripts/publish-check/source_hashes.mjs",
+          "scripts/base-cli/scripts/publish-check/tree_scan.py"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+          "paths": [
+            "bin/rer.mjs",
+            "cli/README.md",
+            "cli/adapter.mjs",
+            "cli/archive-path.mjs",
+            "cli/archive-vite.mjs",
+            "cli/archive.mjs",
+            "cli/auth-copy.mjs",
+            "cli/bounded.mjs",
+            "cli/container-transfer.mjs",
+            "cli/container.mjs",
+            "cli/contract.mjs",
+            "cli/dependencies.mjs",
+            "cli/dependency-approval.mjs",
+            "cli/dependency-doctor.mjs",
+            "cli/dependency-input.mjs",
+            "cli/deploy.mjs",
+            "cli/dev-identity.mjs",
+            "cli/errors.mjs",
+            "cli/export.mjs",
+            "cli/font-cache.mjs",
+            "cli/independent.mjs",
+            "cli/inspect.mjs",
+            "cli/jsonc.mjs",
+            "cli/lifecycle.mjs",
+            "cli/local.mjs",
+            "cli/main.mjs",
+            "cli/managed-server.mjs",
+            "cli/node-runtime-cache.mjs",
+            "cli/node-runtime-discovery.mjs",
+            "cli/node-runtime-download.mjs",
+            "cli/node-runtime.mjs",
+            "cli/output.mjs",
+            "cli/parse.mjs",
+            "cli/portability-worker.mjs",
+            "cli/portability.mjs",
+            "cli/preview-cache.mjs",
+            "cli/project.mjs",
+            "cli/release.mjs",
+            "cli/runtime-front-door.mjs",
+            "cli/scheduled.mjs",
+            "cli/server-activity.mjs",
+            "cli/server-proxy.mjs",
+            "cli/server-registry.mjs",
+            "cli/server-resources.mjs",
+            "cli/settings.mjs",
+            "cli/setup-answers.mjs",
+            "cli/setup-input.mjs",
+            "cli/shared.mjs",
+            "cli/transfers.mjs",
+            "composition/git-source.mjs",
+            "default-seed/scripts/base-cli/inventory.json",
+            "edition-authoring/files.mjs",
+            "edition-authoring/manifest.mjs",
+            "export/SEED-COMMAND-CONTRACT.md",
+            "modules/container/README.md",
+            "modules/container/adapters/d1.mjs",
+            "modules/container/adapters/egress.mjs",
+            "modules/container/adapters/jobs.mjs",
+            "modules/container/adapters/objects.mjs",
+            "modules/container/adapters/retained.mjs",
+            "modules/container/adapters/sqlite-error.mjs",
+            "modules/container/adapters/sqlite-worker.mjs",
+            "modules/container/assets.mjs",
+            "modules/container/bindings.mjs",
+            "modules/container/boundary.mjs",
+            "modules/container/build.mjs",
+            "modules/container/deploy-input.mjs",
+            "modules/container/entrypoint.sh",
+            "modules/container/host.mjs",
+            "modules/container/ingress.mjs",
+            "modules/container/lock.mjs",
+            "modules/container/migrations.mjs",
+            "modules/container/node-engine.mjs",
+            "modules/container/portability-schema.mjs",
+            "modules/container/runner.mjs",
+            "modules/container/ssh.mjs",
+            "modules/container/transfer.mjs",
+            "modules/container/worker-engine.mjs",
+            "modules/dependencies/README.md",
+            "modules/dependencies/approval.mjs",
+            "modules/dependencies/auth.mjs",
+            "modules/dependencies/authority.mjs",
+            "modules/dependencies/crypto.mjs",
+            "modules/dependencies/index.d.mts",
+            "modules/dependencies/index.mjs",
+            "modules/dependencies/logout.mjs",
+            "modules/dependencies/protocol.mjs",
+            "modules/dependencies/schema/approval-attempt.sql",
+            "modules/dependencies/schema/dependencies.sql",
+            "modules/dependencies/store.mjs",
+            "modules/deploy-kit/README.md",
+            "modules/deploy-kit/artifact.mjs",
+            "modules/deploy-kit/build-modules.mjs",
+            "modules/deploy-kit/check.mjs",
+            "modules/deploy-kit/cli.mjs",
+            "modules/deploy-kit/default-stage.mjs",
+            "modules/deploy-kit/deploy.mjs",
+            "modules/deploy-kit/health-request.mjs",
+            "modules/deploy-kit/health.mjs",
+            "modules/deploy-kit/index.mjs",
+            "modules/deploy-kit/migrations.mjs",
+            "modules/deploy-kit/owner-cli.mjs",
+            "modules/deploy-kit/owner.mjs",
+            "modules/deploy-kit/prepare.mjs",
+            "modules/deploy-kit/provider.mjs",
+            "modules/deploy-kit/queue-consumer.mjs",
+            "modules/deploy-kit/receipt.mjs",
+            "modules/deploy-kit/render.mjs",
+            "modules/deploy-kit/resources.mjs",
+            "modules/deploy-kit/sql-safety.mjs",
+            "modules/deploy-kit/sql-tokens.mjs",
+            "modules/deploy-kit/teardown.mjs",
+            "modules/deploy-kit/templates.mjs",
+            "modules/deploy-kit/validation.mjs",
+            "modules/deploy-kit/worker.mjs",
+            "modules/integrations/core/CONTRACT.md",
+            "modules/integrations/core/README.md",
+            "modules/integrations/core/crypto.ts",
+            "modules/integrations/core/database.ts",
+            "modules/integrations/core/delivery.ts",
+            "modules/integrations/core/destination.ts",
+            "modules/integrations/core/index.ts",
+            "modules/integrations/core/node-transport.ts",
+            "modules/integrations/core/public-address.ts",
+            "modules/integrations/core/repository.ts",
+            "modules/integrations/core/schema.sql",
+            "modules/integrations/core/sqlite.ts",
+            "modules/integrations/core/timestamped-body-signature.ts",
+            "modules/integrations/core/tokens.ts",
+            "modules/integrations/core/types.ts",
+            "modules/integrations/core/upgrade-token-usage-context.sql",
+            "modules/integrations/core/webhook.ts",
+            "modules/job-queue/README.md",
+            "modules/job-queue/cli.mjs",
+            "modules/job-queue/command.mjs",
+            "modules/job-queue/config.mjs",
+            "modules/job-queue/identity.mjs",
+            "modules/job-queue/index.mjs",
+            "modules/job-queue/membership.mjs",
+            "modules/job-queue/module.json",
+            "modules/job-queue/policy.mjs",
+            "modules/job-queue/processes.mjs",
+            "modules/job-queue/resources.mjs",
+            "modules/job-queue/storage.mjs",
+            "modules/job-queue/supervisor.mjs",
+            "modules/mail/.gitignore",
+            "modules/mail/LICENSE",
+            "modules/mail/README.md",
+            "modules/mail/doctor.mjs",
+            "modules/mail/index.mjs",
+            "modules/mail/live-proof/README.md",
+            "modules/mail/live-proof/run.mjs",
+            "modules/mail/package.json",
+            "modules/mail/pnpm-lock.yaml",
+            "modules/mail/src/adapters/cloudflare/README.md",
+            "modules/mail/src/adapters/cloudflare/headers.mjs",
+            "modules/mail/src/adapters/cloudflare/index.mjs",
+            "modules/mail/src/adapters/cloudflare/response.mjs",
+            "modules/mail/src/adapters/resend/README.md",
+            "modules/mail/src/adapters/resend/index.mjs",
+            "modules/mail/src/adapters/resend/response.mjs",
+            "modules/mail/src/adapters/resend/serialize.mjs",
+            "modules/mail/src/adapters/resend/size.mjs",
+            "modules/mail/src/adapters/sendgrid/README.md",
+            "modules/mail/src/adapters/sendgrid/index.mjs",
+            "modules/mail/src/adapters/sendgrid/serialize.mjs",
+            "modules/mail/src/core/errors.mjs",
+            "modules/mail/src/core/transport.mjs",
+            "modules/mail/src/core/validation.mjs",
+            "modules/mail/src/development/index.d.mts",
+            "modules/mail/src/development/index.mjs",
+            "modules/mail/src/development/outbox.mjs",
+            "modules/mail/src/development/schema.sql",
+            "modules/mail/src/development/viewer-html.mjs",
+            "modules/mail/src/development/viewer.mjs",
+            "modules/mail/src/doctor/README.md",
+            "modules/mail/src/doctor/common.mjs",
+            "modules/mail/src/doctor/dns.mjs",
+            "modules/mail/src/doctor/index.mjs",
+            "modules/mail/src/doctor/probe.mjs",
+            "modules/mail/src/doctor/receive.mjs",
+            "modules/mail/src/doctor/records.mjs",
+            "modules/mail/src/events/README.md",
+            "modules/mail/src/events/index.mjs",
+            "modules/mail/src/events/intake.mjs",
+            "modules/mail/src/events/storage.mjs",
+            "modules/mail/src/events/verify.mjs",
+            "modules/mail/src/inbound/README.md",
+            "modules/mail/src/inbound/bytes.mjs",
+            "modules/mail/src/inbound/headers.mjs",
+            "modules/mail/src/inbound/index.mjs",
+            "modules/mail/src/inbound/mime.mjs",
+            "modules/mail/src/inbound/multipart.mjs",
+            "modules/mail/src/inbound/resend-attachment.mjs",
+            "modules/mail/src/inbound/resend.mjs",
+            "modules/mail/src/inbound/sendgrid.mjs",
+            "modules/mail/src/sender.mjs",
+            "modules/mail/src/sendgrid-email/index.d.mts",
+            "modules/mail/src/sendgrid-email/index.mjs",
+            "modules/mail/src/unsubscribe/index.mjs",
+            "modules/operator-auth/README.md",
+            "modules/operator-auth/accounts/adapter.mjs",
+            "modules/operator-auth/accounts/admin.mjs",
+            "modules/operator-auth/accounts/credentials.mjs",
+            "modules/operator-auth/accounts/editor-owner.mjs",
+            "modules/operator-auth/accounts/index.d.mts",
+            "modules/operator-auth/accounts/index.mjs",
+            "modules/operator-auth/accounts/oa.mjs",
+            "modules/operator-auth/accounts/provider-control.mjs",
+            "modules/operator-auth/accounts/provider-pin.mjs",
+            "modules/operator-auth/accounts/roles.mjs",
+            "modules/operator-auth/accounts/schema/dependency-setup.sql",
+            "modules/operator-auth/accounts/schema/dev-sessions.sql",
+            "modules/operator-auth/accounts/schema/domain-rules-step-up.sql",
+            "modules/operator-auth/accounts/schema/invitation-cancellation.sql",
+            "modules/operator-auth/accounts/schema/operator-auth.sql",
+            "modules/operator-auth/accounts/schema/provider-control.sql",
+            "modules/operator-auth/accounts/schema/provider-pins.sql",
+            "modules/operator-auth/accounts/settings-page.mjs",
+            "modules/operator-auth/accounts/store.mjs",
+            "modules/operator-auth/branding.mjs",
+            "modules/operator-auth/config.mjs",
+            "modules/operator-auth/conformance/README.md",
+            "modules/operator-auth/conformance/index.d.mts",
+            "modules/operator-auth/conformance/index.mjs",
+            "modules/operator-auth/conformance/presentation.mjs",
+            "modules/operator-auth/crypto.mjs",
+            "modules/operator-auth/dev-admission.d.mts",
+            "modules/operator-auth/dev-admission.mjs",
+            "modules/operator-auth/dev-gate.mjs",
+            "modules/operator-auth/dev/badge.mjs",
+            "modules/operator-auth/dev/index.d.mts",
+            "modules/operator-auth/dev/index.mjs",
+            "modules/operator-auth/dev/personas.mjs",
+            "modules/operator-auth/dev/sign-in-as.d.mts",
+            "modules/operator-auth/dev/sign-in-as.mjs",
+            "modules/operator-auth/docs/README.md",
+            "modules/operator-auth/docs/tanstack-start.md",
+            "modules/operator-auth/docs/vite-spa.md",
+            "modules/operator-auth/errors.mjs",
+            "modules/operator-auth/http.mjs",
+            "modules/operator-auth/identity/admission.mjs",
+            "modules/operator-auth/identity/email-link/confirmation.mjs",
+            "modules/operator-auth/identity/email-link/message.mjs",
+            "modules/operator-auth/identity/index.d.mts",
+            "modules/operator-auth/identity/index.mjs",
+            "modules/operator-auth/identity/oidc/README.md",
+            "modules/operator-auth/identity/oidc/client-auth.mjs",
+            "modules/operator-auth/identity/oidc/config.mjs",
+            "modules/operator-auth/identity/oidc/crypto.mjs",
+            "modules/operator-auth/identity/oidc/errors.mjs",
+            "modules/operator-auth/identity/oidc/index.d.mts",
+            "modules/operator-auth/identity/oidc/index.mjs",
+            "modules/operator-auth/identity/oidc/jwt.mjs",
+            "modules/operator-auth/identity/oidc/network.mjs",
+            "modules/operator-auth/identity/oidc/presets.mjs",
+            "modules/operator-auth/identity/oidc/schema/oidc.sql",
+            "modules/operator-auth/identity/oidc/store.mjs",
+            "modules/operator-auth/identity/principal.mjs",
+            "modules/operator-auth/index.d.mts",
+            "modules/operator-auth/index.mjs",
+            "modules/operator-auth/input.mjs",
+            "modules/operator-auth/local-cli.mjs",
+            "modules/operator-auth/page.mjs",
+            "modules/operator-auth/policy.mjs",
+            "modules/operator-auth/routes.mjs",
+            "modules/operator-auth/service.mjs",
+            "modules/operator-auth/signin/index.mjs",
+            "modules/owner-claim/README.md",
+            "modules/owner-claim/idp.mjs",
+            "modules/owner-claim/index.d.mts",
+            "modules/owner-claim/index.mjs",
+            "modules/owner-claim/page.mjs",
+            "modules/owner-claim/schema/idp.sql",
+            "modules/owner-claim/schema/owner-claim.sql",
+            "modules/owner-claim/transaction.mjs",
+            "modules/owner-claim/verify.mjs",
+            "modules/portability/README.md",
+            "modules/portability/catalogue.mjs",
+            "modules/portability/cli-options.mjs",
+            "modules/portability/cli.mjs",
+            "modules/portability/copies.mjs",
+            "modules/portability/dev-data.mjs",
+            "modules/portability/diff.mjs",
+            "modules/portability/export.mjs",
+            "modules/portability/files.mjs",
+            "modules/portability/format.mjs",
+            "modules/portability/generated.mjs",
+            "modules/portability/hash.mjs",
+            "modules/portability/http.mjs",
+            "modules/portability/import.mjs",
+            "modules/portability/index.d.mts",
+            "modules/portability/index.mjs",
+            "modules/portability/journal.mjs",
+            "modules/portability/lines.mjs",
+            "modules/portability/payloads.mjs",
+            "modules/portability/provider-data.mjs",
+            "modules/portability/restore-safety.mjs",
+            "modules/portability/schema/portability.sql",
+            "modules/portability/storage.mjs",
+            "modules/release/README.md",
+            "modules/release/catalogue.mjs",
+            "modules/release/export.mjs",
+            "modules/release/produce.mjs",
+            "modules/release/public-child-transport-state.cjs",
+            "modules/release/public-child.mjs",
+            "modules/release/public-git.mjs",
+            "modules/release/publication-scan.mjs",
+            "modules/release/publish-handoff.mjs",
+            "modules/release/source.mjs",
+            "modules/release/test-summary.mjs",
+            "operations/README.md",
+            "operations/operations.mjs",
+            "operations/project-operations.mjs",
+            "scripts/publish-check.mjs",
+            "scripts/publish-check/README.md",
+            "scripts/publish-check/checksum_maps.py",
+            "scripts/publish-check/cli.py",
+            "scripts/publish-check/command_arguments.py",
+            "scripts/publish-check/command_shell_quotes.py",
+            "scripts/publish-check/command_source_quotes.py",
+            "scripts/publish-check/content_identities.py",
+            "scripts/publish-check/copy_identities.py",
+            "scripts/publish-check/destination.py",
+            "scripts/publish-check/env_values.py",
+            "scripts/publish-check/font_licence.py",
+            "scripts/publish-check/git_history.py",
+            "scripts/publish-check/github_refs.py",
+            "scripts/publish-check/gitleaks.py",
+            "scripts/publish-check/gitleaks.toml",
+            "scripts/publish-check/history_scan.py",
+            "scripts/publish-check/hit_location.py",
+            "scripts/publish-check/hygiene_config.py",
+            "scripts/publish-check/hygiene_text.py",
+            "scripts/publish-check/identity-recipe.mjs",
+            "scripts/publish-check/json_identity.py",
+            "scripts/publish-check/license-exceptions.json",
+            "scripts/publish-check/licenses.py",
+            "scripts/publish-check/policy.py",
+            "scripts/publish-check/project_identity.py",
+            "scripts/publish-check/provenance.py",
+            "scripts/publish-check/provenance_pins.py",
+            "scripts/publish-check/public_base.py",
+            "scripts/publish-check/public_hygiene.py",
+            "scripts/publish-check/publication-config.json",
+            "scripts/publish-check/publication_config.py",
+            "scripts/publish-check/report.py",
+            "scripts/publish-check/repository_commands.py",
+            "scripts/publish-check/repository_intent.py",
+            "scripts/publish-check/reviewed.py",
+            "scripts/publish-check/source_hashes.mjs",
+            "scripts/publish-check/tree_scan.py"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "scripts/base-cli/bin/rer.mjs",
+            "originPath": "bin/rer.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/adapter.mjs",
+            "originPath": "cli/adapter.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/archive-path.mjs",
+            "originPath": "cli/archive-path.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/archive-vite.mjs",
+            "originPath": "cli/archive-vite.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/archive.mjs",
+            "originPath": "cli/archive.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/auth-copy.mjs",
+            "originPath": "cli/auth-copy.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/bounded.mjs",
+            "originPath": "cli/bounded.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/container-transfer.mjs",
+            "originPath": "cli/container-transfer.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/container.mjs",
+            "originPath": "cli/container.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/contract.mjs",
+            "originPath": "cli/contract.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/dependencies.mjs",
+            "originPath": "cli/dependencies.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/dependency-approval.mjs",
+            "originPath": "cli/dependency-approval.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/dependency-doctor.mjs",
+            "originPath": "cli/dependency-doctor.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/dependency-input.mjs",
+            "originPath": "cli/dependency-input.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/deploy.mjs",
+            "originPath": "cli/deploy.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/dev-identity.mjs",
+            "originPath": "cli/dev-identity.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/errors.mjs",
+            "originPath": "cli/errors.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/export.mjs",
+            "originPath": "cli/export.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/font-cache.mjs",
+            "originPath": "cli/font-cache.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/independent.mjs",
+            "originPath": "cli/independent.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/inspect.mjs",
+            "originPath": "cli/inspect.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/jsonc.mjs",
+            "originPath": "cli/jsonc.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/lifecycle.mjs",
+            "originPath": "cli/lifecycle.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/local.mjs",
+            "originPath": "cli/local.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/main.mjs",
+            "originPath": "cli/main.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/managed-server.mjs",
+            "originPath": "cli/managed-server.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/node-runtime-cache.mjs",
+            "originPath": "cli/node-runtime-cache.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/node-runtime-discovery.mjs",
+            "originPath": "cli/node-runtime-discovery.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/node-runtime-download.mjs",
+            "originPath": "cli/node-runtime-download.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/node-runtime.mjs",
+            "originPath": "cli/node-runtime.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/output.mjs",
+            "originPath": "cli/output.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/parse.mjs",
+            "originPath": "cli/parse.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/portability-worker.mjs",
+            "originPath": "cli/portability-worker.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/portability.mjs",
+            "originPath": "cli/portability.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/preview-cache.mjs",
+            "originPath": "cli/preview-cache.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/project.mjs",
+            "originPath": "cli/project.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/README.md",
+            "originPath": "cli/README.md"
+          },
+          {
+            "path": "scripts/base-cli/cli/release.mjs",
+            "originPath": "cli/release.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/runtime-front-door.mjs",
+            "originPath": "cli/runtime-front-door.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/scheduled.mjs",
+            "originPath": "cli/scheduled.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/server-activity.mjs",
+            "originPath": "cli/server-activity.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/server-proxy.mjs",
+            "originPath": "cli/server-proxy.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/server-registry.mjs",
+            "originPath": "cli/server-registry.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/server-resources.mjs",
+            "originPath": "cli/server-resources.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/settings.mjs",
+            "originPath": "cli/settings.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/setup-answers.mjs",
+            "originPath": "cli/setup-answers.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/setup-input.mjs",
+            "originPath": "cli/setup-input.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/shared.mjs",
+            "originPath": "cli/shared.mjs"
+          },
+          {
+            "path": "scripts/base-cli/cli/transfers.mjs",
+            "originPath": "cli/transfers.mjs"
+          },
+          {
+            "path": "scripts/base-cli/composition/git-source.mjs",
+            "originPath": "composition/git-source.mjs"
+          },
+          {
+            "path": "scripts/base-cli/edition-authoring/files.mjs",
+            "originPath": "edition-authoring/files.mjs"
+          },
+          {
+            "path": "scripts/base-cli/edition-authoring/manifest.mjs",
+            "originPath": "edition-authoring/manifest.mjs"
+          },
+          {
+            "path": "scripts/base-cli/inventory.json",
+            "originPath": "default-seed/scripts/base-cli/inventory.json"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/d1.mjs",
+            "originPath": "modules/container/adapters/d1.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/egress.mjs",
+            "originPath": "modules/container/adapters/egress.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/jobs.mjs",
+            "originPath": "modules/container/adapters/jobs.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/objects.mjs",
+            "originPath": "modules/container/adapters/objects.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/retained.mjs",
+            "originPath": "modules/container/adapters/retained.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/sqlite-error.mjs",
+            "originPath": "modules/container/adapters/sqlite-error.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/adapters/sqlite-worker.mjs",
+            "originPath": "modules/container/adapters/sqlite-worker.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/assets.mjs",
+            "originPath": "modules/container/assets.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/bindings.mjs",
+            "originPath": "modules/container/bindings.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/boundary.mjs",
+            "originPath": "modules/container/boundary.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/build.mjs",
+            "originPath": "modules/container/build.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/deploy-input.mjs",
+            "originPath": "modules/container/deploy-input.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/entrypoint.sh",
+            "originPath": "modules/container/entrypoint.sh"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/host.mjs",
+            "originPath": "modules/container/host.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/ingress.mjs",
+            "originPath": "modules/container/ingress.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/lock.mjs",
+            "originPath": "modules/container/lock.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/migrations.mjs",
+            "originPath": "modules/container/migrations.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/node-engine.mjs",
+            "originPath": "modules/container/node-engine.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/portability-schema.mjs",
+            "originPath": "modules/container/portability-schema.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/README.md",
+            "originPath": "modules/container/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/runner.mjs",
+            "originPath": "modules/container/runner.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/ssh.mjs",
+            "originPath": "modules/container/ssh.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/transfer.mjs",
+            "originPath": "modules/container/transfer.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/container/worker-engine.mjs",
+            "originPath": "modules/container/worker-engine.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/approval.mjs",
+            "originPath": "modules/dependencies/approval.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/auth.mjs",
+            "originPath": "modules/dependencies/auth.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/authority.mjs",
+            "originPath": "modules/dependencies/authority.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/crypto.mjs",
+            "originPath": "modules/dependencies/crypto.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/index.d.mts",
+            "originPath": "modules/dependencies/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/index.mjs",
+            "originPath": "modules/dependencies/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/logout.mjs",
+            "originPath": "modules/dependencies/logout.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/protocol.mjs",
+            "originPath": "modules/dependencies/protocol.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/README.md",
+            "originPath": "modules/dependencies/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/schema/approval-attempt.sql",
+            "originPath": "modules/dependencies/schema/approval-attempt.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/schema/dependencies.sql",
+            "originPath": "modules/dependencies/schema/dependencies.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/dependencies/store.mjs",
+            "originPath": "modules/dependencies/store.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/artifact.mjs",
+            "originPath": "modules/deploy-kit/artifact.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/build-modules.mjs",
+            "originPath": "modules/deploy-kit/build-modules.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/check.mjs",
+            "originPath": "modules/deploy-kit/check.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/cli.mjs",
+            "originPath": "modules/deploy-kit/cli.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/default-stage.mjs",
+            "originPath": "modules/deploy-kit/default-stage.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/deploy.mjs",
+            "originPath": "modules/deploy-kit/deploy.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/health-request.mjs",
+            "originPath": "modules/deploy-kit/health-request.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/health.mjs",
+            "originPath": "modules/deploy-kit/health.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/index.mjs",
+            "originPath": "modules/deploy-kit/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/migrations.mjs",
+            "originPath": "modules/deploy-kit/migrations.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/owner-cli.mjs",
+            "originPath": "modules/deploy-kit/owner-cli.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/owner.mjs",
+            "originPath": "modules/deploy-kit/owner.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/prepare.mjs",
+            "originPath": "modules/deploy-kit/prepare.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/provider.mjs",
+            "originPath": "modules/deploy-kit/provider.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/queue-consumer.mjs",
+            "originPath": "modules/deploy-kit/queue-consumer.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/README.md",
+            "originPath": "modules/deploy-kit/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/receipt.mjs",
+            "originPath": "modules/deploy-kit/receipt.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/render.mjs",
+            "originPath": "modules/deploy-kit/render.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/resources.mjs",
+            "originPath": "modules/deploy-kit/resources.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/sql-safety.mjs",
+            "originPath": "modules/deploy-kit/sql-safety.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/sql-tokens.mjs",
+            "originPath": "modules/deploy-kit/sql-tokens.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/teardown.mjs",
+            "originPath": "modules/deploy-kit/teardown.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/templates.mjs",
+            "originPath": "modules/deploy-kit/templates.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/validation.mjs",
+            "originPath": "modules/deploy-kit/validation.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/deploy-kit/worker.mjs",
+            "originPath": "modules/deploy-kit/worker.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/CONTRACT.md",
+            "originPath": "modules/integrations/core/CONTRACT.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/crypto.ts",
+            "originPath": "modules/integrations/core/crypto.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/database.ts",
+            "originPath": "modules/integrations/core/database.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/delivery.ts",
+            "originPath": "modules/integrations/core/delivery.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/destination.ts",
+            "originPath": "modules/integrations/core/destination.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/index.ts",
+            "originPath": "modules/integrations/core/index.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/node-transport.ts",
+            "originPath": "modules/integrations/core/node-transport.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/public-address.ts",
+            "originPath": "modules/integrations/core/public-address.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/README.md",
+            "originPath": "modules/integrations/core/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/repository.ts",
+            "originPath": "modules/integrations/core/repository.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/schema.sql",
+            "originPath": "modules/integrations/core/schema.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/sqlite.ts",
+            "originPath": "modules/integrations/core/sqlite.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/timestamped-body-signature.ts",
+            "originPath": "modules/integrations/core/timestamped-body-signature.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/tokens.ts",
+            "originPath": "modules/integrations/core/tokens.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/types.ts",
+            "originPath": "modules/integrations/core/types.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/upgrade-token-usage-context.sql",
+            "originPath": "modules/integrations/core/upgrade-token-usage-context.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/integrations/core/webhook.ts",
+            "originPath": "modules/integrations/core/webhook.ts"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/cli.mjs",
+            "originPath": "modules/job-queue/cli.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/command.mjs",
+            "originPath": "modules/job-queue/command.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/config.mjs",
+            "originPath": "modules/job-queue/config.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/identity.mjs",
+            "originPath": "modules/job-queue/identity.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/index.mjs",
+            "originPath": "modules/job-queue/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/membership.mjs",
+            "originPath": "modules/job-queue/membership.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/module.json",
+            "originPath": "modules/job-queue/module.json"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/policy.mjs",
+            "originPath": "modules/job-queue/policy.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/processes.mjs",
+            "originPath": "modules/job-queue/processes.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/README.md",
+            "originPath": "modules/job-queue/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/resources.mjs",
+            "originPath": "modules/job-queue/resources.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/storage.mjs",
+            "originPath": "modules/job-queue/storage.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/job-queue/supervisor.mjs",
+            "originPath": "modules/job-queue/supervisor.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/.gitignore",
+            "originPath": "modules/mail/.gitignore"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/doctor.mjs",
+            "originPath": "modules/mail/doctor.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/index.mjs",
+            "originPath": "modules/mail/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/LICENSE",
+            "originPath": "modules/mail/LICENSE"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/live-proof/README.md",
+            "originPath": "modules/mail/live-proof/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/live-proof/run.mjs",
+            "originPath": "modules/mail/live-proof/run.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/package.json",
+            "originPath": "modules/mail/package.json"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/pnpm-lock.yaml",
+            "originPath": "modules/mail/pnpm-lock.yaml"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/README.md",
+            "originPath": "modules/mail/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/cloudflare/headers.mjs",
+            "originPath": "modules/mail/src/adapters/cloudflare/headers.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/cloudflare/index.mjs",
+            "originPath": "modules/mail/src/adapters/cloudflare/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/cloudflare/README.md",
+            "originPath": "modules/mail/src/adapters/cloudflare/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/cloudflare/response.mjs",
+            "originPath": "modules/mail/src/adapters/cloudflare/response.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/resend/index.mjs",
+            "originPath": "modules/mail/src/adapters/resend/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/resend/README.md",
+            "originPath": "modules/mail/src/adapters/resend/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/resend/response.mjs",
+            "originPath": "modules/mail/src/adapters/resend/response.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/resend/serialize.mjs",
+            "originPath": "modules/mail/src/adapters/resend/serialize.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/resend/size.mjs",
+            "originPath": "modules/mail/src/adapters/resend/size.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/sendgrid/index.mjs",
+            "originPath": "modules/mail/src/adapters/sendgrid/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/sendgrid/README.md",
+            "originPath": "modules/mail/src/adapters/sendgrid/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/adapters/sendgrid/serialize.mjs",
+            "originPath": "modules/mail/src/adapters/sendgrid/serialize.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/core/errors.mjs",
+            "originPath": "modules/mail/src/core/errors.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/core/transport.mjs",
+            "originPath": "modules/mail/src/core/transport.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/core/validation.mjs",
+            "originPath": "modules/mail/src/core/validation.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/development/index.d.mts",
+            "originPath": "modules/mail/src/development/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/development/index.mjs",
+            "originPath": "modules/mail/src/development/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/development/outbox.mjs",
+            "originPath": "modules/mail/src/development/outbox.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/development/schema.sql",
+            "originPath": "modules/mail/src/development/schema.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/development/viewer-html.mjs",
+            "originPath": "modules/mail/src/development/viewer-html.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/development/viewer.mjs",
+            "originPath": "modules/mail/src/development/viewer.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/common.mjs",
+            "originPath": "modules/mail/src/doctor/common.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/dns.mjs",
+            "originPath": "modules/mail/src/doctor/dns.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/index.mjs",
+            "originPath": "modules/mail/src/doctor/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/probe.mjs",
+            "originPath": "modules/mail/src/doctor/probe.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/README.md",
+            "originPath": "modules/mail/src/doctor/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/receive.mjs",
+            "originPath": "modules/mail/src/doctor/receive.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/doctor/records.mjs",
+            "originPath": "modules/mail/src/doctor/records.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/events/index.mjs",
+            "originPath": "modules/mail/src/events/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/events/intake.mjs",
+            "originPath": "modules/mail/src/events/intake.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/events/README.md",
+            "originPath": "modules/mail/src/events/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/events/storage.mjs",
+            "originPath": "modules/mail/src/events/storage.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/events/verify.mjs",
+            "originPath": "modules/mail/src/events/verify.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/bytes.mjs",
+            "originPath": "modules/mail/src/inbound/bytes.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/headers.mjs",
+            "originPath": "modules/mail/src/inbound/headers.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/index.mjs",
+            "originPath": "modules/mail/src/inbound/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/mime.mjs",
+            "originPath": "modules/mail/src/inbound/mime.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/multipart.mjs",
+            "originPath": "modules/mail/src/inbound/multipart.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/README.md",
+            "originPath": "modules/mail/src/inbound/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/resend-attachment.mjs",
+            "originPath": "modules/mail/src/inbound/resend-attachment.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/resend.mjs",
+            "originPath": "modules/mail/src/inbound/resend.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/inbound/sendgrid.mjs",
+            "originPath": "modules/mail/src/inbound/sendgrid.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/sender.mjs",
+            "originPath": "modules/mail/src/sender.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/sendgrid-email/index.d.mts",
+            "originPath": "modules/mail/src/sendgrid-email/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/sendgrid-email/index.mjs",
+            "originPath": "modules/mail/src/sendgrid-email/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/mail/src/unsubscribe/index.mjs",
+            "originPath": "modules/mail/src/unsubscribe/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/adapter.mjs",
+            "originPath": "modules/operator-auth/accounts/adapter.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/admin.mjs",
+            "originPath": "modules/operator-auth/accounts/admin.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/credentials.mjs",
+            "originPath": "modules/operator-auth/accounts/credentials.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/editor-owner.mjs",
+            "originPath": "modules/operator-auth/accounts/editor-owner.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/index.d.mts",
+            "originPath": "modules/operator-auth/accounts/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/index.mjs",
+            "originPath": "modules/operator-auth/accounts/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/oa.mjs",
+            "originPath": "modules/operator-auth/accounts/oa.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/provider-control.mjs",
+            "originPath": "modules/operator-auth/accounts/provider-control.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/provider-pin.mjs",
+            "originPath": "modules/operator-auth/accounts/provider-pin.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/roles.mjs",
+            "originPath": "modules/operator-auth/accounts/roles.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/dependency-setup.sql",
+            "originPath": "modules/operator-auth/accounts/schema/dependency-setup.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/dev-sessions.sql",
+            "originPath": "modules/operator-auth/accounts/schema/dev-sessions.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/domain-rules-step-up.sql",
+            "originPath": "modules/operator-auth/accounts/schema/domain-rules-step-up.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/invitation-cancellation.sql",
+            "originPath": "modules/operator-auth/accounts/schema/invitation-cancellation.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/operator-auth.sql",
+            "originPath": "modules/operator-auth/accounts/schema/operator-auth.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/provider-control.sql",
+            "originPath": "modules/operator-auth/accounts/schema/provider-control.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/schema/provider-pins.sql",
+            "originPath": "modules/operator-auth/accounts/schema/provider-pins.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/settings-page.mjs",
+            "originPath": "modules/operator-auth/accounts/settings-page.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/accounts/store.mjs",
+            "originPath": "modules/operator-auth/accounts/store.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/branding.mjs",
+            "originPath": "modules/operator-auth/branding.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/config.mjs",
+            "originPath": "modules/operator-auth/config.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/conformance/index.d.mts",
+            "originPath": "modules/operator-auth/conformance/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/conformance/index.mjs",
+            "originPath": "modules/operator-auth/conformance/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/conformance/presentation.mjs",
+            "originPath": "modules/operator-auth/conformance/presentation.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/conformance/README.md",
+            "originPath": "modules/operator-auth/conformance/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/crypto.mjs",
+            "originPath": "modules/operator-auth/crypto.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev-admission.d.mts",
+            "originPath": "modules/operator-auth/dev-admission.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev-admission.mjs",
+            "originPath": "modules/operator-auth/dev-admission.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev-gate.mjs",
+            "originPath": "modules/operator-auth/dev-gate.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev/badge.mjs",
+            "originPath": "modules/operator-auth/dev/badge.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev/index.d.mts",
+            "originPath": "modules/operator-auth/dev/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev/index.mjs",
+            "originPath": "modules/operator-auth/dev/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev/personas.mjs",
+            "originPath": "modules/operator-auth/dev/personas.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev/sign-in-as.d.mts",
+            "originPath": "modules/operator-auth/dev/sign-in-as.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/dev/sign-in-as.mjs",
+            "originPath": "modules/operator-auth/dev/sign-in-as.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/docs/README.md",
+            "originPath": "modules/operator-auth/docs/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/docs/tanstack-start.md",
+            "originPath": "modules/operator-auth/docs/tanstack-start.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/docs/vite-spa.md",
+            "originPath": "modules/operator-auth/docs/vite-spa.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/errors.mjs",
+            "originPath": "modules/operator-auth/errors.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/http.mjs",
+            "originPath": "modules/operator-auth/http.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/admission.mjs",
+            "originPath": "modules/operator-auth/identity/admission.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/email-link/confirmation.mjs",
+            "originPath": "modules/operator-auth/identity/email-link/confirmation.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/email-link/message.mjs",
+            "originPath": "modules/operator-auth/identity/email-link/message.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/index.d.mts",
+            "originPath": "modules/operator-auth/identity/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/index.mjs",
+            "originPath": "modules/operator-auth/identity/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/client-auth.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/client-auth.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/config.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/config.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/crypto.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/crypto.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/errors.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/errors.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/index.d.mts",
+            "originPath": "modules/operator-auth/identity/oidc/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/index.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/jwt.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/jwt.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/network.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/network.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/presets.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/presets.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/README.md",
+            "originPath": "modules/operator-auth/identity/oidc/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/schema/oidc.sql",
+            "originPath": "modules/operator-auth/identity/oidc/schema/oidc.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/oidc/store.mjs",
+            "originPath": "modules/operator-auth/identity/oidc/store.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/identity/principal.mjs",
+            "originPath": "modules/operator-auth/identity/principal.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/index.d.mts",
+            "originPath": "modules/operator-auth/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/index.mjs",
+            "originPath": "modules/operator-auth/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/input.mjs",
+            "originPath": "modules/operator-auth/input.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/local-cli.mjs",
+            "originPath": "modules/operator-auth/local-cli.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/page.mjs",
+            "originPath": "modules/operator-auth/page.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/policy.mjs",
+            "originPath": "modules/operator-auth/policy.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/README.md",
+            "originPath": "modules/operator-auth/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/routes.mjs",
+            "originPath": "modules/operator-auth/routes.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/service.mjs",
+            "originPath": "modules/operator-auth/service.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/operator-auth/signin/index.mjs",
+            "originPath": "modules/operator-auth/signin/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/idp.mjs",
+            "originPath": "modules/owner-claim/idp.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/index.d.mts",
+            "originPath": "modules/owner-claim/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/index.mjs",
+            "originPath": "modules/owner-claim/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/page.mjs",
+            "originPath": "modules/owner-claim/page.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/README.md",
+            "originPath": "modules/owner-claim/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/schema/idp.sql",
+            "originPath": "modules/owner-claim/schema/idp.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/schema/owner-claim.sql",
+            "originPath": "modules/owner-claim/schema/owner-claim.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/transaction.mjs",
+            "originPath": "modules/owner-claim/transaction.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/owner-claim/verify.mjs",
+            "originPath": "modules/owner-claim/verify.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/catalogue.mjs",
+            "originPath": "modules/portability/catalogue.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/cli-options.mjs",
+            "originPath": "modules/portability/cli-options.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/cli.mjs",
+            "originPath": "modules/portability/cli.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/copies.mjs",
+            "originPath": "modules/portability/copies.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/dev-data.mjs",
+            "originPath": "modules/portability/dev-data.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/diff.mjs",
+            "originPath": "modules/portability/diff.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/export.mjs",
+            "originPath": "modules/portability/export.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/files.mjs",
+            "originPath": "modules/portability/files.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/format.mjs",
+            "originPath": "modules/portability/format.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/generated.mjs",
+            "originPath": "modules/portability/generated.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/hash.mjs",
+            "originPath": "modules/portability/hash.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/http.mjs",
+            "originPath": "modules/portability/http.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/import.mjs",
+            "originPath": "modules/portability/import.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/index.d.mts",
+            "originPath": "modules/portability/index.d.mts"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/index.mjs",
+            "originPath": "modules/portability/index.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/journal.mjs",
+            "originPath": "modules/portability/journal.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/lines.mjs",
+            "originPath": "modules/portability/lines.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/payloads.mjs",
+            "originPath": "modules/portability/payloads.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/provider-data.mjs",
+            "originPath": "modules/portability/provider-data.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/README.md",
+            "originPath": "modules/portability/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/restore-safety.mjs",
+            "originPath": "modules/portability/restore-safety.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/schema/portability.sql",
+            "originPath": "modules/portability/schema/portability.sql"
+          },
+          {
+            "path": "scripts/base-cli/modules/portability/storage.mjs",
+            "originPath": "modules/portability/storage.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/catalogue.mjs",
+            "originPath": "modules/release/catalogue.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/export.mjs",
+            "originPath": "modules/release/export.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/produce.mjs",
+            "originPath": "modules/release/produce.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/public-child-transport-state.cjs",
+            "originPath": "modules/release/public-child-transport-state.cjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/public-child.mjs",
+            "originPath": "modules/release/public-child.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/public-git.mjs",
+            "originPath": "modules/release/public-git.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/publication-scan.mjs",
+            "originPath": "modules/release/publication-scan.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/publish-handoff.mjs",
+            "originPath": "modules/release/publish-handoff.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/README.md",
+            "originPath": "modules/release/README.md"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/source.mjs",
+            "originPath": "modules/release/source.mjs"
+          },
+          {
+            "path": "scripts/base-cli/modules/release/test-summary.mjs",
+            "originPath": "modules/release/test-summary.mjs"
+          },
+          {
+            "path": "scripts/base-cli/operations/operations.mjs",
+            "originPath": "operations/operations.mjs"
+          },
+          {
+            "path": "scripts/base-cli/operations/project-operations.mjs",
+            "originPath": "operations/project-operations.mjs"
+          },
+          {
+            "path": "scripts/base-cli/operations/README.md",
+            "originPath": "operations/README.md"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check.mjs",
+            "originPath": "scripts/publish-check.mjs"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/checksum_maps.py",
+            "originPath": "scripts/publish-check/checksum_maps.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/cli.py",
+            "originPath": "scripts/publish-check/cli.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/command_arguments.py",
+            "originPath": "scripts/publish-check/command_arguments.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/command_shell_quotes.py",
+            "originPath": "scripts/publish-check/command_shell_quotes.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/command_source_quotes.py",
+            "originPath": "scripts/publish-check/command_source_quotes.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/content_identities.py",
+            "originPath": "scripts/publish-check/content_identities.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/copy_identities.py",
+            "originPath": "scripts/publish-check/copy_identities.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/destination.py",
+            "originPath": "scripts/publish-check/destination.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/env_values.py",
+            "originPath": "scripts/publish-check/env_values.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/font_licence.py",
+            "originPath": "scripts/publish-check/font_licence.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/git_history.py",
+            "originPath": "scripts/publish-check/git_history.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/github_refs.py",
+            "originPath": "scripts/publish-check/github_refs.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/gitleaks.py",
+            "originPath": "scripts/publish-check/gitleaks.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/gitleaks.toml",
+            "originPath": "scripts/publish-check/gitleaks.toml"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/history_scan.py",
+            "originPath": "scripts/publish-check/history_scan.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/hit_location.py",
+            "originPath": "scripts/publish-check/hit_location.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/hygiene_config.py",
+            "originPath": "scripts/publish-check/hygiene_config.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/hygiene_text.py",
+            "originPath": "scripts/publish-check/hygiene_text.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/identity-recipe.mjs",
+            "originPath": "scripts/publish-check/identity-recipe.mjs"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/json_identity.py",
+            "originPath": "scripts/publish-check/json_identity.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/license-exceptions.json",
+            "originPath": "scripts/publish-check/license-exceptions.json"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/licenses.py",
+            "originPath": "scripts/publish-check/licenses.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/policy.py",
+            "originPath": "scripts/publish-check/policy.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/project_identity.py",
+            "originPath": "scripts/publish-check/project_identity.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/provenance_pins.py",
+            "originPath": "scripts/publish-check/provenance_pins.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/provenance.py",
+            "originPath": "scripts/publish-check/provenance.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/public_base.py",
+            "originPath": "scripts/publish-check/public_base.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/public_hygiene.py",
+            "originPath": "scripts/publish-check/public_hygiene.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/publication_config.py",
+            "originPath": "scripts/publish-check/publication_config.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/publication-config.json",
+            "originPath": "scripts/publish-check/publication-config.json"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/README.md",
+            "originPath": "scripts/publish-check/README.md"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/report.py",
+            "originPath": "scripts/publish-check/report.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/repository_commands.py",
+            "originPath": "scripts/publish-check/repository_commands.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/repository_intent.py",
+            "originPath": "scripts/publish-check/repository_intent.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/reviewed.py",
+            "originPath": "scripts/publish-check/reviewed.py"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/source_hashes.mjs",
+            "originPath": "scripts/publish-check/source_hashes.mjs"
+          },
+          {
+            "path": "scripts/base-cli/scripts/publish-check/tree_scan.py",
+            "originPath": "scripts/publish-check/tree_scan.py"
+          },
+          {
+            "path": "SEED-COMMAND-CONTRACT.md",
+            "originPath": "export/SEED-COMMAND-CONTRACT.md"
+          }
         ]
       }
     }

@@ -48,7 +48,9 @@ try {
   const subhead = await page.locator('.hero-sub').innerText();
   assert.equal(subhead, 'Your Codex or Claude fixes the problem and writes the reply. You press Send.');
   assert.equal(subhead.split(/\s+/).length, 14, 'the subhead stays at 14 words');
-  assert.equal(await page.locator('.hero-free').innerText(), '100% free and open source.');
+  assert.equal((await page.locator('.hero-free').innerText()).replace(/\u00a0/g, ' '), '100% free, open source alternative to Zendesk, Intercom, Help Scout and Freshdesk');
+  assert.deepEqual(await page.locator('.hero-free strong').allInnerTexts(), ['Zendesk', 'Intercom', 'Help\u00a0Scout', 'Freshdesk'], 'the four company names are strong elements and Help Scout does not break');
+  assert.deepEqual(await page.locator('.hero-free').evaluate(el => [getComputedStyle(el).fontWeight, ...[...el.querySelectorAll('strong')].map(s => getComputedStyle(s).fontWeight)]), ['400', '600', '600', '600', '600'], 'the names are bold and the lead-in is not');
   assert.equal(await page.locator('.hero-examples').count(), 0, 'the examples strip is removed');
   assert.deepEqual(await page.locator('.hero-steps li').allInnerTexts(), ['The customer asks', 'The agent fixes it', 'You press Send']);
   assert.deepEqual(await page.locator('.hero-copy .actions a').allInnerTexts(), ['Get the code', 'Read the docs'], 'the hero has two controls and no third');
@@ -86,7 +88,7 @@ try {
   const pageText = await page.locator('.h2h-home').innerText();
   const labels = await page.locator('figure.drawing').evaluateAll(figures => figures.map(figure => figure.getAttribute('aria-label')).join(' '));
   const metaDescription = await page.locator('meta[name="description"]').getAttribute('content');
-  assert.equal(metaDescription, 'Customer support, solved. Your Codex or Claude fixes the problem and writes the reply; you press Send. Chat widget, shared inbox, help centre and suggested replies. 100% free and open source, MIT licensed.');
+  assert.equal(metaDescription, 'Customer support, solved. Your Codex or Claude fixes the problem and writes the reply; you press Send. Chat widget, shared inbox, help centre and suggested replies. 100% free, open source alternative to Zendesk, Intercom, Help Scout and Freshdesk. MIT licensed.');
   const everything = `${pageText} ${labels} ${await page.title()} ${metaDescription}`.replace(/free as in cost|free of charge|No fees\./gi, '');
   assert.doesNotMatch(everything, /\$|£|€|\bUS\b|Cloudflare|\bhost(s|ing|ed)?\b|\bproviders?\b|run\s?edit\s?run|runeditrun|\bcosts?\b|\bfees?\b|\bpric(e|es|ed|ing)\b|\bpaid\b|\bbilling\b|invoice|Explain the change/i, 'no cost, hosting, provider, Run Edit Run or billing text anywhere on the page');
   // Truth: only Codex and Claude, never sending or deciding by themselves, no invented access levels, no figure but "100% free".

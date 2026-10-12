@@ -16,7 +16,7 @@ const fieldNames = [...appearanceFieldNames, ...behaviorFieldNames, ...textField
 
 export default function WidgetSettings({ projectId }) {
     const { markDirty, markSaved } = useUnsavedChanges();
-    const { settings, csrfToken, previewAgent, previewBrand } = useContext(WidgetSettingsContext);
+    const { settings, csrfToken, previewAgent, previewBrand, mailMode } = useContext(WidgetSettingsContext);
     // The form shows the effective widget (saved overrides over the widget defaults). Only fields the
     // person edits are tracked, so saving without edits stores nothing new and one edit touches one value.
     const { register, getValues } = useForm({ defaultValues: useMemo(() => effectiveSettings(settings, fieldNames, previewBrand), []) });
@@ -56,6 +56,7 @@ export default function WidgetSettings({ projectId }) {
                     open: true,
                     onOpenChange: setPreviewOpen,
                     agent: previewAgent,
+                    mailMode,
                     workspace_brand: previewBrand,
                 },
             });

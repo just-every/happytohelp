@@ -1,6 +1,7 @@
 import type {Env} from '../../platform/env'
+import {localMailOrigin} from '../../edition/local-mail/configuration'
 import type {EmailInput} from './email'
-import {sendSendGrid, type SendGridMessage} from '../sendgrid-email/sender'
+import {sendSendGrid, type SendGridMessage} from '../../vendor/base/modules/sendgrid-email/src/sender'
 
 export type EmailProvider = 'resend'|'cloudflare'|'sendgrid'
 const providers:readonly EmailProvider[]=['resend','cloudflare','sendgrid']
@@ -11,9 +12,11 @@ export function selectedEmailProvider(env:Env):EmailProvider|null{
  return providers.includes(value)?value:null
 }
 export function emailConfigured(env:Env){
+ if(localMailOrigin(env))return typeof env.EMAIL_FROM==='string'&&Boolean(env.EMAIL_FROM.trim())
  const provider=selectedEmailProvider(env)
  return Boolean(provider&&typeof env.EMAIL_API_KEY==='string'&&env.EMAIL_API_KEY.trim()&&typeof env.EMAIL_FROM==='string'&&env.EMAIL_FROM.trim()&&(provider!=='cloudflare'||/^[a-f0-9]{32}$/i.test(String(env.EMAIL_ACCOUNT_ID||''))))
 }
+export function emailMode(env:Env):'local'|'remote'|'unavailable'{return emailConfigured(env)?localMailOrigin(env)?'local':'remote':'unavailable'}
 function namedAddress(from:string){
  const named=from.match(/^(.*?)\s*<([^>]+)>$/)
  return named?{name:named[1].trim(),address:named[2]}:from

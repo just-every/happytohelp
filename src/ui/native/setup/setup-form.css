@@ -1,0 +1,52 @@
+/* The step's form: hand-inked fields on paper (a 2px ink line with slightly uneven corners, as in design E), black and outlined
+   pill actions as on the homepage, and the review list in the same ink box as the fields it sums up. */
+.h2h-setup form { margin-top: 30px; }
+.h2h-setup .setup-fields { display: grid; gap: 19px; }
+.h2h-setup .setup-field { display: grid; gap: 8px; }
+.h2h-setup .setup-field > span { font-size: 18.5px; font-weight: 600; line-height: 1.3; }
+.h2h-setup .setup-field input:not([type=color]) { width: 100%; min-width: 0; height: 58px; padding: 0 20px; color: var(--ink); font: inherit; font-size: 19px; background: var(--field); border: 2px solid var(--ink); border-radius: 20px 21px 18px 19px; }
+.h2h-setup .setup-field small { margin-top: 2px; color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
+
+/* Brand colour: the real colour input, drawn as a round swatch, and the hex field beside it, sharing one inked box. The box
+   carries the hex field's focus ring; the swatch carries its own. */
+.h2h-setup .setup-colour { display: flex; align-items: center; gap: 10px; height: 68px; padding: 0 8px 0 10px; background: var(--field); border: 2px solid var(--ink); border-radius: 20px 21px 18px 19px; }
+.h2h-setup .setup-colour input[type=color] { flex: none; width: 48px; height: 48px; padding: 0; background: none; border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.h2h-setup .setup-colour input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+.h2h-setup .setup-colour input[type=color]::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.h2h-setup .setup-colour input[type=color]::-moz-color-swatch { border: 0; border-radius: 50%; }
+.h2h-setup .setup-field .setup-colour input:not([type=color]) { flex: 1; height: 100%; padding: 0 10px; font-size: 21px; background: transparent; border: 0; border-radius: 0; }
+/* !important only to lift the dashboard stylesheet's shared ring (itself !important) off the hex field onto its box. */
+.h2h-setup .setup-colour input:not([type=color]):focus-visible { outline: none !important; box-shadow: none !important; }
+.h2h-setup .setup-colour:has(input:not([type=color]):focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 4px var(--paper); }
+
+.h2h-setup .setup-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 20px; margin-top: 35px; }
+.h2h-setup :is(.setup-primary, .setup-secondary) { display: inline-flex; align-items: center; justify-content: center; min-height: 57px; padding: 0 33px; color: var(--ink); font: inherit; font-size: 18px; font-weight: 600; line-height: 1; white-space: nowrap; border: 2px solid var(--ink); border-radius: 999px; cursor: pointer; transition: background-color 0.18s, color 0.18s, border-color 0.18s; }
+.h2h-setup .setup-secondary { min-width: 198px; background: var(--field); }
+.h2h-setup .setup-secondary:hover:not(:disabled) { background: #fff; }
+.h2h-setup .setup-primary { min-width: 166px; color: #fff; background: var(--ink); }
+.h2h-setup .setup-primary:hover:not(:disabled) { background: #3a3a38; border-color: #3a3a38; }
+.h2h-setup .setup-actions button:disabled { opacity: 0.55; cursor: progress; }
+
+.h2h-setup .setup-review { padding: 4px 24px; background: var(--field); border: 2px solid var(--ink); border-radius: 22px 24px 20px 23px; }
+.h2h-setup .setup-review > div { display: grid; grid-template-columns: minmax(7.5rem, 0.36fr) minmax(0, 1fr); gap: 16px; align-items: center; min-height: 58px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.h2h-setup .setup-review > div:last-child { border-bottom: 0; }
+.h2h-setup .setup-review dt { color: var(--ink-soft); }
+.h2h-setup .setup-review dd { display: flex; align-items: center; gap: 12px; min-width: 0; font-weight: 500; overflow-wrap: anywhere; }
+.h2h-setup .setup-swatch { flex: none; width: 30px; height: 30px; border: 2px solid var(--ink); border-radius: 50%; }
+.h2h-setup .setup-note { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 20px; color: var(--ink-soft); font-size: 16px; line-height: 1.5; }
+.h2h-setup .setup-note-icon { width: 28px; height: 28px; color: var(--ink); }
+
+@media (max-width: 640px) {
+  .h2h-setup .setup-fields { gap: 22px; }
+  .h2h-setup .setup-field > span { font-size: 17px; }
+  .h2h-setup .setup-field input:not([type=color]) { height: 54px; padding: 0 16px; font-size: 17px; border-radius: 17px 18px 16px 17px; }
+  .h2h-setup .setup-colour { height: 62px; border-radius: 17px 18px 16px 17px; }
+  .h2h-setup .setup-field .setup-colour input:not([type=color]) { font-size: 18px; }
+  .h2h-setup .setup-actions { flex-wrap: nowrap; gap: 12px; margin-top: 32px; }
+  .h2h-setup :is(.setup-primary, .setup-secondary) { flex: 1 1 auto; min-width: 0; min-height: 54px; padding: 0 16px; font-size: 16px; }
+  .h2h-setup .setup-review { padding: 4px 16px; }
+  .h2h-setup .setup-review > div { grid-template-columns: minmax(0, 1fr); gap: 2px; min-height: 0; }
+  .h2h-setup .setup-review dt { font-size: 15px; }
+  .h2h-setup .setup-note { grid-template-columns: 24px minmax(0, 1fr); gap: 12px; font-size: 15px; }
+  .h2h-setup .setup-note-icon { width: 24px; height: 24px; }
+}

@@ -36,3 +36,6 @@ export const addedTables = [
   // 0109_magic_signins.sql
   'magic_signins',
 ];
+
+// Native resolution provenance, lifecycle and visitor feedback.
+export const outcomeTables = ['message_authorship','conversation_tracking','conversation_handoffs','conversation_resolutions','conversation_ratings','conversation_rating_history','reporting_legacy_conversations'];

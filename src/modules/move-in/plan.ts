@@ -1,0 +1,32 @@
+import {reconcileContactKeys} from './contact-keys'
+import {Buffer} from 'node:buffer'
+import {validateArtifactOriginal} from '../import-kit/src/storage/originals'
+import type {Env} from '../../platform/env'
+import {canonicalJson,sha256,type SourceBundle} from '../import-kit/src/d1/index'
+import {sourceIdentity} from '../import-kit/src/provenance/identity'
+import {planningState,relevantTags} from './planning-state'
+import {prepareMapping,withTags} from './readers/normalise'
+import {recordKey,type Run} from './types'
+import {retainReview} from './plans'
+export async function preparePlan(env:Env,run:Run){
+ if(!await reconcileContactKeys(env,run))return
+ const retained=(await env.DB.prepare('SELECT record_json,serialized FROM move_in_records WHERE run_id=? ORDER BY ordinal').bind(run.id).all<any>()).results,records=[],diagnostics=JSON.parse(run.diagnostics_json),seen=new Map<string,string>(),conflicts=new Set<string>()
+ for(const row of retained){const record=JSON.parse(row.record_json),key=recordKey(record);if(seen.has(key)&&(run.vendor==='intercom'||seen.get(key)!==row.serialized)){conflicts.add(key);diagnostics.push({severity:'error',code:'conflicting_duplicate_id',message:`Conflicting ${record.kind} ID ${record.sourceId}`,kind:record.kind,sourceId:record.sourceId,location:record.location})}else if(!seen.has(key)){seen.set(key,row.serialized);records.push(record)}}
+ const artifacts=[];for(const file of JSON.parse(run.files_json)){const object=await env.FILES.get(file.key);if(!object)throw new Error('source_file_missing');const bytes=new Uint8Array(await object.arrayBuffer());if(sha256(bytes)!==file.sha256)throw new Error('source_file_changed');validateArtifactOriginal({name:file.name,sha256:file.sha256,size:file.size,original:{status:'available',base64:Buffer.from(bytes).toString('base64')}});artifacts.push({name:file.name,sha256:file.sha256,size:file.size,original:{status:'unavailable' as const,reason:'not-supplied' as const}})}
+ const source:SourceBundle=withTags({records,artifacts,diagnostics},run.vendor),existing=await relevantTags(env,run.project_id,source.records),prepared=await prepareMapping({projectId:run.project_id,actorId:run.actor_id,vendor:run.vendor,source,tagIds:new Map(existing.map(t=>[t.normalized_name,t.id]))})
+ for(const key of conflicts)prepared.rejections.set(key,'conflicting_duplicate_id')
+ // A conversation cannot publish when its required imported contact was rejected.
+ const rejectedContacts=new Set(source.records.filter(r=>['user','contact'].includes(r.kind)&&prepared.rejections.has(recordKey(r))).map(r=>r.sourceId))
+ for(const record of source.records){if(!['ticket','conversation'].includes(record.kind))continue;const p=record.payload as any,contact=run.vendor==='zendesk'?String(p.requester_id):String(p.contacts?.contacts?.[0]?.id);if(!prepared.rejections.has(recordKey(record))&&rejectedContacts.has(contact))prepared.rejections.set(recordKey(record),'conversation_contact_rejected')}
+ const {nativeById,claimById,nativeIds,collisions}=await planningState(env,run,source.records,prepared,existing)
+ for(const record of source.records){const key=recordKey(record),claim=claimById.get(sourceIdentity(run.project_id,run.vendor,record.kind,record.sourceId));if(record.kind==='tag-name'&&claim){const tagId=existing.find(t=>t.normalized_name===record.sourceId)?.id,tag=tagId?nativeById.get(`tag/${tagId}`):undefined;if(tag)prepared.effects.set(key,[{targetKind:'tag',targetId:tag.targetId,value:tag.value}])}if(claim&&claim!==record.payloadHash)prepared.rejections.set(key,'source_changed_conflict')
+  for(const effect of prepared.effects.get(key)??[]){const existing=nativeById.get(`${effect.targetKind}/${effect.targetId}`);if((existing||claim)&&!nativeIds.get(effect.targetKind)?.has(effect.targetId)){prepared.rejections.set(key,'native_target_missing');continue}if(existing&&effect.targetKind==='article'){const prior=(existing.value as any).tables.knowledge_articles[0],article=(effect.value as any).tables.knowledge_articles[0];article.source_incarnation=prior.source_incarnation;article.publication_version=`${prior.source_incarnation}:${article.source_revision}`}
+   if(!prepared.rejections.has(key)&&nativeIds.get(effect.targetKind)?.has(effect.targetId)&&(!claim||!existing||canonicalJson(existing.value)!==canonicalJson(effect.value)))prepared.rejections.set(key,'native_target_conflict')
+  }
+ }
+ for(const record of source.records)for(const effect of prepared.effects.get(recordKey(record))??[]){if(effect.targetKind!=='contact')continue;const collision=collisions.get(effect.targetId);if(collision?.email)prepared.rejections.set(recordKey(record),'native_contact_email_conflict');if(collision?.external)prepared.rejections.set(recordKey(record),'native_contact_identity_conflict')}
+ const emailOwners=new Map<string,string[]>();for(const record of source.records){if(!['user','contact'].includes(record.kind))continue;const p=record.payload as any;if(typeof p.email==='string'){const address=p.email.trim().toLowerCase();emailOwners.set(address,[...(emailOwners.get(address)??[]),recordKey(record)])}}
+ for(const owners of emailOwners.values())if(owners.length>1)for(const key of owners)prepared.rejections.set(key,'duplicate_source_email')
+ for(const record of source.records){if(!['ticket','conversation'].includes(record.kind))continue;const p=record.payload as any,contact=run.vendor==='zendesk'?String(p.requester_id):String(p.contacts?.contacts?.[0]?.id);if(!prepared.rejections.has(recordKey(record))&&prepared.rejections.has(`${run.vendor==='zendesk'?'user':'contact'}/${contact}`))prepared.rejections.set(recordKey(record),'conversation_contact_rejected');if(!prepared.rejections.has(recordKey(record))&&run.vendor==='zendesk'&&Array.isArray(p.comments)&&p.comments.some((comment:any)=>prepared.rejections.has(`user/${comment.author_id}`)))prepared.rejections.set(recordKey(record),'comment_author_conflict');if(!prepared.rejections.has(recordKey(record))&&run.vendor==='intercom'&&[p.source?.author,...(p.conversation_parts?.conversation_parts??[]).map((part:any)=>part.author)].some(author=>author&&['contact','user','lead'].includes(author.type)&&prepared.rejections.has(`contact/${author.id}`)))prepared.rejections.set(recordKey(record),'comment_author_conflict')}
+ await retainReview(env,run,source,prepared,retained.length-records.length)
+}

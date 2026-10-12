@@ -8,6 +8,66 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
+## 0.4.0 — 2026-10-12
+
+### Added
+
+- **Move in.** Owners and admins import support history (conversations,
+  contacts, tags, saved replies and articles) from supported Zendesk and
+  Intercom exports. Each import shows its plan, rejections and conflicts before
+  you approve it, keeps original source IDs, timestamps and publication state,
+  resumes after a stop and can be undone. Applying or undoing an import sends no
+  mail and starts no model work, assignment or notification.
+- **Resolution feedback and Reports.** A visitor can rate the answer to their
+  resolved conversation with thumbs up or down and an optional comment. Each
+  resolution records how it was reached (AI, assisted, human or unknown). Reports
+  show volume, median and p90 first-response and resolution times, AI resolution
+  and satisfaction for a workspace-calendar range, with a daily series and
+  formula-safe CSV exports. Imported history is excluded.
+- **Connections.** Scoped workspace API tokens (seven scopes, shown once, stored
+  hashed, revocable), thirteen Bearer API operations, four signed webhook events
+  with delivery logs, and Slack delivery. Explicit HTTP 5xx and 429 answers are
+  retried a bounded number of times; timeouts and redirects are reported as
+  uncertain and never replayed.
+- **The rer local path.** `node scripts/rer.mjs install`, `setup` and `dev`
+  replace `scripts/install.mjs`, `scripts/setup.mjs` and `scripts/operations.mjs`.
+  Local sign-in links and customer mail go to a development outbox on your
+  computer; nothing is emailed. Native password sign-in is kept. `export`,
+  `import` and `reset` move or clear local data.
+- Installation archives are refused in build output and are never served by the
+  local app.
+
+### Changed
+
+- Use **Node.js 22.20.0** and pnpm 10.12.4. (0.3 used Node.js 26.8.1 or newer.)
+- Apply the ten additive migrations `0110_move_in.sql` to
+  `119_local_portability.sql`, in order, before the updated Worker serves
+  traffic. They leave earlier migrations and existing rows unchanged.
+
+### Upgrading from 0.3.x
+
+Back up first: locally `.wrangler/state` and `.dev.vars`; on Cloudflare the D1
+database, every R2 object and your secrets, including `INTEGRATION_ENCRYPTION_KEY`.
+Update your checkout, switch to Node.js 22.20.0 and run `node scripts/rer.mjs setup`
+with your existing owner email. It applies the migrations and keeps your owner,
+password, data and saved settings. Never use `reset` to upgrade.
+[Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) lists every step.
+
+### Known limits
+
+- Accessibility is on a confirmed owner **HOLD**: an automated checker wrongly
+  accepted four contrast cases. No WCAG conformance is claimed.
+- Backups and archives cover D1 and R2 only. **Durable Object** storage is not
+  included, and full portable-storage fidelity (including resizable ArrayBuffer
+  preservation) is not established.
+- Hosted operating costs are **unmeasured**. Timed activation and paid-provider
+  (model and mail) execution are not qualified.
+- Move in and the connection protocols are qualified with **synthetic fixtures**
+  only; real vendor exports and live Slack were not supplied.
+- No hosted installation, compliance or FedRAMP qualification is claimed.
+- The hosted service at **app.happytohelp.com** is separate legacy production. It
+  is not part of this release and is not upgraded by it.
+
 ## 0.3.0 — 2026-10-10
 
 - Hand assistant replies and attachments to the editable composer, close compact

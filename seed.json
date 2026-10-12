@@ -1,11 +1,17 @@
 {
   "id": "happytohelp",
   "name": "HappyToHelp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "MIT",
   "repository": "https://github.com/just-every/happytohelp",
   "maturity": "Owner-installable MIT source release. Local verification and hosted, real-provider and accessibility acceptance are separate; see ACCEPTANCE.md.",
   "category": "support",
+  "replaces": [
+    "Zendesk",
+    "Intercom",
+    "Help Scout",
+    "Freshdesk"
+  ],
   "spine": {
     "id": "happytohelp-conversation",
     "record": "Project-owned customer conversations with durable messages, evidence and explicitly authorized work."
@@ -21,7 +27,8 @@
     {
       "id": "identity",
       "clauses": [
-        "IDENTITY-001"
+        "IDENTITY-001",
+        "IDENTITY-002"
       ]
     },
     {
@@ -95,6 +102,42 @@
       "clauses": [
         "SOURCE-001"
       ]
+    },
+    {
+      "id": "move-in",
+      "clauses": [
+        "MOVE-IN-001"
+      ]
+    },
+    {
+      "id": "resolution-feedback",
+      "clauses": [
+        "OUTCOMES-001"
+      ]
+    },
+    {
+      "id": "reports",
+      "clauses": [
+        "REPORTS-001"
+      ]
+    },
+    {
+      "id": "workspace-connections",
+      "clauses": [
+        "CONNECTIONS-001"
+      ]
+    },
+    {
+      "id": "first-workspace",
+      "clauses": [
+        "FIRST-RUN-001"
+      ]
+    },
+    {
+      "id": "local-mail",
+      "clauses": [
+        "LOCAL-MAIL-001"
+      ]
     }
   ],
   "nonGoals": [
@@ -131,6 +174,18 @@
         "Installation ID and edition origin",
         "User-selected element structure",
         "Explicitly reviewed text limited to 240 characters"
+      ],
+      "adapters": []
+    },
+    {
+      "id": "workspace-connections",
+      "required": false,
+      "requiredWhen": "Saving or enabling workspace webhook or Slack connections",
+      "why": "Configured workspace receivers including Slack (workspace-receivers) sends to custom destination workspace-connection-version: Owner-selected public HTTPS webhook receivers or the fixed Slack incoming-webhook and chat.postMessage protocols. Customer receivers and Slack are external destinations. Delivery uses platform HTTPS fetch with manual redirects, a finite timeout and byte bounds.",
+      "data": [
+        "Opaque workspace, conversation, message and resolution IDs",
+        "Event type, time, revision, outcome and numeric rating",
+        "Slack notification with up to 500 characters of the first committed visitor message"
       ],
       "adapters": []
     }
@@ -222,10 +277,10 @@
     },
     {
       "name": "INTEGRATION_ENCRYPTION_KEY",
-      "secret": true,
       "required": false,
-      "requiredWhen": "Selecting the corresponding optional capability",
-      "why": "Private native binding; see OPERATIONS.md."
+      "requiredWhen": "Saving or enabling workspace webhook or Slack connections",
+      "secret": true,
+      "why": "Encrypt native stored GitHub tokens, webhook signing keys and Slack credentials for Configured workspace receivers including Slack; load from server-side secret storage and never expose to browser code or logs."
     },
     {
       "name": "GITHUB_CLIENT_SECRET",

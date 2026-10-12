@@ -1,463 +1,194 @@
-# Running HappyToHelp
+# HappyToHelp operations
 
-This guide is the manual path for running HappyToHelp and the reference for
-every setting. The installer (`node scripts/install.mjs`, see
-[Install](docs/INSTALLER.md)) runs the same commands for you.
-
-Jump to what you want to do:
-
-- Run it on your own computer by hand: [Run it on your computer](#run-it-on-your-computer)
-- Put it online by hand: [Deploy to your Cloudflare account](#deploy-to-your-cloudflare-account)
-- Turn on AI replies, email or another optional feature: [Optional features and their settings](#optional-features-and-their-settings)
-- Change how much visitors can send or spend: [Limit public traffic and AI spending](#limit-public-traffic-and-ai-spending)
-- Remove a customer's personal data: [Contact erasure](#contact-erasure)
-- Update to a new release: [Upgrade an existing installation](#upgrade-an-existing-installation)
-
-Later sections are reference material for less common jobs and for developers
-and maintainers.
-
-## How HappyToHelp runs
-
-HappyToHelp is a single Cloudflare Worker (a program that runs on Cloudflare's
-network), built with TanStack Start/React for the pages and Hono for the API. It
-stores everything in Cloudflare services in your own account. Each service is
-connected to the Worker under a fixed name, called a *binding*. You only need
-these names when you look at your Cloudflare dashboard or the code:
-
-| Cloudflare service | Binding | What HappyToHelp uses it for |
-| --- | --- | --- |
-| D1 (SQLite database) | `DB` | Application records and the state of background operations |
-| R2 (file storage) | `FILES` | Uploaded content and media |
-| Queues | `JOBS`, plus a dead-letter queue (where failed background work is set aside) | Dispatching saved background work |
-| Durable Object (SQLite-backed) | `CONVERSATIONS` | Coordinating live conversation connections |
-
-A scheduled job (cron) runs once a minute and picks up any eligible saved work
-that still needs to run. No other server, database or cache is required.
-
-## Before you start
-
-- Install **Node 26.8.1 or newer** and **pnpm 10.12.4**.
-- Always type `pnpm run setup`. Plain `pnpm setup` is pnpm's own, unrelated
-  command.
-- Optional quick checks. You can run these on a fresh checkout, before
-  installing any dependencies:
-
-  ```sh
-  node scripts/operations.mjs describe
-  node scripts/operations.mjs check
-  ```
-
-  `describe` prints the repository's list of operations and what each one does.
-  `check` also checks the settings exported in your terminal (for example, that
-  `H2H_PUBLIC_ORIGIN` is an HTTPS origin or that `RATE_LIMITS` is valid) and the
-  checkout's Worker configuration, so it is most useful after you set your
-  deployment values. It exits with an error if that configuration is not
-  valid. These checks only read files and your settings: they do not run setup
-  or deploy, read secrets, sign in or check remote health.
+The maintained entry point is `node scripts/rer.mjs`. Use Node **22.20.0** and
+pnpm **10.12.4**. `describe --json` describes real flags without effects;
+`check --profile first-party` validates structure before dependencies or private
+configuration exist. `doctor` checks installed tools and local inputs.
 
 ## Run it on your computer
 
-A copy on your computer is for trying HappyToHelp out or working on the code.
-Only you can reach it, so customers on your website can't use it.
+Prepare the private manifest answers in [Install](docs/INSTALLER.md#private-setup-answers), then:
 
-1. Install dependencies:
+```sh
+node scripts/rer.mjs install
+node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
+node scripts/rer.mjs dev
+```
 
-   ```sh
-   pnpm install --frozen-lockfile
-   ```
-
-2. Prepare the local database:
-
-   ```sh
-   pnpm run setup -- --local
-   ```
-
-   This gathers the database migrations (from `migrations/` and any module's own
-   `migrations/` folder) into `.generated/migrations` and applies them to a local
-   D1 database. It does not create anything in Cloudflare or publish code.
-
-3. Optional: put any runtime settings, such as provider keys, in a private
-   `.dev.vars` file in the checkout, one `NAME=value` per line. See
-   [How to set a setting](#how-to-set-a-setting).
-4. Start the development server:
-
-   ```sh
-   pnpm run dev
-   ```
-
-5. In your browser, open `/setup` on the address the development server prints,
-   and choose an email and password to create the first owner
-   ([First-run setup](docs/SETUP-WORKFLOW.md) walks through the page).
-   Setup closes as soon as an owner exists; after that, sign in at `/login`.
-
-To start it again later, run `pnpm run dev` again in the same folder.
+Install is frozen dependency installation. Setup builds, migrates, prepares the
+native first owner and stops its temporary app. Dev stays in the foreground with
+assets and HMR. Open the printed `RER_SIGN_IN` outbox, choose the newest message,
+follow its link and press **Sign in**. No email is sent. Password sign-in remains
+available. Ctrl+C stops owned children. Setup reruns preserve owner/data/private
+settings; a conflicting saved email or origin is refused.
 
 ### Find your way around
 
-- `/` is the public homepage ("Customer Support, Solved.").
-- Dashboard routes include `/projects` and `/conversations`.
-- Each workspace's published Help Center has its own route.
-- The homepage does not load the customer chat widget. To try the widget, set
-  the workspace's exact allowed website origin, then install the widget snippet
-  shown in that workspace's widget settings on a page served from that origin.
+The inbox, knowledge, customer context and workspace settings use the same native
+actor/project authority. The sidebar's Setup checklist records observed provider
+and widget behavior; saved defaults do not pass it. Workspace creation starts
+with the widget snippet, and Advanced holds secrets/verification examples.
 
-An *origin* is the scheme and host of a web address with nothing after it, for
-example `https://help.example.com`. HappyToHelp uses exact origins to decide
-which websites may use a workspace's widget. A website on the public internet
-can't reach a copy running on your computer, so to try the widget on your real
-website, [deploy to Cloudflare](#deploy-to-your-cloudflare-account) first.
+See [Local command reference](RUN-LOCALLY.md) for loopback ports, production
+preview, explicit stop and idle shutdown. An occupied explicit port refuses;
+rer never chooses another silently. Saved remote mail is preserved: use a
+separate checkout for a local outbox trial.
+
+## Local data and backups
+
+Canonical D1/R2/KV/DO state is `.wrangler/state`. Private generated settings are
+`.dev.vars` and its declared recovery copy `.dev.vars.previous` (0600);
+installer drafts/logs are `.seed/installer` and CLI bookkeeping is `.rer/local`.
+Secret directories are 0700. Never commit these, answers or private archives.
+Ambiguous prior state, symlinks and unsafe placement require explicit recovery;
+rer never silently moves or removes it.
+
+Stop dev before export, import or reset:
+
+```sh
+node scripts/rer.mjs export --output exports/support.rer
+node scripts/rer.mjs reset --yes
+node scripts/rer.mjs import --input exports/support.rer --yes
+node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
+```
+
+Export creates a new owner-only archive with integrity and explicit exclusions.
+It includes supported domain rows, native identities/password hashes and FILES
+objects. Sessions, one-use links, development outbox, private configuration,
+provider/integration credentials, outbound execution queues and local-computer
+pairing/grants/jobs are excluded. Signed visitor verification is reconfigured.
+Archives contain sensitive data and must be protected as backups.
+
+Import validates integrity and resource coverage before atomic restore into an
+empty destination. It preserves native owners; setup does not claim a new owner
+over them. Re-enter private configuration and external integration credentials.
+Restore sends no mail, model request or connection notification. Remote transfer
+is unsupported and refuses with exit 4. D1/R2 archives do not include Durable
+Object storage or establish full portable-storage fidelity.
+
+Reset prints its inventory and requires explicit confirmation. It removes only
+local state, owners/sessions/outbox, `.rer/local`, `.seed/installer` and declared
+private settings/recovery copies. Source, dependencies, lockfiles, manifest,
+export archives and `.rer/deploy` receipts survive. Active operations refuse.
+A second reset succeeds with an empty inventory, and subsequent setup creates
+an empty installation. Keep answers outside `.seed/installer` if needed after reset.
 
 ## Deploy to your Cloudflare account
 
-Deploying takes two commands. `setup` creates the resources in your Cloudflare
-account and prepares the database. `deploy` builds the code and publishes it.
-
-Run every step from [What you need first](#what-you-need-first) to the end in
-**the same terminal window**. The values you `export` there last only until
-that window closes; if you close it, export them again before you carry on.
+Use the real `deploy.json` declaration with Base deploy-kit. The command derives
+resource names and the application origin from the project/environment and the
+owner's account. Configure private `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN` in the process environment; never pass or print token
+values. The token needs the declared Workers, D1, R2 and Queues capabilities.
+Enable R2 before provisioning. Commit source before a real deployment.
 
 ### What you need first
 
-1. **Dependencies and a Wrangler sign-in.** Wrangler is Cloudflare's
-   command-line tool and is installed with the dependencies. Run
-   `pnpm install --frozen-lockfile`, then either `pnpm exec wrangler login` or
-   export `CLOUDFLARE_API_TOKEN`.
-2. **The right Cloudflare products.** The account must be able to use Workers,
-   D1, R2, Queues and Durable Objects. Enable R2 in the Cloudflare dashboard
-   before you run setup for the first time. The Workers Paid plan covers all of
-   them and is required for Cloudflare Email Sending.
-3. **API token permissions** (only if you use a token instead of
-   `wrangler login`):
-   - for the selected account: *Workers Scripts: Edit*, *D1: Edit*,
-     *Workers R2 Storage: Edit*, *Queues: Edit* and *Account Settings: Read*;
-   - so Wrangler can identify the user: *User Details: Read* and
-     *Memberships: Read*;
-   - for every custom domain (application or preview), on that domain's zone:
-     *Zone: Read* and *Workers Routes: Edit*.
+Use an account-owned API token pinned to the intended account, with account
+permissions **Workers Scripts: Edit**, **D1: Edit**, **Workers R2 Storage: Edit**
+and **Queues: Edit**. This declaration does not need KV or zone permissions.
+An account-owned token does not need or support **User Details** or
+**Memberships** for this flow. Keep the token in private environment input.
+The account also needs an enabled R2 service and a workers.dev subdomain.
 
-   Setup reads the zone before it creates anything, so a token without
-   *Zone: Read* stops with a clear message and no resources are created.
-   Cloudflare Email Sending uses its own dedicated token with
-   *Email Sending: Edit* (see [the integrations guide](src/modules/integrations/README.md)).
-   Never reuse the deployment token for it.
-4. **A setup token** for a fresh installation. Set `H2H_SETUP_TOKEN` to a
-   private value of at least 32 characters before you deploy, for example:
+### Find your account ID
 
-   ```sh
-   export H2H_SETUP_TOKEN=$(openssl rand -hex 32)
-   ```
+Copy the intended account ID from the Cloudflare dashboard and explicitly set
+`CLOUDFLARE_ACCOUNT_ID` in the same private environment as
+`CLOUDFLARE_API_TOKEN`. Rer uses this pinned account directly: no user discovery
+or `wrangler whoami` is required. Check that the dashboard account, token scope
+and supplied ID agree before deploying.
 
-   If you don't have `openssl`, any private random value of at least 32
-   characters works. Keep the value private, and keep a copy: deploy stores it
-   as a Worker secret, and `/setup` asks for it before the first owner can be
-   created (see [Claim your new installation](#claim-your-new-installation)).
-   Optionally, also set `H2H_SETUP_OWNER_EMAIL` before `setup -- --remote` to
-   allow only that email address to become the first owner.
+For a **user-owned** token only, optional user/account discovery with
+`pnpm exec wrangler whoami` may require User Details and Memberships read
+permissions. That discovery is a convenience for choosing an account; it is
+not a prerequisite for an account-owned token or a reason to broaden its scope.
 
-### Find your account ID and workers.dev subdomain
-
-- **Account ID:** run `pnpm exec wrangler whoami` after you sign in; it lists
-  each account you can use with its account ID. You can also find it in the
-  Cloudflare dashboard, on your account's overview page. It is 32 hexadecimal
-  characters.
-- **workers.dev subdomain:** in the Cloudflare dashboard, open
-  **Workers & Pages**; your subdomain is shown there. Register one first if the
-  account has none.
-
-### Choose your web address
-
-Set these in the terminal that will run the commands, using your own values:
+The declaration names DB, FILES, CONVERSATIONS, JOBS, its dead-letter queue and
+scheduled recovery. Declared secret bindings include `H2H_SETUP_TOKEN` and
+`INTEGRATION_ENCRYPTION_KEY`, read from private environment variables. Preserve
+existing keys and owner data. Configure optional mail/model inputs through the
+supported runtime declaration and native workspace settings. Deployment never
+converts remote mail into development capture.
 
 ```sh
-export CLOUDFLARE_ACCOUNT_ID=<32-character account ID>
-export H2H_RESOURCE_PREFIX=my-support          # Worker and resource name prefix
-export H2H_PUBLIC_ORIGIN=https://my-support.<your-subdomain>.workers.dev
+node scripts/rer.mjs deploy --dry-run
+node scripts/rer.mjs deploy --environment production
 ```
 
-| Variable | Rule |
-| --- | --- |
-| `CLOUDFLARE_ACCOUNT_ID` | The 32-character hexadecimal account ID. |
-| `H2H_RESOURCE_PREFIX` | 3–40 characters: a lowercase letter followed by lowercase letters, digits or hyphens. It names the Worker (`<prefix>`), D1 database (`<prefix>-db`), R2 bucket (`<prefix>-files`) and queues (`<prefix>-jobs`, `<prefix>-jobs-dead`). |
-| `H2H_PUBLIC_ORIGIN` | The `https://` address people will use: an origin with no path, port, query or credentials. It becomes `APP_ORIGIN`. |
-| `H2H_SETUP_TOKEN` | The private setup token from [What you need first](#what-you-need-first). |
-
-The public origin can take one of two forms. `scripts/deployment/config.mjs` and
-`scripts/deployment/domains.mjs` enforce these rules.
-
-- **A workers.dev address:** `https://<prefix>.<your-subdomain>.workers.dev`.
-  The first part of the hostname must equal `H2H_RESOURCE_PREFIX`, and
-  `<your-subdomain>` is the account's workers.dev subdomain. Setup enables the
-  workers.dev route for the Worker.
-- **A custom domain:** any DNS hostname whose zone is **active in the same
-  Cloudflare account**. Setup looks up the zone with the Cloudflare API before it
-  creates resources, and refuses zones that are missing, inactive or in another
-  account. Deploy attaches the hostname as a Worker custom domain; Wrangler
-  reports DNS conflicts and certificate issuance.
-
-The optional website preview (`PREVIEW_ORIGIN`), which loads your website
-through a proxy, must use a separate **custom domain** in an active zone of the
-same account. It cannot be a workers.dev hostname and cannot be the same as the
-application origin. Leave it unset to keep website preview turned off.
-
-### Create the resources and publish
-
-If you want optional features from the start, such as an AI provider key or
-email, set them now too (see [How to set a setting](#how-to-set-a-setting)).
-
-1. Check your settings. This prints the resource names and changes nothing:
-
-   ```sh
-   pnpm run setup -- --plan
-   ```
-
-2. Create the resources and prepare the database:
-
-   ```sh
-   pnpm run setup -- --remote
-   ```
-
-   This finds or creates the D1 database, R2 bucket and both queues, records the
-   selected bindings, routes and public variables in the private file
-   `.seed/deployment/<prefix>/wrangler.json`, and applies remote D1 migrations.
-   It changes remote resources and the database schema but **does not publish
-   Worker code**.
-
-3. Build and publish:
-
-   ```sh
-   pnpm run deploy -- --remote
-   ```
-
-   This needs the same target and unchanged public variables. It collects
-   migrations, builds the Worker, checks that the built configuration matches
-   the target, applies migrations, passes your configured secrets to Wrangler
-   through a temporary JSON file with mode `0600`, readable only by you (never
-   as command arguments), publishes the
-   Worker and its assets, deletes the temporary file and waits for `/health`.
-
-4. Open your `H2H_PUBLIC_ORIGIN` address followed by `/setup`, enter the setup
-   token and create the owner account (see
-   [Claim your new installation](#claim-your-new-installation)).
-
-Keep in mind:
-
-- If you change a public variable, run setup again before you deploy.
-- Secrets you leave unset are not revoked. To rotate or delete an existing
-  Worker secret, use Wrangler.
-- Do not commit `.seed/`, `.dev.vars`, generated state or credentials.
+Default environment is production. Dry run validates the declaration and real
+build locally with zero provider requests. Real deploy builds, provisions,
+applies migrations, publishes and checks health in the owner account. It is an
+external change requiring owner authorization. Release produces source/artifacts
+with its existing `--repo` and `--output` arguments and never pushes or deploys.
+Inspect `node scripts/rer.mjs describe` and per-command `--help` for other flags.
 
 ### If setup fails at the R2 step
 
-`setup -- --remote` lists D1, R2 and Queues before it starts creating anything.
-
-- **If listing R2 buckets fails**, setup has not created any resources yet.
-- **If creating the R2 bucket fails**, the D1 database may already exist, but
-  queue creation, the deployment configuration and remote migrations have not
-  run.
-
-Setup names the R2 operation that failed and the account and token checks to
-make, without printing raw Wrangler output. To fix it:
-
-1. Enable R2 for the selected account.
-2. Confirm the token has the *Workers R2 Storage: Edit* permission.
-3. Run setup again with the same resource prefix. Setup finds existing resources
-   by name before it creates any.
-
-A failed command does not mean Cloudflare rolled back an earlier step that
-succeeded.
+Enable R2 in the account, confirm permissions and inspect the deploy-kit failure
+before resuming. Preserve existing resources and uncertain provider outcomes;
+never automatically replay ambiguous work or switch resource targets to hide it.
 
 ### Claim your new installation
 
-A fresh installation (one with no owner yet) deploys only with a private
-`H2H_SETUP_TOKEN` of at least 32 characters. Without one, deploy reads the
-remote D1 setup state after applying migrations and, if no owner exists, stops
-before uploading the Worker.
-
-Once it is deployed, open `/setup` and enter the token
-([First-run setup](docs/SETUP-WORKFLOW.md) walks through the page). Creating the
-first owner closes setup permanently. Later redeploys of an installation that
-already has an owner may leave the token out.
-
-This protects you even if the Worker is published some other way. At runtime, a
-Worker reached through any non-loopback host (any address other than
-`localhost`, `127.0.0.1` or `[::1]`), or configured with a public `APP_ORIGIN`,
-answers owner setup with HTTP 503 until a token is configured, so nobody can
-claim it just by reaching it first. The installer and hosted installations from
-Run Edit Run (a separate service that hosts HappyToHelp) supply the token
-themselves.
+An empty hosted installation uses the native `/setup` form with its private
+first-owner capability. Keep it out of URLs, logs and recordings. Claim closes
+permanently and never bypasses tenant authority. See [First-run setup](docs/SETUP-WORKFLOW.md).
 
 ### What `/health` does and does not tell you
 
-`GET /health` reports the runtime plus D1 and R2 reachability, or returns
-HTTP 503. It does not prove queue delivery, live connections, that each
-workspace's data stays separate, provider budgets, email receipt, GitHub access
-or model quality. After each deployment, check the journeys you rely on
-separately. Then sign in and follow [After you install](README.md#after-you-install)
-on the Overview page.
+Health means the native Worker can reach D1 and R2. It does not qualify queues,
+sockets, email delivery, provider access, custom domains, compliance or product
+acceptance. Confirm those through their public flows on the intended installation.
 
-## Try a first deployment on a throwaway account
+### Finish a disposable hosted proof
 
-This is optional. Before you deploy for real, you can prove that a complete
-hosted installation works by trying it on a disposable one. This walk-through
-deploys a pinned public release, claims it, and checks email and the widget end
-to end.
+Before provisioning, save a complete account inventory and a private owned
+resource list for the authorized disposable run. Record the exact planned
+Worker name, DB database name/ID, FILES bucket name, JOBS queue name/ID,
+JOBS_DEAD_LETTER queue name/ID, and the derived CONVERSATIONS Durable Object
+namespace name/ID for class `ConversationSocket` after upload. Get identities
+from the deployment receipt and provider readback, rather than guessing names
+from a prefix. Refuse collisions with pre-existing resources. Record the
+Worker's schedules and queue consumers too. Retain this inventory and all
+observations outside product source; never include tokens or customer content
+in public evidence.
 
-It pins the `v0.2.1` release so that every step, including the commit check,
-has a known answer. It is a test, not the way to install the current release;
-for a real installation, follow
-[Deploy to your Cloudflare account](#deploy-to-your-cloudflare-account) on the
-latest code.
+After observations are complete, stop the journey and any other producers.
+Delete only resources whose exact identity and ownership match that list:
 
-**You will need:**
+1. Enumerate uploaded object keys in the owned FILES bucket, remove those
+   objects, and list the bucket again to prove it is empty. A partial listing
+   or unexpected object needs reconciliation before deleting the bucket.
+2. Enumerate consumers of each owned queue with
+   `GET /accounts/<account-id>/queues/<queue-id>/consumers`. Check every
+   consumer's `script` (or `script_name`) against the exact owned Worker name
+   and its `consumer_id` against readback. Stop on an unrelated consumer.
+   Detach the verified consumer with
+   `DELETE /accounts/<account-id>/queues/<queue-id>/consumers/<consumer-id>`
+   and read back the empty consumer list **before** deleting the Worker.
+   Cloudflare error **10064** means the Worker still consumes a queue; inspect
+   and detach that owned consumer instead of replaying Worker deletion blindly.
+3. Delete the owned Worker (and thus its schedules/bindings), then the main
+   JOBS queue **before** its JOBS_DEAD_LETTER queue. Delete the emptied FILES
+   bucket and the owned DB database by their verified names/IDs.
+4. Take complete post-delete Worker, D1, R2, Queue and Durable Object namespace
+   inventories; confirm all owned names/IDs, including the derived namespace,
+   are absent. Do not assume Worker deletion proves namespace removal. Compare
+   against the before inventory and account for unrelated resources without
+   deleting them. Record failed requests and the corrected ordering as evidence.
 
-- a throwaway Cloudflare account and a website origin you control. Keep
-  `app.happytohelp.com` (the company's own service) and every production
-  account out of this test;
-- R2 enabled in that account before setup;
-- either the account's `workers.dev` subdomain available, or an active
-  custom-domain zone in that account;
-- a verified SendGrid sender and a test mailbox.
-
-No AI provider is needed, because you will send a human reply.
-
-### 1. Get the exact release
-
-Start from a fresh checkout of the public `v0.2.1` tag:
-
-```sh
-git clone https://github.com/just-every/happytohelp.git happytohelp
-cd happytohelp
-git checkout --detach v0.2.1
-git rev-parse HEAD
-```
-
-The last command should print
-`59c6e2e1beb321e9f1cb5493efd05e20fc068638`.
-
-Install the pinned toolchain and dependencies. Then run
-`pnpm exec wrangler login` and select the throwaway account, or provide a scoped
-`CLOUDFLARE_API_TOKEN`. Do not use a production credential.
-
-### 2. Set the target and owner details
-
-Set these in the terminal that will run the commands:
-
-| Name | Value |
-| --- | --- |
-| `CLOUDFLARE_ACCOUNT_ID` | The throwaway account's 32-character account ID. |
-| `H2H_RESOURCE_PREFIX` | A unique lowercase prefix (3–40 characters); it names this Worker and its D1, R2 and queues. |
-| `H2H_PUBLIC_ORIGIN` | `https://<prefix>.<workers.dev-subdomain>.workers.dev`, or an eligible active custom-domain origin. For `workers.dev`, the first hostname label must equal the prefix. |
-| `H2H_SETUP_TOKEN` | A private random value at least 32 characters long. Keep it available for the first claim at `/setup`; never place it in a repository, URL, command argument or receipt. |
-| `H2H_SETUP_OWNER_EMAIL` | Optional. Set to the owner test-mailbox address to limit first-owner setup to that address. |
-| `EMAIL_PROVIDER` | `sendgrid`. |
-| `EMAIL_API_KEY` | A SendGrid API key with the required mail-send access, supplied privately to this terminal. |
-| `EMAIL_FROM` | The verified SendGrid sender address, supplied privately to this terminal. |
-
-### 3. Deploy
-
-Run these commands in order:
-
-```sh
-node scripts/operations.mjs describe
-node scripts/operations.mjs check
-pnpm install --frozen-lockfile
-pnpm run setup -- --plan
-pnpm run setup -- --remote
-pnpm run deploy -- --remote
-```
-
-These work as described in
-[Create the resources and publish](#create-the-resources-and-publish).
-`setup -- --plan` only validates the target and prints resource names.
-`setup -- --remote` applies the release's migrations without publishing code.
-`deploy -- --remote` publishes the Worker and waits for `/health`; the setup
-token and the email secrets you selected reach Wrangler through the same private
-secret path.
-
-### 4. Claim the installation
-
-1. Open `/setup` at the installation's origin.
-2. Enter the setup token and, if you set `H2H_SETUP_OWNER_EMAIL`, that same
-   owner email.
-3. Choose an owner password and enter the exact website origin where you will
-   test the widget.
-
-The first owner can be created only once; after that, setup is closed. Sign in
-at `/login`.
-
-### 5. Check health
-
-Fetch `/health` and confirm it returns HTTP 200 naming the native runtime
-(`native-rer`), with D1 and R2 marked reachable (`database` and `files`). This
-says nothing about queues, live connections, email receipt or widget behavior.
-
-### 6. Prove that email arrives
-
-1. On `/login`, choose **Forgot your password?** and request a reset for the
-   owner test mailbox.
-2. Confirm the message arrives in that mailbox.
-3. Use its one-hour link to set the password, then sign in.
-
-A provider's record that it accepted the message is not proof that it reached
-the mailbox; check both. This tests outbound email only. Receiving email through
-SendGrid needs a separate Inbound Parse route, the `INBOUND_EMAIL_TOKEN` secret
-and a mailbox routed to that endpoint.
-
-### 7. Prove the widget-to-operator loop
-
-1. In your workspace, open **Widget** and copy its generated installation
-   snippet into a page served from the exact website origin you entered during
-   owner setup.
-2. Open that page as a customer and send a test message.
-3. In the dashboard, open **Conversations**, select that message and send a
-   manual reply from the **Reply to conversation** composer.
-4. Confirm the reply appears in the customer widget.
-
-This checks hosted delivery of a human reply. It does not test AI or email
-replies. Use only test content and the disposable workspace.
-
-### 8. Write down what you saw
-
-Write down the source tag and commit, and record separate observations for:
-
-- deploy health;
-- SendGrid provider acceptance;
-- actual mailbox receipt;
-- the widget/operator reply.
-
-Local fixtures, an install screen or HTTP 200 from `/health` on its own do not
-establish those hosted outcomes.
+These are destructive steps for an explicitly disposable, authorized scope.
+They are not an upgrade, reset or cleanup procedure for a retained installation.
+Use authenticated account API tooling that loads credentials privately, never
+token-bearing command arguments. Incomplete inventories are not teardown proof.
 
 ## Optional features and their settings
 
-Each provider below stays unused until you configure it. (Public request limits
-and daily AI ceilings are the exception: they are on by default, and their
-settings only override the defaults.) Settings come in two kinds:
-
-- **Variables** are public configuration. Setup copies the ones you set into the
-  remote configuration, so changing one means running setup again.
-- **Secrets** are private values such as API keys. Deploy passes the ones you set
-  to Cloudflare privately.
-
-The allowed names for both are listed in `scripts/deployment/environment.mjs`.
-For local development, `.dev.vars` accepts the same names. A provider you have
-not configured fails with a clear error where it is used; HappyToHelp never
-invents answers or reports delivery that did not happen.
-
-### How to set a setting
-
-- **On your own computer:** add the setting to `.dev.vars` in the checkout, one
-  `NAME=value` per line (for example `OPENAI_API_KEY=...`), then restart
-  `pnpm run dev`.
-- **On Cloudflare, with the commands in this guide:** `export` the setting in
-  the terminal that runs them. Export variables before
-  `pnpm run setup -- --remote`, then run `pnpm run deploy -- --remote`; if you
-  change a variable later, run setup again before you deploy. Export secrets
-  before `pnpm run deploy -- --remote`. A redeploy is how a changed setting
-  reaches your installation.
-- **A secret on Cloudflare, without redeploying:** in the Cloudflare dashboard,
-  open your Worker, go to **Settings → Variables and Secrets** and add it as a
-  secret.
+Runtime allowlists live in `scripts/deployment/environment.mjs`; native secrets
+remain private. Local settings changes need an explicit restart. For online
+changes update the real declaration and private inputs, then use rer deploy.
+Do not rotate encryption keys without migrating encrypted stored connections.
 
 ### Which settings matter for a small team
 
@@ -477,7 +208,7 @@ platform administrators (see [the integrations guide](src/modules/integrations/R
 
 | Feature | Variables and other configuration | Secrets |
 | --- | --- | --- |
-| Owner access and sign-up | `APP_ORIGIN` (remote setup derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` for first-owner setup; optional `TURNSTILE_SECRET` |
+| Owner access and sign-up | `APP_ORIGIN` (deployment derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` for first-owner setup; optional `TURNSTILE_SECRET` |
 | AI replies, assist, profiles and monitoring (Ensemble) | Models selected in workspace and AI configuration (the dashboard's **AI** page); `CONTEXT_MODEL` for widget-triggered context work | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`. Keyword search over content you supply needs none of these providers. |
 | Help center import from another provider (Intercom, Freshdesk or Zendesk) | Platform/subdomain and destination workspace chosen for each import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |
@@ -518,13 +249,7 @@ table above.
 **Website preview.** Preview must use a hostname separate from the application's origin. Never run
 untrusted proxied pages under the origin where owners sign in.
 
-**GitHub and stored connections.** `INTEGRATION_ENCRYPTION_KEY` is the base64 encoding of 32 random bytes:
-
-```sh
-openssl rand -base64 32
-```
-
-Do not rotate it without migrating the encrypted stored connections. Configure
+**GitHub and stored connections.** `INTEGRATION_ENCRYPTION_KEY` is private installation configuration. Rer setup generates it; deployment reads it privately. Do not rotate it without migrating the encrypted stored connections. Configure
 GitHub OAuth redirects with the actual deployed URLs.
 
 **Work on a local computer.** Handing support work to a local computer additionally needs the local agent
@@ -759,65 +484,87 @@ The details, for reference:
 See [the local agent guide](local-agent/README.md) for pairing and revoking a
 computer.
 
+
 ## Upgrade an existing installation
 
-### Update to a new release
+Back up the selected database, private FILES objects and configuration before
+upgrading. Keep applied migration names and bytes immutable. Read RELEASE.json
+for the revision's additive migration order and buyer recovery obligations.
+Update source while preserving owner customizations and private settings, then
+use the rer setup/build path locally or authorized rer deploy remotely before
+serving updated code. Never reset as an upgrade mechanism.
 
-1. **Back up first.** Record the source commit you are running now, and make a
-   backup of your data (see
-   [Updates and recovery](docs/INDEPENDENT-RELEASE.md#back-up-your-data)).
-2. **Read the release notes.** In the [Changelog](CHANGELOG.md), read the notes
-   for every version between yours and the new one. Before 1.0.0, a minor
-   version may include breaking changes.
-3. **Merge the new release into your source**, the way you would take in any
-   upstream change. [Upgrade from v0.2.0 to v0.2.1](docs/INDEPENDENT-RELEASE.md#upgrade-from-v020-to-v021)
-   on the Updates and recovery page shows the exact Git commands for one
-   release, and how to roll back.
-4. **Deploy it** from the same terminal settings as before:
+Test restoration in separate resources before switching traffic. Retain private
+Move in originals and journals, erasure fences, rating cycles/history, unknown
+provenance, encrypted credentials/keys and uncertain delivery state together.
+Imports and replay must not restore erased identities or send external work.
+See [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
+
+### Upgrading from 0.3.x
+
+0.3 ran on Node.js 26.8.1 or newer through `node scripts/install.mjs`,
+`pnpm run setup -- --local` and Vite on port 5173. 0.4 runs on Node.js
+**22.20.0** through `node scripts/rer.mjs`; `pnpm run setup` and `pnpm run dev`
+now call rer. Owners, passwords, members, pending invitations, workspaces,
+appearance, contacts, conversations, attachments, articles and categories carry
+over unchanged.
+
+On your computer:
+
+1. Stop the app with Ctrl+C in the installer or `pnpm run dev` terminal.
+2. Back up local state and private settings outside the checkout:
 
    ```sh
-   pnpm install --frozen-lockfile
-   pnpm run deploy -- --remote
+   cp -a .wrangler/state ../happytohelp-0.3-state
+   cp -p .dev.vars ../happytohelp-0.3.dev.vars
    ```
 
-   Deploy applies new database migrations before it uploads the new Worker. If
-   you changed a public variable, run setup again first.
-5. **Check it.** Confirm `/health`, then the journeys you rely on.
+   Skip the second line if you have no `.dev.vars`. Keep both copies private.
+3. Update the source and keep your own commits, for example
+   `git fetch origin --tags && git merge v0.4.0`. Resolve conflicts only in files
+   you changed.
+4. Switch to Node.js 22.20.0 and run `node scripts/rer.mjs install`.
+5. If `.dev.vars` sets `EMAIL_PROVIDER` to a real provider, setup refuses to
+   replace it, because local 0.4 sends sign-in links and customer mail to the
+   development outbox. Move the `EMAIL_*` lines into your private backup and
+   configure provider mail on your deployed installation instead.
+6. Create `.seed/local-answers.json` as in
+   [private setup answers](docs/INSTALLER.md#private-setup-answers), with your
+   existing workspace name, widget website origin, colour, owner name and owner
+   password. Then run setup with your existing owner email:
 
-**Updating from 0.2.2 to 0.3.0** adds one migration, `0109_magic_signins.sql`,
-which must be applied before the updated Worker serves traffic; the deploy in
-step 4 does this. Coming from v0.2.1, the update also applies
-`0105_edition_delegation.sql` to `0108_public_answer_citations.sql`, listed in
-the 0.2.2 notes in the [Changelog](CHANGELOG.md). Back up the D1 database
-first. `0109_magic_signins.sql` only adds the `magic_signins` table
-and its `magic_signins_expiry` index, which store hashed, expiring, single-use
-email sign-in links. It doesn't rewrite existing rows, create accounts, send
-email or configure a provider. Include `magic_signins` in backup and restore.
-Email sign-in needs a configured email provider and `APP_ORIGIN`; password
-sign-in remains available.
+   ```sh
+   node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
+   node scripts/rer.mjs dev
+   ```
 
-### What migrations 0102 to 0104 do
+   Setup applies `0110_move_in.sql` to `119_local_portability.sql` to the local
+   database, reports **Existing owner and workspace preserved**, and adds this
+   release's local settings after the lines already in `.dev.vars`, which stay
+   unchanged. A different owner email is refused.
+7. Open the address dev prints, normally `http://127.0.0.1:8787` rather than port
+   5173. Sign in again with your existing password or the outbox link: sessions
+   from the old address do not carry over. Pending invitation and password-reset
+   links point at the old address; use **Copy link** on a pending invitation to
+   issue a fresh one.
 
-Deploy applies new migrations before publishing the Worker. Existing data is
-untouched by all three of these:
+On Cloudflare, back up the D1 database, every R2 object with its metadata and
+your Worker secrets, including `INTEGRATION_ENCRYPTION_KEY`, as in
+[Back up your data](docs/INDEPENDENT-RELEASE.md#back-up-your-data). Then run
+`node scripts/rer.mjs deploy --dry-run` and
+`node scripts/rer.mjs deploy --environment production`, which applies the
+migrations before publishing. This release's upgrade evidence covers local
+installations; a hosted upgrade is not part of it.
 
-- `0102_public_abuse_limits.sql` only adds the `abuse_counters` table and its
-  index.
-- `0103_contact_erasure.sql` adds `messages.erased_at` (null for existing
-  messages) and the `contact_erasures` and `contact_erasure_objects` tables.
-- `0104_inbound_email_classification.sql` only adds columns and an index to the
-  inbound mail receipts. A failed receipt written before this migration is
-  classified the next time it is claimed.
+To go back, stop 0.4, check out your 0.3 commit and restore both copies:
+replace `.wrangler/state` with `../happytohelp-0.3-state` and `.dev.vars` with
+`../happytohelp-0.3.dev.vars`. Never run 0.3 against a database migrated by 0.4.
+The local state copy includes Durable Object storage; rer archives and D1/R2
+backups do not.
 
-### AI reply records from earlier builds
-
-Each AI reply generation command is identified by its ID together with a
-standard form of the actor that requested it, so the scheduled replay of unsent
-work (the outbox) cannot run the same command twice, whether the message came
-in by email, the widget or an operator. Earlier builds could leave a
-conversation's outbox undelivered on every scheduler run after a failed, queued
-or uncertain generation for an email message. No action is needed after
-upgrading: existing records written in the earlier form are recognized.
+From 0.4 on, Move in keeps private import originals in R2 and their journals in
+D1. Back up and restore them together, with the encryption key, so resume and
+undo can verify original bytes.
 
 ## Import data from the original HappyToHelp service
 
@@ -886,158 +633,61 @@ summary regression plus real local request-limit checks. These keep the
 working without calling a provider. Configured limits are guards, not measured
 capacity.
 
+
 ## What has and has not been verified
 
-**What has been checked.** The project's checks run locally: full verification
-([`pnpm run verify`](#check-that-everything-works)), the browser test suites, and the upgrade and recovery commands. Each reports its own results
-against an exact revision and artifact. These checks use stand-in provider responses, so they
-don't prove that a hosted installation or a live AI or email provider works.
-Acceptance on a hosted installation with real providers is recorded separately
-and isn't claimed by a release.
-
-The current schema has 109 tables and 42 migration files. (Migration file
-numbers have gaps, so the numbers don't count the files.)
-
-**Still outstanding:**
-
-- **A timed recording of a live installation** is still missing. Preparing the
-  recorder does not establish installation time or that configured providers
-  accept requests. See [tests/live/RECORDING.md](tests/live/RECORDING.md).
-- **Accessibility has not passed.** Its status is **FAIL / confirmed owner
-  HOLD**: in four test cases the automated contrast checker wrongly accepted
-  text, and a widget measurement failed because of timing and background
-  reliability. Both remain unresolved, and the project owner has put further
-  checker work on hold. A limited run in which 21 states passed does not
-  establish conformance. HappyToHelp makes no claim that its screens or
-  widget meet accessibility standards.
-- **Portable-storage fidelity** is also still on hold. This is a separate way of
-  carrying Durable Object storage between environments; it is not part of the
-  normal D1 and R2 backup and restore.
-
-[HANDOVER.md](HANDOVER.md) and the
-[accessibility audit](docs/ACCESSIBILITY-AUDIT-2026-09-30.md) record the exact
-limits and outstanding obligations. Historical receipts are kept outside the
-product source, and a new source version never turns a failed check into a
-pass.
-
-Publishing the source, deploying a hosted installation, validating a production
-import and actually running paid providers are separate operations, each with
-its own evidence.
+Results belong to the exact source tested. Local native/browser and fixture
+checks do not establish hosted installation or real model/mail/Slack acceptance.
+Timed activation, hosted operating costs and paid execution remain unqualified.
+Accessibility is **FAIL / confirmed owner HOLD** and full portable-storage
+fidelity remains held; D1/R2 backup does not qualify Durable Object storage.
+[HANDOVER.md](HANDOVER.md#acceptance-boundaries) records current limits.
 
 ## For developers and maintainers
 
 ### Check that everything works
 
 ```sh
-pnpm run verify
+node scripts/rer.mjs check --profile first-party
+node scripts/rer.mjs verify
 ```
 
-This runs the repository's full local check: the operations configuration check
-(`node scripts/operations.mjs describe`), the build, the type check, module
-tests, runtime tests against the built Worker, the first-release journey and the
-source integrity check, followed by the contract, homepage and docs tests.
-
-The first-release journey (`pnpm run test:journey`) takes one owner, one
-customer and one operator through a locally built Worker. It covers:
-
-- health, owner setup and login;
-- tenant isolation (each workspace's data stays separate);
-- a widget conversation with an attachment;
-- operator handling, including a stale-frontier 409 (a reply refused because
-  the conversation changed since the operator loaded it);
-- refusal of AI work when no AI provider is configured;
-- WebSocket replay and resume;
-- session revocation;
-- the workspace deletion boundary.
-
-This is local evidence only; see
-[What has and has not been verified](#what-has-and-has-not-been-verified).
-
-To check the deployment package without deploying anything, run:
-
-```sh
-pnpm run deploy -- --local
-```
-
-It builds, applies local migrations and runs a Wrangler packaging dry run.
+Verify runs the real build, typecheck, selected module tests, native runtime,
+command journey, workflow checks and source checks. Internal `verify:app` is a
+nonrecursive adapter target. Locally run only touched tests and `pnpm run typecheck`;
+full verification/browser runs belong on the designated remote runner and CI.
+Refresh the source lock with `pnpm run source:lock` and check it with
+`pnpm run source:check`. Inspect the source graph with `pnpm run source:inspect`.
 
 ### Change the database schema
 
-1. Never edit a migration that has already been applied.
-2. Add a new, uniquely numbered migration file in `migrations/` (or in the
-   relevant module's `migrations/` folder).
-3. Run `pnpm run migrations:prepare`.
-4. Apply it with the same setup target you used before (`pnpm run setup --
-   --local` or `pnpm run setup -- --remote`).
+Add an immutable migration in its owning module. `scripts/migrations.mjs` collects
+selected migrations for the real build/setup/transfer paths. Prove upgrade and
+prior-data custody through native D1/R2 flows; never edit applied SQL.
 
-Preparing migrations removes outdated copies from `.generated/migrations`; it
-does not rewrite D1's record of which migrations were applied. Back up your data
-before any migration with significant consequences.
+### Local sign-in links and customer mail
 
-### Sign in automatically during local development
+Trusted `H2H_LOCAL=true`, the exact loopback `APP_ORIGIN` and development mail
+are supplied by local setup/dev. The bounded durable outbox prunes on capture;
+list/get enforce visibility without writes. Its viewer is escaped, non-cacheable
+and unavailable remotely. Headers/request origins cannot enable it. Remote
+missing credentials or delivery failure never select a local fallback.
 
-On a trusted machine with exactly one existing owner, you can skip the login
-screen during local development:
-
-```sh
-H2H_LOCAL_OWNER_LOGIN=1 pnpm run dev --port 5174 --strictPort
-```
-
-Opening `/projects` or `/login` then creates an ordinary owner session for the
-existing local account. It does not create an owner or change passwords. With
-zero or several active owners, use normal login or first-owner setup.
-
-This option binds Vite to loopback, disables remote Cloudflare bindings and
-accepts only same-origin browser POSTs from loopback. Anyone who can reach that
-development server can enter the owner's workspace, so use it only on a trusted
-machine.
-
-- Without the environment flag, normal password login applies.
-- The automatic sign-in endpoint and client behavior are left out of production
-  builds, even when the flag is set during `pnpm run build`. Deployed
-  authentication and normal tenant and permission checks are unchanged.
-- Signing out while the option is on returns you to automatic sign-in. To test
-  logout, restart without the flag.
+Native magic links require explicit single-use confirmation POST; scanner GETs
+do not consume them. Native passwords and tenant/session checks are retained.
+`node scripts/rer.mjs outbox --owner-email you@example.com` requests a new
+ordinary message while the app runs; `--open` explicitly opens the browser.
+Never print message contents, cookies or token-bearing sign-in URLs.
 
 ### Security headers
 
-Operator pages and every API response carry:
-
-- `Content-Security-Policy: frame-ancestors 'self'` (plus
-  `RER_MANAGEMENT_ORIGIN` when it is configured);
-- `X-Content-Type-Options: nosniff`;
-- `Referrer-Policy: strict-origin-when-cross-origin`;
-- `X-Frame-Options: SAMEORIGIN`, but only when no management origin may frame
-  the app.
-
-Published Help Center pages stay embeddable on customer sites (no framing
-restriction). The website-preview proxy keeps its own sandbox policy, and the
-widget script is a static asset served without these headers.
+Preserve the native CSP, scoped preview origin, frame protections, content-type
+and cache policies, and origin/permission checks. Provider and customer content
+is untrusted. Keep secrets out of assets, build metadata and source archives.
 
 ### License, source tools and reproducible builds
 
-The whole repository is MIT licensed (see `LICENSE`); third-party components
-keep the notices listed in [docs/SOURCE-PROVENANCE.md](docs/SOURCE-PROVENANCE.md).
-
-Maintainers use `pnpm run source:inspect`, `source:check`, `source:lock` and
-`source:release` to author the source and track releases; see
-[docs/AUTHORING.md](docs/AUTHORING.md). A source release, local checks and
-importer fixtures do not by themselves establish a deployment or a production
-data migration.
-
-`pnpm run build` runs the pinned Base build tool (the delivery producer) and
-writes a byte-reproducible schema-2 artifact, with raw hashed payloads, to
-`delivery-artifact/`. For a given commit, the output does not depend on the
-checkout path, build time, locale or host, provided you build with the Node and
-pnpm versions declared in `package.json`. A different Node release may compress
-the local agent download differently.
-
-- The local agent download (`happytohelp-local-agent.tar.gz`) has normalized
-  metadata: numeric root owner, 0644/0755 modes and a fixed 1985-10-26 timestamp
-  on every file. Symlinks in `local-agent/` are refused at build time.
-- `pnpm run test:reproducible-build` (about 90 seconds) builds two fresh copies
-  at different paths and requires the same SHA-256 and no builder, repository,
-  temporary or home paths. It runs in the delivery workflow, not in
-  `pnpm run verify`.
-- `dist/server/wrangler.json` is Wrangler's local deploy configuration and names
-  your checkout. It is excluded from the artifact and must never be published.
+Keep asset provenance and third-party notices with selected source. The
+[authoring guide](docs/AUTHORING.md) describes exact Base copies and source graph
+checks. Reproducible artifact and prior-data checks have their own public paths;
+a source lock is not product or provider acceptance.

@@ -1,0 +1,40 @@
+import React, {useEffect, useState} from 'react';
+import {Link} from '@tanstack/react-router';
+import {nativeRequest} from '../transport';
+import './Reports.css';
+const duration = value => value === null ? '—' : value < 1000 ? `${value} ms` : value < 60000 ? `${Number((value / 1000).toFixed(1))} sec` : value < 3600000 ? `${Number((value / 60000).toFixed(1))} min` : `${Number((value / 3600000).toFixed(1))} hr`;
+const percent = value => value === null ? '—' : `${Number((value * 100).toFixed(1))}%`;
+export default function Reports({projectId}) {
+    const [period,setPeriod]=useState('30'),[start,setStart]=useState(''),[end,setEnd]=useState('');
+    const [query,setQuery]=useState('period=30'),[report,setReport]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(true);
+    const endpoint=`/api/dashboard/projects/${encodeURIComponent(projectId)}/reports`;
+    useEffect(()=>{let active=true;setLoading(true);setError('');nativeRequest(`${endpoint}?${query}`).then(result=>{if(active){setReport(result);if(!start)setStart(result.range.start);if(!end)setEnd(result.range.end);}}).catch(failure=>{if(active){setError(failure.message);setReport(null);}}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[endpoint,query]);
+    const apply=event=>{event.preventDefault();const params=new URLSearchParams({period});if(period==='custom'){params.set('start',start);params.set('end',end);}setQuery(params.toString());};
+    const peak=Math.max(1,...(report?.daily||[]).map(day=>day.conversations));
+    return <div className="reports-page">
+        <p>Conversations created in this workspace during the selected calendar range. Imported history is excluded, including legacy imports and Move in.</p>
+        <form onSubmit={apply} className="reports-range" aria-label="Report range">
+            <label>Range<select aria-label="Range" className="form-select" value={period} onChange={event=>setPeriod(event.target.value)}><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="custom">Custom</option></select></label>
+            {period==='custom'&&<><label>Start (inclusive)<input type="date" className="form-control" required value={start} onChange={event=>setStart(event.target.value)}/></label><label>End (exclusive)<input type="date" className="form-control" required value={end} onChange={event=>setEnd(event.target.value)}/></label></>}
+            <button className="btn btn-primary" disabled={loading} type="submit">Apply range</button>
+        </form>
+        {error&&<p role="alert" className="text-danger">{error}</p>}
+        {loading&&<p role="status">Loading reports…</p>}
+        {report&&!loading&&<>
+            <p className="reports-scope">{report.range.start} through {report.range.end} (exclusive) · <strong>{report.range.timezone}</strong> · <Link to={`/projects/${projectId}/edit`}>Workspace timezone</Link></p>
+            <div className="reports-downloads"><a className="btn btn-white" href={`${endpoint}?${query}&format=conversations.csv`}>Conversations CSV</a><a className="btn btn-white" href={`${endpoint}?${query}&format=summary.csv`}>Summary CSV</a></div>
+            <div className="reports-metrics">
+                <Metric title="Conversations" value={report.volume} detail="Created in this range"/>
+                <Metric title="First response" value={duration(report.firstResponse.median)} detail={`Median · p90 ${duration(report.firstResponse.p90)} · ${report.firstResponse.count} conversations`}/>
+                <Metric title="First resolution" value={duration(report.firstResolution.median)} detail={`Median · p90 ${duration(report.firstResolution.p90)} · ${report.firstResolution.count} conversations`}/>
+                <Metric title="AI resolution rate" value={percent(report.aiResolution.rate)} detail={`${report.aiResolution.count} AI / ${report.aiResolution.total} currently resolved`}/>
+                <Metric title="Satisfaction" value={percent(report.satisfaction.rate)} detail={`${report.satisfaction.positive} thumbs up / ${report.satisfaction.total} rated resolutions`}/>
+            </div>
+            {!report.volume&&<p role="status">No native conversations were created in this range.</p>}
+            <section className="reports-section" aria-labelledby="reports-daily"><h2 id="reports-daily">Daily volume</h2><p>Each conversation appears on its creation date in {report.range.timezone}.</p><ol className="reports-daily" tabIndex={0} aria-labelledby="reports-daily">{report.daily.map(day=><li key={day.date}><time>{day.date}</time><span className="reports-bar" aria-hidden="true"><span style={{width:`${100*day.conversations/peak}%`}}/></span><span>{day.conversations}<span className="visually-hidden"> conversations</span></span></li>)}</ol></section>
+            <section className="reports-section" aria-labelledby="reports-comments"><h2 id="reports-comments">Latest comments</h2>{report.comments.length?<ul className="reports-comments">{report.comments.map(comment=><li key={comment.conversationId}><div><strong>{comment.value===1?'Thumbs up':'Thumbs down'}</strong> · <Link to={`/projects/${projectId}/conversations/${comment.conversationId}`}>Open conversation</Link></div><p>{comment.comment}</p><small>{new Date(comment.updatedAt).toLocaleString(undefined,{timeZone:report.range.timezone})} · {report.range.timezone}</small></li>)}</ul>:<p>No rating comments for currently resolved conversations in this range.</p>}</section>
+            <details className="reports-definitions"><summary>How these numbers are calculated</summary><p>First response measures the first visible answer after the first visitor message. First resolution measures creation to the first recorded resolution, when the full history is known. Notes, context insights and provisional replies do not count.</p><p>Median is the middle duration, or the mean of the two middle durations. The 90th percentile uses nearest rank. A visible historical answer still counts as a response when its outcome provenance is unknown. Durations without the required timestamps stay outside the samples.</p><p>Each conversation contributes once. Rates use its latest resolution and latest rating for that resolution. Reopened conversations leave the resolved and rated denominators until resolved again. Earlier cycles and rating changes remain recorded.</p><p>Assisted means an operator sent an AI or local-agent draft, including edited drafts. Assisted takes precedence over human replies in a mixed cycle. Otherwise a confirmed human-written reply makes the outcome human, even when other replies have unknown provenance. AI requires only confirmed AI answers and a complete record showing no person handoff. Otherwise the outcome is unknown.</p></details>
+        </>}
+    </div>;
+}
+function Metric({title,value,detail}){return <section className="reports-metric"><h2>{title}</h2><strong>{value}</strong><p>{detail}</p></section>;}

@@ -1,38 +1,305 @@
 {
-  "version": "0.3.0",
-  "previousVersion": "0.2.2",
-  "date": "2026-10-10",
-  "contractChanges": {},
+  "version": "0.4.0",
+  "previousVersion": "0.3.0",
+  "date": "2026-10-12",
+  "contractChanges": {
+    "IDENTITY-002": {
+      "change": "added",
+      "summary": "Retain native password identity, first-owner setup and prior data under the dated owner decision; do not replace it with operator-auth."
+    },
+    "MOVE-IN-001": {
+      "change": "added",
+      "summary": "Require private current-role reviewed, bounded resumable inert history imports and conflict-safe undo, with exact business-state repeat/undo acceptance excluding only platform counters/sequences, audit and import journals.",
+      "migrationIds": [
+        "0110_move_in.sql",
+        "111_move_in_identity_audit.sql",
+        "116_import_kit_custody.sql",
+        "118_import_kit_runtime.sql"
+      ]
+    },
+    "OUTCOMES-001": {
+      "change": "added",
+      "summary": "Record resolution provenance and current-session feedback with change history, cycle authority and conservative unknown historical evidence.",
+      "migrationIds": [
+        "112_conversation_outcomes.sql",
+        "113_outcomes_history.sql"
+      ]
+    },
+    "REPORTS-001": {
+      "change": "added",
+      "summary": "Report workspace-calendar native cohorts with bounded median/p90 aggregates, closed-cycle outcome/satisfaction rates and formula-safe CSV; exclude imports.",
+      "migrationIds": [
+        "112_conversation_outcomes.sql",
+        "113_outcomes_history.sql"
+      ]
+    },
+    "CONNECTIONS-001": {
+      "change": "added",
+      "summary": "Require scoped workspace tokens, Bearer-only guarded APIs and durable tenant events. Base owns signing and bounded delivery attempts; HappyToHelp retries explicit 5xx and 429 responses while timeouts and redirects stay uncertain.",
+      "migrationIds": [
+        "114_integrations_core.sql",
+        "115_native_integrations.sql"
+      ]
+    },
+    "FIRST-RUN-001": {
+      "change": "added",
+      "summary": "Lead installed owners to a plain setup checklist and new workspaces to the widget snippet while retaining Advanced controls and intentional display names."
+    },
+    "LOCAL-MAIL-001": {
+      "change": "added",
+      "summary": "Select durable development mail capture only through explicit trusted local configuration with bounded viewer visibility, pruning on capture and production exclusion.",
+      "migrationIds": [
+        "117_development_outbox.sql"
+      ]
+    }
+  },
   "proseChanges": [
     {
       "document": "README.md",
-      "section": "Develop locally without the installer",
+      "section": "Run it on your computer",
       "change": "changed",
-      "date": "2026-10-10",
-      "summary": "Existing accounts can also request a one-time email sign-in link when native email and APP_ORIGIN are configured.",
-      "was": "Create the first owner with an email and password at /setup, then use /login after setup closes.",
-      "now": "The password and setup path remains available; configured installations also offer an email sign-in link that requires an explicit Sign in confirmation.",
-      "ownerAction": "Apply 0109_magic_signins.sql before running the updated Worker; configure the native email provider and APP_ORIGIN to offer email sign-in."
+      "date": "2026-10-09",
+      "summary": "Local setup explicitly selects durable local mail capture and exact loopback origin while preserving a saved remote provider choice.",
+      "was": "Local owner setup used native password login and configured email sign-in required a native email provider and APP_ORIGIN.",
+      "now": "Password login remains; new local setups can use captured sign-in links and customer mail through the development outbox, while remote provider failures never fall back to capture.",
+      "ownerAction": "Apply all additive migrations before starting the updated Worker; keep private APP_ORIGIN and the chosen dev port equal and use the local viewer only on a trusted computer."
     },
     {
       "document": "README.md",
       "section": "Verify",
       "change": "changed",
+      "date": "2026-10-09",
+      "summary": "Verification includes Move in, Reports, Connections, first-workspace and local mail suites and release-version agreement.",
+      "was": "The common command built and checked modules/runtime/journey/source integrity with separate focused connector/browser gates and independent hosted acceptance.",
+      "now": "The common command also runs the new feature suites and README release identity agreement; historical scoped checks and executable suite definitions do not qualify the final release.",
+      "ownerAction": "Run exact-candidate verification, clean-clone walkthrough and hosted proof separately, retaining every unresolved acceptance boundary."
+    },
+    {
+      "document": "README.md",
+      "section": "Run it on your computer",
+      "change": "changed",
+      "summary": "The README now opens with a numbered version-pinned local installation recipe, explicit mail-mode boundaries and shutdown instructions.",
+      "was": "The README opened with the product description and documented the standalone installer separately; it did not lead with a numbered clone-and-run recipe pinned to this release.",
+      "now": "Clone the intended v0.4.0 tag, start the installer, choose a local trial and follow its Open link to the exact app origin. Only explicit development mail enables the outbox; a preserved remote provider requires its own configuration. Keep the app origin and port equal, and stop the installer terminal to close both listeners. The public tag and final after-clone proof remain pending.",
+      "ownerAction": "Use the exact application address shown by the installer, inspect captures only in explicit development mode, retain private local state and stop the terminal when finished. Do not treat the untagged public clone command as verified.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "README.md",
+      "section": "Support history, feedback, Reports and connections",
+      "change": "changed",
+      "summary": "The README now describes reviewed history import, resolution feedback, Reports, scoped API connections and the first-workspace experience with their acceptance limits.",
+      "was": "The README described chat, shared inboxes, assistance, knowledge, local delegation and setup, without promising the new history-import, feedback, Reports or scoped workspace connection workflows.",
+      "now": "Owners review inert five-kind history imports and conflict-safe undo, visitors rate their current closed resolution, stored provenance feeds workspace-calendar Reports and safe CSV, and scoped tokens and signed events retain workspace authority. First-run guidance leads to the checklist and widget snippet. Synthetic imports and recorded Slack checks do not establish real-export or live acceptance; business equality and bounded HTTPS fetch follow the 2026-10-09 owner rulings; HTTP500 remains uncertain without replay.",
+      "ownerAction": "Read the linked workflow, import, Reports and API guides, review the required migration and authority steps, and retain the stated acceptance limits before enabling these workflows.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/WORKSPACE-WORKFLOWS.md",
+      "change": "added",
+      "summary": "A new owner guide connects the review, feedback, Reports, API, webhook, Slack and local-trial workflows.",
+      "now": "The guide explains current-role import review and undo, retained source custody, rating cycles and provenance, report cohorts and denominators, one-time scoped credentials, receiver checks, conservative delivery and local capture. It records exact business equality, ordinary HTTPS fetch bounds and remaining live-Slack and hosted evidence limits.",
+      "ownerAction": "Use the guide to choose and verify each workspace workflow; retain private custody, revoke unwanted tokens and complete separately required delivery and acceptance evidence.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/moving-in.md",
+      "change": "added",
+      "summary": "A new owner guide documents obtaining supported history files, reviewing a plan, applying or resuming it and undoing unchanged imported records.",
+      "now": "Documented source shapes support conversations, contacts, tags, saved replies and articles within bounded uploads. The guide states source-located omissions, publication changes, authority checks, private originals, conflicts, erasure fences and inert effects. Validation is synthetic-only, real exports were not supplied and exact business-state repeat/undo equality is required; platform counters/sequences, audit and import journals are excluded.",
+      "ownerAction": "Obtain the documented exports and supplements, inspect the plan before approval, keep private originals with their journals and review conflicts before resume or undo. Do not infer real-export acceptance from fixtures.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/moving-in-shapes.md",
+      "change": "added",
+      "summary": "A new import reference explains supported record structures and the conservative identity audit used for custody and erasure.",
+      "now": "The reference distinguishes understood typed fields from opaque or unsupported values, record discriminators from envelopes, nullable shapes, bounded identity indexing and located refusals. Ambiguous or structurally unprocessable uploads are refused before custody; incomplete identity evidence remains fenced after erasure.",
+      "ownerAction": "Use located diagnostics to correct or unwrap files into documented record collections, and resolve erasure restrictions without inventing missing source identities.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/reports.md",
+      "change": "added",
+      "summary": "A new Reports guide defines workspace-calendar cohorts, response and resolution durations, stored outcomes, satisfaction and CSV exports.",
+      "now": "Native conversations created in the selected timezone range form the cohort; imports are excluded. Median and nearest-rank p90, latest closed-cycle denominators, unknown evidence, daily series, comments and formula-safe CSV have explicit meanings, without a classification model request.",
+      "ownerAction": "Choose the workspace timezone and calendar range, interpret rates with their shown sample counts and closed-cycle denominators, and preserve unknown historical evidence.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/api.md",
+      "change": "added",
+      "summary": "A new API guide specifies thirteen scoped Bearer operations and the webhook and Slack delivery contract.",
+      "now": "Workspace tokens use seven explicit scopes, optional expiry, revocation, show-once secrets and hashed storage. Examples preserve token privacy, cursor and error semantics, native authority and erasure. Receiver signatures and replay checks are documented; outbound delivery uses ordinary HTTPS fetch with manual redirects, finite timeout and byte bounds, HTTP500 remains uncertain without replay, and Slack has recorded-response evidence only.",
+      "ownerAction": "Grant only needed scopes, copy secrets once, revoke unwanted tokens, validate exact signed receiver bytes and inspect delivery logs. Keep live Slack acceptance distinct; HTTP500 is uncertain and must not replay.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "HANDOVER.md",
+      "change": "changed",
+      "summary": "The maintainer handover now distinguishes the prepared 0.4 source and its expanded workflows and custody from final release qualification.",
+      "was": "The handover oriented maintainers to the 0.3 native workspace, historical schema and source selection, focused release gates and retained accessibility, activation and portable-storage limits.",
+      "now": "The maintainer handover orients maintainers to the prepared 0.4 source, its workflows, explicit native identity retention and current Base origin custody. Hosted proof, publication, owner approval and unresolved import, transport, upstream and compliance limits stay open.",
+      "ownerAction": "Preserve earlier migrations, native identity and exact Base copies; qualify the actual final revision and report each unresolved owner or upstream boundary without converting historical checks into acceptance.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "ACCEPTANCE.md",
+      "change": "changed",
+      "summary": "Acceptance now requires exact-source evidence for history import, outcomes, Reports, connections, first-run and local capture while retaining prior gates.",
+      "was": "Acceptance defined the 0.3 workspace, focused release and prior-data gates with independent hosted/provider evidence and unresolved accessibility, timed activation and portable-storage obligations.",
+      "now": "New workflow clauses require current-role and tenant checks, exact business-state repeat/undo equality, prior-data custody, emitted runtime/browser flows and development-mail refusal boundaries. Historical scoped results do not qualify the final candidate; live Slack, hosted install, jurisdiction inventory and final publication approval remain unavailable or pending.",
+      "ownerAction": "Run the required exact-candidate checks and retain failed, unrun and owner-blocked obligations separately; do not approve the release from suite definitions or partial historical results.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "OPERATIONS.md",
+      "section": "Local sign-in links and customer mail",
+      "change": "changed",
+      "summary": "Operations now documents explicitly selected durable development mail and migration 117 with remote-provider and production exclusions.",
+      "was": "Operations documented native password access, configured provider mail and optional automatic local owner sign-in, without a durable local mail outbox or its migration.",
+      "now": "New local setup selects development capture with exact loopback APP_ORIGIN; existing remote choices are preserved and leave the local outbox disabled. The additive Base schema retains sensitive captures, visibility bounds and pruning on capture. Sign-in requires explicit confirmation, rejected viewer requests do no D1 work, and production exposes neither sender nor viewer.",
+      "ownerAction": "Apply unchanged migration 117 through the additive path, retain the prior 49 migrations and local state, keep APP_ORIGIN and dev port equal, and use captured sign-in links only in trusted explicit development mode.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/INSTALLER.md",
+      "change": "changed",
+      "summary": "Installer guidance now explains provider-free local trials, preserved remote mail choices and checklist-first completion.",
+      "was": "The installer guide covered discovering and reviewing configuration, local or hosted installation and saved answers, without documenting explicit local mail capture and the new checklist and snippet landing behavior.",
+      "now": "A new local trial requires no email choice or provider key and captures local mail; a saved remote choice keeps its behavior. Both new and existing owners use native password access and reach the setup checklist without replacing prior accounts or workspaces; another workspace leads with its widget snippet.",
+      "ownerAction": "Keep the installer terminal open during the trial, follow its application link after completion and preserve existing owner accounts and chosen provider configuration.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/AUTHORING.md",
+      "change": "changed",
+      "summary": "Authoring guidance now separates portable local-copy checks from maintained verification against the immutable official Base origin.",
+      "was": "The public source graph retained licensed local files and historical donor attribution without private origin selections or comparison archives; source:check bound the local source and tool bytes offline.",
+      "now": "The graph retains selected immutable origins and comparison archives. Offline checks validate local hashes and Git owner-executable modes, while actual-origin verification detects forged hashes or modes, missing origins and copies outside recorded paths. Hand-declared predecessor custody retains the historical 74-copy/240-file, outbox 75-copy/241-file and onboarding 244-file stages; current Base 995225ee695bb57b3cfbf8dbf293ee48070dcbe9 has 75 copy records and 255 files. Maintained record paths refuse symlinks; discovery retains its explicit tiny-file and conventional root-file exclusions.",
+      "ownerAction": "Before a Base-copy merge, verify the official pinned checkout and run maintained non-offline copy verification and the actual-origin negative controls; stage intended source, refresh its lock and check the frozen revision.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "docs/SOURCE-PROVENANCE.md",
+      "change": "changed",
+      "summary": "Provenance now records maintained Base origins, selected comparison archives, exact copies and the official portable producer projection.",
+      "was": "Provenance retained original licensing and historical source revisions while the public recipe omitted private origins and comparison archives; those historical revisions did not assert current upstream byte equality.",
+      "now": "Current Base 995225ee695bb57b3cfbf8dbf293ee48070dcbe9 selections retain exact source mappings, 75 verbatim-copy records containing 255 files with Git modes and selected immutable archives; the 97170 refresh and 241/244-file stages remain historical. The outbox ledger copy belongs to mail; the producer setup-manifest retains only its official projection. The latest maintained verifier and original-name custody changes are copied without local patches; edition adaptations remain separate, licenses and historical attribution remain intact, and native authentication is retained. Edition-owned setup preflight and the runtime binding inventory preserve remote-mail selection; edition-owned HTTPS fetch implements the dated override. Setup/deploy reject malformed invocation URLs with fixed diagnostics that omit parser input and causes.",
+      "ownerAction": "Preserve licensing and attribution, verify copied bytes against the selected official revision and retain edition-owned policy separately; no source-custody record establishes runtime, provider or publication acceptance.",
+      "date": "2026-10-09"
+    },
+    {
+      "document": "README.md",
+      "section": "Run it on your computer",
+      "change": "changed",
+      "date": "2026-10-09",
+      "summary": "Integrate the later owner-reviewed 0.3 documentation and public docs site with prepared 0.4 local setup and feature instructions.",
+      "was": "The prepared 0.4 quick start preceded the product heading and repository guides; the owner-reviewed docs site was not yet merged.",
+      "now": "The owner-reviewed overview remains the single page title, followed by the prepared version-specific local recipe, private saved origin and explicit local-mail boundaries. The twelve published owner guides and their docs routes are retained; detailed 0.4 workflow references are explicitly classified as repository guides. Native passwords, existing workspaces, inert import and ordinary HTTPS delivery behavior remain unchanged.",
+      "ownerAction": "Treat the 0.4 clone recipe as intended release instructions until the public tag exists. Use the installer Open address or matching saved APP_ORIGIN port, apply the listed additive migrations and distinguish scoped local checks from final CI, publication and hosted proof."
+    },
+    {
+      "document": "docs/INSTALLER.md",
+      "section": "Run it locally",
+      "change": "changed",
       "date": "2026-10-10",
-      "summary": "The connector requires strict structured output and retains bounded, redacted provider failure diagnostics, with a dedicated browser check.",
-      "was": "Local application and browser verification use provider fixtures and do not establish live-provider or deployment acceptance.",
-      "now": "Those acceptance limits remain; test:provider-errors-browser additionally checks native pairing, the runner, durable provider failure records and operator reload at desktop and mobile widths, while failed work neither sends a customer reply nor restarts automatically.",
-      "ownerAction": "Preserve strict delegated result validation and redaction; run the provider error checks when changing connector or provider integration behavior."
+      "summary": "Prepare the official manifest-based onboarding contract while retaining native password identity and prior private installer answers.",
+      "was": "Product fields and validation metadata were supplied through the legacy browser and seed model.",
+      "now": "The root manifest declares fields and the edition maps them to its existing native first-owner API.",
+      "ownerAction": "Prepare private answers from the manifest fields; keep exact-revision verification separate from hosted use."
+    },
+    {
+      "document": "CHANGELOG.md",
+      "change": "changed",
+      "date": "2026-10-12",
+      "summary": "The changelog again lists every release, newest first, with a 0.4.0 entry for its additions, required migrations, the 0.3.x upgrade and known limits.",
+      "was": "A short product-capabilities summary replaced the versioned changelog; it had no 0.4.0 entry and dropped the 0.3.0 and earlier notes.",
+      "now": "The versioned changelog keeps the 0.3.0, 0.2.2, 0.2.1 and 0.2.0 notes and adds 0.4.0: Move in, feedback and Reports, Connections, the rer local path, the ten additive migrations, upgrading from 0.3.x and the known limits.",
+      "ownerAction": "Read the notes for every version between yours and 0.4.0 before upgrading."
+    },
+    {
+      "document": "README.md",
+      "section": "Release 0.4.0",
+      "change": "added",
+      "date": "2026-10-12",
+      "summary": "The README states what 0.4.0 adds, the required migrations and its known limits, and points 0.3 installations at the upgrade steps.",
+      "now": "A short release section names Move in, feedback and Reports, Connections and the rer local path, requires the ten additive migrations before serving, and lists the accessibility HOLD, Durable Object storage, unmeasured costs, synthetic-fixture scope, absent hosted and compliance claims and the separate app.happytohelp.com service.",
+      "ownerAction": "Back up and apply the listed migrations before serving 0.4.0; an existing 0.3 installation follows Upgrading from 0.3.x."
+    },
+    {
+      "document": "OPERATIONS.md",
+      "section": "Upgrading from 0.3.x",
+      "change": "added",
+      "date": "2026-10-12",
+      "summary": "Operations gives the exact local upgrade from 0.3.x and the hosted backup obligations.",
+      "now": "Stop the app, back up .wrangler/state and .dev.vars, merge the release, switch to Node.js 22.20.0, move a saved remote mail provider aside, then run rer install, setup with the existing owner email and dev. Setup applies 0110 to 119, keeps the owner and workspace and adds local settings without changing saved lines. Sign in again at the new address and reissue pending invitation links. Hosted installations back up D1, R2 objects and secrets before rer deploy; rollback restores both copies.",
+      "ownerAction": "Take the backups first, never reset to upgrade, and keep Move in originals, journals and the encryption key together from 0.4 on."
+    },
+    {
+      "document": "ACCEPTANCE.md",
+      "change": "changed",
+      "date": "2026-10-12",
+      "summary": "The verification boundary now points to the accessibility HOLD in Acceptance holds, which follows it.",
+      "was": "The verification boundary referred to the confirmed checker HOLD as stated above, although it is stated below.",
+      "now": "The verification boundary links the confirmed checker HOLD in Acceptance holds.",
+      "ownerAction": "Keep reporting accessibility as FAIL / confirmed owner HOLD with no WCAG conformance claim."
+    },
+    {
+      "document": "docs/moving-in-shapes.md",
+      "section": "Source structure and contact erasure",
+      "change": "changed",
+      "date": "2026-10-12",
+      "summary": "Contact erasure removes an incomplete import only when it holds the erased contact's identity, not whenever any contact is erased.",
+      "was": "Erasing any contact fenced every incomplete upload in the workspace and removed all their originals, extracted files, plans and journals.",
+      "now": "Values in fields the readers do not interpret are hashed whole into a private index at upload; erasure removes an incomplete upload only when its understood identities or that index hold the erased contact's email, external ID, source ID or a known alias. Other people's uploads keep their custody; an upload without an index is still fenced by any erasure.",
+      "ownerAction": "None; an incomplete upload that held only another person's data stays available to review, apply or undo after an erasure."
     }
   ],
   "extensionPointChanges": [],
   "migrations": [
     {
-      "id": "0109_magic_signins.sql",
-      "buyerSteps": "Back up the selected D1 database, then apply migrations/0109_magic_signins.sql through the existing setup/migration path before starting the updated Worker. It adds only the magic_signins table and magic_signins_expiry index, storing hashed, expiring, single-use email sign-in capabilities; it does not rewrite existing rows, create accounts, send email or configure a provider. Keep applied migration names and bytes unchanged. Include magic_signins records in backup and restore so expiry and consumption state survive recovery. Email sign-in requires the configured native email provider and APP_ORIGIN; password sign-in remains available."
+      "id": "0110_move_in.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Adds the Base import journals, workspace/conversation tags, private Move in source/run/batch/provenance/erasure custody and identity indexes. It seeds contact lookup keys and replaces only the two context message triggers with import-fenced equivalents; prior native content remains. No import is started and no staff, provider, assignment or notification is activated. Restore source objects together with all import journals so resume and undo can verify original bytes. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "111_move_in_identity_audit.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Conservatively clears old Move in identity_complete claims and adds identity_audited with zero for pre-audit custody; it does not delete source files or native rows. Old originals are structurally reindexed during erasure; missing or unprocessable originals leave a visible format hold rather than recreating erased identities. Preserve those audit values and holds on restore. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "112_conversation_outcomes.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Adds message authorship, conversation tracking/handoff/resolution/rating and rating-history tables, legacy report exclusions and guarded transition triggers. It does not rewrite messages or infer missing historical authorship. Preserve cycles, outcome evidence, latest ratings and rating history on restore. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "113_outcomes_history.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Backfills legacy exclusions and incomplete tracking for existing native conversations, proven visitor/local-reply/completed-generation authorship where supported, and unknown historical resolutions. It preserves all original messages and does not infer historical human authorship, handoffs or resolution order from absent evidence. Preserve the conservative unknown outcomes and evidence on restore. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "114_integrations_core.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Adds maintained Base durable delivery, attempts, resolutions, replay identities, hashed tokens, usage and token-event journals. It creates no credentials, sends no requests and configures no destination. Restore revoked/expired grants, attempts and uncertain outcomes exactly; never replay uncertain external work. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "115_native_integrations.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Adds native encrypted destinations, tenant events/intents/audits, dispatch cursor and authority epoch. Its triggers fan out newly committed native events, fence contact erasure and track authority changes; existing imports remain inert. It enables no destination. The edition uses bounded HTTPS fetch when an owner configures one. Preserve encrypted credentials with the installation encryption key, erasure fences, version identities and dispatch state on restore; never replay uncertain sends. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "116_import_kit_custody.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Adds reversal-policy/hash/cursor fields, immutable creation-plan snapshots and reversal reports to the existing Base import journal. It does not copy missing old originals or promise that old journal snapshots exist. Preserve current source objects, journals, snapshot-release state and reversal reports together so reviewed reversal remains conflict-safe after restore. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "117_development_outbox.sql",
+      "buyerSteps": "Back up the selected D1 database and private R2 objects before upgrading; keep their metadata, hashes and encryption keys available for a restored installation. Adds the maintained local development outbox table and ordering index. It does not select development mail, send mail, consume sign-in capabilities or rewrite prior rows. Explicit trusted local configuration selects capture; production rejects that configuration and mounts neither sender nor viewer. Preserve sensitive local captures and sequence/order state on restore, with visibility bounds and pruning on capture; exclude private local state from source publication. Apply through the normal additive setup/migration path before starting the updated Worker, in this release's listed order. Keep applied migration names and bytes unchanged. Include the added state and its indexes/triggers in backup and restore; verify a restored copy before switching traffic. This D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "118_import_kit_runtime.sql",
+      "buyerSteps": "Back up D1 and private R2 originals before upgrading. Apply this additive official Base import-kit runtime schema after migration 117 and before starting the updated Worker. The prior 50 applied SQL files remain byte-for-byte unchanged. This installs required custody indexes, publication fences, stream and staging schema, and upgrades structurally identified legacy stream receipts; it does not start an import or enable streams, send mail, invoke a model or activate notifications. Preserve the complete journal, privacy tombstones, revisions and original source objects together on backup/restore, then verify prior conversations and reviewed import resume/undo on a restored copy before switching traffic. The D1/R2 archive does not include Durable Object storage or establish full portable-storage fidelity."
+    },
+    {
+      "id": "119_local_portability.sql",
+      "buyerSteps": "Apply this additive Base portability schema after migration 118. Existing SQL and native password identity remain unchanged. Local export/import use these operation journals and fences; archives exclude live grants, external credentials and local-computer execution state. Keep backups private, re-enter settings and reauthorize integrations after restore; Durable Object connections are transient."
     }
   ],
   "breaking": true,
-  "agentUpdateInstructions": "Update from 0.2.2 with owner customizations, current actor/project authority, explicit operator Send and resolve-versus-resolve-and-reply boundaries preserved. CONTRACT.md clause meanings and the published extension-point lists are unchanged; preserve their existing obligations when adopting the implementation changes. The breaking flag records the required D1 migration step: apply 0109_magic_signins.sql before the updated Worker serves traffic, retain all earlier migration names and bytes, and verify backup/restore includes magic_signins with expiry and consumption state. Keep password sign-in available; enable email sign-in only with a configured native mail adapter and APP_ORIGIN, preserving hashed tokens, the explicit confirmation POST and current membership checks. Preserve native media ownership and copied attachment bytes when adopting local drafts; failures and uncertain provider outcomes must not replay work or send a reply automatically. Keep package and connector protocol versions aligned. Delivery now uses the pinned Base producer with schema-2 manifests and raw payload sidecars: preserve the whole artifact directory and its hashes, and verify artifact consumers and a restored copy before switching traffic. Run source integrity and the relevant local upgrade, recovery, identity, draft/media and connector checks on the adopted source. Local results do not establish hosted, real-provider, production-import, portable-storage fidelity or full accessibility acceptance; retain the documented accessibility checker HOLD and other HANDOVER.md limits.",
-  "publicReleaseNotes": "Assistant replies and attachments enter the operator composer for explicit Send. Adopted local attachments retain native media authority and copied bytes.\n\nPublic appearance persists through native project settings across the widget and Help Center, with visible loading, error, offline and recovery states. Long names, multiline greetings and unbroken article text wrap within their surfaces; wide article code and tables scroll within the content column.\n\nNative email sign-in uses hashed, expiring single-use capabilities with explicit browser confirmation and current membership checks. Apply additive migration 0109_magic_signins.sql before starting the updated Worker; preserve its records in backup and restore.\n\nLocal-agent package, MCP server and Codex/MCP client identities report 0.3.0. Delegation output is strict and provider failures retain bounded redacted diagnostics without replay or automatic Send.\n\nThe pinned Base producer packages schema-2 manifests and raw payload sidecars. Preserve the whole artifact directory, migration identities and owner customizations; validate a restored copy before switching traffic.\n\nHosted and real-provider acceptance remain independent of local tests. The retained accessibility checker HOLD remains in force; this release does not claim complete WCAG conformance."
+  "agentUpdateInstructions": "Update from 0.3.0 or the 0.3 fix line by merging the release into the owner's checkout, preserving owner customizations, native passwords, current actor/project authority and explicit operator Send. Apply every listed additive migration before starting the updated Worker and before it serves traffic; 0109_magic_signins.sql before the updated Worker remains a prerequisite for older installations. Its magic_signins table and magic_signins_expiry index retain backup and restore obligations for expiry and consumption state. That migration does not rewrite existing rows, create accounts, send email or configure a provider. Email sign-in requires APP_ORIGIN, and password sign-in remains available. Apply additive 118_import_kit_runtime.sql for the current official Base dependency closure; preserve every previously applied migration file unchanged (42 in 0.3.x) and exact copied Base bytes. Keep schema-2 manifests and raw payload sidecars intact. Preserve private import originals with resumable journals, rating cycles/history, conservative unknown provenance, erased identities, encrypted credentials/keys and uncertain delivery state. Restore D1/R2 and validate native authority before switching traffic; DO storage and full portable fidelity are outside that archive. Outbound connections use ordinary HTTPS fetch with refused redirects, finite timeout and request/response bounds; DNS pinning is not claimed. HappyToHelp retries explicit HTTP 5xx and 429 with Base signing and bounded attempts; timeout and redirect outcomes remain uncertain. Preserve the accessibility checker HOLD, timed activation and portable-storage limits. Real exports and live Slack were not supplied; hosted proof is not part of this release. Apply 119_local_portability.sql for the local command contract. Locally, back up .wrangler/state and .dev.vars, switch from Node.js 26 to 22.20.0, replace scripts/install.mjs, scripts/setup.mjs and scripts/operations.mjs with node scripts/rer.mjs install, setup --owner-email <existing owner> --answers .seed/local-answers.json and dev; setup applies the migrations, keeps the existing owner and workspace, and adds this release's local settings after the saved .dev.vars lines without changing them. A saved remote EMAIL_PROVIDER is refused locally: move it to private backup first. Sign in again at the new address; old sessions and one-use links do not carry over, so reissue pending invitation links. Never reset to upgrade. Private configuration is not archived; reconfigure external credentials, signed visitor verification and delegation grants after restore.",
+  "publicReleaseNotes": "HappyToHelp 0.4.0 adds Move in, a reviewed import of support history (conversations, contacts, tags, saved replies and articles) that keeps original timestamps and publication state and starts nothing; resolution feedback and Reports with workspace-calendar response, resolution and satisfaction figures and formula-safe CSV; Connections, with scoped workspace API tokens, signed webhook events and Slack delivery; and the local rer path (node scripts/rer.mjs install, setup and dev) with sign-in through a local development outbox. Native passwords, owners and data are kept. Before the updated Worker serves traffic, back up D1, R2 and private settings and apply the ten listed additive migrations, 0110_move_in.sql to 119_local_portability.sql, in order; earlier migrations stay unchanged. Upgrading from 0.3.x also means Node.js 22.20.0 and the rer commands; OPERATIONS.md lists every step. Known limits: accessibility is on a confirmed owner HOLD and no WCAG conformance is claimed; backups and archives cover D1 and R2 but not Durable Object storage, and full portable-storage fidelity is not established; hosted operating costs are unmeasured, and timed activation and paid-provider execution are not qualified; imports and connections are qualified with synthetic fixtures only, without real vendor exports or live Slack; no hosted installation, compliance or FedRAMP qualification is claimed. The hosted service at app.happytohelp.com is separate legacy production and is not part of this release."
 }

@@ -1,3 +1,4 @@
+import {writeArticle} from './article-write'
 import {authoring} from './authoring'
 import { Hono } from 'hono'
 import type { AppEnv } from '../../platform/env'
@@ -27,14 +28,4 @@ routes.get('/:projectId/articles',async c=>{
  const rows=await c.env.DB.prepare('SELECT a.*,category_id categoryId,(SELECT json_group_array(category_id) FROM knowledge_article_categories WHERE article_id=a.id) categories FROM knowledge_articles a WHERE project_id=? ORDER BY position,updated_at DESC').bind(projectId).all<any>()
  return c.json(await Promise.all(rows.results.map(row=>presentArticle(c.env,projectId,row))))
 })
-routes.post('/:projectId/articles',async c=>{
- const b=await c.req.json();const projectId=c.req.param('projectId');const articleId=b.id||id();const status=b.status||(b.is_published?'published':'draft');
- if(!['draft','published'].includes(status))return c.json({error:'Invalid status'},400);
- const existing=await c.env.DB.prepare('SELECT project_id FROM knowledge_articles WHERE id=?').bind(articleId).first<{project_id:string}>();if(existing&&existing.project_id!==projectId)return c.json({error:'Not found'},404);
- const categories=b.categoryIds||b.categories||(b.categoryId?[b.categoryId]:[]);if(!Array.isArray(categories))return c.json({error:'Invalid categories'},400);
- for(const category of categories)if(!await c.env.DB.prepare('SELECT id FROM knowledge_categories WHERE id=? AND project_id=?').bind(category,projectId).first())return c.json({error:'Category not found'},400);
- await c.env.DB.batch([
- c.env.DB.prepare('INSERT INTO knowledge_articles(id,project_id,category_id,slug,title,content,summary,status,updated_at) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET category_id=excluded.category_id,slug=excluded.slug,title=excluded.title,content=excluded.content,summary=excluded.summary,status=excluded.status,updated_at=excluded.updated_at WHERE knowledge_articles.project_id=excluded.project_id').bind(articleId,projectId,categories[0]||null,requiredString(b.slug||`${String(b.title).toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${articleId.slice(0,8)}`,'slug',200),requiredString(b.title,'title',500),requiredString(b.content,'content',100000),b.summary||'',status,Date.now()),
- c.env.DB.prepare('DELETE FROM knowledge_article_categories WHERE article_id=?').bind(articleId),
- ...categories.map((category:string)=>c.env.DB.prepare('INSERT INTO knowledge_article_categories(article_id,category_id) VALUES(?,?)').bind(articleId,category))]);return c.json({id:articleId},201)
-})
+routes.post('/:projectId/articles',async c=>c.json(await writeArticle(c.env,c.req.param('projectId'),await c.req.json()),201))

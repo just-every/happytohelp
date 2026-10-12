@@ -1,3 +1,4 @@
+import {validTimezone} from '../reports/calendar'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
@@ -16,6 +17,7 @@ projects.post('/projects',async c=>{const a=await requireActor(c);if(a.role==='c
 projects.get('/projects/:projectId/settings',async c=>{const a=await scope(c);return c.json({data:decode(await c.env.DB.prepare('SELECT p.id,p.name,p.widget_key,p.allowed_origin,p.created_at,s.settings_json FROM projects p LEFT JOIN project_settings s ON s.project_id=p.id WHERE p.id=?').bind(a.projectId).first())})})
 projects.put('/projects/:projectId/settings',async c=>{
  const a=await scope(c,true),b=await c.req.json(),appearance=appearanceSettings(b)
+ if('timezone' in b&&!validTimezone(b.timezone))throw new HTTPException(400,{message:'Choose a valid IANA timezone'})
  const existing=await c.env.DB.prepare('SELECT settings_json FROM project_settings WHERE project_id=?').bind(a.projectId).first<{settings_json:string}>()
  const settings={...JSON.parse(existing?.settings_json||'{}'),...appearance}
  if('display_mode' in b){if(!['balanced','light','dark'].includes(b.display_mode))throw new HTTPException(400,{message:'Invalid display mode'});settings.display_mode=b.display_mode}
@@ -56,6 +58,7 @@ projects.delete('/projects/:projectId',async c=>{
   archiveSettings,
   c.env.DB.prepare('UPDATE email_settings SET inbound_address=NULL,is_enabled=0,updated_at=? WHERE project_id=?').bind(now,a.projectId),
   c.env.DB.prepare('UPDATE sessions SET revoked_at=? WHERE project_id=?').bind(now,a.projectId),
+  c.env.DB.prepare("UPDATE identity_tokens SET consumed_at=COALESCE(consumed_at,?) WHERE project_id=? AND kind='invite'").bind(now,a.projectId),
   c.env.DB.prepare('DELETE FROM memberships WHERE project_id=?').bind(a.projectId),
   c.env.DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_blocked',1) WHERE project_id=?").bind(a.projectId),
   c.env.DB.prepare('UPDATE projects SET widget_key=?,allowed_origin=? WHERE id=?').bind(id(),'https://deleted.invalid',a.projectId),

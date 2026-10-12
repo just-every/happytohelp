@@ -1,189 +1,129 @@
 # HappyToHelp
 
-**Customer Support, Solved.**
+HappyToHelp is an open-source support workspace with a customer chat widget,
+shared inbox, AI-assisted replies, help centers, customer context and optional
+work delegated to your own Codex or Claude. It works with human replies without
+an AI provider. The editable React application runs on Cloudflare Workers with
+Hono, D1, R2, Queues and Durable Objects.
 
-Your Codex or Claude fixes the problem and writes the reply. You press Send.
+## Release 0.4.0
 
-That line describes HappyToHelp's [local agent](local-agent/README.md). When a
-customer reports a problem, you hand the conversation to Codex or Claude running
-on a computer you control, using your own Codex or Claude account or API key. It
-looks into the problem, can fix it if you allow it, and drafts a reply. Nothing
-reaches the customer until you press **Send**. The local agent is optional, and
-HappyToHelp doesn't provide or charge for Codex or Claude.
+Version 0.4.0 adds Move in for reviewed support-history imports, resolution
+feedback with workspace-calendar Reports, Connections with scoped API tokens,
+signed webhook events and Slack delivery, and the `node scripts/rer.mjs` local
+path with sign-in through a development outbox. Native passwords, owners and data
+are kept. Before the updated Worker serves traffic, back up and apply the ten
+additive migrations `0110_move_in.sql` to `119_local_portability.sql` in order;
+an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x).
+[The changelog](CHANGELOG.md) lists every change. Known limits:
 
-HappyToHelp is a free, open-source customer support desk that you run yourself.
-It is MIT-licensed, and it gives your team:
+- Accessibility is on a confirmed owner **HOLD**; no WCAG conformance is claimed.
+- Backups cover D1 and R2, not **Durable Object** storage, and full
+  portable-storage fidelity is not established.
+- Hosted operating costs are **unmeasured**; timed activation and paid-provider
+  execution are not qualified.
+- Imports and connections are qualified with **synthetic fixtures** only, without
+  real vendor exports or live Slack.
+- No hosted installation, compliance or FedRAMP qualification is claimed.
+- The hosted service at **app.happytohelp.com** is separate legacy production and
+  is not part of this release.
 
-- a live chat widget for your website
-- a shared inbox for your team
-- AI-drafted replies in the inbox, using an AI provider key you add (OpenAI,
-  Anthropic, Google, DeepSeek, xAI or OpenRouter). This is separate from the
-  local agent, and also optional.
-- a knowledge base, which you can publish as a Help Center for your customers
-- context about your customers
-- optionally, the local agent described above
+## Run it on your computer
 
-Without any AI set up, HappyToHelp still works as a chat widget, shared inbox and
-Help Center that your team answers by hand.
+1. Use Git, **Node.js 22.20.0** and **pnpm 10.12.4**, then acquire the release:
 
-HappyToHelp runs on Cloudflare Workers, Cloudflare's platform for running apps
-on its network. You run it on your own computer or in your own Cloudflare
-account. You don't need a HappyToHelp account or any shared service.
+   ```sh
+   git clone --branch v0.4.0 https://github.com/just-every/happytohelp
+   cd happytohelp
+   ```
 
-Prefer not to host it yourself? [Run Edit Run](https://runeditrun.com), a
-separate service, hosts HappyToHelp for you through its **Assisted** and
-**Managed** options. Its site describes what each option includes.
+   Already running 0.3? Keep your checkout and data, and follow
+   [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) instead.
 
-## What it costs
+2. From that checkout, install its frozen dependencies:
 
-HappyToHelp itself is free: no seats, plans or fees. The services it runs on,
-and the optional providers you connect, bill you directly on your own accounts:
+   ```sh
+   node scripts/rer.mjs describe --json
+   node scripts/rer.mjs check --profile first-party
+   node scripts/rer.mjs install
+   ```
 
-- **Cloudflare**, to put HappyToHelp online. HappyToHelp uses Workers, D1, R2,
-  Queues and Durable Objects. The Workers Paid plan (US$5 per month at the time
-  of writing) covers all of them, and you need it to send email through
-  Cloudflare Email Sending. These docs don't promise that Cloudflare's free plan
-  is enough, so check Cloudflare's pricing for those products before you rely on
-  it.
-- **Email** (optional): Resend, SendGrid or Cloudflare Email Sending. Several of
-  these have free tiers.
-- **AI replies** (optional): your AI provider bills each reply and suggestion.
-  Automatic replies that website visitors trigger are capped each day, by
-  default at an estimated US$10 per workspace (see
-  [Limits and AI ceilings](docs/PUBLIC-LIMITS.md)).
-- **The local agent** (optional): it uses your own Codex or Claude, under
-  whatever plan or API key you already have with OpenAI or Anthropic.
+3. Create a private `.seed/local-answers.json` as described in
+   [Install](docs/INSTALLER.md#private-setup-answers). Then:
 
-There is no typical monthly total in these docs. If you want to estimate your
-own, see [Measure local usage and costs](OPERATIONS.md#measure-local-usage-and-costs).
+   ```sh
+   node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
+   node scripts/rer.mjs dev
+   ```
+
+   Setup builds, migrates, prepares the native first owner and stops its temporary
+   app. Dev stays in the foreground with assets and HMR. It prints `RER_READY` with
+   the app address and `RER_SIGN_IN` with the development outbox. Open the outbox,
+   choose the newest sign-in message, follow its link and press **Sign in**. No
+   email is sent. Native password sign-in also works. Ctrl+C stops dev and its
+   children. Setup reruns preserve the owner, data and saved private settings.
+
+4. Stop dev before the remaining commands:
+
+   ```sh
+   node scripts/rer.mjs verify
+   node scripts/rer.mjs export --output exports/support.rer
+   node scripts/rer.mjs reset --yes
+   node scripts/rer.mjs import --input exports/support.rer --yes
+   node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
+   node scripts/rer.mjs dev
+   ```
+
+   Export before reset to preserve data. Import requires an empty destination;
+   native identities/password hashes survive, while sessions, one-use links,
+   provider credentials and transient execution state do not. Re-enter private
+   configuration. Archives are private backups. See [Operations](OPERATIONS.md)
+   for the exact inventory and [Local command reference](RUN-LOCALLY.md) for ports,
+   fixed preview, idle shutdown and command inspection.
 
 ## Choose how to run it
 
-- **Publish it to your Cloudflare account.** Choose this if real customers will
-  use it. The chat widget on your website has to reach HappyToHelp over the
-  internet, so it must run online.
-- **Run it on your own computer.** Choose this to try HappyToHelp out, or to
-  work on the code. It runs only while your computer and its terminal window
-  are open, and only you can reach it, so customers on your website can't use it.
+Local dev is a loopback trial on your computer. An online installation in your
+own Cloudflare account lets the widget on your website reach the workspace.
+Both use the same rer commands. An independently managed project may select its
+own operating contract; this seed's CLI is not a platform admission requirement.
 
-Either way, the easiest route is the
-[guided installer](#install-with-the-guided-installer). It opens a page in your
-browser, asks a few questions and sets everything up. If you would rather run
-each command yourself, see
-[Develop locally without the installer](#develop-locally-without-the-installer)
-or [Deploy to your own Cloudflare account](#deploy-to-your-own-cloudflare-account).
+## Deploy to your own Cloudflare account
 
-You'll know it worked when you can sign in to your new workspace.
+Read [deployment prerequisites](OPERATIONS.md#deploy-to-your-cloudflare-account),
+configure the real declaration and private account credentials, then:
 
-## What you need
+```sh
+node scripts/rer.mjs deploy --dry-run
+node scripts/rer.mjs deploy --environment production
+```
 
-To run HappyToHelp at all:
+Dry run validates/builds locally and makes no provider request. Deployment
+provisions declared resources, applies migrations, publishes and checks health
+through Base deploy-kit. Hosted installation and real provider execution are not
+qualified by this release.
 
-- **Node.js 26.8.1 or newer.** Check with `node --version`. If yours is older,
-  install a newer one from [nodejs.org](https://nodejs.org). This version is set
-  in `package.json` under `engines`.
-- **pnpm 10.12.4**, the exact version the repository is locked to (set in
-  `package.json` under `packageManager`). One way to install it:
-  `npm install --global pnpm@10.12.4`.
-- **Git**, to download the code.
+## What you need and what it costs
 
-The local agent is different: it runs on whichever computer does the support
-work, and it only needs Node.js 20 or later there (see
-[Local agent](local-agent/README.md#what-you-need)).
+HappyToHelp is MIT licensed with no seats or subscription fees. Your Cloudflare,
+email and optional AI providers bill your own accounts. Enable R2 and the account
+capabilities required by the declaration before deployment. An email sender must
+be verified. Local development needs no external mail or AI credential.
 
-To put it online, you also need:
-
-- **A Cloudflare account.** Sign up at [cloudflare.com](https://www.cloudflare.com)
-  if you don't have one.
-- **R2 turned on in that account.** R2 is Cloudflare's file storage. In the
-  Cloudflare dashboard, open **R2** and turn it on before you install;
-  Cloudflare may ask you to add a payment method first. Setup creates the R2
-  storage before it deploys anything, so if R2 is off, installation stops at
-  that step. [If setup fails at the R2 step](OPERATIONS.md#if-setup-fails-at-the-r2-step)
-  explains how to recover.
-
-Optional, and billed to you directly by each provider:
-
-- **An email provider:** Resend, SendGrid or Cloudflare Email Sending, with a
-  verified sender (usually an address on a domain you own). HappyToHelp uses it
-  for sign-in links, password recovery, invitations and email replies.
-- **An AI provider key:** OpenAI, Anthropic, Google, DeepSeek, xAI or
-  OpenRouter. HappyToHelp never calls a provider until you add one. See
-  [Set up AI replies](#set-up-ai-replies).
-
-You can also connect your own accounts for website crawling into the knowledge
-base (Apify), semantic search (Qdrant) and GitHub. All of these are optional.
-Every setting is listed in
-[Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings).
-
-The commands in these docs are written for a macOS or Linux terminal (or WSL on
-Windows).
-
-## Install with the guided installer
-
-1. Download the code and start the installer:
-
-   ```sh
-   git clone https://github.com/just-every/happytohelp happytohelp
-   cd happytohelp
-   node scripts/install.mjs
-   ```
-
-   The installer itself uses only what comes with Node, so you don't need to
-   install HappyToHelp's dependencies first. It installs them for you later,
-   using pnpm.
-
-2. A setup page opens in your browser. It fills in what it can find out by
-   itself and asks you only for the rest.
-
-3. Choose where HappyToHelp will run:
-
-   - **Publish online with Cloudflare.** The installer creates the database
-     (D1), file storage (R2) and queues in your Cloudflare account, deploys the
-     app and creates your owner account on it.
-   - **Run locally.** The installer installs the exact dependency versions
-     HappyToHelp is locked to, prepares a local database, starts the app and
-     creates your owner account. Keep the installer's terminal window open
-     while you use the app on this computer.
-
-4. Review your answers and press **Approve and install**. Nothing is installed
-   or deployed until you press it, and it is the only approval button.
-
-[Install](docs/INSTALLER.md) walks through every screen, including how the
-installer connects to Cloudflare, what to do if something fails and how to start
-a local copy again later. It also covers the installer's command-line options
-and how a coding agent can fill in the answers for you.
+Configure optional model keys, Apify crawl, Qdrant search, GitHub and email only
+when you need them. See [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)
+and [Measure local usage and costs](OPERATIONS.md#measure-local-usage-and-costs).
+The optional [local agent](local-agent/README.md) runs on the computer doing the
+support work and has its own runtime prerequisites.
 
 ## After you install
 
-Sign in, then work through **Setup** in your workspace's sidebar. (This is a
-checklist inside the app, not the `/setup` page you used to create your
-account.) It ticks off each item only once HappyToHelp has actually seen it
-working:
-
-- **Owner mail delivered**, **Sender DNS** and **Inbound address**: email.
-- **Model key** and **Spend ceilings**: AI replies.
-- **First published article**: knowledge.
-- **Widget origin saved** and **Widget seen**: the chat widget on your website.
-
-A sensible order for a small team:
-
-1. **Add the chat widget to your website.** Open **Settings → Widget**, copy the
-   installation snippet and add it to every page where you want the widget to
-   appear. It works on any site where you can add your own HTML, but only on
-   the one website address you entered during setup (see
-   [The widget website origin](docs/SETUP-WORKFLOW.md#the-widget-website-origin)).
-2. **Set up AI replies**, if you want them (see
-   [Set up AI replies](#set-up-ai-replies)).
-3. **Add knowledge.** Open **Knowledge** and publish articles that answer common
-   questions. When AI answers search your knowledge, they use only published
-   articles and datasets, never drafts or anything else unpublished.
-4. **Set up email**, so you can send invitations and password resets and
-   receive customer email (see [Email and integrations](src/modules/integrations/README.md)).
-5. **Invite your team** from **Settings → Agents**. (The dashboard calls
-   teammates who answer customers *agents*.)
-6. **Connect a computer**, if you want the local agent (see
-   [Local agent](local-agent/README.md)).
+Sign in and use **Setup** in the workspace sidebar. Its eight observed checks
+cover owner mail, sender DNS, inbound mail, model access, spend ceilings,
+published knowledge, widget origin and an authenticated widget visit. Saved
+settings alone do not complete them. Add the widget through **Settings → Widget**,
+set its exact [website origin](docs/SETUP-WORKFLOW.md#the-widget-website-origin),
+publish useful articles and invite teammates through **Settings → Agents**.
 
 ## Set up AI replies
 
@@ -198,7 +138,7 @@ workspace that uses one of that provider's models.
    `OPENROUTER_API_KEY`.
    - **On Cloudflare:** in the Cloudflare dashboard, open your Worker, go to
      **Settings → Variables and Secrets** and add the key as a secret. You can
-     also set it in your terminal before you run `pnpm run deploy -- --remote` (see
+     also set it in your terminal before you run `node scripts/rer.mjs deploy --environment production` (see
      [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)).
    - **On your own computer:** add a line such as `OPENAI_API_KEY=your-key` to
      a file named `.dev.vars` in the `happytohelp` folder, then restart the app.
@@ -230,216 +170,70 @@ customer.
 
 When you are done, delete the demo workspace from its settings.
 
-## Develop locally without the installer
+## Support history, feedback, Reports and connections
 
-Use this path if you want to work on the code yourself.
+Owner/admin **Move in** reviews five kinds: conversations, contacts, tags, saved
+replies and articles. Inspect per-kind plans, rejections, omissions, conflicts and
+publication changes; approve, resume a stopped batch, follow report links, repeat
+or undo through the same current role checks. Original source IDs, timestamps and
+private notes remain attributed; published articles stay published and drafts stay
+drafts. Apply and undo are inert: no mail, widget messages, model work, assignment
+or connection notifications. [The moving-in guide](docs/moving-in.md) explains
+formats, source custody and conflict-safe undo. Validation is **documented-format,
+synthetic-only; realExport: not-supplied**. The 9 October owner ruling requires exact business-state equality on repeat and
+undo. Platform counters/sequences, audit and import journals are excluded; business
+notes, source links, identities and native contact content remain checked.
 
-1. Install the dependencies:
+A resolved widget conversation asks **Did this answer your question?** with thumbs
+up/down and an optional comment up to 1,000 characters. Only its owning visitor
+session can rate its current closed cycle; widget action limits apply and changes
+retain history. Native records
+store AI, assisted, human or unknown provenance. A visitor message reopens the
+conversation; another resolution gets its own record. Reports uses the workspace
+timezone and 7/30/90-day or custom calendar ranges for volume, median/p90 first
+response and resolution times, AI resolution and satisfaction counts/rates, daily
+series and latest comments with conversation links. Conversation and summary CSV
+exports guard formula-leading cells. Imports are excluded and Reports calls no
+model. [The Reports guide](docs/reports.md) and
+[workspace workflows](docs/WORKSPACE-WORKFLOWS.md) explain the denominators.
 
-   ```sh
-   pnpm install --frozen-lockfile
-   ```
+Settings offers seven explicit token scopes, optional expiry, one-time secret
+display, hashed storage, revoke, last use and audit. [The API guide](docs/api.md)
+contains thirteen Bearer-only operations. Webhooks support four signed events,
+explicit test sends and safe attempt logs; public HTTPS destinations are checked
+against SSRF. Slack has incoming-webhook and bot-plus-channel modes. Both have
+recorded-response checks only; **live Slack: not-supplied**. Deliveries use ordinary platform HTTPS fetch with manual redirects. Every 3xx fails without following its Location. Requests are limited to 1 MiB, responses (including streams) to 64 KiB, and the entire request/response to 10 seconds. Public HTTPS destination syntax and literal IP validation remain enforced; this edition does not claim DNS pinning. Base HTTP 500 remains uncertain without automatic replay; 429 retains four bounded attempts with the same logical identity and exact body.
 
-2. Prepare the local database. This collects the database migrations (the
-   files that create and update the database's tables) and applies them to a
-   local D1 database:
+Installed owners land on the plain setup checklist; new workspaces lead with the
+widget snippet, with secrets and verification controls under **Advanced**. Empty
+inboxes offer widget installation, a real test conversation and a demo. Workspace
+headers follow the selected workspace; visitors intentionally see the operator's
+display name. Local mail is sensitive captured data, not a provider receipt.
 
-   ```sh
-   pnpm run setup -- --local
-   ```
 
-   Type `pnpm run setup`, not `pnpm setup`. `pnpm setup` is an unrelated pnpm
-   command.
-
-3. Start the app:
-
-   ```sh
-   pnpm run dev
-   ```
-
-   This builds the customer chat widget and the local agent download, then
-   starts the Vite development server. To choose the port, pass Vite's flags
-   straight through, for example `pnpm run dev --port 5174 --strictPort`.
-
-4. Open the address it prints (normally `http://localhost:5173`) and go to
-   `/setup`. Enter an email and password to create the first owner account
-   ([First-run setup](docs/SETUP-WORKFLOW.md) walks through the page).
-
-5. After that, `/setup` closes. Sign in at `/login` from then on.
-
-Your data stays on this computer between runs. To start the app again later, run
-`pnpm run dev` in the same folder.
-
-If you have set up an email provider and `APP_ORIGIN` (the public address of
-your app), you can also sign in without a password: choose **Email me a sign-in
-link** on the sign-in page, then press **Sign in** on the page that the link
-opens.
-
-Optional settings for local development, such as API keys, go in a private
-`.dev.vars` file, one `NAME=value` per line. See
-[Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)
-for the names.
-
-### When you need a setup token
-
-You can create the first owner account without a setup token only during local
-development: the request must go to `localhost`, `127.0.0.1` or `[::1]`, and
-there must be no public `APP_ORIGIN`. Any other address, including a LAN
-address, a tunnel or a deployed Worker, needs the private `H2H_SETUP_TOKEN`
-configured for that installation. [First-run setup](docs/SETUP-WORKFLOW.md#have-your-setup-token-ready)
-explains where the token comes from.
-
-## Deploy to your own Cloudflare account
-
-The installer's **Publish online with Cloudflare** option does all of this for
-you. To do it by hand, follow
-[Deploy to your Cloudflare account](OPERATIONS.md#deploy-to-your-cloudflare-account)
-in the Operations guide. It is the full, step-by-step version, including where
-to find your Cloudflare account ID and `workers.dev` subdomain, the permissions
-an API token needs, custom domains and every optional setting.
-
-In outline, you:
-
-1. Turn on R2 in your Cloudflare account.
-2. Install the dependencies and sign in with Wrangler, Cloudflare's
-   command-line tool (`pnpm exec wrangler login`), or set
-   `CLOUDFLARE_API_TOKEN` instead.
-3. Set four values in your terminal: `CLOUDFLARE_ACCOUNT_ID`,
-   `H2H_RESOURCE_PREFIX` (the name for your app and its resources),
-   `H2H_PUBLIC_ORIGIN` (its web address) and `H2H_SETUP_TOKEN` (a private value
-   you'll need at `/setup`).
-4. Run `pnpm run setup -- --plan`, `pnpm run setup -- --remote` and
-   `pnpm run deploy -- --remote`.
-5. Open your address followed by `/setup`, enter the setup token and create the
-   owner account.
-
-Want to try a hosted installation from start to finish on a throwaway account
-first? Follow
-[Try a first deployment on a throwaway account](OPERATIONS.md#try-a-first-deployment-on-a-throwaway-account).
-
-## Where to go next
-
-Read these in roughly this order:
-
-1. [Install](docs/INSTALLER.md): the guided installer, screen by screen.
-2. [First-run setup](docs/SETUP-WORKFLOW.md): the `/setup` page, where the
-   owner account and first workspace are created if the installer didn't do it.
-3. [Email and integrations](src/modules/integrations/README.md): sending and
-   receiving email, and connecting GitHub.
-4. [Local agent](local-agent/README.md): connect a computer and hand support
-   work to Codex or Claude.
-5. [Limits and AI ceilings](docs/PUBLIC-LIMITS.md): how visitor traffic and AI
-   spending are capped, and how to change the caps (`RATE_LIMITS` and
-   `AI_DAILY_CEILINGS`).
-
-Look things up later:
-
-- [Operations](OPERATIONS.md): the manual commands and every setting.
-- [Personal data](docs/PRIVACY.md): what is stored and sent to providers, and
-  how to erase a customer's data.
-- [Updates and recovery](docs/INDEPENDENT-RELEASE.md): updates, backups and
-  restores.
-- [Inbound email recovery](docs/INBOUND-EMAIL-RECOVERY.md): when an incoming
-  email didn't reach the inbox.
-- [Security](SECURITY.md) and the [Changelog](CHANGELOG.md).
-
-For maintainers and contributors (on GitHub):
-
-- [HANDOVER.md](HANDOVER.md): orientation for maintainers
-- [CONTRACT.md](CONTRACT.md) and [ACCEPTANCE.md](ACCEPTANCE.md): product
-  requirements and the checks that prove them
-- [docs/MODULES.md](docs/MODULES.md) and [docs/AUTHORING.md](docs/AUTHORING.md):
-  reusable modules and how the source is put together
-
-## Words these docs use
-
-- **Installation:** one running copy of HappyToHelp, on your computer or in your
-  Cloudflare account.
-- **Workspace:** one support space with its own inbox, chat widget, settings and
-  team. The API, setting names and a few screens call a workspace a *project*.
-- **Owner, admin and operator:** the roles on a workspace's team. The first
-  owner is created at `/setup`; operators answer customers. The dashboard shows
-  the operator role as **Agent**.
-- **Contact:** the record of a customer who has talked to you. A **visitor** is
-  someone using the chat widget on your website.
-- **Origin:** the start of a web address, with nothing after it: the scheme,
-  host and any port, such as `https://help.example.com`. HappyToHelp uses exact
-  origins to decide which website may use a workspace's widget, and
-  `APP_ORIGIN` is the public address of your installation.
-- **Setup token:** the private `H2H_SETUP_TOKEN` that protects the first owner
-  sign-up everywhere except local development on your own computer (see
-  [When you need a setup token](#when-you-need-a-setup-token)).
-- **Local agent:** the small program you install on a computer you control, so
-  Codex or Claude on that computer can take on support work. A computer that
-  runs it is a **paired computer**.
-- **Worker:** HappyToHelp's server, which runs on Cloudflare Workers (both on
-  Cloudflare and, for development, on your own computer).
 
 ## Verify
 
-For developers: run the full set of checks on your copy of the code.
-
 ```sh
-pnpm run verify
+node scripts/rer.mjs verify
 ```
 
-It does the following:
+The complete target checks the contract, real build, typecheck, native runtime,
+command journey, current workflows and selected Base copies. For a change, run
+its touched tests plus `pnpm run typecheck`; CI is the full wall. Browser suites
+and full verification run on the designated remote runner. Provider fixtures
+prove local protocol behavior; hosted acceptance and paid-provider execution
+require separate evidence. Preserve [the current holds](HANDOVER.md#acceptance-boundaries).
 
-- checks the app's operations configuration
-- builds the app and type-checks it
-- runs the module and runtime test suites
-- runs the first-release journey: one owner, customer and operator go through
-  the app on a real local Worker
-- checks source integrity: that the source files match the recorded source lock
-- runs the contract, homepage and docs tests
+## Where to go next
 
-These local tests use provider fixtures (stand-in responses) instead of real AI
-or email providers. They don't prove that a live provider or a deployment works.
-
-### Run the browser tests
-
-Browser tests need Chromium. Install it once:
-
-```sh
-pnpm exec playwright install chromium
-```
-
-Each `test:*-browser` script in `package.json` then starts its own separate local
-Worker. For example:
-
-```sh
-pnpm run test:setup-browser
-pnpm run test:ui-browser
-pnpm run test:conversation-panel-resize-browser
-```
-
-### Test how failed agent tasks are handled
-
-Since 0.3.0, the local agent requires strict structured output from its AI
-model. When delegated work fails, HappyToHelp keeps the HTTP status the provider
-reported and a short, redacted excerpt of the error. Failed work never sends a
-customer reply and never restarts on its own.
-
-`pnpm run test:provider-errors-browser` checks this. It covers pairing a
-computer, the local runner, the saved failure records and what an operator sees
-after reloading the page, at desktop and mobile widths. For what you see when a
-task fails, see
-[When an AI provider request fails](local-agent/README.md#when-an-ai-provider-request-fails).
-
-## How it's built
-
-HappyToHelp is one Cloudflare Worker:
-
-- **Pages:** TanStack Start and React
-- **API:** Hono
-- **Records:** D1, Cloudflare's SQL database
-- **Files:** R2, Cloudflare's file storage
-- **Background work:** Cloudflare Queues
-- **Live conversations:** a Durable Object that holds the live chat connections
+- [Install](docs/INSTALLER.md): private answers and the rer journey.
+- [First-run setup](docs/SETUP-WORKFLOW.md): native owner and workspace checklist.
+- [Operations](OPERATIONS.md): configuration, data movement, deployment and recovery.
+- [Updates and recovery](docs/INDEPENDENT-RELEASE.md): owner customizations and backups.
+- [Product contract](CONTRACT.md) and [acceptance](ACCEPTANCE.md): requirements and proof.
+- [Authoring](docs/AUTHORING.md): source selection and exact Base copies.
 
 ## License
 
-MIT; see [LICENSE](LICENSE). This covers the whole repository, including the
-homepage drawings and setup artwork. Bundled third-party components keep their
-own notices in [docs/licenses](docs/licenses) and in their package metadata; see
-[docs/SOURCE-PROVENANCE.md](docs/SOURCE-PROVENANCE.md).
+[MIT](LICENSE). Third-party asset notices remain under [docs/licenses](docs/licenses).

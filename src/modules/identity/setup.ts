@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
-import { hashToken } from '../../platform/auth'
+import { hashToken, requireActor } from '../../platform/auth'
 import { id, requiredString, serverSecret } from '../../platform/db'
 import { passwordHash } from './credentials'
 import { sessionCookie } from './session'
@@ -26,7 +26,9 @@ setup.get('/setup-status', async c => {
 setup.get('/setup', async c => {
  const open = await setupAvailable(c.env.DB)
  c.header('Cache-Control', 'no-store')
- return c.json({available: open, ...(tokenRequired(c.env, c.req.url) ? {tokenRequired: true} : {})})
+ // A visitor's own valid session is theirs to know; it lets a claimed installation send its signed-in owner onward.
+ const signedIn = open ? false : await requireActor(c).then(() => true, () => false)
+ return c.json({available: open, ...(tokenRequired(c.env, c.req.url) ? {tokenRequired: true} : {}), ...(signedIn ? {signedIn: true} : {})})
 })
 setup.post('/bootstrap', async c => {
  const origin = c.req.header('Origin')

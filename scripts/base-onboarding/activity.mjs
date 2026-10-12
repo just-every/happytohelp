@@ -1,12 +1,11 @@
 // Activity is session-only: a restarted process must not imply work is still running.
 const topics = Object.freeze({workspace:'workspace details',owner:'owner details',hosting:'hosting details',email:'email setup',setup:'setup details'});
 const phases = Object.freeze({checking:'Checking',needs_input:'Needs your input for',complete:'Finished checking'});
-const fields = new Set(['target','ownerName','email','name','allowedOrigin','primaryColor','accountId','prefix','appOrigin','emailProvider','emailFrom','emailAccountId','prefixMode','addressMode']);
 export function validateAgentActivity(input) {
  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(key=>!['phase','topic'].includes(key))||!Object.hasOwn(phases,input.phase)||!Object.hasOwn(topics,input.topic))throw Error('Choose a supported activity phase and topic.');
  return {phase:input.phase,topic:input.topic};
 }
-export function createActivity(state,allowedFields=[...fields]) {
+export function createActivity(state,allowedFields=Object.keys(state.draft??{})) {
  const accepted=new Set(allowedFields);
  state.activity=[];state.agent={mode:'manual',attached:false,attachedAt:null,lastSeenAt:null};let sequence=0;
  const attach=()=>{const at=new Date().toISOString();state.agent={mode:'connected',attached:true,attachedAt:state.agent.attachedAt||at,lastSeenAt:at};};

@@ -12,6 +12,13 @@ export function useHydrated() {
 
 export interface AuthOptions { setupRequired: boolean; registrationAvailable: boolean; recoveryAvailable: boolean }
 
+export function useSignInMail() {
+    const [options,setOptions]=useState<{mailMode:'local'|'remote'|'unavailable'}|null>(null);
+    const [failed,setFailed]=useState(false);
+    useEffect(()=>{let active=true;nativeRequest('/api/identity/sign-in-options').then(value=>{if(active)setOptions(value)}).catch(()=>{if(active)setFailed(true)});return()=>{active=false}},[]);
+    return {options,failed};
+}
+
 /** What this installation offers a signed-out visitor. `options` is null until known; `failed` if it could not be read. */
 export function useAuthOptions() {
     const [options, setOptions] = useState<AuthOptions | null>(null);

@@ -1,0 +1,165 @@
+# Workspace API
+
+A workspace owner or admin creates a named token in Settings → API tokens.
+The seven scopes are `conversations:read`, `conversations:write`, `messages:write`,
+`contacts:read`, `contacts:write`, `articles:read`, and `articles:write`. Token
+secrets are shown once and stored only as hashes; Settings shows last use and
+audit, expiry and revoke controls. The thirteen operations below retain native
+workspace/role and erasure boundaries. Select only the needed scopes;
+copy the secret once. Tokens belong to the workspace and continue to work when
+the issuing person leaves. Revoke tokens in Settings. Optional expiry is UTC.
+Every request uses an explicit bearer token. Cookies do not authenticate this
+API, and it emits no CORS permissions. The default limit is 120 requests per
+minute per token, configurable with `RATE_LIMITS.apiRequestsPerTokenMinute`.
+Failures are JSON `{ "error": { "code": "…", "message": "…" } }`; missing or
+expired credentials return 401, missing scope 403, foreign or missing resource
+IDs 404, changed conversation/authority 409, and rate limits 429 with Retry-After.
+Times are ISO 8601. List results contain `data` and `next_cursor`; pass the latter
+as `cursor` with the same filters. `limit` is 1–100 (default 50). Conversation
+status is `open`, `resolved` or `all`; `updated_since` is inclusive and `tag` is
+an exact workspace tag ID or name. Order is descending time then ID; message
+lists order by descending revision then ID. Cursors bind workspace and filters.
+
+The examples use `H2H_URL`, `H2H_TOKEN`, `CONVERSATION_ID`, `CONTACT_ID`,
+`ARTICLE_ID`, and the conversation's current integer `REVISION`. Supply those
+values in your shell environment. Token headers enter curl through standard
+input, so the token is not a command argument. Do not enable shell tracing.
+
+List conversations (`conversations:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/conversations?status=open&limit=25" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+Get a conversation (`conversations:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/conversations/$CONVERSATION_ID" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+List messages (`conversations:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/conversations/$CONVERSATION_ID/messages" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+Reply (`messages:write`). Read the current revision before sending. Keep the same
+localId and identical command when checking an uncertain request; a conflicting
+command returns 409. Replies use native admission and delivery. API automation
+has unknown outcome provenance and cannot assert a human or assisted source.
+
+```sh
+curl --silent --show-error --config - --request POST "$H2H_URL/api/v1/conversations/$CONVERSATION_ID/messages" --data "{\"localId\":\"docs-reply-1\",\"content\":\"We have received your request.\",\"expectedRevision\":$REVISION}" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+header = "Content-Type: application/json"
+EOF_CURL
+```
+
+Resolve (`conversations:write`):
+
+```sh
+curl --silent --show-error --config - --request POST "$H2H_URL/api/v1/conversations/$CONVERSATION_ID/resolve" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+List contacts (`contacts:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/contacts" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+Get a contact (`contacts:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/contacts/$CONTACT_ID" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+Create a contact (`contacts:write`):
+
+```sh
+curl --silent --show-error --config - --request POST "$H2H_URL/api/v1/contacts" --data '{"name":"Documentation Contact","email":"documentation@example.test"}' <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+header = "Content-Type: application/json"
+EOF_CURL
+```
+
+Update a contact (`contacts:write`). Erasing or erased contacts refuse updates.
+Erasure is a separate owner/admin operation and is not exposed here.
+
+```sh
+curl --silent --show-error --config - --request PUT "$H2H_URL/api/v1/contacts/$CONTACT_ID" --data '{"name":"Updated Contact"}' <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+header = "Content-Type: application/json"
+EOF_CURL
+```
+
+List articles, including drafts (`articles:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/articles" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+Get an article (`articles:read`):
+
+```sh
+curl --silent --show-error --config - "$H2H_URL/api/v1/articles/$ARTICLE_ID" <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+EOF_CURL
+```
+
+Create a draft (`articles:write`):
+
+```sh
+curl --silent --show-error --config - --request POST "$H2H_URL/api/v1/articles" --data '{"title":"Documentation Draft","slug":"documentation-draft","content":"Draft body","status":"draft"}' <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+header = "Content-Type: application/json"
+EOF_CURL
+```
+
+Update and publish (`articles:write`). Status is `draft` or `published`;
+`categoryIds` must all belong to this workspace. Public help pages expose only
+published articles under the native knowledge rules.
+
+```sh
+curl --silent --show-error --config - --request PUT "$H2H_URL/api/v1/articles/$ARTICLE_ID" --data '{"title":"Published Guide","content":"Published guide body","status":"published"}' <<EOF_CURL
+header = "Authorization: Bearer $H2H_TOKEN"
+header = "Content-Type: application/json"
+EOF_CURL
+```
+
+Workspace owners/admins administer connections. Settings → Webhooks supports `conversation.created`, `message.created`,
+`conversation.resolved` and `conversation.rated`. Events contain identifiers and
+revision/outcome/rating values, never transcript text, email addresses or rating
+comments. Imported history and undo emit none. Configurations are immutable
+versions: disable a connection and create a new one to change its destination or
+signing key. Disabled destinations refuse pending delivery. Contact erasure
+removes retained event bodies and pending delivery payloads; safe attempt
+metadata remains. A test is explicit and is recorded in the delivery log.
+
+The signature is Base `integrations.webhook.v1`: HMAC-SHA256 with the one-time
+32-byte hex key over the UTF-8 JSON array `["integrations.webhook.v1", tenant,
+destinationId, event, id, timestamp, exactBody]`. Headers are `webhook-tenant`,
+`webhook-destination`, `webhook-event`, `webhook-id`, `webhook-timestamp` and
+`webhook-signature` (`v1=<hex>`). Verify original bytes, expected tenant and
+destination, timestamp freshness and replay identity before applying an effect.
+See the copied Base [receiver guide](../src/vendor/base/modules/integrations/receiver.md).
+
+Deliveries use ordinary platform HTTPS fetch with manual redirects. Every 3xx fails without following its Location. Requests are limited to 1 MiB, responses (including streams) to 64 KiB, and the entire request/response to 10 seconds. Public HTTPS destination syntax and literal IP validation remain enforced; this edition does not claim DNS pinning. Explicit HTTP 5xx and 429 responses retry within Base’s four-attempt policy, retaining the same logical identity and exact signed body. A timeout or redirect remains uncertain and is not automatically replayed. Receivers must deduplicate the webhook ID before applying effects.
+Slack supports both incoming webhooks and bot tokens with channel IDs, escapes
+text, and shares conservative durable delivery. Local recorded responses do not
+establish live Slack acceptance: **live Slack: not-supplied**.
+
+Slack posts one durable notification for a new native conversation once its first visitor message is committed. The notification includes up to 500 characters of that native visitor message, escaped through Base's Slack renderer. Empty widget conversations wait for that context. Erasure suppresses pending delivery and removes retained payloads; it cannot remove messages already accepted by Slack.

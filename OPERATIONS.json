@@ -1,38 +1,189 @@
 {
-  "version": 1,
-  "edition": "happytohelp",
+  "version": 2,
   "requiredEnvironment": [],
   "commands": {
     "setup": {
       "argv": [
-        "pnpm",
-        "run",
-        "setup",
-        "--",
-        "--local"
+        "node",
+        "scripts/rer.mjs",
+        "setup"
       ],
-      "effects": "Collect selected migrations and prepare local D1 for first-owner setup. --plan validates a remote target and prints resource names; --remote creates D1/R2/Queues in your Cloudflare account and applies remote migrations without publishing code."
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Build, migrate, prepare private settings and the native first owner; stop the temporary app."
     },
-    "deploy": {
+    "dev": {
       "argv": [
-        "pnpm",
-        "run",
-        "deploy",
-        "--",
-        "--local"
+        "node",
+        "scripts/rer.mjs",
+        "dev"
       ],
-      "effects": "Build, apply local migrations and run a Wrangler packaging dry run. --remote refuses a fresh installation (no owner yet) without a private H2H_SETUP_TOKEN of at least 32 characters, then publishes the Worker/assets to the prepared target, passing configured secrets privately, and checks D1/R2 health."
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Foreground app with assets/HMR, health-gated readiness and development outbox sign-in."
+    },
+    "build": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "build"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "See SEED-COMMAND-CONTRACT.md for build effects."
     },
     "verify": {
       "argv": [
-        "pnpm",
-        "run",
+        "node",
+        "scripts/rer.mjs",
         "verify"
       ],
-      "effects": "Run the operations descriptor, build, type check, module and emitted-Worker runtime tests and source integrity check. Browser suites run separately (package.json test:*-browser scripts)."
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Run the complete nonrecursive verification target."
+    },
+    "reset": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "reset"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Explicitly confirmed deletion of the contained local inventory; no remote effect."
+    },
+    "deploy": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "deploy"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Owner-account provision, migration, publication and health; dry-run builds/validates locally with no provider request."
+    },
+    "export": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "export"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "New private archive of supported local D1/FILES data with integrity and explicit exclusions."
+    },
+    "import": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "import"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Confirmed validated atomic restore into an empty local destination; native identities retained."
+    },
+    "release": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "release"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "See SEED-COMMAND-CONTRACT.md for release effects."
+    },
+    "outbox": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "outbox"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "See SEED-COMMAND-CONTRACT.md for outbox effects."
+    },
+    "doctor": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "doctor"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "See SEED-COMMAND-CONTRACT.md for doctor effects."
+    },
+    "describe": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "describe"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "See SEED-COMMAND-CONTRACT.md for describe effects."
+    },
+    "check": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "check"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "See SEED-COMMAND-CONTRACT.md for check effects."
+    },
+    "install": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "install"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Frozen pinned dependency installation; no setup, global changes or deployment."
+    },
+    "preview": {
+      "argv": [
+        "node",
+        "scripts/rer.mjs",
+        "preview"
+      ],
+      "inputs": [
+        "scripts/rer.mjs",
+        "scripts/installer/local.mjs"
+      ],
+      "effects": "Serve fixed production output, preserve local owner and durable state, stop after idle timeout or explicit stop."
     }
   },
-  "authentication": "Remote commands require Wrangler sign-in or CLOUDFLARE_API_TOKEN, plus CLOUDFLARE_ACCOUNT_ID, H2H_RESOURCE_PREFIX and H2H_PUBLIC_ORIGIN. Set H2H_SETUP_TOKEN before deploying a fresh installation. Provider secrets remain private. Local checks do not validate credentials; see OPERATIONS.md for token permissions and origin rules.",
+  "authentication": "Owner-account deployment requires private CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN plus the secret environment inputs declared in deploy.json. Local native password/outbox sign-in requires no external provider credential. See OPERATIONS.md.",
   "health": {
     "path": "/health",
     "meaning": "Native Worker with reachable D1 and R2; does not prove queues, sockets, providers or product acceptance."
@@ -42,6 +193,10 @@
     "meaning": "Product requirements and the evidence each requires; a passing result belongs to a named source revision."
   },
   "configuration": [
+    {
+      "path": "deploy.json",
+      "description": "Base deploy-kit owner-account resources and private secret inputs."
+    },
     {
       "path": "wrangler.jsonc",
       "description": "Native DB/FILES/JOBS/CONVERSATIONS bindings and scheduled recovery; generated migrations are collected before setup."
@@ -64,9 +219,30 @@
     }
   ],
   "notes": [
-    "Requires Node >=26.8.1 and pnpm 10.12.4 with the committed lockfile. Use pnpm run setup, not pnpm setup.",
-    "node scripts/install.mjs is the guided installer; it runs these same commands after explicit approval.",
-    "describe/check and a local packaging dry run do not establish a deployment, provider behavior or a production data migration.",
-    "REGISTRATION_ENABLED=true lets every self-registered project spend the installation's AI provider keys; only AI_DAILY_CEILINGS.repliesPerInstallation caps the total. Set TURNSTILE_SECRET, a repliesPerInstallation you are willing to pay daily, and provider-side spending limits first."
-  ]
+    "Node 22.20.0, pnpm 10.12.4 and frozen dependencies.",
+    "Native HappyToHelp owner/password and magic-link auth is retained. Local sign-in uses the development outbox.",
+    "No CLI operation implies hosted or provider acceptance."
+  ],
+  "project": "just-every/happytohelp",
+  "runtime": {
+    "requirements": [
+      {
+        "name": "node",
+        "version": "22.20.0"
+      },
+      {
+        "name": "pnpm",
+        "version": "10.12.4"
+      }
+    ]
+  },
+  "seedContract": {
+    "version": 1,
+    "profile": "first-party",
+    "adapter": "scripts/installer/local.mjs"
+  },
+  "environmentSources": {},
+  "documentation": {
+    "document": "OPERATIONS.md"
+  }
 }

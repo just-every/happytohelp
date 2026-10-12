@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "title": "HappyToHelp",
+  "groups": [
+    {
+      "id": "workspace",
+      "label": "Workspace"
+    },
+    {
+      "id": "owner",
+      "label": "Your account"
+    },
+    {
+      "id": "email",
+      "label": "Email delivery"
+    }
+  ],
+  "fields": [
+    {
+      "name": "WORKSPACE_NAME",
+      "label": "Workspace name",
+      "kind": "text",
+      "group": "workspace",
+      "required": true,
+      "help": "The name your team sees in HappyToHelp."
+    },
+    {
+      "name": "WIDGET_ORIGIN",
+      "label": "Website where customers will use chat",
+      "kind": "url",
+      "group": "workspace",
+      "required": true,
+      "placeholder": "https://example.com",
+      "help": "The chat widget will be allowed on this website."
+    },
+    {
+      "name": "PRIMARY_COLOR",
+      "label": "Brand colour",
+      "kind": "colour",
+      "group": "workspace",
+      "required": true
+    },
+    {
+      "name": "OWNER_NAME",
+      "label": "Your name",
+      "kind": "text",
+      "group": "owner",
+      "required": true
+    },
+    {
+      "name": "OWNER_EMAIL",
+      "label": "Your email",
+      "kind": "email",
+      "group": "owner",
+      "required": true
+    },
+    {
+      "name": "OWNER_PASSWORD",
+      "label": "Create an owner password",
+      "kind": "secret",
+      "group": "owner",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "OWNER_EMAIL",
+        "nonEmpty": true
+      },
+      "help": "At least 12 characters. Used to create your owner account."
+    },
+    {
+      "name": "EMAIL_PROVIDER",
+      "label": "Email service",
+      "kind": "select",
+      "group": "email",
+      "required": true,
+      "default": "later",
+      "options": [
+        {
+          "value": "cloudflare",
+          "label": "Cloudflare Email Sending"
+        },
+        {
+          "value": "resend",
+          "label": "Resend"
+        },
+        {
+          "value": "sendgrid",
+          "label": "SendGrid"
+        },
+        {
+          "value": "later",
+          "label": "Set up email later"
+        },
+        {
+          "value": "development",
+          "label": "Local development outbox"
+        }
+      ]
+    },
+    {
+      "name": "EMAIL_FROM",
+      "label": "Sender email address",
+      "kind": "email",
+      "group": "email",
+      "required": false,
+      "presentations": [
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "cloudflare"
+          },
+          "required": true
+        },
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "resend"
+          },
+          "required": true
+        },
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "sendgrid"
+          },
+          "required": true
+        }
+      ],
+      "help": "Use an address on your verified sending domain."
+    },
+    {
+      "name": "EMAIL_ACCOUNT_ID",
+      "label": "Email Sending account",
+      "kind": "text",
+      "group": "email",
+      "required": true,
+      "when": {
+        "field": "EMAIL_PROVIDER",
+        "equals": "cloudflare"
+      }
+    },
+    {
+      "name": "EMAIL_API_KEY",
+      "label": "Email sending token",
+      "kind": "secret",
+      "group": "email",
+      "required": false,
+      "ownerVisible": true,
+      "input": "entered",
+      "presentations": [
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "resend"
+          },
+          "required": true
+        },
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "sendgrid"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "CLOUDFLARE_EMAIL_API_KEY",
+      "label": "Email Sending token",
+      "kind": "secret",
+      "group": "email",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "EMAIL_ACCOUNT_ID",
+        "nonEmpty": true
+      },
+      "presentations": [
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "cloudflare"
+          },
+          "required": true
+        }
+      ],
+      "help": "Cloudflare requires Email Sending: Edit permission."
+    },
+    {
+      "name": "H2H_SETUP_TOKEN",
+      "label": "Private owner setup token",
+      "kind": "secret",
+      "required": true,
+      "generate": "hex",
+      "ownerVisible": false
+    },
+    {
+      "name": "INTEGRATION_ENCRYPTION_KEY",
+      "label": "Private integration encryption key",
+      "kind": "secret",
+      "required": true,
+      "generate": "base64",
+      "ownerVisible": false
+    }
+  ],
+  "steps": [
+    {
+      "type": "extension",
+      "id": "native-owner-password"
+    }
+  ]
+}

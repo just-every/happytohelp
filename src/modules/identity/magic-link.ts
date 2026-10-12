@@ -5,6 +5,7 @@ import type { AppEnv, Env } from '../../platform/env'
 import { hashToken } from '../../platform/auth'
 import { serverSecret } from '../../platform/db'
 import { emailConfigured, sendEmail } from '../integrations/email'
+import {emailMode} from '../integrations/email-provider'
 import { sessionCookie } from './session'
 import { clientAddress } from '../../platform/rate-limits'
 
@@ -57,7 +58,7 @@ magicLink.post('/magic-link', async c => {
    await c.env.DB.prepare('UPDATE magic_signins SET consumed_at=? WHERE token_hash=?').bind(Date.now(), hash).run()
   }
  })())
- return c.json({ accepted: true, message: 'If this address belongs to a HappyToHelp account, check your inbox for a sign-in link. You can also use your password.' }, 202)
+ return c.json({ accepted: true, message: emailMode(c.env)==='local' ? 'If this address belongs to an account, its sign-in link is in the local outbox on this computer. No email is sent. You can also use your password.' : 'If this address belongs to a HappyToHelp account, check your inbox for a sign-in link. You can also use your password.' }, 202)
 })
 magicLink.post('/magic-link/consume', async c => {
  sameOrigin(c.req.raw)
@@ -69,10 +70,12 @@ magicLink.post('/magic-link/consume', async c => {
  // D1 batches commit atomically. Only the batch that inserts a session from an unspent token may consume it.
  // Membership, email and deletion are checked at admission, not at email issuance.
  const results = await c.env.DB.batch([
-  c.env.DB.prepare(`INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) SELECT ?,t.user_id,t.project_id,coalesce(m.role,'operator'),? FROM magic_signins t JOIN users u ON u.id=t.user_id AND u.email=t.email LEFT JOIN memberships m ON m.user_id=t.user_id AND m.project_id=t.project_id LEFT JOIN projects p ON p.id=t.project_id WHERE t.token_hash=? AND t.consumed_at IS NULL AND t.expires_at>? AND ((t.project_id IS NULL AND NOT EXISTS(SELECT 1 FROM memberships WHERE user_id=t.user_id)) OR (m.user_id IS NOT NULL AND p.id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=p.id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)))`).bind(sessionHash, now + 86400000, hash, now),
-  c.env.DB.prepare('UPDATE magic_signins SET consumed_at=? WHERE token_hash=? AND consumed_at IS NULL AND EXISTS(SELECT 1 FROM sessions WHERE token_hash=?)').bind(now, hash, sessionHash),
+  c.env.DB.prepare(`INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) SELECT ?,t.user_id,t.project_id,coalesce(m.role,'operator'),? FROM magic_signins t JOIN users u ON u.id=t.user_id AND u.email=t.email LEFT JOIN memberships m ON m.user_id=t.user_id AND m.project_id=t.project_id LEFT JOIN projects p ON p.id=t.project_id WHERE t.token_hash=? AND t.consumed_at IS NULL AND t.expires_at>? AND ((t.project_id IS NULL AND NOT EXISTS(SELECT 1 FROM memberships WHERE user_id=t.user_id)) OR (m.user_id IS NOT NULL AND p.id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=p.id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL))) RETURNING actor_id`).bind(sessionHash, now + 86400000, hash, now),
+  c.env.DB.prepare('UPDATE magic_signins SET consumed_at=? WHERE token_hash=? AND consumed_at IS NULL AND EXISTS(SELECT 1 FROM sessions WHERE token_hash=?) RETURNING user_id').bind(now, hash, sessionHash),
  ])
- if (results[0].meta.changes !== 1 || results[1].meta.changes !== 1) throw invalid()
+ // D1's changes count includes authority-trigger writes. Admission is the
+ // authenticated row returned by each atomic statement, never that aggregate.
+ if (results[0].results.length !== 1 || results[1].results.length !== 1) throw invalid()
  c.header('Set-Cookie', sessionCookie(session, c.req.url))
  const admitted=await c.env.DB.prepare('SELECT project_id FROM sessions WHERE token_hash=?').bind(sessionHash).first<{project_id:string|null}>()
  return c.json({ signedIn: true, destination: loginDestination(body.returnTo,new URL(c.req.url).origin,!admitted?.project_id) })

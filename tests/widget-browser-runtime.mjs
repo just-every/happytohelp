@@ -6,8 +6,8 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-const runtime=await createRuntime();let success=false;
+import {createLocalMailRuntime} from './helpers/local-mail-runtime.mjs';
+const runtime=await createLocalMailRuntime();let success=false;
 const evidenceRoot=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-widget-evidence-'));const proofDir=pathToFileURL(join(evidenceRoot,'widget-native')+'/');await mkdir(proofDir,{recursive:true});console.log('Widget evidence:',proofDir.pathname);
 const call=async(path,body,token,extra={})=>{const response=await fetch(runtime.origin+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} :{}),...extra},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,`${path}: ${response.status} ${await response.clone().text()}`);return response.json()};
 try{

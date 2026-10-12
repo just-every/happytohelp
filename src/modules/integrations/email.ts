@@ -1,7 +1,9 @@
 import {hashToken} from '../../platform/auth'
+import {localMailSender} from '../../edition/local-mail/outbox'
+import {emailMode} from './email-provider'
 import type {Env} from '../../platform/env'
 import {emailConfigured, providerRequest, providerReceipt, selectedEmailProvider, sendGridDelivery} from './email-provider'
-import {SendGridSendError} from '../sendgrid-email/sender'
+import {SendGridSendError} from '../../vendor/base/modules/sendgrid-email/src/sender'
 export {emailConfigured} from './email-provider'
 import {HTTPException} from 'hono/http-exception'
 
@@ -19,6 +21,8 @@ async function updateDelivery(env:Env,id:string,state:'sent'|'failed'|'uncertain
  await env.DB.prepare('UPDATE email_deliveries SET state=?,provider_id=coalesce(?,provider_id),error=?,updated_at=? WHERE id=?').bind(state,providerId,error,Date.now(),id).run()
 }
 async function sendThroughSelectedProvider(env:Env,input:EmailInput,from:string):Promise<string|null>{
+ const local=localMailSender(env)
+ if(local){await local.send({deliveryId:input.idempotencyKey,from,to:[input.to],subject:input.subject,text:input.text,...(input.replyTo?{replyTo:input.replyTo}:{}),...(input.headers?{headers:input.headers}:{})});return null}
  if(selectedEmailProvider(env)==='sendgrid'){
   const receipt=await sendGridDelivery(env,input,from)
   return receipt.providerMessageId
@@ -39,7 +43,7 @@ export async function sendEmail(env:Env,input:EmailInput){
  const from=await senderFor(env,input),intentHash=await hashToken(JSON.stringify({...input,from})),existing=await env.DB.prepare('SELECT state,provider_id,intent_hash FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<DeliveryRow>()
  if(existing){
   if(existing.intent_hash!==intentHash)throw new HTTPException(409,{message:'Email command identity conflict'})
-  if(existing.state==='sent')return {id:existing.provider_id,state:'sent'}
+  if(existing.state==='sent')return {id:existing.provider_id,state:'sent',...(emailMode(env)==='local'?{mode:'local' as const}:{})}
   throw new HTTPException(409,{message:`Email delivery ${existing.state}; reconcile before retrying`})
  }
  const now=Date.now(),claimed=await env.DB.prepare("INSERT OR IGNORE INTO email_deliveries VALUES(?,?,?,?,?,'sending',NULL,NULL,?,?)").bind(input.idempotencyKey,input.projectId||null,input.to,input.subject,intentHash,now,now).run()
@@ -47,7 +51,7 @@ export async function sendEmail(env:Env,input:EmailInput){
  try{
   const providerId=await sendThroughSelectedProvider(env,input,String(from))
   await updateDelivery(env,input.idempotencyKey,'sent',null,providerId)
-  return {id:providerId,state:'sent'}
+  return {id:providerId,state:'sent',...(emailMode(env)==='local'?{mode:'local' as const}:{})}
  }catch(error){
  const classified=sendGridFailure(error)
  if(classified){

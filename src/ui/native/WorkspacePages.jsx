@@ -1,3 +1,7 @@
+import WorkspaceName from './WorkspaceName';
+import Connections from './pages/Connections';
+import Reports from './pages/Reports';
+import MoveIn from './pages/MoveIn';
 import React from 'react';
 import {ActivationPage} from './activation';
 import { Link } from '@tanstack/react-router';
@@ -18,7 +22,7 @@ import TrainingRuns from './pages/TrainingRuns';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
 import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
-const titles={edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',activation:'Setup',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
+const titles={'api-settings':'API tokens','webhook-settings':'Webhooks','slack-settings':'Slack','delivery-log':'Delivery log',reports:'Reports','move-in':'Move in',edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',activation:'Setup',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
 export default function WorkspacePages({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const segments=pathname.split('/').filter(Boolean);
@@ -30,11 +34,14 @@ export default function WorkspacePages({ settings }) {
     let page;
     if(settings.projectUnavailable)page=<ProjectUnavailable/>;
     else if(section==='projects')page=<ProjectsPage/>;
-    else if(section==='activation')page=<ActivationPage projectId={projectId}/>;
+    else if(section==='reports')page=<Reports projectId={projectId}/>;
+    else if(section==='move-in')page=<MoveIn projectId={projectId}/>;
+    else if(section==='activation')page=<ActivationPage projectId={projectId} role={settings.projects?.[projectId]?.role}/>;
     else if(section==='articles'&&recordId==='import')page=<ArticleImport {...{projectId}}/>;
     else if(['datasets','articles','categories'].includes(section))page=<KnowledgePage {...{projectId,section,recordId}} project={settings.projects?.[projectId]||settings.project}/>;
     else if(['ais','macros','contacts','plugins','agents'].includes(section))page=<ManagementPage {...{projectId,section,recordId}}/>;
-    else if(['edit','settings','email-settings'].includes(section))page=<ProjectSettings {...{projectId,section}}/>;
+    else if(['edit','settings','email-settings'].includes(section))page=<ProjectSettings {...{projectId,section}} role={settings.projects?.[projectId]?.role}/>;
+    else if(['api-settings','webhook-settings','slack-settings','delivery-log'].includes(section))page=<Connections {...{projectId,section}} role={settings.projects?.[projectId]?.role}/>;
     else if(section==='github-settings')page=<GitHubSettings {...{projectId}}/>;
     else if(section==='widget-settings')page=<WidgetSettingsPage {...{projectId}}/>;
     else if(section==='local-agent')page=<ComputersPage {...{projectId}} projectName={settings.projects[projectId]?.name}/>;
@@ -61,7 +68,7 @@ export default function WorkspacePages({ settings }) {
         <div className="header workspace-page-header"><div className="header-body">
             <div className="row align-items-end"><div className="col">
                 {section==='users'&&!foreignUser&&!settings.projectUnavailable&&<h6 className="header-pretitle">Overview</h6>}
-                <h1 className="header-title display-4">{title}</h1>
+                <WorkspaceName settings={settings}/><h1 className="header-title display-4">{title}</h1>
             </div><div className="col-auto" id="workspace-header-actions"/></div>
             <div id="workspace-header-tabs"/>
         </div></div>

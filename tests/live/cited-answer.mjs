@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {chromium} from 'playwright'
+import {authenticatedReplyReceipt} from './mail-receipt.mjs'
 const required=['BASE_URL','WIDGET_KEY','OPERATOR_EMAIL','OPERATOR_PASSWORD']
 const absent=required.filter(name=>!process.env[name])
 const base=process.env.BASE_URL?.replace(/\/$/,'')
@@ -57,11 +58,20 @@ test('live cited native answer reaches widget and the same inbox; handoff and op
   await operator.getByPlaceholder('Type your reply…').fill(reply)
   await operator.getByRole('button',{name:'Send',exact:true}).click()
   await widget.getByText(reply,{exact:true}).waitFor()
-  const final=await transcript();assert.equal(final.messages.filter(m=>m.content===reply).length,1)
+  const final=await transcript(),operatorReplies=final.messages.filter(m=>m.content===reply);assert.equal(operatorReplies.length,1)
+  const persistedReply=operatorReplies[0];assert.ok(persistedReply.id);assert.ok(['owner','admin','operator'].includes(persistedReply.actor_role))
+  const operatorFrame=await until(async()=>frames.find(f=>f.message?.id===persistedReply.id),Boolean,'socket operator message')
+  assert.equal(operatorFrame.message.content,persistedReply.content);assert.equal(operatorFrame.message.actor_role,persistedReply.actor_role);assert.equal(operatorFrame.message.actor_id,persistedReply.actor_id)
+  await widget.reload();await mount();await widget.getByText(reply,{exact:true}).waitFor()
+  assert.equal(await widget.getByText(reply,{exact:true}).count(),1)
+  const reloadedReplies=(await transcript()).messages.filter(m=>m.id===persistedReply.id)
+  assert.equal(reloadedReplies.length,1);assert.deepEqual(reloadedReplies[0],persistedReply)
+  assert.equal((await transcript()).messages.filter(m=>m.content===reply).length,1)
   await t.test('delivered transcript mail',{skip:!process.env.TEST_MAIL_TO||!process.env.MAILBOX_RECEIPT_URL?'TEST_MAIL_TO and MAILBOX_RECEIPT_URL required; no mail sent':false},async()=>{
    const r=await operator.request.put(`${base}/api/dashboard/projects/${session.projectId}/conversations/${session.conversationId}`,{data:{send_transcript_to:process.env.TEST_MAIL_TO,idempotencyKey:`t021-mail:${session.conversationId}`}})
    assert.equal(r.status(),200)
-   await until(async()=>{const r=await fetch(process.env.MAILBOX_RECEIPT_URL);assert.ok(r.ok);return r.text()},text=>text.includes(reply),'delivered mail receipt')
+   const receipt=await until(async()=>{const r=await fetch(process.env.MAILBOX_RECEIPT_URL);assert.ok(r.ok);return authenticatedReplyReceipt(await r.json(),reply)},Boolean,'authenticated delivered mail receipt')
+   assert.equal(receipt.auth.dmarc,'pass');assert.ok(receipt.excerpt.includes(persistedReply.content))
   })
   console.log('Live proof passed: native anchor, durable REST/socket identity, widget/inbox reload, human handoff and operator reply.')
  }finally{await browser.close()}

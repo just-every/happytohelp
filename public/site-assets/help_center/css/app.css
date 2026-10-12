@@ -58,11 +58,6 @@ body {
     text-decoration: none;
 }
 
-.help-center-brand > span {
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
 .help-center-brand:hover,
 .help-center-brand:focus-visible {
     color: var(--help-center-brand-ink, #fff);
@@ -118,10 +113,6 @@ body {
     width: min(calc(100% - 2.5rem), 80rem);
     margin: 0 auto;
     padding: 1.5rem 0 4rem;
-}
-
-.help-center-content {
-    overflow-wrap: anywhere;
 }
 
 .help-center-content > :first-child {
@@ -191,7 +182,6 @@ body {
 
 .help-center-content pre {
     overflow-x: auto;
-    overflow-wrap: normal;
     margin: 1rem 0;
     padding: 1rem;
     border-radius: 0.5rem;
@@ -203,12 +193,6 @@ body {
     padding: 0;
     background: transparent;
     color: inherit;
-}
-
-.help-center-content pre:focus-visible,
-.help-center-table-scroll:focus-visible {
-    outline: 3px solid var(--help-center-link);
-    outline-offset: 2px;
 }
 
 .help-center-content img {
@@ -223,13 +207,10 @@ body {
     color: var(--help-center-muted);
 }
 
-.help-center-table-scroll {
+.help-center-content table {
+    display: block;
     max-width: 100%;
     overflow-x: auto;
-    overflow-wrap: normal;
-}
-
-.help-center-content table {
     border-collapse: collapse;
 }
 
@@ -278,8 +259,8 @@ body {
 .help-center-lockup > svg:last-child { flex: none; overflow: visible; }
 .help-center-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 .help-center-welcome { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; }
-.help-center-welcome img { width: 3rem; height: 3rem; flex: 0 0 auto; object-fit: cover; border-radius: 50%; }
-.help-center-welcome p { min-width: 0; margin: 0; white-space: pre-line; }
+.help-center-welcome img { width: 3rem; height: 3rem; object-fit: cover; border-radius: 50%; }
+.help-center-welcome p { margin: 0; white-space: pre-line; }
 .help-center-status{margin:1rem auto;padding:.75rem 1rem;max-width:72rem;color:#172533;background:#edf3f8;border:1px solid #61758a;border-radius:.5rem}.help-center-status[hidden]{display:none}.help-center-status button{color:#fff;background:#172533;border:0;border-radius:.3rem;padding:.5rem .75rem;font:inherit}.help-center-status button:focus-visible{outline:3px solid #005fcc;outline-offset:3px}
 
 /* Reserve the widget's 500px desktop panel, 25px right inset and a 1.25rem gap. */

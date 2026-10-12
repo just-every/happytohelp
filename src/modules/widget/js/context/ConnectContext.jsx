@@ -21,6 +21,7 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   const [contact, setContact] = useState(context.contact || {});
   const [localContact, setLocalContact] = useState(context.contact || {});
   const [messages, setMessages] = useState([]);
+  const [resolution, setResolution] = useState(null);
   const [agentTyping, setAgentTyping] = useState(emptyTypingState);
   const [connectErrors, setConnectErrors] = useState([]);
   const [connectionState, setConnectionState] = useState('connecting');
@@ -53,17 +54,18 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
         const value = event.configuration;
         setCollectorReady(value.collectorEnabled === true && context.settings.collector.enabled && !(context.settings.collector.disable_bots && isBot));
         const brand = value.brand?.name || value.project?.name;
-        setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), workspace_brand: {name: brand, avatar_url: value.brand?.avatar_url || value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
+        setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), mailMode: value.mailMode, workspace_brand: {name: brand, avatar_url: value.brand?.avatar_url || value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
         onSettingsUpdated?.({...widgetAppearance(value.brand, value.settings), settings: {...value.settings?.settings, collector: {...value.settings?.settings?.collector, enabled: value.collectorEnabled === true}}});
         break;
       }
       case 'session':
         setContactAuth({id: event.session.contactId, token: event.session.token});
         setConversationId(event.session.conversationId);
-        setContact(current => ({...current, id: event.session.contactId}));
+        setContact(current => ({...current, id: event.session.contactId, ...event.contact}));
         if (event.session.settings) setConversationSettings(current => ({...current, ...event.session.settings}));
         break;
-      case 'transcript': setFilteredMessages(event.messages); break;
+      case 'transcript': setFilteredMessages(event.messages); setResolution(event.resolution || null); break;
+      case 'resolution': setResolution(payload.resolution || null); break;
       case 'message':
         setFilteredMessages([event.message || payload]); setThinking(false);
         if (chunks.current[(event.message || payload).local_id]) chunks.current[(event.message || payload).local_id].complete = true;
@@ -98,7 +100,7 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     const onError = error => { if (active()) fail(error); };
     const client = new WidgetTransport({apiOrigin: context.apiOrigin, widgetKey: context.widgetKey, onEvent: event => { if (active()) eventHandler.current(event); }, onError});
     transport.current = client;
-    setMessages([]); setContactAuth({}); setConversationId(null); setConnectionState('connecting');
+    setMessages([]); setResolution(null); setContactAuth({}); setContact(context.contact || {}); setConversationId(null); setConnectionState('connecting');
     client.connect({...localContact, ...context.contact}).catch(onError);
     return () => { client.close(); Collector.setCollectorEnabled(false); Collector.setMessageHandler(null); };
   }, [context.apiOrigin, context.widgetKey, context.contact?.hash, context.contact?.identifier, fail]);
@@ -171,5 +173,5 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
       setFilteredMessages([{...contact_message, sending: true, failed_send: true}]); setAgentTyping(emptyTypingState()); setThinking(false);
     });
   };
-  return <ConnectContext.Provider value={{open, connectionState, retryConnection, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;
+  return <ConnectContext.Provider value={{open, resolution, setResolution, connectionState, retryConnection, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;
 }

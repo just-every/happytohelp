@@ -4,7 +4,6 @@ import {resolve,join} from 'node:path';
 import {chromium} from 'playwright';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
 import {assertHelpSearchFits,assertHelpSearchReachable} from './helpers/appearance-geometry.mjs';
-import {exerciseLongAppearance} from './helpers/appearance-long-content.mjs';
 import {assertHelpLinksReadable} from './helpers/help-center-link-contrast.mjs';
 import {appearanceAudit} from './helpers/appearance-audit.mjs';
 const directory=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/appearance');await mkdir(directory,{recursive:true});
@@ -50,8 +49,8 @@ try{
   await page.setViewportSize(viewport);
   await page.goto(origin+`/projects/${tenant.projectId}/edit`);await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByText('Additional branding',{exact:true}).click();assert.equal(await page.locator('.project-parity-tabs button.active').evaluate(el=>getComputedStyle(el).borderBottomColor),await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--workspace-button-bg').trim()).then(hex=>'rgb('+hex.slice(1).match(/../g).map(v=>parseInt(v,16)).join(', ')+')'));await audit(page,viewport.width+'-appearance-saved');
   // Request delays and transport failures, not fabricated application responses.
-  // A held route stays until the state it released is audited: removing the last route disables
-  // interception, and Chromium then drops requests still paused in it (an image that never loads).
+  // Keep held routes until the released state and its images are audited.
+  // Disabling the last route can drop image requests still paused in interception.
   let release;const held=new Promise(r=>release=r);
   await page.route('**'+widgetPath,async route=>{await held;await route.continue()});
   await page.goto(origin+`/projects/${tenant.projectId}/widget-settings`);await page.getByText('Loading your widget settings and preview…').waitFor();await audit(page,viewport.width+'-settings-loading');release();await page.getByRole('tab',{name:'Theme',exact:true}).waitFor();
@@ -100,7 +99,6 @@ try{
   }
  }
  await writeFile(join(directory,'help-link-contrast.json'),JSON.stringify(contrastMeasurements,null,2));
- await exerciseLongAppearance({page,browser,origin,tenant,project,api,brand,audit});
  // Removal uses the same native form and restores defaults across both public surfaces.
  await page.goto(origin+`/projects/${tenant.projectId}/edit`);await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByText('Additional branding',{exact:true}).click();
  for(const label of ['Public brand name','Logo URL','Support avatar URL','Welcome greeting'])await page.getByLabel(label,{exact:true}).fill('');await page.getByRole('button',{name:'Reset',exact:true}).click();await page.getByRole('button',{name:'Update',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor();

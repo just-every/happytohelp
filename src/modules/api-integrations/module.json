@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "happytohelp/api-integrations",
+  "version": "0.1.0",
+  "sourcePaths": [
+    "src/modules/api-integrations",
+    "migrations/115_native_integrations.sql",
+    "docs/api.md",
+    "tests/connections"
+  ],
+  "selectedEditionDependencies": [
+    "runeditrun/base",
+    "runeditrun/integrations-core",
+    "runeditrun/conversation",
+    "happytohelp/outcomes",
+    "runeditrun/knowledge"
+  ],
+  "runtime": "Workers TypeScript with D1 and ordinary platform HTTPS fetch",
+  "license": "MIT",
+  "notices": [
+    "LICENSE",
+    "docs/SOURCE-PROVENANCE.md"
+  ],
+  "editionIntegration": {
+    "sourceOwner": "just-every/happytohelp",
+    "requiredContracts": [
+      "Native management authority, contact erasure, guarded message admission and resolution transitions",
+      "Edition HTTPS fetch override dated 2026-10-09: manual redirects, finite timeout and bounded request/stream response; no DNS-pinning claim",
+      "Edition-owned src/platform/integration-authority.ts supplies the native token and issuer authority bridge"
+    ],
+    "verificationScope": "Local D1, synthetic HTTPS receiver and recorded Slack fixtures; hosted and live Slack require separate evidence."
+  }
+}

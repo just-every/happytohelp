@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "happytohelp/outcomes",
+  "version": "0.1.0",
+  "sourcePaths": [
+    "src/modules/outcomes",
+    "migrations/112_conversation_outcomes.sql",
+    "migrations/113_outcomes_history.sql",
+    "tests/reports/outcomes.mjs",
+    "tests/reports/ratings.mjs",
+    "tests/reports/migration.mjs",
+    "tests/reports/upgrade.mjs",
+    "tests/reports/widget-races.mjs",
+    "tests/reports/import-inertness.mjs",
+    "tests/reports/operator-feedback.mjs"
+  ],
+  "selectedEditionDependencies": [
+    "runeditrun/base",
+    "runeditrun/integrations-core"
+  ],
+  "runtime": "Workers TypeScript/ESM with edition-owned integration",
+  "license": "MIT",
+  "notices": [
+    "LICENSE"
+  ],
+  "editionIntegration": {
+    "sourceOwner": "just-every/happytohelp",
+    "requiredContracts": [
+      "src/platform current authority and D1 environment",
+      "edition-selected conversation, AI generation, local proposal, context and import schemas with the complete migration ledger"
+    ],
+    "verificationScope": "The edition owns route composition and UI; module tests exercise that selected native composition."
+  }
+}

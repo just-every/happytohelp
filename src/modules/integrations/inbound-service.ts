@@ -1,3 +1,4 @@
+import {trackingStatement} from '../outcomes/state'
 import {HTTPException} from 'hono/http-exception'
 import type {Env} from '../../platform/env'
 import {id,requiredString} from '../../platform/db'
@@ -50,6 +51,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
    await env.DB.batch([
     env.DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind(key,project.project_id,contact.id,now,now),
     env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=?').bind(key,recordId),
+    trackingStatement(env,key,true),
    ])
    conversation={id:key,revision:0,last_message_id:null}
   }else await env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=?').bind(conversation.id,recordId).run()

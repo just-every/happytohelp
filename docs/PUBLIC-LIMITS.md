@@ -226,7 +226,7 @@ default.
 
 3. Apply them the same way as the other optional settings in
    [Operations](../OPERATIONS.md): set them in the environment when you run
-   `pnpm run setup -- --remote`, then run `pnpm run deploy -- --remote`. If you
+   the real `deploy.json` declaration, then run `node scripts/rer.mjs deploy --environment production`. If you
    change them later, run setup again before you deploy. For local runs, put the same
    names in `.dev.vars`.
 

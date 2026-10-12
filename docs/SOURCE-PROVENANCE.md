@@ -1,6 +1,6 @@
 # Source origins and licensing
 
-HappyToHelp 0.3.0 is a native port of the original HappyToHelp service. The
+HappyToHelp 0.4.0 is a native port of the original HappyToHelp service. The
 original repositories were read, not modified, when the port began on
 14 September 2026. This repository contains the retained and ported source; it
 does not wrap or require any original PHP, Lambda, MySQL or Python service, and
@@ -21,15 +21,20 @@ later changes to the originals do not flow into it.
 
 These revisions identify where source came from, not the exact bytes of every
 current file; the source lock (`sources.lock.json`) records the current files.
-The Base donor repository is private. The public edition retains its licensed
-local source and the observed revisions above, without a private repository URL
-or a remote comparison baseline. `edition.json` selects those existing local
-files under their original capability identities. The optional parent/origin
-selections and their unused donor snapshots were removed; no retained Base
-implementation or license bytes were changed by this publication cleanup.
-`pnpm run source:check` verifies the locked local source and authoring tool bytes
-offline. Comparing against a future Base revision requires a new authorized
-source selection; these historical revisions do not assert a public donor URL.
+The Base donor repository is private. Its repository identity and immutable
+origin revisions remain in `edition.json`, `sources.lock.json` and
+`base-copies.json`; they identify provenance and do not imply public donor access.
+The edition selects licensed local files under their original capability identities,
+with no parent selection. A qualified freeze retains exactly the selected
+immutable comparison archives and their dependency closure in `.edition/sources/`,
+so source checks and comparisons with those baselines work offline. Unselected
+comparison archives are removed during locking. The current candidate retains
+all seven selected archives, while runtime qualification remains pending as
+recorded below. A future Base update needs a new reviewed immutable pin.
+Edition-owned adaptations remain outside records claiming verbatim equality;
+original licenses and historical donor attribution remain intact.
+`pnpm run source:check` verifies locked local source, selected archives and exact
+authoring tool bytes offline. It does not authenticate the remote donor.
 Frozen evaluation comparator files are historical test inputs.
 
 ## Licensing
@@ -75,5 +80,18 @@ Widget avatar PNGs have their text metadata and C2PA `caBX` content-credential
 chunks removed for publication because those chunks contained contact email
 metadata. Their original compressed image pixels and rendering chunks are
 preserved. The published files no longer carry the original signed C2PA
-credentials or certificate chain. `tests/publication-metadata.mjs` checks the
-original IDAT hashes and rejects email, text and C2PA identity metadata.
+credentials or certificate chain. The avatar pixels are preserved losslessly. Publication qualification scans the actual export; compressed-byte identities are not permanent test pins.
+
+## Maintained Base copies
+
+Current runtime helpers and the portable CLI come from reviewed Base main. The source manifests record exact origins and mappings; `base-copies.json` records byte and mode equality. Base tests stay in Base. Retained comparison archives contain only selected source.
+
+Run `pnpm run source:check` and `node scripts/edition-authoring/cli.mjs verify-base --offline` to check the local selection. To verify acquisition against an authenticated Base checkout, run the same command with `--base` and the checkout path. These commands establish source integrity; product qualification requires the real local journeys and private CI.
+
+The owner’s 8 October decision retains HappyToHelp native password identity, owner bootstrap and magic-link admission. The local adapter declares APP_ORIGIN and native bindings to Base; no SESSION_SECRET or alternate login shortcut is introduced. Setup uses the shared manifest reader; the native password answer remains private. The product retains protected native artwork. The HappyToHelp local command reference is edition-owned so its native-identity archive policy stays accurate.
+
+Base owns signed delivery preparation and bounded attempts. HappyToHelp retries explicit server failures and rate limits; timeout and redirect outcomes remain uncertain. Receivers must deduplicate the logical webhook ID. Ordinary HTTPS fetch is bounded but does not claim DNS pinning.
+
+Local archives retain domain rows, native identities/password hashes and FILES objects. Live sessions, external credentials, verification secrets, delegation grants and local-computer pairing/execution records are excluded. Reconfigure those settings after restore. Archives are private backups and do not carry transient Durable Object connections.
+
+The Zendesk and Intercom readers are edition-owned ports with synthetic format qualification; no real export or live Slack acceptance is asserted. The guide and registry describe that boundary. Source, hosted acceptance and owner publication are separate.

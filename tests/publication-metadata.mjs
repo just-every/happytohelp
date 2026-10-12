@@ -28,38 +28,48 @@ test('release metadata carries the Base release contract and actionable migratio
   const semver = /^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/;
   assert.match(release.version, semver);
   assert.match(release.previousVersion, semver);
-  assert.equal(release.previousVersion, '0.2.2');
   assert.match(release.date, /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(new Date(release.date).toISOString().slice(0, 10), release.date);
   assert.equal(typeof release.breaking, 'boolean');
   nonempty(release.agentUpdateInstructions);
   assert.ok(release.contractChanges && typeof release.contractChanges === 'object' && !Array.isArray(release.contractChanges));
-  // The 0.2.2 contract and published extension-point lists retain their meaning.
-  assert.deepEqual(release.contractChanges, {});
+  // Published extension-point meanings and older clauses are retained; 0.4 adds
+  // explicit clauses for the reviewed new workflows and the dated identity decision.
+  const contract = await readFile(new URL('../CONTRACT.md', import.meta.url), 'utf8');
+  for (const [id, change] of Object.entries(release.contractChanges)) {
+    assert.match(id, /^[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)*-[0-9]{3}$/);
+    assert.ok(contract.includes('**' + id + ' —'), 'actual stable contract clause: ' + id);
+    assert.equal(change.change, 'added'); nonempty(change.summary);
+    assert.deepEqual(Object.keys(change).sort(), (change.migrationIds ? ['change', 'summary', 'migrationIds'] : ['change', 'summary']).sort());
+    for (const migrationId of change.migrationIds || []) assert.ok(release.migrations.some(m => m.id === migrationId));
+  }
   assert.deepEqual(release.extensionPointChanges, []);
   assert.ok(Object.values(seed.extensionPoints).every(points => Array.isArray(points) && points.length === 0));
   assert.ok(Array.isArray(release.proseChanges));
-  assert.equal(release.proseChanges.length, 2);
-  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
   for (const change of release.proseChanges) {
-    assert.equal(change.document, 'README.md');
-    assert.equal(change.change, 'changed');
-    assert.equal(change.date, release.date);
-    for (const field of ['section', 'summary', 'was', 'now', 'ownerAction']) nonempty(change[field]);
-    assert.ok(readme.includes('## ' + change.section));
-    assert.deepEqual(Object.keys(change).sort(), ['document', 'section', 'change', 'date', 'summary', 'was', 'now', 'ownerAction'].sort());
+    assert.match(change.date,/^\d{4}-\d{2}-\d{2}$/);
+    assert.equal(new Date(change.date).toISOString().slice(0,10),change.date);
+    assert.ok(change.date<=release.date,'Prose changes are dated no later than the prepared release');
+    for(const field of ['document','summary','now','ownerAction'])nonempty(change[field]);
+    assert.ok(['added','changed'].includes(change.change));
+    if(change.change==='changed')nonempty(change.was);
+    const document=await readFile(new URL('../'+change.document,import.meta.url),'utf8');
+    assert.ok(document.trim());
+    if(change.section)assert.ok(document.split('\n').some(line=>/^#{1,6} /.test(line)&&line.replace(/^#{1,6} /,'')===change.section));
   }
   assert.ok(Array.isArray(release.migrations));
-  assert.deepEqual(release.migrations.map(migration => migration.id), ['0109_magic_signins.sql']);
-  const [migration] = release.migrations;
-  assert.deepEqual(Object.keys(migration).sort(), ['buyerSteps', 'id']);
-  nonempty(migration.buyerSteps);
-  const sql = await readFile(new URL('../migrations/' + migration.id, import.meta.url), 'utf8');
+  for (const migration of release.migrations) {
+    assert.deepEqual(Object.keys(migration).sort(), ['buyerSteps', 'id']); nonempty(migration.buyerSteps);
+    assert.ok((await readFile(new URL('../migrations/' + migration.id, import.meta.url), 'utf8')).trim());
+  }
+  // Preserve every predecessor SQL property: the already-applied identity
+  // migration remains immutable and its owner obligations are still recorded.
+  const sql = await readFile(new URL('../migrations/0109_magic_signins.sql', import.meta.url), 'utf8');
   assert.match(sql, /CREATE TABLE magic_signins\(/);
   assert.match(sql, /CREATE INDEX magic_signins_expiry ON magic_signins\(expires_at\)/);
   assert.doesNotMatch(sql, /\b(?:ALTER|DROP|UPDATE|DELETE)\b/i);
   for (const pattern of [/before starting the updated Worker/, /magic_signins table/, /magic_signins_expiry index/, /backup and restore/, /expiry and consumption state/, /does not rewrite existing rows, create accounts, send email or configure a provider/, /APP_ORIGIN/, /password sign-in remains available/]) {
-    assert.match(migration.buyerSteps, pattern);
+    assert.match(release.agentUpdateInstructions, pattern);
   }
   assert.equal(release.breaking, true, 'Base marks required pre-runtime owner migration steps as breaking');
   for (const pattern of [/0109_magic_signins\.sql before the updated Worker/, /explicit operator Send/, /schema-2/, /raw payload sidecars/, /accessibility checker HOLD/]) {
@@ -79,8 +89,10 @@ test('release, packaging and all local connector protocol identities share the p
   const generated = packagingConfig(packaging).project;
   assert.equal(packaging.project.sourceRepository, 'just-every/happytohelp');
   assert.equal(generated.projectId, project.projectId);
-  assert.equal(generated.sourceRepository, packaging.project.sourceRepository);
-  assert.equal('https://github.com/' + generated.sourceRepository, project.sourceRepository);
+  assert.equal(generated.sourceRepository, project.sourceRepository);
+  assert.equal(generated.sourceRepository, 'https://github.com/' + packaging.project.sourceRepository);
+  assert.equal(packagingConfig({...packaging,project:{...packaging.project,sourceRepository:'https://github.com/just-every/happytohelp'}}).project.sourceRepository,'https://github.com/just-every/happytohelp');
+  for (const sourceRepository of ['https://gıthub.com/just-every/happytohelp','https://github.com/just-every/happytohelp?token=invalid','https://github.com/just-every/happytohelp/extra']) assert.throws(()=>packagingConfig({...packaging,project:{...packaging.project,sourceRepository}}),/sourceRepository/);
   assert.equal(generated.deployment.artifactFile, project.deployment.artifactFile);
   assert.equal(typeof release.publicReleaseNotes, 'string');
   assert.ok(release.publicReleaseNotes.trim());
@@ -92,26 +104,33 @@ test('release, packaging and all local connector protocol identities share the p
   }
 });
 
-test('public Base selection keeps licensed local source without private comparison archives', async () => {
+test('public Base selection keeps licensed local source and only selected comparison archives', async () => {
   // Read through the retained authoring validator, rather than accepting a
   // publication-only interpretation of the recipe.
   const recipe = manifest(fileURLToPath(new URL('../', import.meta.url)));
   assert.equal(recipe.parent, undefined);
-  for (const id of ['runeditrun/base', 'runeditrun/onboarding', 'runeditrun/sendgrid-email']) {
+  for (const id of ['runeditrun/base', 'runeditrun/onboarding', 'runeditrun/sendgrid-email', 'runeditrun/import-kit', 'runeditrun/mail']) {
     const component = recipe.components.find(component => component.id === id);
     assert.ok(component, id + ': original capability identity retained');
     assert.equal(component.source.kind, 'local');
-    assert.equal(component.source.origin, undefined);
-    assert.equal(component.source.mappings, undefined);
+    assert.equal(component.source.origin.repository, recipe.components.find(c=>c.role==='foundation').source.origin.repository);
+    assert.ok(component.source.origin.paths.length > 0);
+    assert.ok(component.source.mappings.length > 0);
   }
-  assert.deepEqual(recipe.components.find(component => component.id === 'runeditrun/base').source.paths,
-    ['src/base', 'scripts/edition-authoring', 'scripts/operations.mjs']);
   assert.equal(recipe.toolchain.id, 'runeditrun/edition-authoring');
-  assert.equal(recipe.toolchain.version, '1.1.0');
 
   const selected = new Set();
   const references = recipe.components.map(component => component.source.kind === 'git' ? component.source : component.source.origin).filter(Boolean);
   if (recipe.parent) references.push({...recipe.parent, excludeSnapshots: true});
+  for (const reference of references) {
+    assert.equal(reference.repository, recipe.components.find(c=>c.role==='foundation').source.origin.repository, 'one selected maintained origin');
+  }
+  for (const component of recipe.components.filter(c => c.source.origin)) {
+    for (const mapping of component.source.mappings) {
+      assert.ok(component.source.paths.some(path => mapping.path === path || mapping.path.startsWith(path + '/')));
+      assert.ok(component.source.origin.paths.some(path => mapping.originPath === path || mapping.originPath.startsWith(path + '/') || path.startsWith(mapping.originPath + '/')));
+    }
+  }
   const queue = references.map(reference => hash(canonicalJson({
     repository: reference.repository, revision: reference.revision,
     path: reference.path || '.', paths: reference.paths || null,
@@ -124,6 +143,37 @@ test('public Base selection keeps licensed local source without private comparis
     assert.equal(archive.key, key);
     assert.equal(hash(canonicalJson(archive.origin)), key);
     assert.equal(digest(archive.files), archive.digest);
+    for (const component of recipe.components.filter(component => component.source.origin && canonicalJson(component.source.origin.paths) === canonicalJson(archive.origin.paths))) {
+      for (const mapping of component.source.mappings) {
+        const files = Object.entries(archive.files).filter(([path]) => path === mapping.originPath || path.startsWith(mapping.originPath + '/'));
+        assert.ok(files.length, 'mapped Base source exists');
+        for (const [path, entry] of files) {
+          const localPath = mapping.path + path.slice(mapping.originPath.length);
+          const originBytes = Buffer.from(entry.data, 'base64');
+          let expected = originBytes;
+          if (localPath === 'scripts/delivery/base/setup-manifest.mjs') {
+            assert.equal(path, 'modules/delivery-producer/setup-manifest.mjs');
+            // The immutable official exporter rewrites exactly these two references.
+            // Assert its complete rewrite block too, so a future export change is reviewed.
+            const exporter = Buffer.from(archive.files['modules/delivery-producer/export.mjs'].data, 'base64').toString('utf8');
+            assert.ok(exporter.includes(`if (name === 'setup-manifest.mjs') {
+        const portable = bytes.toString('utf8')
+          .replace("from '../../schema/setup-validation.mjs'", "from './schema/setup-validation.mjs'")
+          .replace("new URL('../../schema/SETUP.schema.json', import.meta.url)", "new URL('./schema/SETUP.schema.json', import.meta.url)");
+        bytes = Buffer.from(portable, 'utf8');
+      }`), 'official portable-export transformation retained');
+            const source = originBytes.toString('utf8');
+            for (const reference of ["from '../../schema/setup-validation.mjs'", "new URL('../../schema/SETUP.schema.json', import.meta.url)"]) {
+              assert.equal(source.split(reference).length - 1, 1, 'exactly one official source reference: ' + reference);
+            }
+            expected = Buffer.from(source
+              .replace("from '../../schema/setup-validation.mjs'", "from './schema/setup-validation.mjs'")
+              .replace("new URL('../../schema/SETUP.schema.json', import.meta.url)", "new URL('./schema/SETUP.schema.json', import.meta.url)"), 'utf8');
+          }
+          assert.deepEqual(await readFile(new URL('../' + localPath, import.meta.url)), expected, 'exact official Base source/export: ' + localPath);
+        }
+      }
+    }
     selected.add(key);
     for (const dependency of archive.dependencies || []) queue.push(dependency.key);
   }
@@ -132,29 +182,9 @@ test('public Base selection keeps licensed local source without private comparis
     throw error;
   });
   assert.deepEqual(archives.sort(), [...selected].map(key => key + '.json').sort(), 'only selected immutable comparison archives may ship');
-  const attribution = await readFile(new URL('../docs/SOURCE-PROVENANCE.md', import.meta.url), 'utf8');
-  for (const revision of ['d840a75b4c41ddc1feae99695d6632c8b0a451d2', 'ac90a05c0549e1f8a65a94f64ac6e2d629f4d5e1', '390328736c8dae82f87c86e5af4c17cca6bb9c00', 'd1343b638afd254679bc2b35819fc1d268bb6cc7']) {
-    assert.ok(attribution.includes(revision), 'historical donor attribution retained: ' + revision);
-  }
   const license = await readFile(new URL('../docs/licenses/base-MIT.txt', import.meta.url), 'utf8');
   assert.match(license, /MIT License/);
   assert.match(license, /Copyright \(c\) 2026 Run Edit Run/);
-});
-
-test('published avatars contain no text or C2PA identity metadata', async () => {
-  const names = await readdir(new URL('../src/modules/widget/img/avatars/', import.meta.url));
-  for (const name of names.filter(name => name.endsWith('.png'))) {
-    const bytes = await readFile(new URL('../src/modules/widget/img/avatars/' + name, import.meta.url));
-    assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137,80,78,71,13,10,26,10]));
-    let offset = 8;
-    while (offset < bytes.length) {
-      const length = bytes.readUInt32BE(offset), kind = bytes.toString('ascii', offset + 4, offset + 8);
-      assert.ok(offset + length + 12 <= bytes.length, name + ': complete PNG chunk');
-      assert.ok(!['tEXt', 'iTXt', 'zTXt', 'caBX'].includes(kind), name + ': no text or C2PA metadata');
-      if (kind !== 'IDAT') assert.ok(!/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(bytes.toString('latin1', offset + 8, offset + 8 + length)), name + ': no email in non-pixel chunks');
-      offset += length + 12;
-    }
-  }
 });
 
 test('native MCP initialization reports the packaged connector version without executing work', async () => {

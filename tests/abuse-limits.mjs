@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto'
 import {awaitWindowRoom} from './helpers/window-room.mjs'
 const require=createRequire(import.meta.url),{build}=require(require.resolve('esbuild',{paths:[require.resolve('wrangler')]})),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
 
-const migrations=['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0006_registration.sql','0007_conversation_history.sql','0008_account_sessions.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0097_owner_setup.sql','0102_public_abuse_limits.sql','020_ai_support.sql','0085_ai_context_guards.sql']
+const migrations=['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0006_registration.sql','0007_conversation_history.sql','0008_account_sessions.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0097_owner_setup.sql','0102_public_abuse_limits.sql','020_ai_support.sql','0085_ai_context_guards.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql']
 const sha=value=>createHash('sha256').update(value).digest('hex')
 const bundle=build({entryPoints:['tests/abuse-limits-worker.ts'],bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})
 

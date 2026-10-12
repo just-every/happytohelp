@@ -31,6 +31,7 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
  else{const names=Object.keys(row);statements.push(env.DB.prepare(`INSERT INTO ${sqlName(mapped.table)} (${names.map(sqlName).join(',')}) VALUES(${names.map(()=>'?').join(',')})`).bind(...names.map(k=>row[k])))}
  if(mapped.hold)statements.push(env.DB.prepare('INSERT OR IGNORE INTO legacy_import_holds VALUES(?,?,?,?,?,NULL)').bind(`${plan.id}:${source.table}:${source.sourceId}`,plan.id,source.table,source.sourceId,mapped.hold))
  }
+ if(source.table==='conversations'&&source.mapped.some(m=>m.table==='conversations')){const mapped=source.mapped.find(m=>m.table==='conversations')!;statements.push(env.DB.prepare('INSERT OR IGNORE INTO reporting_legacy_conversations(project_id,conversation_id,run_id) VALUES(?,?,?)').bind(mapped.row.project_id,mapped.row.id,plan.id))}
  statements.push(env.DB.prepare('INSERT INTO legacy_import_rows VALUES(?,?,?,?,?,?,?,?)').bind(plan.id,source.table,source.sourceId,source.rowDigest,stable(source.row),source.mapped.map(m=>m.table).join(',')||null,source.mapped.map(m=>m.key.map(k=>m.row[k]).join(':')).join(',')||null,source.mapped.length?'mapped':'archived_only'))
  await env.DB.batch(statements);applied++
  }

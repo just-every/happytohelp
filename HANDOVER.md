@@ -1,207 +1,103 @@
 # Maintainer handover
 
-This is the orientation for someone taking over HappyToHelp maintenance. Start
-with [README.md](README.md) to install and run it, then read this page.
+Start with [AGENTS.md](AGENTS.md#run-it-locally): use `node scripts/rer.mjs`
+for install, setup with private manifest answers/owner email, foreground dev,
+outbox sign-in and verification. [Operations](OPERATIONS.md) documents reset,
+private archives, restore and owner-account deployment. Inspect actual commands
+with `describe --json`; `check --profile first-party` works before installation.
 
 ## Product and current scope
 
-HappyToHelp 0.3.0 is the native TypeScript edition of the original customer
-support application. It preserves the React dashboard, Shadow DOM widget, AI
-assistance, knowledge ingestion, customer context and local-computer delegation
-on a Cloudflare Worker. Pricing, billing, waitlist and referrer features are
-outside this edition. [CONTRACT.md](CONTRACT.md) defines required behavior and
-[ACCEPTANCE.md](ACCEPTANCE.md) defines the evidence needed to qualify it.
-
-The current schema has 109 tables and 42 migrations. Version 0.2.1 has 97 tables
-and 37 migrations. Keep each revision’s inventory separate when testing upgrades.
-Applied migration names and bytes are part of the data contract: never rewrite
-them.
-
-## Version 0.3.0 changes
-
-Version 0.3.0 includes:
-
-- Shared logo, accent, greeting and support avatar are saved through the existing
-  Appearance settings and rendered in widget, settings preview and public Help Center.
-  Help Center navigation retains server-rendered routes while showing loading,
-  network error and offline states with explicit recovery. Widget recovery keeps
-  its durable conversation identity.
-- Email sign-in uses the configured native mail adapter, a 15-minute hashed,
-  atomic single-use capability, an explicit Sign in POST and the existing native
-  session/return destination policy. Link-scanner GETs cannot consume the fragment
-  token. Account discovery and provider work run after the neutral response;
-  uncertain mail is recorded and never replayed automatically. Migration 0109 adds
-  only `magic_signins` and its expiry index: 109 tables, 42 migrations.
-- `pnpm run build` calls Base delivery-producer exported at
-  `d6a1bd83ee80ec3d603ded2c067d4c504d8a2bf5`. Product policy lives in
-  `scripts/delivery/base/packaging.json`; the runtime export is unchanged.
-  Schema 2 retains raw payloads with verified hashes/sizes. The superseded product
-  producer is removed; its test-only oracle preserves historical assertions.
-- `test:hero-connector-browser` pairs and runs the actual local connector child,
-  publishes an existing native support guide from 404 to 200, uses its proposed
-  reply, presses Send and checks the visitor socket/reload identity at both widths.
-  Only the Codex app-server boundary is a fixture. `resolve` never sends itself.
-  Existing resolve-and-reply authority/revocation/frontier suites remain required.
-
-
-The common verification command covers the local application. Upgrade,
-independent recovery, browser and configured-provider checks are separate.
-The upgrade comparison preserves original-column row bytes and permits only
-the explicitly asserted secret and citation backfills. The independent recovery
-check requires the exact revision-specific table inventory and native D1/R2 export/restore.
-Any failed gate stays failed; a source version or lock is not acceptance.
-
-## Acceptance limits and outstanding work
-
-The timed activation recording is still missing. Recorder preparation and local
-fixture tests do not establish a timed installation or live-provider acceptance.
-Use [tests/live/RECORDING.md](tests/live/RECORDING.md) for the real-run recorder and
-[tests/live/README.md](tests/live/README.md) for configured cited-answer evidence.
-
-Accessibility remains **FAIL / confirmed owner HOLD**. A historical bounded run
-passed 21 states with zero Axe violations, but independent 23-case oracles
-reproduced four false accepts: pseudo/ancestor-opacity text reported 8.475:1 or
-12.63:1 while screenshot contrast was at most 2.27:1. A widget audit reported
-4.36:1 while settled glyphs measured 6.324:1; the exact earlier animation frame
-is inferred because the capture omitted opacity. Eighteen review nodes and all
-covered or unsupported pixels remain LIMITED. No complete WCAG conformance is
-claimed. The decision remains to hold the checker and record the limitation;
-no further checker correction is authorized by these maintenance instructions.
-[The accessibility audit](docs/ACCESSIBILITY-AUDIT-2026-09-30.md) preserves the
-findings and reproducible checks.
-
-Portable storage fidelity remains unaccepted: a separate, unintegrated approach
-restored a resizable ArrayBuffer as fixed length 4 instead of retaining maximum
-length 12 and length tracking. Further correction is pending; default HOLD.
-Durable Object portable storage is not included in the native D1/R2 recovery
-contract. These obligations must not be inferred complete from local tests.
-
-Hosted operating costs and actual paid model execution remain unmeasured.
-The synthetic local usage fixture preserves missing D1 metadata and unknown
-billing rather than estimating them as zero. See
-[the usage guide](docs/usage/README.md). Historical qualification records are
-kept in maintainer custody outside the product source. Fresh qualification must
-identify its exact revision, artifact digest, commands and unresolved limits.
-Publishing source does not establish deployment, production-import, configured
-provider or full accessibility acceptance.
+HappyToHelp is the native TypeScript support workspace: React dashboard,
+Shadow DOM widget, AI assistance, knowledge, customer context, local-computer
+delegation, reviewed imports, resolution feedback, Reports and integrations.
+Pricing, billing, waitlist and referrer features are outside this edition.
+[CONTRACT.md](CONTRACT.md) defines requirements and [ACCEPTANCE.md](ACCEPTANCE.md)
+defines the evidence each needs. The private release line is untagged source;
+public publication and owner release approval remain separate.
 
 ## Architecture
 
-| Layer | Implementation |
-| --- | --- |
-| Pages | TanStack Start/React (`src/routes`, `src/ui`). `/` is the “Customer Support, Solved.” homepage (`src/ui/homepage`: one component per section, drawings in `drawings/`, scoped `homepage.css` and `drawings.css`); `/docs`: repository Markdown rendered at build time (`src/ui/docs`, `docs/site.json`); the authenticated workspace is one pathless dashboard layout (see [docs/NAVIGATION.md](docs/NAVIGATION.md)). |
-| API | Hono (`src/app.ts`, mounted by `src/server.ts`), with identity, project and role checks in `src/platform`. |
-| Records | D1 (`DB`). Schema lives in `migrations/` plus module migrations; `pnpm run migrations:prepare` collects them into `.generated/migrations`. |
-| Files | R2 (`FILES`) for attachments, media and knowledge artifacts. |
-| Background work | Queues (`JOBS`, dead letter `JOBS_DEAD_LETTER`) consumed in `src/jobs.ts`; a minute cron recovers persisted work. |
-| Live delivery | The `ConversationSocket` Durable Object. Transcripts and the replay outbox live in D1, so sockets can always be reauthorized and replayed. |
-| Customer widget | `src/modules/widget`, built to `public/widget.js` by `pnpm run build:widget`. |
-| Local agent | `local-agent/`, packaged to `public/downloads/happytohelp-local-agent.tar.gz`; pairs a computer that runs delegated work. |
-| Installer | `scripts/install.mjs` with shared onboarding in `scripts/base-onboarding/` and HappyToHelp adapters in `scripts/installer/`. |
-| Deployment | `scripts/setup.mjs`, `scripts/deploy.mjs` and `scripts/deployment/`; hosted delivery artifacts via `scripts/delivery/build.mjs`. |
+- `scripts/rer.mjs` dispatches the byte-exact self-contained Base CLI export.
+- `scripts/installer/local.mjs` declares native lifecycle/dev/preview/verify,
+  owner-account deploy and portability hooks; `native-local.mjs` retains native
+  bootstrap and ordinary sign-in. `rer-setup.json` owns setup fields, and
+  `scripts/installer/ui/seed.mjs` owns presentation.
+- Base onboarding owns private custody, locks, process cleanup, readiness and
+  bounded work. Internal `build:app`, `build:assets`, `verify:app` are real adapter
+  targets. Build collects immutable migrations, assets and delivery output.
+- `src/modules` owns reusable capabilities; native Worker/platform adapters
+  integrate through imports. Runtime environment policy remains in
+  `scripts/deployment/environment.mjs`, including management integration.
+- `deploy.json` declares actual owner-account resources/private secret inputs.
+  Local durable data stays in `.wrangler/state`; generated settings and archives
+  never belong in source. `docs/site.json` selects Markdown for `/docs`.
 
-## Where things live
+## Recorded owner decisions
 
-- `src/modules/*`: capabilities with their own `module.json` and README
-  (conversations, widget, ai-support, knowledge, customer-context,
-  local-computer, training-runs, plugin-sdk, site-preview, identity,
-  management, integrations, public-site, legacy-import, sendgrid-email).
-  [docs/MODULES.md](docs/MODULES.md) describes the reusable ones.
-- `src/edition`: HappyToHelp-specific wiring between modules.
-- `src/base` and `scripts/edition-authoring`: runtime foundation and source
-  authoring tools retained from Run Edit Run Base (see [docs/AUTHORING.md](docs/AUTHORING.md)).
-- `management/`: integration profile for Run Edit Run's hosted Assisted and
-  Managed service.
-- `tests/`: runtime, module and browser suites. `scripts/verify-modules.mjs`
-  lists the module suites that `pnpm run verify` runs.
-- `docs/`: operator and developer documentation; `docs/licenses/` holds
-  third-party notices. [docs/PRIVACY.md](docs/PRIVACY.md) is the operator-facing
-  privacy note and [docs/PUBLIC-LIMITS.md](docs/PUBLIC-LIMITS.md) the public
-  request limits and daily AI ceilings. The pages listed in `docs/site.json` are
-  published on the site at `/docs`; the rest stay on GitHub.
+Native password identity, first-owner experience and prior account/workspace
+state are retained (8 October). Native WebP workspace artwork and protected
+asset handling remain product capabilities. Manifest answers use the maintained
+Base model; copied Base sources stay byte-exact and are never locally patched.
 
-## How to verify a change
+Repeat and undo compare exact business state, including contacts, conversations,
+messages, private notes, tags, source links and every other imported business
+table (9 October). Only platform counters/sequences, audit and import journals
+are excluded. The contact-key `email_digest` is derived memoization: project/
+contact links and native email remain exact, and populated digests are validated.
+Synthetic 1,000-conversation Zendesk and Intercom datasets qualify local capacity.
 
-Use the declared package commands for the exact source revision under review. The aggregate `pnpm run verify` does not include the separate `pnpm run test:independent-runtime` recovery assertion.
+Connections use ordinary platform HTTPS fetch through the unchanged Base wire
+interface (9 October scoped override). Redirects are refused; timeout, request
+and streamed-response bounds remain enforced. This edition does not claim DNS
+pinning. Uncertain external outcomes never trigger automatic replay. Preserve
+the current contract's outcome/retry policy and tenant/erasure fences.
 
-The package currently declares these browser suites:
+The approved homepage retains its aqua/ink illustrations, self-hosted Outfit,
+hand-drawn wordmark, actual links and reduced-motion behavior. Its ordered
+content and drawings are specified by PUBLIC-001; no price/hosting/provider plug,
+compliance claim or unsupported import promise belongs there. Native docs use
+the same visual language and current Markdown, with one page heading.
 
-- `pnpm run test:widget-browser`
-- `pnpm run test:widget-settings-browser`
-- `pnpm run test:ui-browser`
-- `pnpm run test:accessibility-browser`
-- `pnpm run test:navigation-browser`
-- `pnpm run test:workspace-shell-browser`
-- `pnpm run test:public-help-center-browser`
-- `pnpm run test:not-found-browser`
-- `pnpm run test:setup-browser`
-- `pnpm run test:identity-browser`
-- `pnpm run test:demo-inbox-browser`
-- `pnpm run test:mobile-inbox-browser`
-- `pnpm run test:conversation-panel-resize-browser`
-- `pnpm run test:inbox-conversation-browser`
-- `pnpm run test:widget-lifecycle-browser`
-- `pnpm run test:contact-erasure-browser`
-- `pnpm run test:management-library-browser`
-- `pnpm run test:delegation-scoped-browser`
-- `pnpm run test:delegation-browser`
-- `pnpm run test:computers-delegation-browser`
-- `pnpm run test:activation-browser`
-- `pnpm run test:activation-spend-browser`
+## Acceptance boundaries
 
-Install Chromium once with `pnpm exec playwright install chromium`. Each browser command starts its own isolated local Worker. Local tests use provider fixtures only; they do not prove a live provider or deployment.
+Local command/native/browser/fixture results belong to the exact revision
+executed. They do not establish hosted installation, configured provider
+execution, public release, live Slack or compliance qualification. Jurisdiction,
+external-service inventory and FedRAMP acceptance remain unproved.
 
-Other separate focused commands include `pnpm run test:independent-runtime`, `pnpm run test:delegation-authority-runtime`, `pnpm run test:delegation` and `pnpm run test:usage`. These do not expand the `verify` script. The accessibility command is bounded to its declared browser states; the final checker limitations remain on confirmed owner HOLD. `test:usage` prepares generated migrations before running the two existing usage tests.
+Accessibility is **FAIL / confirmed owner HOLD**. The checker falsely accepted
+four contrast cases; timing/background reliability and unsupported pixels remain
+limited. No further checker correction is authorized here. Keep
+[the accessibility audit](docs/ACCESSIBILITY-AUDIT-2026-09-30.md) and report no
+complete WCAG conformance.
 
-The `pnpm run verify` script runs operations describe, build, typecheck, module suites, emitted-Worker runtime and security-header checks, the first-release journey (`pnpm run test:journey`), source integrity, independent-contract and homepage-source checks. The browser suites start isolated emitted Workers with local D1, R2 and Durable Objects and write evidence to a temporary directory or `H2H_EVIDENCE_DIR`. The resize suite accepts `H2H_RUNTIME_PORT` and `H2H_RUNTIME_INSPECTOR_PORT`; contact-erasure and identity suites accept `H2H_TEST_PORT`. Identity also starts its sign-up-and-email Worker two ports above; it never sends mail.
+Timed activation recording remains missing; recorder preparation is not a timed
+installation. See [recording instructions](tests/live/RECORDING.md) and
+[configured cited-answer proof](tests/live/README.md). Hosted operating costs
+and paid model execution remain unmeasured; unknown billing is never zero.
 
-Homepage browser/runtime checks are separate from the package `test:*-browser` scripts. Against a local native preview, run `H2H_TEST_ORIGIN=http://127.0.0.1:5186 node tests/homepage-browser.mjs` and `node tests/public-site-runtime.mjs` with the same origin after `pnpm run setup -- --local` and `pnpm exec vite preview --host 127.0.0.1 --port 5186`. `pnpm run dev` also needs local setup first: an unknown one-segment path such as `/does-not-exist` looks up a project name, so on an unmigrated local D1 it answers 500 (`no such table: projects`) instead of the branded 404. `H2H_TEST_ORIGIN=<dev origin> node tests/dev-smoke.mjs` checks `/`, `/login` and `/does-not-exist` (200, 200, 404). `node tests/independent-browser.mjs` checks homepage and setup against the delivery artifact after `pnpm run build`. Provider tests use fixtures at the real SDK/HTTP boundary and never call a paid provider.
+Full portable-storage fidelity remains held. D1/R2 archives omit Durable Object
+storage, and the resizable ArrayBuffer/length-tracking preservation obligation
+remains unresolved. No local archive result waives that hold.
 
-Continuous integration's `.github/workflows/verify.yml` runs on pushes to `main` and pull requests with the declared Node and pnpm versions: a frozen install, `pnpm run verify`, the browser suites above and homepage/public-site checks against a local native preview. It needs no secrets. The delivery workflow (`.github/workflows/delivery.yml`) also runs the reproducible-build check and builds the delivery artifact.
+## Maintenance and prior-data custody
 
-After tracked source changes, regenerate the source lock with `pnpm run source:lock` and confirm `pnpm run source:check` passes (see [docs/AUTHORING.md](docs/AUTHORING.md)).
+Keep applied migration names/bytes immutable and follow RELEASE.json's additive
+order and backup obligations. Restore D1/R2, import originals/journals, privacy
+fences, provenance, rating cycles and encrypted configuration together. Never
+reset an installation to upgrade it; validate restoration before switching traffic.
+Native owners survive rer setup/import; active sessions, one-use links and
+external execution credentials require explicit reconfiguration.
 
-## Conventions that matter
+Run touched tests plus typecheck, full verification/browser suites on the remote
+runner, and push-triggered CI on the exact merged release head. Refresh locks
+through `pnpm run source:lock`; check copies offline with the official tool, and
+prove actual origin separately for a Base refresh. A lock or source version is
+not acceptance. Preserve concurrent branch work through normal fetch/merge;
+no force push, deployment or public release follows from a documentation change.
 
-- Missing provider configuration returns an explicit unavailable result. Do not
-  add mock data, silent fallbacks or pretend provider success to application code;
-  fixtures belong in tests.
-- Uncertain outcomes of paid or remote work (AI generations, email sends,
-  provider imports) stay uncertain and are never replayed automatically.
-- Persist before broadcasting. Final replies are admitted atomically so two
-  writers cannot both finalize a conversation turn.
-- Every private read or write re-checks the current user, project and role.
-- Never edit an applied migration; add a new numbered one.
-- Keep files split by responsibility and remove replaced code instead of
-  disabling it.
-
-## Repository identity and releases
-
-The canonical public repository URL is declared once, in `package.json`
-`repository.url`. The homepage links derive from it; `tests/repository-identity.mjs`
-checks that `seed.json`, `README.md`, `SECURITY.md` and the one runtime default
-that cannot import it (the OpenRouter referer header) carry the same URL, that the
-widget's context carries no repository URL, and that `rer-project.json` and
-`management/integration/{profile,recipe}.json` carry its GitHub owner and repository name. Other
-tests read the value from `package.json`. To rename the repository, change
-`package.json`, substitute the old URL and GitHub repository identity in the files that test
-names, and run `pnpm run verify`.
-
-The release version is `package.json` `version`, mirrored in `seed.json`; record
-each release in [CHANGELOG.md](CHANGELOG.md). Report vulnerabilities as described
-in [SECURITY.md](SECURITY.md).
-
-## Known gaps
-
-- Accessibility is targeted at WCAG 2.2 AA. The bounded 21-state audit is not a
-  complete conformance review; the retained checker verdict is FAIL and the owner
-  HOLD remains because of checker false accepts and timing/background reliability.
-  Hosted operating costs remain
-  unmeasured; local scenarios preserve unknown usage and billing totals
-  (`seed.json` and the usage guide).
-- Some legacy dashboard features are not yet native; see
-  [docs/UI-PARITY.md](docs/UI-PARITY.md).
-- The separate portability candidate still has a resizable-`ArrayBuffer`
-  fidelity failure and is not integrated or accepted. Durable
-  Object storage is not part of a portable export; recovery relies on D1 and R2
-  ([docs/INDEPENDENT-RELEASE.md](docs/INDEPENDENT-RELEASE.md)).
+[Workspace workflows](docs/WORKSPACE-WORKFLOWS.md), [Move in](docs/moving-in.md),
+[Reports](docs/reports.md) and [API](docs/api.md) retain feature limits and explicit
+owner actions. [Authoring](docs/AUTHORING.md) and [Modules](docs/MODULES.md)
+map selected source and capability ownership.

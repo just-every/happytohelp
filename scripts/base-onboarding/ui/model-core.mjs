@@ -4,6 +4,8 @@ const safeKeys = seed.safeKeys || Object.keys(fields).filter(key => fields[key].
 const product = seed.product;
 const branding = seed.branding || product;
 const features = seed.features || {};
+// Browser editions opt specific safe values into the collapsed answer summary.
+const summaryDefaults = [...new Set((Array.isArray(seed.summaryDefaults) ? seed.summaryDefaults : []).filter(key => safeKeys.includes(key) && fields[key]?.type !== 'password'))];
 function normalizeWebsite(value) {
   const text = typeof value === 'string' ? value.trim() : '';
   if (!text) return '';
@@ -12,23 +14,19 @@ function normalizeWebsite(value) {
 }
 function safeDraft(draft) { return Object.fromEntries(safeKeys.filter(key => typeof draft[key] === 'string').map(key => [key, draft[key]])); }
 function initialDraft(state) {
-  const draft = { ...safeDraft(seed.initialValues?.(state) || {}), ...safeDraft(state.draft || {}) }, sending = state.known?.email || {};
-  if (features.email && !draft.emailProvider && sending.configuration === 'configured') draft.emailProvider = sending.provider;
-  if (features.email && !draft.emailFrom) draft.emailFrom = sending.from || '';
-  if (features.email && !draft.emailAccountId) draft.emailAccountId = sending.accountId || '';
+  const draft = { ...safeDraft(seed.initialValues?.(state) || {}), ...safeDraft(state.draft || {}) };
   const accounts = state.known?.providers?.cloudflare?.accounts || [];
   if (features.hosting && !draft.accountId && accounts.length === 1) draft.accountId = accounts[0].id;
+  // This explicit edition feature makes the local/no-email starting choices reviewable in setup.
+  if (features.localTrialWithoutEmail === true) {
+    if (features.hosting && !draft.target && fields.target?.valid?.('local')) draft.target = 'local';
+  }
   return normalizeAutomaticDraft(draft);
 }
 function secretReady(key, draft, known = {}) {
   const readiness = known.secretReadiness || {};
   if (readiness.scopes?.[key]) return readiness[key] === true && Object.entries(readiness.scopes[key]).every(([field,value]) => draft[field] === value);
-  const binding = (seed.secretScopes || { password: ['ownerEmail', 'email'], apiToken: ['accountId', 'accountId'], emailApiKey: ['emailProvider', 'emailProvider'] })[key];
-  if (!binding) return readiness[key] === true;
-  return readiness[key] === true && (!Object.hasOwn(readiness, binding[0]) || readiness[binding[0]] === draft[binding[1]]) && (key !== 'emailApiKey' || draft.emailProvider !== 'cloudflare' || !Object.hasOwn(readiness, 'emailAccountId') || readiness.emailAccountId === draft.emailAccountId);
-}
-function configuredEmailReady(draft, known = {}) {
-  return Boolean(known.email?.credentialPresent && known.email.provider === draft.emailProvider && (draft.emailProvider !== 'cloudflare' || known.email.accountId === draft.emailAccountId));
+  return readiness[key] === true;
 }
 const hostingKeys = ['target', 'accountId', 'prefix', 'appOrigin', 'apiToken'];
 function hostingModel(draft, known = {}) {
@@ -44,24 +42,42 @@ function setupModel(draft, known = {}) {
     keys.push('accountId', 'prefix', 'appOrigin');
     if (!known.providers?.cloudflare?.authenticated && !fields.apiToken.valid(draft.apiToken) && !secretReady('apiToken', draft, known)) connections.push('cloudflare');
   }
-  if (features.email) keys.push('emailProvider');
-  if (features.email && ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider)) {
-    keys.push('emailFrom');
-    if (draft.emailProvider === 'cloudflare') keys.push('emailAccountId');
-    if (!configuredEmailReady(draft, known) && !secretReady('emailApiKey', draft, known)) keys.push('emailApiKey');
-  }
   const missing = keys.filter(key => !fields[key].valid(draft[key]) && !(fields[key].type === 'password' && secretReady(key, draft, known)));
   const complete = keys.filter(key => fields[key].valid(draft[key]) || (fields[key].type === 'password' && secretReady(key, draft, known)));
   return { missing, complete, connections, remaining: missing.length + connections.length, ready: !missing.length && !connections.length };
 }
 function installInput(draft) {
   if (seed.installInput) return seed.installInput(draft);
-  if (!features.email) return { ...safeDraft(draft), ...Object.fromEntries(Object.keys(fields).filter(key => fields[key].type === 'password' && draft[key]).map(key => [key, draft[key]])) };
-  const data = safeDraft(draft);
-  for (const key of ['emailProvider', 'emailFrom', 'emailAccountId']) delete data[key];
-  return { ...data, password: draft.password || undefined, apiToken: draft.apiToken || undefined, emailConfiguration: { provider: draft.emailProvider, from: draft.emailFrom, accountId: draft.emailAccountId, apiKey: draft.emailApiKey || undefined } };
+  return { ...safeDraft(draft), ...Object.fromEntries(Object.keys(fields).filter(key => fields[key].type === 'password' && draft[key]).map(key => [key, draft[key]])) };
 }
 function displayValue(key, value) { return fields[key]?.options?.find(([option]) => option === value)?.[1] || value; }
+function summaryKeys(draft, state = {}) {
+  const answered = new Set(Array.isArray(state.answered) ? state.answered : []), sources = state.sources || {};
+  return safeKeys.filter(key => {
+    const field = fields[key], value = draft[key], source = sources[key];
+    if (typeof value !== 'string' || !value.trim() || field?.type === 'password' || typeof field?.valid !== 'function' || !field.valid(value)) return false;
+    return answered.has(key) || ['agent', 'browser', 'saved'].includes(source) || summaryDefaults.includes(key);
+  });
+}
+
+function failureDetails(state = {}) {
+  const error = typeof state.error === 'string' ? state.error : '';
+  // Commands append their private log path after the captured output. A child
+  // can print its own Log: lines, so only the final, anchored line is metadata.
+  const diagnostic = error.match(/\nLast output \(up to 40 lines\):\n([\s\S]*)\nLog: ([^\r\n]+)$/);
+  const commandOutput = diagnostic?.[1] || '';
+  return {
+    step: typeof state.step === 'string' && state.step ? state.step : 'the last installation step',
+    output: commandOutput === '(no output)' ? '' : commandOutput,
+    logPath: diagnostic?.[2] || '',
+  };
+}
+function failureNote(failure) {
+  const note = failure.output
+    ? `Output from ${failure.step} is shown above.`
+    : `Installation stopped during ${failure.step}. Review the installation activity above.`;
+  return note + (failure.logPath ? ` Installer log: ${failure.logPath}` : '');
+}
 
 function mergeAgentDraft(draft, state, appliedRevision = 0, pendingKeys = []) {
   const update = state.lastUpdate;
@@ -84,25 +100,14 @@ function normalizeAutomaticDraft(value) {
   if (!features.hosting) return draft;
   draft.prefixMode ||= draft.prefix ? 'custom' : 'automatic';
   draft.addressMode ||= draft.appOrigin ? 'custom' : 'automatic';
-  if (draft.prefixMode === 'automatic') draft.prefix = derivePrefix(draft.name);
+  if (draft.prefixMode === 'automatic') draft.prefix = derivePrefix(draft[seed.nameKey]);
   return draft;
 }
-function emailModel(draft, known = {}) {
-  if (!features.email) return { keys: [], complete: true };
-  const keys = ['emailProvider'];
-  if (features.email && ['cloudflare', 'resend', 'sendgrid'].includes(draft.emailProvider)) {
-    keys.push('emailFrom');
-    if (draft.emailProvider === 'cloudflare') keys.push('emailAccountId');
-    if (!configuredEmailReady(draft, known) && !secretReady('emailApiKey', draft, known)) keys.push('emailApiKey');
-  }
-  return { keys, complete: keys.every(key => fields[key].valid(draft[key])) };
-}
-
 // Navigation is deliberately separate from readiness: only the user advances a step.
 const setupGroups = seed.setupGroups.map(group => ({ ...group, complete: group.complete || (group.kind === 'hosting'
- ? ((draft, known) => (!features.hosting || hostingModel(draft, known).complete) && (!features.email || emailModel(draft, known).complete))
+ ? ((draft, known) => (!features.hosting || hostingModel(draft, known).complete))
  : ((draft, known) => !setupModel(draft, known).missing.some(key => group.keys.includes(key)))) }));
-function readySummary(draft) { return seed.readySummary?.(draft) || `${draft.name || product.name} is ready to be installed.`; }
+function readySummary(draft) { return seed.readySummary?.(draft) || `${draft[seed.nameKey] || product.name} is ready to be installed.`; }
 function nextIncompleteGroup(draft, known = {}) {
   return setupGroups.find(group => !group.complete(draft, known))?.id || null;
 }
@@ -118,5 +123,5 @@ function setupProgress(draft, known = {}, { active = null, visited = [], editing
   return `Step ${reached.indexOf(active) + 1} of ${reached.length + remaining.length}`;
 }
 
-return { fields, safeKeys, product, branding, features, normalizeWebsite, safeDraft, initialDraft, secretReady, configuredEmailReady, hostingKeys, hostingModel, setupModel, installInput, displayValue, mergeAgentDraft, derivePrefix, normalizeAutomaticDraft, emailModel, setupGroups, readySummary, nextIncompleteGroup, setupProgress };
+return { fields, safeKeys, product, branding, features, summaryDefaults, normalizeWebsite, safeDraft, initialDraft, secretReady, hostingKeys, hostingModel, setupModel, installInput, displayValue, summaryKeys, failureDetails, failureNote, mergeAgentDraft, derivePrefix, normalizeAutomaticDraft, setupGroups, readySummary, nextIncompleteGroup, setupProgress };
 }

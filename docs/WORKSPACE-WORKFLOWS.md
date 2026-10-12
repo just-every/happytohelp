@@ -1,0 +1,106 @@
+# Working in your workspace
+
+## Bring existing history
+
+An owner or admin opens **Settings → Move in existing support history** or the
+optional checklist link. Upload documented source files for conversations,
+contacts, conversation tags, saved replies and articles. Review the plan counts,
+source-located omissions/rejections, native conflicts and articles that will be
+published before **Approve and import**. Background batches preserve committed
+progress. Resolve a reported issue and choose **Resume import**, then inspect the
+report and its record links. Current owner/admin session and membership are
+rechecked for each batch. Other workspaces and reviewers cannot inspect private
+original files, plans or reports.
+
+Exact repeat imports report already imported decisions; changed source or native
+records cause review conflicts. **Undo whole import** reverses unchanged created
+records in reverse dependency order; later native edits or references are retained
+as conflicts. Source files and provenance remain in private custody. The 9 October owner ruling requires exact business-state repeat/undo equality,
+including private notes and source links. Platform counters/sequences, audit and
+import journals are excluded. Only the derived contact-key email digest may be
+memoized; native email and project/contact links remain exact and validated.
+
+Imports retain source IDs and timestamps, public messages/private notes, and draft or
+published article state. They create no trusted staff access or automation consent
+and send no mail, widget, model, assignment or connection effects. Imports are
+excluded from Reports. Conversation **Tags** lets you add/remove unique workspace
+tags; inbox rows show them and the tag filter stays in the current workspace.
+See [moving in](moving-in.md) for file limits, format supplements, erasure and
+conflict/resume details. Evidence is documented-format and synthetic-only;
+**realExport: not-supplied**.
+
+## Resolve, collect feedback and reopen
+
+Resolve a conversation through the normal operator controls. The owning visitor
+session sees **Did this answer your question?**, thumbs up/down and an optional
+comment of at most 1,000 characters. One latest rating belongs to each resolution;
+changing it appends history. The widget action rate limit applies. Another visitor
+session cannot submit feedback.
+Operators can inspect prior resolution feedback after reopening. Contact erasure
+removes comments.
+
+Stored native provenance determines outcomes: **AI** needs complete visible AI
+answer history with no person handoff; **assisted** records a confirmed operator
+reply drafted by AI or a paired local agent; **human** records confirmed authored
+operator replies; missing or API-automation provenance is **unknown**. These labels
+come from write-time records, without a classification model request. A new visitor
+message reopens the cycle; resolving again records a separate outcome and rating
+eligibility. Reopened conversations leave current closed-cycle rate denominators.
+
+## Read Reports
+
+Reports uses the workspace's IANA timezone (UTC by default). Select 7, 30 or 90
+days, or custom dates spanning 1–366 days; the start is inclusive and end exclusive.
+The cohort is native conversations created within that workspace-calendar range.
+Move in and legacy imports are explicitly excluded. Reports displays volume,
+median and nearest-rank p90 from the first visitor message to first visible reply,
+and creation to first known resolution, with sample counts for missing evidence.
+Historical uncertain durations remain absent rather than zero.
+
+AI resolution rate is AI outcomes divided by currently resolved conversations.
+Customer satisfaction (CSAT) is thumbs up divided by rated closed resolutions,
+with the rated count shown. Each conversation contributes its latest closed cycle
+once; unknown outcomes do not become AI. The daily series uses creation dates in
+the selected timezone. The latest ten comments link to their conversations.
+
+Download conversation CSV for IDs, UTC creation/reply/resolution times, durations,
+status, outcome, rating and comment; summary CSV contains aggregates and daily
+series. Formula-leading `=`, `+`, `-`, `@` cells are neutralized. Export scope
+matches the selected cohort and excludes imports. Reading Reports calls no model.
+
+## Connect tools
+
+A workspace owner/admin creates a named token in **Settings → API tokens**, with
+only the needed scopes: `conversations:read`, `conversations:write`,
+`messages:write`, `contacts:read`, `contacts:write`, `articles:read`,
+`articles:write`. Copy the secret once; only its hash is stored. Optional expiry,
+revocation, last use and audit are visible in Settings. Workspace grants outlive
+the issuing person's membership; revoke unwanted tokens explicitly. The thirteen
+[Bearer API operations](api.md) use current native authority, per-token limits,
+ISO dates, cursor lists and JSON errors; cookies grant no access and no CORS is
+provided. Revoked/expired/wrong-scope credentials are refused; foreign IDs reveal
+no other workspace's existence.
+
+**Webhooks** selects `conversation.created`, `message.created`,
+`conversation.resolved`, `conversation.rated`. Copy the signing secret once and
+verify exact bytes, tenant, destination, freshness and replay identity at the
+receiver. Deliveries use ordinary platform HTTPS fetch with manual redirects. Every 3xx fails without following its Location. Requests are limited to 1 MiB, responses (including streams) to 64 KiB, and the entire request/response to 10 seconds. Public HTTPS destination syntax and literal IP validation remain enforced; this edition does not claim DNS pinning. Base HTTP 500 remains uncertain without automatic replay; 429 retains four bounded attempts with the same logical identity and exact body. **Send test** is explicit; logs show event, status, duration and a safe error class.
+
+**Slack** accepts either an incoming webhook or a bot token plus channel ID. It
+uses Base escaping and posts once per new native conversation after its first
+visitor message. Use explicit test sends and inspect safe logs. Existing evidence
+uses recorded responses for both modes; **live Slack: not-supplied**. Import and
+undo generate no connection notifications. Erasure suppresses pending payloads;
+it cannot withdraw a message already accepted by a receiver.
+
+## Start a local trial
+
+Follow [README](../README.md#run-it-on-your-computer). Password login is retained.
+The checklist describes local necessities; a new workspace leads with the widget
+snippet and keeps secrets/verification under Advanced. Workspace headers show the
+current workspace and visitor agent headers intentionally show the operator's
+display name. With explicitly selected development mail, use `/__dev/outbox` at
+the exact app origin. Captured sign-in links require explicit **Sign in**. Capture
+is local evidence, not remote delivery. Without configured mail, links are
+unavailable with a plain explanation and the widget promises no email reply.
+Stop the installer or dev terminal with Ctrl+C; closing a browser leaves it running.

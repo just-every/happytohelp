@@ -48,7 +48,8 @@ try{
  const secondSettings=await settingsApi(second.id);assert.match(secondSettings.verificationSecret,/^[0-9a-f]{64}$/);assert.notEqual(secondSettings.verificationSecret,initial.verificationSecret);checks.push('created project has its own server secret');
 
  await open();
- // Code tab: the secret can be revealed and copied.
+ // Advanced retains the secret controls after the initial install snippet.
+ await page.locator('.widget-code__advanced > summary').click();
  const reveal=page.getByRole('button',{name:'Reveal server secret'}),copy=page.getByRole('button',{name:'Copy server secret'});
  assert.equal(await reveal.isEnabled(),true);assert.equal(await copy.isEnabled(),true);
  await page.screenshot({path:join(evidenceDir,'desktop-code-secret.png'),fullPage:true});
@@ -107,7 +108,7 @@ try{
  await page.screenshot({path:join(evidenceDir,'desktop-theme-launcher-edit.png'),fullPage:true});checks.push('closed launcher background edit shows in the Launcher preview');
 
  // Mobile: the secret and tabs work at phone width.
- await page.setViewportSize({width:390,height:844});await open();
+ await page.setViewportSize({width:390,height:844});await open();await page.locator('.widget-code__advanced > summary').click();
  assert.equal(await page.getByRole('button',{name:'Reveal server secret'}).isEnabled(),true);
  await page.screenshot({path:join(evidenceDir,'mobile-code-secret.png'),fullPage:true});
  await tab('Theme');await assertThemeDefaults();await page.screenshot({path:join(evidenceDir,'mobile-theme-defaults.png'),fullPage:true});checks.push('mobile layout shows the secret and default theme');

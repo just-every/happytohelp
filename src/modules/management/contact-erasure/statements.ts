@@ -1,3 +1,4 @@
+import {importErasureStatements} from '../../move-in/erasure'
 import type {Env} from '../../../platform/env'
 import {legacyArchiveRedaction} from './archive'
 import {erasureInboundEvidenceStatements} from './inbound-evidence'
@@ -52,13 +53,12 @@ ON CONFLICT(project_id,contact_id) DO UPDATE SET last_erased_at=excluded.last_er
  context_records=context_records+excluded.context_records,sessions=sessions+excluded.sessions`
 
 /** Email delivery logs keep their idempotency identity; the recipient address is removed. */
-function emailDeliveries(env: Env, request: ErasureRequest) {
-  const addresses = request.emails.slice(0, 2)
-  while (addresses.length < 2) addresses.push('')
+function emailDeliveries(env: Env, request: Pick<ErasureRequest,'projectId'|'contactId'|'emails'>) {
   return env.DB.prepare(`UPDATE email_deliveries SET recipient='' WHERE project_id=?1 AND recipient<>'' AND (
-   id IN (SELECT 'message:'||id||':notification' FROM messages WHERE ${messages}) OR lower(recipient) IN (?3,?4))`)
-    .bind(request.projectId, request.contactId, ...addresses)
+   id IN (SELECT 'message:'||id||':notification' FROM messages WHERE ${messages}) OR lower(recipient) IN (SELECT value FROM json_each(?3)))`)
+    .bind(request.projectId, request.contactId, JSON.stringify(request.emails))
 }
+export function emailEvidenceStatements(env:Env,request:Pick<ErasureRequest,'projectId'|'contactId'|'emails'>){return [emailDeliveries(env,request),...erasureInboundEvidenceStatements(env.DB,request)]}
 
 export function erasureStatements(env: Env, request: ErasureRequest) {
   const {projectId, contactId, actorId, now} = request
@@ -69,9 +69,10 @@ export function erasureStatements(env: Env, request: ErasureRequest) {
     env.DB.prepare(tombstone).bind(projectId, contactId, actorId, now),
     // Copies of the contact's data held outside the canonical rows, removed while those rows still identify them.
     bound(legacyArchiveRedaction),
-    emailDeliveries(env, request),
+    ...importErasureStatements(env,projectId,contactId),
+    ...['conversation_ratings','conversation_rating_history'].map(table=>bound(`UPDATE ${table} SET comment='' WHERE resolution_id IN (SELECT id FROM conversation_resolutions WHERE project_id=?1 AND (contact_id=?2 OR conversation_id IN (${conversations}))) AND comment<>''`)),
     // Inbound email claims keep only the classifier's rule names; sender, subject and headers go.
-    ...erasureInboundEvidenceStatements(env.DB, request),
+    ...emailEvidenceStatements(env, request),
     // AI work on these conversations: stop active generations, keep usage accounting, remove generated text.
     bound(`UPDATE ai_attempt_events SET event_json=json_object('type',type,'erased',1) WHERE attempt_id IN (${attempts}) AND type<>'cost_update' AND event_json<>json_object('type',type,'erased',1)`),
     withTime(`UPDATE ai_generations SET state=CASE WHEN state IN ('queued','running') THEN 'cancelled' ELSE state END,instruction='',

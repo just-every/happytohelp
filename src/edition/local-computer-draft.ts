@@ -49,5 +49,5 @@ export async function prepareLocalDraft(env: LocalEnv, input: DraftInput) {
     }
     const media = await copyLocalAttachments(env, { projectId, conversationId, operatorId,
         requestId: 'draft:' + jobId + ':' + operatorId }, attachments, guard);
-    return { body: proposal.body, attachments: media };
+    return { body: proposal.body, attachments: media, authoring: {kind:'local',jobId,proposalId} };
 }

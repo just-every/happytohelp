@@ -1,3 +1,4 @@
+import { enforceRateLimits } from '../../../platform/rate-limits'
 import { HTTPException } from 'hono/http-exception'
 import { text } from '../common'
 import { admitInsightPair } from '../../conversations/insight-admission'
@@ -25,6 +26,7 @@ export async function useInsight({ c, actor, conversation, data }: WidgetCommand
     (item.action === 'send' && item.text === (data.text || data.contact_message?.content)),
   )
   if (!choice) throw new HTTPException(400, { message: 'Select an existing insight response' })
+  await enforceRateLimits(c.env,[['messagesPerConversationMinute',conversation.id],['messagesPerContactHour',actor.contactId!]])
   const result = await admitInsightPair(c.env, {
     actor,
     conversationId: conversation.id,
@@ -33,6 +35,7 @@ export async function useInsight({ c, actor, conversation, data }: WidgetCommand
     aiLocalId: text(data.ai_message?.local_id, 200),
     contactLocalId: text(data.local_id || data.contact_message?.local_id || data.requestId, 200),
     expectedRevision: conversation.revision,
+    sessionHash: c.get('sessionHash'),
   })
   // Admission commits the pair and outbox before delivery; replays schedule no work.
   if (result.accepted && !result.duplicate) {

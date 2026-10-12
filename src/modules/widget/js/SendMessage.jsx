@@ -18,9 +18,9 @@ import {updateViewportProperties} from "./includes/utils";
 export default function SendMessage({ mainView, setView, messages, localContact, contact, sendContact, onSend, displayError }) {
     const context = useContext(AppContext);
     const isPreview = context.preview?.enabled === true;
-    const { open, getCurrentAgent } = useContext(ConnectContext);
+    const { open, getCurrentAgent, conversationSettings } = useContext(ConnectContext);
     const currentAgent = getCurrentAgent();
-    const needsNotifyEmail = ( !currentAgent?.is_ai && messages.length && !contact.email);
+    const needsNotifyEmail = ( !currentAgent?.is_ai && messages.length && !contact.email && ['local','remote'].includes(conversationSettings.mailMode));
 
     const [message, setMessage] = useState("");
     const [files, setFiles] = useState([]);

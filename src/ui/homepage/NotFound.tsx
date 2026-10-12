@@ -1,6 +1,7 @@
 import { SiteFooter } from './SiteFooter';
 import { SiteHeader } from './SiteHeader';
 import './outfit.css';
+import './brand-tokens.css';
 import './homepage.css';
 import './not-found.css';
 

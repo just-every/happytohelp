@@ -27,7 +27,7 @@ const runtime=new Miniflare(convertV4MiniflareOptions({
  ...(inspectorPort?{inspectorPort:Number(inspectorPort),inspectorHost:'127.0.0.1'}:{}),
  resourcePersistencePath:join(persist,'v3'),
  resourceTmpPath:join(persist,'tmp'),
- workers:[{...options,name:'happytohelp-native-isolated-test',modulesRoot,modules:[...modules.filter(module=>module.path===main),...modules.filter(module=>module.path!==main)]},...externalWorkers],
+ workers:[{...options,...(process.env.H2H_TEST_OUTBOUND_FIXTURE?{outboundService:(await import(process.env.H2H_TEST_OUTBOUND_FIXTURE)).default}:{}),bindings:{...options.bindings,...JSON.parse(process.env.H2H_TEST_BINDINGS||'{}')},name:'happytohelp-native-isolated-test',modulesRoot,modules:[...modules.filter(module=>module.path===main),...modules.filter(module=>module.path!==main)]},...externalWorkers],
  logRequests:true,log:new Log(LogLevel.INFO),
 }))
 let closing=false

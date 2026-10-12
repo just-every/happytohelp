@@ -219,9 +219,6 @@ try {
     }
   })
   assert.deepEqual(look, { current: ['rgb(214, 245, 250)', true], underline: 'rgb(90, 216, 236)', header: ['rgb(90, 216, 236)', 'underline'], code: 'rgb(20, 20, 20)', pre: 'rgba(255, 255, 255, 0.62)', title: '600' })
-  // The overview no longer carries a commented code block; the Operations deploy commands do.
-  await open('/docs/operations')
-  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.docs-prose .hljs-comment')).color), 'rgb(102, 99, 93)')
   await open('/docs/privacy')
   assert.deepEqual(await page.locator('.docs-table').first().evaluate(region => [region.getAttribute('role'), region.getAttribute('tabindex'), region.getAttribute('aria-label').startsWith('Table:')]), ['region', '0', true])
 

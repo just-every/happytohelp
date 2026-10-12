@@ -1,3 +1,4 @@
+import {migrationStatements} from './helpers/migration-statements.mjs';
 import {createRequire} from 'node:module'
 import {readFile} from 'node:fs/promises'
 import assert from 'node:assert/strict'
@@ -5,7 +6,7 @@ const require=createRequire(import.meta.url),{build}=require(require.resolve('es
 const compiled=await build({entryPoints:['tests/conversation-worker.ts'],bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})
 const mf=new Miniflare(convertV4MiniflareOptions({name:'conversation-test',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-08',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}},bindings:{H2H_SETUP_TOKEN:'socket-fixture-setup-token-0123456789abcdef'}}))
 try{
-const DB=await mf.getD1Database('DB');for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0097_owner_setup.sql','0102_public_abuse_limits.sql'])for(const sql of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).split(file==='0097_owner_setup.sql'?/;\s*(?=(?:--|CREATE|INSERT)|$)/:';').filter(s=>s.trim()))await DB.prepare(sql).run()
+const DB=await mf.getD1Database('DB');for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0097_owner_setup.sql','0102_public_abuse_limits.sql','020_ai_support.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
 async function api(path,body,token,extra={}){return mf.dispatchFetch('https://app.example/api/'+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...extra},body:body===undefined?undefined:JSON.stringify(body)})}
 const owner=await(await api('identity/bootstrap',{password:'test-setup-password-123',email:'socket@example.com',name:'Socket',allowedOrigin:'https://widget.example',setupToken:'socket-fixture-setup-token-0123456789abcdef'})).json();const project=await DB.prepare('SELECT widget_key FROM projects WHERE id=?').bind(owner.projectId).first()
 const contact=await(await api('identity/widget/session',{widgetKey:project.widget_key},undefined,{Origin:'https://widget.example'})).json();const other=await(await api('identity/widget/session',{widgetKey:project.widget_key},undefined,{Origin:'https://widget.example'})).json()

@@ -398,6 +398,11 @@ export const Provider = (props) => {
                 // Re-read persisted enriched buckets: actor/media relationships belong to the server.
                 setLastConnected(Date.now());
                 refreshInboxData();
+            } else if (frame.type === 'resolution') {
+                // Operator history is read through authenticated dashboard data, never broadcast to visitors.
+                setLastConnected(Date.now());
+                updateConversation(activeConversationId, {resolution: frame.resolution || null});
+                refreshInboxData();
             } else if (frame.type === 'chunk') {
                 const part = frame.payload;
                 if (!part?.localId || typeof part.chunk !== 'string' || !Number.isInteger(part.index)) return;

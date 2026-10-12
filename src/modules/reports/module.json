@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "happytohelp/reports",
+  "version": "0.1.0",
+  "sourcePaths": [
+    "src/modules/reports",
+    "docs/reports.md",
+    "tests/reports/calendar.mjs",
+    "tests/reports/figures.mjs",
+    "tests/reports/browser.mjs",
+    "tests/reports/harness.mjs",
+    "tests/reports/worker.ts"
+  ],
+  "selectedEditionDependencies": [
+    "happytohelp/outcomes"
+  ],
+  "runtime": "Workers TypeScript/ESM with edition-owned integration",
+  "license": "MIT",
+  "notices": [
+    "LICENSE"
+  ],
+  "editionIntegration": {
+    "sourceOwner": "just-every/happytohelp",
+    "requiredContracts": [
+      "src/platform current authority and D1 environment",
+      "edition-selected conversation, AI generation, local proposal, context and import schemas with the complete migration ledger"
+    ],
+    "verificationScope": "The edition owns route composition and UI; module tests exercise that selected native composition."
+  }
+}

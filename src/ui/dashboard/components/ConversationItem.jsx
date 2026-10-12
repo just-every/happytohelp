@@ -76,6 +76,7 @@ function ConversationItem({ conversation, setConversation }) {
                             { projectName && <div className="conversation-item-meta d-flex align-items-center mb-1">
                                 <span className="badge conversation-item-project text-truncate">{ projectName }</span>
                             </div> }
+                            <div className="conversation-tags">{(conversation.tags||[]).map(tag=><span className="conversation-tag" key={tag.id}>{tag.name}</span>)}</div>
                             <div className="conversation-item-preview d-flex align-items-center">
                                 { conversation.last_message && <div className="text-truncate me-auto">
                                     { conversation.last_message.agent && <h4 className="d-inline">{ conversation.last_message.agent.name }: </h4> }

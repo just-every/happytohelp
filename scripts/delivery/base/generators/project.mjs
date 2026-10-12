@@ -1,4 +1,4 @@
-import {artifactFilename, object, repository, string} from './validation.mjs';
+import {artifactFilename, object, sourceRepository, string} from './validation.mjs';
 
 function profiles(value) {
   object(value, 'verificationProfiles', ['schema', 'visual']);
@@ -40,7 +40,7 @@ export function generateProjectDescriptor(input) {
   }
   if (Object.hasOwn(input.operations, 'verificationProfiles')) operations.verificationProfiles = profiles(input.operations.verificationProfiles);
   return {
-    schema: 1, projectId, name: string(input.name, 'name', 100), sourceRepository: repository(input.sourceRepository), license: string(input.license, 'license', 200),
+    schema: 1, projectId, name: string(input.name, 'name', 100), sourceRepository: sourceRepository(input.sourceRepository), license: string(input.license, 'license', 200),
     deployment: {target: string(input.deployment.target, 'deployment.target', 100), artifactFile: artifactFilename(input.deployment.artifactFile === undefined ? 'rer-worker-artifact.json' : input.deployment.artifactFile)},
     operations,
     ...(Object.hasOwn(input, 'verification') ? {verification: policy(input.verification)} : {}),

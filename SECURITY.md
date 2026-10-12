@@ -38,7 +38,7 @@ Security fixes are released on the latest minor version.
 ## Install a security fix
 
 - **You host it yourself:** pull the fixed release and run
-  `pnpm run deploy -- --remote`. [Operations](OPERATIONS.md) explains that
+  `node scripts/rer.mjs deploy --environment production`. [Operations](OPERATIONS.md) explains that
   command and how to upgrade an existing installation.
 - **Run Edit Run hosts it for you:** hosted **Assisted** and **Managed**
   installations through [Run Edit Run](https://runeditrun.com), a separate

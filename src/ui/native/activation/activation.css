@@ -9,3 +9,4 @@
 @media(max-width:1199.98px){.activation-checklist{padding:16px}.activation-steps{grid-template-columns:1fr}.activation-heading{gap:8px}.conversation-empty-state:has(.activation-checklist){text-align:left;padding:0}.activation-checklist--compact h2{font-size:1.15rem}}
 
 .activation-checklist h2,.activation-checklist h3{color:inherit}.activation-overview{max-width:980px;margin:0 auto}
+.provider-setup-notice a { text-decoration: underline; text-underline-offset: 2px; }

@@ -62,6 +62,9 @@ export class WidgetTransport {
       if (this.session.verified && signedIdentity) this.session.verifiedIdentity = signedIdentity;
       localStorage.setItem(this.storageKey, JSON.stringify(this.session));
     }
+    // Contact details are current private server data, never part of the
+    // persisted browser session. Check authority before resolving a conversation.
+    const profile = await this.request('/api/identity/widget/profile');
     if (!this.session.conversationId) {
       const existing = await this.request('/api/conversations');
       const conversation = existing.conversations?.[0] || await this.request('/api/conversations', {method: 'POST', json: {projectId: this.session.projectId}});
@@ -71,7 +74,7 @@ export class WidgetTransport {
     this.conversationId = this.session.conversationId;
     await this.refresh();
     if (!this.closed) {
-      this.onEvent({type: 'session', session: this.session});
+      this.onEvent({type: 'session', session: this.session, contact: profile.contact});
       this.openSocket();
     }
     return this.session;
@@ -79,7 +82,7 @@ export class WidgetTransport {
   async refresh() {
     const result = await this.request(`/api/conversations/${this.conversationId}/messages`);
     if (result.revision >= this.revision) {this.revision = result.revision; this.lastMessageId = result.lastMessageId;}
-    this.onEvent({type: 'transcript', messages: await Promise.all(result.messages.map(message => this.message(message)))});
+    this.onEvent({type: 'transcript', resolution: result.resolution || null, messages: await Promise.all(result.messages.map(message => this.message(message)))});
     return result;
   }
   async message(message) {
@@ -118,6 +121,7 @@ export class WidgetTransport {
         if (payload.message) payload.message = await this.message(payload.message);
         if (!active()) return;
         this.onEvent(payload);
+        if (payload.type === 'message') await this.refresh();
         if (payload.eventId) this.eventId = payload.eventId;
       } catch(error) { if (active()) this.onError(error); }
     });

@@ -79,6 +79,17 @@ body.workspace-themed[data-workspace-mode=dark] {
         --bs-btn-disabled-border-color: var(--workspace-button-bg);
     }
     .btn-outline-primary:hover, .btn-outline-primary:active { color: #fff; background-color: var(--workspace-button-bg); border-color: var(--workspace-button-bg); }
+    .text-danger, .invalid-feedback { color: #f3a3ae !important; }
+    .btn-outline-danger {
+        --bs-btn-color: #f3a3ae;
+        --bs-btn-border-color: #f3a3ae;
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: #bf2d48;
+        --bs-btn-hover-border-color: #bf2d48;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: #bf2d48;
+        --bs-btn-active-border-color: #bf2d48;
+    }
     .btn-white { --bs-btn-bg: var(--workspace-surface-raised); --bs-btn-color: var(--workspace-muted); --bs-btn-border-color: var(--workspace-line); --bs-btn-disabled-bg: var(--workspace-surface-raised); }
     .page-link.active, .active > .page-link { background: var(--workspace-button-bg); border-color: var(--workspace-button-bg); color: #fff; }
     .badge.bg-primary, .badge.text-bg-primary { background: var(--workspace-button-bg) !important; color: #fff !important; }

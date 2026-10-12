@@ -4,6 +4,7 @@ import { hashToken,requireActor,requireProject } from '../../platform/auth'
 import { accounts } from './accounts'
 import { recovery } from './recovery'
 import { widget } from './widget'
+import { widgetProfile } from './widget-profile'
 import { registration } from './registration'
 import { setup } from './setup'
 import { options } from './options'
@@ -13,6 +14,7 @@ export const routes=new Hono<AppEnv>()
 routes.route('/',accounts)
 routes.route('/',recovery)
 routes.route('/',widget)
+routes.route('/',widgetProfile)
 routes.route('/',registration)
 routes.route('/',setup)
 routes.route('/',options)

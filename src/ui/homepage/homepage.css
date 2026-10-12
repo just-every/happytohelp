@@ -1,14 +1,8 @@
 /* Homepage chrome: paper, ink and one geometric sans-serif. Colour lives inside the drawings (drawings.css); outside them only
    the aqua accents borrow its tokens: the hero's caption discs and the desk's number discs, the circles behind the three
    promises, the text links' underlines, the pen lines (the hero flourish, the dividers, the closing line) and the sparks of
-   the header and footer mark. Nothing else has a hue. */
-body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
+   the header and footer mark. Nothing else has a hue. The tokens, and the body's paper, are in brand-tokens.css. */
 .h2h-home {
-  --paper: #f6f2ea;
-  --ink: #141414;
-  --ink-soft: #66635d;
-  --rule: rgba(20, 20, 20, 0.16);
-  --gutter: clamp(20px, 5vw, 76px);
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
@@ -76,7 +70,8 @@ body:has(.h2h-home) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-home .hero-copy .pill--large { min-height: 74px; padding: 0 50px; font-size: 22px; }
 .h2h-home .hero-copy .text-link { font-size: 21px; font-weight: 600; text-decoration-color: var(--d-cyan-deep); text-decoration-thickness: 3px; text-underline-offset: 10px; }
 .h2h-home .hero-copy .text-link:hover { text-decoration-color: var(--ink); }
-.h2h-home .hero-free { margin-top: 28px; font-size: 18px; }
+.h2h-home .hero-free { margin-top: 28px; font-size: 16px; text-wrap: balance; }
+.h2h-home .hero-free strong { font-weight: 600; }
 .h2h-home .hero-stage { min-width: 0; container: hero-stage / inline-size; }
 .h2h-home .hero-steps { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 32px; margin-top: 22px; counter-reset: step; font-size: 1.125rem; }
 .h2h-home .hero-steps li { display: inline-flex; align-items: center; gap: 14px; counter-increment: step; }

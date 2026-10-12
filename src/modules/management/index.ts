@@ -1,3 +1,4 @@
+import {reports} from '../reports/routes'
 import {Hono} from 'hono'
 import type {AppEnv} from '../../platform/env'
 import {projectPolicy} from './policy'
@@ -20,7 +21,7 @@ import {activation} from './activation'
 export const routes=new Hono<AppEnv>()
 routes.route('/',activation).route('/',workspaceArtwork).route('/',projects).route('/',resources).route('/',contactErasure).route('/',widgetSettings).route('/',integrations).route('/',admin).route('/',invitations).route('/',githubOAuth).route('/',projectPolicy)
 export const dashboardRoutes=new Hono<AppEnv>()
-dashboardRoutes.route('/',demoInbox).route('/',dashboard).route('/',dashboardActions).route('/',dashboardMedia).route('/',resources).route('/',aiUsage).route('/',aiSpend)
+dashboardRoutes.route('/',reports).route('/',demoInbox).route('/',dashboard).route('/',dashboardActions).route('/',dashboardMedia).route('/',resources).route('/',aiUsage).route('/',aiSpend)
 export {publicWidget} from './widget-settings'
 
 export {widgetEvents} from './widget-events'

@@ -1,7 +1,7 @@
 export const stepLabels = {
- owner_mail: 'Owner mail delivered', sender_dns: 'Sender DNS', inbound_address: 'Inbound address',
- model_key: 'Model key', spend_ceilings: 'Spend ceilings', published_article: 'First published article',
- widget_origin: 'Widget origin saved', widget_seen: 'Widget seen',
+ owner_mail: 'Check a test email arrives', sender_dns: 'Verify your sending address', inbound_address: 'Receive replies by email',
+ model_key: 'Connect an AI provider', spend_ceilings: 'Set limits for AI use', published_article: 'Publish a help article',
+ widget_origin: 'Choose the website for your widget', widget_seen: 'Open the widget on your website',
 } as const
 export type StepId = keyof typeof stepLabels
 export type ProbeState = 'not_checked'|'checking'|'pending'|'done'|'failed'|'unavailable'|'unknown'

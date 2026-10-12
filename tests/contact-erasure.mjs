@@ -24,7 +24,7 @@ const root=new URL('..',import.meta.url).pathname,directory=await mkdtemp(join(t
 await mkdir(migrations)
 for(const source of [join(root,'migrations'),...(await readdir(join(root,'src/modules'),{withFileTypes:true})).filter(d=>d.isDirectory()).map(d=>join(root,'src/modules',d.name,'migrations'))]){if(!existsSync(source))continue;for(const name of (await readdir(source)).filter(n=>n.endsWith('.sql')))await cp(join(source,name),join(migrations,name))}
 await writeFile(config,JSON.stringify({name:'h2h-contact-erasure-test',compatibility_date:'2026-09-08',compatibility_flags:['nodejs_compat'],d1_databases:[{binding:'DB',database_name:'erasure',database_id:'erasure-local',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:'erasure-files'}]}))
-await promisify(execFile)(process.execPath,[join(root,'node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',config,'--persist-to',persist],{cwd:directory,env:{PATH:process.env.PATH,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'}})
+await promisify(execFile)(process.execPath,[join(root,'node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',config,'--persist-to',persist],{cwd:directory,env:{PATH:process.env.PATH,TMPDIR:process.env.TMPDIR,WRANGLER_LOG_PATH:process.env.WRANGLER_LOG_PATH,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'}})
 const proxy=await getPlatformProxy({configPath:config,persist:{path:join(persist,'v3')}})
 const env={...proxy.env,EMAIL_API_KEY:undefined,OPENAI_API_KEY:undefined},DB=env.DB,FILES=env.FILES
 const conversationRoutes=createConversationRoutes()

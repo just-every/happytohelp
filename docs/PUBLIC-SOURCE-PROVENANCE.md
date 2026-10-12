@@ -53,13 +53,6 @@ the root MIT licence like the rest of the source:
   and the public header and footer draw it inline (`BrandWord.tsx`) as a
   decorative SVG, the link named by visually hidden text; the no-project Help
   Center page draws the same element from `wordSvg()`.
-- **Installer and setup background**: `public/setup/ocean.webp` (SHA-256
-  `a3dfb0d036ce7e773acdf1aaac2c3863cc4948f299c5bd0e6220a3d620165a09`,
-  1,207,294 bytes, 3072x2048), used by the standalone installer and the in-app
-  `/setup` page. It is a WebP delivery derivative (quality 95, full resolution)
-  of the owner's 3072x2048 PNG source (SHA-256
-  `9e76eb5c98d25004c5993171f83c2ed0ea069397a5456e7f09bbde0363f4b983`,
-  14,184,241 bytes).
 
 The homepage is an ordinary React route in `src/routes/index.tsx` built from the
 components in `src/ui/homepage`. Its text and links are real DOM content, and

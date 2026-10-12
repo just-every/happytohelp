@@ -12,7 +12,7 @@ export interface Integration {
   recordResult(env:LocalEnv, job:Record<string,any>,result:Record<string,any>):Promise<void>;
   deliveryRevision(env:LocalEnv,projectId:string,conversationId:string):Promise<number>;
   prepareDraft(env: LocalEnv, input: DraftInput): Promise<{ body: string; attachments: Record<string, unknown>[] }>;
-  deliver(env: LocalEnv, input: { projectId: string; conversationId: string; operatorId: string; requestId: string; expectedRevision:number; expectedLastMessageId: string | null; body: string; attachmentIds: string[]; resolve: boolean }): Promise<{ messageId: string }>;
+  deliver(env: LocalEnv, input: { projectId: string; conversationId: string; operatorId: string; requestId: string; expectedRevision:number; expectedLastMessageId: string | null; body: string; attachmentIds: string[]; resolve: boolean; source?: {jobId:string;proposalId:string|null} }): Promise<{ messageId: string }>;
 }
 export type App = Hono<any>;
 export const now = () => new Date().toISOString();

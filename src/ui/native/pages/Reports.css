@@ -1,0 +1,24 @@
+.reports-page { max-width: 1150px; }
+.reports-scope a,.reports-comments a { text-decoration:underline; text-underline-offset:2px; }
+.reports-range { display:flex; flex-wrap:wrap; gap:12px; align-items:end; margin:24px 0 16px; }
+.reports-range label { display:grid; gap:6px; margin:0; }
+.reports-range input,.reports-range select { min-height:42px; }
+.reports-downloads { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 24px; }
+.reports-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; }
+.reports-metric,.reports-section { border:1px solid var(--bs-border-color,#d9e2ef); border-radius:10px; padding:20px; background:var(--bs-body-bg,#fff); }
+.reports-metric h2 { font-size:15px; margin:0 0 12px; }
+.reports-metric>strong { font-size:30px; line-height:1.2; }
+.reports-metric p { font-size:13px; margin:10px 0 0; }
+.reports-section { margin-top:24px; }
+.reports-section h2 { font-size:20px; }
+.reports-daily { list-style:none; margin:16px 0 0; padding:0; max-height:360px; overflow-y:auto; }
+.reports-daily:focus-visible { outline:3px solid var(--workspace-ink,#12263f); outline-offset:3px; }
+.reports-daily li { display:grid; grid-template-columns:95px minmax(20px,1fr) 40px; align-items:center; gap:12px; margin:9px 0; font-variant-numeric:tabular-nums; }
+.reports-bar { height:16px; background:#e6edf5; border-radius:3px; overflow:hidden; }
+.reports-bar>span { display:block; height:100%; background:#315f9c; }
+.reports-comments { list-style:none; padding:0; margin:0; }
+.reports-comments li+li { border-top:1px solid #d9e2ef; margin-top:16px; padding-top:16px; }
+.reports-comments p { white-space:pre-wrap; overflow-wrap:anywhere; margin:8px 0; }
+.reports-definitions { margin:24px 0; }
+.reports-definitions summary { cursor:pointer; font-weight:600; margin-bottom:12px; }
+@media(max-width:575px) { .reports-range label { width:100%; } .reports-range button { width:100%; } .reports-metrics { grid-template-columns:1fr; } .reports-section { padding:16px; } .reports-daily li { grid-template-columns:85px minmax(20px,1fr) 28px; gap:8px; font-size:12px; } }

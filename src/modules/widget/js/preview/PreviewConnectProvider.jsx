@@ -10,7 +10,7 @@ export default function PreviewConnectProvider({children, open}) {
   const [contact, setContact] = useState(context.contact || {});
   const [conversationSettings, setConversationSettings] = useState({ais: [], human: null, ...context.conversationSettings});
   const previewAgent = context.preview?.agent;
-  const previewSettings = {...conversationSettings, workspace_brand: context.preview?.workspace_brand || conversationSettings.workspace_brand};
+  const previewSettings = {...conversationSettings, mailMode: context.preview?.mailMode, workspace_brand: context.preview?.workspace_brand || conversationSettings.workspace_brand};
   const unavailable = () => Promise.reject(new Error('Sending is unavailable in the settings preview'));
   return <ConnectContext.Provider value={{open, messages: [], agentTyping: emptyTypingState(), thinking: false, insight: null, connectErrors: [], contact, setContact, localContact: contact, setLocalContact: setContact, contactAuth: {}, conversationSettings: previewSettings, setConversationSettings, getCurrentAgent: () => previewAgent || conversationSettings.human, mainView, setMainView, sendMessage: unavailable, assertConnected: unavailable, uploadMedia: unavailable, sendInsight: unavailable, setFilteredMessages: () => {}}}>{children}</ConnectContext.Provider>;
 }

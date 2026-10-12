@@ -1,10 +1,10 @@
+import {randomBytes} from 'node:crypto';
 import assert from 'node:assert/strict';
-import {randomUUID} from 'node:crypto';
 
 // Default deployment: registration off and no email provider. Covers the fresh install, the plain link-problem pages,
 // the invitation page for a signed-out invitee and every kind of person who can follow an invitation link.
-const inviteePassword = randomUUID();
-const owner = { name: 'Harbour Desk', email: 'aster@review.test', password: randomUUID() };
+const invitedPassword=randomBytes(24).toString('base64url');
+const owner = { name: 'Harbour Desk', email: 'aster@review.test', password: randomBytes(24).toString('base64url') };
 
 export async function checkFreshInstall({ origin, kit }) {
     let page = await kit.open(origin, '/login');
@@ -121,7 +121,7 @@ export async function checkInvitationAcceptance({ origin, kit, runtime }, ownerS
     await kit.done(page, 'accept-invitation-new-person-mobile');
     page = await kit.open(origin, link(nia));
     await page.getByLabel('Your name').fill('Nia Newhire');
-    await page.locator('input[type=password]').fill(inviteePassword);
+    await page.locator('input[type=password]').fill(invitedPassword);
     await page.getByRole('button', { name: 'Create account and join' }).click();
     await kit.expectText(page, /Welcome to Harbour Desk/);
     assert.equal(await page.getByRole('alert').count(), 0);
@@ -129,7 +129,7 @@ export async function checkInvitationAcceptance({ origin, kit, runtime }, ownerS
     kit.pass('signed-out new invitee: sees workspace and email on load, short password stopped in the browser, valid account created without an error');
 
     page = await kit.open(origin, '/login');
-    await kit.login(page, 'nia@review.test', inviteePassword);
+    await kit.login(page, 'nia@review.test', invitedPassword);
     await page.waitForURL('**/conversations');
     const session = await page.evaluate(async () => (await fetch('/api/identity/session')).json());
     assert.equal(session.projectId, ownerSession.projectId);
@@ -162,7 +162,7 @@ export async function checkInvitationAcceptance({ origin, kit, runtime }, ownerS
     await kit.shot(page, 'accept-invitation-account-holder');
     await page.getByRole('link', { name: 'Sign in', exact: true }).click();
     await page.waitForURL('**/login?returnTo=*');
-    await kit.login(page, 'nia@review.test', inviteePassword);
+    await kit.login(page, 'nia@review.test', invitedPassword);
     await page.waitForURL('**/accept-invitation?token=*');
     await page.getByRole('button', { name: 'Accept invitation' }).click();
     await kit.expectText(page, /You have joined Second Desk/);
@@ -185,5 +185,5 @@ export async function checkInvitationAcceptance({ origin, kit, runtime }, ownerS
     assert.equal(await page.locator('input').count(), 0);
     await kit.done(page, 'accept-invitation-expired');
     kit.pass('an expired invitation is reported as expired, with no form');
-    return { operator: { email: 'nia@review.test', password: inviteePassword } };
+    return { operator: { email: 'nia@review.test', password: invitedPassword } };
 }

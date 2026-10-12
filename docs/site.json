@@ -1,41 +1,182 @@
 {
   "sections": [
-    { "title": "Start here", "pages": [
-      { "slug": "",                       "source": "README.md",                          "label": "Overview" },
-      { "slug": "install",                "source": "docs/INSTALLER.md",                  "label": "Install" },
-      { "slug": "setup",                  "source": "docs/SETUP-WORKFLOW.md",             "label": "First-run setup" },
-      { "slug": "local-agent",            "source": "local-agent/README.md",              "label": "Local agent" }
-    ]},
-    { "title": "Run it", "pages": [
-      { "slug": "operations",             "source": "OPERATIONS.md",                      "label": "Operations" },
-      { "slug": "integrations",           "source": "src/modules/integrations/README.md", "label": "Email and integrations" },
-      { "slug": "limits",                 "source": "docs/PUBLIC-LIMITS.md",              "label": "Limits and AI ceilings" },
-      { "slug": "privacy",                "source": "docs/PRIVACY.md",                    "label": "Personal data" },
-      { "slug": "updates-and-recovery",   "source": "docs/INDEPENDENT-RELEASE.md",        "label": "Updates and recovery" },
-      { "slug": "inbound-email-recovery", "source": "docs/INBOUND-EMAIL-RECOVERY.md",     "label": "Inbound email recovery" }
-    ]},
-    { "title": "Project", "pages": [
-      { "slug": "security",               "source": "SECURITY.md",                        "label": "Security" },
-      { "slug": "changelog",              "source": "CHANGELOG.md",                       "label": "Changelog" }
-    ]}
+    {
+      "title": "Start here",
+      "pages": [
+        {
+          "slug": "",
+          "source": "README.md",
+          "label": "Overview"
+        },
+        {
+          "slug": "install",
+          "source": "docs/INSTALLER.md",
+          "label": "Install"
+        },
+        {
+          "slug": "setup",
+          "source": "docs/SETUP-WORKFLOW.md",
+          "label": "First-run setup"
+        },
+        {
+          "slug": "local-agent",
+          "source": "local-agent/README.md",
+          "label": "Local agent"
+        }
+      ]
+    },
+    {
+      "title": "Run it",
+      "pages": [
+        {
+          "slug": "run-locally",
+          "source": "RUN-LOCALLY.md",
+          "label": "Local command reference"
+        },
+        {
+          "slug": "operations",
+          "source": "OPERATIONS.md",
+          "label": "Operations"
+        },
+        {
+          "slug": "integrations",
+          "source": "src/modules/integrations/README.md",
+          "label": "Email and integrations"
+        },
+        {
+          "slug": "limits",
+          "source": "docs/PUBLIC-LIMITS.md",
+          "label": "Limits and AI ceilings"
+        },
+        {
+          "slug": "privacy",
+          "source": "docs/PRIVACY.md",
+          "label": "Personal data"
+        },
+        {
+          "slug": "updates-and-recovery",
+          "source": "docs/INDEPENDENT-RELEASE.md",
+          "label": "Updates and recovery"
+        },
+        {
+          "slug": "inbound-email-recovery",
+          "source": "docs/INBOUND-EMAIL-RECOVERY.md",
+          "label": "Inbound email recovery"
+        }
+      ]
+    },
+    {
+      "title": "Project",
+      "pages": [
+        {
+          "slug": "security",
+          "source": "SECURITY.md",
+          "label": "Security"
+        },
+        {
+          "slug": "changelog",
+          "source": "CHANGELOG.md",
+          "label": "Changelog"
+        }
+      ]
+    }
   ],
   "githubOnly": [
-    { "source": "AGENTS.md", "reason": "Contributor and coding-agent rules, read from the checkout by installer agents" },
-    { "source": "CONTRACT.md", "reason": "Product requirement clauses for maintainers" },
-    { "source": "ACCEPTANCE.md", "reason": "Evidence gates for the contract clauses" },
-    { "source": "HANDOVER.md", "reason": "Maintainer orientation" },
-    { "source": "docs/ACCESSIBILITY-AUDIT-2026-09-30.md", "reason": "Dated accessibility audit record" },
-    { "source": "docs/AUTHORING.md", "reason": "Edition authoring and source custody for maintainers" },
-    { "source": "docs/MODULES.md", "reason": "Source module map for developers" },
-    { "source": "docs/NAVIGATION.md", "reason": "Router implementation notes" },
-    { "source": "docs/SOURCE-PROVENANCE.md", "reason": "Source provenance receipt referenced by module.json files" },
-    { "source": "docs/PUBLIC-SOURCE-PROVENANCE.md", "reason": "Public asset provenance receipt" },
-    { "source": "docs/UI-PARITY.md", "reason": "Parity audit history against the original application" },
-    { "source": "docs/usage/README.md", "reason": "Local usage meter for maintainers" },
-    { "source": "docs/licenses/FEATHER-ICONS.md", "reason": "Third-party licence notice kept beside the source it covers" },
-    { "source": "docs/licenses/FONT-AWESOME-FREE.md", "reason": "Third-party licence notice kept beside the source it covers" },
-    { "source": "docs/licenses/LOBE-ICONS.md", "reason": "Third-party licence notice kept beside the source it covers" },
-    { "source": "live-proofs/README.md", "reason": "Manual GitHub workflow proofs for maintainers" },
-    { "source": "management/README.md", "reason": "Run Edit Run management profile integration" }
+    {
+      "source": "AGENTS.md",
+      "reason": "Contributor and coding-agent rules, read from the checkout by installer agents"
+    },
+    {
+      "source": "CLAUDE.md",
+      "reason": "One line that points Claude Code at AGENTS.md"
+    },
+    {
+      "source": "CONTRACT.md",
+      "reason": "Product requirement clauses for maintainers"
+    },
+    {
+      "source": "ACCEPTANCE.md",
+      "reason": "Evidence gates for the contract clauses"
+    },
+    {
+      "source": "HANDOVER.md",
+      "reason": "Maintainer orientation"
+    },
+    {
+      "source": "docs/ACCESSIBILITY-AUDIT-2026-09-30.md",
+      "reason": "Dated accessibility audit record"
+    },
+    {
+      "source": "docs/AUTHORING.md",
+      "reason": "Edition authoring and source custody for maintainers"
+    },
+    {
+      "source": "docs/MODULES.md",
+      "reason": "Source module map for developers"
+    },
+    {
+      "source": "docs/NAVIGATION.md",
+      "reason": "Router implementation notes"
+    },
+    {
+      "source": "docs/SOURCE-PROVENANCE.md",
+      "reason": "Source provenance receipt referenced by module.json files"
+    },
+    {
+      "source": "docs/PUBLIC-SOURCE-PROVENANCE.md",
+      "reason": "Public asset provenance receipt"
+    },
+    {
+      "source": "docs/UI-PARITY.md",
+      "reason": "Parity audit history against the original application"
+    },
+    {
+      "source": "docs/usage/README.md",
+      "reason": "Local usage meter for maintainers"
+    },
+    {
+      "source": "docs/licenses/FEATHER-ICONS.md",
+      "reason": "Third-party licence notice kept beside the source it covers"
+    },
+    {
+      "source": "docs/licenses/FONT-AWESOME-FREE.md",
+      "reason": "Third-party licence notice kept beside the source it covers"
+    },
+    {
+      "source": "docs/licenses/LOBE-ICONS.md",
+      "reason": "Third-party licence notice kept beside the source it covers"
+    },
+    {
+      "source": "live-proofs/README.md",
+      "reason": "Manual GitHub workflow proofs for maintainers"
+    },
+    {
+      "source": "management/README.md",
+      "reason": "Run Edit Run management profile integration"
+    },
+    {
+      "source": "docs/WORKSPACE-WORKFLOWS.md",
+      "reason": "Detailed prepared 0.4 workflow guide linked from the overview; maintained with its feature source"
+    },
+    {
+      "source": "docs/api.md",
+      "reason": "Prepared 0.4 API and signed-delivery reference linked from the overview"
+    },
+    {
+      "source": "docs/moving-in-shapes.md",
+      "reason": "Detailed supported import shapes beside the importer source and workflow guide"
+    },
+    {
+      "source": "docs/moving-in.md",
+      "reason": "Prepared 0.4 import review, source custody and undo guide linked from the overview"
+    },
+    {
+      "source": "docs/reports.md",
+      "reason": "Prepared 0.4 report cohorts, metrics and CSV reference linked from the overview"
+    },
+    {
+      "source": "SEED-COMMAND-CONTRACT.md",
+      "reason": "Copied Base command contract for maintainers; the README and local command reference explain product usage"
+    }
   ]
 }

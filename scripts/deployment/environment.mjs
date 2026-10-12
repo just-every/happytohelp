@@ -15,8 +15,10 @@ export const variableNames = [
  'BRAND_IMAGE_QUALITY','TRAINING_PRICE_CEILINGS','ENABLE_SYNTHETIC_EVALUATION',
  'RATE_LIMITS','AI_DAILY_CEILINGS',
 ]
+/** Native bindings other than the standard database, storage and queue bindings. */
+export const serviceBindingNames = []
 /** Overridable limit names; defaults live in src/platform/limit-config.ts (tests keep both lists equal). */
-export const rateLimitNames=['widgetSessionsPerIpHour','widgetSessionsPerProjectHour','conversationsPerContactHour','conversationsPerIpHour','conversationsPerProjectHour','messagesPerContactHour','messagesPerConversationMinute','widgetEventsPerContactMinute','uploadsPerContactDay','uploadBytesPerContactDay','uploadsPerProjectDay','uploadBytesPerProjectDay','registrationsPerIpDay','projectsPerIpDay','projectsPerAccountDay']
+export const rateLimitNames=['apiRequestsPerTokenMinute','widgetSessionsPerIpHour','widgetSessionsPerProjectHour','conversationsPerContactHour','conversationsPerIpHour','conversationsPerProjectHour','messagesPerContactHour','messagesPerConversationMinute','widgetEventsPerContactMinute','uploadsPerContactDay','uploadBytesPerContactDay','uploadsPerProjectDay','uploadBytesPerProjectDay','registrationsPerIpDay','projectsPerIpDay','projectsPerAccountDay']
 export const aiCeilingNames=['repliesPerProject','spendUsdPerProject','repliesPerInstallation','contextRunsPerProject']
 function validateLimitMap(env,name,keys,fractional=[]){
  if(!configured(env,name))return
@@ -26,12 +28,26 @@ function validateLimitMap(env,name,keys,fractional=[]){
 const configured=(env,name)=>typeof env[name]==='string'&&env[name].trim()!==''
 export function runtimeVariables(env){validateRuntimeEnvironment(env);return Object.fromEntries(variableNames.filter(name=>configured(env,name)).map(name=>[name,env[name]]))}
 export function runtimeSecrets(env){return Object.fromEntries(secretNames.filter(name=>configured(env,name)).map(name=>[name,env[name]]))}
-export function validateRuntimeEnvironment(env){
+function validateRemoteMailSelection(env){
  if(configured(env,'EMAIL_PROVIDER')&&!['resend','cloudflare','sendgrid'].includes(env.EMAIL_PROVIDER))throw new Error('EMAIL_PROVIDER must be resend, cloudflare or sendgrid')
  if(env.EMAIL_PROVIDER==='cloudflare'&&!/^[a-f0-9]{32}$/i.test(env.EMAIL_ACCOUNT_ID||''))throw new Error('Cloudflare email requires EMAIL_ACCOUNT_ID')
  if(configured(env,'EMAIL_PROVIDER'))for(const name of ['EMAIL_API_KEY','EMAIL_FROM'])if(!configured(env,name))throw new Error(`${env.EMAIL_PROVIDER} email requires ${name}`)
+}
+function runtimeUrl(value,name){
+ try{return new URL(value)}catch{throw new Error(`${name} must be a valid URL`)}
+}
+/** Validate only this invocation's mail choice; saved private settings stay untouched. */
+export function validateLocalSetupEnvironment(env){
+ if(env.EMAIL_PROVIDER!=='development'){validateRemoteMailSelection(env);return}
+ if(env.H2H_LOCAL!=='true'||env.RER_INSTALLATION_ID)throw new Error('Development mail requires trusted local configuration')
+ const origin=runtimeUrl(env.APP_ORIGIN||'','Development mail origin');
+ if(origin.origin!==env.APP_ORIGIN||origin.protocol!=='http:'||origin.hostname!=='127.0.0.1')throw new Error('Development mail requires an exact loopback HTTP origin')
+}
+export function validateRuntimeEnvironment(env){
+ if(env.H2H_LOCAL==='true')throw new Error('Local development mail configuration cannot be deployed')
+ validateRemoteMailSelection(env)
  for(const name of ['REGISTRATION_ENABLED','ENABLE_SYNTHETIC_EVALUATION'])if(configured(env,name)&&!['true','false'].includes(env[name]))throw new Error(`${name} must be true or false`)
- for(const name of ['APP_ORIGIN','PREVIEW_ORIGIN','RER_MANAGEMENT_ORIGIN','QDRANT_URL'])if(configured(env,name)){const url=new URL(env[name]);if(url.protocol!=='https:'||url.username||url.password||url.hash)throw new Error(`${name} must be HTTPS without embedded credentials`);if(name!=='QDRANT_URL'&&(url.pathname!=='/'||url.search||url.port))throw new Error(`${name} must be an origin`)}
+ for(const name of ['APP_ORIGIN','PREVIEW_ORIGIN','RER_MANAGEMENT_ORIGIN','QDRANT_URL'])if(configured(env,name)){const url=runtimeUrl(env[name],name);if(url.protocol!=='https:'||url.username||url.password||url.hash)throw new Error(`${name} must be HTTPS without embedded credentials`);if(name!=='QDRANT_URL'&&(url.pathname!=='/'||url.search||url.port))throw new Error(`${name} must be an origin`)}
  if(configured(env,'PREVIEW_ORIGIN')&&(env.PREVIEW_ORIGIN===env.APP_ORIGIN||env.PREVIEW_ORIGIN===env.H2H_PUBLIC_ORIGIN))throw new Error('Preview must have a separate origin')
  if(configured(env,'TRAINING_PRICE_CEILINGS')){const values=JSON.parse(env.TRAINING_PRICE_CEILINGS);if(!values||Array.isArray(values)||typeof values!=='object')throw new Error('TRAINING_PRICE_CEILINGS must be a model map');for(const value of Object.values(values))if(!value||!Number.isFinite(value.inputPerMillion)||!Number.isFinite(value.outputPerMillion)||value.inputPerMillion<=0||value.outputPerMillion<=0)throw new Error('Training price ceilings require positive per-million input/output rates')}
  validateLimitMap(env,'RATE_LIMITS',rateLimitNames)

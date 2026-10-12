@@ -3,16 +3,23 @@
 HappyToHelp preserves the useful parts of the original HappyToHelp owner
 workspace: customer widget, operator dashboard, AI assistance and reply,
 knowledge, customer context, delegated local work, training and integrations.
+Run installation and development through `node scripts/rer.mjs`; inspect the actual
+commands with `describe --json` and enforce `check --profile first-party`.
 Its public surface is the “Customer Support, Solved.” homepage, the documentation at `/docs` built from the repository's Markdown, and dynamic published help centers.
-It is editable source that replaces the original PHP/AWS application runtime with
-a Cloudflare Worker stack. These clauses state required behavior; the evidence
+It is editable source running on a Cloudflare Worker stack. These clauses state required behavior; the evidence
 each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
 
 - **NATIVE-001 — Native owner installation.** A clean owner can inspect the
   operating description before installing dependencies, install locked source,
   prepare local or selected remote bindings/migrations, build, verify and deploy
-  through the common commands. Resource setup and publication have distinct
-  effects. The delivered runtime requires no original checkout or PHP service.
+  through `node scripts/rer.mjs`. Local setup exits with no app running; dev
+  uses the printed development outbox. Reset is explicitly confirmed and local;
+  export/import preserve supported native data with documented exclusions.
+  Deployment dry-run makes no provider requests. The delivered runtime requires no original checkout or PHP service.
+- **IDENTITY-002 — Retained native password identity (owner decision 2026-10-08).**
+  Preserve native password sign-in, first-owner setup, the accepted owner
+  experience and prior account/workspace data with the maintained Base command mechanisms. Retain this edition's authentication and native owner setup. Existing tenant and permission checks
+  continue to govern every session.
 - **IDENTITY-001 — Scoped authority.** Owner setup, registration, login/recovery,
   project switching, membership and widget admission establish native identity.
   Every private read/write enforces the current actor/project/role; blocked or
@@ -20,6 +27,21 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   never substitutes for user authority. The public widget key and origin are not
   a secret: visitor, registration and project-creation requests are bounded by
   D1-backed limits (`RATE_LIMITS`) and refused with HTTP 429 and `Retry-After`.
+- **FIRST-RUN-001 — A useful first workspace.** A completed installation leads
+  the owner to the setup checklist, whose plain-language items explain local
+  trial requirements. Ordinary workspace creation leads with the widget snippet;
+  Advanced retains the server secret and verification examples. Empty inboxes
+  offer installation, a real test conversation and a demo. Workspace headers
+  follow workspace switching. Visitor headers retain the operator's display name.
+- **LOCAL-MAIL-001 — Explicit local capture.** Only trusted, explicit local mail
+  configuration selects the maintained development outbox for native sign-in and
+  customer mail. Capture persists in local D1 with bounded visibility and pruning
+  on capture, and is described as local capture rather than remote delivery.
+  The viewer is loopback-only, escaped and non-cacheable. Production mounts
+  neither this sender nor this viewer; request URLs and headers cannot enable
+  them, and rejected viewer requests do no database work. Missing credentials or
+  failed remote delivery never fall back to local capture. Native password
+  identity, single-use sign-in confirmation and prior stored data are retained.
 - **CONVERSATION-001 — Durable transcript.** Customer, operator, generation,
   import and administrative writers preserve stable message/command identity,
   revision/frontier, attachment ownership and final-reply admission atomically.
@@ -33,7 +55,55 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
 - **UI-001 — Existing editable experience.** Reuse the original React dashboard,
   transcripts/drafts/suggestions, settings and Shadow DOM widget; preserve useful
   desktop/mobile flows, attachment display, collector/privacy controls and errors.
-  Native routing/transport replaces baked origins and Laravel bootstrapping.
+  Native routing and transport use the configured application origin.
+- **MOVE-IN-001 — Reviewed history import.** Current workspace owner/admin
+  reviewers privately upload, inspect per-kind plans, source-located omissions,
+  rejections, conflicts and publication changes, then explicitly apply bounded,
+  resumable imports of conversations, contacts, tags, saved replies and articles.
+  Preserve source identities, timestamps, private notes and publication state;
+  reject unsupported meaning rather than inventing it. Recheck current role and
+  workspace authority for apply, resume and whole-import undo. Retain immutable
+  source custody and conflict-safe reversal journals. Imports and undo send no
+  mail, widget messages, model requests, assignment or connection notifications;
+  imports are excluded from Reports. Native tag controls enforce workspace scope.
+  Owner decision 2026-10-09 requires exact business-state repeat/undo equality,
+  including contacts, conversations, messages, private notes, tags, source links
+  and every other imported business table. Only platform counters/sequences,
+  audit history and import journals are excluded. Synthetic 1,000-conversation
+  datasets for both vendors qualify this local flow.
+- **OUTCOMES-001 — Resolution feedback and provenance.** Current original visitor
+  sessions may rate a closed resolution with thumbs up/down and an optional
+  comment up to 1,000 characters. Changes retain history; reopened cycles cannot
+  receive the previous resolution's rating. Operators retain access to each past
+  resolution's latest feedback after reopening; visitor eligibility and report
+  denominators remain tied to the current cycle. Erasure removes rating comments.
+  Confirmed operator-sent drafts establish assisted outcomes, otherwise confirmed
+  human replies establish human outcomes. AI requires a complete visible answer
+  history without a person handoff; missing evidence remains unknown. Status,
+  assignment and cancellation transitions recheck current authority atomically.
+- **REPORTS-001 — Workspace calendar reports.** Native conversations created in
+  the workspace IANA calendar range form the cohort; Move in and legacy imports
+  are excluded. First visitor-to-visible-answer response and creation-to-first
+  known-resolution durations use median and nearest-rank p90. Each conversation
+  contributes its latest closed cycle once to outcome and satisfaction rates.
+  Reopened conversations leave those denominators. Aggregate queries return
+  bounded data; CSV streams every matching conversation with formula-safe cells.
+- **CONNECTIONS-001 — Workspace integrations.** Owner/admin tokens have explicit
+  scopes, optional expiry, one-time display, hashed storage and durable audit.
+  Bearer-only API calls have no CORS, per-token limits and native guarded writes.
+  Contact erasure fences API identity restoration and pending event payloads.
+  Native events commit tenant-bound webhook and Slack intents; historical import
+  apply and undo do not emit them. Slack projects bounded native visitor text
+  through Base escaping. Base owns signing, durable attempts and retry policy.
+  HTTP 500 stays uncertain and is not replayed; 429 retains bounded retries.
+  **Scoped edition override, owner decision 2026-10-09:** this consumer uses
+  ordinary platform HTTPS fetch through the unchanged Base wire interface. It
+  refuses every 3xx with manual redirect handling, enforces a 10-second timeout,
+  a 1 MiB request limit and 64 KiB streamed-response limit. Destination syntax
+  and literal IP validation remain enforced. This expressly overrides Base's
+  transport DNS-pinning requirement for this edition; it does not claim DNS
+  pinning or change copied Base contracts. Local synthetic protocol checks do
+  not establish a live Slack connection or hosted installation.
 - **ACTIVATION-001 — Observed owner setup.** An owner sees the same durable,
   project-scoped eight-step checklist on the genuinely empty inbox and Setup page.
   Before explicit validation it is zero of eight, even when installer defaults exist.
@@ -93,7 +163,7 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   beside a code glyph, says it is fixed; the reply to Maya, beside a person glyph,
   carries Send inside it, the only step left) beside the subhead “Your Codex or
   Claude fixes the problem and writes the reply. You press Send.”, the line
-  “100% free and open source.”, an aqua pen-stroke flourish under the calls to
+  “100% free, open source alternative to Zendesk, Intercom, Help Scout and Freshdesk”, an aqua pen-stroke flourish under the calls to
   action that draws itself in once, and the caption steps “The customer asks”,
   “The agent fixes it” and “You press Send” on filled aqua number discs; “Not just better. Free.” (100% free and
   open source, free as in code and free as in cost, MIT licensed, “No seats. No
@@ -153,3 +223,9 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
 
 A source manifest, a compiling bundle or a provider fixture is not by itself
 evidence that a clause is met.
+
+The platform admission index's `move_in_contact_keys.email_digest` is lazy,
+derived memoization. Business equality retains its exact project/contact links
+and independently validates each populated digest against the native email;
+NULL-to-correct-digest does not change business state. The contact row, email,
+identity and every source/business link remain in the equality comparison.

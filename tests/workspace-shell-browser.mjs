@@ -45,7 +45,10 @@ try {
   await check('deep link to another member project activates it before data loads',async()=>{
     await bindSession(bound.id);
     await page.goto(`${runtime.origin}/projects/${other.id}/conversations/${other.conversationId}`);await ready();
-    await page.locator('.transcript-message-content').getByText(other.message,{exact:true}).waitFor();
+    const transcriptMessage=page.locator('.transcript-message-content').getByText(other.message,{exact:true});
+    await transcriptMessage.waitFor();
+    assert.equal(await transcriptMessage.count(),1,'the opened transcript contains exactly one target message');
+    assert.equal(await transcriptMessage.isVisible(),true,'the target conversation message is visible');
     await shot('deep-link-conversation');
     assert.equal(await api(`/api/conversations/${other.conversationId}/messages`),200,'conversation reads follow the URL project');
     assert.equal(await api(`/api/knowledge/${other.id}/articles`),200,'knowledge reads follow the URL project');
@@ -203,7 +206,7 @@ try {
     await shot('projects-mobile');
     await page.setViewportSize({width:1440,height:900});
   });
-  await check('another user ID has no profile page; own profile routes still work',async()=>{
+  await check('/users/<other-id> is not a page; own profile routes still work',async()=>{
     const ownId=await page.evaluate(async()=>(await (await fetch('/api/management/bootstrap')).json()).currentAgent.id);
     await page.goto(`${runtime.origin}/users/${unknownId}`);await ready();
     await page.getByText('This page was not found.').waitFor();
@@ -234,19 +237,18 @@ try {
   });
   await check('dashboard loads open project sockets without teardown warnings',async()=>{
     const fresh=await context.newPage();const lines=[];let sockets=[];
-    const profilePath=new URL('users/profile',runtime.origin).pathname;
     fresh.on('console',message=>lines.push(`${message.type()}: ${message.text()}`));
     fresh.on('websocket',socket=>sockets.push(socket));
     // A socket closed while still connecting is the browser warning this check guards against.
     await fresh.addInitScript(()=>{const close=WebSocket.prototype.close;window.__closedWhileConnecting=0;WebSocket.prototype.close=function(...args){if(this.readyState===0)window.__closedWhileConnecting++;return close.apply(this,args)}});
     try{
-      for(const path of ['/projects',profilePath,`/projects/${bound.id}/conversations`]){
+      for(const path of ['/projects','/users/profile',`/projects/${bound.id}/conversations`]){
         sockets=[];
         await fresh.goto(runtime.origin+path);await fresh.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:/Switch workspace:/}).waitFor();
         await fresh.waitForTimeout(1500);
         const open=sockets.filter(socket=>!socket.isClosed()&&/\/api\/projects\/[^/]+\/socket/.test(socket.url()));
         assert.equal(await fresh.evaluate(()=>window.__closedWhileConnecting),0,`${path}: no socket is closed before its handshake completes`);
-        assert.equal(open.length,path==='/projects'||path===profilePath?fixture.projects.length:1,`${path}: one live project socket per connected project`);
+        assert.equal(open.length,path==='/projects'||path==='/users/profile'?fixture.projects.length:1,`${path}: one live project socket per connected project`);
       }
       const noisy=lines.filter(line=>/closed before the connection is established|Live connection unavailable/.test(line));
       assert.deepEqual(noisy,[],'no WebSocket teardown or false reconnect warnings');

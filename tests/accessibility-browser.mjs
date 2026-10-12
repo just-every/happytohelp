@@ -58,7 +58,8 @@ async function listen(server, port) {
 }
 
 const ports = await selectRuntimePorts();
-const runtime = await createRuntime({port: ports.port, inspectorPort: ports.inspectorPort});
+// Local mail mode, as a local install runs it, so the widget offers its email notification explanation.
+const runtime = await createRuntime({port: ports.port, inspectorPort: ports.inspectorPort, vars: {H2H_LOCAL: 'true', APP_ORIGIN: `http://127.0.0.1:${ports.port}`, EMAIL_PROVIDER: 'development', EMAIL_FROM: 'support@localhost.test'}});
 let hostServer;
 let browser;
 let success = false;

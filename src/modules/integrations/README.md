@@ -29,7 +29,7 @@ settings and members. Setting names and API paths call a workspace a *project*.
 ### Choose a provider
 
 Set `EMAIL_PROVIDER` to pick a provider, then give it a key and a sender address.
-[How to set a setting](../../../OPERATIONS.md#how-to-set-a-setting) explains where
+[Optional features and their settings](../../../OPERATIONS.md#optional-features-and-their-settings) explains where
 these go. If you already use one of these providers, pick that one. Cloudflare
 Email Sending needs the Workers Paid plan.
 
@@ -282,8 +282,8 @@ which kind it is.
   installation tokens can't use `/user/repos`). Instead it checks each repository
   in the workspace's saved list by reading it.
 
-A workspace can select up to 50 repositories. Write each as the GitHub owner
-followed by a slash and the repository name, for example `just-every/happytohelp`. Under
+A workspace can select up to 50 repositories. Enter each repository’s owner and
+name separated by a slash. Under
 **Access**, choose separately whether operators (**Allow agents**) and customers
 (**Allow contacts**) may use them.
 

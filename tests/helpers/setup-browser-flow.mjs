@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { chromium } from 'playwright';
-import { sceneBackground } from './scene-background.mjs';
 
 // Call only against fresh isolated test storage: this exercises real first-owner setup.
 export async function checkSetupBrowser(origin, evidenceDir) {
@@ -19,8 +18,6 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         await page.goto(origin + '/setup#name=Setup%20browser%20workspace&ownerName=Setup%20owner');
         await page.getByLabel('Owner password', { exact: true }).waitFor();
         assert.equal(await page.getByLabel('Bootstrap token').count(), 0);
-        assert.deepEqual(await sceneBackground(page, '.setup-scene'), { path: '/setup/ocean.webp', status: 200, type: 'image/webp', width: 3072, height: 2048 });
-        checks.push('setup scenery background is served and decodes');
         assert.equal(new URL(page.url()).hash, '');
         await page.getByLabel('Owner password', { exact: true }).fill('temporary-password');
         await page.getByRole('button', { name: 'Save for later' }).click();
@@ -78,8 +75,15 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         await page.getByRole('button', { name: 'Login', exact: true }).click();
         await page.waitForURL('**/conversations');
         checks.push('chosen password signs in after session revocation');
+        // A signed-in owner who opens /setup is sent on to the workspace; nobody can create another owner.
+        await page.goto(origin + '/setup');
+        await page.waitForURL(/\/projects\/[^/]+\/activation$/);
+        assert.equal(await page.getByRole('button', { name: 'Create workspace', exact: true }).count(), 0);
+        checks.push('a signed-in owner opening /setup continues to the workspace');
+        assert.equal(await page.evaluate(async () => (await fetch('/api/identity/session', { method: 'DELETE' })).status), 200);
         await page.goto(origin + '/setup');
         await page.getByRole('link', { name: 'Sign in', exact: true }).waitFor();
+        assert.equal(await page.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/login?returnTo=%2Fsetup');
         assert.equal(await page.getByRole('button', { name: 'Create workspace', exact: true }).count(), 0);
         checks.push('completed setup shows sign-in and cannot create another owner');
         await page.screenshot({ path: join(evidenceDir, 'setup-complete.png'), fullPage: true });

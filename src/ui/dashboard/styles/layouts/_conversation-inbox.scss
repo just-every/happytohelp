@@ -10,10 +10,14 @@ body.conversation-workspace #chat .conversation-inbox {
     .conversation-inbox-header {
         position: relative;
         display: flex;
-        flex: 0 0 var(--conversation-top-height);
+        // The search field and the tag filter each take a full row, so the header
+        // grows to fit both instead of overflowing the column at any width.
+        flex: 0 0 auto;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        height: var(--conversation-top-height);
+        gap: 8px;
+        min-height: var(--conversation-top-height);
         padding: 14px 14px;
 
         &::after {

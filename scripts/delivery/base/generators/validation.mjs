@@ -21,6 +21,19 @@ export function repository(value) {
   return name;
 }
 
+/** Descriptor document form; integration repository() remains an internal key. */
+export function sourceRepository(value) {
+  const invalid = () => new Error('sourceRepository must be https://github.com/<owner>/<repo> (legacy owner/repo is also accepted)');
+  if (typeof value !== 'string' || value !== value.trim()) throw invalid();
+  const url = /^https:\/\/github\.com\/([^/]+\/[^/]+)$/i.exec(value);
+  const identity = url ? url[1].replace(/\.git$/i, '') : value;
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/.test(identity) || identity.split('/').some(part => part.endsWith('.'))) throw invalid();
+  // A literal .git repository name cannot be represented without a transport
+  // suffix under this document contract. Do not silently change its identity.
+  if (/\.git$/i.test(identity)) throw new Error('sourceRepository has a literal .git repository name that cannot use the canonical https://github.com/<owner>/<repo> form');
+  return `https://github.com/${identity}`;
+}
+
 export function artifactFilename(value) {
   const name = string(value, 'artifactFile', 200);
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\.json$/.test(name) || name.includes('..') || name === 'release-provenance.json') throw new Error('artifactFile must be a root JSON filename other than release-provenance.json');

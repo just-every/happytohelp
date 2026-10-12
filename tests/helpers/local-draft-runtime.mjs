@@ -1,3 +1,4 @@
+import {migrationStatements} from './migration-statements.mjs';
 import assert from 'node:assert/strict';
 import {readFile, readdir, mkdtemp, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -19,8 +20,8 @@ export async function localDraftRuntime() {
             durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}));
         const db = await mf.getD1Database('DB'), bucket = await mf.getR2Bucket('FILES');
         for (const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql',
-            '030_local_computer.sql','0070_management.sql','0050_knowledge.sql','0080_integrations.sql']) {
-            for (const statement of (await readFile('migrations/'+file,'utf8')).split(';').map(x=>x.trim()).filter(Boolean)) await db.prepare(statement).run();
+            '030_local_computer.sql','0070_management.sql','0050_knowledge.sql','0080_integrations.sql','020_ai_support.sql','112_conversation_outcomes.sql']) {
+            for (const statement of migrationStatements(await readFile('migrations/'+file,'utf8'))) await db.prepare(statement).run();
         }
         const request = async (path, body, token, headers = {}, method = body === undefined ? 'GET' : 'POST') => {
             const response = await mf.dispatchFetch('http://localhost'+path, {method, headers:{'Content-Type':'application/json',

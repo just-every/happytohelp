@@ -25,7 +25,7 @@ try {
   const db = await mf.getD1Database('DB')
   for (const name of ['0001_identity.sql', '0002_conversations.sql', '0004_message_intent.sql',
     '0005_widget_identity.sql', '0007_conversation_history.sql', '0070_management.sql',
-    '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql', '0102_public_abuse_limits.sql']) {
+    '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql', '0102_public_abuse_limits.sql','112_conversation_outcomes.sql']) {
     const migration = await readFile(new URL('../migrations/' + name, import.meta.url), 'utf8')
     for (const [, sql] of migration.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)) await db.prepare(sql).run()
   }

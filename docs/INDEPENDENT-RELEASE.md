@@ -41,110 +41,6 @@ exact Git commands for one release and shows how to roll back.
 > silently change the identities of the Cloudflare resources your installation
 > is bound to (its D1 database, R2 bucket and queues).
 
-### Upgrade from v0.2.0 to v0.2.1
-
-This procedure covers only the exact public tags `v0.2.0`
-(`3b34df590cff61358afc07ab56ea886461ca74fd`) and `v0.2.1`
-(`59c6e2e1beb321e9f1cb5493efd05e20fc068638`). `v0.2.1` descends from `v0.2.0`.
-It is kept here as a worked example of the Git steps.
-
-**What changes.** The tag diff changes seven files: `CHANGELOG.md`,
-`docs/INDEPENDENT-RELEASE.md`, `package.json`, `rer-project.json`, `seed.json`,
-`sources.lock.json` and `tests/independent-runtime.mjs`. It updates release and
-hosted-build metadata and changes the independent-runtime table-count assertion
-from 94 to 97. It contains no application-runtime source change and no `.sql`
-migration change. Migrations `0102_public_abuse_limits.sql`,
-`0103_contact_erasure.sql` and `0104_inbound_email_classification.sql` are
-already present in both tags, so the 97-table assertion in v0.2.1 recognizes
-schema that v0.2.0 already ships; it is not a new migration.
-
-#### 1. Prepare a rollback
-
-Before you deploy, record the source SHA you are replacing, and make an
-independent backup under your existing data-retention procedure (see
-[Back up your data](#back-up-your-data) below).
-
-#### 2. Fetch and check the tags
-
-- If this checkout has the official repository as `origin`, run
-  `git fetch origin --tags`.
-- If `origin` is your fork, fetch the public repository through a remote named
-  `upstream`. Add it if needed, then fetch:
-
-  ```sh
-  git remote add upstream https://github.com/just-every/happytohelp.git
-  git fetch upstream --tags
-  ```
-
-Confirm the tag commits and ancestry:
-
-```sh
-git rev-parse 'v0.2.0^{commit}'
-git rev-parse 'v0.2.1^{commit}'
-git merge-base --is-ancestor v0.2.0 v0.2.1
-```
-
-The first two commands must print the SHAs above, and the ancestry check must
-exit successfully.
-
-#### 3. Merge the release
-
-From a clean source branch based on the deployed v0.2.0 code, create an upgrade
-branch and merge the public tag:
-
-```sh
-git switch -c upgrade/happytohelp-v0.2.1
-git merge --no-ff v0.2.1
-git rev-parse HEAD
-```
-
-Resolve any merge conflicts while keeping your own source changes. Do not
-replace a checkout you have edited with generated output. Record the final
-`HEAD` SHA that you deploy.
-
-#### 4. Deploy
-
-For an installation whose existing remote target configuration is still present,
-run:
-
-```sh
-pnpm install --frozen-lockfile
-pnpm run deploy -- --remote
-```
-
-`deploy -- --remote` collects the migration files from the checked-out source,
-builds, asks Wrangler to apply remote D1 migrations, and only then uploads the
-Worker. There are no new SQL migrations between these exact tags, so a database
-already migrated by v0.2.0 has no v0.2.1 migration to apply.
-
-If this is a fresh checkout without `.seed/deployment/<prefix>/wrangler.json`,
-first restore the same account, prefix, origin and runtime variables, then run
-`pnpm run setup -- --plan` and `pnpm run setup -- --remote` before deploying.
-Setup reuses resources it finds by their declared names.
-
-Confirm the resulting `/health`. It verifies the runtime plus D1/R2
-reachability, not the rest of the service.
-
-#### Roll back
-
-To roll back this exact code-only update, check out the pre-upgrade SHA you
-recorded (for an unmodified v0.2.0 installation, `v0.2.0`), install that
-revision's frozen dependencies, and run `pnpm run deploy -- --remote` with the
-same target and runtime configuration:
-
-```sh
-read -r -p 'Pre-upgrade commit SHA: ' PRE_UPGRADE_SHA
-git switch --detach "$PRE_UPGRADE_SHA"
-pnpm install --frozen-lockfile
-pnpm run deploy -- --remote
-```
-
-Do not delete data, undo or edit applied migration records, or reverse SQL by
-hand. The two public tags have no schema difference, so this code rollback
-leaves the v0.2.0 D1 schema and all D1/R2 data in place. This does not cover a
-later v0.2.x source revision that added migrations or changed stored data; older
-code may not be compatible with such a database.
-
 ## Back up your data
 
 Your data lives in two places: the D1 database (named `<prefix>-db`, where
@@ -231,20 +127,19 @@ give consent again. Otherwise, normal sign-in sessions work as before.
 
 ### On your computer
 
-Use Node 26.8.1 or newer and pnpm 10.12.4. The guided way is the installer,
-`node scripts/install.mjs` (see [Install](INSTALLER.md)). To do it by hand,
-run:
+Use Node **22.20.0** and pnpm **10.12.4**. Prepare private manifest answers
+as described in [Install](INSTALLER.md), then run:
 
 ```sh
-node scripts/operations.mjs describe
-pnpm install --frozen-lockfile
-pnpm run setup -- --local
-pnpm run dev --port 12401 --strictPort
+node scripts/rer.mjs install
+node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json --port 12401
+node scripts/rer.mjs dev
 ```
 
-Then open `http://localhost:12401/setup` to create your owner account and
-workspace. Port 12401 is only an example; without `--port`, the app uses the
-address it prints (normally `http://localhost:5173`).
+Setup prepares the native owner and stops its temporary app. Dev prints the
+app address and development outbox; choose its newest message, follow the link
+and press Sign in. No email is sent. Port 12401 is an explicit example; the
+saved loopback origin is reused. Stop dev with Ctrl+C.
 
 You do not need an email or AI account to set up the owner, hold conversations,
 let visitors in through the widget, or answer from knowledge content you supply
@@ -258,12 +153,11 @@ To hand support work to your own computer, use the local agent's pairing steps
 
 ### On your own Cloudflare account
 
-Choose the installer's **Publish online with Cloudflare** option, or deploy by
-hand with your own `CLOUDFLARE_ACCOUNT_ID`, `H2H_RESOURCE_PREFIX`,
-`H2H_PUBLIC_ORIGIN`, optional `PREVIEW_ORIGIN` and a fresh `H2H_SETUP_TOKEN`.
+Use `node scripts/rer.mjs deploy --environment production` with the real
+`deploy.json` declaration and private owner-account credentials.
 [Deploy to your Cloudflare account](../OPERATIONS.md#deploy-to-your-cloudflare-account)
-in the Operations guide has the full steps, the prerequisites, the rules for
-origins and the API token permissions.
+covers prerequisites, secret custody and health boundaries. Local
+`node scripts/rer.mjs deploy --dry-run` builds/validates without provider requests.
 
 **Website preview** lets owners and admins see their website with the chat
 widget on it. It needs its own custom-domain origin (`PREVIEW_ORIGIN`), pointed
@@ -301,7 +195,7 @@ it at `/setup`. Creating the first owner closes setup permanently.
 
 The **artifact** is the deployable package of your installation. You only need
 it if you deliver builds yourself or want to check a published build. To build
-it, run `pnpm run build` or `pnpm run verify`. Both run the pinned Base producer
+it, run `node scripts/rer.mjs build` or `node scripts/rer.mjs verify`. Both run the pinned Base producer
 (the packaging step, fixed to an exact upstream version) after Vite.
 
 - The producer writes `delivery-artifact/happytohelp-worker-artifact.json`.

@@ -6,7 +6,7 @@ export default function SetupNotice({ state, error }: { state: 'loading' | 'comp
     if (state === 'complete') return <IdentityFrame>
         <h1>You’re already set up</h1>
         <p className="id-lede">This installation already has an owner. Sign in to continue to your workspace.</p>
-        <div className="id-actions"><a className="pill pill--ink" href="/login">Sign in</a></div>
+        <div className="id-actions"><a className="pill pill--ink" href="/login?returnTo=%2Fsetup">Sign in</a></div>
     </IdentityFrame>;
     if (state === 'unavailable') return <IdentityFrame>
         <h1>Set up HappyToHelp</h1>

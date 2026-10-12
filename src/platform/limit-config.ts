@@ -7,6 +7,7 @@ import type { Env } from './env'
  * conversations, attachments). They sit well above a busy site's real traffic.
  */
 export const rateLimitDefaults = {
+ apiRequestsPerTokenMinute: 120,
  widgetSessionsPerIpHour: 30,
  widgetSessionsPerProjectHour: 5000,
  conversationsPerContactHour: 10,

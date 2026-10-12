@@ -1,0 +1,21 @@
+/* The brand's tokens, defined once for every surface in the homepage's language: the homepage and the pages built on it (the
+   docs and the 404), and first-run setup. Paper, ink and one geometric sans-serif's chrome (homepage.css reads these), and
+   the drawings' ink and aqua family (drawings.css reads these; the page's discs, links, dividers and closing line, and
+   setup's steps, card and drawings, borrow them). No other stylesheet defines them, so setup cannot drift from the homepage. */
+/* The body holding either root declares the tokens too, so its background reads the paper. The roots keep their own
+   declaration for any browser without :has(), which :is() lets drop the body selectors alone rather than the whole rule. */
+body:has(.h2h-home), body:has(.h2h-setup) { margin: 0; padding: 0; background: var(--paper); }
+:is(body:has(.h2h-home), body:has(.h2h-setup)), .h2h-home, .h2h-setup {
+  --paper: #f6f2ea;
+  --ink: #141414;
+  --ink-soft: #66635d;
+  --rule: rgba(20, 20, 20, 0.16);
+  --gutter: clamp(20px, 5vw, 76px);
+  --d-ink: var(--ink);
+  --d-ink-soft: #6b6a65;
+  --d-cyan: #8fe3ee;
+  --d-cyan-deep: #5ad8ec;
+  --d-cyan-tint: #d6f5fa;
+  --d-cyan-wash: #e8f9fc;
+  --d-line: rgba(20, 20, 20, 0.14);
+}

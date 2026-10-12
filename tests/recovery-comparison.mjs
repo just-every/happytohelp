@@ -7,20 +7,16 @@ import {snapshot, compareSnapshots, summarize, sha256} from './helpers/recovery/
 import {seedJourney, verifyAccess, verifyFreshLogin, setupToken} from './helpers/recovery/journey.mjs';
 
 const [profile, buildDirectory, outputDirectory] = process.argv.slice(2);
-assert.ok(['launch', 'candidate'].includes(profile), 'Usage: node tests/recovery-comparison.mjs launch|candidate BUILD_DIRECTORY NEW_OUTPUT_DIRECTORY');
+assert.equal(profile, 'first-run', 'Usage: node tests/recovery-comparison.mjs first-run BUILD_DIRECTORY NEW_OUTPUT_DIRECTORY');
 assert.ok(buildDirectory && outputDirectory, 'Build and output directories are required');
 const buildRoot = resolve(buildDirectory), output = resolve(outputDirectory);
 const build = JSON.parse(await readFile(join(buildRoot, 'build.json')));
 const bytes = await readFile(join(buildRoot, 'delivery-artifact/artifact.json'));
 assert.equal(sha256(bytes), build.artifactSha256, 'Artifact does not match build receipt');
 const artifact = await readArtifact(join(buildRoot, 'delivery-artifact/artifact.json'));
-if (profile === 'launch') assert.equal(build.sourceSha, '09d80a7896fa6ca8643516976ca43d9576607c75');
-const candidateAdditions=['0107_activation_receipts.sql','0108_public_answer_citations.sql','0109_magic_signins.sql'];
-const expectedMigrations = profile === 'launch' ? 38 : 42;
-if(profile==='candidate'){assert.equal(artifact.deploymentSpec.migrations.filter(m=>!candidateAdditions.includes(m.name)).length,39);assert.deepEqual(artifact.deploymentSpec.migrations.filter(m=>candidateAdditions.includes(m.name)).map(m=>m.name),candidateAdditions);}
-assert.equal(artifact.deploymentSpec.migrations.length, expectedMigrations);
-const verificationMigration = artifact.deploymentSpec.migrations.find(m => m.name === '0106_project_verification_secret.sql');
-assert.equal(Boolean(verificationMigration), profile === 'candidate', 'Preserve candidate migration 0106');
+const migrationNames = artifact.deploymentSpec.migrations.map(migration => migration.name);
+assert.ok(migrationNames.length > 0, 'Recovery requires the real emitted migration ledger');
+assert.equal(new Set(migrationNames).size, migrationNames.length, 'Each emitted migration must apply once');
 assert.deepEqual(artifact.deploymentSpec.migrations.map(({name, sha256}) => ({name, sha256})), build.migrations);
 await mkdir(output); // Refuse to silently reuse a previous run's state or receipt.
 const startedAt = new Date().toISOString();
@@ -40,15 +36,12 @@ try {
       await storage.inspect({key: `${journey.owner.projectId}/recovery/${suffix}`, bytes, options: {httpMetadata: {contentType: 'application/octet-stream', cacheControl: 'private, max-age=73', contentDisposition: `attachment; filename="${suffix}.bin"`}, customMetadata: {purpose: 'recovery-comparison', unicode: 'café'}}});
     }
     before = await snapshot(storage);
-    assert.equal(Object.keys(before.rows).length, 104);
     const migrations = before.rows.d1_migrations.map(row => JSON.parse(row).name).sort();
     assert.deepEqual(migrations, artifact.deploymentSpec.migrations.map(m => m.name).sort(), 'Applied migration rows must match the emitted artifact');
     assert.ok(before.rows.messages.length > 0 && before.rows.sessions.length > 0 && before.rows.media.length > 0, 'Recovery requires populated native records');
     assert.ok(before.objects.length >= 3);
-    if (profile === 'candidate') {
-      const project = before.rows.projects.map(row => JSON.parse(row)).find(row => row.id === journey.owner.projectId);
-      assert.match(project.verification_secret, /^[a-f0-9]{64}$/, 'Candidate project verification secret must survive full row comparison');
-    }
+    const project = before.rows.projects.map(row => JSON.parse(row)).find(row => row.id === journey.owner.projectId);
+    assert.match(project.verification_secret, /^[a-f0-9]{64}$/, 'Project verification secret must survive full row comparison');
   });
   const exportFile = join(output, 'native-export.sql');
   await original.run(['d1', 'export', 'DB', '--local', '--output', exportFile]);
@@ -70,11 +63,10 @@ try {
   const receipt = {
     profile, sourceSha: build.sourceSha, artifactSha256: build.artifactSha256, startedAt, finishedAt: new Date().toISOString(), node: process.version,
     tables: Object.keys(before.rows).length, migrations: artifact.deploymentSpec.migrations.length,
-    migration0106Sha256: verificationMigration?.sha256 ?? null,
     nativeExportSha256: sha256(await readFile(exportFile)), restoredExportSha256: sha256(await readFile(repeatExport)),
     before: summarize(before), restored: summarize(after),
     checks: ['actual native D1 export and fresh D1 import', 'every schema definition and row compared', 'applied migration identities match artifact', 'empty fresh R2 target', 'all R2 bytes and HTTP/custom metadata compared', 'byte-identical native SQL re-export before login', 'retained session authenticated media and transcript', 'fresh password login authenticated media and transcript', 'unauthenticated media refused', 'restored setup stays closed'],
-    boundaries: ['local emitted Worker, D1 and R2 only', 'no provider credentials supplied or live-provider qualification', 'Durable Object storage not exported', 'not complete RER export or production recovery qualification', 'original 97-table independent-runtime assertion unchanged'],
+    boundaries: ['local emitted Worker, D1 and R2 only', 'no provider credentials supplied or live-provider qualification', 'Durable Object storage not exported', 'not complete RER export or production recovery qualification', 'the actual complete migrated schema and every row are compared without a fixed inventory'],
   };
   await writeFile(join(output, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
   console.log(JSON.stringify({profile, sourceSha: build.sourceSha, tables: receipt.tables, migrations: receipt.migrations, objects: before.objects.length, result: 'PASS'}));

@@ -7,9 +7,9 @@ test('receipt storage requires an explicit credential-free GitHub repository', (
   const url = 'https://github.com/just-every/happytohelp.git';
   assert.equal(evidenceRepository(url), url);
   for (const value of [undefined, '', '/local/store', 'file:///local/store',
-    'https://user:password@github.com/just-every/happytohelp.git',
-    'https://elsewhere.example/just-every/happytohelp.git', `${url}?token=test`,
-    `${url}\n`, 'https://github.com/example/../receipts.git']) {
+    url.replace('https://','https://test-only-user:test-only-password@'),
+    'https://elsewhere.example/example/receipts.git', `${url}?token=test`,
+    `${url}\n`, url.replace('/happytohelp.git','/../happytohelp.git')]) {
     assert.throws(() => evidenceRepository(value), /receipt-store-unconfigured/);
   }
 });

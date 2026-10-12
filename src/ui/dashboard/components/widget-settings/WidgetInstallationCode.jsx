@@ -66,14 +66,6 @@ export default function WidgetInstallationCode() {
 
     return (
         <div className="widget-code">
-            <section className="widget-code__section widget-code__section--secret" aria-labelledby="widget-code-secret-heading">
-                <div className="widget-code__section-heading">
-                    <h2 id="widget-code-secret-heading">Server secret</h2>
-                    <p>Use this secret to verify signed-in users on your server.</p>
-                </div>
-                <SecretControl />
-            </section>
-
             <section className="widget-code__section" aria-labelledby="widget-code-install-heading">
                 <div className="widget-code__section-heading">
                     <h2 id="widget-code-install-heading"><span aria-hidden="true">1.</span> Install the widget</h2>
@@ -87,6 +79,16 @@ export default function WidgetInstallationCode() {
                     aiCode={aiIntegrationBrief}
                     aiCopyAriaLabel="Copy redacted AI setup guide from the anonymous installation snippet"
                 />
+            </section>
+
+            <details className="widget-code__advanced">
+                <summary>Advanced</summary>
+            <section className="widget-code__section widget-code__section--secret" aria-labelledby="widget-code-secret-heading">
+                <div className="widget-code__section-heading">
+                    <h2 id="widget-code-secret-heading">Server secret</h2>
+                    <p>Use this secret to verify signed-in users on your server.</p>
+                </div>
+                <SecretControl />
             </section>
 
             <section className="widget-code__section" aria-labelledby="widget-code-verification-heading">
@@ -144,6 +146,7 @@ export default function WidgetInstallationCode() {
                         aiCopyAriaLabel={`Copy redacted AI setup guide with the ${selectedLanguage.label} metadata addition`}
                     />
                 </div>
+            </details>
             </details>
         </div>
     );

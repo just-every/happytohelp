@@ -44,6 +44,7 @@ const normaliseSuggestions = rawSuggestions => {
 export default function useConversationSuggestions({
     conversationId,
     message,
+    draftOrigin,
     onMessageChange,
     onLoadingMessageChange,
     disabled,
@@ -104,20 +105,20 @@ export default function useConversationSuggestions({
         setUndoStack(stack => {
             const last = stack[stack.length - 1];
             if (last?.message === message) return stack;
-            return [ ...stack, { action, message, ...details } ];
+            return [ ...stack, { action, message, origin: draftOrigin, ...details } ];
         });
         setRedoStack([]);
-    }, [ message ]);
+    }, [ message, draftOrigin ]);
 
     const clearReplySuggestionSelection = useCallback(() => {
         replySelection.current = null;
         setSelectedSuggestion(null);
     }, []);
 
-    const applyDraft = useCallback((draft, action) => {
+    const applyDraft = useCallback((draft, action, origin) => {
         rememberDraft(action);
         clearReplySuggestionSelection();
-        onMessageChange(draft);
+        onMessageChange(draft, undefined, origin);
     }, [ clearReplySuggestionSelection, onMessageChange, rememberDraft ]);
 
     const requestAssist = useCallback((options = {}) => {
@@ -219,10 +220,10 @@ export default function useConversationSuggestions({
         }
 
         replySelection.current = nextSelection.selection
-            ? { ...nextSelection.selection, selectionId }
+            ? { ...nextSelection.selection, selectionId, originalOrigin: currentSelection ? currentSelection.originalOrigin : draftOrigin }
             : null;
         setSelectedSuggestion(nextSelection.selection ? index : null);
-        onMessageChange(nextSelection.message);
+        onMessageChange(nextSelection.message, undefined, nextSelection.action === 'deselect' ? currentSelection.originalOrigin || null : {kind: 'ai', generationId: suggestions.generation_id, selection: index});
 
         if (nextSelection.action === 'deselect') {
             setUndoStack(stack => {
@@ -233,7 +234,7 @@ export default function useConversationSuggestions({
                 return stack.slice(0, -1);
             });
         }
-    }, [ conversationId, disabled, message, onMessageChange, rememberDraft, suggestions.loading ]);
+    }, [ conversationId, disabled, message, onMessageChange, rememberDraft, suggestions.loading, suggestions.generation_id, draftOrigin ]);
 
     const runTool = useCallback(tool => {
         if (disabled || suggestions.loading || !message?.trim()) return;
@@ -251,24 +252,24 @@ export default function useConversationSuggestions({
             if (!stack.length) return stack;
 
             const previous = stack[stack.length - 1];
-            setRedoStack(redo => [ ...redo, { action: previous.action, message } ]);
-            onMessageChange(previous.message);
+            setRedoStack(redo => [ ...redo, { action: previous.action, message, origin: draftOrigin } ]);
+            onMessageChange(previous.message, undefined, previous.origin || null);
             clearReplySuggestionSelection();
             return stack.slice(0, -1);
         });
-    }, [ clearReplySuggestionSelection, message, onMessageChange ]);
+    }, [ clearReplySuggestionSelection, message, draftOrigin, onMessageChange ]);
 
     const redo = useCallback(() => {
         setRedoStack(stack => {
             if (!stack.length) return stack;
 
             const next = stack[stack.length - 1];
-            setUndoStack(undoHistory => [ ...undoHistory, { action: next.action, message } ]);
-            onMessageChange(next.message);
+            setUndoStack(undoHistory => [ ...undoHistory, { action: next.action, message, origin: draftOrigin } ]);
+            onMessageChange(next.message, undefined, next.origin || null);
             clearReplySuggestionSelection();
             return stack.slice(0, -1);
         });
-    }, [ clearReplySuggestionSelection, message, onMessageChange ]);
+    }, [ clearReplySuggestionSelection, message, draftOrigin, onMessageChange ]);
 
     useEffect(() => {
         if (!activeTool || !suggestions.tool_response) return;
@@ -287,7 +288,7 @@ export default function useConversationSuggestions({
             conversationId,
             draft: message,
         })) {
-            applyDraft(suggestions.tool_response, activeTool);
+            applyDraft(suggestions.tool_response, activeTool, {kind: 'ai', generationId: suggestions.generation_id});
         }
         previousToolResponse.current = '';
         activeToolRequest.current = null;

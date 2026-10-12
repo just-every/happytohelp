@@ -13,7 +13,6 @@ const records = [], errors = [], cleanup = {};
 let runtime, browser, success = false;
 try {
     runtime = await createRuntime();
-    assert.equal(runtime.migrationCount, 42);
     const fixture = await buildInboxFixture(runtime.origin);
     const conversationId = fixture.contacts.draft.id;
     const apiPath = `/api/dashboard/projects/${fixture.projectId}/conversations/${conversationId}`;

@@ -17,7 +17,7 @@ test('fresh integration/release ancestry admits exact commits and rejects featur
     const args={cwd:root,sha:first,dispatchSha:tip,dispatchRef:'refs/heads/main',event:'workflow_dispatch',repo:'just-every/happytohelp',mode:'stage',remote:root,env:localEnv};
     assert.equal(validateSource(args),first);
     for (const mutation of [{sha:feature},{sha:'HEAD'},{sha:'--help'},{sha:tip+'\necho bad'},{sha:tip.toUpperCase()},
-      {repo:'nodejs/node'},{event:'pull_request'},{dispatchRef:'refs/heads/feature'},{dispatchSha:feature},{mode:'proof',proof:'../../package.json'}])
+      {repo:'octocat/Hello-World'},{event:'pull_request'},{dispatchRef:'refs/heads/feature'},{dispatchSha:feature},{mode:'proof',proof:'../../package.json'}])
       assert.throws(()=>validateSource({...args,...mutation}));
     g(['tag','scratch',feature]);assert.throws(()=>validateSource({...args,sha:feature}));
     g(['tag','v0.2.3-rc.1',feature]);assert.equal(validateSource({...args,sha:feature}),feature);

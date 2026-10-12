@@ -1,3 +1,5 @@
+import './first-run.css';
+import WorkspaceName from './WorkspaceName';
 import React, { useEffect } from 'react';
 import { createWorkspaceTheme, normalizeWorkspaceMode } from './workspaceModes';
 import { Outlet } from '@tanstack/react-router';
@@ -52,6 +54,6 @@ export function DashboardContent() {
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
     return isInbox
-        ? <div className="main-content"><h1 className="visually-hidden">Inbox</h1><div id="chat"><Chat /></div></div>
+        ? <div className="main-content inbox-with-header"><header className="inbox-workspace-header"><WorkspaceName settings={settings}/><h1 className="visually-hidden">Inbox</h1></header><div id="chat"><Chat /></div></div>
         : <WorkspacePages settings={settings} />;
 }

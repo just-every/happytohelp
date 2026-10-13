@@ -17,15 +17,25 @@ const unexpectedMail = (database, owner) => {
 // record the new conversation, but with no destination nothing fans out. Under
 // rer, the development outbox holds only rer's own owner sign-in captures.
 const inertTables = ['move_in_runs', 'ik_jobs', 'native_integration_destinations', 'native_integration_intents', 'integration_deliveries', 'integration_tokens', 'rer_portability_jobs'];
+const exists = (database, table) => scalar(database, "SELECT count(*) n FROM sqlite_master WHERE type='table' AND name=?", table) > 0;
+
+// What the baseline store already held before this source's migrations: zero
+// for 0.3, which has none of these tables (the default for callers that pass
+// none); a populated 0.4 store already has native events and may hold earlier
+// outbox mail. The upgrade adds none.
+export function priorState(database, owner) {
+  const counts = Object.fromEntries([...inertTables, 'native_integration_events'].map(table => [table, exists(database, table) ? count(database, table) : 0]));
+  return {counts, mail: exists(database, 'rer_mail_development_outbox') ? unexpectedMail(database, owner) : 0};
+}
 
 // Through this source's emitted Worker on the upgraded store, with the owner's
 // original password: native identity, transcript, attachment, appearance and
 // article read back; a new conversation works; Move in, Reports and Connections
 // open empty with nothing started.
-export async function readBack(origin, database, data) {
+export async function readBack(origin, database, data, prior = {counts: {}, mail: 0}) {
   const call = client(origin), checks = {};
-  for (const table of [...inertTables, 'native_integration_events']) assert.equal(count(database, table), 0, `${table} must stay empty after upgrade`);
-  assert.equal(unexpectedMail(database, data.owner.email), 0, 'no mail other than owner sign-in captures');
+  for (const table of [...inertTables, 'native_integration_events']) assert.equal(count(database, table), prior.counts[table] ?? 0, `${table} gains no rows from the upgrade`);
+  assert.equal(unexpectedMail(database, data.owner.email), prior.mail, 'no mail other than owner sign-in captures');
   const login = await call('/api/identity/login', {body: {email: data.owner.email, password: data.owner.password, projectId: data.owner.projectId}});
   assert.equal(login.actor.role, 'owner');
   checks.ownerSignIn = {role: login.actor.role, projectId: login.actor.projectId};
@@ -73,8 +83,8 @@ export async function readBack(origin, database, data) {
   const sent = await call(`/api/conversations/${conversation.id}/messages`, {body: {localId: 'after-upgrade', content: 'A new conversation after the upgrade.', expectedRevision: 0}, token: visitor.token});
   assert.equal(sent.accepted, true);
   checks.newConversation = conversation.id;
-  for (const table of inertTables) assert.equal(count(database, table), 0, `${table} must stay empty after the read-back`);
-  assert.equal(unexpectedMail(database, data.owner.email), 0, 'no mail other than owner sign-in captures');
+  for (const table of inertTables) assert.equal(count(database, table), prior.counts[table] ?? 0, `${table} gains no rows from the read-back`);
+  assert.equal(unexpectedMail(database, data.owner.email), prior.mail, 'no mail other than owner sign-in captures');
   checks.inertTables = inertTables;
   checks.ownerSignInCaptures = count(database, 'rer_mail_development_outbox');
   return checks;

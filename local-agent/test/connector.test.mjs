@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { LocalAgentApi } from '../lib/api.mjs';
+import { AGENT_VERSION } from '../lib/version.mjs';
 import { codexLoginStatus, probeBrowserMcp, runtimeCapabilities } from '../lib/capabilities.mjs';
 import { acquireConfigLock, newConfig, readConfig, writeConfig } from '../lib/config.mjs';
 import { ConnectorError } from '../lib/errors.mjs';
@@ -1073,7 +1074,7 @@ test('MCP stdio exposes assignment tools without fabricating desktop capabilitie
   await serving;
   const messages = wire.trim().split('\n').map(JSON.parse);
   assert.equal(messages[0].result.serverInfo.name, 'happytohelp-local-agent');
-  assert.equal(messages[0].result.serverInfo.version, '0.4.0');
+  assert.equal(messages[0].result.serverInfo.version, AGENT_VERSION);
   assert(messages[1].result.tools.some((tool) => tool.name === 'h2h_context'));
   assert(messages[1].result.tools.some((tool) => tool.name === 'h2h_recover'));
   assert.deepEqual(JSON.parse(messages[2].result.content[0].text), { id: 'job-1' });

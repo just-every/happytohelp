@@ -8,6 +8,35 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
+## 0.4.1 — 2026-10-13
+
+### Fixed
+
+- **Worker memory while applying or undoing a large import.** Undoing a
+  1,000-conversation import could peak above 128 MiB of sampled Worker heap in
+  verification. A reviewed import is now split into children of at most 10
+  records (was 20), each invocation applies or reverses up to 20 journal rows
+  (was 10), and the D1 request meter counts UTF-8 bytes without copying every
+  bound value. Reviews and imports created by 0.4.0 keep their recorded children
+  and stay resumable and undoable.
+- **Move in reviews of up to 5,000 records.** Preparing a review read the
+  database twice for every child, so the smaller children pushed imports of
+  roughly 2,500 records or more (and every 5,000-record import, in 0.4.0 too)
+  past the Worker's 1,000-query limit. They stayed in "Preparing review" with no
+  error. Authority is now checked once before and once after all child plans are
+  written. A review's decisions and diagnostics, which passed D1's 2 MB row limit
+  for 5,000 Intercom records, are kept as a private object under the import's
+  storage prefix; the import row keeps the summary and the object's hash. Reviews
+  prepared by 0.4.0 are read unchanged. A background step that still runs out of
+  queries records the error on the import, which the page shows with
+  **Resume import**.
+- **Delivery build.** The delivery workflow allows 90 minutes, enough for the
+  full verification, frees the runner disk space Verify already frees, and uses
+  Node.js 22.20.0 like the rest of the project.
+
+No migration. A 0.4.0 installation merges `v0.4.1`; a 0.3 installation follows
+[Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x).
+
 ## 0.4.0 — 2026-10-12
 
 ### Added

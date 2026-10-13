@@ -521,7 +521,7 @@ On your computer:
 
    Skip the second line if you have no `.dev.vars`. Keep both copies private.
 3. Update the source and keep your own commits, for example
-   `git fetch origin --tags && git merge v0.4.0`. Resolve conflicts only in files
+   `git fetch origin --tags && git merge v0.4.1`. Resolve conflicts only in files
    you changed.
 4. Switch to Node.js 22.20.0 and run `node scripts/rer.mjs install`.
 5. If `.dev.vars` sets `EMAIL_PROVIDER` to a real provider, setup refuses to

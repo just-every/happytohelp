@@ -2,14 +2,17 @@ import assert from 'node:assert/strict';
 
 // Released sources an installation may upgrade from, as published in the public
 // repository. The 0.3.0 and 0.3 fix-line trees equal the private release sources
-// 160aee3f56898ac091097655aaa1c06a802f75c9 and 751c36e3404aa2cf49db8a6b25452393030dc940.
+// 160aee3f56898ac091097655aaa1c06a802f75c9 and 751c36e3404aa2cf49db8a6b25452393030dc940;
+// the 0.4.0 tree equals private 0452618504dd286cfb6a75fabefa279d08bc7428.
 // `previous` marks RELEASE.json's previousVersion line, which must receive exactly
 // the listed release migrations and keep every prior schema definition.
 export const repository = 'https://github.com/just-every/happytohelp';
 export const baselines = {
   '0.2.1': {commit: '59c6e2e1beb321e9f1cb5493efd05e20fc068638', tree: 'a6d7254014b1ea996b386d765c4c6813b79c3f60', migrations: 37, tables: 97, populate: populate021},
-  '0.3.0': {commit: '60e9a84688ea41575d56a8f692bbb8173366c7c5', tree: 'c329b580464b084d1899f7ba77fe52dad7daa091', migrations: 42, previous: true, populate: populate03},
-  '0.3.x': {commit: 'a6dc18da5fa8500ad3607210ecff09aedfecb825', tree: 'b9f889b14b289f7c0bf9df2e99c4bae823dabc8c', migrations: 42, previous: true, populate: populate03},
+  '0.3.0': {commit: '60e9a84688ea41575d56a8f692bbb8173366c7c5', tree: 'c329b580464b084d1899f7ba77fe52dad7daa091', migrations: 42, populate: populate03},
+  '0.3.x': {commit: 'a6dc18da5fa8500ad3607210ecff09aedfecb825', tree: 'b9f889b14b289f7c0bf9df2e99c4bae823dabc8c', migrations: 42, populate: populate03},
+  // 0.4.0 keeps the 0.3 API used to populate it.
+  '0.4.0': {commit: 'ee8d38e743fb8b0eb8c9af16b4d178133292d05e', tree: '0b9b6db9198ebde4100e183e5f2ba6bd1f70d882', migrations: 52, tables: 189, previous: true, populate: populate03},
 };
 
 export function client(origin) {

@@ -1,10 +1,15 @@
-import {Buffer} from 'node:buffer'
-/** Workers Paid D1 limits, shared by every operation in one invocation. */
-export function boundedDatabase(db:D1Database,limit=1000){
+/** UTF-8 byte length without encoding a copy. In Workers Buffer.byteLength
+ * encodes the whole string, so metering every bound plan and row would copy it. */
+export function utf8Length(text:string){let bytes=text.length;for(let i=0;i<text.length;i++){const code=text.charCodeAt(i);if(code<0x80)continue;if(code<0x800){bytes++;continue}if(code>=0xd800&&code<=0xdbff&&i+1<text.length&&(text.charCodeAt(i+1)&0xfc00)===0xdc00)i++;bytes+=2}return bytes}
+/** Workers Paid D1 limits, shared by every operation in one invocation. Work stops
+ * `reserve` statements short of the limit; the reserve opens once that happens, so the
+ * handler can still record why it stopped instead of failing silently. */
+export function boundedDatabase(db:D1Database,limit=1000,reserve=0){
  const metrics={statements:0,writes:0,maxSqlBytes:0,maxBindings:0,maxValueBytes:0,maxParameterBytes:0,maxDurationMs:0},raw=new WeakMap<object,D1PreparedStatement>(),queries=new WeakMap<object,string>()
- const consume=(count:number)=>{if(metrics.statements+count>limit)throw new Error('WORKER_D1_STATEMENT_LIMIT');metrics.statements+=count}
+ let ceiling=limit-reserve
+ const consume=(count:number)=>{if(metrics.statements+count>ceiling){ceiling=limit;throw new Error('WORKER_D1_STATEMENT_LIMIT')}metrics.statements+=count}
  const readOnly=(sql:string)=>/^\s*(SELECT|PRAGMA|EXPLAIN)\b/i.test(sql)
- function check(sql:string,params:unknown[]=[]){const sqlBytes=Buffer.byteLength(sql),sizes=params.map(value=>typeof value==='string'?Buffer.byteLength(value):value instanceof ArrayBuffer||ArrayBuffer.isView(value)?value.byteLength:8),maxValue=Math.max(0,...sizes),total=sizes.reduce((n,size)=>n+size,0);if(sqlBytes>100000||params.length>100)throw new Error('WORKER_D1_QUERY_LIMIT');if(maxValue>2000000||total>2000000)throw new Error('WORKER_D1_VALUE_LIMIT');metrics.maxSqlBytes=Math.max(metrics.maxSqlBytes,sqlBytes);metrics.maxBindings=Math.max(metrics.maxBindings,params.length);metrics.maxValueBytes=Math.max(metrics.maxValueBytes,maxValue);metrics.maxParameterBytes=Math.max(metrics.maxParameterBytes,total)}
+ function check(sql:string,params:unknown[]=[]){const sqlBytes=utf8Length(sql),sizes=params.map(value=>typeof value==='string'?utf8Length(value):value instanceof ArrayBuffer||ArrayBuffer.isView(value)?value.byteLength:8),maxValue=Math.max(0,...sizes),total=sizes.reduce((n,size)=>n+size,0);if(sqlBytes>100000||params.length>100)throw new Error('WORKER_D1_QUERY_LIMIT');if(maxValue>2000000||total>2000000)throw new Error('WORKER_D1_VALUE_LIMIT');metrics.maxSqlBytes=Math.max(metrics.maxSqlBytes,sqlBytes);metrics.maxBindings=Math.max(metrics.maxBindings,params.length);metrics.maxValueBytes=Math.max(metrics.maxValueBytes,maxValue);metrics.maxParameterBytes=Math.max(metrics.maxParameterBytes,total)}
  async function measured<T>(run:()=>Promise<T>){const start=performance.now();try{return await run()}finally{metrics.maxDurationMs=Math.max(metrics.maxDurationMs,performance.now()-start)}}
  function wrap(statement:D1PreparedStatement,query:string,params:unknown[]=[]):D1PreparedStatement{
   check(query,params)

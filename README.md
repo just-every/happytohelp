@@ -6,7 +6,12 @@ work delegated to your own Codex or Claude. It works with human replies without
 an AI provider. The editable React application runs on Cloudflare Workers with
 Hono, D1, R2, Queues and Durable Objects.
 
-## Release 0.4.0
+## Release 0.4.1
+
+Version 0.4.1 is a fix release for 0.4.0. Applying or undoing a large Move in
+import uses less Worker memory, and the delivery build has time to finish its
+verification. It adds no migration: a 0.4.0 installation merges `v0.4.1` and
+serves its existing data.
 
 Version 0.4.0 adds Move in for reviewed support-history imports, resolution
 feedback with workspace-calendar Reports, Connections with scoped API tokens,
@@ -33,7 +38,7 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 1. Use Git, **Node.js 22.20.0** and **pnpm 10.12.4**, then acquire the release:
 
    ```sh
-   git clone --branch v0.4.0 https://github.com/just-every/happytohelp
+   git clone --branch v0.4.1 https://github.com/just-every/happytohelp
    cd happytohelp
    ```
 

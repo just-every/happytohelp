@@ -11,12 +11,12 @@ import {createRuntime} from './helpers/emitted-runtime.mjs';
 import {baselines, repository} from './helpers/upgrade-baselines.mjs';
 import {findDatabase, snapshot, schema, bucketSnapshot} from './helpers/upgrade-snapshot.mjs';
 import {expectedMigrationRows, expectedSchema, schemaExceptions} from './helpers/upgrade-exceptions.mjs';
-import {readBack} from './helpers/upgrade-readback.mjs';
+import {readBack, priorState} from './helpers/upgrade-readback.mjs';
 
 // Prior-data upgrade: build each released source, populate it through its own
 // API, apply this source's migrations in place, compare every pre-existing row,
 // then serve the upgraded store with this source's emitted Worker.
-// Usage: node tests/upgrade.mjs [0.2.1|0.3.0|0.3.x ...] after `pnpm run build`.
+// Usage: node tests/upgrade.mjs [0.2.1|0.3.0|0.3.x|0.4.0 ...] after `pnpm run build`.
 const run = promisify(execFile);
 const root = resolve(new URL('..', import.meta.url).pathname);
 const release = JSON.parse(await readFile(join(root, 'RELEASE.json'), 'utf8'));
@@ -57,6 +57,7 @@ async function upgrade(label) {
     const state = join(runtimeDirectory, 'state');
     const database = await findDatabase(join(state, 'v3/d1'));
     const before = snapshot(database), beforeSchema = schema(database), beforeFiles = await bucketSnapshot(join(state, 'v3/r2'));
+    const prior = priorState(database, data.owner.email);
     if (baseline.tables) assert.equal(Object.keys(before).length, baseline.tables);
     for (const table of ['projects', 'users', 'memberships', 'sessions', 'contacts', 'conversations', 'messages', 'knowledge_articles']) assert.ok(before[table].rows.length > 0, `${table} must contain real journey rows`);
     // Applied migration names and bytes are immutable.
@@ -88,11 +89,11 @@ async function upgrade(label) {
     assert.deepEqual(receipt.failures, [], 'Pre-existing application rows changed outside exact migration exceptions');
     if (baseline.previous) {
       assert.deepEqual(changedSchema, [], 'Prior schema changed outside the listed replacements');
-      assert.deepEqual(order, release.migrations.map(migration => migration.id), 'A 0.3 installation receives exactly the listed release migrations in order');
+      assert.deepEqual(order, release.migrations.map(migration => migration.id), 'The previous release receives exactly the listed release migrations in order');
     }
     assert.ok(receipt.files.identical, 'Stored files changed during upgrade');
     current = await createRuntime({persist: state});
-    receipt.readBack = await readBack(current.origin, database, data);
+    receipt.readBack = await readBack(current.origin, database, data, prior);
     receipt.seconds = Math.round((Date.now() - started) / 1000);
     if (evidence) { await mkdir(evidence, {recursive: true}); await writeFile(join(evidence, `upgrade-${label}.json`), JSON.stringify(receipt, null, 2) + '\n'); }
     console.log(`${label}: ${receipt.baselineTables} tables / ${receipt.baselineMigrations} migrations -> ${receipt.finalTables} / ${receipt.finalMigrations}; ${comparison.filter(row => row.identical).length}/${comparison.length} prior tables identical, ${comparison.filter(row => row.matchesExpected).length}/${comparison.length} as expected; ${receipt.files.objects} stored files identical; read back on this Worker in ${receipt.seconds}s`);

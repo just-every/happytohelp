@@ -71,7 +71,7 @@ test('release metadata carries the Base release contract and actionable migratio
   for (const pattern of [/before starting the updated Worker/, /magic_signins table/, /magic_signins_expiry index/, /backup and restore/, /expiry and consumption state/, /does not rewrite existing rows, create accounts, send email or configure a provider/, /APP_ORIGIN/, /password sign-in remains available/]) {
     assert.match(release.agentUpdateInstructions, pattern);
   }
-  assert.equal(release.breaking, true, 'Base marks required pre-runtime owner migration steps as breaking');
+  assert.equal(release.breaking, release.migrations.length > 0, 'Base marks required pre-runtime owner migration steps as breaking');
   for (const pattern of [/0109_magic_signins\.sql before the updated Worker/, /explicit operator Send/, /schema-2/, /raw payload sidecars/, /accessibility checker HOLD/]) {
     assert.match(release.agentUpdateInstructions, pattern);
   }

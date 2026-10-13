@@ -16,7 +16,7 @@ test('portable product verification refuses each copied-path drift independently
     assert.equal(result.report.copies.reduce((sum, copy) => sum + copy.files, 0), copiedFiles.length);
   };
   positive(product);
-  const name = 'scripts/base-cli/operations/operations.mjs';
+  const name = 'scripts/delivery/base/paths.mjs';
   const original = fs.readFileSync(path.join(product, name));
   for (const kind of ['modified', 'missing', 'unrecorded', 'not-a-file', 'mode']) {
     const {root, close} = fixture();
@@ -27,12 +27,12 @@ test('portable product verification refuses each copied-path drift independently
       if (kind === 'mode') fs.chmodSync(path.join(root,name),0o755);
       if (kind === 'missing') fs.unlinkSync(path.join(root, name));
       if (kind === 'unrecorded') {
-        expectedPath = 'scripts/base-onboarding/product-unrecorded-test.mjs';
+        expectedPath = 'src/base/product-unrecorded-test.mjs';
         write(root, expectedPath, 'export const testOnly = true;\n');
       }
       if (kind === 'not-a-file') {
         fs.unlinkSync(path.join(root, name));
-        fs.symlinkSync('project-operations.mjs', path.join(root, name));
+        fs.symlinkSync('artifact.mjs', path.join(root, name));
       }
       const result = run(root, '--offline');
       assert.equal(result.status, 1, kind);

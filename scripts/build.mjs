@@ -1,8 +1,8 @@
 import {fileURLToPath} from 'node:url';
-import {withoutLocalVariables} from './base-onboarding/local/build.mjs';
-import {buildEnvironment} from './base-onboarding/local/environment.mjs';
-import {createCommands} from './base-onboarding/commands.mjs';
-import {privateDirectory} from './base-onboarding/private-files.mjs';
+import {withoutLocalVariables} from '@runeditrun/rer/local/build';
+import {buildEnvironment} from '@runeditrun/rer/local/environment';
+import {createCommands} from '@runeditrun/rer/commands';
+import {privateDirectory} from '@runeditrun/rer/private-files';
 import {secretNames,variableNames} from './deployment/environment.mjs';
 
 const root=fileURLToPath(new URL('..',import.meta.url));

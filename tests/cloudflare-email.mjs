@@ -2,7 +2,7 @@ import {registerHooks} from 'node:module'
 import {existsSync} from 'node:fs'
 import {readFile} from 'node:fs/promises'
 import assert from 'node:assert/strict'
-import {normalizeEmail,emailMetadata,emailEnvironment} from '../scripts/base-onboarding/email.mjs'
+import {normalizeEmail,emailMetadata,emailEnvironment} from '@runeditrun/rer/internal/onboarding/email.mjs'
 registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'.ts',c.parentURL);if(existsSync(u))return n(u.href,c)}return n(s,c)}})
 const {sendEmail,emailConfigured}=await import('../src/modules/integrations/email.ts')
 const {getPlatformProxy}=await import('wrangler'),proxy=await getPlatformProxy({persist:false}),originalFetch=globalThis.fetch

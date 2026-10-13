@@ -1,3 +1,6 @@
+import { fileURLToPath as __rerTestEntryPath } from 'node:url';
+const __rerTestEntry = __rerTestEntryPath(import.meta.resolve('@runeditrun/rer/internal/global/rer.mjs'));
+const __rerTestEntryArgs = args => args[1] === 'dev' && !args.some(arg => ['--foreground', '--detach', '--stop', '--help'].includes(arg)) ? [...args, '--foreground'] : args;
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
@@ -13,14 +16,14 @@ export function processRun(root,command,args,env){
  return {child,done,get output(){return output}};
 }
 export async function command(root,args,env,expected=0){
- const result=await processRun(root,process.execPath,['scripts/rer.mjs',...args],env).done;
+ const result=await processRun(root,process.execPath,__rerTestEntryArgs([__rerTestEntry,...args]),env).done;
  if(result.code!==expected){const directory=env.H2H_EVIDENCE_DIR||join(root,'test-results/base-command');await mkdir(directory,{recursive:true,mode:0o700});await writeFile(join(directory,'failed-'+args[0]+'.log'),result.output,{mode:0o600});}
  assert.equal(result.code,expected,`rer ${args[0]} exits ${expected}; private diagnostics are in the checkout capture`);
  return result.output;
 }
 export async function serve(root,env){
  await waitForServingCapacity(env);
- const running=processRun(root,process.execPath,['scripts/rer.mjs','dev','--non-interactive'],{...env,RER_SERVER_JOURNEY:'1'});
+ const running=processRun(root,process.execPath,__rerTestEntryArgs([__rerTestEntry,'dev','--non-interactive']),{...env,RER_SERVER_JOURNEY:'1'});
  const deadline=Date.now()+180000;
  while(Date.now()<deadline){
   const ready=running.output.match(/^RER_READY (http:\/\/\S+)$/m);

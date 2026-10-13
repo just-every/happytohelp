@@ -58,7 +58,7 @@ No migration. A 0.4.0 installation merges `v0.4.1`; a 0.3 installation follows
   with delivery logs, and Slack delivery. Explicit HTTP 5xx and 429 answers are
   retried a bounded number of times; timeouts and redirects are reported as
   uncertain and never replayed.
-- **The rer local path.** `node scripts/rer.mjs install`, `setup` and `dev`
+- **The rer local path.** `pnpm exec rer install`, `setup` and `dev`
   replace `scripts/install.mjs`, `scripts/setup.mjs` and `scripts/operations.mjs`.
   Local sign-in links and customer mail go to a development outbox on your
   computer; nothing is emailed. Native password sign-in is kept. `export`,
@@ -77,7 +77,7 @@ No migration. A 0.4.0 installation merges `v0.4.1`; a 0.3 installation follows
 
 Back up first: locally `.wrangler/state` and `.dev.vars`; on Cloudflare the D1
 database, every R2 object and your secrets, including `INTEGRATION_ENCRYPTION_KEY`.
-Update your checkout, switch to Node.js 22.20.0 and run `node scripts/rer.mjs setup`
+Update your checkout, switch to Node.js 22.20.0 and run `pnpm exec rer setup`
 with your existing owner email. It applies the migrations and keeps your owner,
 password, data and saved settings. Never use `reset` to upgrade.
 [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) lists every step.

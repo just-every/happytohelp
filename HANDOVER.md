@@ -1,6 +1,6 @@
 # Maintainer handover
 
-Start with [AGENTS.md](AGENTS.md#run-it-locally): use `node scripts/rer.mjs`
+Start with [AGENTS.md](AGENTS.md#run-it-locally): use `pnpm exec rer`
 for install, setup with private manifest answers/owner email, foreground dev,
 outbox sign-in and verification. [Operations](OPERATIONS.md) documents reset,
 private archives, restore and owner-account deployment. Inspect actual commands
@@ -18,7 +18,7 @@ public publication and owner release approval remain separate.
 
 ## Architecture
 
-- `scripts/rer.mjs` dispatches the byte-exact self-contained Base CLI export.
+- `package.json` and `pnpm-lock.yaml` pin `@runeditrun/rer` exactly; `pnpm exec rer` runs that installed command package.
 - `scripts/installer/local.mjs` declares native lifecycle/dev/preview/verify,
   owner-account deploy and portability hooks; `native-local.mjs` retains native
   bootstrap and ordinary sign-in. `rer-setup.json` owns setup fields, and
@@ -104,7 +104,7 @@ Keep applied migration names/bytes immutable and follow RELEASE.json's additive
 order and backup obligations. Restore D1/R2, import originals/journals, privacy
 fences, provenance, rating cycles and encrypted configuration together. Never
 reset an installation to upgrade it; validate restoration before switching traffic.
-Native owners survive rer setup/import; active sessions, one-use links and
+Native owners survive pnpm exec rer setup/import; active sessions, one-use links and
 external execution credentials require explicit reconfiguration.
 
 Run touched tests plus typecheck, full verification/browser suites on the remote

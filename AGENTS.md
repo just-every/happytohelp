@@ -7,9 +7,9 @@ name, colour, owner name and an AI key are optional.
 Keep secrets in that file, never command arguments.
 
 ```sh
-node scripts/rer.mjs install
-node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-node scripts/rer.mjs dev
+pnpm install --frozen-lockfile
+pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+pnpm exec rer dev --foreground
 ```
 
 Dev prints the app address and its `/__dev/outbox`. Open the outbox, choose the
@@ -17,13 +17,13 @@ newest sign-in message, follow its link and press **Sign in**. No email is sent.
 Stop dev with Ctrl+C before verification or data operations.
 
 ```sh
-node scripts/rer.mjs verify
-node scripts/rer.mjs reset --yes
-node scripts/rer.mjs export --output exports/support.rer
-node scripts/rer.mjs import --input exports/support.rer --yes
-node scripts/rer.mjs deploy --dry-run
-node scripts/rer.mjs deploy --environment production
-node scripts/rer.mjs describe
+pnpm exec rer verify
+pnpm exec rer reset --yes
+pnpm exec rer export --output exports/support.rer
+pnpm exec rer import --input exports/support.rer --yes
+pnpm exec rer deploy --dry-run
+pnpm exec rer deploy --environment production
+pnpm exec rer describe
 ```
 
 Reset erases the printed local inventory; export your data **before** resetting

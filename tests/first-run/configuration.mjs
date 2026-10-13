@@ -7,8 +7,8 @@ import {randomBytes} from 'node:crypto';
 import {prepareNativeLocal,nativeOwner} from '../../scripts/installer/native-local.mjs';
 import {adapter,commandAdapter} from '../../scripts/installer/local.mjs';
 import {readySummary} from '../../scripts/installer/ui/seed.mjs';
-import {loadInstallerSeed} from '../../scripts/base-onboarding/setup-manifest.mjs';
-import {prepareSettings} from '../../scripts/base-onboarding/adapter-settings.mjs';
+import {loadInstallerSeed} from '@runeditrun/rer/setup-manifest';
+import {prepareSettings} from '@runeditrun/rer/adapter-settings';
 import {validateRuntimeEnvironment,runtimeVariables} from '../../scripts/deployment/environment.mjs';
 
 const seedFor=()=>loadInstallerSeed(process.cwd(),commandAdapter);

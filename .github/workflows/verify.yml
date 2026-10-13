@@ -42,9 +42,9 @@ jobs:
           df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
           sudo rm -rf -- /usr/local/lib/android
           df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
-      - run: node scripts/rer.mjs describe
-      - run: node scripts/edition-authoring/cli.mjs check
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec rer describe
+      - run: node scripts/edition-authoring/cli.mjs check
       - run: pnpm exec playwright install --with-deps chromium
       - id: verify
         run: pnpm run verify
@@ -154,8 +154,8 @@ jobs:
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         run: |
           node --input-type=module -e 'import {mkdir,writeFile} from "node:fs/promises"; import {randomBytes} from "node:crypto"; await mkdir(".seed",{recursive:true,mode:0o700}); await writeFile(".seed/native-preview-answers.json",JSON.stringify({WORKSPACE_NAME:"CI preview",WIDGET_ORIGIN:"https://example.test",PRIMARY_COLOR:"#7c3aed",OWNER_NAME:"CI owner",OWNER_PASSWORD:randomBytes(24).toString("base64url"),EMAIL_PROVIDER:"later"}),{mode:0o600});'
-          node scripts/rer.mjs setup --owner-email ci-preview@example.test --answers .seed/native-preview-answers.json --port 5186 --non-interactive
-          nohup node scripts/rer.mjs preview --port 5186 --non-interactive > "$RUNNER_TEMP/native-preview.log" 2>&1 &
+          pnpm exec rer setup --owner-email ci-preview@example.test --answers .seed/native-preview-answers.json --port 5186 --non-interactive
+          nohup pnpm exec rer preview --port 5186 --non-interactive > "$RUNNER_TEMP/native-preview.log" 2>&1 &
           for _ in $(seq 1 60); do
             if curl -fsS "$H2H_PREVIEW_ORIGIN/health"; then exit 0; fi
             sleep 2
@@ -173,7 +173,7 @@ jobs:
       - name: Stop local native preview
         if: ${{ always() && steps.preview.outcome != 'skipped' }}
         run: |
-          node scripts/rer.mjs preview --stop --non-interactive
+          pnpm exec rer preview --stop --non-interactive
 
       - name: Confirm verification preserves source
         if: ${{ !cancelled() && steps.verify.outcome == 'success' }}

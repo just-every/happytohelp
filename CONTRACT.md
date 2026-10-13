@@ -3,7 +3,7 @@
 HappyToHelp preserves the useful parts of the original HappyToHelp owner
 workspace: customer widget, operator dashboard, AI assistance and reply,
 knowledge, customer context, delegated local work, training and integrations.
-Run installation and development through `node scripts/rer.mjs`; inspect the actual
+Run installation and development through `rer`; inspect the actual
 commands with `describe --json` and enforce `check --profile first-party`.
 Its public surface is the “Customer Support, Solved.” homepage, the documentation at `/docs` built from the repository's Markdown, and dynamic published help centers.
 It is editable source running on a Cloudflare Worker stack. These clauses state required behavior; the evidence
@@ -12,7 +12,7 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
 - **NATIVE-001 — Native owner installation.** A clean owner can inspect the
   operating description before installing dependencies, install locked source,
   prepare local or selected remote bindings/migrations, build, verify and deploy
-  through `node scripts/rer.mjs`. Local setup exits with no app running; dev
+  through `rer`. Local setup exits with no app running; dev
   uses the printed development outbox. Reset is explicitly confirmed and local;
   export/import preserve supported native data with documented exclusions.
   Deployment dry-run makes no provider requests. The delivered runtime requires no original checkout or PHP service.

@@ -2,9 +2,9 @@ import {randomBytes} from 'node:crypto';
 import {lstat,readdir,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
-import {selectLocalState} from '../base-onboarding/local/state.mjs';
-import {readSettings} from '../base-onboarding/adapter-settings.mjs';
-import {writePrivateFile} from '../base-onboarding/private-files.mjs';
+import {selectLocalState} from '@runeditrun/rer/local/state';
+import {readSettings} from '@runeditrun/rer/adapter-settings';
+import {writePrivateFile} from '@runeditrun/rer/private-files';
 
 const generatedToken='INBOUND_EMAIL_TOKEN';
 // A key answered for a provider other than the chosen one is contradictory; refuse it before any file is written.

@@ -27,7 +27,7 @@ serves its existing data.
 
 Version 0.4.0 adds Move in for reviewed support-history imports, resolution
 feedback with workspace-calendar Reports, Connections with scoped API tokens,
-signed webhook events and Slack delivery, and the `node scripts/rer.mjs` local
+signed webhook events and Slack delivery, and the `rer` local
 path with sign-in through a development outbox. Native passwords, owners and data
 are kept. Before the updated Worker serves traffic, back up and apply the ten
 additive migrations `0110_move_in.sql` to `119_local_portability.sql` in order;
@@ -47,10 +47,10 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 
 ## Run it on your computer
 
-1. Use Git, **Node.js 22.20.0** and **pnpm 10.12.4**, then acquire the release:
+1. Use Git, **Node.js 22.20.0** and **pnpm 10.12.4**, then acquire the current public source:
 
    ```sh
-   git clone --branch v0.4.1 https://github.com/just-every/run-happytohelp
+   git clone --branch main https://github.com/just-every/run-happytohelp
    cd run-happytohelp
    ```
 
@@ -60,17 +60,17 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 2. From that checkout, install its frozen dependencies:
 
    ```sh
-   node scripts/rer.mjs describe --json
-   node scripts/rer.mjs check --profile first-party
-   node scripts/rer.mjs install
+   pnpm install --frozen-lockfile
+   pnpm exec rer describe --json
+   pnpm exec rer check --profile first-party
    ```
 
 3. Create a private `.seed/local-answers.json` as described in
    [Install](docs/INSTALLER.md#private-setup-answers). Then:
 
    ```sh
-   node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-   node scripts/rer.mjs dev
+   pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+   pnpm exec rer dev --foreground
    ```
 
    Setup builds, migrates, prepares the native first owner and stops its temporary
@@ -84,12 +84,12 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 4. Stop dev before the remaining commands:
 
    ```sh
-   node scripts/rer.mjs verify
-   node scripts/rer.mjs export --output exports/support.rer
-   node scripts/rer.mjs reset --yes
-   node scripts/rer.mjs import --input exports/support.rer --yes
-   node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-   node scripts/rer.mjs dev
+   pnpm exec rer verify
+   pnpm exec rer export --output exports/support.rer
+   pnpm exec rer reset --yes
+   pnpm exec rer import --input exports/support.rer --yes
+   pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+   pnpm exec rer dev --foreground
    ```
 
    Export before reset to preserve data. Import requires an empty destination;
@@ -112,8 +112,8 @@ Read [deployment prerequisites](OPERATIONS.md#deploy-to-your-cloudflare-account)
 configure the real declaration and private account credentials, then:
 
 ```sh
-node scripts/rer.mjs deploy --dry-run
-node scripts/rer.mjs deploy --environment production
+pnpm exec rer deploy --dry-run
+pnpm exec rer deploy --environment production
 ```
 
 Dry run validates/builds locally and makes no provider request. Deployment
@@ -167,7 +167,7 @@ and Setup say a key is missing.
    [Install](docs/INSTALLER.md#private-setup-answers)).
    - **On Cloudflare:** in the Cloudflare dashboard, open your Worker, go to
      **Settings → Variables and Secrets** and add the key as a secret. You can
-     also set it in your terminal before you run `node scripts/rer.mjs deploy --environment production` (see
+     also set it in your terminal before you run `pnpm exec rer deploy --environment production` (see
      [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)).
    - **On your own computer:** add a line such as `OPENAI_API_KEY=your-key` to
      a file named `.dev.vars` in the `happytohelp` folder, then restart the app.
@@ -248,7 +248,7 @@ display name. Local mail is sensitive captured data, not a provider receipt.
 ## Verify
 
 ```sh
-node scripts/rer.mjs verify
+pnpm exec rer verify
 ```
 
 The complete target checks the contract, real build, typecheck, native runtime,

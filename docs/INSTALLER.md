@@ -1,12 +1,12 @@
 # Install HappyToHelp
 
-Use Node **22.20.0** and pnpm **10.12.4**. The command descriptor works before
-dependencies or private configuration exist:
+Use Node **22.20.0** and pnpm **10.12.4**. Install the checkout's exact command package before inspecting its descriptor; no private
+configuration is needed:
 
 ```sh
-node scripts/rer.mjs describe --json
-node scripts/rer.mjs check --profile first-party
-node scripts/rer.mjs install
+pnpm install --frozen-lockfile
+pnpm exec rer describe --json
+pnpm exec rer check --profile first-party
 ```
 
 Install uses the pinned package manager and frozen lockfile. It does not set up
@@ -73,8 +73,8 @@ deploy unchanged and older archives still import.
 ## Run it locally
 
 ```sh
-node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-node scripts/rer.mjs dev
+pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+pnpm exec rer dev --foreground
 ```
 
 Setup builds, applies local migrations, prepares private settings and the first
@@ -97,8 +97,8 @@ bounded serving. Sign-in takes you to the workspace Setup page described in
 
 ## Verify, reset and move data
 
-Stop dev, then run `node scripts/rer.mjs verify`. Export before destructive reset
-if you need the data. Reset requires `node scripts/rer.mjs reset --yes` after
+Stop dev, then run `pnpm exec rer verify`. Export before destructive reset
+if you need the data. Reset requires `pnpm exec rer reset --yes` after
 reviewing its printed inventory. Export/import use `--output FILE` and
 `--input FILE --yes`; import requires an empty destination. Native owners survive
 restore. Re-enter private configuration before setup/dev. See
@@ -106,10 +106,10 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-`node scripts/rer.mjs deploy --dry-run` builds and validates locally without
-provider requests. `node scripts/rer.mjs deploy --environment production`
+`pnpm exec rer deploy --dry-run` builds and validates locally without
+provider requests. `pnpm exec rer deploy --environment production`
 requires owner authorization and the private credentials/declaration described
 in [Operations](../OPERATIONS.md#deploy-to-your-cloudflare-account).
-`node scripts/rer.mjs describe` lists the remaining commands and real flags.
+`pnpm exec rer describe` lists the remaining commands and real flags.
 All new verbs accept `--help`, `--cwd PATH`, `--non-interactive` and `--json`;
 release has its own preserved parser. No command implies provider acceptance.

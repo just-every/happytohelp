@@ -1,10 +1,10 @@
-import {localInstaller} from '../base-onboarding/adapter.mjs';
-import {developmentTarget,previewTarget} from '../base-onboarding/operator-installer.mjs';
-import {installOperator} from '../base-onboarding/operator-install.mjs';
-import {selectLocalState} from '../base-onboarding/local/state.mjs';
-import {commandAdapter as createCommandAdapter} from '../base-cli/cli/adapter.mjs';
-import {ownerDeploy} from '../base-cli/cli/deploy.mjs';
-import {localPortability} from '../base-cli/cli/portability.mjs';
+import {localInstaller} from '@runeditrun/rer/local-installer';
+import {developmentTarget,previewTarget} from '@runeditrun/rer/operator-installer';
+import {installOperator} from '@runeditrun/rer/operator-install';
+import {selectLocalState} from '@runeditrun/rer/local/state';
+import {commandAdapter as createCommandAdapter} from '@runeditrun/rer/adapter';
+import {ownerDeploy} from '@runeditrun/rer/deploy';
+import {localPortability} from '@runeditrun/rer/portability';
 import {localOwner,nativeOwner,prepareNativeLocal} from './native-local.mjs';
 import {archivePolicy} from './portability-policy.mjs';
 import * as model from './ui/seed.mjs';

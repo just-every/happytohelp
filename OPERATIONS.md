@@ -1,18 +1,18 @@
 # HappyToHelp operations
 
-The maintained entry point is `node scripts/rer.mjs`. Use Node **22.20.0** and
+The maintained entry point is `pnpm exec rer`, using the exact `@runeditrun/rer`
+pin after `pnpm install --frozen-lockfile`. Use Node **22.20.0** and
 pnpm **10.12.4**. `describe --json` describes real flags without effects;
-`check --profile first-party` validates structure before dependencies or private
-configuration exist. `doctor` checks installed tools and local inputs.
+`check --profile first-party` validates structure before private configuration exists. `doctor` checks installed tools and local inputs.
 
 ## Run it on your computer
 
 Prepare the private manifest answers in [Install](docs/INSTALLER.md#private-setup-answers), then:
 
 ```sh
-node scripts/rer.mjs install
-node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-node scripts/rer.mjs dev
+pnpm install --frozen-lockfile
+pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+pnpm exec rer dev --foreground
 ```
 
 Install is frozen dependency installation. Setup builds, migrates, prepares the
@@ -48,10 +48,10 @@ rer never silently moves or removes it.
 Stop dev before export, import or reset:
 
 ```sh
-node scripts/rer.mjs export --output exports/support.rer
-node scripts/rer.mjs reset --yes
-node scripts/rer.mjs import --input exports/support.rer --yes
-node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
+pnpm exec rer export --output exports/support.rer
+pnpm exec rer reset --yes
+pnpm exec rer import --input exports/support.rer --yes
+pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
 ```
 
 Export creates a new owner-only archive with integrity and explicit exclusions.
@@ -114,8 +114,8 @@ supported runtime declaration and native workspace settings. Deployment never
 converts remote mail into development capture.
 
 ```sh
-node scripts/rer.mjs deploy --dry-run
-node scripts/rer.mjs deploy --environment production
+pnpm exec rer deploy --dry-run
+pnpm exec rer deploy --environment production
 ```
 
 Default environment is production. Dry run validates the declaration and real
@@ -123,7 +123,7 @@ build locally with zero provider requests. Real deploy builds, provisions,
 applies migrations, publishes and checks health in the owner account. It is an
 external change requiring owner authorization. Release produces source/artifacts
 with its existing `--repo` and `--output` arguments and never pushes or deploys.
-Inspect `node scripts/rer.mjs describe` and per-command `--help` for other flags.
+Inspect `pnpm exec rer describe` and per-command `--help` for other flags.
 
 ### If setup fails at the R2 step
 
@@ -189,7 +189,7 @@ token-bearing command arguments. Incomplete inventories are not teardown proof.
 
 Runtime allowlists live in `scripts/deployment/environment.mjs`; native secrets
 remain private. Local settings changes need an explicit restart. For online
-changes update the real declaration and private inputs, then use rer deploy.
+changes update the real declaration and private inputs, then use pnpm exec rer deploy.
 Do not rotate encryption keys without migrating encrypted stored connections.
 
 ### Which settings matter for a small team
@@ -493,7 +493,7 @@ Back up the selected database, private FILES objects and configuration before
 upgrading. Keep applied migration names and bytes immutable. Read RELEASE.json
 for the revision's additive migration order and buyer recovery obligations.
 Update source while preserving owner customizations and private settings, then
-use the rer setup/build path locally or authorized rer deploy remotely before
+use the pnpm exec rer setup/build path locally or authorized pnpm exec rer deploy remotely before
 serving updated code. Never reset as an upgrade mechanism.
 
 Test restoration in separate resources before switching traffic. Retain private
@@ -506,14 +506,14 @@ See [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
 0.3 ran on Node.js 26.8.1 or newer through `node scripts/install.mjs`,
 `pnpm run setup -- --local` and Vite on port 5173. 0.4 runs on Node.js
-**22.20.0** through `node scripts/rer.mjs`; `pnpm run setup` and `pnpm run dev`
+**22.20.0** through `rer`; `pnpm run setup` and `pnpm run dev`
 now call rer. Owners, passwords, members, pending invitations, workspaces,
 appearance, contacts, conversations, attachments, articles and categories carry
 over unchanged.
 
 On your computer:
 
-1. Stop the app with Ctrl+C in the installer or `pnpm run dev` terminal.
+1. Stop the app with Ctrl+C in the installer or `pnpm run dev -- --foreground` terminal.
 2. Back up local state and private settings outside the checkout:
 
    ```sh
@@ -522,10 +522,10 @@ On your computer:
    ```
 
    Skip the second line if you have no `.dev.vars`. Keep both copies private.
-3. Update the source and keep your own commits, for example
-   `git fetch origin --tags && git merge v0.4.1`. Resolve conflicts only in files
+3. Update to current public main and keep your own commits, for example
+   `git fetch origin main && git merge origin/main`. Resolve conflicts only in files
    you changed.
-4. Switch to Node.js 22.20.0 and run `node scripts/rer.mjs install`.
+4. Switch to Node.js 22.20.0 and run `pnpm install --frozen-lockfile`.
 5. If `.dev.vars` sets `EMAIL_PROVIDER` to a real provider, setup refuses to
    replace it, because local 0.4 sends sign-in links and customer mail to the
    development outbox. Move the `EMAIL_*` lines into your private backup and
@@ -536,8 +536,8 @@ On your computer:
    password. Then run setup with your existing owner email:
 
    ```sh
-   node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-   node scripts/rer.mjs dev
+   pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+   pnpm exec rer dev --foreground
    ```
 
    Setup applies `0110_move_in.sql` to `119_local_portability.sql` to the local
@@ -553,8 +553,8 @@ On your computer:
 On Cloudflare, back up the D1 database, every R2 object with its metadata and
 your Worker secrets, including `INTEGRATION_ENCRYPTION_KEY`, as in
 [Back up your data](docs/INDEPENDENT-RELEASE.md#back-up-your-data). Then run
-`node scripts/rer.mjs deploy --dry-run` and
-`node scripts/rer.mjs deploy --environment production`, which applies the
+`pnpm exec rer deploy --dry-run` and
+`pnpm exec rer deploy --environment production`, which applies the
 migrations before publishing. This release's upgrade evidence covers local
 installations; a hosted upgrade is not part of it.
 
@@ -650,8 +650,8 @@ fidelity remains held; D1/R2 backup does not qualify Durable Object storage.
 ### Check that everything works
 
 ```sh
-node scripts/rer.mjs check --profile first-party
-node scripts/rer.mjs verify
+pnpm exec rer check --profile first-party
+pnpm exec rer verify
 ```
 
 Verify runs the real build, typecheck, selected module tests, native runtime,
@@ -677,7 +677,7 @@ missing credentials or delivery failure never select a local fallback.
 
 Native magic links require explicit single-use confirmation POST; scanner GETs
 do not consume them. Native passwords and tenant/session checks are retained.
-`node scripts/rer.mjs outbox --owner-email you@example.com` requests a new
+`pnpm exec rer outbox --owner-email you@example.com` requests a new
 ordinary message while the app runs; `--open` explicitly opens the browser.
 Never print message contents, cookies or token-bearing sign-in URLs.
 

@@ -4,180 +4,165 @@
   "commands": {
     "setup": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "setup"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Build, migrate, prepare private settings and the native first owner; stop the temporary app."
     },
     "dev": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "dev"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Foreground app with assets/HMR, health-gated readiness and development outbox sign-in."
     },
     "build": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "build"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for build effects."
     },
     "verify": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "verify"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Run the complete nonrecursive verification target."
     },
     "reset": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "reset"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Explicitly confirmed deletion of the contained local inventory; no remote effect."
     },
     "deploy": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "deploy"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Owner-account provision, migration, publication and health; dry-run builds/validates locally with no provider request."
     },
     "export": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "export"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "New private archive of supported local D1/FILES data with integrity and explicit exclusions."
     },
     "import": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "import"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Confirmed validated atomic restore into an empty local destination; native identities retained."
     },
     "release": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "release"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for release effects."
     },
     "outbox": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "outbox"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for outbox effects."
     },
     "doctor": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "doctor"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for doctor effects."
     },
     "describe": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "describe"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for describe effects."
     },
     "check": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "check"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for check effects."
     },
     "install": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "install"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Frozen pinned dependency installation; no setup, global changes or deployment."
     },
     "preview": {
       "argv": [
-        "node",
-        "scripts/rer.mjs",
+        "rer",
         "preview"
       ],
       "inputs": [
-        "scripts/rer.mjs",
+        "package.json",
         "scripts/installer/local.mjs"
       ],
       "effects": "Serve fixed production output, preserve local owner and durable state, stop after idle timeout or explicit stop."

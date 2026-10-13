@@ -1,3 +1,6 @@
+import { fileURLToPath as __rerTestEntryPath } from 'node:url';
+const __rerTestEntry = __rerTestEntryPath(import.meta.resolve('@runeditrun/rer/internal/global/rer.mjs'));
+const __rerTestEntryArgs = args => args[1] === 'dev' && !args.some(arg => ['--foreground', '--detach', '--stop', '--help'].includes(arg)) ? [...args, '--foreground'] : args;
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 
@@ -9,7 +12,7 @@ export function commandEnvironment(input=process.env){
 }
 
 export function command(root,args,{timeout=1200000}={}){
- const child=spawn(process.execPath,['scripts/rer.mjs',...args,'--non-interactive','--json'],{
+ const child=spawn(process.execPath,__rerTestEntryArgs([__rerTestEntry,...args,'--non-interactive','--json']),{
   cwd:root,env:commandEnvironment(),detached:process.platform!=='win32',stdio:['ignore','pipe','pipe'],
  });
  let output='',exited=false;

@@ -4,9 +4,9 @@ Use Node 22.20.0 and pnpm 10.12.4. Select those tools before running commands;
 rer checks them and never changes global tools. From the project root:
 
 ```sh
-node scripts/rer.mjs install
-node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json
-node scripts/rer.mjs dev
+pnpm install --frozen-lockfile
+pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+pnpm exec rer dev --foreground
 ```
 
 Prepare private answers as described in [Install](docs/INSTALLER.md#private-setup-answers).
@@ -96,9 +96,10 @@ After the pinned Node 22.20.0 / pnpm 10.12.4 frozen installation and ordinary
 
 ```sh
 pnpm run preview
+# In another terminal:
 pnpm run preview -- --stop
-node scripts/rer.mjs dev --idle-timeout 1800
-node scripts/rer.mjs dev --stop
+pnpm exec rer dev --idle-timeout 1800 --foreground
+pnpm exec rer dev --stop
 ```
 
 Use preview for fixed production output; use dev for live edits and HMR.
@@ -106,11 +107,11 @@ Preview reuses an intact build only when the actual public inputs and output
 bytes match its nonsecret receipt. Neither mode resets the saved owner or
 `.wrangler/state`; both request ordinary sign-in through the local outbox before
 readiness. Open the newest message; no email was sent. The same checkout has one
-foreground instance. A compatible duplicate prints its URL, while another mode
+managed instance. A compatible duplicate prints its URL, while another mode
 or explicit conflicting option refuses with exit 4 and its stop instruction.
 
 Idle timeout precedence is `--idle-timeout`, `RER_SERVER_IDLE_SECONDS`, then
-1800 seconds. Positive integer seconds only. Application HTTP/assets/outbox
+43200 seconds (12 hours). Positive integer seconds only. Application HTTP/assets/outbox
 activity resets the timer, active streams prevent expiry, and internal probes
 or HMR control traffic alone do not keep the app alive. Real application
 WebSocket messages count. `--stop` is idempotent and cannot take start flags.
@@ -122,11 +123,11 @@ and at least 60 seconds idle is stopped; otherwise the command lists safe URLs
 and stop instructions and refuses. Worktrees are distinct; symlink aliases are
 one checkout. Stops clean up owned descendants before freeing capacity/state.
 
-Heavy bounded work joins `~/.rer/jobs`; inspect it with
-`node scripts/base-cli/modules/job-queue/cli.mjs status`. Labels identify project,
+Heavy bounded work joins `~/.rer/jobs`; waiting commands report their live queue
+position. Package mode has no queue status command. Labels identify project,
 initiating command/phase and checkout. Nested jobs share only validated live
 membership. Original `CI=true` skips admission and permits heavy-command
 `--no-queue`; ordinary calls and `CI=false` queue. Help/check/describe/doctor,
 outbox URL, stop and reset inspection remain light. Keep `pnpm install
---frozen-lockfile` or `node scripts/rer.mjs install` for dependencies and `pnpm run deploy`
+--frozen-lockfile` or `pnpm exec rer install` for dependencies and `pnpm run deploy`
 for deployment; pnpm's built-in deploy is a different command.

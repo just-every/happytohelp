@@ -4,6 +4,7 @@ dist/
 .wrangler/
 .tanstack/
 .generated/
+/migrations/core/
 .seed/
 .dev.vars*
 .env*

@@ -33,7 +33,7 @@ function qualify({base, pin, record: inputRecord, product: inputProduct}) {
     const {root, close} = fixture(inputRecord);
     try {
       positive(root);
-      const name = 'scripts/base-cli/operations/operations.mjs';
+      const name = 'scripts/delivery/base/paths.mjs';
       const changedRecord = structuredClone(inputRecord);
       const copy = changedRecord.copies.find(copy => copy.path === name);
       if (kind === 'origin-mismatch') {

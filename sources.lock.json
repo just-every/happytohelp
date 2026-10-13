@@ -8697,7 +8697,7 @@
       "executable": false
     },
     "tests/publication-metadata.mjs": {
-      "sha256": "ae894409e43641463bd845904581e8626442374dd4704d09c6b0c2da384de77c",
+      "sha256": "73797c2db09f7ccca829502a519987ef57b1c9f6a0f8d400600f38ba10380e62",
       "executable": false
     },
     "tests/recovery-artifact-build.mjs": {

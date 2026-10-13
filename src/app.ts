@@ -18,6 +18,7 @@ import { trainingRoutes } from './modules/training-runs'
 import { routes as management,dashboardRoutes,publicWidget,widgetEvents } from './modules/management'
 import { inboundEmail } from './modules/integrations'
 import { applyMessageEffects } from './message-effects'
+import { modelReady } from './modules/management/provisioning/index'
 import { routes as sitePreview,brandMediaRoutes } from './modules/site-preview/routes'
 import {moveInRoutes} from './modules/move-in/routes'
 import {tags} from './modules/management/tags'
@@ -54,7 +55,8 @@ app.route('/api/delegation/v1',delegation)
 app.route('/api/delegation',nativeDelegation)
 app.route('/delegation',consent)
 app.route('/api/identity',identity)
-app.route('/api/conversations',createConversationRoutes(applyMessageEffects))
+// A default assistant answers new conversations only once its provider key is installed.
+app.route('/api/conversations',createConversationRoutes(applyMessageEffects,modelReady))
 app.route('/api/conversations',widgetEvents)
 app.route('/api/projects',projectSocketRoutes)
 app.route('/api/ai-support',ai)

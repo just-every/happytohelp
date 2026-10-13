@@ -3,7 +3,7 @@
   "name": "HappyToHelp",
   "version": "0.4.1",
   "license": "MIT",
-  "repository": "https://github.com/just-every/happytohelp",
+  "repository": "https://github.com/just-every/run-happytohelp",
   "maturity": "Owner-installable MIT source release. Local verification and hosted, real-provider and accessibility acceptance are separate; see ACCEPTANCE.md.",
   "category": "support",
   "replaces": [

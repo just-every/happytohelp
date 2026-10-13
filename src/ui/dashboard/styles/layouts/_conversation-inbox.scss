@@ -1,168 +1,100 @@
+// The inbox list column (ConversationsList.jsx, ConversationItem.jsx, InboxSearch.jsx, InboxTagFilter.jsx): 340px on
+// paper behind a rule; the search field and the tag filter, then rows with no dividers. A row is 76px or more with a
+// 14px radius, its contact's avatar, name, time, a two-line preview and the unread disc; the open one sits on the aqua tint.
 body.conversation-workspace #chat .conversation-inbox {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background: var(--workspace-surface-raised, #fff);
-    border-right: 1px solid var(--conversation-line);
-    color: var(--conversation-ink);
+    gap: 0;
+    border-right: 1px solid var(--rule);
+    color: var(--ink);
+    background: transparent;
     overflow: hidden;
 
     .conversation-inbox-header {
         position: relative;
         display: flex;
-        // The search field and the tag filter each take a full row, so the header
-        // grows to fit both instead of overflowing the column at any width.
         flex: 0 0 auto;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
+        flex-direction: column;
         gap: 8px;
-        min-height: var(--conversation-top-height);
-        padding: 14px 14px;
-
-        &::after {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            height: 1px;
-            content: '';
-            background: var(--conversation-line);
-            opacity: 0;
-            transition: opacity .18s ease;
-        }
+        padding: 16px;
+        border-bottom: 1px solid transparent;
+        transition: border-color .18s ease;
     }
 
-    &.is-scrolled .conversation-inbox-header::after { opacity: 1; }
+    &.is-scrolled .conversation-inbox-header { border-bottom-color: var(--rule); }
 
     .conversation-list-items {
-        min-height: 0;
         flex: 1 1 auto;
+        min-height: 0;
+        padding: 4px 12px 20px;
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 0 14px 20px;
     }
 
-    .conversation-demo-label {
-        padding: 0 14px;
-        color: var(--conversation-quiet);
-        font-size: 12px;
-        line-height: 1.5;
-    }
+    .conversation-demo-label { padding: 0 16px; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
 
     .conversation-empty-state {
-        margin: 1.5rem 0;
-        padding: 0 1rem;
-        color: var(--conversation-quiet);
-        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 48px 0 24px;
+        color: var(--ink-soft);
+        font-size: 15px;
         text-align: center;
         overflow-wrap: anywhere;
+
+        > p { max-width: 14rem; margin: 8px 0 0; }
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    body.conversation-workspace #chat .conversation-inbox .conversation-inbox-header::after { transition: none; }
-}
-
-body.conversation-workspace #chat {
-    .conversation-list-sentinel { height: 1px; }
-
-    // A rejected search term is feedback about the input, not a failed load: it offers no Retry.
-    .conversation-search-notice {
-        margin: 12px 0;
-        padding: 8px 12px;
-        color: var(--conversation-muted);
-        font-size: 12px;
-        line-height: 1.5;
-        overflow-wrap: anywhere;
-    }
-
-    .conversation-list-error,
-    .conversation-load-error {
-        margin: 12px 0;
-        overflow-wrap: anywhere;
-        padding: 8px 12px;
-        color: var(--conversation-muted);
-        font-size: 12px;
-        line-height: 1.5;
-
-        button {
-            margin-left: 6px;
-            padding: 2px 4px;
-            border: 0;
-            border-radius: 4px;
-            color: var(--conversation-accent);
-            background: transparent;
-            font: inherit;
-            font-weight: 600;
-            cursor: pointer;
-
-            &:hover { background: var(--workspace-primary-soft); }
-            &:focus-visible { outline: 2px solid var(--conversation-accent); outline-offset: 2px; }
-        }
-    }
-}
-
-body.conversation-workspace #chat .conversation-inbox .search-query {
-    flex: 0 0 auto;
-    width: 100%;
-    margin: 0;
-
-    .input-group {
-        border: 1px solid var(--conversation-line);
-        border-radius: 7px;
+// The search field (magnifier inside, at the right) and the tag filter, 44px each.
+body.conversation-workspace #chat .conversation-inbox {
+    .search-query { flex: 0 0 auto; width: 100%; margin: 0; }
+    .search-query .input-group {
+        flex-wrap: nowrap;
+        border: 1.5px solid var(--field-line);
+        border-radius: 8px;
+        background: var(--surface);
         transition: border-color .15s ease, box-shadow .15s ease;
 
-        &:focus-within {
-            border-color: var(--conversation-accent);
-            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), .12);
-        }
+        &:hover { border-color: var(--ink); }
+        &:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
     }
-
-    .form-control,
-    .btn {
-        min-height: 40px;
+    .search-query .form-control,
+    .search-query .btn {
+        min-height: 41px;
         border: 0;
+        background: transparent !important;
         box-shadow: none;
-        font-size: 13px;
+        font-size: 15px;
     }
-
-    .form-control { border-radius: 6px 0 0 6px !important; }
-    .btn { border-radius: 0 6px 6px 0 !important; }
-    .form-control:focus-visible,
-    .btn:focus-visible { outline: none; }
-    .input-group-append { margin-left: 0; }
-    .btn { color: var(--workspace-quiet, #667085); }
+    .search-query .form-control { padding: 0 4px 0 14px; border-radius: 8px 0 0 8px !important; }
+    .search-query .btn { width: 44px; padding: 0; border-radius: 0 8px 8px 0 !important; color: var(--ink); }
+    .search-query .btn:hover { color: var(--ink); background: var(--hover) !important; }
+    .search-query :is(.form-control, .btn):focus-visible { outline: none; box-shadow: none !important; }
+    .search-query .input-group-append { display: flex; margin-left: 0; }
+    .inbox-tag-filter { min-height: 44px; font-size: 15px; }
 }
 
-body.conversation-workspace #chat .sidebar .conversation-item-wrap { margin-bottom: 8px; }
+// Rows.
+body.conversation-workspace #chat .sidebar .conversation-item-wrap { position: relative; margin-bottom: 4px; }
 
 body.conversation-workspace #chat .sidebar .conversation-item {
     display: block;
+    text-decoration: none;
 
-    .card {
-        margin: 0;
-        border: 1px solid transparent;
-        border-radius: 11px;
-        box-shadow: none;
-    }
+    .card { margin: 0; border: 0; border-radius: 14px; background: transparent; box-shadow: none; }
 
     .card-body {
         position: relative;
+        min-height: 76px;
         // The right edge is the row's Close / Reopen column.
-        padding: 18px 48px 18px 14px;
-        background: var(--workspace-surface-raised, #fff);
+        padding: 12px 42px 12px 12px;
         border-radius: inherit;
+        background: transparent;
 
-        > .row {
-            --bs-gutter-x: 1rem;
-        }
-
-        .col-auto .avatar {
-            --avatar-size: 2.5rem;
-            flex-shrink: 0;
-            aspect-ratio: 1;
-        }
+        > .row { --bs-gutter-x: 12px; flex-wrap: nowrap; }
+        .col-auto .avatar { --avatar-size: 40px; flex-shrink: 0; aspect-ratio: 1; }
     }
 
     .conversation-item-heading {
@@ -170,135 +102,171 @@ body.conversation-workspace #chat .sidebar .conversation-item {
         flex-wrap: nowrap;
         gap: 8px;
 
-        > h4 {
-            min-width: 0;
-            max-width: none;
-            color: var(--conversation-ink);
-            font-size: 14px;
-            font-weight: 650;
-        }
-
+        > h4 { min-width: 0; max-width: none; margin: 0; color: var(--ink); font-size: 16px; font-weight: 600; line-height: 1.3; }
         > time,
-        > .conversation-item-time {
-            flex: 0 0 auto;
-            margin-left: auto !important;
-            color: var(--conversation-quiet) !important;
-            font-size: 11px;
-        }
+        > .conversation-item-time { flex: 0 0 auto; margin-left: auto !important; color: var(--ink-soft) !important; font-size: 13px; }
+        > .fe-check-circle { color: var(--ink) !important; }
     }
 
-    .conversation-item-meta {
-        gap: 6px;
-        min-height: 1.25rem;
-    }
+    .conversation-item-meta { gap: 6px; min-height: 1.25rem; }
 
     .conversation-item-preview {
         min-width: 0;
-        min-height: 26px;
-        gap: 6px;
+        gap: 8px;
         align-items: flex-start !important;
 
         > .text-truncate {
             display: -webkit-box;
-            min-height: 3.1em;
-            line-height: 1.55;
+            color: var(--ink-soft);
+            font-size: 14px;
+            line-height: 1.45;
             white-space: normal !important;
             overflow-wrap: anywhere;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
         }
+        > .text-truncate h4 { color: var(--ink-soft); font-size: 14px; font-weight: 500; }
     }
 
+    // The unread disc: aqua with an ink numeral.
     .conversation-item-unread {
         display: inline-flex;
         flex: 0 0 auto;
         align-items: center;
         justify-content: center;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 4px;
-        border-radius: 6px;
-        background: var(--conversation-accent);
-        color: #fff;
-        font-size: 10px;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 6px;
+        border-radius: 999px;
+        color: var(--on-aqua);
+        background: var(--d-cyan);
+        font-size: 12px;
         font-weight: 600;
         line-height: 1;
     }
 
-    .conversation-item-agent {
-        display: inline-flex;
-        flex: 0 0 auto;
-        margin-left: auto;
-        align-items: center;
+    .conversation-item-agent { display: inline-flex; flex: 0 0 auto; align-items: center; margin-left: auto; }
+    .conversation-item-agent .avatar { --avatar-size: 24px; }
 
-        .avatar {
-            width: 1.625rem;
-            height: 1.625rem;
-        }
+    .conversation-item-project { display: block; max-width: 100%; overflow: hidden; font-size: 12px; line-height: 22px; text-overflow: ellipsis; }
+
+    &:not(.active):hover .card-body { background: var(--hover); }
+    &.active .card-body { background: var(--d-cyan-tint); }
+    &:focus-visible .card { outline: 2px solid var(--ink); outline-offset: 2px; }
+}
+
+// Close / Reopen sits in the row's reserved right column: a small round ink-outlined button.
+body.conversation-workspace #chat .conversation-item-wrap .conversation-item-action {
+    top: 12px;
+    right: 8px;
+    width: 32px;
+    min-height: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+// Pagination and errors in the list.
+body.conversation-workspace #chat {
+    .conversation-list-sentinel { height: 1px; }
+
+    // A rejected search term is feedback about the input, not a failed load: it offers no Retry.
+    .conversation-search-notice,
+    .conversation-list-error,
+    .conversation-load-error {
+        margin: 12px 0;
+        padding: 8px 12px;
+        color: var(--ink-soft);
+        font-size: 14px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
     }
 
-    .conversation-item-project {
-        max-width: 100%;
+    .conversation-list-error button,
+    .conversation-load-error button {
+        margin-left: 6px;
+        padding: 0 2px;
         border: 0;
-        background: var(--conversation-accent-soft);
-        color: var(--conversation-accent);
-        font-size: 10px;
-        font-weight: 650;
-    }
-
-    .text-truncate {
-        color: var(--conversation-muted);
-        font-size: 12px;
-    }
-
-    .text-truncate h4 {
-        color: var(--conversation-muted);
-        font-size: 12px;
-        font-weight: 650;
-    }
-
-    &.active {
-        .card {
-            background: var(--conversation-accent-soft);
-        }
-
-        .card-body {
-            background: var(--conversation-accent-soft);
-        }
-
-        .conversation-item-heading > h4,
-        .conversation-item-heading > time,
-        .conversation-item-heading > .conversation-item-time,
-        .text-truncate,
-        .text-truncate h4 {
-            color: var(--conversation-accent) !important;
-        }
-
-        .conversation-item-unread {
-            background: var(--conversation-accent);
-            color: #fff;
-        }
-    }
-
-    &:focus-visible .card {
-        outline: 2px solid var(--conversation-accent);
-        outline-offset: 2px;
-    }
-
-    &:not(.active):hover .card-body {
-        background: var(--conversation-hover);
+        color: var(--ink);
+        background: transparent;
+        font: inherit;
+        font-weight: 500;
+        text-decoration: underline 2px var(--d-cyan-deep);
+        text-underline-offset: 4px;
+        cursor: pointer;
     }
 }
 
+// The five views as one quiet row of text above the search, on desktop and phone alike: no borders, the current one on
+// the aqua tint. A disc (aqua, ink numeral) appears only on a view whose count is above zero.
+body.conversation-workspace #chat .inbox-views {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 2px;
+    padding: 14px 6px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+
+    // The narrower three-column desktop has less room: the row wraps instead of hiding a view.
+    @media (min-width: 1200px) and (max-width: 1439.98px) { flex-wrap: wrap; overflow: visible; }
+
+    .inbox-view-link {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 6px;
+        min-height: 32px;
+        padding: 0 8px;
+        border: 0;
+        border-radius: 999px;
+        color: var(--ink-soft);
+        background: transparent;
+        box-shadow: none;
+        font-size: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover { color: var(--ink); background: var(--hover); }
+        &.is-active { color: var(--ink); background: var(--d-cyan-tint); font-weight: 500; }
+        &:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    }
+
+    .inbox-view-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        border-radius: 999px;
+        color: var(--on-aqua);
+        background: var(--d-cyan);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+    }
+}
+
+// The greeting: the landing's section voice with the aqua pen line under it.
+body.conversation-workspace #chat .inbox-greeting {
+    margin: 0;
+    color: var(--ink);
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.conversation-workspace #chat .conversation-inbox .conversation-inbox-header { transition: none; }
+}
+
+// Keep a contact's name readable beside the timestamp in the narrow laptop list.
 @media (min-width: 1200px) and (max-width: 1439.98px) {
-    body.conversation-workspace #chat .sidebar .conversation-item {
-        .card-body { padding: 14px 46px 14px 10px; }
-
-        .conversation-item-heading {
-            gap: 4px;
-
-            > h4 { font-size: 12px; }
-            > .conversation-item-time { font-size: 10px; }
-        }
+    body.conversation-workspace .conversation-item-heading {
+        align-items: flex-start !important;
+        > h4 { white-space: normal !important; overflow: visible; overflow-wrap: anywhere; }
     }
 }

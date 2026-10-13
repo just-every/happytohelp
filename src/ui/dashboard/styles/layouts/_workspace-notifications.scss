@@ -1,9 +1,9 @@
 body.workspace-themed .alert-success {
     --bs-alert-color: var(--bs-action);
-    --bs-alert-bg: var(--workspace-primary-soft);
-    --bs-alert-border-color: var(--workspace-primary-border);
+    --bs-alert-bg: var(--d-cyan-tint);
+    --bs-alert-border-color: var(--rule);
     --bs-alert-link-color: var(--bs-action);
 
-    hr { color: var(--workspace-primary-border); }
+    hr { color: var(--rule); }
     .close { color: inherit; }
 }

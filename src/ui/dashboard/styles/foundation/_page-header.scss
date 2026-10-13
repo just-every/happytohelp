@@ -1,45 +1,87 @@
-// Workspace page frame: `.main-content > .container-fluid > .header` with the
-// page title, optional pretitle and header tabs, followed by page content.
+// Workspace page frame (WorkspacePages.jsx): the title at 32px with its actions on the title line; below them the tabs
+// rail. Notices (a page the account cannot open) are centred under their drawing instead.
 
-.header {
-  --bs-header-tabs-link-color: var(--bs-gray-600);
-  --bs-header-tabs-link-hover-color: var(--bs-gray-700);
-  margin-bottom: 2rem;
-  background-color: var(--bs-header-bg, transparent);
-  color: var(--bs-header-color, inherit);
+.workspace-page-header {
+  position: relative;
+  margin: 0 0 28px;
+
+  .header-body { padding: 0; border: 0; }
+  .workspace-page-heading { display: flex; align-items: flex-end; gap: 16px 24px; min-height: 0; }
+  .workspace-page-titles { flex: 1 1 auto; min-width: 0; }
+  .workspace-page-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .workspace-page-actions:empty { display: none; }
+  .header-pretitle { margin: 0 0 6px; color: var(--ink-soft); font-size: 14px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+  .header-title { margin: 0; color: var(--ink); font-size: 32px; font-weight: 500; letter-spacing: -.025em; line-height: 1.15; overflow-wrap: anywhere; }
+  #workspace-header-tabs:not(:empty) { margin-top: 20px; }
 }
 
-.header-body {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--bs-border-color);
+// The tabs rail: a page's text link (e.g. "Move in existing support history") sits at its right end.
+.workspace-tabs-rail {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px 24px;
+  border-bottom: 1px solid var(--rule);
+
+  > nav { flex: 1 1 auto; min-width: 0; }
+  > nav > .nav-tabs, > .project-parity-tabs { border-bottom: 0; }
+  > .h2h-link { flex: 0 0 auto; margin-bottom: 12px; }
 }
 
-.header-pretitle {
-  color: var(--bs-secondary-color);
-  letter-spacing: .08em;
-  text-transform: uppercase;
+@media (max-width: 767.98px) {
+  .workspace-page-header {
+    margin-bottom: 20px;
+    .workspace-page-heading { flex-wrap: wrap; align-items: flex-start; }
+    .workspace-page-titles { flex-basis: 100%; }
+    .workspace-page-actions { order: 3; flex-basis: 100%; }
+  }
+  .workspace-tabs-rail { flex-direction: column; align-items: stretch; border-bottom: 0; }
+  .workspace-tabs-rail > nav > .nav-tabs, .workspace-tabs-rail > .project-parity-tabs { border-bottom: 1px solid var(--rule); }
+  .workspace-tabs-rail > .h2h-link { align-self: flex-start; margin: 4px 0 0; }
 }
 
-.header-title {
-  margin-bottom: 0;
+// A page the account cannot open: centred under the question drawing. No card, no red.
+.workspace-notice-page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100dvh - var(--top-bar-height, 0px));
+  padding: 40px 24px;
+
+  @include media-breakpoint-up(xl) { min-height: 100dvh; }
 }
 
-.header-tabs {
-  margin-bottom: -1.5rem;
-  border-bottom-width: 0;
+.workspace-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 560px;
+  text-align: center;
 
-  .nav-link {
-    --bs-nav-link-color: var(--bs-header-tabs-link-color);
-    --bs-nav-link-hover-color: var(--bs-header-tabs-link-hover-color);
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+  .h2h-drawing { margin-bottom: 24px; }
+  .header-title { margin: 0 0 14px; color: var(--ink); font-size: 32px; font-weight: 500; letter-spacing: -.025em; line-height: 1.15; }
+  p[role=alert] { margin: 0 0 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.5; }
+
+  @media (max-width: 575.98px) {
+    .btn { width: auto; }
   }
 }
 
-[data-bs-theme="dark"] .header {
-  --bs-header-bg: var(--bs-black);
-  --bs-header-color: var(--bs-white);
-  --bs-header-tabs-link-color: var(--bs-white);
-  --bs-header-tabs-link-hover-color: var(--bs-white);
+.workspace-notice__shortcuts {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+
+  @include media-breakpoint-up(xl) { display: none; }
+}
+
+// A page's code still loading inside the shell (Dashboard.tsx).
+.dashboard-content-pending {
+  padding: 40px 48px;
+  color: var(--ink-soft);
+  font-size: 16px;
+
+  @include media-breakpoint-down(md) { padding: 20px 16px; }
 }

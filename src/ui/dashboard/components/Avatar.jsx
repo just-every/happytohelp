@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import initialsFromName from 'initials';
 import { ChatContext } from "../contexts/ChatContext";
 
-import '../styles/components/Avatar.css';
+import '../styles/components/Avatar.scss';
 
 function Avatar({ name, initials, className, url, icon, href, style, projectId, variant }) {
     // The avatar background is a per-project widget setting. Prefer an explicitly passed

@@ -1,7 +1,7 @@
 .connections-page { min-width: 0; }
 .connections-page input, .connections-page select, .connections-page textarea { max-width: 100%; min-width: 0; }
-.connections-page .alert-info { color: #154d69; background: #edf7fc; border-color: #9ccadd; }
-.connections-page .alert-warning { color: #684609; background: #fff8e7; border-color: #ddc28a; }
-.connections-page .alert-danger { color: #7a1423; background: #fff0f2; border-color: #dfa0ab; }
-.connections-page .btn-outline-danger { color: #a51d35; border-color: #a51d35; }
-.connections-page .btn-outline-danger:hover, .connections-page .btn-outline-danger:focus-visible { color: #fff; background: #a51d35; }
+.connections-page .alert-info { color: var(--ink); background: var(--d-cyan-tint); border-color: var(--d-cyan-tint); }
+.connections-page .alert-warning { color: var(--ink); background: var(--note); border-color: var(--rule); }
+.connections-page .alert-danger { color: var(--danger); background: var(--surface); border-color: var(--danger); }
+.connections-page .btn-outline-danger { color: var(--danger); border-color: var(--danger); }
+.connections-page .btn-outline-danger:hover, .connections-page .btn-outline-danger:focus-visible { color: var(--danger); background: var(--hover); }

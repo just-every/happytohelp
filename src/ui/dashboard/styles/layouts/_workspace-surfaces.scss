@@ -15,20 +15,20 @@ body.workspace-page .workspace-page-content {
     .card-body { padding: 16px 0; }
     .card-footer { padding: 16px 0 0; border: 0; background: transparent; }
     .list-group-item { padding: 16px 0; border: 0; color: inherit; background: transparent; }
-    .list-group-item.active { color: var(--bs-primary); background: var(--workspace-primary-soft); }
-    .list-group-item-action:hover { background: var(--workspace-primary-hover); }
+    .list-group-item.active { color: var(--bs-primary); background: var(--d-cyan-tint); }
+    .list-group-item-action:hover { background: var(--hover); }
     .table {
         --bs-table-bg: transparent;
-        --bs-table-color: var(--conversation-ink);
+        --bs-table-color: var(--ink);
         --bs-table-border-color: transparent;
-        --bs-table-striped-bg: var(--workspace-primary-hover);
-        --bs-table-hover-bg: var(--workspace-primary-hover);
-        --bs-table-hover-color: var(--conversation-ink);
-        --bs-table-active-bg: var(--workspace-primary-soft);
+        --bs-table-striped-bg: var(--hover);
+        --bs-table-hover-bg: var(--hover);
+        --bs-table-hover-color: var(--ink);
+        --bs-table-active-bg: var(--d-cyan-tint);
         --bs-table-active-color: var(--bs-primary);
         margin-bottom: 0;
         font-size: 13px;
-        th { padding: 12px; color: var(--conversation-muted); background: transparent; font-size: 11px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+        th { padding: 12px; color: var(--ink-soft); background: transparent; font-size: 11px; font-weight: 600; text-transform: none; letter-spacing: 0; }
         th a { color: inherit; }
         th a:hover { color: var(--bs-primary); }
         td { padding: 16px 12px; vertical-align: middle; }
@@ -40,16 +40,16 @@ body.workspace-page .workspace-page-content {
         td a:not(.btn, .dropdown-item, .dropdown-toggle):has(+ .badge),
         td a[href*="/contacts/"]:not(.dropdown-item) { font-weight: 600; }
         td a:not(.btn, .dropdown-item):hover { color: var(--bs-primary); }
-        td small { color: var(--conversation-muted); }
+        td small { color: var(--ink-soft); }
     }
     .badge { border-radius: 6px; font-size: 11px; font-weight: 500; }
-    .badge:is(.text-bg-light, .text-bg-primary-subtle) { color: var(--bs-primary) !important; background: var(--workspace-primary-soft) !important; }
-    .dropdown-ellipses { padding: 6px; color: var(--conversation-muted); }
+    .badge:is(.text-bg-light, .text-bg-primary-subtle) { color: var(--bs-primary) !important; background: var(--d-cyan-tint) !important; }
+    .dropdown-ellipses { padding: 6px; color: var(--ink-soft); }
     [data-record-row] {
         cursor: pointer;
-        + [data-record-row] { border-top: 1px solid var(--conversation-line); }
-        &:hover, &:focus-within { --bs-table-accent-bg: var(--workspace-primary-hover); background: var(--workspace-primary-hover); }
-        &:focus-within { outline: 2px solid rgba(var(--bs-primary-rgb), .35); outline-offset: -2px; }
+        + [data-record-row] { border-top: 1px solid var(--rule); }
+        &:hover, &:focus-within { --bs-table-accent-bg: var(--hover); background: var(--hover); }
+        &:focus-within { outline: 2px solid rgba(var(--ink-rgb), .35); outline-offset: -2px; }
     }
     .insight-content__open {
         display: inline-flex;
@@ -81,21 +81,21 @@ body.workspace-page .workspace-page-content {
     }
     .workspace-search {
         overflow: hidden;
-        border: 1px solid var(--conversation-line);
+        border: 1px solid var(--rule);
         border-radius: 8px;
-        background: var(--workspace-field-bg, #fff);
+        background: var(--surface);
         .form-control { border: 0; box-shadow: none !important; background: transparent; }
-        .input-group-text { padding: 0 12px; border: 0; color: var(--conversation-muted); background: transparent; }
-        &:focus-within { border-color: var(--bs-primary); box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), .12); }
+        .input-group-text { padding: 0 12px; border: 0; color: var(--ink-soft); background: transparent; }
+        &:focus-within { border-color: var(--bs-primary); box-shadow: 0 0 0 3px rgba(var(--ink-rgb), .12); }
     }
     .workspace-section { margin-top: 32px; }
     .workspace-section > :first-child { margin-top: 0; }
     .workspace-avatar-choice { border: 0; border-radius: 25%; }
     .workspace-avatar-choice .avatar-img { border-radius: 25%; }
     .workspace-avatar-action { display: inline-flex; align-items: center; gap: 12px; min-height: 36px; }
-    .workspace-avatar-action > .fe { width: 24px; color: var(--conversation-ink); font-size: 20px; text-align: center; }
+    .workspace-avatar-action > .fe { width: 24px; color: var(--ink); font-size: 20px; text-align: center; }
     #widget-settings hr { border: 0; margin-block: 24px !important; }
     #schedule-fields .btn-group-toggle { flex-wrap: wrap; gap: 6px; }
     #schedule-fields .btn-group-toggle > .btn { margin: 0; border-radius: 7px; }
-    #schedule-fields .btn-group-toggle > .btn:has(input:checked) { color: var(--bs-primary); background: var(--workspace-primary-soft); }
+    #schedule-fields .btn-group-toggle > .btn:has(input:checked) { color: var(--bs-primary); background: var(--d-cyan-tint); }
 }

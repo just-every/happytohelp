@@ -10,7 +10,7 @@ Report it privately through GitHub's private vulnerability reporting for this
 repository. Do not open a public issue, pull request or discussion for a
 suspected vulnerability.
 
-1. Open <https://github.com/just-every/happytohelp/security/advisories/new>
+1. Open <https://github.com/just-every/run-happytohelp/security/advisories/new>
    (or choose **Security → Report a vulnerability** on the repository page).
 2. Include:
    - the affected version or commit

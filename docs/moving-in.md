@@ -1,6 +1,6 @@
 # Move in your support history
 
-Open **Settings → Move in existing support history**, or use the optional **Move in** link on the setup checklist. A workspace owner or admin uploads and reviews each import. Its original files, plan and report are private to that reviewer in that workspace.
+Open **Settings → Move in existing support history**, or use the optional **Move in** link on the Setup page. A workspace owner or admin uploads and reviews each import. Its original files, plan and report are private to that reviewer in that workspace.
 
 Choose the format, upload the file, and wait for **Ready for review**. Read the counts, publication changes, omissions, rejections and file diagnostics before choosing **Approve and import**. Processing continues in bounded background batches. The report links to imported conversations, contacts, saved replies and articles. If processing stops, resolve the reported issue and choose **Resume import**; committed progress is retained. The reviewer must still have a current owner/admin session and membership when a batch executes.
 

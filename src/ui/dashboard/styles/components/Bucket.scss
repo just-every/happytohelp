@@ -9,7 +9,7 @@
     &.contact-messages-ended, &.contact-messages-final {
         &:after {
             content: "";
-            background: var(--workspace-surface-subtle, #F9FBFD);
+            background: var(--paper-deep);
             height: 100%;
             width: 2.5rem;
             position: absolute;
@@ -28,7 +28,7 @@
     &.agent-messages-ended, &.agent-messages-final {
         &:before {
             content: "";
-            background: var(--workspace-surface-subtle, #F9FBFD);
+            background: var(--paper-deep);
             height: 100%;
             width: 2.5rem;
             position: absolute;
@@ -50,7 +50,7 @@
         top: 0;
         height: 100%;
         left: 0;
-        border-right: 1px solid var(--workspace-line, #E3EBF6);
+        border-right: 1px solid var(--rule);
         height: 100%;
         width: 1.25rem;
         width: calc(1.25rem + 3px);

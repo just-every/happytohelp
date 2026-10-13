@@ -9,6 +9,7 @@ import type { HastState } from './hast.ts';
 import { highlight } from './highlight.ts';
 import type { AnchorCheck, LinkContext } from './links.ts';
 import { createSlugger } from './slug.ts';
+import { docsPreamble } from './preamble.ts';
 
 // One Markdown file to static HTML with the app's own react-markdown 6 and remark-gfm 1. Raw HTML stays disabled (it
 // renders as text), and the output carries classes only: no style or event attributes.
@@ -52,7 +53,7 @@ function table({ node, children }: { node?: HastNode; children?: ReactNode }) {
 export function renderPage(markdown: string, links: LinkContext): RenderedPage {
   const state: HastState = { slug: createSlugger(), links, title: '', titleId: '', description: '', toc: [], ids: [], anchors: [], images: [], problems: [] };
   const html = renderToStaticMarkup(createElement(Markdown, {
-    remarkPlugins: [gfm],
+    remarkPlugins: [gfm, docsPreamble],
     rehypePlugins: [[docsHast, state]],
     components: { code, table },
     children: markdown,

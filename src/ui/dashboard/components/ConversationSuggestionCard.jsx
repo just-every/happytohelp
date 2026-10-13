@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 import ReplyIcon, { hasReplyIcon } from './reply-icons/ReplyIcon';
+import { Sparks } from '../../homepage/drawings/Sparks';
 
 // The selectable reply remains a button, so Markdown is rendered with phrasing
 // elements only. This keeps the expansion button a valid sibling control.
@@ -64,6 +65,7 @@ export default function ConversationSuggestionCard({ disabled, icon, label, onSe
     }, [ measureOverflow, response ]);
 
     return <article className={ `conversation-suggestion-card${ selected ? ' is-selected' : '' }${ isExpandable ? ' is-expandable' : '' }` }>
+        <Sparks />
         <button
             type="button"
             className={ `conversation-suggestions__option${ selected ? ' is-selected' : '' }` }

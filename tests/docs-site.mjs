@@ -66,7 +66,7 @@ test('the docs build renders every page with no problems, one title, unique ids 
   for (const page of site.pages) {
     const markdown = readFileSync(join(root, page.source), 'utf8');
     assert.equal(page.title, /^# (.+)$/m.exec(markdown)[1].replace(/`/g, ''), `${page.source} title`);
-    assert.match(markdown.trimStart(), /^# /, `${page.source} starts with its H1`);
+    assert.deepEqual(renderPage(markdown, { source: page.source, repository: readRepository(root), published: new Map(site.pages.map(entry => [entry.source, entry.href])), kind: pathKind(root) }).problems, [], `${page.source} starts its native article with its H1`);
     assert.doesNotMatch(page.html, /<h1\b/, `${page.source} has exactly one H1, rendered by the page`);
     assert.equal(new Set(page.ids).size, page.ids.length, `${page.source} heading ids are unique`);
     assert.doesNotMatch(page.html, /\s(style|on[a-z]+)=|<script/i, `${page.source} has no inline style, handler or script`);
@@ -93,7 +93,7 @@ test('the docs build renders every page with no problems, one title, unique ids 
 // A link context for in-memory fixtures: one published page and a few repository paths.
 const fixtureContext = (source = 'docs/PAGE.md') => ({
   source,
-  repository: { url: 'https://github.com/just-every/happytohelp', branch: 'main' },
+  repository: { url: 'https://github.com/just-every/run-happytohelp', branch: 'main' },
   published: new Map([['docs/PAGE.md', '/docs/page'], ['docs/OTHER.md', '/docs/other']]),
   kind: path => ({ 'docs/PAGE.md': 'file', 'docs/OTHER.md': 'file', 'docs/INTERNAL.md': 'file', 'docs/licenses': 'directory', LICENSE: 'file', 'docs/media/diagram.png': 'file' })[path] ?? null,
 });
@@ -144,8 +144,8 @@ test('links go to published pages, to GitHub for everything else, or are reporte
   ].join('\n\n'));
   assert.deepEqual(page.problems, []);
   assert.deepEqual([...page.html.matchAll(/href="([^"]+)"/g)].map(match => match[1]), [
-    '#fixture-page', '/docs/other', '/docs/other#part', 'https://github.com/just-every/happytohelp/blob/main/docs/INTERNAL.md',
-    'https://github.com/just-every/happytohelp/tree/main/docs/licenses', 'https://github.com/just-every/happytohelp/blob/main/LICENSE',
+    '#fixture-page', '/docs/other', '/docs/other#part', 'https://github.com/just-every/run-happytohelp/blob/main/docs/INTERNAL.md',
+    'https://github.com/just-every/run-happytohelp/tree/main/docs/licenses', 'https://github.com/just-every/run-happytohelp/blob/main/LICENSE',
     'https://example.com/a?b=c', 'mailto:team@example.com',
   ]);
   assert.deepEqual(page.anchors, [{ source: 'docs/PAGE.md', id: 'fixture-page' }, { source: 'docs/OTHER.md', id: 'part' }]);
@@ -180,7 +180,7 @@ test('broken links and anchors across pages fail the site build, naming the file
   const fixture = await realpath(await mkdtemp(join(tmpdir(), 'h2h-docs-site-')));
   try {
     await mkdir(join(fixture, 'docs'));
-    await writeFile(join(fixture, 'package.json'), JSON.stringify({ repository: { url: 'https://github.com/just-every/happytohelp' } }));
+    await writeFile(join(fixture, 'package.json'), JSON.stringify({ repository: { url: 'https://github.com/just-every/run-happytohelp' } }));
     await writeFile(join(fixture, 'docs/site.json'), JSON.stringify({ sections: [{ title: 'S', pages: [{ slug: '', source: 'README.md', label: 'Home' }, { slug: 'guide', source: 'docs/GUIDE.md', label: 'Guide' }] }], githubOnly: [{ source: 'NOTES.md', reason: 'Maintainer notes' }] }));
     await writeFile(join(fixture, 'README.md'), '# Home\n\n[guide](docs/GUIDE.md#second) [bad](docs/GUIDE.md#third) [notes](NOTES.md#kept) [gone](NOTES.md#lost) [missing](docs/MISSING.md) [self](#nowhere)\n');
     await writeFile(join(fixture, 'docs/GUIDE.md'), '# Guide\n\n## Second\n');
@@ -193,7 +193,7 @@ test('broken links and anchors across pages fail the site build, naming the file
       'README.md: #nowhere (no such heading in README.md)',
     ]);
     assert.match(built.pages[0].html, /href="\/docs\/guide#second"/);
-    assert.match(built.pages[0].html, /href="https:\/\/github\.com\/just-every\/happytohelp\/blob\/main\/NOTES\.md#kept"/);
+    assert.match(built.pages[0].html, /href="https:\/\/github\.com\/just-every\/run-happytohelp\/blob\/main\/NOTES\.md#kept"/);
   } finally {
     await rm(fixture, { recursive: true, force: true });
   }

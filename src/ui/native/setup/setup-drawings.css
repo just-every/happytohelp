@@ -1,74 +1,14 @@
-/* The left column's drawings, in the homepage drawings' language (drawings.css): the Known details card as an ink card on a
-   pale aqua plate with the logo's sparks on its corner; under it, on the first step, the homepage's aqua flourish, and on the
-   later steps a browser window showing the workspace's name and its chat bubble in the brand colour. */
-.h2h-setup .setup-known { --card-radius: 31px 28px 32px 30px / 30px 32px 28px 31px; position: relative; isolation: isolate; align-self: start; margin-top: 55px; padding: 24px 34px 32px 36px; }
-/* The plate swells past the card (most to the right and above, as in design E). The card's ink line and its face, a shade
-   lighter than the plate, are its ::before, so they paint over the plate (a negative layer would cover a border on the card). */
-.h2h-setup .setup-known-plate { position: absolute; z-index: -2; top: -32px; right: -33px; bottom: -30px; left: -20px; width: calc(100% + 53px); height: calc(100% + 62px); fill: var(--d-cyan-tint); fill-opacity: 0.7; pointer-events: none; overflow: visible; }
-.h2h-setup .setup-known::before { content: ''; position: absolute; z-index: -1; inset: 0; background: var(--d-cyan-wash); border: 2px solid var(--ink); border-radius: var(--card-radius); }
-.h2h-setup .setup-known header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
-.h2h-setup .setup-known h2 { font-size: 26px; font-weight: 600; line-height: 1.3; letter-spacing: -0.02em; }
-.h2h-setup .setup-known button { min-height: 36px; margin-right: -4px; padding: 0 14px; color: var(--ink); font: inherit; font-size: 17px; font-weight: 600; line-height: 1; background: var(--d-cyan-tint); border: 2px solid var(--ink); border-radius: 999px; box-shadow: 0 0 0 2px var(--d-cyan-deep); cursor: pointer; transition: background-color 0.18s; }
-.h2h-setup .setup-known button:hover { background: var(--d-cyan); }
-.h2h-setup .setup-known dl { display: grid; gap: 14px; font-size: 18px; line-height: 1.4; }
-.h2h-setup .setup-known dl > div { display: grid; grid-template-columns: 203px minmax(0, 1fr); gap: 12px; }
-.h2h-setup .setup-known dd { overflow-wrap: anywhere; }
-.h2h-setup .setup-known small { display: block; margin-top: 16px; padding: 16px 18% 0 0; color: var(--ink-soft); font-size: 16px; line-height: 1.45; border-top: 1.5px solid var(--ink); }
-
-/* The logo's sparks (Sparks.tsx), as drawings.css seats them on a card's top-right corner: --spark is one unit of the mark's
-   grid. On the Known details card they are inked and tipped back, as in design E. */
-.h2h-setup .d-sparks { --spark: 1px; position: absolute; left: calc(100% + 2px + 0.5 * var(--spark)); top: calc(-2px - 37.6 * var(--spark)); width: calc(29.9 * var(--spark)); height: calc(45.3 * var(--spark)); overflow: visible; color: var(--ink); pointer-events: none; }
-.h2h-setup .setup-known > .d-sparks { --spark: 0.95px; left: calc(100% - 24px); top: -44px; transform: rotate(-24deg); transform-origin: 0 100%; }
-
-/* Step 1: the homepage's flourish (Flourish.tsx), drawn in once as it appears; reduced motion shows it drawn. */
+/* The left column's drawing, in the homepage drawings' language (drawings.css): the homepage's aqua flourish. */
+/* The homepage's flourish (Flourish.tsx), drawn in as it appears the first time and held still for a while after
+   (cooldown.tsx marks it data-drawn="still"); reduced motion shows it drawn. */
 .h2h-setup .hero-flourish { display: block; width: 92%; height: auto; aspect-ratio: 640 / 150; margin: 58px 0 0 -18px; color: var(--d-cyan-deep); overflow: visible; pointer-events: none; }
 .h2h-setup .hero-flourish path { stroke-dasharray: 1 2; stroke-dashoffset: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .h2h-setup .hero-flourish path { animation: h2h-setup-flourish 1.5s cubic-bezier(0.55, 0.05, 0.35, 1) 0.2s both; }
+  .h2h-setup .setup-drawing[data-drawn="still"] .hero-flourish path { animation: none; }
 }
 @keyframes h2h-setup-flourish { from { stroke-dashoffset: 1.02; } to { stroke-dashoffset: 0; } }
 
-/* Steps 2 and 3: the window on its pen line. The art is a size container and everything in the window is in em of a type
-   size set from its width, so the drawing scales as one. */
-.h2h-setup .setup-window-art { position: relative; container-type: inline-size; width: calc(100% + 24px); aspect-ratio: 650 / 250; margin: 40px 0 0 -16px; }
-.h2h-setup .setup-window-line { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--d-cyan-deep); overflow: visible; }
-.h2h-setup .setup-window-tilt { position: absolute; left: 25%; top: 3%; width: 50%; font-size: 2.25cqw; transform: rotate(-7deg); }
-/* SketchWindow's frame and bar, as drawings.css draws them on the homepage, with the bar's dots inked in. */
-.h2h-setup .d-window { position: relative; background: #fff; border: 2px solid var(--d-ink); border-radius: 0.9em 0.7em 0.8em 0.7em / 0.7em 0.9em 0.7em 0.8em; box-shadow: 1px 1.5px 0 rgba(20, 20, 20, 0.55); }
-.h2h-setup .d-bar { display: flex; align-items: center; gap: 0.4em; height: 2.6em; padding: 0 1.1em; border-bottom: 1.5px solid var(--d-ink); }
-.h2h-setup .d-bar i { width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--d-ink); }
-.h2h-setup .setup-window-title { position: absolute; top: 0; left: 4.3em; right: 1em; overflow: hidden; font-size: 1em; font-weight: 500; line-height: 2.6em; white-space: nowrap; text-overflow: ellipsis; }
-.h2h-setup .setup-window-page { position: relative; display: grid; gap: 0.7em; padding: 1.4em 1.6em 1.9em; }
-.h2h-setup .setup-window-page i { display: block; height: 0.95em; border-radius: 999px; background: #e3e1da; }
-.h2h-setup .setup-window-page i:nth-of-type(1) { width: 72%; }
-.h2h-setup .setup-window-page i:nth-of-type(2) { width: 50%; }
-.h2h-setup .setup-window-page i:nth-of-type(3) { width: 40%; }
-.h2h-setup .setup-window-page i:nth-of-type(4) { width: 25%; margin-top: 0.6em; }
-.h2h-setup .setup-window-chat { position: absolute; right: 1.5em; bottom: 1.5em; display: grid; place-items: center; width: 4.6em; height: 4.6em; border-radius: 50%; background: var(--brand); }
-.h2h-setup .setup-window-chat > svg { width: 2.9em; height: 2.9em; margin: 0.1em 0 0 0.15em; overflow: visible; }
-.h2h-setup .setup-window-sparks .d-sparks { --spark: 0.042em; left: 82%; top: -0.9em; color: var(--brand); }
-/* Two ink sparks off the window's top-left corner, the logo's sparks turned to face out of it. */
-.h2h-setup .setup-window-ink .d-sparks { --spark: 0.06em; left: -2.4em; top: -1.6em; transform: scaleX(-1) rotate(-20deg); }
-
-@media (max-width: 1100px) {
-  .h2h-setup .setup-known { padding-right: 26px; padding-left: 28px; }
-  .h2h-setup .setup-known dl { font-size: 17px; }
-  .h2h-setup .setup-known dl > div { grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); }
-}
 @media (max-width: 860px) {
-  .h2h-setup .setup-known { margin-top: 64px; }
   .h2h-setup .hero-flourish { width: min(100%, 34rem); margin-top: 44px; margin-left: -8px; }
-  .h2h-setup .setup-window-art { width: min(100%, 40rem); margin: 40px 0 0; }
-}
-@media (max-width: 640px) {
-  .h2h-setup .setup-known { --card-radius: 24px 22px 25px 23px; padding: 20px 20px 24px; }
-  .h2h-setup .setup-known-plate { top: -14px; right: -14px; bottom: -14px; left: -12px; width: calc(100% + 26px); height: calc(100% + 28px); }
-  .h2h-setup .setup-known > .d-sparks { --spark: 0.75px; left: calc(100% - 16px); top: -36px; }
-  .h2h-setup .setup-known h2 { font-size: 23px; }
-  .h2h-setup .setup-known button { min-height: 44px; padding: 0 18px; font-size: 16px; }
-  .h2h-setup .setup-known dl { gap: 12px; font-size: 16px; }
-  .h2h-setup .setup-known dl > div { display: block; }
-  .h2h-setup .setup-known dt { color: var(--ink-soft); font-size: 14.5px; }
-  .h2h-setup .setup-known small { padding-right: 0; font-size: 15px; }
-  .h2h-setup .setup-window-tilt { left: 18%; width: 64%; font-size: 2.9cqw; }
 }

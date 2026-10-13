@@ -13,7 +13,7 @@ import useConversationAssistant from "../hooks/useConversationAssistant";
 import useConversationLoading from '../hooks/useConversationLoading';
 import ConversationBody from "./ConversationBody";
 
-import '../styles/components/Conversation.css';
+import '../styles/components/Conversation.scss';
 import NoteModal from "./NoteModal";
 import { useUnsavedChanges } from '../../native/NavigationGuard';
 

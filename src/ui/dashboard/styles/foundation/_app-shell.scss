@@ -1,10 +1,7 @@
-// Application frame: the sidebar (`nav#sidebar`) is followed by
-// `main#workspace-main`, whose `.main-content` holds either a workspace page or the inbox
-// (`#chat > .layout`, with the conversation list in `.sidebar` and the open
-// conversation in `.main`). From xl up the three sit side by side; below xl
-// the sidebar is a fixed top bar and the conversation slides over the list.
-
-$app-top-bar-height: 73px;
+// Application frame: the sidebar (`nav#sidebar`, ./_sidebar.scss) is followed by `main#workspace-main`, whose
+// `.main-content` holds either a workspace page or the inbox (`#chat > .layout`, with the conversation list in
+// `.sidebar` and the open conversation in `.main`). From xl up the three sit side by side; below xl the sidebar is
+// the fixed top bar and the conversation slides over the list.
 
 @mixin app-scroll-without-scrollbar {
   overflow-x: hidden;
@@ -14,23 +11,6 @@ $app-top-bar-height: 73px;
 
   &::-webkit-scrollbar {
     display: none;
-  }
-}
-
-// Page gutters beside the sidebar.
-@include media-breakpoint-up(md) {
-  .navbar-vertical ~ #workspace-main > .main-content {
-    .container,
-    .container-fluid {
-      padding-left: 2.25rem !important;
-      padding-right: 2.25rem !important;
-    }
-  }
-}
-
-@include media-breakpoint-up(xl) {
-  .navbar-vertical.navbar-expand-xl ~ #workspace-main > .main-content {
-    margin-left: 250px;
   }
 }
 
@@ -56,7 +36,7 @@ $app-top-bar-height: 73px;
   order: 3;
   flex: 1;
   height: 100%;
-  background: $body-bg;
+  background: var(--paper);
 
   .chat-body {
     display: flex;
@@ -83,7 +63,6 @@ $app-top-bar-height: 73px;
 
   .sidebar {
     flex-grow: 0;
-    width: 420px;
     height: 100vh;
   }
 
@@ -93,24 +72,11 @@ $app-top-bar-height: 73px;
   }
 }
 
-// Below xl the top bar is fixed and an open conversation covers the list.
+// Below xl an open conversation covers the list.
 @include media-breakpoint-down(xl) {
-  body {
-    padding-top: $app-top-bar-height;
-  }
-
-  #sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
-    z-index: $zindex-fixed;
-    border-radius: 0;
-  }
-
   .main {
     position: fixed;
-    top: $app-top-bar-height;
+    top: var(--top-bar-height);
     right: 0;
     bottom: 0;
     left: 0;
@@ -124,15 +90,5 @@ $app-top-bar-height: 73px;
       visibility: visible;
       transform: translateX(0);
     }
-  }
-
-  .chat-footer {
-    min-height: 140px;
-    margin: 0 !important;
-    padding-top: 1rem !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
-    border-radius: 0 !important;
   }
 }

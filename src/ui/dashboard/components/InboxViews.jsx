@@ -1,52 +1,45 @@
 import React, { useContext } from 'react';
-import { createPortal } from 'react-dom';
 import { Link } from '@tanstack/react-router';
-import { useDashboardLocation } from '../../native/dashboard-state';
+import useLiveInboxLocation from '../hooks/useLiveInboxLocation';
 import { useMobileNavigation } from '../../native/MobileNavigation';
 import { ChatContext } from '../contexts/ChatContext';
 import formatCompactCount from '../utils/formatCompactCount';
 import { INBOX_VIEWS, normalizeInboxView } from './inboxViewDefinitions';
 
+/** The five views as one quiet row of text above the conversation list. A disc appears only where a count above zero asks for attention. */
 export default function InboxViews() {
-    const target = document.getElementById('navigation-inbox-views');
-    const location = useDashboardLocation();
-    const {setOpen} = useMobileNavigation();
+    // The row follows the router's live location, so which link is current and what each link carries never trail a loading page.
+    const location = useLiveInboxLocation();
+    const { setOpen } = useMobileNavigation();
     const searchParams = location.search;
     const { inboxViewCounts, setIsMainVisible } = useContext(ChatContext);
     const selectedView = normalizeInboxView(searchParams.view, inboxViewCounts);
-    if (!target) {
-        return null;
-    }
 
     const onSelect = () => {
-        const isCompactWorkspace = window.matchMedia('(max-width: 1199.98px)').matches;
-
-        if (isCompactWorkspace) {
+        if (window.matchMedia('(max-width: 1199.98px)').matches) {
             setIsMainVisible(false);
             setOpen(false);
         }
     };
 
-    return createPortal(
-        <nav className="inbox-views" aria-label="Inbox views">
-            { INBOX_VIEWS.map(view => {
-                const count = inboxViewCounts[view.id];
+    return <nav className="inbox-views" data-testid="inbox-views" aria-label="Inbox views">
+        { INBOX_VIEWS.map(view => {
+            const count = inboxViewCounts[view.id];
+            const current = selectedView === view.id;
 
-                return <Link
-                    key={ view.id }
-                    to={location.pathname}
-                    search={{ view: view.id, ...(searchParams.q ? { q: searchParams.q } : {}) }}
-                    onClick={onSelect}
-                    className={ `inbox-view-link${ selectedView === view.id ? ' is-active' : '' }` }
-                    aria-current={ selectedView === view.id ? 'page' : undefined }>
-                    <span className="inbox-view-label">{ view.label }</span>
-                    { Number.isFinite(count) && <span
-                        className="inbox-view-count"
-                        title={ String(count) }
-                        aria-label={ `Count: ${ count }` }>{ formatCompactCount(count) }</span> }
-                </Link>;
-            }) }
-        </nav>,
-        target
-    );
+            return <Link
+                key={ view.id }
+                to={ location.pathname }
+                search={{ view: view.id, ...(searchParams.q ? { q: searchParams.q } : {}) }}
+                onClick={ onSelect }
+                className={ `inbox-view-link${ current ? ' is-active' : '' }` }
+                aria-current={ current ? 'page' : undefined }>
+                <span className="inbox-view-label">{ view.label }</span>
+                { view.disc && count > 0 && <span
+                    className="inbox-view-count"
+                    data-testid="count-disc"
+                    title={ String(count) }>{ formatCompactCount(count) }</span> }
+            </Link>;
+        }) }
+    </nav>;
 }

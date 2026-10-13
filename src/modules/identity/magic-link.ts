@@ -14,7 +14,7 @@ const lifetime = 15 * 60 * 1000
 const invalid = () => new HTTPException(400, { message: 'This sign-in link is invalid, expired or already used. Request a new link.' })
 
 /** Email links trust the installation origin, never the incoming Host or a return URL. */
-function linkOrigin(env: Env) {
+export function linkOrigin(env: Env) {
  try {
   const url = new URL(String(env.APP_ORIGIN || ''))
   if (url.username || url.password || url.pathname !== '/' || url.search || url.hash) return null

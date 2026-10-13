@@ -10,17 +10,17 @@ body.conversation-workspace #chat {
         min-width: 0;
         min-height: 116px;
         margin-top: 1rem;
-        padding: .75rem;
-        background: var(--workspace-surface-raised, #fff);
-        border: 1px solid var(--conversation-line);
-        border-radius: .55rem;
-        box-shadow: 0 1px 3px rgba(32, 53, 87, .04);
+        padding: 12px 14px;
+        background: var(--surface);
+        border: 1.5px solid var(--field-line);
+        border-radius: 8px;
         cursor: text;
         transition: border-color .15s ease, box-shadow .15s ease;
 
+        &:hover { border-color: var(--ink); }
         &:focus-within {
-            border-color: var(--conversation-accent);
-            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), .12);
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px var(--d-cyan-deep);
         }
 
         textarea {
@@ -29,10 +29,10 @@ body.conversation-workspace #chat {
             min-height: 24px;
             max-height: min(18rem, 32dvh) !important;
             padding: 0;
-            color: var(--conversation-ink);
+            color: var(--ink);
             background: transparent !important;
             border: 1px solid transparent !important;
-            font-size: .8125rem;
+            font-size: 15px;
             line-height: 1.45;
             overflow-y: auto !important;
             overflow-wrap: break-word;
@@ -41,8 +41,8 @@ body.conversation-workspace #chat {
             box-shadow: none !important;
 
             &::placeholder {
-                color: var(--conversation-quiet);
-                font-size: .8125rem;
+                color: var(--ink-soft);
+                font-size: 15px;
             }
         }
     }

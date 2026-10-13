@@ -37,6 +37,6 @@ export const commandAdapter=createCommandAdapter(adapter,{
  generatedOutputs:['.generated','delivery-artifact','public/downloads','public/widget.js'],
  product:model.product.name,dev,preview,verify:['pnpm',['run','verify:app']],deploy:ownerDeploy('deploy.json',adapter),
  portability,
- setup:{manifestFile:'rer-setup.json'},browserModule:'scripts/installer/ui/seed.mjs',input:{names:{email:'OWNER_EMAIL',name:'OWNER_NAME'},defaults:async root=>({target:'local',PRIMARY_COLOR:'#7c3aed',EMAIL_PROVIDER:'later'})},
+ setup:{manifestFile:'rer-setup.json'},browserModule:'scripts/installer/ui/seed.mjs',input:{names:{email:'OWNER_EMAIL',name:'OWNER_NAME'},defaults:async root=>({target:'local',EMAIL_PROVIDER:'later'})},
  localPrerequisites:async({vars})=>vars.H2H_LOCAL==='true'&&vars.EMAIL_PROVIDER==='development',
 });

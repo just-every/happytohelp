@@ -92,9 +92,12 @@ export async function checkPopulatedArticle({page, runtime, projectId, ownerToke
     await page.getByRole('button', {name: 'Delete', exact: true}).waitFor();
     for (const viewport of [{width: 1440, height: 1000}, {width: 320, height: 568}]) {
         await page.setViewportSize(viewport);
+        // On a phone Delete waits behind the bottom bar's More button.
+        const more = page.getByRole('button', {name: 'More actions', exact: true});
+        if (await more.isVisible() && await more.getAttribute('aria-expanded') === 'false') await more.click();
         const label = `dashboard-populated-article-${viewport.width}`;
         audit.assertAxeClean(await audit.scan(page, label), label);
-        await audit.measureContrast(page, label, [{label: 'article Delete action', selector: '.knowledge-form-actions .btn-link.text-danger'}]);
+        await audit.measureContrast(page, label, [{label: 'article Delete action', selector: '.knowledge-form-actions .btn-danger'}]);
         const layout = await audit.measureLayout(page, label);
         assert.equal(layout.horizontalOverflow, false);
         assert.equal(layout.targetsClipped.length, 0);

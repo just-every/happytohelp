@@ -2,7 +2,7 @@
 body.conversation-workspace {
     .avatar,
     .avatar .avatar-img,
-    .avatar .avatar-title { border-radius: 25% !important; }
+    .avatar .avatar-title { border-radius: 50% !important; }
 }
 
 body.conversation-workspace #chat {
@@ -18,9 +18,9 @@ body.conversation-workspace #chat {
     // into a pale surface and a darker readable ink. Anonymous shape icons keep
     // their existing inline color semantics and are intentionally excluded.
     .avatar.avatar-contact.avatar-fallback:not(.avatar-contact-anonymous) .avatar-title {
-        color: color-mix(in srgb, var(--avatar-identity-color, #5473d8) 50%, #162242) !important;
-        background: color-mix(in srgb, var(--avatar-identity-color, #5473d8) 10%, #ffffff) !important;
-        border-color: color-mix(in srgb, var(--avatar-identity-color, #5473d8) 24%, #ffffff) !important;
+        color: color-mix(in srgb, var(--avatar-identity-color, var(--ink)) 50%, var(--ink)) !important;
+        background: color-mix(in srgb, var(--avatar-identity-color, var(--ink)) 10%, var(--surface)) !important;
+        border-color: color-mix(in srgb, var(--avatar-identity-color, var(--ink)) 24%, var(--surface)) !important;
     }
 
     .avatar.avatar-fallback .avatar-title > span {

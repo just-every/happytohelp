@@ -95,8 +95,7 @@ try {
             page.on('dialog', dialog => dialog.accept());
             const navigationToggle = page.getByRole('button', {name:'Toggle navigation', exact:true});
             if (await navigationToggle.isVisible()) await navigationToggle.click();
-            await page.getByRole('button', {name:'Settings', exact:true}).click();
-            await page.getByRole('link', {name:'Project', exact:true}).click();
+            await page.getByTestId('nav-settings').click();
             await page.waitForURL('**/edit');
             await page.getByRole('heading', {name:'Project details', exact:true}).waitFor();
             await composer.waitFor({state:'detached'});

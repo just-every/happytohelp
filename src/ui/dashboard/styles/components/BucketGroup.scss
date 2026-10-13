@@ -2,6 +2,13 @@
     z-index: 2;
     border-radius: 30px;
 
+    // From sm up a closed run keeps both sides on one line: the summaries shorten before the agent's avatar would drop
+    // under them. On a phone the row wraps, as on release, so every summary reads in full.
+    @media (min-width: 576px) {
+        > .row { flex-wrap: nowrap; }
+        .message-outline { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+
     .avatar {
         z-index: 2;
         position: relative;
@@ -17,12 +24,12 @@
     padding-top: 0.4rem;
     text-align: center;
     font-size: 0.9em;
-    color: var(--workspace-muted, #b9b9b9);
+    color: var(--ink-soft);
 }
 .message-outline {
     border-radius: 0.5rem 0.5rem 0.5rem 2px;
     font-size: 1em;
-    border: 1px solid var(--workspace-line, #e3e5ea);
+    border: 1px solid var(--rule);
     padding: 8px 14px;
 
     &.message-outline-right {
@@ -31,12 +38,12 @@
 }
 .bucket-group.closed:hover {
     .message-outline {
-        background-color: var(--workspace-surface-raised, #ffffff);
-        color: var(--workspace-ink, #12263F) !important;
+        background-color: var(--surface);
+        color: var(--ink) !important;
 
         &.message-outline-right {
-            background-color: #2ca1e5;
-            color: #ffffff !important;
+            background-color: var(--ink);
+            color: var(--on-ink) !important;
         }
     }
 }

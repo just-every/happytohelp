@@ -10,6 +10,7 @@ import ArticleEditorActions from './knowledge/ArticleEditorActions';
 import KnowledgeLists from './knowledge/KnowledgeLists';
 import { KnowledgeFields } from './knowledge/KnowledgeForms';
 import KnowledgeTabs from './knowledge/KnowledgeTabs';
+import { SourceOrigin, canCrawl } from './knowledge/source-origin';
 import './knowledge/knowledge.css';
 import './stack-table.css';
 
@@ -213,7 +214,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                     <dt>Indexed pages</dt><dd>{pages.length}</dd>
                 </dl>
                 {draft.error && <p role="alert" className="alert alert-danger">{draft.error}</p>}
-                <button className="btn btn-primary" disabled={busy} onClick={refresh}>Refresh now</button>
+                {canCrawl(draft) ? <button className="btn btn-primary" disabled={busy} onClick={refresh}>Refresh now</button> : <SourceOrigin source={draft}/>}
             </div> : existingDataset && tab === 'pages' ? <div className="table-responsive">
                 <table className="table knowledge-table stack-table">
                     <thead><tr><th>Page</th><th>Content</th></tr></thead>
@@ -223,6 +224,11 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                     </tr>)}</tbody>
                 </table>
                 {!pages.length && <p>No indexed pages yet.</p>}
+            </div> : existingDataset && tab === 'settings' && !canCrawl(draft) ? <div className="knowledge-form">
+                <SourceOrigin source={draft}/>
+                <div className="knowledge-form-actions">
+                    <button type="button" className="btn btn-link text-danger" disabled={busy} onClick={() => remove(draft)}>Delete</button>
+                </div>
             </div> : <form
                 className={'knowledge-form' + (isArticle ? ' knowledge-form-wide' : '')}
                 onSubmit={event => save(event)}

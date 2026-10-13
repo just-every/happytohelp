@@ -27,12 +27,27 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   never substitutes for user authority. The public widget key and origin are not
   a secret: visitor, registration and project-creation requests are bounded by
   D1-backed limits (`RATE_LIMITS`) and refused with HTTP 429 and `Retry-After`.
-- **FIRST-RUN-001 — A useful first workspace.** A completed installation leads
-  the owner to the setup checklist, whose plain-language items explain local
-  trial requirements. Ordinary workspace creation leads with the widget snippet;
-  Advanced retains the server secret and verification examples. Empty inboxes
-  offer installation, a real test conversation and a demo. Workspace headers
-  follow workspace switching. Visitor headers retain the operator's display name.
+- **FIRST-RUN-001 — A useful first workspace.** First-run setup is one screen: the
+  owner's email, a password, the website and, only where the server requires one,
+  the private setup token. Missing names and colours are derived and every derived
+  value can be changed. A completed installation leads the owner to a workspace that
+  is already set up, whose Setup page lists only what cannot be done for them (an
+  AI service key, the widget on their website and, with a hosted email provider, a
+  verified sending domain), leads with the widget, lets the owner skip any of
+  them for now, and shows everything else under "What we've set". Every workspace created by first-owner setup, signed-in
+  workspace creation or email-verified registration, and never a demo workspace,
+  is provisioned in one step: a starter
+  assistant as its default visitor assistant, a reply-by-email mailbox when the
+  installation holds `INBOUND_EMAIL_TOKEN`, and mail sent from the installation
+  sender until the workspace's own domain is verified. The starter assistant answers
+  visitors by itself once a provider key exists, within the daily AI ceilings; with
+  no key no assistant is assigned to a new conversation, it stays with the team and
+  the AI page and Setup say a key is missing. The first-run Create workspace action
+  may send one welcome email to the owner; an uncertain send is never replayed.
+  Ordinary workspace creation leads with the widget snippet; Advanced retains the
+  server secret and verification examples. Empty inboxes offer installation, a link to
+  Setup and a demo. Workspace headers follow workspace switching.
+  Visitor headers retain the operator's display name.
 - **LOCAL-MAIL-001 — Explicit local capture.** Only trusted, explicit local mail
   configuration selects the maintained development outbox for native sign-in and
   customer mail. Capture persists in local D1 with bounded visibility and pruning
@@ -104,24 +119,40 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   transport DNS-pinning requirement for this edition; it does not claim DNS
   pinning or change copied Base contracts. Local synthetic protocol checks do
   not establish a live Slack connection or hosted installation.
-- **ACTIVATION-001 — Observed owner setup.** An owner sees the same durable,
-  project-scoped eight-step checklist on the genuinely empty inbox and Setup page.
-  Before explicit validation it is zero of eight, even when installer defaults exist.
-  Checks distinguish saved configuration from observed delivery, sender DNS,
-  authenticated model metadata, an inbound receipt, effective runtime ceilings,
-  current article publication, allowed origin and an authenticated widget ping.
-  GET performs no provider work. Only an explicit owner test-mail action may send,
-  to that owner's mailbox, with durable identity; acceptance/queueing is pending
-  and ambiguous work is never replayed. Missing provider permissions and unsupported
-  status APIs remain unavailable. Configuration changes invalidate observations;
-  model/DNS validation expires after 15 minutes and every observation shows its time.
-  Publication does not assert model retrieval or a cited answer. Provider keys and
+- **ACTIVATION-001 — Observed owner setup.** An owner sees the durable,
+  project-scoped eight-step list on the Setup page; the genuinely empty inbox
+  shows one next action and a link to it, and loads none of it. A
+  step is confirmed only by an observation, never by a saved configuration, an
+  installer default or a preset, so a workspace with nothing observed yet is zero
+  of its applicable steps. The system runs its own checks: while an owner is signed
+  in the page asks the server to observe, bounded by freshness windows. These
+  checks are non-generative metadata, domain and DNS reads and never send mail.
+  They distinguish saved configuration from observed sender DNS, authenticated
+  model metadata, an inbound receipt, effective runtime ceilings, allowed origin
+  and an authenticated widget ping; whether an article is published is not one of
+  them (that step stays among the eight ids but is hidden and never counted). Mail to the owner
+  is confirmed by a used emailed sign-in link, or by the provider's reported outcome
+  for the welcome or test email; local capture is described as capture, never
+  delivery, and provider acceptance or queueing is pending. `GET` performs no
+  provider work and writes nothing. Only an explicit owner action (Create
+  workspace, or Send me a test) may send mail, to that owner's mailbox, with
+  durable identity; ambiguous work is never replayed. Missing provider permissions
+  and unsupported status APIs remain unavailable. Configuration changes invalidate
+  observations; model and DNS validation expire after 15 minutes and every
+  observation shows its time. The owner can skip an owner-only step (the widget,
+  the AI service, the sending domain) for now, and undo it. A skip is stored on the
+  server for the workspace, can be made by an owner or admin only, makes no provider
+  request, and moves the step out of Needs you and out of the confirmed count and its
+  total; a skipped step is never shown as confirmed. An observation always wins: a
+  skipped step that is later observed is confirmed and counted, and a rejected
+  provider key stays under Needs you whether or not it was skipped. Provider keys and
   their fingerprints never enter API responses or browser storage.
 - **AI-001 — Configured model execution.** Retain Ensemble model selection,
   context/tools, streamed events, normalization, raw per-round provider usage,
   attribution, bounded suggestions and reply lifecycle. Missing providers fail
-  explicitly; uncertain provider attempts remain uncertain and are not replayed
-  automatically. Usage is diagnostic/provider accounting data, not an active
+  explicitly when AI is asked for, and a default assistant whose provider has no
+  key is simply not assigned to new conversations; uncertain provider attempts
+  remain uncertain and are not replayed automatically. Usage is diagnostic/provider accounting data, not an active
   payment, balance or debit system. Visitor-caused automatic AI work is capped per
   UTC day per project and installation (`AI_DAILY_CEILINGS`); a skipped reply is
   recorded as terminal and never replayed.

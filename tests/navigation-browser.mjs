@@ -19,10 +19,18 @@ page.on('request',request=>requests.push({method:request.method(),url:request.ur
 const nav=page.getByRole('navigation',{name:'Main navigation'});
 // The real unread badge contributes '<count> unread conversations' to Inbox's
 // accessible name after its asynchronous count arrives. Keep other names exact.
-const link=name=>nav.getByRole('link',{name:name==='Inbox'?/^Inbox(?:\s+\d+ unread conversations)?$/:name,exact:true});
+// Project is the one Settings row; the other Settings pages are reached through the Settings menu beside the page.
+const link=name=>name==='Project'?nav.getByTestId('nav-settings'):nav.getByRole('link',{name:name==='Inbox'?/^Inbox(?:\s+\d+ unread conversations)?$/:name,exact:true});
+const view=name=>page.locator(`nav[data-testid="inbox-views"]:visible a[href*="view=${name}"]`);
+const settingsMenu=()=>page.getByTestId('settings-menu');
+const menuLink=async name=>{
+  if(!await settingsMenu().count())await link('Project').click();
+  const menu=settingsMenu();await menu.waitFor();const entry=menu.getByRole('link',{name,exact:true});
+  if(!await entry.isVisible())await menu.getByTestId('settings-menu-more').locator('summary').click();
+  await entry.click();await entry.and(menu.locator('[aria-current="page"]')).waitFor();
+};
 const sameDocument=async(stamp,label)=>assert.equal(await page.evaluate(()=>performance.timeOrigin),stamp,label);
 const ready=()=>nav.getByRole('button',{name:/Switch workspace:/}).waitFor();
-const settings=async()=>{const button=nav.getByRole('button',{name:'Settings',exact:true});if(await button.getAttribute('aria-expanded')!=='true')await button.click();};
 const switchProject=async name=>{await nav.getByRole('button',{name:/Switch workspace:/}).click();await nav.getByRole('button',{name,exact:true}).click();await nav.getByRole('button',{name:`Switch workspace: ${name}`,exact:true}).waitFor();};
 try {
   const fixture=await navigationFixture(runtime.origin),[alpha,beta]=fixture.projects;
@@ -34,22 +42,22 @@ try {
   assert.match(await page.locator('#navigation-inbox-unread .navbar-unread-count').getAttribute('aria-label'),/^\d+ unread conversations$/);
   assert.equal(await link('Inbox').count(),1,'Inbox remains addressable with its populated unread badge');
   checks.push('real unread count is present and Inbox remains addressable by its complete accessible name');
-  await nav.getByRole('link',{name:/All open/}).click();
+  await view('open').click();
   await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
   await page.locator('.transcript-message-content').getByText(alpha.message,{exact:true}).waitFor();
   let stamp=await watchShell(page);
   // Forward real GETs with latency so a transient shell replacement is observable.
   await page.route('**/api/management/**',async route=>{if(route.request().method()==='GET')await new Promise(resolve=>setTimeout(resolve,200));await route.continue();});
-  await settings();await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
+  await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
   assert.equal(await page.getByLabel('Website',{exact:true}).inputValue(),'https://alpha.example.test');
   await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByLabel('Workspace color hex').waitFor();
   assert.equal(await page.getByLabel('Workspace color hex').inputValue(),alpha.color);
   await assertShell(page,stamp,'Project retains document/sidebar');
-  await link('Inbox').click();await nav.getByRole('link',{name:/All open/}).click();
+  await link('Inbox').click();await view('open').click();
   await page.locator('.conversation-list-items').getByText('Alpha Visitor',{exact:true}).waitFor();
   await assertShell(page,stamp,'Inbox and All open retain document/sidebar');
   checks.push('actual Project → Inbox → All open clicks preserve document, timeOrigin, sidebar node; delayed reads never replace shell');
-  await settings();await link('Saved Replies').click();await page.locator('#workspace-header-actions').getByRole('link',{name:'Save a Reply'}).waitFor();
+  await menuLink('Saved Replies');await page.locator('#workspace-header-actions').getByRole('link',{name:'Save a Reply'}).waitFor();
   await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
   assert.equal(await page.locator('#workspace-header-actions').getByRole('link').count(),0);
   await page.getByRole('button',{name:'Appearance',exact:true}).waitFor();
@@ -57,7 +65,7 @@ try {
   assert.equal(await page.getByRole('button',{name:'Appearance',exact:true}).count(),0);
   await assertShell(page,stamp,'header portals update on route changes');
   checks.push('header actions and tabs follow current page without stale portals');
-  await link('Inbox').click();await nav.getByRole('link',{name:/All open/}).click();
+  await link('Inbox').click();await view('open').click();
   await page.waitForURL(url=>url.searchParams.get('view')==='open');
   const allOpenURL=page.url();
   await page.getByRole('searchbox',{name:'Search all open by customer name or email',exact:true}).fill('Alpha');
@@ -70,33 +78,33 @@ try {
   await page.goForward();await page.waitForURL(searchedURL);
   await page.waitForFunction(()=>document.querySelector('input[type=search]')?.value==='Alpha');
   assert.equal(await page.getByRole('searchbox').inputValue(),'Alpha');
-  await nav.getByRole('link',{name:/Unassigned/}).click();await page.waitForURL(url=>url.searchParams.get('view')==='unassigned');const unassignedURL=page.url();
+  await view('unassigned').click();await page.waitForURL(url=>url.searchParams.get('view')==='unassigned');const unassignedURL=page.url();
   await page.goBack();await page.waitForURL(searchedURL);await page.goForward();await page.waitForURL(unassignedURL);
   await assertShell(page,stamp,'inbox Back/Forward preserves shell');
   checks.push('inbox search and view clicks plus Back/Forward restore q/view and search field state');
-  await switchProject('Navigation Beta');await nav.getByRole('link',{name:/All open/}).click();
+  await switchProject('Navigation Beta');await view('open').click();
   await page.locator('.conversation-list-items').getByText('Beta Visitor',{exact:true}).waitFor();
   assert.equal(await page.locator('.conversation-list-items').getByText('Alpha Visitor',{exact:true}).count(),0);
-  await page.waitForFunction(()=>document.body.dataset.workspaceMode==='dark');
-  await settings();await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
+  await page.waitForFunction(()=>document.body.dataset.theme==='dark');
+  await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
   assert.equal(await page.getByLabel('Website',{exact:true}).inputValue(),'https://beta.example.test');
   await sameDocument(stamp,'project switching retains document');
-  await switchProject('Global Inbox');await nav.getByRole('link',{name:/All open/}).click();
+  await switchProject('Global Inbox');await view('open').click();
   await page.locator('.conversation-list-items').getByText('Alpha Visitor',{exact:true}).waitFor();
   await page.locator('.conversation-list-items').getByText('Beta Visitor',{exact:true}).waitFor();
-  await switchProject('Navigation Alpha');await page.waitForFunction(()=>document.body.dataset.workspaceMode==='light');
+  await switchProject('Navigation Alpha');await page.waitForFunction(()=>document.body.dataset.theme==='light');
   await sameDocument(stamp,'global/project switching retains document');
   stamp=await watchShell(page);
   checks.push('project switch isolates real tenant records/settings/theme; global inbox spans both projects');
-  await nav.getByRole('link',{name:/All open/}).click();
+  await view('open').click();
   await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
   await page.getByPlaceholder('Type your reply…').fill('Unsaved conversation draft');
   await page.getByRole('searchbox').fill('Alpha');await page.getByRole('button',{name:'Search conversations',exact:true}).click();
   await page.waitForURL(url=>url.searchParams.get('q')==='Alpha');
   assert.equal(await page.getByPlaceholder('Type your reply…').inputValue(),'Unsaved conversation draft');
-  await nav.getByRole('link',{name:/Unassigned/}).click();await page.waitForURL(url=>url.searchParams.get('view')==='unassigned');
+  await view('unassigned').click();await page.waitForURL(url=>url.searchParams.get('view')==='unassigned');
   assert.equal(await page.getByPlaceholder('Type your reply…').inputValue(),'Unsaved conversation draft');
-  await settings();page.once('dialog',dialog=>dialog.dismiss());await link('Project').click();
+  page.once('dialog',dialog=>dialog.dismiss());await link('Project').click();
   assert.equal(await page.getByPlaceholder('Type your reply…').inputValue(),'Unsaved conversation draft');
   assert.equal(new URL(page.url()).pathname,`/projects/${alpha.id}/conversations/${alpha.conversationId}`);
   page.once('dialog',dialog=>dialog.accept());await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
@@ -126,11 +134,11 @@ try {
   assert.equal(await page.getByLabel('Website',{exact:true}).inputValue(),'https://unsaved.example.test');
   await page.keyboard.press('Escape');
   page.once('dialog',dialog=>dialog.accept());await link('Inbox').click();await page.waitForURL(`**/projects/${alpha.id}/conversations`);await page.locator('.conversation-inbox').waitFor();
-  await settings();await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
+  await link('Project').click();await page.getByLabel('Website',{exact:true}).waitFor();
   assert.equal(await page.getByLabel('Website',{exact:true}).inputValue(),'https://alpha.example.test');
   checks.push('unsaved settings cancel retains draft; cancelled workspace/signout preserve identity; proceed discards without a write');
   for(let visit=0;visit<2;visit++) {
-    await settings();await link('Widget').click();await page.getByRole('tab',{name:'Theme',exact:true}).click();
+    await menuLink('Widget');await page.getByRole('tab',{name:'Theme',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('#happytohelp')?.childElementCount>0);
     assert.equal(await page.locator('#happytohelp').count(),1);
     await link('Inbox').click();await page.locator('.conversation-inbox').waitFor();
@@ -164,7 +172,7 @@ try {
   await page.goBack();await page.getByRole('button',{name:'Login',exact:true}).waitFor();assert.equal(await page.locator('#sidebar').count(),0);
   checks.push('sign out and Back cannot reveal stale authenticated shell');
   await login();await switchProject('Navigation Alpha');
-  await settings();await page.context().clearCookies();await link('Project').click();
+  await page.context().clearCookies();await link('Project').click();
   await page.getByRole('button',{name:'Login',exact:true}).waitFor();assert.equal(await page.locator('#sidebar').count(),0);
   checks.push('expired session encountered by actual route click clears authenticated shell');
   await page.getByLabel('Email',{exact:true}).fill(fixture.email);await page.getByLabel('Password',{exact:true}).fill(fixture.password);
@@ -172,7 +180,7 @@ try {
   await page.getByLabel('Website',{exact:true}).waitFor();assert.equal(await page.getByLabel('Website',{exact:true}).inputValue(),'https://alpha.example.test');
   checks.push('session expiry login restores requested project route and real settings');
   await link('Inbox').click();await page.locator('.conversation-inbox').waitFor();
-  await nav.getByRole('link',{name:/All open/}).click();await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
+  await view('open').click();await page.locator('.conversation-list-items').getByRole('link').filter({hasText:'Alpha Visitor'}).first().click();
   await page.getByPlaceholder('Type your reply…').waitFor();await page.getByRole('button',{name:'Reply tools',exact:true}).click();
   // Expire only this request: clearing all cookies lets unrelated inbox refreshes
   // remove the menu before the click. Forward to the real Worker without auth.

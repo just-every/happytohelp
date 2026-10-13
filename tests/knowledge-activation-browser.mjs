@@ -196,6 +196,8 @@ try {
         assert.ok(row);
         assert.equal(row.status, 'draft');
         assert.equal(row.is_published, false);
+        // The saved article opens at its own address and loads its record there; its status reads Loading… until it arrives.
+        await page.getByLabel('Title', { exact: true }).waitFor();
         assert.equal((await actions.getByRole('status').locator('strong').innerText()).trim(), 'Draft');
         assert.equal(await page.getByLabel('Published', { exact: true }).count(), 0, 'the old publication checkbox is removed');
     });
@@ -213,6 +215,7 @@ try {
         let rows = await request('/api/knowledge/' + projectId + '/articles');
         assert.equal(rows.find(item => item.id === articleId).is_published, true);
         await page.reload();
+        await page.getByLabel('Title', { exact: true }).waitFor();
         assert.equal((await actions.getByRole('status').locator('strong').innerText()).trim(), 'Published');
         rows = await request('/api/knowledge/' + projectId + '/articles');
         assert.equal(rows.find(item => item.id === articleId).status, 'published');
@@ -234,6 +237,8 @@ try {
     });
 
     await record('Unpublish withdraws article retrieval and Publish restores eligibility', async () => {
+        // The viewport is still 390px wide here, where Unpublish waits behind the More actions button.
+        await page.getByRole('button', { name: 'More actions', exact: true }).click();
         await page.getByRole('button', { name: 'Unpublish', exact: true }).click();
         await actions.getByRole('status').locator('strong').filter({ hasText: /^Saved as draft$/ }).waitFor();
         const row = (await request('/api/knowledge/' + projectId + '/articles')).find(item => item.id === articleId);

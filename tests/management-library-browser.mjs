@@ -86,7 +86,7 @@ try{
   const axe=await readFile(join(resolve(new URL('..',import.meta.url).pathname),'node_modules/axe-core/axe.min.js'),'utf8');
   const fresh=await request(`${knowledge}/articles`,{token,body:{title:'Axe dialog article',slug:'axe-dialog-article',content:'Steps.',status:'draft'}});
   for(const viewport of [{width:1440,height:1000},{width:320,height:568}]){
-   await page.setViewportSize(viewport);await page.goto(`${base}/articles/${fresh.id}`);await page.getByRole('button',{name:'Delete',exact:true}).click();
+   await page.setViewportSize(viewport);await page.goto(`${base}/articles/${fresh.id}`);await page.getByRole('button',{name:'Save',exact:true}).waitFor();const more=page.getByRole('button',{name:'More actions',exact:true});if(await more.isVisible())await more.click();await page.getByRole('button',{name:'Delete',exact:true}).click();
    const dialog=page.getByRole('dialog',{name:/Axe dialog article/});await dialog.waitFor({timeout:3000});
    await page.evaluate(axe);const result=await page.evaluate(async()=>{const run=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}});return run.violations.map(v=>`${v.id}: ${v.nodes.map(n=>n.target.join(' ')).join(', ')}`)});
    assert.deepEqual(result,[],`axe violations at ${viewport.width}px`);

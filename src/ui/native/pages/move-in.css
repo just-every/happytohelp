@@ -1,4 +1,7 @@
-.move-in-page{max-width:960px;min-width:0;overflow-wrap:anywhere}.move-in-page input,.move-in-page select{max-width:100%;min-width:0}.move-in-page h3{font-size:1.05rem;margin-top:1rem}.move-in-page li{margin:.4rem 0}.move-in-actions{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin:1rem 0}.conversation-tags{display:flex;flex-wrap:wrap;gap:.35rem}.conversation-tag{font-size:.75rem;border:1px solid currentColor;border-radius:1rem;padding:.1rem .5rem;overflow-wrap:anywhere;max-width:100%}.conversation-tags-form{display:flex;gap:.4rem;margin-top:.6rem}.conversation-tags-form input{min-width:0}.inbox-tag-filter{width:100%;font-size:.85rem}.import-source-note{font-size:.8rem;margin:.3rem 0;overflow-wrap:anywhere}
-
-.move-in-page .btn-outline-danger{color:#a51d35;border-color:#a51d35}.move-in-page .btn-outline-danger:hover,.move-in-page .btn-outline-danger:focus-visible{background:#a51d35;color:#fff}
-.move-in-page .alert-danger{color:#7a1423;background-color:#fff0f2;border-color:#dfa0ab}
+/* Move in (MoveIn.jsx and its steps): a readable column of fields, plans and results. */
+.move-in-page { max-width: 960px; min-width: 0; overflow-wrap: anywhere; }
+.move-in-page input, .move-in-page select { max-width: 100%; min-width: 0; }
+.move-in-page h3 { margin-top: 1rem; font-size: 20px; font-weight: 500; }
+.move-in-page li { margin: .4rem 0; }
+.move-in-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 1rem 0; }
+.import-source-note { margin: .3rem 0; color: var(--ink-soft); font-size: 13px; overflow-wrap: anywhere; }

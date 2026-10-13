@@ -49,8 +49,8 @@
   }
 
   &.message-note {
-    background-color: rgb(242, 212, 156) !important;
-    border-color: rgb(242, 212, 156) !important;
+    background-color: var(--rule) !important;
+    border-color: var(--rule) !important;
   }
 }
 

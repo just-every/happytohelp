@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 // the 0.4.0 tree equals private 0452618504dd286cfb6a75fabefa279d08bc7428.
 // `previous` marks RELEASE.json's previousVersion line, which must receive exactly
 // the listed release migrations and keep every prior schema definition.
-export const repository = 'https://github.com/just-every/happytohelp';
+export const repository = 'https://github.com/just-every/run-happytohelp';
 export const baselines = {
   '0.2.1': {commit: '59c6e2e1beb321e9f1cb5493efd05e20fc068638', tree: 'a6d7254014b1ea996b386d765c4c6813b79c3f60', migrations: 37, tables: 97, populate: populate021},
   '0.3.0': {commit: '60e9a84688ea41575d56a8f692bbb8173366c7c5', tree: 'c329b580464b084d1899f7ba77fe52dad7daa091', migrations: 42, populate: populate03},

@@ -1,7 +1,7 @@
-// Approved 12ui A conversation geometry; sender palettes remain edition-owned. These rules
-// only change the rows inside it so paging and follow-to-bottom behavior remain intact.
+// The conversation drawn like the landing's hero thread: the customer's messages in white ink-outlined bubbles (the
+// drawn card), the team's in aqua. These rules only change the rows inside the transcript, so paging and
+// follow-to-bottom behaviour remain intact.
 body.conversation-workspace #chat {
-    --transcript-message-tint: 65%;
 
     .conversation-transcript {
         width: min(calc(100% - 2 * var(--conversation-content-gutter)), var(--conversation-content-width));
@@ -12,14 +12,14 @@ body.conversation-workspace #chat {
     }
 
     .chat-body {
-        .chat-content time { color: var(--conversation-quiet) !important; }
-        .message .chat-box-status { color: var(--conversation-quiet) !important; }
+        .chat-content time { color: var(--ink-soft) !important; }
+        .message .chat-box-status { color: var(--ink-soft) !important; }
 
         .message-content.transcript-message-content,
         .message-content.message-note.transcript-note-content {
             font-family: inherit;
-            font-size: .8125rem;
-            line-height: 1.55;
+            font-size: 16px;
+            line-height: 1.5;
         }
 
         .message {
@@ -61,7 +61,7 @@ body.conversation-workspace #chat {
         // Keep actorless activity neutral. Known customer and support groups use
         // A's mirrored avatar positions with the owner's wider reading measure.
         .transcript-actor-group[data-transcript-side] {
-            width: min(85%, 40rem);
+            width: min(78%, 42rem);
         }
 
         .transcript-actor-group[data-transcript-side="right"] {
@@ -70,11 +70,6 @@ body.conversation-workspace #chat {
 
             > .transcript-group-main { grid-column: 1; grid-row: 1; }
             > .transcript-group-rail { grid-column: 2; grid-row: 1; }
-
-            .transcript-event::before {
-                right: calc(-2.25rem - .23rem);
-                left: auto;
-            }
         }
 
         .transcript-group-rail {
@@ -93,23 +88,27 @@ body.conversation-workspace #chat {
             min-width: 0;
         }
 
+        // The team's bubble: aqua tint, no outline.
         .transcript-message-card {
             width: 100%;
             box-sizing: border-box;
-            padding: .75rem 1rem .875rem;
+            padding: 14px 18px;
             border: 0;
-            border-radius: .8rem;
-            background: var(--workspace-surface-raised, #fff);
-            background: color-mix(in srgb, var(--workspace-surface-raised, #fff), var(--transcript-actor-tile, var(--conversation-accent)) var(--transcript-actor-tint, var(--transcript-message-tint)));
+            border-radius: 16px;
+            background: var(--d-cyan-tint);
             box-shadow: none;
-            color: var(--conversation-ink);
+            color: var(--ink);
         }
 
         .transcript-message-main,
         .transcript-note-main { min-width: 0; }
 
+        // The customer's bubble: the landing's drawn card.
         [data-transcript-side="left"] .transcript-message-card {
-            background: #f5f6f8;
+            border: 1.5px solid var(--ink);
+            border-radius: var(--card-radius);
+            background: var(--surface);
+            box-shadow: var(--card-shadow);
         }
 
         .transcript-message-section + .transcript-message-section {
@@ -151,18 +150,18 @@ body.conversation-workspace #chat {
         .transcript-message-avatar {
             order: 0 !important;
             display: block;
-            width: 40px;
-            min-width: 40px;
-            height: 40px;
-            min-height: 40px;
+            width: 36px;
+            min-width: 36px;
+            height: 36px;
+            min-height: 36px;
         }
 
         .transcript-message-avatar img,
         .transcript-message-avatar .avatar-title {
-            width: 40px;
-            min-width: 40px;
-            height: 40px;
-            min-height: 40px;
+            width: 36px;
+            min-width: 36px;
+            height: 36px;
+            min-height: 36px;
         }
 
         .transcript-message-byline,
@@ -179,9 +178,9 @@ body.conversation-workspace #chat {
         .transcript-event-actor {
             min-width: 0;
             overflow-wrap: anywhere;
-            color: var(--conversation-ink);
-            font-size: .875rem;
-            font-weight: 700;
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .transcript-message-time,
@@ -189,10 +188,10 @@ body.conversation-workspace #chat {
             display: inline-flex;
             align-items: center;
             min-height: 24px;
-            color: var(--conversation-quiet);
+            color: var(--ink-soft);
             margin-left: auto;
-            font-size: .75rem;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 400;
             white-space: nowrap;
         }
 
@@ -206,10 +205,10 @@ body.conversation-workspace #chat {
             border-radius: .25rem;
             cursor: help;
 
-            &:hover { color: var(--conversation-accent); }
+            &:hover { color: var(--ink); }
             &:focus-visible {
-                color: var(--conversation-accent);
-                outline: 2px solid var(--conversation-accent);
+                color: var(--ink);
+                outline: 2px solid var(--ink);
                 outline-offset: 2px;
             }
         }
@@ -278,6 +277,7 @@ body.conversation-workspace #chat {
         }
 
 
+        // Activity ("Switched to human agent", visits, assignment): small soft lines between short rule stubs.
         .transcript-event {
             position: relative;
             display: block !important;
@@ -285,27 +285,26 @@ body.conversation-workspace #chat {
             box-sizing: border-box;
             min-height: 0;
             margin-top: .75rem;
-            padding: .7rem .9rem;
+            padding: 4px 52px;
             border: 0;
-            border-radius: .7rem;
-            background: var(--workspace-surface-subtle, #f3f4f8);
-            background: color-mix(in srgb, var(--workspace-surface-subtle, #f3f4f8) 88%, var(--conversation-accent-soft) 12%);
-            color: var(--conversation-quiet);
+            background: transparent;
+            color: var(--ink-soft);
+            font-size: 13px;
+            text-align: center;
         }
 
-        .transcript-event::before {
+        .transcript-event::before,
+        .transcript-event::after {
             position: absolute;
-            z-index: 1;
-            top: .9rem;
-            left: calc(-2.25rem - .23rem);
-            width: .4rem;
-            height: .4rem;
-            border: 2px solid var(--workspace-surface, #ffffff);
-            border-radius: 50%;
-            background: var(--workspace-muted, #8b98a5);
+            top: 50%;
+            width: 40px;
+            height: 1px;
+            background: var(--rule);
             content: "";
-            transform: translateY(-50%);
         }
+
+        .transcript-event::before { left: 0; }
+        .transcript-event::after { right: 0; }
 
         .transcript-event-content {
             display: block;
@@ -318,10 +317,11 @@ body.conversation-workspace #chat {
         }
 
         .transcript-event-detail {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
+            display: flex;
+            flex-wrap: wrap;
             align-items: baseline;
-            column-gap: .5rem;
+            justify-content: center;
+            gap: 0 .5rem;
             min-width: 0;
         }
 
@@ -332,30 +332,18 @@ body.conversation-workspace #chat {
         }
 
         .transcript-event-copy .pageview {
-            color: var(--conversation-quiet) !important;
+            color: var(--ink-soft) !important;
             max-width: min(400px, 100%);
 
             &:hover,
-            &:focus-visible { color: var(--conversation-ink) !important; }
+            &:focus-visible { color: var(--ink) !important; }
         }
 
         .transcript-event-detail > .transcript-event-time {
-            grid-column: 2;
-            margin-left: auto;
+            margin-left: 0;
         }
 
-        .transcript-event-page-view::before,
-        .transcript-event-page-view-group::before {
-            background: #168f88;
-        }
-
-        .transcript-event-agent_assigned::before {
-            background: #168f88;
-        }
-
-        .transcript-event-used_insight::before {
-            background: #8d67a8;
-        }
+        .transcript-event-actor { font-size: 13px; }
 
         .transcript-event-note {
             display: block !important;
@@ -364,20 +352,22 @@ body.conversation-workspace #chat {
             background: transparent;
             box-shadow: none;
 
-            &::before { display: none; }
+            text-align: left;
+
+            &::before, &::after { display: none; }
         }
 
+        // The internal note: a dashed ink outline on the note paper.
         .transcript-note-card {
             display: block;
             width: 100%;
             box-sizing: border-box;
-            padding: .75rem 1rem .875rem;
-            border: 1px solid color-mix(in srgb, #d99b60 40%, transparent);
-            border-radius: .8rem;
-            background: var(--workspace-surface-raised, #fff);
-            background: color-mix(in srgb, var(--workspace-surface-raised, #fff), var(--transcript-actor-tile, var(--conversation-accent)) var(--transcript-actor-tint, 12%));
+            padding: 12px 16px 14px;
+            border: 1.5px dashed var(--ink);
+            border-radius: 12px;
+            background: var(--note);
             box-shadow: none;
-            color: var(--conversation-ink);
+            color: var(--ink);
         }
 
         .transcript-note-card .transcript-note-header {
@@ -388,13 +378,13 @@ body.conversation-workspace #chat {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            color: #a95812;
-            font-size: 0.78rem;
-            font-weight: 500;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 600;
         }
 
         .transcript-note-label i {
-            font-size: 0.78rem;
+            font-size: 14px;
         }
 
         .message-content.message-note.transcript-note-content {
@@ -407,7 +397,7 @@ body.conversation-workspace #chat {
             border: 0 !important;
             border-radius: 0;
             background: transparent !important;
-            color: var(--conversation-ink);
+            color: var(--ink);
             white-space: normal;
         }
 
@@ -429,7 +419,7 @@ body.conversation-workspace #chat {
         .transcript-event-page_view { padding: .25rem 0; }
 
         .transcript-event-page-view-group a {
-            color: var(--conversation-muted);
+            color: var(--ink-soft);
         }
 
         .transcript-event-page-view-group > .transcript-event-content {
@@ -440,7 +430,7 @@ body.conversation-workspace #chat {
             padding: 0;
             border: 0;
             background: transparent;
-            color: var(--conversation-quiet);
+            color: var(--ink-soft);
             font: inherit;
             font-weight: 500;
             text-decoration: none;
@@ -449,7 +439,7 @@ body.conversation-workspace #chat {
 
         .transcript-event-page-view-group .transcript-event-group-toggle:hover,
         .transcript-event-page-view-group .transcript-event-group-toggle:focus-visible {
-            color: var(--conversation-ink);
+            color: var(--ink);
             text-decoration: underline;
         }
 
@@ -480,36 +470,27 @@ body.conversation-workspace #chat {
             margin-right: 0;
             margin-left: 0;
             padding-top: 1.25rem;
-            color: var(--conversation-quiet);
+            color: var(--ink-soft);
             font-size: 0.78rem;
             letter-spacing: 0.02em;
             text-align: center;
 
             &::before,
             &::after {
-                flex: 1 1 auto;
+                flex: 0 0 40px;
                 height: 1px;
-                background: var(--workspace-line, #f0f2f7);
+                background: var(--rule);
                 content: "";
             }
-        }
-    }
-}
 
-@media (min-width: 1200px) {
-    body.conversation-workspace #chat .chat-body {
-        .message-content.transcript-message-content,
-        .message-content.message-note.transcript-note-content {
-            font-size: .875rem;
+            justify-content: center;
         }
-    }
-}
 
-@media (min-width: 1600px) {
-    body.conversation-workspace #chat .chat-body {
-        .message-content.transcript-message-content,
-        .message-content.message-note.transcript-note-content {
-            font-size: .9375rem;
+        .transcript-event-page-view-group { padding: 0; }
+        .transcript-event-page-view-group .transcript-event-group-toggle {
+            color: var(--ink);
+            text-decoration: underline 2px var(--d-cyan-deep);
+            text-underline-offset: 4px;
         }
     }
 }
@@ -522,16 +503,12 @@ body.conversation-workspace #chat {
         }
 
         .transcript-actor-group[data-transcript-side] {
-            width: 96%;
+            width: 94%;
         }
 
         .transcript-actor-group[data-transcript-side="right"] {
             grid-template-columns: minmax(0, 1fr) 1.75rem;
 
-            .transcript-event:not(.transcript-event-page-view-row)::before {
-                right: calc(-1.375rem - .23rem);
-                left: auto;
-            }
         }
 
         .transcript-message-row { margin-top: 1.25rem; }
@@ -550,7 +527,7 @@ body.conversation-workspace #chat {
 
         .transcript-message-card,
         .transcript-note-card {
-            padding: .625rem .75rem .75rem;
+            padding: 12px 14px;
         }
 
         .transcript-message-byline,
@@ -563,17 +540,5 @@ body.conversation-workspace #chat {
             gap: .35rem;
         }
 
-        .transcript-event:not(.transcript-event-page-view-row)::before {
-            left: calc(-1.375rem - .23rem);
-        }
-    }
-}
-
-// Bright sender fills need the original subtler mix behind dark-mode white ink.
-body.conversation-workspace[data-workspace-mode="dark"] #chat {
-    --transcript-message-tint: 12%;
-
-    .conversation-transcript [data-transcript-side="left"] .transcript-message-card {
-        background: var(--workspace-surface-raised, #202332);
     }
 }

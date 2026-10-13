@@ -80,7 +80,7 @@ try {
         if (width === 390) await page.getByRole('button', {name: 'Toggle navigation', exact: true}).click();
         await page.getByRole('button', {name: 'Account menu', exact: true}).filter({visible: true}).click();
         await page.locator('.native-account-dropdown').waitFor();
-        const settingsGeometry = await page.locator('.navbar-settings-toggle').evaluate(element => {
+        const settingsGeometry = await page.getByTestId('nav-settings').evaluate(element => {
             const rect = element.getBoundingClientRect(), menu = document.querySelector('.native-account-dropdown').getBoundingClientRect();
             const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
             return {button: rect.toJSON(), menu: menu.toJSON(), centerReachable: element === hit || element.contains(hit), intersection: {width: Math.max(0, Math.min(rect.right, menu.right) - Math.max(rect.left, menu.left)), height: Math.max(0, Math.min(rect.bottom, menu.bottom) - Math.max(rect.top, menu.top))}};

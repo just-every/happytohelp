@@ -58,11 +58,6 @@ export default function ConversationHeader({
                     <div className="conversation-header-identity-copy">
                         <div className="conversation-header-name-row">
                             <a className="chat-header-title" href={ `/projects/${conversation.project_id}/contacts/${conversation.contact_id}` } title={ contactName }>{ contactName }</a>
-                            { conversation.contact.is_verified ? <span className="badge text-bg-primary">Verified</span> : <span className="badge text-bg-secondary-subtle">Unverified</span> }
-                            { conversation.resolved_at
-                                ? <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-resolved-at` }><TimeAgo date={ conversation.resolved_at } /></Tooltip> }><span className="conversation-header-status is-closed">{ statusLabel }</span></OverlayTrigger>
-                                : <span className="conversation-header-status is-open">{ statusLabel }</span> }
-                            { isAiAssigned && <span className="conversation-header-status is-ai">AI</span> }
                         </div>
                         <div className="conversation-header-meta">
                             { metaItems.map((item, index) => <React.Fragment key={ item.key }>
@@ -71,6 +66,13 @@ export default function ConversationHeader({
                             </React.Fragment>) }
                         </div>
                     </div>
+                </div>
+                <div className="conversation-header-chips">
+                    { conversation.contact.is_verified ? <span className="badge text-bg-primary">Verified</span> : <span className="badge text-bg-secondary-subtle">Unverified</span> }
+                    { conversation.resolved_at
+                        ? <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-resolved-at` }><TimeAgo date={ conversation.resolved_at } /></Tooltip> }><span className="conversation-header-status is-closed">{ statusLabel }</span></OverlayTrigger>
+                        : <span className="conversation-header-status is-open">{ statusLabel }</span> }
+                    { isAiAssigned && <span className="conversation-header-status is-ai">AI</span> }
                 </div>
                 <div className="conversation-header-actions">
                     { conversation.resolved_at

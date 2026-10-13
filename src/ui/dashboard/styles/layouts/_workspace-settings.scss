@@ -1,58 +1,63 @@
-// Settings inherit the approved record-page hierarchy and workspace color tokens.
+// Settings pages: titled sections, and on the main tabs cards side by side (stacked on a phone or a narrow column), each
+// headed by a 20px title. Body text is 16px and notes 14px soft; the page's submit pill sits under the cards.
 body.workspace-page {
-    .workspace-settings { max-width: 1040px; font-size: 13px; }
+    .workspace-settings { max-width: 1160px; font-size: 16px; }
     .workspace-email-settings { max-width: 800px; }
-    .settings-section { min-width: 0; padding: 24px 0; border-bottom: 1px solid var(--conversation-line); }
+    .settings-section { min-width: 0; padding: 24px 0; border-bottom: 1px solid var(--rule); }
     .settings-section:first-of-type { padding-top: 0; }
     .settings-section:last-child { border-bottom: 0; }
     .workspace-page-content .settings-section__heading {
-        display: flex; align-items: center; gap: 8px; margin: 0 0 16px;
-        color: var(--conversation-ink); font-size: 14px; font-weight: 650; line-height: 1.4;
-        h2, h3 { margin: 0; font: inherit; }
-        .fe { flex: 0 0 16px; font-size: 16px; color: inherit; }
+        display: flex; align-items: center; gap: 12px; margin: 0 0 18px;
+        color: var(--ink); font-size: 20px; font-weight: 500; letter-spacing: -.01em; line-height: 1.25;
+        h2, h3 { display: flex; align-items: center; gap: 12px; margin: 0; font: inherit; }
+        > .fe, h2 > .fe { flex: 0 0 20px; font-size: 20px; color: inherit; }
     }
-    .settings-section__description, .settings-note { margin: 0 0 16px; color: var(--conversation-muted); font-size: 12px; line-height: 1.5; }
+    .settings-section__description, .settings-note { margin: 0 0 16px; color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
     .settings-section__heading + .settings-section__description { margin-top: -8px; }
+
+    // The cards. A section inside a card is a sub-group under one hairline (Contact tracking in Help Center).
+    .settings-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+    .settings-section.h2h-card { padding: 28px; border-bottom: 1px solid var(--rule-strong); }
+    .settings-section.h2h-card .settings-section { margin-top: 24px; padding: 24px 0 0; border-top: 1px solid var(--rule); border-bottom: 0; }
+    .settings-section.h2h-card .settings-section .settings-section__heading { font-size: 16px; }
+    .settings-section.h2h-card .form-switch { padding-left: 56px; }
+    .settings-section.h2h-card .form-group:last-child { margin-bottom: 0; }
+
     .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
     .settings-grid > * { min-width: 0; }
     .settings-grid .form-group { margin: 0; }
     .settings-grid + .settings-grid { margin-top: 20px; }
     .settings-grid__full { grid-column: 1 / -1; }
-    .settings-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .settings-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
     .settings-identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .settings-identity .avatar { flex-shrink: 0; }
     .settings-identity > div { min-width: 0; }
     .settings-identity a, .settings-identity p { overflow-wrap: anywhere; }
-    .settings-identity h2, .settings-identity h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
-    .settings-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; }
-    .settings-column { min-width: 0; }
-    .settings-column + .settings-column { border-left: 1px solid var(--conversation-line); padding-left: 32px; }
-    .workspace-page-content > .tab-content > .tab-pane > form:has(.settings-columns) { max-width: 1040px; }
-    .settings-column .settings-grid { grid-template-columns: minmax(0, 1fr); }
+    .settings-identity h2, .settings-identity h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
     .settings-weekdays, .settings-hours { grid-column: 1 / -1; }
-    .settings-weekdays .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
-    .settings-weekdays .btn-group > .btn { flex: 0 0 auto; margin: 0; border-radius: 7px; }
+    .settings-weekdays .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .settings-weekdays .btn-group > .btn { flex: 0 0 auto; margin: 0; }
     .settings-hours .form-inline { display: flex; align-items: center; gap: 10px; max-width: 340px; }
     .settings-hours .form-inline > div { flex: 1 1 0; min-width: 0; margin-bottom: 0; }
     .settings-hours .form-inline > span { margin: 0 !important; }
     #schedule-fields > .settings-grid { margin-bottom: 20px; }
     .settings-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 28px; }
-    .settings-balance { color: var(--conversation-ink); font-size: 28px; font-weight: 650; letter-spacing: -.025em; }
-    .workspace-settings .settings-column > h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600; }
+    .settings-balance { color: var(--ink); font-size: 28px; font-weight: 500; letter-spacing: -.025em; }
     .settings-header-actions { display: flex; align-items: center; gap: 12px; }
     .settings-header-actions .workspace-filter-bar--header { width: 260px; }
-    .workspace-settings table tbody tr + tr { border-top: 1px solid var(--conversation-line); }
-    .workspace-settings .settings-empty { padding: 32px 12px; color: var(--conversation-muted); font-size: 12px; }
-    .settings-empty p { margin: 0 0 4px; color: var(--conversation-ink); font-size: 13px; font-weight: 600; }
-    .workspace-settings details > summary { width: fit-content; margin-top: 8px; color: var(--conversation-muted); cursor: pointer; font-size: 12px; font-weight: 600; }
+    .workspace-settings table tbody tr + tr { border-top: 1px solid var(--rule); }
+    .workspace-settings .settings-empty { padding: 32px 12px; color: var(--ink-soft); font-size: 14px; }
+    .settings-empty p { margin: 0 0 4px; color: var(--ink); font-size: 16px; font-weight: 600; }
+    .workspace-settings details > summary { width: fit-content; margin-top: 8px; color: var(--ink); cursor: pointer; font-size: 16px; font-weight: 500; text-decoration: underline 1.5px var(--d-cyan-deep); text-underline-offset: 5px; }
 
-    @media (max-width: 767.98px) {
-        .settings-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-        .settings-column + .settings-column { border-left: 0; border-top: 1px solid var(--conversation-line); padding: 24px 0 0; }
+    @media (max-width: 991.98px) {
+        .settings-cards { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 575.98px) {
+        .settings-section.h2h-card { padding: 20px; }
         .settings-grid { grid-template-columns: minmax(0, 1fr); }
         .settings-header-actions { flex-wrap: wrap; }
         .settings-header-actions .workspace-filter-bar--header { flex: 1 1 180px; width: auto; }
+        .settings-actions > .btn-primary { width: 100%; }
     }
 }

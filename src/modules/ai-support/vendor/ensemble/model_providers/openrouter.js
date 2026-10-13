@@ -8,7 +8,7 @@ export class OpenRouterProvider extends OpenAIChat {
     constructor(apiKey) {
         super('openrouter', apiKey, 'https://openrouter.ai/api/v1', {
             'User-Agent': 'HappyToHelp',
-            'HTTP-Referer': 'https://github.com/just-every/happytohelp',
+            'HTTP-Referer': 'https://github.com/just-every/run-happytohelp',
             'X-Title': 'HappyToHelp',
         }, {
             provider: {

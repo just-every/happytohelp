@@ -87,16 +87,16 @@ test('release, packaging and all local connector protocol identities share the p
   assert.equal(packaging.edition.componentId, edition.id);
   assert.equal(packaging.project.projectId, project.projectId);
   const generated = packagingConfig(packaging).project;
-  assert.equal(packaging.project.sourceRepository, 'just-every/happytohelp');
+  assert.equal(packaging.project.sourceRepository, 'just-every/run-happytohelp');
   assert.equal(generated.projectId, project.projectId);
   assert.equal(generated.sourceRepository, project.sourceRepository);
   assert.equal(generated.sourceRepository, 'https://github.com/' + packaging.project.sourceRepository);
-  assert.equal(packagingConfig({...packaging,project:{...packaging.project,sourceRepository:'https://github.com/just-every/happytohelp'}}).project.sourceRepository,'https://github.com/just-every/happytohelp');
-  for (const sourceRepository of ['https://gıthub.com/just-every/happytohelp','https://github.com/just-every/happytohelp?token=invalid','https://github.com/just-every/happytohelp/extra']) assert.throws(()=>packagingConfig({...packaging,project:{...packaging.project,sourceRepository}}),/sourceRepository/);
+  assert.equal(packagingConfig({...packaging,project:{...packaging.project,sourceRepository:'https://github.com/just-every/run-happytohelp'}}).project.sourceRepository,'https://github.com/just-every/run-happytohelp');
+  for (const sourceRepository of ['https://gıthub.com/just-every/run-happytohelp','https://github.com/just-every/run-happytohelp?token=invalid','https://github.com/just-every/run-happytohelp/extra']) assert.throws(()=>packagingConfig({...packaging,project:{...packaging.project,sourceRepository}}),/sourceRepository/);
   assert.equal(generated.deployment.artifactFile, project.deployment.artifactFile);
   assert.equal(typeof release.publicReleaseNotes, 'string');
   assert.ok(release.publicReleaseNotes.trim());
-  assert.equal(project.sourceRepository, 'https://github.com/just-every/happytohelp');
+  assert.equal(project.sourceRepository, 'https://github.com/just-every/run-happytohelp');
   for (const file of ['capabilities.mjs', 'mcp.mjs', 'providers/codex-app-server.mjs']) {
     const source = await readFile(new URL('../local-agent/lib/' + file, import.meta.url), 'utf8');
     assert.match(source, /version: AGENT_VERSION/);

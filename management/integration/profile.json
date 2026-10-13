@@ -1,7 +1,7 @@
 {
   "id": "happytohelp",
   "name": "HappyToHelp",
-  "sourceRepository": "just-every/happytohelp",
+  "sourceRepository": "just-every/run-happytohelp",
   "artifactFile": "delivery-artifact/happytohelp-worker-artifact.json",
   "artifactNamePrefix": "happytohelp-worker-",
   "compiler": "management/integration",

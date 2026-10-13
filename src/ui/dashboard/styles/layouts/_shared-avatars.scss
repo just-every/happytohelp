@@ -5,22 +5,22 @@ body.workspace-page {
     .avatar-agent {
         &,
         .avatar-img,
-        .avatar-title { border-radius: 25% !important; }
+        .avatar-title { border-radius: 50% !important; }
 
         .avatar-img { object-fit: cover; }
     }
 
     .avatar-agent.avatar-fallback .avatar-title {
-        color: #394878 !important;
-        background: #b2e2ff !important;
-        border: 0 !important;
+        color: var(--ink) !important;
+        background: var(--surface) !important;
+        border: 1.5px solid var(--ink) !important;
     }
 
     // Initials are usable before the enhancement bundle loads. The renderer
     // replaces them with the deterministic profile glyph and its bright tile.
     .avatar-contact.avatar-fallback .avatar-title {
-        color: #182955 !important;
-        background: #b2d6fd !important;
+        color: var(--ink) !important;
+        background: var(--d-cyan-tint) !important;
         border: 0 !important;
     }
 
@@ -28,8 +28,10 @@ body.workspace-page {
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--contact-profile-symbol-ink, #182955) !important;
-        background: var(--contact-profile-symbol-tile, #b2d6fd) !important;
+        color: var(--contact-profile-symbol-ink, var(--ink)) !important;
+        box-sizing: border-box;
+        background: var(--contact-profile-symbol-tile, var(--d-cyan-tint)) !important;
+        border: 1.5px solid var(--ink) !important;
         overflow: hidden;
     }
 

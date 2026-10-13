@@ -6,7 +6,6 @@
 @import "bootstrap/scss/functions";
 
 @import "./foundation/tokens";
-@import "./foundation/tokens-dark";
 
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/variables-dark";
@@ -61,14 +60,6 @@
 @import "./foundation/surfaces";
 @import "./foundation/transcript";
 
-@import "./user/site";
-@import "./layouts/conversation-fonts";
-@import "./layouts/conversation-palette";
-@import "./layouts/workspace-color-settings";
-@import "./layouts/global-inbox-appearance";
-@import "./layouts/conversation-navigation";
-@import "./layouts/workspace-sidebar-artwork";
-@import "./layouts/conversation-views";
 @import "./layouts/conversation-inbox";
 @import "./layouts/conversation-workspace";
 @import "./layouts/conversation-header";
@@ -86,7 +77,6 @@
 @import "./layouts/workspace-pages";
 @import "./layouts/workspace-surfaces";
 @import "./layouts/workspace-notifications";
-@import "./layouts/workspace-controls";
 @import "./layouts/workspace-contact-profile";
 @import "./layouts/workspace-insights";
 @import "./layouts/workspace-insight-detail";
@@ -97,18 +87,11 @@
 @import "./layouts/workspace-widget-code";
 @import "./layouts/conversation-ai-instructions";
 @import "./layouts/conversation-composer-tools";
-@import "./layouts/workspace-modes";
 
-// Restore a visible keyboard ring after removing the old global focus reset.
+// The keyboard ring: ink on paper, as on the landing (foundation/_base.scss sets the two variables).
 body :is(a[href], button:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, [tabindex]:not([tabindex="-1"])):focus-visible {
-    outline: 2px solid var(--accessibility-focus-ring, #005fcc) !important;
+    outline: 2px solid var(--accessibility-focus-ring) !important;
     outline-offset: 2px !important;
-    box-shadow: 0 0 0 4px var(--accessibility-focus-halo, #fff) !important;
-    // A fading halo exposes a low-contrast ring over the dark navigation surface.
+    box-shadow: 0 0 0 4px var(--accessibility-focus-halo) !important;
     transition: none !important;
-}
-
-:is([data-bs-theme="dark"], [data-workspace-mode="dark"]) {
-    --accessibility-focus-ring: #cda0fd;
-    --accessibility-focus-halo: #152e4d;
 }

@@ -26,7 +26,7 @@ for (const workflow of ['deploy-stage','live-proof']) test(`${workflow}: isolate
     assert.equal(result.status,1);assert.equal(result.stdout,'');
   }
   const guard=source.split('        run: |\n')[1].split('      - uses:')[0].split('\n').filter(Boolean).map(l=>l.slice(10)).join('\n');
-  const base={PATH:process.env.PATH,GITHUB_EVENT_NAME:'workflow_dispatch',GITHUB_REPOSITORY:'just-every/happytohelp',GITHUB_REF:'refs/heads/main',INPUT_SHA:sha,CONTROL_SHA:sha};
+  const base={PATH:process.env.PATH,GITHUB_EVENT_NAME:'workflow_dispatch',GITHUB_REPOSITORY:'just-every/run-happytohelp',GITHUB_REF:'refs/heads/main',INPUT_SHA:sha,CONTROL_SHA:sha};
   assert.equal(spawnSync('bash',['--noprofile','--norc','-e','-c',guard],{env:base}).status,0);
   for(const delta of [{INPUT_SHA:'$(touch /tmp/h2h-unsafe)'},{GITHUB_REF:'refs/heads/feature'},{GITHUB_REPOSITORY:'attacker/fork'}])
     assert.equal(spawnSync('bash',['--noprofile','--norc','-e','-c',guard],{env:{...base,...delta}}).status,1);

@@ -8,8 +8,9 @@ import type {Probe} from './types'
  * of the recipient. A plain-text receipt can be reconstructed without opening R2. */
 export async function checkInbound(env:Env,config:Configuration):Promise<Probe> {
  const email=config.email
- if(!email?.is_enabled||!email.inbound_address)return {state:'pending',detail:'Save and enable your receiving address in Email settings.'}
+ // The installation's gateway token comes first: without it no mailbox can receive, whatever is saved.
  if(!env.INBOUND_EMAIL_TOKEN)return {state:'unavailable',detail:'CONFIGURATION_REQUIRED: INBOUND_EMAIL_TOKEN. Configure the authenticated inbound gateway in the installation.'}
+ if(!email?.is_enabled||!email.inbound_address)return {state:'pending',detail:'Save and enable your receiving address in Email settings.'}
  const address=email.inbound_address.toLowerCase()
  const rows=await env.DB.prepare(`SELECT i.id,i.intent_hash,m.content,m.conversation_id,c.email sender
   FROM activation_inbound_receipts r JOIN inbound_emails i ON i.id=r.inbound_id AND i.project_id=r.project_id

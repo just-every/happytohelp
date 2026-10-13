@@ -7516,7 +7516,7 @@
       "executable": false
     },
     "tests/base-origin-verification.mjs": {
-      "sha256": "04ecec675ba6e385c60e93a3b2e393d460a921200a99dc9a4d9cc273624069f4",
+      "sha256": "8f9aad7eafd2fd4f956bb274d1105f63a3161c10cb670a008f43fb42ca5cfe4f",
       "executable": false
     },
     "tests/base-refresh-browser.mjs": {
@@ -8008,7 +8008,7 @@
       "executable": false
     },
     "tests/helpers/base-origin-fixture.mjs": {
-      "sha256": "63e3569f6165f4ba9323ecac6f117906372d5405dd3a459d6a683414d2dae244",
+      "sha256": "cc12f4fe83366979a999c5df88cfae52b28f1c5efd693f966cc2460264ba4a25",
       "executable": false
     },
     "tests/helpers/delegation-worker.mjs": {
@@ -8688,7 +8688,7 @@
       "executable": false
     },
     "tests/operating-environment.mjs": {
-      "sha256": "a01224872d25d4ec715e40ef3036ab3a0ef7cc4b03be03662119ac1de3ab658a",
+      "sha256": "b33daa7c9b5dd441c15f1fbf921f666406812b140b446e3c5429cc7d7946b10c",
       "executable": false
     },
     "tests/plugin-sdk.mjs": {

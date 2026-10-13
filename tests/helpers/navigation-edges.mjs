@@ -30,9 +30,9 @@ export async function rapidTenantBack(page,alpha,beta) {
     });
     assert.deepEqual(session,{status:200,projectId:alpha.id},'Back binds the actual session to Alpha before the next journey');
     await nav.getByRole('button',{name:'Switch workspace: Navigation Alpha',exact:true}).waitFor();
-    await page.waitForFunction(()=>document.body.dataset.workspaceMode==='light');
+    await page.waitForFunction(()=>document.body.dataset.theme==='light');
     await page.keyboard.press('Escape');
-    await nav.getByRole('link',{name:/All open/}).click();
+    await page.locator('nav[data-testid="inbox-views"]:visible a[href*="view=open"]').click();
     await page.locator('.conversation-list-items').getByText('Alpha Visitor',{exact:true}).waitFor();
     assert.equal(await page.locator('.conversation-list-items').getByText('Beta Visitor',{exact:true}).count(),0);
     assert.equal(await page.evaluate(()=>performance.timeOrigin),origin);
@@ -41,10 +41,10 @@ export async function rapidTenantBack(page,alpha,beta) {
 
 export async function pluginPrefill(page) {
   const nav=page.getByRole('navigation',{name:'Main navigation'});
-  const settings=nav.getByRole('button',{name:'Settings',exact:true});
-  if(await settings.getAttribute('aria-expanded')!=='true')await settings.click();
-  const more=nav.locator('details.native-extra-settings');if(await more.getAttribute('open')===null)await more.locator('summary').click();
-  await nav.getByRole('link',{name:'Integrations',exact:true}).click();
+  await nav.getByTestId('nav-settings').click();
+  const menu=page.getByTestId('settings-menu'),more=menu.getByTestId('settings-menu-more');await menu.waitFor();
+  if(await more.getAttribute('open')===null)await more.locator('summary').click();
+  await menu.getByRole('link',{name:'Integrations',exact:true}).click();
   const requests=[],origin=new URL(page.url()).origin;
   const observe=request=>requests.push({method:request.method(),url:request.url()});
   page.on('request',observe);

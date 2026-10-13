@@ -25,7 +25,7 @@ export async function signIn({browser,origin,width,evidence}){
   assert.equal((await context.request.get(origin+'/api/identity/session')).status(),401,'opening a link does not sign in');
   await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.waitForURL(url=>url.pathname!=='/login/magic');
   const session=await context.request.get(origin+'/api/identity/session');assert.equal(session.status(),200);
-  await page.getByTestId('activation-checklist').waitFor();await audit(page,evidence,`cli-${width}-signed-in`);
+  await page.getByTestId('setup-list').waitFor();await audit(page,evidence,`cli-${width}-signed-in`);
   const replay=await browser.newContext({viewport:{width,height:844}});
   try{const other=await replay.newPage();await other.goto(link);await other.getByRole('button',{name:'Sign in',exact:true}).click();await other.getByRole('alert').waitFor();assert.equal((await replay.request.get(origin+'/api/identity/session')).status(),401)}finally{await replay.close();}
   return session.json();

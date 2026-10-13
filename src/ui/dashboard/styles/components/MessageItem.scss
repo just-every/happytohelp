@@ -1,10 +1,9 @@
 .message-content {
-    font-family: "Open Sans";
-    letter-spacing: 0.01em;
+        letter-spacing: 0.01em;
     padding: 8px 14px;
     margin: 0;
     list-style: none;
-    background-color: var(--workspace-surface-raised, #ffffff);
+    background-color: var(--surface);
     display: block;
     float: left;
     clear: both;
@@ -14,10 +13,10 @@
     word-break: break-word;
     max-width: 90%;
     box-sizing: border-box;
-    border: 1px solid var(--workspace-line, #e3e5ea);
+    border: 1px solid var(--rule);
 
     a {
-        color: var(--workspace-ink, #444);
+        color: var(--ink);
         text-decoration: underline;
     }
 
@@ -28,17 +27,18 @@
         font-weight: 600;
     }
     code {
-        font-family: monospace;
-        background: #444444;
-        color: #fff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        background: var(--paper-deep);
+        color: var(--ink);
         padding: 2px 5px;
         word-break: break-word;
         white-space: pre-wrap;
     }
     pre {
-        background: #444444;
+        background: var(--paper-deep);
+        color: var(--ink);
         padding: 9px 14px;
-        border-radius: 2px;
+        border-radius: 8px;
         margin: 5px 0px;
         word-break: break-word;
         white-space: pre-wrap;
@@ -84,19 +84,19 @@
     &.message-content-right {
         float: right;
         border-radius: 0.5rem 0.5rem 2px 0.5rem;
-        background-color: #2ca1e5;
-        border-color: #2ca1e5;
-        color: #fff;
+        background-color: var(--ink);
+        border-color: var(--ink);
+        color: var(--on-ink);
 
         a {
-            color: #fff;
+            color: var(--on-ink);
         }
 
         code {
-            background: #0070b1;
+            background: var(--ink);
         }
         pre {
-            background: #0070b1;
+            background: var(--ink);
             code {
                 background: transparent;
             }
@@ -112,7 +112,7 @@
             cursor: zoom-in;
         }
         &.happytohelp-preview-loading {
-            background: var(--workspace-surface-subtle, #f3f3f3);
+            background: var(--paper-deep);
             min-height: 200px;
             min-width: 300px;
         }
@@ -156,7 +156,7 @@
 
     .chat-box-status {
         font-size: 0.8em;
-        color: var(--workspace-muted, #b9b9b9);
+        color: var(--ink-soft);
         margin: -0.5rem 3.5rem 0;
         flex: 1;
 

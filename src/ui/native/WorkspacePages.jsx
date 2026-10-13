@@ -1,9 +1,10 @@
-import WorkspaceName from './WorkspaceName';
+import SettingsMenu from './SettingsMenu';
+import { onSettingsDestination } from './settings-destinations';
 import Connections from './pages/Connections';
 import Reports from './pages/Reports';
 import MoveIn from './pages/MoveIn';
 import React from 'react';
-import {ActivationPage} from './activation';
+import {ActivationPage,SetupTitle} from './activation';
 import { Link } from '@tanstack/react-router';
 import { useDashboardLocation } from './dashboard-state';
 import GitHubSettings from './pages/GitHubSettings';
@@ -22,7 +23,7 @@ import TrainingRuns from './pages/TrainingRuns';
 import AccountPage from './pages/AccountPage';
 import InsightsPage from './pages/InsightsPage';
 import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
-const titles={'api-settings':'API tokens','webhook-settings':'Webhooks','slack-settings':'Slack','delivery-log':'Delivery log',reports:'Reports','move-in':'Move in',edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',activation:'Setup',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
+const titles={'api-settings':'API tokens','webhook-settings':'Webhooks','slack-settings':'Slack','delivery-log':'Delivery log',reports:'Reports','move-in':'Move in',edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
 export default function WorkspacePages({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const segments=pathname.split('/').filter(Boolean);
@@ -59,17 +60,25 @@ export default function WorkspacePages({ settings }) {
     if(section==='macros'&&recordId==='create')title='Save a Reply';
     if(section==='agents'&&recordId==='create')title='Invite Agent';
     if(section==='plugins')title='Plugins';
+    if(section==='activation')title=<SetupTitle projectId={projectId}/>;
     if(section==='delegation')title=recordId==='authorize'?'Connect to Slate':'Connected applications';
     if(section==='github-settings')title='Project';
     if(section==='admin')title=settings.isPlatformAdmin?adminTitles[segments[1]||'projects']||'Admin':'Administration';
     if(settings.projectUnavailable)title='Project not found';
     else if(foreignUser)title='Not found';
-    return <div className="main-content"><div className="container-fluid workspace-page-container">
+    const header=<h1 className="header-title">{title}</h1>;
+    // A page the account cannot open is a centred notice under its drawing, titled there; it has no page header.
+    if([ProjectUnavailable,PageNotFound,AdminRequired].includes(page.type))return <div className="main-content"><div className="workspace-notice-page" key={pathname}>{React.cloneElement(page,{header})}</div></div>;
+    // The twelve Settings destinations of a project share one side menu; no other page has it.
+    const menuProject=settings.isGlobalInbox||settings.projectUnavailable?null:segments[0]==='projects'?projectId:settings.project?.id;
+    const menu=menuProject&&onSettingsDestination(pathname,`/projects/${menuProject}`);
+    return <div className="main-content"><div className={`container-fluid workspace-page-container${menu?' has-settings-menu':''}`}>
+        {menu&&<SettingsMenu projectId={menuProject}/>}
         <div className="header workspace-page-header"><div className="header-body">
-            <div className="row align-items-end"><div className="col">
-                {section==='users'&&!foreignUser&&!settings.projectUnavailable&&<h6 className="header-pretitle">Overview</h6>}
-                <WorkspaceName settings={settings}/><h1 className="header-title display-4">{title}</h1>
-            </div><div className="col-auto" id="workspace-header-actions"/></div>
+            <div className="workspace-page-heading"><div className="workspace-page-titles">
+                {section==='users'&&!foreignUser&&<h6 className="header-pretitle">Overview</h6>}
+                {header}
+            </div><div className="workspace-page-actions" id="workspace-header-actions"/></div>
             <div id="workspace-header-tabs"/>
         </div></div>
         <div className="workspace-page-content" key={pathname}>{page}</div>

@@ -76,12 +76,14 @@ try {
     await page.waitForURL(`**/projects/${fixture.projects[1].id}/conversations`);
     await assertShell(page, stamp, size + ': workspace switch retains shell before All open');
     await checkpoint(size + ': click All open');
-    if (size === 'mobile') await nav.getByRole('button', {name:'Toggle navigation'}).click();
-    await nav.getByRole('link', {name:/All open/}).click();
+    // The views are one row above the list on both widths: choosing one needs no menu.
+    const view = name => page.locator(`nav[data-testid="inbox-views"]:visible a[href*="view=${name}"]`);
+    assert.equal(await nav.locator('a[href*="view="]').count(), 0, size + ': the navigation holds no inbox views');
+    await view('open').click();
     await page.waitForURL(url => url.searchParams.get('view') === 'open');
     await page.locator('.conversation-list-items').getByText('Beta Visitor', {exact:true}).waitFor();
     assert.equal(await page.locator('.conversation-list-items').getByText('Alpha Visitor', {exact:true}).count(), 0);
-    await page.waitForFunction(() => document.body.dataset.workspaceMode === 'dark');
+    await page.waitForFunction(() => document.body.dataset.theme === 'dark');
     assert.equal(await page.evaluate(() => performance.timeOrigin), stamp, size + ': workspace switch retains document');
     await assertShell(page, stamp, size + ': All open retains shell');
     assert.deepEqual(errors, [], size + ': no click handler exceptions');
@@ -89,13 +91,14 @@ try {
       const toggle = nav.getByRole('button', {name:'Toggle navigation'});
       assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
       assert.equal(await nav.locator('#sidebarCollapse').isVisible(), false);
+      // A query-only selection again: the row stays in reach and the menu stays closed.
+      await view('unassigned').click();
+      await page.waitForURL(url => url.searchParams.get('view') === 'unassigned');
+      assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
       await toggle.click();
       assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
-      await nav.getByRole('link', {name:/All open/}).waitFor();
-      // Exercise a query-only selection again: pathname effects cannot close it.
-      await nav.getByRole('link', {name:/All open/}).click();
-      assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
-      await assertShell(page, stamp, 'mobile: repeated All open retains shell');
+      assert.equal(await nav.locator('a[href*="view="]').count(), 0, 'mobile: the opened menu holds no inbox views');
+      await assertShell(page, stamp, 'mobile: repeated view selection retains shell');
     }
     await checkpoint(size + ': completed');
     await page.screenshot({path:join(evidence, size + '.png'),fullPage:true});

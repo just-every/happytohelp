@@ -27,7 +27,7 @@ try{
  assert.equal(await page.getByRole('link',{name:'Billing',exact:true}).count(),0);
  assert.equal((await page.request.get(`${origin}/projects/${f.projectId}/billing`)).status(),404);
  checks.push('billing navigation and document route removed');
- await page.getByRole('link',{name:/All open/}).click();await page.getByRole('link').filter({hasText:'Browser Visitor'}).first().waitFor();checks.push('all-open shows persisted visitor conversation');
+ await page.locator('nav[data-testid="inbox-views"] a[href*="view=open"]').click();await page.getByRole('link').filter({hasText:'Browser Visitor'}).first().waitFor();checks.push('all-open shows persisted visitor conversation');
  // Keep the frontier read pending long enough to expose premature acknowledgement.
  // A text-only locator also matches React's controlled textarea before Send.
  await page.route('**/api/conversations/*/messages',async route=>{if(route.request().method()==='GET')await new Promise(resolve=>setTimeout(resolve,300));await route.continue();});

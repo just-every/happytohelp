@@ -4,6 +4,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {chromium} from 'playwright';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {firstOwner} from './first-run/browser-kit.mjs';
 
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-demo-inbox-'));
 await mkdir(evidence,{recursive:true});
@@ -12,16 +13,7 @@ const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 let success=false;
 try {
-  await page.goto(runtime.origin+'/setup');
-  await page.getByLabel('Your name',{exact:true}).fill('Demo owner');
-  await page.getByLabel('Owner email').fill('demo-browser@example.test');
-  await page.getByLabel('Owner password',{exact:true}).fill('demo-inbox-browser-password');
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByLabel('Workspace name').fill('Real empty workspace');
-  await page.getByRole('button',{name:'Review setup',exact:true}).click();
-  await page.getByRole('button',{name:'Create workspace',exact:true}).click();
-  await page.waitForURL(/\/projects\/[^/]+\/widget-settings$/);
-  const originalId=new URL(page.url()).pathname.split('/')[2];
+  const originalId=await firstOwner(page,runtime.origin,{email:'demo-browser@example.test',password:'demo-inbox-browser-password',workspaceName:'Real empty workspace'});
   await page.goto(`${runtime.origin}/projects/${originalId}/conversations`);
   await page.getByRole('button',{name:'Try a demo inbox',exact:true}).waitFor();
   await page.screenshot({path:join(evidence,'empty-invitation.png'),fullPage:true});

@@ -2,7 +2,6 @@ import React,{useContext,useState} from 'react';
 import {ChatContext} from '../../contexts/ChatContext';
 import {nativeRequest} from '../../../native/transport';
 import ConversationDetailSection from './ConversationDetailSection';
-import '../../../native/pages/move-in.css';
 export default function ConversationTags({conversation}){
  const {updateConversation}=useContext(ChatContext),[name,setName]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),path=`/api/dashboard/projects/${conversation.project_id}/conversations/${conversation.id}/tags`;
  const change=async(tag)=>{setBusy(true);setError('');try{if(tag){await nativeRequest(`${path}/${tag.id}`,{method:'DELETE'});updateConversation(conversation.id,{tags:(conversation.tags||[]).filter(t=>t.id!==tag.id)})}else{const result=await nativeRequest(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});updateConversation(conversation.id,{tags:[...(conversation.tags||[]).filter(t=>t.id!==result.data.id),result.data]});setName('')}}catch(e){setError(e.message)}finally{setBusy(false)}};

@@ -1,17 +1,29 @@
 import assert from 'node:assert/strict';
-import {axeChecklist,capture,noOverflow,visibleControl} from './browser-kit.mjs';
+import {axeChecklist,axeInboxStart,capture,noOverflow,visibleControl} from './browser-kit.mjs';
 
 export async function freshViews({page,runtime,projectId,evidence,artifacts,checks}){
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:width===390?844:1000});
-  for(const section of ['conversations','activation']){
-   await page.goto(`${runtime.origin}/projects/${projectId}/${section}`);
-   await page.getByText('0 of 8 done',{exact:false}).first().waitFor();
-   assert.equal(await page.getByText('0 of 8 done',{exact:false}).count(),1,`${section}: one checklist summary`);
-   await noOverflow(page,`${width} ${section}`);await axeChecklist(page,evidence,`${width}-${section}`);await capture(page,evidence,`${width}-${section}-fresh`,artifacts);
-  }
+  // The empty inbox sends the owner to Setup by a link and sends nothing to the activation routes itself.
+  const activationCalls=[];const watch=r=>{if(/^\/api\/management\/projects\/[^/]+\/activation/.test(new URL(r.url()).pathname))activationCalls.push(r.url())};
+  page.on('request',watch);await page.goto(`${runtime.origin}/projects/${projectId}/conversations`);
+  const start=page.locator('[data-testid="inbox-start"]:visible');await start.waitFor();await page.waitForTimeout(2500);page.off('request',watch);
+  assert.equal(await start.count(),1,'conversations: one visible start block');
+  assert.equal(await page.locator('[data-testid="setup-list"]').count(),0,'conversations: no setup list in the inbox');
+  assert.deepEqual(activationCalls,[],'conversations: the empty inbox sends no activation request');
+  await noOverflow(page,`${width} conversations`);await axeInboxStart(page,evidence,`${width}-conversations`);await capture(page,evidence,`${width}-conversations-fresh`,artifacts);
+  await page.goto(`${runtime.origin}/projects/${projectId}/activation`);
+  // Opening the page asks for its own automatic check; confirmed rows are exactly the observed ones.
+  const first=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/activation/check')&&r.request().method()==='POST');
+  await page.goto(`${runtime.origin}/projects/${projectId}/activation`);
+  const root=page.locator('[data-testid="setup-list"]:visible');await root.waitFor();
+  assert.equal(await root.count(),1,'activation: one visible setup list');
+  assert.equal((await (await first).request().postDataJSON()).auto,true,'activation: the page asks for its own automatic check');
+  await root.locator('[role="status"] time').waitFor();
+  assert.equal(await root.locator('[data-set][data-state="confirmed"]').count(),Number(await root.getAttribute('data-confirmed')),'activation: confirmed rows match the confirmed count');
+  await noOverflow(page,`${width} activation`);await axeChecklist(page,evidence,`${width}-activation`);await capture(page,evidence,`${width}-activation-fresh`,artifacts);
  }
- checks.push('fresh synthetic owner: untouched 0/8 in real inbox and full activation page at 1440/390; axe serious/critical zero');
+ checks.push('fresh synthetic owner: the empty inbox shows its start block and no setup list (no activation request) and the full Setup page observes by itself at 1440/390; axe serious/critical zero');
 }
 export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,checks}){
  const base=`${runtime.origin}/projects/${projectId}`;
@@ -22,7 +34,9 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
   if(width===390)await nav.getByRole('button',{name:'Toggle navigation'}).click();
   assert.equal(await nav.getByRole('link',{name:'Knowledge',exact:true}).count(),1);
   assert.ok(await nav.getByRole('link',{name:'Knowledge',exact:true}).isVisible(),'primary knowledge link is visible');
-  assert.ok(await nav.getByRole('link',{name:'AI',exact:true}).isVisible());assert.ok(await nav.getByRole('link',{name:'Local computers',exact:true}).isVisible());
+  assert.ok(await nav.getByRole('link',{name:'AI',exact:true}).isVisible());
+  const more=nav.locator('details[data-testid="nav-more"]');if(!await more.evaluate(details=>details.open))await more.locator('summary').click();
+  assert.ok(await nav.getByRole('link',{name:'Local computers',exact:true}).isVisible(),'Local computers is reachable in More');
   await page.goto(base+'/articles');const draftRow=page.getByRole('row').filter({hasText:'Activation draft again'});await draftRow.getByText('Not used by AI answers',{exact:true}).waitFor();assert.match(await page.locator('body').innerText(),/Used by AI answers/i);assert.match((await draftRow.innerText()).replace('Activation draft again',''),/\bdraft\b|not used|\bno\b/i,'draft source is explicitly ineligible');await noOverflow(page,'Knowledge');
   await page.goto(base+'/articles/create');await page.getByRole('heading',{name:'New article',exact:true}).waitFor();
   await page.getByLabel('Title',{exact:true}).fill(`Long activation article ${width}`);await page.getByLabel('Summary',{exact:true}).fill('Long article checks persistent actions.');

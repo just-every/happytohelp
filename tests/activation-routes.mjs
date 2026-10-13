@@ -6,6 +6,10 @@ import {getPlatformProxy} from 'wrangler'
 const {activation}=await import('../src/modules/management/activation.ts')
 const {receiveEmail}=await import('../src/modules/integrations/inbound-service.ts')
 const {widgetEvents}=await import('../src/modules/management/widget-events.ts')
+const {routes:identity}=await import('../src/modules/identity/routes.ts')
+const {sendEmail}=await import('../src/modules/integrations/email.ts')
+const {aiCeilings}=await import('../src/platform/limit-config.ts')
+const {DEFAULT_WORKSPACE_COLOUR}=await import('../src/modules/management/workspace-colour.ts')
 const proxy=await getPlatformProxy({persist:false,envFiles:[]}),DB=proxy.env.DB
 for(const name of (await readdir(new URL('../migrations/',import.meta.url))).filter(name=>name.endsWith('.sql')).sort()) {
  const source=(await readFile(new URL('../migrations/'+name,import.meta.url),'utf8')).replace(/^\s*--[^\n]*$/gm,'')
@@ -18,7 +22,10 @@ const call=(suffix='',{body,token=primary.tokens.owner,env=base}={})=>activation
 const snapshot=async(options)=>{const response=await call('',options);assert.equal(response.status,200,await response.clone().text());return(await response.json()).data}
 const check=async(step,options={})=>{const response=await call('/check',{...options,body:step?{step}:{}});assert.equal(response.status,200,await response.clone().text());return(await response.json()).data.steps.find(row=>row.id===step)}
 const step=(data,id)=>data.steps.find(row=>row.id===id)
-let requests=[],sendCount=0,event='sent',modelStatus=200,dnsStatus='verified',statusMismatch=false,sendUncertain=false
+let requests=[],sendCount=0,event='sent',modelStatus=200,dnsStatus='verified',statusMismatch=false,sendUncertain=false,domainListed=true,recipient='owner-activation@example.test',proposedStatus='pending',ownStatus='pending'
+const messages=new Map()
+// Resend's domain detail: public DNS names and values per record.
+const domainRecords=status=>[{record:'SPF',name:'send',type:'MX',value:'feedback-smtp.example-region.amazonses.com',priority:10,status},{record:'SPF',name:'send',type:'TXT',value:'v=spf1 include:amazonses.com ~all',status},{record:'DKIM',name:'resend._domainkey',type:'TXT',value:'p=MIGfMA0GCSqGSIb3DQEB',status}]
 const originalFetch=globalThis.fetch
 globalThis.fetch=async(input,init={})=>{
  const url=String(input),method=init.method||'GET';requests.push({url,method})
@@ -27,15 +34,19 @@ globalThis.fetch=async(input,init={})=>{
   const value=name.startsWith('_dmarc.')?'v=DMARC1; p=none':name.includes('._domainkey.')?'v=DKIM1; p=fixture-public-key':'v=spf1 include:fixture.test ~all'
   return Response.json({Status:0,Answer:[{type:16,data:JSON.stringify(value)}]})
  }
- if(url==='https://api.openai.com/v1/models/gpt-5-mini')return Response.json(modelStatus===200?{id:'gpt-5-mini',object:'model'}:{error:'fixture'},{status:modelStatus})
- if(url==='https://api.resend.com/domains')return Response.json({data:[{id:'domain-1',name:'example.test'}],has_more:false})
- if(url==='https://api.resend.com/domains/domain-1')return Response.json({id:'domain-1',name:'example.test',status:dnsStatus,records:[{record:'SPF',status:dnsStatus},{record:'DKIM',status:dnsStatus}]})
+ for(const host of ['https://api.openai.com/v1/models/','https://api.anthropic.com/v1/models/'])if(url.startsWith(host)){const id=decodeURIComponent(url.slice(host.length));return Response.json(modelStatus===200?{id,object:'model'}:{error:'fixture'},{status:modelStatus})}
+ if(url==='https://api.resend.com/domains')return Response.json({data:domainListed?[{id:'domain-1',name:'example.test'},{id:'domain-2',name:'acme.test'},{id:'domain-3',name:'mine.test'}]:[],has_more:false})
+ if(url==='https://api.resend.com/domains/domain-1')return Response.json({id:'domain-1',name:'example.test',status:dnsStatus,records:domainRecords(dnsStatus)})
+ if(url==='https://api.resend.com/domains/domain-2')return Response.json({id:'domain-2',name:'acme.test',status:proposedStatus,records:domainRecords(proposedStatus)})
+ if(url==='https://api.resend.com/domains/domain-3')return Response.json({id:'domain-3',name:'mine.test',status:ownStatus,records:domainRecords(ownStatus)})
  if(url==='https://api.resend.com/emails'&&method==='POST'){
   sendCount++;if(sendUncertain)throw new Error('Fixture connection lost after provider accepted')
-  const body=JSON.parse(init.body);assert.deepEqual(body.to,['owner-activation@example.test']);assert.equal(body.headers['Auto-Submitted'],'auto-generated')
-  return Response.json({id:'test-message-1'})
+  const body=JSON.parse(init.body);assert.deepEqual(body.to,[recipient])
+  if(init.headers['Idempotency-Key'].startsWith('activation:'))assert.equal(body.headers['Auto-Submitted'],'auto-generated')
+  const id=`test-message-${sendCount}`;messages.set(id,body);return Response.json({id})
  }
- if(url==='https://api.resend.com/emails/test-message-1')return Response.json({id:'test-message-1',to:[statusMismatch?'someone@example.test':'owner-activation@example.test'],from:'support@example.test',last_event:event})
+ const sent=url.startsWith('https://api.resend.com/emails/')&&messages.get(url.split('/').pop())
+ if(sent)return Response.json({id:url.split('/').pop(),to:statusMismatch?['someone@example.test']:sent.to,from:sent.from,last_event:event})
  throw new Error(`Unexpected provider request ${method} ${url}`)
 }
 test.after(async()=>{globalThis.fetch=originalFetch;await proxy.dispose()})
@@ -62,21 +73,24 @@ test('explicit local checks persist, default ceilings disclose scope, changed or
  assert.equal(step(await snapshot(),'widget_origin').state,'unknown','reverting config does not revive an invalidated observation')
  assert.equal((await check('widget_origin')).state,'done')
 })
-test('published article observes only current project publication and invalidates on unpublish',async()=>{
+test('the help article step is hidden and never counts, whatever is published',async()=>{
  const insert=(id,project,status)=>DB.prepare('INSERT INTO knowledge_articles(id,project_id,slug,title,content,status,updated_at) VALUES(?,?,?,?,?,?,?)').bind(id,project,id,'Returns','Return instructions',status,Date.now()).run()
- await insert('foreign',other.projectId,'published');await insert('own',primary.projectId,'draft')
- assert.equal((await check('published_article')).state,'pending')
- await DB.prepare("UPDATE knowledge_articles SET status='published' WHERE id='own'").run()
- const article=await check('published_article');assert.equal(article.state,'done');assert.equal(article.receiptRef,'article:own');assert.match(article.detail,/require their own proof/)
- await DB.prepare("UPDATE knowledge_articles SET status='draft' WHERE id='own'").run()
- assert.equal(step(await snapshot(),'published_article').state,'unknown')
+ const before=await snapshot(),article=step(before,'published_article')
+ assert.deepEqual([article.placement,article.applicable,article.state],['hidden',false,'not_checked'])
+ await insert('own',primary.projectId,'published');await insert('foreign',other.projectId,'published')
+ const checked=await check('published_article'),after=await snapshot()
+ assert.deepEqual([checked.placement,checked.applicable,checked.state],['hidden',false,'not_checked'],'the step is never observed')
+ assert.deepEqual([after.done,after.applicableTotal,after.total,after.steps.length],[before.done,before.applicableTotal,8,8],'publishing changes neither count')
+ assert.ok(!('articles' in after.facts))
+ await DB.prepare("DELETE FROM knowledge_articles WHERE project_id=?").bind(primary.projectId).run()
 })
 test('model presence does not complete validation; authenticated metadata, revoked key and stale receipts are distinguished',async()=>{
  await DB.prepare('INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,created_at) VALUES(?,?,?,?,?,?,?)').bind('assistant',primary.projectId,'Helper','Support','Help','gpt-5-mini',Date.now()).run()
  await DB.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind(primary.projectId,JSON.stringify({default_visitor_ai_id:'assistant'}),Date.now()).run()
  const missing=await check('model_key',{env:{...base,OPENAI_API_KEY:undefined}});assert.equal(missing.state,'unavailable');assert.match(missing.detail,/CONFIGURATION_REQUIRED: OPENAI_API_KEY/)
  assert.equal((await check('model_key')).state,'done')
- const before=requests.length;assert.equal(step(await snapshot(),'model_key').state,'done');assert.equal(requests.length,before)
+ const before=requests.length,validated=await snapshot();assert.equal(step(validated,'model_key').state,'done');assert.equal(requests.length,before)
+ assert.deepEqual([validated.facts.ai.provider,validated.facts.ai.checkable],['openai',true],'an OpenAI key can be checked automatically')
  modelStatus=401;assert.equal((await check('model_key')).state,'failed');modelStatus=200
  assert.equal((await check('model_key')).state,'done')
  await DB.prepare("UPDATE activation_receipts SET checked_at=? WHERE project_id=? AND step_id='model_key'").bind(Date.now()-16*60*1000,primary.projectId).run()
@@ -125,4 +139,314 @@ test('widget instruction, wrong origin and owner preview do not count; only auth
 test('deleted project denies activation even if a membership was retained',async()=>{
  await DB.prepare("UPDATE project_settings SET settings_json=json_set(settings_json,'$.deleted_at',1) WHERE project_id=?").bind(primary.projectId).run()
  assert.ok([401,403].includes((await call()).status))
+})
+
+// Automatic checks, placement, owner-mail evidence, sender records and the starter, each in a workspace of its own.
+const localEnv={...proxy.env,H2H_LOCAL:'true',EMAIL_PROVIDER:'development',APP_ORIGIN:'http://127.0.0.1:8787',EMAIL_FROM:'support@local.test',INBOUND_EMAIL_TOKEN:'fixture-inbound-key',PREVIEW_ORIGIN:'https://preview.example'}
+const kit=(ws,env=base)=>{
+ const send=async(suffix,body,options={})=>{
+  const response=await activation.request(`${origin}/projects/${ws.projectId}/activation${suffix}`,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${ws.tokens.owner}`},body:body===undefined?undefined:JSON.stringify(body)},options.env||env)
+  assert.equal(response.status,options.status||200,await response.clone().text())
+  return response.status===200?(await response.json()).data:null
+ }
+ return {get:options=>send('',undefined,options),check:(body,options)=>send('/check',body,options),testMail:options=>send('/test-mail',{},options)}
+}
+const ids=(data,where)=>data.steps.filter(where).map(row=>row.id)
+const since=start=>requests.slice(start).map(row=>row.url)
+const receiptRows=async projectId=>JSON.stringify((await DB.prepare('SELECT * FROM activation_receipts WHERE project_id=? ORDER BY step_id').bind(projectId).all()).results)
+const defaultAssistant=async(ws,id,model)=>{
+ await DB.prepare('INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,created_at) VALUES(?,?,?,?,?,?,?)').bind(id,ws.projectId,'Helper','Support','Help',model,Date.now()).run()
+ await DB.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind(ws.projectId,JSON.stringify({default_visitor_ai_id:id,default_responder:id}),Date.now()).run()
+}
+
+test('automatic checks repeat no provider request while an observation is fresh, and re-run on expiry or change',async()=>{
+ const ws=await seedWorkspace(DB,'auto'),api=kit(ws);await defaultAssistant(ws,'auto-assistant','gpt-5-mini')
+ const model='https://api.openai.com/v1/models/gpt-5-mini',domain='https://api.resend.com/domains/domain-1'
+ let start=requests.length
+ await Promise.all(Array.from({length:5},()=>api.check({auto:true})))
+ const burst=since(start);assert.ok(burst.includes(model)&&burst.includes(domain))
+ assert.equal(new Set(burst).size,burst.length,'five rapid automatic checks make each provider request once')
+ const data=await api.get();assert.equal(step(data,'model_key').state,'done');assert.equal(step(data,'sender_dns').state,'done')
+ start=requests.length;for(let i=0;i<5;i++)await api.check({auto:true})
+ assert.deepEqual(since(start),[],'fresh observations are kept')
+ await api.check({step:'model_key'});assert.deepEqual(since(start),[model],'a check without auto runs now')
+ const age=(id,ms)=>DB.prepare('UPDATE activation_receipts SET checked_at=? WHERE project_id=? AND step_id=?').bind(Date.now()-ms,ws.projectId,id).run()
+ dnsStatus='pending';await api.check({step:'sender_dns'});dnsStatus='verified'
+ start=requests.length;await api.check({auto:true});assert.deepEqual(since(start),[],'a waiting provider observation is kept for 60 seconds')
+ await age('sender_dns',61000);await age('model_key',61000);await api.check({auto:true})
+ assert.ok(since(start).includes(domain),'a waiting provider observation is read again after 60 seconds')
+ assert.ok(!since(start).includes(model),'a done model validation holds for 15 minutes')
+ // An expired validation reads as unknown on GET, which neither calls a provider nor writes; the next automatic check renews it.
+ await age('model_key',16*60*1000);start=requests.length;const stored=await receiptRows(ws.projectId)
+ assert.equal(step(await api.get(),'model_key').state,'unknown');assert.deepEqual(since(start),[]);assert.equal(await receiptRows(ws.projectId),stored)
+ assert.equal(step(await api.check({auto:true}),'model_key').state,'done');assert.deepEqual(since(start),[model])
+ // Local observations are read again on every automatic check until done: a real widget ping is seen at once.
+ assert.equal(step(await api.check({auto:true}),'widget_seen').state,'pending')
+ await DB.prepare('INSERT INTO contacts(id,project_id,created_at) VALUES(?,?,?)').bind('auto-contact',ws.projectId,Date.now()).run()
+ await DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind('auto-conversation',ws.projectId,'auto-contact',Date.now(),Date.now()).run()
+ await DB.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,contact_id,expires_at) VALUES(?,?,?,?,?,?)').bind(sha('auto-contact-token'),'auto-contact',ws.projectId,'contact','auto-contact',Date.now()+600000).run()
+ assert.equal((await widgetEvents.request(origin+'/auto-conversation/widget-events',{method:'POST',headers:{Authorization:'Bearer auto-contact-token',Origin:'https://auto.example','Content-Type':'application/json'},body:JSON.stringify({action:'pingActive',data:{opened:true}})},base)).status,200)
+ const seen=step(await api.check({auto:true}),'widget_seen');assert.deepEqual([seen.state,seen.placement],['done','set'])
+ // A changed configuration is checked again at once.
+ start=requests.length;await api.check({auto:true},{env:{...base,OPENAI_API_KEY:'rotated-model-key'}});assert.deepEqual(since(start),[model])
+ for(const body of [{auto:false},{auto:'yes'},{auto:true,done:true}])await api.check(body,{status:400})
+})
+
+test('placement and the applicable count follow the installation, and facts carry values but no secrets',async()=>{
+ const ws=await seedWorkspace(DB,'place'),api=kit(ws)
+ const hosted=await api.get()
+ assert.deepEqual([hosted.environment,hosted.total,hosted.done,hosted.applicableTotal],['hosted',8,0,7])
+ assert.deepEqual(ids(hosted,row=>row.placement==='needs_you'),['sender_dns','model_key','widget_seen'])
+ assert.deepEqual(ids(hosted,row=>row.placement==='hidden'),['published_article'])
+ assert.deepEqual(ids(hosted,row=>row.placement==='set'),['owner_mail','inbound_address','spend_ceilings','widget_origin'])
+ const trial=await api.get({env:localEnv})
+ assert.deepEqual([trial.environment,trial.applicableTotal,trial.facts.mail.mode],['local',5,'local'])
+ assert.deepEqual(ids(trial,row=>row.placement==='needs_you'),['model_key','widget_seen'])
+ assert.deepEqual(ids(trial,row=>row.placement==='hidden'),['sender_dns','published_article']);assert.deepEqual(ids(trial,row=>!row.applicable),['sender_dns','inbound_address','published_article'])
+ const start=requests.length
+ const other=await api.check({step:'sender_dns'},{env:{...base,EMAIL_PROVIDER:'sendgrid'}}),dns=step(other,'sender_dns')
+ assert.deepEqual(since(start),[]);assert.deepEqual([dns.state,dns.placement,dns.applicable,other.applicableTotal,other.facts.mail.statusApi],['unavailable','set',false,6,false])
+ const data=await api.check({auto:true})
+ assert.deepEqual([data.facts.workspaceName,data.facts.website,data.facts.inboundAddress],[ws.name,'https://place.example',null])
+ assert.deepEqual(data.facts.widget,{key:'widget-place',scriptUrl:origin+'/widget.js',apiOrigin:origin})
+ assert.deepEqual(data.facts.ceilings,{...aiCeilings(base),resetUtc:'00:00',source:'defaults'})
+ assert.deepEqual(data.facts.colour,{hex:DEFAULT_WORKSPACE_COLOUR,source:'default'})
+ assert.deepEqual(data.facts.ai,{assistantId:null,provider:null,secretName:null,keyInstalled:true,checkable:false})
+ assert.deepEqual(data.facts.inbound,{enabled:false,gateway:true});assert.equal(data.facts.starterAssistant,null)
+ assert.equal((await api.get({env:{...base,OPENAI_API_KEY:undefined}})).facts.ai.keyInstalled,false)
+ for(const response of [hosted,trial,other,data])assert.doesNotMatch(JSON.stringify(response),/fixture-|rotated-|fingerprint/)
+})
+
+test('a key only for a provider with no metadata check is a set row that is not counted, and never confirmed',async()=>{
+ const noKey={...base,OPENAI_API_KEY:undefined}
+ const ws=await seedWorkspace(DB,'deepseek'),api=kit(ws,{...noKey,DEEPSEEK_API_KEY:'fixture-deepseek-key'});await defaultAssistant(ws,'deepseek-assistant','deepseek-v4-pro')
+ const withOpenAi=kit(await seedWorkspace(DB,'openai-count')),openai=await withOpenAi.get()
+ const start=requests.length,data=await api.check({step:'model_key'}),row=step(data,'model_key')
+ assert.deepEqual(since(start),[],'no provider request is made for a provider with no metadata check')
+ assert.deepEqual([row.state,row.placement,row.applicable],['unavailable','set',false])
+ assert.deepEqual([data.facts.ai.provider,data.facts.ai.checkable],['deepseek',false],'the snapshot says a DeepSeek key cannot be checked automatically')
+ assert.equal(data.applicableTotal,openai.applicableTotal-1);assert.equal(data.done,0)
+ // With no key at all it is still the owner's to add, and counted.
+ const missing=await kit(ws,noKey).get(),absent=step(missing,'model_key')
+ assert.deepEqual([absent.placement,absent.applicable,missing.applicableTotal],['needs_you',true,openai.applicableTotal])
+})
+
+test('skip for now is durable per workspace, owner or admin only, never confirms, and yields to an observation',async()=>{
+ const ws=await seedWorkspace(DB,'skip'),untouched=await seedWorkspace(DB,'skip-other'),api=kit(ws),pings=widgetEvents
+ const skip=(body,{token=ws.tokens.owner,workspace=ws,env=base,raw}={})=>activation.request(`${origin}/projects/${workspace.projectId}/activation/skip`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:raw??JSON.stringify(body)},env)
+ const set=async(step_,skipped,options)=>{const response=await skip({step:step_,skipped},options);assert.equal(response.status,200,await response.clone().text());assert.equal(response.headers.get('Cache-Control'),'no-store');return (await response.json()).data}
+ const fresh=await api.get(),start=requests.length,sends=sendCount
+ assert.deepEqual([fresh.applicableTotal,fresh.done],[7,0])
+ // Skipping a need moves it out of the count and confirms nothing; the settings row did not exist before.
+ const skipped=await set('widget_seen',true),widget=step(skipped,'widget_seen')
+ assert.deepEqual([widget.placement,widget.applicable,widget.state],['skipped',false,'not_checked'])
+ assert.deepEqual([skipped.applicableTotal,skipped.done,skipped.total],[6,0,8])
+ assert.deepEqual([requests.length,sendCount],[start,sends],'a skip makes no provider request and sends no mail')
+ assert.doesNotMatch(JSON.stringify(skipped),/fixture-|rotated-|fingerprint/)
+ const stamp=async()=>(await DB.prepare("SELECT settings_json,updated_at FROM project_settings WHERE project_id=?").bind(ws.projectId).first())
+ const before=await stamp();assert.equal(JSON.parse(before.settings_json).activation_skips.widget_seen>0,true)
+ assert.deepEqual(step(await set('widget_seen',true),'widget_seen').placement,'skipped');assert.deepEqual(await stamp(),before,'repeating a skip changes nothing')
+ // Stored on the server: another session (an admin) and a fresh read see it, and no other workspace does.
+ assert.equal(step(await api.get(),'widget_seen').placement,'skipped')
+ const asAdmin=await activation.request(`${origin}/projects/${ws.projectId}/activation`,{headers:{Authorization:`Bearer ${ws.tokens.admin}`}},base)
+ assert.equal(step((await asAdmin.json()).data,'widget_seen').placement,'skipped')
+ assert.deepEqual(ids(await kit(untouched).get(),row=>row.placement==='skipped'),[])
+ // Undo restores the step and the count exactly; undoing what is not skipped is a no-op.
+ const undone=await set('widget_seen',false);assert.deepEqual([step(undone,'widget_seen').placement,undone.applicableTotal],['needs_you',7])
+ assert.deepEqual(JSON.parse((await stamp()).settings_json).activation_skips,{});const idle=await stamp();await set('widget_seen',false);assert.deepEqual(await stamp(),idle)
+ // An admin may skip; an operator, an anonymous caller, another workspace's owner and a widget visitor may not.
+ assert.equal(step(await set('sender_dns',true,{token:ws.tokens.admin}),'sender_dns').placement,'skipped')
+ await DB.prepare('INSERT INTO contacts(id,project_id,created_at) VALUES(?,?,?)').bind('skip-contact',ws.projectId,Date.now()).run()
+ await DB.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,contact_id,expires_at) VALUES(?,?,?,?,?,?)').bind(sha('skip-contact-token'),'skip-contact',ws.projectId,'contact','skip-contact',Date.now()+600000).run()
+ assert.equal((await skip({step:'model_key',skipped:true},{token:''})).status,401)
+ for(const token of [ws.tokens.operator,untouched.tokens.owner,'skip-contact-token'])assert.equal((await skip({step:'model_key',skipped:true},{token})).status,403)
+ assert.equal((await skip({step:'model_key',skipped:true},{workspace:untouched,token:ws.tokens.owner})).status,403)
+ // Only the owner's own steps can be skipped, and only by a strict body.
+ const before400=JSON.stringify(await api.get())
+ for(const body of [{step:'published_article',skipped:true},{step:'owner_mail',skipped:true},{step:'inbound_address',skipped:true},{step:'spend_ceilings',skipped:true},{step:'widget_origin',skipped:true},{step:'nope',skipped:true},
+  {skipped:true},{step:'model_key'},{step:'model_key',skipped:'yes'},{step:'model_key',skipped:1},{step:'model_key',skipped:true,done:true},[],null,'model_key'])assert.equal((await skip(body)).status,400,JSON.stringify(body))
+ assert.equal((await skip(null,{raw:'{not json'})).status,400)
+ assert.equal(JSON.stringify(await api.get()),before400,'a refused skip changes nothing')
+ // A step that is not a need now is unchanged: sender DNS on a local installation is hidden either way.
+ const local=await set('sender_dns',true,{env:localEnv});assert.deepEqual([step(local,'sender_dns').placement,step(local,'sender_dns').applicable],['hidden',false])
+ // An observation beats the skip: a real widget visit makes it a confirmed, counted row, and undoing the stale skip changes nothing.
+ await set('widget_seen',true)
+ await DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind('skip-conversation',ws.projectId,'skip-contact',Date.now(),Date.now()).run()
+ const visit=await pings.request(origin+'/skip-conversation/widget-events',{method:'POST',headers:{Authorization:'Bearer skip-contact-token',Origin:'https://skip.example','Content-Type':'application/json'},body:JSON.stringify({action:'pingActive',data:{}})},base)
+ assert.equal(visit.status,200)
+ assert.equal(step(await api.get(),'widget_seen').placement,'skipped','nothing is confirmed until it is observed')
+ const seen=await api.check({auto:true}),row=step(seen,'widget_seen')
+ assert.deepEqual([row.state,row.placement,row.applicable],['done','set',true])
+ assert.deepEqual(ids(seen,item=>item.state==='done'&&item.placement!=='set'),[],'every observed step is a confirmed row, skipped or not (the verified sending address too)')
+ assert.deepEqual([seen.done,seen.applicableTotal],[ids(seen,item=>item.state==='done').length,ids(seen,item=>item.applicable).length],'done counts observed steps, all applicable')
+ const stale=await set('widget_seen',false);assert.deepEqual([step(stale,'widget_seen').placement,stale.done,stale.applicableTotal],['set',seen.done,seen.applicableTotal])
+ // A problem is never hidden by a skip: a rejected key stays under Needs you.
+ const keyed=await seedWorkspace(DB,'skip-key'),keys=kit(keyed);await defaultAssistant(keyed,'skip-assistant','gpt-5-mini')
+ assert.equal(step(await set('model_key',true,{workspace:keyed,token:keyed.tokens.owner}),'model_key').placement,'skipped')
+ modelStatus=401;try{const failed=step(await keys.check({step:'model_key'}),'model_key');assert.deepEqual([failed.state,failed.placement,failed.applicable],['failed','needs_you',true])}finally{modelStatus=200}
+ assert.deepEqual([step(await keys.check({step:'model_key'}),'model_key').placement],['set'])
+})
+
+test('a used emailed sign-in link confirms owner mail; local capture is never called delivery',async()=>{
+ const ws=await seedWorkspace(DB,'mail'),api=kit(ws,localEnv),owner='owner-mail@example.test'
+ const identityCall=async(path,body)=>{const pending=[];const response=await identity.request('http://127.0.0.1:8787'+path,{method:'POST',headers:{'Content-Type':'application/json','CF-Connecting-IP':'127.0.0.9'},body:JSON.stringify(body)},localEnv,{waitUntil:task=>pending.push(task),passThroughOnException(){}});await Promise.all(pending);return response}
+ const outbox=async()=>(await DB.prepare('SELECT count(*) n FROM rer_mail_development_outbox').first()).n
+ const emailedToken=async email=>{
+  assert.equal((await identityCall('/magic-link',{email})).status,202)
+  const message=JSON.parse((await DB.prepare('SELECT message FROM rer_mail_development_outbox ORDER BY sequence DESC LIMIT 1').first()).message)
+  assert.deepEqual(message.to,[email]);return message.text.match(/token=([a-f0-9]{64})/)[1]
+ }
+ const ownerMail=async(body={step:'owner_mail'})=>step(await api.check(body),'owner_mail')
+ let mail=await ownerMail();assert.equal(mail.state,'pending');assert.doesNotMatch(mail.detail,/delivered/i)
+ // The first-run welcome email lands in the local outbox: captured, not delivered, not confirmed.
+ await sendEmail(localEnv,{projectId:ws.projectId,to:owner,subject:'Welcome to HappyToHelp',text:'Your workspace is ready.',idempotencyKey:`welcome:${ws.projectId}`})
+ mail=await ownerMail();assert.deepEqual([mail.state,mail.receiptRef],['pending',`welcome:${ws.projectId}`]);assert.match(mail.detail,/local outbox/);assert.doesNotMatch(mail.detail,/delivered/i)
+ // The owner's own test mail is captured too, once.
+ let messages=await outbox();mail=step(await api.testMail(),'owner_mail');await api.testMail()
+ assert.equal(await outbox(),messages+1);assert.equal(mail.state,'pending');assert.doesNotMatch(mail.detail,/delivered/i)
+ // Another member's used link, and the owner's unused link, do not count; checks send nothing.
+ assert.equal((await identityCall('/magic-link/consume',{token:await emailedToken('operator-mail@example.test')})).status,200)
+ const token=await emailedToken(owner);messages=await outbox()
+ assert.equal((await ownerMail()).state,'pending');assert.equal((await ownerMail({auto:true})).state,'pending');assert.equal(await outbox(),messages)
+ // The owner uses their emailed link: the next automatic check confirms it without waiting.
+ assert.equal((await identityCall('/magic-link/consume',{token})).status,200)
+ mail=await ownerMail({auto:true});assert.equal(mail.state,'done');assert.match(mail.detail,/local outbox/);assert.doesNotMatch(mail.detail,/delivered/i);assert.equal(await outbox(),messages)
+ // A changed owner address is a changed configuration; the old link proves nothing about the new address.
+ await DB.prepare('UPDATE users SET email=? WHERE id=?').bind('owner-mail-new@example.test','owner-mail').run()
+ assert.equal(step(await api.get(),'owner_mail').state,'unknown');assert.equal((await ownerMail({auto:true})).state,'pending')
+})
+
+test('one used sign-in link confirms owner mail in every workspace its owner owns, never where they are not an owner',async()=>{
+ // Sign-in links are issued for the person's lowest-id workspace; the link proves their mailbox, wherever it was issued.
+ const env={...base,APP_ORIGIN:origin},first=await seedWorkspace(DB,'two-a'),second=await seedWorkspace(DB,'two-b')
+ await DB.prepare("INSERT INTO memberships VALUES(?,?,'owner')").bind(second.projectId,'owner-two-a').run()
+ // The owner of workspace p-two-0, whose links are issued for it, is only an admin of the second workspace.
+ await seedWorkspace(DB,'two-0');await DB.prepare("INSERT INTO memberships VALUES(?,?,'admin')").bind(second.projectId,'owner-two-0').run()
+ const apis=[kit(first,env),kit(second,env)]
+ const identityCall=async(path,body)=>{const pending=[];const response=await identity.request(origin+path,{method:'POST',headers:{'Content-Type':'application/json','CF-Connecting-IP':'127.0.0.10'},body:JSON.stringify(body)},env,{waitUntil:task=>pending.push(task),passThroughOnException(){}});await Promise.all(pending);return response}
+ const usedLink=async email=>{
+  recipient=email;const sends=sendCount
+  assert.equal((await identityCall('/magic-link',{email})).status,202);assert.equal(sendCount,sends+1)
+  const token=[...messages.values()].at(-1).text.match(/token=([a-f0-9]{64})/)[1]
+  assert.equal((await identityCall('/magic-link/consume',{token})).status,200)
+ }
+ const ownerMail=async()=>Promise.all(apis.map(async api=>step(await api.check({step:'owner_mail'}),'owner_mail')))
+ try {
+  await usedLink('owner-two-0@example.test')
+  assert.deepEqual((await ownerMail()).map(row=>row.state),['pending','pending'],"a non-owner's used link does not count")
+  const sends=sendCount;await usedLink('owner-two-a@example.test')
+  const rows=await ownerMail()
+  assert.deepEqual(rows.map(row=>row.state),['done','done'],'both workspaces the owner owns confirm owner mail')
+  assert.equal(rows[0].receiptRef,rows[1].receiptRef,'the same used link confirms both');assert.match(rows[1].receiptRef,/^signin:owner-two-a:/)
+  assert.equal(sendCount,sends+1,'checks send nothing')
+ } finally {recipient='owner-activation@example.test'}
+})
+
+test('a hosted welcome email confirms owner mail only on provider delivery, and uncertain mail is never resent',async()=>{
+ try {
+  for(const [key,lost] of [['welcome',false],['welcome-lost',true]]){
+   const ws=await seedWorkspace(DB,key),api=kit(ws);recipient=`owner-${key}@example.test`;event='sent';sendUncertain=lost
+   await sendEmail(base,{projectId:ws.projectId,to:recipient,subject:'Welcome to HappyToHelp',text:'Your workspace is ready.',idempotencyKey:`welcome:${ws.projectId}`}).catch(()=>null)
+   sendUncertain=false;const sends=sendCount
+   let mail=step(await api.check({step:'owner_mail'}),'owner_mail')
+   if(lost)assert.equal(mail.state,'unknown')
+   else {
+    assert.equal(mail.state,'pending');assert.doesNotMatch(mail.detail,/delivered/i)
+    event='delivered';mail=step(await api.check({step:'owner_mail'}),'owner_mail');assert.equal(mail.state,'done');assert.match(mail.receiptRef,/:delivered$/)
+   }
+   for(let i=0;i<3;i++)await api.check({auto:true})
+   await api.check({});await api.get()
+   assert.equal(sendCount,sends,'checks never send or resend')
+  }
+ } finally {recipient='owner-activation@example.test';event='sent';sendUncertain=false}
+})
+
+test('sender DNS reports the provider records as facts, read back without a provider request',async()=>{
+ const ws=await seedWorkspace(DB,'dns'),api=kit(ws),expected=status=>domainRecords(status).map(({type,name,value})=>({type,name,value,status}))
+ try {
+  dnsStatus='pending';const checked=await api.check({step:'sender_dns'})
+  assert.equal(step(checked,'sender_dns').state,'pending');assert.deepEqual(checked.facts.senderRecords,expected('pending'))
+  const start=requests.length;assert.deepEqual((await api.get()).facts.senderRecords,expected('pending'));assert.deepEqual(since(start),[])
+  domainListed=false;const absent=await api.check({step:'sender_dns'})
+  assert.equal(step(absent,'sender_dns').state,'pending');assert.deepEqual(absent.facts.senderRecords,[])
+  domainListed=true;dnsStatus='verified';const verified=await api.check({step:'sender_dns'})
+  assert.equal(step(verified,'sender_dns').state,'done');assert.deepEqual(verified.facts.senderRecords,expected('verified'))
+  assert.deepEqual((await api.get({env:{...base,EMAIL_FROM:'support@other.test'}})).facts.senderRecords,[],'records belong to the configuration they were read under')
+ } finally {dnsStatus='verified';domainListed=true}
+})
+
+test('a verified proposed sender is adopted in the same observation, never over an address the owner chose',async()=>{
+ const workspace=async(key,fromAddress)=>{
+  const ws=await seedWorkspace(DB,key)
+  await DB.prepare('INSERT INTO email_settings VALUES(?,?,?,?,?,?)').bind(ws.projectId,'Support',fromAddress,null,0,1).run()
+  await DB.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind(ws.projectId,JSON.stringify({proposed_sender:'support@acme.test'}),Date.now()).run()
+  return {ws,api:kit(ws)}
+ }
+ const saved=async ws=>DB.prepare('SELECT from_address,updated_at FROM email_settings WHERE project_id=?').bind(ws.projectId).first()
+ try {
+  // Mail goes out from the seeded installation sender, welcome email included, until the workspace's own domain is verified.
+  const seeded=await workspace('switch','support@example.test');recipient='owner-switch@example.test';event='delivered'
+  await sendEmail(base,{projectId:seeded.ws.projectId,to:recipient,subject:'Welcome to HappyToHelp',text:'Your workspace is ready.',idempotencyKey:`welcome:${seeded.ws.projectId}`})
+  let data=await seeded.api.check({})
+  assert.deepEqual([step(data,'sender_dns').state,step(data,'owner_mail').state],['pending','done'])
+  assert.deepEqual([data.facts.mail.sender,data.facts.mail.proposedSender,data.facts.mail.senderSwitch],['support@example.test','support@acme.test',null])
+  assert.equal((await saved(seeded.ws)).from_address,'support@example.test','an unverified domain is not adopted')
+  proposedStatus='verified';data=await seeded.api.check({})
+  assert.equal(step(data,'sender_dns').state,'done');assert.deepEqual({...await saved(seeded.ws)},{from_address:'support@acme.test',updated_at:1},'the sender switches; the mailbox version does not')
+  assert.deepEqual([data.facts.mail.sender,data.facts.mail.senderSwitch?.from,data.facts.mail.senderSwitch?.to],['support@acme.test','support@example.test','support@acme.test'])
+  assert.equal(step(data,'owner_mail').state,'done','the welcome email from the replaced installation sender still counts')
+  const read=await seeded.api.get();assert.deepEqual([step(read,'sender_dns').state,step(read,'owner_mail').state],['done','done'],'the observation describes the sender now in use')
+  // An address the owner chose is never overwritten, even though the proposed domain is verified: it is that address that is checked.
+  const chosen=await workspace('switch-own','help@mine.test')
+  data=await chosen.api.check({step:'sender_dns'})
+  assert.equal(step(data,'sender_dns').state,'pending');assert.equal((await saved(chosen.ws)).from_address,'help@mine.test');assert.equal(data.facts.mail.senderSwitch,null)
+ } finally {recipient='owner-activation@example.test';event='sent';proposedStatus='pending'}
+})
+
+test('sender DNS follows an address the owner chose: its own domain is checked and mail never switches',async()=>{
+ const ws=await seedWorkspace(DB,'dns-own'),api=kit(ws),sentFrom=async()=>(await DB.prepare('SELECT from_address FROM email_settings WHERE project_id=?').bind(ws.projectId).first()).from_address
+ await DB.prepare('INSERT INTO email_settings VALUES(?,?,?,?,?,?)').bind(ws.projectId,'Support','help@mine.test',null,0,1).run()
+ await DB.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind(ws.projectId,JSON.stringify({proposed_sender:'support@acme.test'}),Date.now()).run()
+ proposedStatus='verified'
+ try {
+  // The proposed domain is verified, but the address in use is help@mine.test, whose domain is the one checked.
+  ownStatus='pending';let start=requests.length,data=await api.check({step:'sender_dns'})
+  assert.equal(step(data,'sender_dns').state,'pending');assert.equal(data.facts.mail.senderDnsDomain,'mine.test')
+  assert.ok(since(start).some(url=>url.endsWith('/domains/domain-3'))&&!since(start).some(url=>url.endsWith('/domains/domain-2')),'only the domain of the address in use is read')
+  ownStatus='verified';data=await api.check({step:'sender_dns'})
+  assert.equal(step(data,'sender_dns').state,'done');assert.equal(data.facts.mail.senderDnsDomain,'mine.test')
+  assert.deepEqual([await sentFrom(),data.facts.mail.sender,data.facts.mail.proposedSender,data.facts.mail.senderSwitch],['help@mine.test','help@mine.test','support@acme.test',null],'verifying the chosen address never switches the sender')
+  assert.equal(step(await api.get(),'sender_dns').state,'done')
+  // Still on the seeded installation sender, the proposed domain is the one named.
+  await DB.prepare('UPDATE email_settings SET from_address=? WHERE project_id=?').bind('support@example.test',ws.projectId).run()
+  assert.equal((await api.get()).facts.mail.senderDnsDomain,'acme.test')
+ } finally {proposedStatus='pending';ownStatus='pending'}
+})
+
+test('an untouched starter moves to the installed provider before validation; an edited assistant never changes',async()=>{
+ const seed={name:'Support helper',role:'Support',prompt:'Answer from published help articles.',model:'claude-haiku-4-5-20251001',is_enabled:true}
+ const starter=async(key,profile=seed)=>{
+  const ws=await seedWorkspace(DB,key),id=`${key}-assistant`
+  await DB.prepare('INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,is_enabled,created_at) VALUES(?,?,?,?,?,?,1,?)').bind(id,ws.projectId,profile.name,profile.role,profile.prompt,profile.model,Date.now()).run()
+  await DB.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind(ws.projectId,JSON.stringify({default_visitor_ai_id:id,default_responder:id,starter_ai:{id,seed}}),Date.now()).run()
+  return {ws,id,api:kit(ws)}
+ }
+ const stored=async({ws,id})=>({model:(await DB.prepare('SELECT model FROM ai_profiles WHERE id=?').bind(id).first()).model,seed:JSON.parse((await DB.prepare('SELECT settings_json FROM project_settings WHERE project_id=?').bind(ws.projectId).first()).settings_json).starter_ai.seed.model})
+ // Only an OpenAI key is installed: the untouched starter follows it, and its marker with it, so it still reads as untouched.
+ const moved=await starter('starter')
+ assert.equal(step(await moved.api.get(),'model_key').state,'not_checked');assert.deepEqual(await stored(moved),{model:seed.model,seed:seed.model},'GET changes nothing')
+ const data=await moved.api.check({auto:true}),now=await stored(moved)
+ assert.notEqual(now.model,seed.model);assert.equal(now.seed,now.model)
+ // The starter fact is the assistant itself and whether it is untouched; it answers visitors by itself, with nothing to switch.
+ assert.deepEqual(data.facts.starterAssistant,{id:moved.id,name:seed.name,model:now.model,provider:'openai',edited:false})
+ assert.deepEqual([data.facts.ai.assistantId,data.facts.ai.secretName],[moved.id,'OPENAI_API_KEY'],'the starter is the default visitor assistant')
+ assert.equal(step(data,'model_key').state,'done')
+ // With its own provider's key installed it stays where it is.
+ const own=await starter('starter-own')
+ assert.equal(step(await own.api.check({step:'model_key'},{env:{...base,ANTHROPIC_API_KEY:'fixture-anthropic-key'}}),'model_key').state,'done');assert.equal((await stored(own)).model,seed.model)
+ // An assistant the owner edited is never changed, and the missing key stays stated.
+ const edited=await starter('starter-edited',{...seed,prompt:'My own instructions.'})
+ const kept=await edited.api.check({auto:true}),missing=step(kept,'model_key')
+ assert.equal((await stored(edited)).model,seed.model);assert.equal(kept.facts.starterAssistant.edited,true)
+ assert.equal(missing.state,'unavailable');assert.match(missing.detail,/ANTHROPIC_API_KEY/)
 })

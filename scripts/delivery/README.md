@@ -9,9 +9,9 @@ maintained upstream. Use the official exporter when a selected producer change
 requires an update.
 
 The producer accepts a canonical GitHub HTTPS source URL and retains a GitHub
-owner and repository pair as legacy packaging input. HappyToHelp uses `just-every/happytohelp`; the public
+owner and repository pair as legacy packaging input. HappyToHelp uses `just-every/run-happytohelp`; the public
 `rer-project.json` descriptor records the corresponding HTTPS destination
-`https://github.com/just-every/happytohelp`. Publication identity checks exercise
+`https://github.com/just-every/run-happytohelp`. Publication identity checks exercise
 the actual generator and compare these two representations of the same source.
 
 `pnpm run build` packages the emitted tree automatically, cleaning its generated

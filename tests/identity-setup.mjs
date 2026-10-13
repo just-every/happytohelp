@@ -9,6 +9,8 @@ registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL
 const {Hono}=await import('hono'),{getPlatformProxy}=await import('wrangler'),{setup}=await import('../src/modules/identity/setup.ts'),{accounts}=await import('../src/modules/identity/accounts.ts')
 const {projects}=await import('../src/modules/management/projects.ts')
 const {verifyPassword}=await import('../src/modules/identity/credentials.ts')
+const {deriveWorkspaceName,deriveOwnerName,FALLBACK_WORKSPACE_NAME}=await import('../src/modules/identity/workspace-defaults.ts')
+const {sendWelcomeEmail}=await import('../src/modules/identity/welcome-email.ts')
 const directory=await mkdtemp(join(tmpdir(),'h2h-owner-setup-')),configPath=join(directory,'wrangler.json')
 await writeFile(configPath,JSON.stringify({name:'owner-setup-test',compatibility_date:'2026-09-01',d1_databases:[{binding:'DB',database_name:'isolated-setup',database_id:'isolated-setup-test'}]}))
 const proxy=await getPlatformProxy({configPath,persist:false,envFiles:[]})
@@ -21,8 +23,11 @@ try {
  await migrate()
  await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';')[0]).run()
  await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('CREATE TABLE user_settings'))).run()
+ // Creating a workspace also provisions its starter assistant, which needs the assistant table.
+ await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('CREATE TABLE ai_profiles('))).run()
  await db.prepare(readFileSync(new URL('../migrations/0098_personal_visual_inspiration.sql',import.meta.url),'utf8')).run()
- const entry={name:'First Owner',email:'Owner@Example.invalid',password:randomBytes(24).toString('base64url'),allowedOrigin:'https://example.invalid/page'}
+ // First-run setup asks for email, password and website only: the workspace name, owner name and colour are derived.
+ const entry={email:'Owner@Example.invalid',password:randomBytes(24).toString('base64url'),allowedOrigin:'https://example.invalid/page'}
  const submit=(body=entry,headers={})=>app.request('http://127.0.0.1/bootstrap',{method:'POST',headers:{'content-type':'application/json',origin:'http://127.0.0.1',...headers},body:typeof body==='string'?body:JSON.stringify(body)},env)
  const state=async()=>(await app.request('http://127.0.0.1/setup',{},env)).json()
  assert.deepEqual(await state(),{available:true})
@@ -45,10 +50,32 @@ try {
  assert.equal((await submit({...entry,ownerName:'Actual Owner',primaryColor:'#AABBCC'})).status,500)
  for(const table of ['owner_setup','users','projects','project_settings','user_settings','memberships','credentials','sessions'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0)
  await db.prepare('DROP TRIGGER reject_setup_credentials').run()
- const responses=await Promise.all([submit(),submit({...entry,email:'racer@example.invalid'})])
+ // Local development mail: Create workspace sends the owner one welcome email, which lands in the development outbox.
+ for(const table of ['email_settings','email_deliveries'])await db.prepare(readFileSync(new URL('../migrations/0080_integrations.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('CREATE TABLE '+table+'('))).run()
+ for(const sql of readFileSync(new URL('../migrations/117_development_outbox.sql',import.meta.url),'utf8').replace(/^--.*$/gm,'').split(';').filter(sql=>sql.trim()))await db.prepare(sql).run()
+ Object.assign(env,{H2H_LOCAL:'true',EMAIL_PROVIDER:'development',APP_ORIGIN:'http://127.0.0.1',EMAIL_FROM:'HappyToHelp <noreply@localhost.test>'})
+ const racers=[entry,{...entry,email:'racer@example.invalid'}],responses=await Promise.all(racers.map(body=>submit(body)))
  assert.deepEqual(responses.map(r=>r.status).sort(),[201,409])
  assert.equal((await db.prepare('SELECT count(*) n FROM user_settings').first()).n,0)
- const success=responses.find(r=>r.status===201),owner=await success.json()
+ // Either request may win the race; everything the winner did is checked against the winner's own email.
+ const success=responses.find(r=>r.status===201),winner=racers[responses.indexOf(success)].email.toLowerCase(),owner=await success.json()
+ assert.equal(owner.welcomeEmail,'sent')
+ assert.equal((await db.prepare("SELECT count(*) n FROM email_deliveries WHERE state='sent' AND project_id=? AND id=?").bind(owner.projectId,'welcome:'+owner.projectId).first()).n,1)
+ const welcome=async()=>(await db.prepare('SELECT message FROM rer_mail_development_outbox').all()).results.map(row=>JSON.parse(row.message))
+ assert.equal((await welcome()).length,1);assert.deepEqual((await welcome())[0].to,[winner])
+ // A retry or reload cannot send it again: the delivery is recorded under the workspace's own identity.
+ assert.equal(await sendWelcomeEmail(env,{projectId:owner.projectId,workspaceName:'Example',ownerEmail:winner}),'sent')
+ assert.equal((await welcome()).length,1)
+ assert.equal((await db.prepare('SELECT name FROM projects').first()).name,'Example')
+ assert.equal((await db.prepare('SELECT name FROM users').first()).name,deriveOwnerName(winner))
+ // Provisioning adds the starter assistant, proposed sender and site read beside the colour and the derived marker.
+ const settings=JSON.parse((await db.prepare('SELECT settings_json FROM project_settings').first()).settings_json),starter=await db.prepare('SELECT id,is_enabled FROM ai_profiles').first()
+ assert.deepEqual([settings.primary_color,settings.derived],['#713ee0',{name:'Example',colour:true}])
+ assert.deepEqual([settings.default_visitor_ai_id,starter.is_enabled],[starter.id,1])
+ assert.equal(deriveWorkspaceName('https://www.acme-widgets.co.uk','h2h-fixture-website' + '@' + 'gmail.com'),'Acme Widgets')
+ assert.equal(deriveWorkspaceName('http://127.0.0.1:4729','ada@northstar.example'),'Northstar')
+ assert.equal(deriveWorkspaceName('http://localhost:3000','h2h-fixture-personal' + '@' + 'gmail.com'),FALLBACK_WORKSPACE_NAME)
+ assert.equal(deriveOwnerName('ada.lovelace+work@northstar.example'),'Ada Lovelace')
  assert.match(success.headers.get('set-cookie'),/HttpOnly/);assert.doesNotMatch(success.headers.get('set-cookie'),/Secure/)
  for(const table of ['owner_setup','users','projects','memberships','credentials','sessions'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,1)
  assert(await verifyPassword(entry.password,(await db.prepare('SELECT password_hash FROM credentials').first()).password_hash))
@@ -61,7 +88,7 @@ try {
  const secureLogin=await app.request('https://example.invalid/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,password:entry.password})},env)
  assert.equal(secureLogin.status,200);assert.match(secureLogin.headers.get('set-cookie'),/Secure/)
  assert.deepEqual(await state(),{available:false});assert.equal((await submit()).status,409)
- for(const table of ['sessions','credentials','memberships','user_settings','users','projects'])await db.prepare(`DELETE FROM ${table}`).run()
+ for(const table of ['sessions','credentials','memberships','user_settings','project_settings','ai_profiles','users','projects'])await db.prepare(`DELETE FROM ${table}`).run()
  assert.deepEqual(await state(),{available:false});assert.equal((await submit()).status,409)
  // Legacy partial installation is closed by the migration without granting credentials.
  await db.prepare('DROP TRIGGER owner_setup_on_user').run();await db.prepare('DROP TRIGGER owner_setup_on_project').run();await db.prepare('DROP TABLE owner_setup').run()
@@ -77,15 +104,28 @@ try {
  await db.prepare('DELETE FROM owner_setup').run()
  env.RER_INSTALLATION_ID='managed-fixture';env.H2H_SETUP_TOKEN='private-owner-setup-fixture';env.H2H_SETUP_OWNER_EMAIL='OWNER@example.invalid'
  const mapped={ownerName:'  Actual Owner  ',email:entry.email,password:entry.password,allowedOrigin:entry.allowedOrigin,primaryColor:'#AABBCC'};
- const managedEntry={...entry,setupToken:env.H2H_SETUP_TOKEN,...Object.fromEntries(['ownerName','email','password','allowedOrigin','primaryColor'].map(key=>[key,mapped[key]]))}
- const managedResponses=await Promise.all([submit(managedEntry),submit(managedEntry)])
+ const managedEntry={...entry,name:'First Owner',setupToken:env.H2H_SETUP_TOKEN,...Object.fromEntries(['ownerName','email','password','allowedOrigin','primaryColor'].map(key=>[key,mapped[key]]))}
+ // A hosted provider whose connection drops after the request left: the owner and workspace still exist and are signed in, the
+ // welcome outcome is recorded as uncertain, and nothing sends it again.
+ Object.assign(env,{EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'re_fixture',EMAIL_FROM:'HappyToHelp <welcome@example.invalid>'})
+ const realFetch=globalThis.fetch,providerCalls=[]
+ globalThis.fetch=async(url,init)=>{if(String(url).startsWith('https://api.resend.com/')){providerCalls.push(JSON.parse(init.body));throw new TypeError('connection lost')}return realFetch(url,init)}
+ let managedResponses
+ try{managedResponses=await Promise.all([submit(managedEntry),submit(managedEntry)])}finally{globalThis.fetch=realFetch}
  assert.deepEqual(managedResponses.map(r=>r.status).sort(),[201,409])
  assert.equal((await db.prepare('SELECT count(*) n FROM user_settings').first()).n,0)
  assert.equal((await db.prepare('SELECT name FROM users').first()).name,'Actual Owner')
- assert.equal((await db.prepare('SELECT name FROM projects').first()).name,entry.name)
+ assert.equal((await db.prepare('SELECT name FROM projects').first()).name,'First Owner')
  assert.match((await db.prepare('SELECT verification_secret FROM projects').first()).verification_secret,/^[0-9a-f]{64}$/,'owner setup gives the first project a server secret')
- assert.deepEqual(JSON.parse((await db.prepare('SELECT settings_json FROM project_settings').first()).settings_json),{primary_color:'#aabbcc'})
+ const managedSettings=JSON.parse((await db.prepare('SELECT settings_json FROM project_settings').first()).settings_json)
+ assert.deepEqual([managedSettings.primary_color,managedSettings.derived],['#aabbcc',{name:null,colour:false}])
  const managedOwner=await managedResponses.find(r=>r.status===201).json()
+ assert.equal(managedOwner.welcomeEmail,'uncertain')
+ assert.equal(providerCalls.length,1);assert.deepEqual(providerCalls[0].to,['owner@example.invalid'])
+ assert.equal((await db.prepare("SELECT state FROM email_deliveries WHERE id=?").bind('welcome:'+managedOwner.projectId).first()).state,'uncertain')
+ globalThis.fetch=async()=>{throw new Error('an uncertain welcome must not be sent again')}
+ try{assert.equal(await sendWelcomeEmail(env,{projectId:managedOwner.projectId,workspaceName:'First Owner',ownerEmail:'owner@example.invalid'}),'uncertain')}finally{globalThis.fetch=realFetch}
+ assert.equal((await welcome()).length,1,'a refused or lost welcome adds nothing to the local outbox')
  assert(await verifyPassword(entry.password,(await db.prepare('SELECT password_hash FROM credentials').first()).password_hash))
  assert.equal((await app.request('http://127.0.0.1/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:mapped.email,password:entry.password})},env)).status,200)
  const profile=(method='GET',body)=>app.request('http://127.0.0.1/management/profile',{method,headers:{authorization:`Bearer ${managedOwner.token}`,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})},env)
@@ -97,7 +137,7 @@ try {
  assert.equal((await db.prepare('SELECT visual_inspiration FROM user_settings WHERE user_id=?').bind(managedOwner.userId).first()).visual_inspiration,'Preserved historical preference')
  assert.equal('visual_inspiration' in (await (await profile()).json()).data,false)
  await db.prepare('DELETE FROM project_settings').run()
- for(const table of ['sessions','credentials','memberships','user_settings','users','projects'])await db.prepare(`DELETE FROM ${table}`).run()
+ for(const table of ['sessions','credentials','memberships','user_settings','ai_profiles','users','projects'])await db.prepare(`DELETE FROM ${table}`).run()
  assert.equal((await submit(managedEntry)).status,409)
  console.log('Real D1 owner setup passed: validation, CSRF, rollback, concurrent first owner, password/login/cookies, permanent closure, legacy partial state and import closure.')
 } finally {await proxy.dispose();await rm(directory,{recursive:true,force:true})}

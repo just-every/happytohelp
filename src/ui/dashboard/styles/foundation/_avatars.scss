@@ -24,8 +24,8 @@ $avatar-presence-diameter: 20%;
 $avatar-presence-inset: 5%;
 $avatar-presence-ring: 5%;
 
-$avatar-file-ink: #98aaca;
-$avatar-file-paper: #dae4f1;
+$avatar-file-ink: var(--ink-soft);
+$avatar-file-paper: var(--rule);
 
 // Content that fills the frame and centres its single child.
 @mixin avatar-fill {
@@ -39,8 +39,8 @@ $avatar-file-paper: #dae4f1;
 
 .avatar {
   --avatar-size: #{$avatar-default-size};
-  --avatar-tile-paper: var(--bs-gray-500);
-  --avatar-tile-ink: var(--bs-white);
+  --avatar-tile-paper: var(--surface);
+  --avatar-tile-ink: var(--ink);
 
   position: relative;
   display: inline-block;
@@ -54,10 +54,6 @@ $avatar-file-paper: #dae4f1;
   .avatar-#{$step} {
     --avatar-size: #{$size};
   }
-}
-
-[data-bs-theme="dark"] .avatar {
-  --avatar-tile-paper: #{$gray-600-dark};
 }
 
 .avatar-img {
@@ -92,7 +88,7 @@ $avatar-file-paper: #dae4f1;
     inline-size: $avatar-presence-diameter;
     block-size: $avatar-presence-diameter;
     border-radius: 50%;
-    background: var(--bs-success);
+    background: var(--d-cyan-deep);
   }
 
   > .avatar-img {

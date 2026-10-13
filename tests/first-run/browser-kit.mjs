@@ -17,14 +17,12 @@ export async function passwordLogin(page,origin,email,password,destination='/pro
  await page.getByLabel('Email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);
  await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL(url=>url.pathname!=='/login');
 }
-export async function firstOwner(page,origin,{email,password,width}){
+/** The one-screen first-run form: email, password and website. The workspace name is derived, so a test that needs a known name renames it afterwards through settings. */
+export async function firstOwner(page,origin,{email,password,width,workspaceName=`Local support ${width}`}){
  await page.goto(origin+'/setup?onboarding=setup');
- const known=page.getByRole('region',{name:'Known details'});await known.waitFor();
- assert.match(await known.innerText(),/Your website[\s\S]*Workspace address/);
- assert.doesNotMatch(await known.innerText(),/Cloudflare Worker|Runtime|Installation/);
- await page.getByLabel('Your name',{exact:true}).fill('Local owner');await page.getByLabel('Owner email',{exact:true}).fill(email);
- await page.getByLabel('Owner password',{exact:true}).fill(password);await page.getByRole('button',{name:'Continue',exact:true}).click();
- await page.getByLabel('Workspace name').fill('Local support '+width);await page.getByLabel('Widget website origin').fill(origin);
- await page.getByRole('button',{name:'Review setup',exact:true}).click();await page.getByRole('button',{name:'Create workspace',exact:true}).click();
- await page.waitForURL(/\/projects\/[^/]+\/activation$/);return new URL(page.url()).pathname.split('/')[2];
+ await page.getByLabel('Your email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);
+ await page.getByLabel('Your website',{exact:true}).fill(origin);await page.getByRole('button',{name:'Create workspace',exact:true}).click();
+ await page.waitForURL(/\/projects\/[^/]+\/activation$/);const projectId=new URL(page.url()).pathname.split('/')[2];
+ const renamed=await page.evaluate(async({projectId,name})=>(await fetch(`/api/management/projects/${projectId}/settings`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})})).status,{projectId,name:workspaceName});
+ assert.equal(renamed,200);return projectId;
 }

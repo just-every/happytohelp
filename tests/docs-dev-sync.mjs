@@ -28,7 +28,7 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
   const root = await realpath(await mkdtemp(join(tmpdir(), 'h2h-docs-sync-')));
   await mkdir(join(root, 'docs'));
   const files = {
-    'package.json': JSON.stringify({ repository: { url: 'https://github.com/just-every/happytohelp' } }),
+    'package.json': JSON.stringify({ repository: { url: 'https://github.com/just-every/run-happytohelp' } }),
     'docs/site.json': site([home, { slug: 'guide', source: 'docs/GUIDE.md', label: 'Guide' }]),
     'README.md': '# Fixture\n\nRead [the second part](docs/GUIDE.md#second).\n',
     'docs/GUIDE.md': '# Guide\n\n## Second\n',
@@ -80,7 +80,7 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
     await until(async () => {
       const { sections, repository } = await loadDocsPage('third');
       assert.deepEqual(sections[0].pages.map(entry => entry.href), ['/docs', '/docs/guide', '/docs/third']);
-      assert.deepEqual(repository, { url: 'https://github.com/just-every/happytohelp', branch: 'main' });
+      assert.deepEqual(repository, { url: 'https://github.com/just-every/run-happytohelp', branch: 'main' });
     }, 'a page added to docs/site.json is listed');
     assert.equal((await page('third')).title, 'Third page');
     assert.equal((await index()).problem, null);

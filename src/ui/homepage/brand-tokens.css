@@ -1,15 +1,23 @@
-/* The brand's tokens, defined once for every surface in the homepage's language: the homepage and the pages built on it (the
-   docs and the 404), and first-run setup. Paper, ink and one geometric sans-serif's chrome (homepage.css reads these), and
-   the drawings' ink and aqua family (drawings.css reads these; the page's discs, links, dividers and closing line, and
-   setup's steps, card and drawings, borrow them). No other stylesheet defines them, so setup cannot drift from the homepage. */
-/* The body holding either root declares the tokens too, so its background reads the paper. The roots keep their own
-   declaration for any browser without :has(), which :is() lets drop the body selectors alone rather than the whole rule. */
-body:has(.h2h-home), body:has(.h2h-setup) { margin: 0; padding: 0; background: var(--paper); }
-:is(body:has(.h2h-home), body:has(.h2h-setup)), .h2h-home, .h2h-setup {
+/* The brand's tokens, defined once for every surface: the homepage and the pages built on it (the docs and the 404),
+   first-run setup, the identity pages and the signed-in workspace. Paper, ink and one geometric sans-serif's chrome, and the
+   drawings' ink and aqua family; the workspace adds its surfaces, lines, chips and the one danger ink below. No other
+   stylesheet defines them, so no surface can drift from the homepage. Nothing else has a hue. */
+:root {
   --paper: #f6f2ea;
+  --paper-deep: #efe9dd;
+  --surface: #ffffff;
   --ink: #141414;
+  --ink-rgb: 20, 20, 20;
+  --ink-hover: #3a3a38;
+  /* Text and marks drawn on an ink fill (the black pill). */
+  --on-ink: #ffffff;
+  /* Text and marks on an aqua fill (count discs, step discs): ink in every mode, since the aqua stays light. */
+  --on-aqua: #141414;
   --ink-soft: #66635d;
   --rule: rgba(20, 20, 20, 0.16);
+  --rule-strong: rgba(20, 20, 20, 0.22);
+  --field-line: rgba(20, 20, 20, 0.55);
+  --hover: rgba(20, 20, 20, 0.06);
   --gutter: clamp(20px, 5vw, 76px);
   --d-ink: var(--ink);
   --d-ink-soft: #6b6a65;
@@ -18,4 +26,55 @@ body:has(.h2h-home), body:has(.h2h-setup) { margin: 0; padding: 0; background: v
   --d-cyan-tint: #d6f5fa;
   --d-cyan-wash: #e8f9fc;
   --d-line: rgba(20, 20, 20, 0.14);
+  --note: #f7ecd9;
+  --muted-chip: #ebe5d8;
+  --danger: #a8322a;
+  --avatar-aqua: #a6ecf4;
+  --avatar-sky: #bcd8f6;
+  --avatar-lilac: #d4c8f2;
+  --avatar-pink: #f6c4d6;
+  --avatar-coral: #f7bba7;
+  --avatar-apricot: #f7d2a0;
+  --avatar-mint: #b8ebcb;
+  --avatar-blush: #f4ddd5;
+  --avatar-sage: #e1e8d8;
+  /* The drawn card: the landing's .d-card outline at 14px to the em, with its offset ink shadow. */
+  --card-radius: 14px 16px 13px 15px / 15px 13px 16px 14px;
+  --card-shadow: 1px 1.5px 0 rgba(20, 20, 20, 0.55);
+  --font-sans: Outfit, 'Outfit Fallback', 'Avenir Next', 'Segoe UI', sans-serif;
 }
+/* A workspace in Dark display mode (Settings, Project, Appearance) sets data-theme="dark" on its root. The aqua stays. */
+[data-theme="dark"] {
+  --paper: #171614;
+  --paper-deep: #1f1d1a;
+  --surface: #24221f;
+  --ink: #f3efe7;
+  --ink-rgb: 243, 239, 231;
+  --ink-hover: #d9d4ca;
+  --on-ink: #141414;
+  --d-ink: var(--ink);
+  --ink-soft: #b5afa4;
+  --rule: rgba(243, 239, 231, 0.16);
+  --rule-strong: rgba(243, 239, 231, 0.26);
+  --field-line: rgba(243, 239, 231, 0.5);
+  --hover: rgba(243, 239, 231, 0.08);
+  --d-cyan-tint: #1d3a3f;
+  --d-cyan-wash: #1a2c30;
+  --d-line: rgba(243, 239, 231, 0.14);
+  --note: #2e2719;
+  --muted-chip: #2c2a26;
+  --danger: #f08a80;
+  --avatar-aqua: #1f4a50;
+  --avatar-sky: #23364f;
+  --avatar-lilac: #352f55;
+  --avatar-pink: #523042;
+  --avatar-coral: #54332b;
+  --avatar-apricot: #51402a;
+  --avatar-mint: #264a38;
+  --avatar-blush: #3b2a26;
+  --avatar-sage: #2a3326;
+  --card-shadow: 1px 1.5px 0 rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+/* The body holding a page in the homepage's language reads the paper. */
+body:has(.h2h-home), body:has(.h2h-setup), body:has(.h2h-identity) { margin: 0; padding: 0; background: var(--paper); }

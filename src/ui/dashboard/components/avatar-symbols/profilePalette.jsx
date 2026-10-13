@@ -1,16 +1,18 @@
 import cssColorNames from 'css-color-names';
 
-const BRIGHT_PROFILE_TILES = Object.freeze([
-    { name: 'cyan', hue: 182, tile: '#a0eeee' },
-    { name: 'pink', hue: 330, tile: '#fdb0d9' },
-    { name: 'green', hue: 135, tile: '#a5efbb' },
-    { name: 'blue', hue: 213, tile: '#b2d6fd' },
-    { name: 'purple', hue: 270, tile: '#cda0fd' },
-    { name: 'orange', hue: 20, tile: '#feae84' },
-    { name: 'yellow', hue: 44, tile: '#fede79' },
+// The seven pastel fills behind a contact's ink glyph (brand-tokens.css), each with the hue the nickname's colour is
+// matched against. The id hash picks one when the contact has no nickname colour.
+const PROFILE_TILES = Object.freeze([
+    { name: 'aqua', hue: 187, tile: 'var(--avatar-aqua)' },
+    { name: 'sky', hue: 211, tile: 'var(--avatar-sky)' },
+    { name: 'lilac', hue: 257, tile: 'var(--avatar-lilac)' },
+    { name: 'pink', hue: 340, tile: 'var(--avatar-pink)' },
+    { name: 'coral', hue: 14, tile: 'var(--avatar-coral)' },
+    { name: 'apricot', hue: 37, tile: 'var(--avatar-apricot)' },
+    { name: 'mint', hue: 142, tile: 'var(--avatar-mint)' },
 ]);
 
-const PROFILE_SYMBOL_INK = '#182955';
+const PROFILE_SYMBOL_INK = 'var(--ink)';
 
 function stableIndex(value, length) {
     const text = String(value || 'contact');
@@ -59,10 +61,10 @@ function hueDistance(first, second) {
 export function resolveContactProfilePalette(identityColor, stableContactId) {
     const identity = hueAndSaturation(identityColor);
     const tile = identity && identity.saturation >= 0.18
-        ? BRIGHT_PROFILE_TILES.reduce((closest, candidate) => (
+        ? PROFILE_TILES.reduce((closest, candidate) => (
             hueDistance(identity.hue, candidate.hue) < hueDistance(identity.hue, closest.hue) ? candidate : closest
         ))
-        : BRIGHT_PROFILE_TILES[stableIndex(stableContactId, BRIGHT_PROFILE_TILES.length)];
+        : PROFILE_TILES[stableIndex(stableContactId, PROFILE_TILES.length)];
 
     return { ...tile, ink: PROFILE_SYMBOL_INK };
 }
@@ -98,4 +100,4 @@ export function resolveContactProfilePaletteForContact(contact = {}, identityCol
     );
 }
 
-export { BRIGHT_PROFILE_TILES, PROFILE_SYMBOL_INK };
+export { PROFILE_TILES, PROFILE_SYMBOL_INK };

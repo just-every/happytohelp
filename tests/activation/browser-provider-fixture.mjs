@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 
+// Resend's domain detail lists each DNS record with its public name, type, value and status.
+export const domainRecords=status=>[{record:'SPF',name:'send',type:'MX',value:'feedback-smtp.example-region.amazonses.com',priority:10,status},{record:'SPF',name:'send',type:'TXT',value:'v=spf1 include:amazonses.com ~all',status},{record:'DKIM',name:'resend._domainkey',type:'TXT',value:'p=MIGfMA0GCSqGSIb3DQEB',status}];
+
 // Only external provider HTTP is replaced. App routes, D1, R2 and UI remain real.
 export async function providerFixture({port}){
  const state={modelStatus:200,modelBody:{id:'gpt-5-mini',object:'model'},dns:'pending',mailEvent:'queued',sendStatus:200,sendCalls:0,calls:[],messages:new Map()};
@@ -18,7 +21,7 @@ export async function providerFixture({port}){
    if(url.hostname!=='api.resend.com')throw new Error('Unexpected provider '+url);
    assert.equal(request.headers.authorization,'Bearer activation-inert-mail-key');
    if(url.pathname==='/domains')return json({data:[{id:'activation-domain',name:'activation.example.test'}],has_more:false});
-   if(url.pathname==='/domains/activation-domain')return json({id:'activation-domain',name:'activation.example.test',status:state.dns,records:[{record:'SPF',status:state.dns},{record:'DKIM',status:state.dns}]});
+   if(url.pathname==='/domains/activation-domain')return json({id:'activation-domain',name:'activation.example.test',status:state.dns,records:domainRecords(state.dns)});
    if(url.pathname==='/emails'&&request.method==='POST'){
     state.sendCalls++;let text='';for await(const chunk of request)text+=chunk;const body=JSON.parse(text);assert.deepEqual(body.to,['activation-browser@example.test']);assert.equal(body.headers['Auto-Submitted'],'auto-generated');assert.equal(body.headers['X-Auto-Response-Suppress'],'All');
     if(state.sendStatus!==200)return json({error:'uncertain transport fixture'},state.sendStatus);

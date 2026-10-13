@@ -13,6 +13,7 @@ import { recoverLocalResultEffects } from './modules/local-computer'
 import { localComputerIntegration } from './edition/local-computer'
 import { consumeJob as consumeBrand,recoverBrandJobs } from './modules/site-preview/brand'
 import { handleLeadJob,recoverLeadJobs } from './modules/integrations'
+import { consumeSiteRead,recoverSiteReads } from './modules/management/site-read'
 import { applyMessageEffects } from './message-effects'
 import { pruneCounters } from './platform/usage-counters'
 import type { Actor } from './platform/env'
@@ -25,6 +26,7 @@ export async function consumeJob(job:Job,env:Env) {
  if(await consumeKnowledge(job,env))return
  if(await consumeContextJob(job,env,requestContextModel))return
  if(await consumeBrand(job,env))return
+ if(await consumeSiteRead(job,env))return
  if(await handleLeadJob(env,job))return
  if(job.type==='training'){
   await executeTrainingRun(env,job.id,executeTrainingCase)
@@ -54,6 +56,7 @@ export async function runScheduled(env:Env) {
  await recoverTrainingRuns(env)
  await recoverLocalResultEffects(env,localComputerIntegration)
  await recoverBrandJobs(env)
+ await recoverSiteReads(env)
  await recoverLeadJobs(env)
  await pruneCounters(env)
 }

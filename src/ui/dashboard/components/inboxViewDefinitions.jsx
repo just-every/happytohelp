@@ -1,9 +1,11 @@
+// `label` is what the views row shows; `phrase` is how the view reads inside a sentence (search placeholder, empty
+// messages). Only the views flagged `disc` carry a count: the ones where a number above zero asks for attention.
 export const INBOX_VIEWS = [
-    { id: 'mine', label: 'Your inbox', filter: { status: 'unresolved', assigned_to: 'myself' } },
-    { id: 'open', label: 'All open', filter: { status: 'unresolved', assigned_to: 'anyone' } },
-    { id: 'unassigned', label: 'Unassigned', filter: { status: 'unresolved', assigned_to: 'none' } },
-    { id: 'ai', label: 'AI conversations', filter: { status: 'ai', assigned_to: 'anyone' } },
-    { id: 'closed', label: 'Closed', filter: { status: 'resolved', assigned_to: 'anyone' } },
+    { id: 'mine', label: 'Yours', phrase: 'your inbox', disc: true, filter: { status: 'unresolved', assigned_to: 'myself' } },
+    { id: 'open', label: 'Open', phrase: 'all open', filter: { status: 'unresolved', assigned_to: 'anyone' } },
+    { id: 'unassigned', label: 'Unassigned', phrase: 'unassigned', disc: true, filter: { status: 'unresolved', assigned_to: 'none' } },
+    { id: 'ai', label: 'AI', phrase: 'AI conversations', filter: { status: 'ai', assigned_to: 'anyone' } },
+    { id: 'closed', label: 'Closed', phrase: 'closed', filter: { status: 'resolved', assigned_to: 'anyone' } },
 ];
 
 export function defaultInboxView(inboxViewCounts) {
@@ -18,12 +20,8 @@ export function getInboxView(view) {
     return INBOX_VIEWS.find(item => item.id === normalizeInboxView(view));
 }
 
-/** The view's name as it reads inside a sentence ("all open", "AI conversations"). */
 export function inboxViewPhrase(view) {
-    return getInboxView(view).label
-        .split(' ')
-        .map(word => word === 'AI' ? word : word.toLowerCase())
-        .join(' ');
+    return getInboxView(view).phrase;
 }
 
 export function inboxViewFilter(view, query = '') {

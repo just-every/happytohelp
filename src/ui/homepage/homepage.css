@@ -117,10 +117,10 @@
 .h2h-home .ready-line { display: block; width: min(100%, 8.4em); height: auto; aspect-ratio: 620 / 64; margin: 0.06em auto 0; color: var(--d-cyan-deep); overflow: visible; }
 .h2h-home .get-started .actions { justify-content: center; margin-top: 28px; }
 
-/* The dividers: a full-width aqua pen line with one loop between two sections, the long line on wide layouts and the short
-   one on phones, each in its own aspect ratio so the loop stays round. They tuck into the sections' padding. The line the
-   width does not show is folded away to nothing and hidden, not taken out with display: none, so both lines are drawn in
-   together once and a rotated phone or a resized window never draws a divider in again. */
+/* The dividers: a full-width aqua pen line between two sections, each with its own squiggle, the long line on wide layouts
+   and the short one on phones, each in its own aspect ratio so the curves stay true. They tuck into the sections' padding.
+   The line the width does not show is folded away to nothing and hidden, not taken out with display: none, so both lines
+   are drawn in together once and a rotated phone or a resized window never draws a divider in again. */
 .h2h-home .divider { margin: calc(-1 * clamp(20px, 4vw, 64px)) 0; color: var(--d-cyan-deep); pointer-events: none; }
 .h2h-home .divider-line { display: block; width: 100%; height: auto; overflow: visible; }
 .h2h-home .divider-line--wide { aspect-ratio: 1400 / 110; }

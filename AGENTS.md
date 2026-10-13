@@ -2,7 +2,8 @@
 
 Use Node **22.20.0** and pnpm **10.12.4**, from the checkout root. Prepare a
 private `.seed/local-answers.json` using [the manifest fields](docs/INSTALLER.md#private-setup-answers);
-HappyToHelp requires a workspace name, widget origin and native owner password.
+HappyToHelp requires only the widget origin and the native owner password; the workspace
+name, colour, owner name and an AI key are optional.
 Keep secrets in that file, never command arguments.
 
 ```sh
@@ -50,7 +51,9 @@ Unknown paid or remote outcomes remain unknown and never trigger automatic
 replay. Provider fixtures belong only in tests; no mock application behavior or
 silent-success fallback. Never commit credentials, local state or customer data.
 
-Run touched tests and the typecheck. Full verification and browser checks belong
+New workspaces are provisioned only through `src/modules/management/provisioning`
+(starter assistant, mailbox, installation sender); Setup observations live in
+`src/modules/management/activation`. Run touched tests and the typecheck. Full verification and browser checks belong
 on the designated remote runner; keep local, hosted and configured-provider
 results distinct. After tracked edits, run `pnpm run source:lock`, then
 `pnpm run source:check`. Preserve the selected byte-exact Base sources.

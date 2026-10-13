@@ -2,7 +2,7 @@
   "schema": 1,
   "projectId": "just-every/happytohelp",
   "name": "HappyToHelp",
-  "sourceRepository": "https://github.com/just-every/happytohelp",
+  "sourceRepository": "https://github.com/just-every/run-happytohelp",
   "license": "MIT",
   "deployment": {
     "target": "cloudflare-workers",

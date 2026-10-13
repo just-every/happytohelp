@@ -26,6 +26,23 @@ public publication and owner release approval remain separate.
 - Base onboarding owns private custody, locks, process cleanup, readiness and
   bounded work. Internal `build:app`, `build:assets`, `verify:app` are real adapter
   targets. Build collects immutable migrations, assets and delivery output.
+- Setup says "we did these, you approve". First-run setup is one screen
+  (`src/ui/native/Setup.tsx`, `src/modules/identity/setup.ts`) that derives the
+  workspace name and colour and sends the owner one welcome email through the
+  durable send path. `src/modules/management/provisioning` gives every new workspace
+  (first owner, signed-in creation, email-verified registration; never a demo) a
+  starter assistant as its default visitor assistant, a reply-by-email mailbox when
+  `INBOUND_EMAIL_TOKEN` exists and the installation sender until its domain is
+  verified. A new conversation is attached to the default assistant only when its
+  model's provider key exists (`conversations/routes.ts`), so with no key nothing
+  generates and nothing fails. `src/modules/management/activation` observes setup by
+  itself (page-initiated `POST .../check {auto:true}`, GET stays pure) and the Setup
+  list (`src/ui/native/activation`) shows what needs the owner and what was set.
+  `src/modules/management/site-read` reads the customer's website once, writes the
+  pages it read as one private, published knowledge source that the assistant's
+  knowledge search reads (no article of any status, no provider key), and takes a
+  name and a colour. Migration `120_activation_observations.sql` stores
+  the structured data an observation saw.
 - `src/modules` owns reusable capabilities; native Worker/platform adapters
   integrate through imports. Runtime environment policy remains in
   `scripts/deployment/environment.mjs`, including management integration.

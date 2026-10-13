@@ -3,7 +3,7 @@
 ## Bring existing history
 
 An owner or admin opens **Settings → Move in existing support history** or the
-optional checklist link. Upload documented source files for conversations,
+optional Setup page link. Upload documented source files for conversations,
 contacts, conversation tags, saved replies and articles. Review the plan counts,
 source-located omissions/rejections, native conflicts and articles that will be
 published before **Approve and import**. Background batches preserve committed
@@ -96,8 +96,11 @@ it cannot withdraw a message already accepted by a receiver.
 ## Start a local trial
 
 Follow [README](../README.md#run-it-on-your-computer). Password login is retained.
-The checklist describes local necessities; a new workspace leads with the widget
-snippet and keeps secrets/verification under Advanced. Workspace headers show the
+Setup opens on a workspace that is already set up: its Setup page lists only what
+the owner must do (the widget, an AI key, sending-domain DNS), each of which can be skipped for now, and the system runs its
+own checks. Creating the workspace may send the owner one welcome email, captured
+in the outbox locally. A new workspace leads with the widget snippet and keeps
+secrets/verification under Advanced. Workspace headers show the
 current workspace and visitor agent headers intentionally show the operator's
 display name. With explicitly selected development mail, use `/__dev/outbox` at
 the exact app origin. Captured sign-in links require explicit **Sign in**. Capture

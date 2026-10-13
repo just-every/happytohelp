@@ -5,6 +5,7 @@ import {chromium} from 'playwright';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
 import {assertHelpSearchFits,assertHelpSearchReachable} from './helpers/appearance-geometry.mjs';
 import {assertHelpLinksReadable} from './helpers/help-center-link-contrast.mjs';
+import {exerciseLongAppearance} from './helpers/appearance-long-content.mjs';
 import {appearanceAudit} from './helpers/appearance-audit.mjs';
 const directory=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/appearance');await mkdir(directory,{recursive:true});
 const runtime=await createRuntime(),origin=runtime.origin,records=[];let browser,success=false;
@@ -27,10 +28,10 @@ try{
  const assertSelectedMode=async name=>{
   const selected=modes.getByRole('button',{name,exact:true});
   assert.equal(await selected.getAttribute('aria-pressed'),'true');
-  const state=await selected.evaluate(button=>{const s=getComputedStyle(button),body=getComputedStyle(document.body);return {color:s.color,background:s.backgroundColor,primary:body.getPropertyValue('--bs-primary-rgb').trim(),soft:body.getPropertyValue('--workspace-primary-soft').trim()}});
+  const state=await selected.evaluate(button=>{const s=getComputedStyle(button),body=getComputedStyle(document.body);return {color:s.color,background:s.backgroundColor,ink:body.getPropertyValue('--ink').trim(),tint:body.getPropertyValue('--d-cyan-tint').trim()}});
   const rgb=hex=>'rgb('+hex.slice(1).match(/../g).map(v=>parseInt(v,16)).join(', ')+')';
-  assert.equal(state.color,'rgb('+state.primary.split(',').map(v=>Number(v.trim())).join(', ')+')','selected mode uses the saved workspace semantic accent');
-  assert.equal(state.background,rgb(state.soft),'selected mode uses the workspace selected surface');
+  assert.equal(state.color,rgb(state.ink),'selected mode reads in the brand ink');
+  assert.equal(state.background,rgb(state.tint),'selected mode sits on the brand aqua tint');
   for(const other of ['Balanced','Light','Dark'].filter(mode=>mode!==name))assert.equal(await modes.getByRole('button',{name:other,exact:true}).getAttribute('aria-pressed'),'false');
  };
  await assertSelectedMode('Balanced');
@@ -39,6 +40,7 @@ try{
   await page.getByRole('button',{name:'Update',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor();await page.reload();
   await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByText('Additional branding',{exact:true}).click();
   assert.equal(await page.getByLabel('Workspace color hex').inputValue(),brand.primary_color);await assertSelectedMode(name);
+  assert.equal(await page.evaluate(()=>document.body.dataset.theme),name==='Dark'?'dark':'light','the saved display mode renders the workspace');
  }
  const saved=await(await api(settingsPath,{token:tenant.token})).json();for(const [key,value]of Object.entries(brand))assert.equal((saved.data||saved)[key],value);
  const denied=await api(settingsPath,{token:other.token,method:'PUT',body:{welcome_message:'Tenant leak'}});assert.equal(denied.status,403);
@@ -47,7 +49,7 @@ try{
  let publicArticle;
  for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
   await page.setViewportSize(viewport);
-  await page.goto(origin+`/projects/${tenant.projectId}/edit`);await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByText('Additional branding',{exact:true}).click();assert.equal(await page.locator('.project-parity-tabs button.active').evaluate(el=>getComputedStyle(el).borderBottomColor),await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--workspace-button-bg').trim()).then(hex=>'rgb('+hex.slice(1).match(/../g).map(v=>parseInt(v,16)).join(', ')+')'));await audit(page,viewport.width+'-appearance-saved');
+  await page.goto(origin+`/projects/${tenant.projectId}/edit`);await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByText('Additional branding',{exact:true}).click();assert.equal(await page.locator('.project-parity-tabs button.active').evaluate(el=>getComputedStyle(el,'::after').backgroundColor),await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--d-cyan-deep').trim()).then(hex=>'rgb('+hex.slice(1).match(/../g).map(v=>parseInt(v,16)).join(', ')+')'),'the current tab carries the aqua bar');await audit(page,viewport.width+'-appearance-saved');
   // Request delays and transport failures, not fabricated application responses.
   // Keep held routes until the released state and its images are audited.
   // Disabling the last route can drop image requests still paused in interception.
@@ -99,6 +101,7 @@ try{
   }
  }
  await writeFile(join(directory,'help-link-contrast.json'),JSON.stringify(contrastMeasurements,null,2));
+ await exerciseLongAppearance({page,browser,origin,tenant,project,api,brand,audit});
  // Removal uses the same native form and restores defaults across both public surfaces.
  await page.goto(origin+`/projects/${tenant.projectId}/edit`);await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByText('Additional branding',{exact:true}).click();
  for(const label of ['Public brand name','Logo URL','Support avatar URL','Welcome greeting'])await page.getByLabel(label,{exact:true}).fill('');await page.getByRole('button',{name:'Reset',exact:true}).click();await page.getByRole('button',{name:'Update',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor();

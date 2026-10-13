@@ -1,7 +1,5 @@
 import './first-run.css';
-import WorkspaceName from './WorkspaceName';
 import React, { useEffect } from 'react';
-import { createWorkspaceTheme, normalizeWorkspaceMode } from './workspaceModes';
 import { Outlet } from '@tanstack/react-router';
 import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
 import { isInboxPath } from './workspace-scope';
@@ -18,23 +16,16 @@ export default function DashboardClient({ settings }) {
     const isInbox = isInboxPath(pathname, settings);
     useSessionProjectGuard(settings.projectId);
     useEffect(() => {
-        document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed theme-happytohelp`;
+        document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed`;
     }, [isInbox]);
+    // The workspace chrome is always paper, ink and aqua; the workspace's own colour belongs to its widget and help centre.
+    // Dark display mode swaps the brand tokens (brand-tokens.css); Light and Balanced both render the light tokens.
     useEffect(() => {
-        let properties = [];
-        const apply = appearance => {
-            const mode = normalizeWorkspaceMode(appearance?.display_mode);
-            const palette = createWorkspaceTheme(appearance?.primary_color, mode);
-            properties.filter(key => !(key in palette)).forEach(key => document.body.style.removeProperty(key));
-            Object.entries(palette).forEach(([key,value]) => document.body.style.setProperty(key,value));
-            properties = Object.keys(palette);
-            document.body.dataset.workspaceMode = mode;
-            document.documentElement.dataset.bsTheme = mode === 'dark' ? 'dark' : 'light';
-        };
+        const apply = appearance => { document.body.dataset.theme = appearance?.display_mode === 'dark' ? 'dark' : 'light'; };
         apply(settings.isGlobalInbox ? {} : settings.project);
         const update = event => apply(event.detail);
         window.addEventListener('workspace-appearance',update);
-        return () => { window.removeEventListener('workspace-appearance',update); properties.forEach(key=>document.body.style.removeProperty(key)); delete document.body.dataset.workspaceMode; document.documentElement.dataset.bsTheme='light'; };
+        return () => { window.removeEventListener('workspace-appearance',update); delete document.body.dataset.theme; };
     }, [settings]);
     const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
     return <NavigationGuard><MobileNavigationProvider>
@@ -54,6 +45,6 @@ export function DashboardContent() {
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
     return isInbox
-        ? <div className="main-content inbox-with-header"><header className="inbox-workspace-header"><WorkspaceName settings={settings}/><h1 className="visually-hidden">Inbox</h1></header><div id="chat"><Chat /></div></div>
+        ? <div className="main-content inbox-with-header"><header className="inbox-workspace-header"><h1 className="visually-hidden">Inbox</h1></header><div id="chat"><Chat /></div></div>
         : <WorkspacePages settings={settings} />;
 }

@@ -1,8 +1,7 @@
-/* First-run setup (/setup) in the homepage's language: paper, ink and Outfit, with the drawings' aqua only in the drawings, the
-   step discs and the Edit pill. The owner-chosen design E: the welcome, what is already known and a drawing on the left; the
-   steps, the step's heading and its form on the right. Every colour is a brand token (src/ui/homepage/brand-tokens.css, the
-   homepage's own) or a value the homepage itself uses. This file is the page and its right column's chrome; setup-form.css
-   the fields and actions; setup-drawings.css the left column's card and drawings. */
+/* First-run setup (/setup) in the homepage's language: paper, ink and Outfit, with the drawings' aqua only in the drawing. The
+   welcome and a drawing on the left, the one form on the right. Every colour is a brand token (src/ui/homepage/brand-tokens.css,
+   the homepage's own) or a value the homepage itself uses. This file is the page and its chrome; setup-form.css the fields and
+   action; setup-drawings.css the drawing. */
 .h2h-setup {
   /* The fields' face: the homepage's paper-white field (section-drawings.css .sk-field). */
   --field: #fbfaf7;
@@ -19,23 +18,20 @@
   -webkit-font-smoothing: antialiased;
 }
 .h2h-setup *, .h2h-setup *::before, .h2h-setup *::after { box-sizing: border-box; }
-.h2h-setup :where(h1, h2, p, ol, dl, dd) { margin: 0; padding: 0; }
-.h2h-setup dt { font-weight: 400; }
+.h2h-setup :where(h1, p) { margin: 0; padding: 0; }
 .h2h-setup a { color: inherit; text-decoration: none; }
 /* Focus stays in ink, as on the homepage: the dashboard stylesheet's shared keyboard ring reads these two variables. */
 .h2h-setup { --accessibility-focus-ring: var(--ink); --accessibility-focus-halo: var(--paper); }
 .h2h-setup :is(a, button, input):focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 4px var(--paper); }
-.h2h-setup .setup-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
-/* One grid. Its DOM order is the phone's reading order (brand, welcome, step, known details, drawing); from 861px up the
-   left column stacks the brand, welcome, card and drawing in four rows, and the step spans them all on the right. The last
-   row takes up whatever the right column needs beyond the left's four, so the left column never spreads apart. */
-.h2h-setup .setup-page { display: grid; grid-template-columns: minmax(0, 620fr) minmax(0, 638fr); grid-template-rows: auto auto auto auto 1fr; column-gap: clamp(40px, 7.4vw, 113px); max-width: 1536px; margin: 0 auto; padding: 36px var(--gutter) 72px; }
+/* One grid. Its DOM order is the phone's reading order (brand, welcome, form, drawing); from 861px up the left column stacks the
+   brand, welcome and drawing in three rows, and the form spans them all on the right. The last row takes up whatever the right
+   column needs beyond the left's two, so the left column never spreads apart. */
+.h2h-setup .setup-page { display: grid; grid-template-columns: minmax(0, 620fr) minmax(0, 638fr); grid-template-rows: auto auto 1fr; column-gap: clamp(40px, 7.4vw, 113px); max-width: 1536px; margin: 0 auto; padding: 36px var(--gutter) 72px; }
 .h2h-setup .setup-brand { grid-area: 1 / 1; }
 .h2h-setup .setup-intro { grid-area: 2 / 1; padding-top: 34px; }
-.h2h-setup .setup-known { grid-area: 3 / 1; }
-.h2h-setup .setup-drawing { grid-area: 4 / 1; min-width: 0; }
-.h2h-setup .setup-panel { grid-column: 2; grid-row: 1 / -1; min-width: 0; padding-top: 28px; }
+.h2h-setup .setup-drawing { grid-area: 3 / 1; min-width: 0; }
+.h2h-setup .setup-panel { grid-column: 2; grid-row: 1 / -1; min-width: 0; padding-top: 56px; }
 
 /* The homepage header's lockup (BrandLockup.tsx), at the homepage's size: mirrors .h2h-home .brand in homepage.css, and is at
    least 44px tall so the link home is a full-size target on a phone. */
@@ -45,58 +41,21 @@
 .h2h-setup .brand-name { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 .h2h-setup h1 { font-size: clamp(2.25rem, 4.03vw, 3.875rem); font-weight: 600; line-height: 1.035; letter-spacing: -0.03em; }
-.h2h-setup h1 span { display: block; }
 .h2h-setup .setup-intro p { max-width: 26.6em; margin-top: 21px; font-size: clamp(1.1rem, 1.43vw, 1.375rem); line-height: 1.45; color: #2b2a27; }
 
-/* The steps: ink-ringed discs joined by pen lines, the current one filled aqua, the done ones ticked. The discs and labels keep
-   their size; the lines between them are the only flexible part, so they shorten to fit the column and are dropped once they
-   would be mere stubs. */
-.h2h-setup .setup-steps-nav { container: setup-steps / inline-size; }
-.h2h-setup .setup-steps { display: flex; align-items: center; gap: 16px; list-style: none; font-size: 17px; font-weight: 500; line-height: 1.2; white-space: nowrap; }
-.h2h-setup .setup-steps li { display: flex; align-items: center; flex: none; gap: 14px; }
-.h2h-setup .setup-steps .setup-step-line { flex: 0 1 57px; min-width: 0; height: 2px; border-radius: 1px; background: var(--ink); }
-.h2h-setup .setup-step-disc { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border: 2px solid var(--ink); border-radius: 50%; font-size: 17px; }
-.h2h-setup .setup-steps .is-done .setup-step-disc { background: var(--d-cyan-wash); }
-.h2h-setup .setup-steps [aria-current] .setup-step-disc { border-color: var(--d-cyan-deep); background: var(--d-cyan-deep); }
-.h2h-setup .setup-step-disc .d-icon { width: 21px; height: 21px; stroke-width: 3; }
+/* As on the sign-in pages: the alert an ink-edged note. */
+.h2h-setup .setup-error { padding: 14px 18px; overflow-wrap: anywhere; background: #fff; border: 1.5px solid var(--ink); border-left-width: 6px; border-radius: 14px; }
 
-.h2h-setup .setup-panel h2 { margin-top: 48px; font-size: clamp(2rem, 2.74vw, 2.625rem); font-weight: 600; line-height: 1.2; letter-spacing: -0.018em; }
-.h2h-setup .setup-lede { margin-top: 10px; font-size: clamp(1.1rem, 1.43vw, 1.375rem); line-height: 1.4; color: #2b2a27; }
-/* As on the sign-in pages: the alert an ink-edged note, the saved note a quiet one. */
-.h2h-setup .setup-error, .h2h-setup .setup-status { padding: 14px 18px; border-radius: 14px; overflow-wrap: anywhere; }
-.h2h-setup .setup-error { margin-top: 24px; background: #fff; border: 1.5px solid var(--ink); border-left-width: 6px; }
-.h2h-setup .setup-status { margin-top: 22px; font-size: 16px; background: #efede7; border: 1px solid var(--rule); }
-
-/* A pen line shorter than about 20px is a stub: below the column width that leaves it that little room, it is dropped. */
-@media (min-width: 1101px) { @container setup-steps (max-width: 480px) { .h2h-setup .setup-steps .setup-step-line { display: none; } } }
-@media (max-width: 1100px) {
-  @container setup-steps (max-width: 410px) { .h2h-setup .setup-steps .setup-step-line { display: none; } }
-  .h2h-setup .setup-steps { gap: 10px; font-size: 15px; }
-  .h2h-setup .setup-steps li { gap: 9px; }
-  .h2h-setup .setup-steps .setup-step-line { flex-basis: 28px; }
-  .h2h-setup .setup-step-disc { width: 34px; height: 34px; font-size: 15px; }
-}
 /* Tablets and phones: one column in reading order. */
 @media (max-width: 860px) {
   .h2h-setup .setup-page { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; max-width: 720px; padding-top: 24px; padding-bottom: 48px; }
-  .h2h-setup :is(.setup-brand, .setup-intro, .setup-known, .setup-drawing, .setup-panel) { grid-area: auto; }
+  .h2h-setup :is(.setup-brand, .setup-intro, .setup-drawing, .setup-panel) { grid-area: auto; }
   .h2h-setup .setup-intro { padding-top: 32px; }
-  .h2h-setup .setup-panel { padding-top: 36px; }
-  .h2h-setup .setup-panel h2 { margin-top: 36px; }
-  .h2h-setup h1 span { display: inline; }
+  .h2h-setup .setup-panel { padding-top: 8px; }
 }
 @media (max-width: 640px) {
   .h2h-setup { font-size: 17px; }
   .h2h-setup .setup-page { padding-top: 18px; }
   .h2h-setup .setup-intro { padding-top: 26px; }
   .h2h-setup .setup-intro p { margin-top: 16px; }
-  .h2h-setup .setup-panel { padding-top: 30px; }
-  .h2h-setup .setup-panel h2 { margin-top: 28px; }
-  /* Three steps fit a phone's width without their pen lines, at 14px; on the narrowest phones the whole row eases down with the
-     screen (to 12px at 320px) instead of running past it. */
-  .h2h-setup .setup-steps { justify-content: space-between; gap: 6px; font-size: clamp(12px, 3.6vw, 14px); }
-  .h2h-setup .setup-steps li { gap: 0.5em; }
-  .h2h-setup .setup-steps .setup-step-line { display: none; }
-  .h2h-setup .setup-step-disc { width: 2.143em; height: 2.143em; font-size: inherit; }
-  .h2h-setup .setup-step-disc .d-icon { width: 1.214em; height: 1.214em; }
 }

@@ -13,6 +13,10 @@
     {
       "id": "email",
       "label": "Email delivery"
+    },
+    {
+      "id": "ai",
+      "label": "AI replies (optional)"
     }
   ],
   "fields": [
@@ -21,8 +25,8 @@
       "label": "Workspace name",
       "kind": "text",
       "group": "workspace",
-      "required": true,
-      "help": "The name your team sees in HappyToHelp."
+      "required": false,
+      "help": "Optional. Left empty, we name the workspace from your website."
     },
     {
       "name": "WIDGET_ORIGIN",
@@ -38,14 +42,17 @@
       "label": "Brand colour",
       "kind": "colour",
       "group": "workspace",
-      "required": true
+      "required": false,
+      "help": "Optional. Left empty, we choose a colour for you and you can change it later."
     },
     {
       "name": "OWNER_NAME",
       "label": "Your name",
       "kind": "text",
       "group": "owner",
-      "required": true
+      "required": false,
+      "default": "",
+      "help": "Optional. Left empty, we use the first part of your email."
     },
     {
       "name": "OWNER_EMAIL",
@@ -134,11 +141,20 @@
       "label": "Email Sending account",
       "kind": "text",
       "group": "email",
-      "required": true,
+      "required": false,
       "when": {
         "field": "EMAIL_PROVIDER",
         "equals": "cloudflare"
-      }
+      },
+      "presentations": [
+        {
+          "when": {
+            "field": "EMAIL_PROVIDER",
+            "equals": "cloudflare"
+          },
+          "required": true
+        }
+      ]
     },
     {
       "name": "EMAIL_API_KEY",
@@ -189,12 +205,138 @@
       "help": "Cloudflare requires Email Sending: Edit permission."
     },
     {
+      "name": "AI_PROVIDER",
+      "label": "AI service",
+      "kind": "select",
+      "group": "ai",
+      "required": true,
+      "default": "later",
+      "options": [
+        {
+          "value": "openai",
+          "label": "OpenAI"
+        },
+        {
+          "value": "anthropic",
+          "label": "Anthropic (Claude)"
+        },
+        {
+          "value": "google",
+          "label": "Google (Gemini)"
+        },
+        {
+          "value": "deepseek",
+          "label": "DeepSeek"
+        },
+        {
+          "value": "xai",
+          "label": "xAI (Grok)"
+        },
+        {
+          "value": "openrouter",
+          "label": "OpenRouter"
+        },
+        {
+          "value": "later",
+          "label": "Set up AI later"
+        }
+      ],
+      "help": "Choose where AI replies come from. You can add a key later; nothing is sent to a provider until you do."
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "label": "OpenAI API key",
+      "kind": "secret",
+      "group": "ai",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "AI_PROVIDER",
+        "equals": "openai"
+      }
+    },
+    {
+      "name": "ANTHROPIC_API_KEY",
+      "label": "Anthropic (Claude) API key",
+      "kind": "secret",
+      "group": "ai",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "AI_PROVIDER",
+        "equals": "anthropic"
+      }
+    },
+    {
+      "name": "GOOGLE_API_KEY",
+      "label": "Google (Gemini) API key",
+      "kind": "secret",
+      "group": "ai",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "AI_PROVIDER",
+        "equals": "google"
+      }
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "label": "DeepSeek API key",
+      "kind": "secret",
+      "group": "ai",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "AI_PROVIDER",
+        "equals": "deepseek"
+      }
+    },
+    {
+      "name": "XAI_API_KEY",
+      "label": "xAI (Grok) API key",
+      "kind": "secret",
+      "group": "ai",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "AI_PROVIDER",
+        "equals": "xai"
+      }
+    },
+    {
+      "name": "OPENROUTER_API_KEY",
+      "label": "OpenRouter API key",
+      "kind": "secret",
+      "group": "ai",
+      "required": true,
+      "ownerVisible": true,
+      "input": "entered",
+      "when": {
+        "field": "AI_PROVIDER",
+        "equals": "openrouter"
+      }
+    },
+    {
       "name": "H2H_SETUP_TOKEN",
       "label": "Private owner setup token",
       "kind": "secret",
       "required": true,
       "generate": "hex",
       "ownerVisible": false
+    },
+    {
+      "name": "INBOUND_EMAIL_TOKEN",
+      "label": "Private inbound email token",
+      "kind": "secret",
+      "required": false,
+      "generate": "hex",
+      "ownerVisible": true,
+      "help": "Generated for you. Your email provider presents it when it forwards replies to this workspace."
     },
     {
       "name": "INTEGRATION_ENCRYPTION_KEY",

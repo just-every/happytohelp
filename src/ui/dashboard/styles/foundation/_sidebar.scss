@@ -1,180 +1,361 @@
-// Workspace navigation: `nav#sidebar.navbar.navbar-vertical.navbar-expand-xl`.
-// Below the xl breakpoint it is a top bar whose menu collapses; from xl up it is
-// a fixed column on the left. ../layouts/_conversation-navigation.scss styles
-// the refined sidebar on top of this structure.
+// The workspace navigation (Navigation.jsx, AdminNavigation.jsx): `nav#sidebar.navbar-vertical.navbar-expand-xl`.
+// From xl up a 232px paper column: the lockup, the workspace switcher, the primary list (Inbox, Setup, Knowledge, AI,
+// Contacts, More), the one Settings row and the account row. Below xl a 64px top bar (menu, switcher, account) whose menu
+// opens as a full-height sheet. The current row is an aqua tint, never an ink fill.
 
-$sidebar-width: 250px;
-$sidebar-padding-x: 1.5rem;
-$sidebar-icon-width: 1.75rem;
-
-.navbar {
-  --bs-navbar-bg: var(--bs-white);
-  --bs-navbar-border-color: var(--bs-border-color);
-  --bs-navbar-divider-color: var(--bs-border-color);
-  background-color: var(--bs-navbar-bg);
-  border: 0 solid var(--bs-navbar-border-color);
-  border-bottom-width: var(--bs-border-width);
-
-  > [class*="container"] {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .navbar-user {
-    border-top-color: var(--bs-navbar-divider-color);
-  }
+body.workspace-themed {
+  --rail-width: 232px;
+  --top-bar-height: 64px;
 }
 
-// Light workspaces draw the menu toggle in slate; dark ones keep Bootstrap's.
-[data-bs-theme="light"] .navbar .navbar-toggler-icon {
-  --bs-navbar-toggler-icon-bg: #{escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='#{$gray-700}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>"))};
-}
-
-[data-bs-theme="dark"] .navbar {
-  --bs-navbar-bg: #{$gray-800-dark};
-  --bs-navbar-border-color: #{$gray-800-dark};
-  --bs-navbar-hover-color: var(--bs-white);
-  --bs-navbar-active-color: var(--bs-white);
-}
-
-.navbar[class*="fixed-"] {
+#sidebar {
+  --bs-navbar-padding-x: 0;
+  --bs-navbar-padding-y: 0;
+  display: block;
   z-index: $zindex-fixed;
-}
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  background: var(--paper-deep);
+  font-family: var(--font-sans);
 
-.navbar-nav .nav-link:not(.active) {
-  color: var(--bs-navbar-color);
+  > .container-fluid { padding: 0; }
 
-  &:hover,
-  &:focus {
-    color: var(--bs-navbar-hover-color);
+  :is(button, a, summary):focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  // The lockup (BrandLockup.tsx) at the homepage header's proportions, 26px to the em.
+  .navbar-lockup {
+    font-size: 26px;
+    line-height: 1;
+
+    .brand { position: relative; display: inline-flex; align-items: center; gap: .3em; color: var(--ink); text-decoration: none; }
+    .brand-mark { flex: none; width: auto; height: 1.58em; margin-left: .07em; overflow: visible; }
+    .brand-word { flex: none; height: .96em; overflow: visible; }
+    .brand-name { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
   }
-}
 
-// Collapsed (top bar) layout: the menu spans the bar and starts with a rule.
-.navbar-collapse {
-  width: calc(100% + var(--bs-navbar-padding-x) * 2);
-  margin-left: calc(var(--bs-navbar-padding-x) * -1);
-  margin-right: calc(var(--bs-navbar-padding-x) * -1);
-  padding-left: var(--bs-navbar-padding-x);
-  padding-right: var(--bs-navbar-padding-x);
-
-  &::before {
-    content: "";
-    display: block;
-    margin: var(--bs-navbar-padding-y) calc(var(--bs-navbar-padding-x) * -1);
-    border-top: var(--bs-border-width) solid var(--bs-navbar-divider-color);
-  }
-}
-
-.navbar-nav {
-  margin-left: calc(var(--bs-navbar-padding-x) * -1);
-  margin-right: calc(var(--bs-navbar-padding-x) * -1);
-
-  .nav-link {
-    padding-left: var(--bs-navbar-padding-x);
-    padding-right: var(--bs-navbar-padding-x);
-
-    &.active {
-      position: relative;
-
-      &::before {
-        content: "";
-        position: absolute;
-        top: var(--bs-nav-link-padding-y);
-        bottom: var(--bs-nav-link-padding-y);
-        left: 0;
-        border-left: 2px solid var(--bs-primary);
-      }
-    }
-
-    > .fe {
-      display: inline-block;
-      min-width: $sidebar-icon-width;
-      padding-bottom: .125em;
-      font-size: $font-size-lg;
-      line-height: $font-size-base * $line-height-base;
-    }
-  }
-}
-
-.navbar-user {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-
-.navbar-vertical {
-  .navbar-nav .nav-link {
+  // Workspace switcher: the workspace's name and a chevron; its menu is a drawn card.
+  .navbar-workspace { position: relative; min-width: 0; }
+  .navbar-workspace-toggle {
     display: flex;
     align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 10px;
+    color: var(--ink);
+    background: transparent;
+    text-align: left;
+
+    &:hover { background: var(--hover); }
+    &[aria-expanded=true] { background: var(--surface); }
+    > .navbar-workspace-brand { flex: 0 0 28px; width: 28px; height: 28px; border-radius: 7px; object-fit: contain; }
+    > .brand-mark { flex: none; width: auto; height: 28px; overflow: visible; }
+    > .fe { flex: 0 0 18px; font-size: 18px; }
+  }
+  .navbar-workspace-copy { flex: 1 1 auto; min-width: 0; }
+  .navbar-workspace-label { display: block; color: var(--ink-soft); font-size: 13px; line-height: 1.3; }
+  .navbar-workspace-name { display: block; overflow-wrap: anywhere; font-size: 16px; font-weight: 400; line-height: 1.35; }
+  .navbar-workspace-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1050;
+    width: 260px;
+    max-width: calc(100vw - 24px);
+    // With many workspaces the list scrolls inside the card instead of running off the screen. The allowance is the
+    // room the card has below its toggle: the column above it on desktop, the top bar on a phone.
+    max-height: calc(100vh - 160px);
+    max-height: calc(100dvh - 160px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+
+    // Room beside the rows for the keyboard ring (dashboard.scss draws it outside the row), which the scroll box would clip.
+    padding-inline: 8px;
+
+    .dropdown-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; white-space: normal; }
+    // The workspace's own colour (its widget and help centre) as a swatch beside its name.
+    .navbar-workspace-swatch { flex: none; width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 50%; }
+    .dropdown-item.active { font-weight: 500; }
   }
 
-  .navbar-nav .nav .nav-link {
-    padding-left: calc(var(--bs-navbar-padding-x) + #{$sidebar-icon-width});
+  // Items: 42px rows with a 12px icon gap; hover is a faint ink wash.
+  .navbar-nav { flex-direction: column; gap: 2px; margin: 0; padding: 0; }
+  .navbar-nav > .nav-item > .nav-link,
+  .native-global-contacts > summary,
+  .nav-more > summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 42px;
+    margin: 0;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 12px;
+    color: var(--ink);
+    background: transparent;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.25;
+    text-align: left;
+    text-decoration: none;
+
+    > .fe { flex: 0 0 20px; width: 20px; font-size: 19px; color: var(--ink-soft); }
+    &:hover { background: var(--hover); }
+    &::before, &::after { content: none; }
+  }
+  .navbar-link-label { flex: 1 1 auto; min-width: 0; }
+
+  // Items change state at once (current page, hover): no fade through in-between colours.
+  .nav-link, .native-global-contacts > summary, .nav-more > summary { transition: none; }
+
+  // The current row: a quiet aqua tint, with its icon in ink.
+  .navbar-nav > .nav-item > .nav-link.active,
+  .nav-more .nav-link.active {
+    color: var(--ink);
+    background: var(--d-cyan-tint);
+    font-weight: 500;
+
+    > .fe { color: var(--ink); }
+  }
+
+  // The unread count is a disc only while something is unread (navigationInboxBadge.jsx hides it at zero).
+  #navigation-inbox-unread:empty { display: none; }
+  .navbar-unread-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    color: var(--on-aqua);
+    background: var(--d-cyan);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  // More: Local computers, Reports and Insights under one row, each indented under its summary.
+  .nav-more > summary { cursor: pointer; list-style: none; }
+  .nav-more > summary::-webkit-details-marker { display: none; }
+  .nav-more > summary > .nav-more-chevron { flex: 0 0 18px; width: 18px; margin-left: auto; font-size: 18px; }
+  .nav-more[open] > summary > .nav-more-chevron { transform: rotate(180deg); }
+  .nav-more > ul { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 4px; padding: 0; list-style: none; }
+  .nav-more .nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    margin: 0 0 0 32px;
+    padding: 0 12px;
+    border-radius: 10px;
+    color: var(--ink);
+    font-size: 15px;
+    text-decoration: none;
+
+    &:hover:not(.active) { background: var(--hover); }
+  }
+
+  // The bottom block: the one Settings row (in the Global Inbox a disclosure of one link per project), then the account row.
+  .navbar-bottom { margin-top: auto; padding-top: 12px; }
+  .navbar-settings-toggle[aria-expanded=true] { font-weight: 500; }
+  .navbar-settings-toggle > .navbar-settings-chevron { flex: 0 0 18px !important; width: 18px !important; margin-left: auto; font-size: 18px !important; transition: transform .18s; }
+  .navbar-settings-toggle[aria-expanded=true] > .navbar-settings-chevron { transform: rotate(180deg); }
+  #sidebarSettings[hidden] { display: none; }
+  #sidebarSettings .nav { flex-direction: column; gap: 2px; padding: 4px 0 8px; }
+  #sidebarSettings .nav-link,
+  .native-global-contacts .nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    margin: 0 0 0 28px;
+    padding: 0 12px;
+    border-radius: 10px;
+    color: var(--ink);
+    font-size: 15px;
+    text-decoration: none;
+    white-space: normal;
+
+    &:hover:not(.active) { background: var(--hover); }
+    &::before { content: none; }
+  }
+  .native-global-contacts > summary { cursor: pointer; list-style: none; }
+  .native-global-contacts > summary::-webkit-details-marker { display: none; }
+  .native-global-contacts > summary > .fe:last-child { flex-basis: 18px; margin-left: auto; font-size: 18px; }
+
+  // The workspace's own sidebar illustration keeps its slot above the bottom block.
+  .workspace-sidebar-artwork {
+    display: block;
+    width: 100%;
+    max-height: 160px;
+    margin: auto 0 12px;
+    border-radius: 12px;
+    object-fit: cover;
+    object-position: left bottom;
+    pointer-events: none;
+    user-select: none;
+  }
+  &:has(.navbar-settings-toggle[aria-expanded="true"]) .workspace-sidebar-artwork { display: none; }
+
+  // Account: an agent avatar (white circle, ink ring, ink initial), the name and a chevron; the menu opens upwards.
+  .navbar-account-menu { position: relative; }
+  .native-profile-toggle { display: flex; align-items: center; gap: 12px; width: 100%; padding: 4px 8px; border: 0; border-radius: 12px; color: var(--ink); background: transparent; text-align: left; }
+  .native-profile-toggle:hover { background: var(--hover); }
+  .native-profile-avatar { display: flex; flex: 0 0 36px; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1.5px solid var(--ink); border-radius: 50%; color: var(--ink); background: var(--surface); font-size: 16px; font-weight: 500; }
+  .native-profile-avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+  .navbar-profile-name { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; }
+  .native-profile-toggle > .fe { flex: 0 0 18px; font-size: 18px; }
+  .native-account-dropdown { position: absolute; right: 0; left: auto; min-width: 180px; }
+  .native-account-dropdown .dropdown-item { color: var(--ink); }
+  #sidebarUser { width: 100%; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--rule); }
+  #sidebarUser .navbar-account-menu { display: flex; flex-direction: column-reverse; width: 100%; }
+  // The desktop menu takes its own room in the footer rather than covering Settings in the scrolling list above it.
+  #sidebarUser .native-account-dropdown { position: static; margin-bottom: 8px; }
+
+  .navbar-toggler {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: var(--ink);
+    background: transparent;
+
+    &:hover { background: var(--hover); }
+    &:focus { box-shadow: none; }
+  }
+  .navbar-toggler-icon {
+    width: 24px;
+    height: 24px;
+    background: currentColor;
+    -webkit-mask: url("../../../../../node_modules/feather-icons/dist/icons/menu.svg") center / 100% 100% no-repeat;
+    mask: url("../../../../../node_modules/feather-icons/dist/icons/menu.svg") center / 100% 100% no-repeat;
   }
 }
 
-// Fixed column from xl up.
+// Desktop: the fixed paper column.
 @include media-breakpoint-up(xl) {
-  .navbar-vertical.navbar-expand-xl {
-    display: block;
+  #sidebar {
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
-    width: 100%;
-    max-width: $sidebar-width;
-    padding-left: $sidebar-padding-x;
-    padding-right: $sidebar-padding-x;
-    overflow-y: auto;
-    border-width: 0 1px 0 0;
+    width: var(--rail-width);
+    padding: 20px 16px 16px;
+    border-right: 1px solid var(--rule);
+    overflow: visible;
 
-    > [class*="container"] {
-      flex-direction: column;
-      align-items: stretch;
-      min-height: 100%;
+    > .container-fluid { display: flex; flex-direction: column; align-items: stretch; height: 100%; min-height: 0; }
+    .navbar-toggler { display: none; }
+    .navbar-lockup { flex: 0 0 auto; margin: 0 0 22px 4px; }
+    .navbar-workspace { flex: 0 0 auto; margin-bottom: 20px; }
+    // The switcher sits in a quiet box so it reads as the workspace's name, not as a nav row.
+    button.navbar-workspace-toggle { padding: 10px 12px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--rule); }
+    // The open switcher takes its own room in the column, so it never half-covers the items under it.
+    .navbar-workspace-menu { position: static; width: 100%; margin-top: 8px; }
+    .navbar-collapse { display: flex !important; flex: 1 1 auto; flex-direction: column; align-items: stretch; min-height: 0; }
+    .navbar-scroll { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+    .navbar-nav-primary { flex: 0 0 auto; }
+    // Settings is pinned above the account row on any viewport height; the list above it is what scrolls. An open
+    // Settings list scrolls under its own row, within half of the column.
+    .navbar-bottom { display: flex; flex: 0 0 auto; flex-direction: column; min-height: 0; max-height: 55%; }
+    .navbar-nav-utility, .navbar-nav-utility > .nav-item { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+    #sidebarSettings { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+  }
+
+  #sidebar ~ #workspace-main > .main-content { margin-left: var(--rail-width); }
+
+  // Short screens: the items tighten (44px to 40px, then 36px) so the list and the pinned Settings row fit together
+  // before the list has to scroll.
+  @media (max-height: 940px) {
+    #sidebar {
+      .navbar-nav > .nav-item > .nav-link, .native-global-contacts > summary, .nav-more > summary { min-height: 40px; }
+      .navbar-lockup { margin-bottom: 16px; }
+      .navbar-workspace { margin-bottom: 14px; }
     }
-
-    .navbar-collapse {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      width: auto;
-      min-width: 100%;
-      margin-left: -$sidebar-padding-x;
-      margin-right: -$sidebar-padding-x;
-      padding-left: $sidebar-padding-x;
-      padding-right: $sidebar-padding-x;
-
-      &::before {
-        display: none;
-      }
-
-      > * {
-        min-width: 100%;
-      }
-    }
-
-    .navbar-nav {
-      flex-direction: column;
-      margin-left: -$sidebar-padding-x;
-      margin-right: -$sidebar-padding-x;
-    }
-
-    .navbar-nav .nav-link {
-      padding: var(--bs-nav-link-padding-y) $sidebar-padding-x;
-    }
-
-    .navbar-nav .nav .nav-link {
-      padding-left: $sidebar-padding-x + $sidebar-icon-width;
-    }
-
-    .navbar-user {
-      margin-left: -$sidebar-padding-x;
-      margin-right: -$sidebar-padding-x;
-      padding: $spacer $sidebar-padding-x calc(#{$spacer} - var(--bs-navbar-padding-y));
-      border-top: 1px solid var(--bs-navbar-divider-color);
+  }
+  @media (max-height: 820px) {
+    #sidebar {
+      .navbar-nav > .nav-item > .nav-link, .native-global-contacts > summary, .nav-more > summary { min-height: 36px; }
+      .navbar-nav { gap: 0; }
     }
   }
 }
+
+// Phone and tablet: the top bar, with the menu as a full-height sheet under it.
+@include media-breakpoint-down(xl) {
+  body.workspace-themed { padding-top: var(--top-bar-height); }
+
+  #sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    min-height: var(--top-bar-height);
+    padding: 0 12px;
+    border-bottom: 1px solid var(--rule);
+
+    > .container-fluid {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+      // The bar keeps its full height when the menu opens, so the sheet under it reaches the bottom of the screen.
+      grid-template-rows: var(--top-bar-height);
+      align-items: center;
+      min-height: var(--top-bar-height);
+      gap: 0 8px;
+    }
+    .navbar-lockup { display: none; }
+    .navbar-workspace { justify-self: center; max-width: 100%; }
+    .navbar-workspace-toggle { justify-content: center; padding: 6px 10px; }
+    .navbar-workspace-copy { flex: 0 1 auto; }
+    .navbar-workspace-label { display: none; }
+    .navbar-workspace-name { overflow: hidden; font-size: 16px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+    .navbar-workspace-menu { left: 50%; max-height: calc(100vh - 80px); max-height: calc(100dvh - 80px); transform: translateX(-50%); }
+    .navbar-user { justify-self: end; }
+    .native-profile-toggle { padding: 0; }
+    .native-account-dropdown { top: calc(100% + 8px); }
+    .navbar-collapse {
+      grid-column: 1 / -1;
+      height: calc(100dvh - var(--top-bar-height));
+      margin: 0 -12px;
+      padding: 16px 20px 24px;
+      overflow-y: auto;
+      border-top: 1px solid var(--rule);
+      background: var(--paper-deep);
+
+      &:not(.show) { display: none; }
+    }
+    .navbar-collapse.show { display: flex; flex-direction: column; }
+    .navbar-scroll { display: flex; flex: 1 0 auto; flex-direction: column; }
+    // The sheet's rows are 48px, each as wide as the sheet, with Settings aligned like the rest.
+    .navbar-collapse > *, .navbar-scroll > ul, .navbar-bottom, .navbar-bottom ul { width: 100%; align-self: stretch; }
+    .navbar-nav > .nav-item > .nav-link, .native-global-contacts > summary, .nav-more > summary { min-height: 48px; font-size: 17px; }
+    .nav-more .nav-link, .native-global-contacts .nav-link, #sidebarSettings .nav-link { min-height: 44px; font-size: 16px; }
+    .navbar-bottom { margin-top: 12px; }
+  }
+}
+
+// The skip link: an ink pill on paper.
+.workspace-skip-link {
+  position: fixed;
+  z-index: 12000;
+  top: 8px;
+  left: 8px;
+  padding: 10px 18px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--paper);
+  font-weight: 500;
+  transform: translateY(calc(-100% - 12px));
+
+  &:focus { transform: none; }
+}
+
+#workspace-main:focus { outline: 0; }

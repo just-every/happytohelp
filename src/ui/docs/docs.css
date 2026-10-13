@@ -16,7 +16,8 @@
 
 /* Page head: section eyebrow, the title and the page's own pen stroke under it (title-strokes.ts). The stroke spans its
    share of the title's width up to its natural length at the title's size, in a box of its own aspect ratio, so drawing it
-   in once (the hero flourish's draw, skipped when reduced motion is preferred) moves nothing. */
+   in (the hero flourish's draw, skipped when reduced motion is preferred or when cooldown.tsx marks it data-drawn="still")
+   moves nothing. */
 .h2h-docs .docs-page-head { max-width: 36em; font-size: 17px; margin-bottom: 28px; }
 .h2h-docs .docs-eyebrow { margin-bottom: 12px; font-size: 15px; font-weight: 600; color: var(--ink-soft); }
 .h2h-docs .docs-title-line { width: fit-content; max-width: 100%; font-size: clamp(2.25rem, 4.4vw, 3.5rem); }
@@ -25,6 +26,7 @@
 .h2h-docs .docs-title-stroke path { stroke-width: clamp(2.5px, 0.055em, 3px); stroke-dasharray: 1 2; stroke-dashoffset: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .h2h-docs .docs-title-stroke path { animation: h2h-flourish 0.9s cubic-bezier(0.55, 0.05, 0.35, 1) 0.15s both; }
+  .h2h-docs .docs-title-stroke[data-drawn="still"] path { animation: none; }
 }
 
 /* Prose: 17px on a 36em measure. Tables may run past the measure into the rest of the column before they scroll, because

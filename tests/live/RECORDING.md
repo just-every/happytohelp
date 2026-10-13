@@ -124,8 +124,12 @@ Required milestones, in the journey's natural order:
 2. `fresh-storage`: same identities, independent read-only inspection method,
    zero `owners`, `articles`, `conversations`, `activationReceipts`,
    `setupSuccesses` counts before signup. Resource names alone prove nothing.
-3. `owner-setup`: actual owner-operated creation and project identity.
-4. `empty-checklist`: empty real inbox, 0/8, eight `not_checked` states.
+3. `owner-setup`: actual owner-operated creation and project identity. Creating
+   the workspace may send the owner one welcome email; it is evidence only through
+   the provider's own outcome, never because it was sent.
+4. `empty-checklist`: the activation API `GET` for the new workspace, 0/8 and eight
+   `not_checked` states, read before the owner's browser opens the workspace. The
+   browser observes by itself once it opens, so a later reading is not an empty one.
 5. `sender-dns`, `owner-mail-delivered`, `inbound-receipt`, `model-key`,
    `spend-ceilings`: actual provider/check receipts. Mail accepted/queued is not
    delivered. Inbound challenge and delivery IDs must join to this installation.
@@ -144,7 +148,8 @@ Required milestones, in the journey's natural order:
 10. `model-usage`, `final-checklist`: raw provider usage tied to generation,
     `costStatus` (`known`, `unknown`, `partial`), actual numeric `costUsd` when
     known or literal `"unknown"` otherwise; the owner's post-batch spend receipt; all
-    eight current checklist steps observed done. Unknown cost is never zero.
+    eight current checklist steps observed done, as the activation API reports them
+    after the system's own checks, never from saved configuration. Unknown cost is never zero.
 
 `{"kind":"note","text":"..."}` records sanitized observations/failures.
 `{"kind":"redaction-begin"}` and `{"kind":"redaction-end"}` annotate the actual

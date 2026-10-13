@@ -1,4 +1,4 @@
-export const repository = 'just-every/happytohelp';
+export const repository = 'just-every/run-happytohelp';
 export const integrationRef = 'refs/heads/main';
 // The protected Environment selects receipt storage, never dispatch or candidate data.
 export function evidenceRepository(value) {

@@ -63,7 +63,7 @@ function DemoReturn({ settings }) {
     return <section ref={banner} className="demo-workspace-banner" aria-label="Demo workspace">
         <div className="demo-workspace-banner__copy"><strong>You are in the demo workspace</strong><span>Customers, conversations and FAQs are fictional.</span></div>
         <div className="demo-workspace-banner__return">
-            {original ? <span>Return to {original.name}</span> : ready && projects.length > 0 ? <label>Return workspace<select value={selected} onChange={event => setSelected(event.target.value)} disabled={loading}><option value="">Choose your workspace</option>{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label> : <span>{ready ? 'No other workspace is available to your account.' : 'Checking your workspaces…'}</span>}
+            {original ? <span className="demo-workspace-banner__origin">Return to {original.name}</span> : ready && projects.length > 0 ? <label>Return workspace<select value={selected} onChange={event => setSelected(event.target.value)} disabled={loading}><option value="">Choose your workspace</option>{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label> : <span>{ready ? 'No other workspace is available to your account.' : 'Checking your workspaces…'}</span>}
             <button type="button" className="btn btn-sm btn-primary" onClick={back} disabled={!ready || !destination || loading}>{loading ? 'Returning…' : 'Back to your workspace'}</button>
         </div>
         {error && <p className="demo-workspace-banner__error" role="alert">{error}</p>}

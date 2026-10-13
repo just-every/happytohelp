@@ -1,20 +1,13 @@
-/* Public identity pages: the homepage's paper, ink and Outfit, with black pill actions and no colour of their own.
-   The tokens match src/ui/homepage/homepage.css; the dashboard keeps its own design system. */
-body:has(.h2h-identity) { margin: 0; padding: 0; background: #f6f2ea; }
+/* Public identity pages: the homepage's paper, ink and Outfit (the tokens are brand-tokens.css), with black pill actions,
+   aqua-underlined links, notes as drawn cards and, beside sign-in and sign-up, a drawing in the landing hero's hand. */
 .h2h-identity {
-  --paper: #f6f2ea;
-  --ink: #141414;
-  --ink-soft: #5f5c56;
-  --rule: rgba(20, 20, 20, 0.16);
-  --field-line: rgba(20, 20, 20, 0.45);
-  --gutter: clamp(20px, 5vw, 76px);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
   padding: 0 var(--gutter);
   color: var(--ink);
-  font-family: Outfit, 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   line-height: 1.5;
   background-color: var(--paper);
@@ -22,7 +15,7 @@ body:has(.h2h-identity) { margin: 0; padding: 0; background: #f6f2ea; }
   -webkit-font-smoothing: antialiased;
 }
 .h2h-identity *, .h2h-identity *::before, .h2h-identity *::after { box-sizing: border-box; }
-.h2h-identity h1, .h2h-identity h2, .h2h-identity p, .h2h-identity dl, .h2h-identity dd { margin: 0; padding: 0; }
+.h2h-identity h1, .h2h-identity h2, .h2h-identity p, .h2h-identity dl, .h2h-identity dd, .h2h-identity figure { margin: 0; padding: 0; }
 .h2h-identity a { color: inherit; }
 .h2h-identity a:focus-visible, .h2h-identity button:focus-visible, .h2h-identity input:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 8px; }
 
@@ -37,8 +30,12 @@ body:has(.h2h-identity) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-identity .id-panel { width: 100%; max-width: 480px; }
 /* Longer forms (sign-up) pair related fields on wider screens so the whole form and its action fit a laptop screen. */
 .h2h-identity .id-panel--wide { max-width: 600px; }
-.h2h-identity h1 { font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 500; line-height: 1.12; letter-spacing: -0.035em; text-wrap: balance; overflow-wrap: anywhere; }
-.h2h-identity .id-lede { margin-top: 14px; color: var(--ink-soft); font-size: 1.1rem; overflow-wrap: anywhere; }
+/* With a drawing: the form at the left, the drawing at the right, centred on the same column as the homepage. */
+.h2h-identity .id-main--drawn > .id-panel { flex: 0 1 480px; }
+.h2h-identity .id-main--drawn > .id-panel--wide { flex-basis: 600px; }
+.h2h-identity .id-main--drawn { justify-content: space-between; gap: clamp(32px, 6vw, 112px); max-width: 1536px; width: 100%; margin: 0 auto; padding-left: clamp(0px, 3vw, 44px); }
+.h2h-identity h1 { font-size: clamp(2.4rem, 4.2vw, 3.4rem); font-weight: 600; line-height: 1.08; letter-spacing: -0.035em; text-wrap: balance; overflow-wrap: anywhere; }
+.h2h-identity .id-lede { margin-top: 10px; color: var(--ink-soft); font-size: clamp(1.1rem, 1.5vw, 1.4375rem); overflow-wrap: anywhere; }
 .h2h-identity .id-lede strong { color: var(--ink); font-weight: 500; }
 
 .h2h-identity form { display: grid; gap: 20px; margin-top: 30px; }
@@ -46,33 +43,78 @@ body:has(.h2h-identity) { margin: 0; padding: 0; background: #f6f2ea; }
 .h2h-identity .id-row { display: grid; gap: 20px; }
 @media (min-width: 700px) { .h2h-identity .id-row { grid-template-columns: 1fr 1fr; align-items: start; } }
 .h2h-identity label { font-size: 15px; font-weight: 500; }
-.h2h-identity input { width: 100%; min-height: 52px; padding: 0 16px; color: var(--ink); font: inherit; font-size: 17px; background: #fffdf9; border: 1.5px solid var(--field-line); border-radius: 14px; }
+.h2h-identity input { width: 100%; min-height: 48px; padding: 0 14px; color: var(--ink); font: inherit; font-size: 16px; background: var(--surface); border: 1.5px solid var(--field-line); border-radius: 8px; }
+.h2h-identity input::placeholder { color: var(--ink-soft); opacity: 1; }
 .h2h-identity input:hover { border-color: var(--ink); }
+.h2h-identity input:focus-visible { outline: 0; border-color: var(--ink); border-radius: 8px; box-shadow: 0 0 0 3px var(--d-cyan-deep); }
 .h2h-identity .id-hint { color: var(--ink-soft); font-size: 14px; }
 
 .h2h-identity .pill { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: inherit; font-size: 17px; font-weight: 500; line-height: 1; text-decoration: none; white-space: nowrap; border-radius: 999px; cursor: pointer; transition: background-color 0.18s, color 0.18s, border-color 0.18s; }
-.h2h-identity .pill--ink { color: #fff; background: var(--ink); border: 1.5px solid var(--ink); }
-.h2h-identity .pill--ink:hover:not(:disabled) { background: #3a3a38; border-color: #3a3a38; }
+.h2h-identity .pill--ink { color: var(--on-ink); background: var(--ink); border: 1.5px solid var(--ink); }
+.h2h-identity .pill--ink:hover:not(:disabled) { background: var(--ink-hover); border-color: var(--ink-hover); }
 .h2h-identity .pill--ink:disabled { opacity: 0.55; cursor: progress; }
 .h2h-identity form .pill { width: 100%; margin-top: 4px; }
 .h2h-identity .id-actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 30px; }
 
-.h2h-identity .id-alert, .h2h-identity .id-note { margin-top: 22px; padding: 14px 18px; border-radius: 14px; overflow-wrap: anywhere; }
-.h2h-identity .id-alert { background: #fffdf9; border: 1.5px solid var(--ink); border-left-width: 6px; }
-.h2h-identity .id-note { background: rgba(20, 20, 20, 0.04); border: 1px solid var(--rule); }
+/* The error and the notes are drawn cards: the note on the aqua tint, the error on white in the danger ink. */
+.h2h-identity .id-alert, .h2h-identity .id-note { margin-top: 22px; padding: 14px 18px; border: 2px solid var(--ink); border-radius: var(--card-radius); box-shadow: var(--card-shadow); overflow-wrap: anywhere; }
+.h2h-identity .id-alert { color: var(--danger); background: var(--surface); }
+.h2h-identity .id-note { background: var(--d-cyan-tint); }
 .h2h-identity .id-note a { font-weight: 500; }
 .h2h-identity .id-facts { display: grid; gap: 0; margin-top: 26px; border-top: 1px solid var(--rule); }
 .h2h-identity .id-facts > div { display: grid; grid-template-columns: minmax(7rem, 0.35fr) 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .h2h-identity .id-facts dt { color: var(--ink-soft); font-size: 15px; }
 .h2h-identity .id-facts dd { font-weight: 500; overflow-wrap: anywhere; }
 
-.h2h-identity .id-links { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 30px; font-size: 16px; }
-.h2h-identity .id-links a { text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 6px; transition: text-decoration-color 0.18s; }
-.h2h-identity .id-links a:hover { text-decoration-color: var(--ink); }
-.h2h-identity .id-footer { display: flex; flex-wrap: wrap; gap: 8px 28px; max-width: 1536px; width: 100%; margin: 0 auto; padding: 28px 0 40px; color: var(--ink-soft); font-size: 15px; border-top: 1px solid var(--rule); }
+/* Links read as the landing's: ink, weight 600, an aqua underline that turns ink on hover. */
+.h2h-identity :is(.id-links, .id-footer, .id-note, .id-lede) a:not(.pill) { font-weight: 600; text-decoration: underline 3px var(--d-cyan-deep); text-underline-offset: 8px; transition: text-decoration-color 0.18s; }
+.h2h-identity :is(.id-links, .id-footer, .id-note, .id-lede) a:not(.pill):hover { text-decoration-color: var(--ink); }
+.h2h-identity .id-links { display: flex; flex-wrap: wrap; gap: 14px 40px; margin-top: 34px; font-size: 16px; }
+.h2h-identity .id-footer { display: flex; flex-wrap: wrap; gap: 8px 28px; max-width: 1536px; width: 100%; margin: 0 auto; padding: 28px 0 40px; color: var(--ink); font-size: 15px; border-top: 1px solid var(--rule); }
 
+/* The drawing (SignInDrawing.tsx): Maya's question, the team's answer in aqua and her thanks with Send still to press,
+   joined by loose ink arrows, on a pale aqua blob, with the pen line looping under it. Every length is in em. */
+.h2h-identity .id-drawing { position: relative; isolation: isolate; flex: 0 1 640px; align-self: center; min-width: 0; margin-top: -20px; padding: 2.4em 2em 4.5em 3.6em; color: var(--d-ink); font-size: clamp(15px, 1.45vw, 21px); line-height: 1.4; pointer-events: none; }
+.h2h-identity .id-drawing .d-blob { position: absolute; z-index: -1; inset: 0 0 12% 6%; width: 94%; height: 88%; fill: var(--d-cyan-wash); }
+.h2h-identity .id-thread { display: grid; }
+.h2h-identity .id-line { position: relative; display: grid; justify-items: start; gap: 0.3em; }
+.h2h-identity .id-line--fix { margin-top: 2.6em; padding-left: 1.6em; }
+.h2h-identity .id-line--reply { margin-top: 2em; }
+.h2h-identity .id-who { padding-left: 0.2em; font-weight: 600; }
+.h2h-identity .id-bubble { position: relative; justify-self: stretch; margin-right: 1.5em; padding: 0.95em 1.2em; border: 2px solid var(--d-ink); border-radius: 1em 1.15em 0.95em 1.05em / 1.05em 0.9em 1.1em 1em; background: var(--surface); box-shadow: var(--card-shadow); transform: rotate(-1.2deg); transform-origin: 2em 50%; }
+.h2h-identity .id-bubble--team { margin-right: 0; background: var(--d-cyan-tint); }
+.h2h-identity .id-bubble--composer { display: flex; align-items: center; justify-content: space-between; gap: 0.8em; margin-right: 0; padding: 0.6em 0.6em 0.6em 1.2em; }
+.h2h-identity .id-send { display: inline-flex; align-items: center; min-height: 2.2em; padding: 0 1.2em; border-radius: 999px; color: var(--on-ink); background: var(--d-ink); font-weight: 600; }
+.h2h-identity .id-drawing .d-sparks { --spark: 1px; position: absolute; left: calc(100% + 2px); top: -34px; width: 30px; height: 45px; color: var(--d-cyan-deep); overflow: visible; }
+.h2h-identity .id-drawing .hc-arrow { position: absolute; bottom: 100%; color: var(--d-ink); overflow: visible; }
+.h2h-identity .id-drawing .hc-arrow--long { left: 0.4em; width: 1.9em; height: 2.6em; }
+.h2h-identity .id-drawing .hc-arrow--short { left: 0.6em; width: 1.2em; height: 2em; }
+.h2h-identity .id-pen { position: absolute; bottom: 0; left: -24%; width: 82%; height: auto; aspect-ratio: 4 / 1; color: var(--d-cyan-deep); overflow: visible; }
+@media (prefers-reduced-motion: no-preference) {
+  .h2h-identity .id-pen path { stroke-dasharray: 1 2; animation: id-pen 1.5s cubic-bezier(0.55, 0.05, 0.35, 1) 0.35s both; }
+  .h2h-identity .id-pen[data-drawn="still"] path { animation: none; }
+}
+@keyframes id-pen { from { stroke-dashoffset: 1.02; } to { stroke-dashoffset: 0; } }
+
+@media (max-width: 960px) {
+  .h2h-identity .id-main--drawn { flex-direction: column; align-items: center; padding-left: 0; }
+  .h2h-identity .id-main--drawn > .id-panel { flex: none; }
+  .h2h-identity .id-drawing { flex-basis: auto; align-self: center; width: min(100%, 420px); margin-top: 8px; font-size: 14px; }
+}
 @media (max-width: 640px) {
   .h2h-identity { font-size: 16px; }
   .h2h-identity .id-header { height: 76px; }
+  .h2h-identity .id-links { flex-direction: column; align-items: center; gap: 12px; }
   .h2h-identity .id-facts > div { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* The workspace's own loading and load-failure screens (Dashboard.tsx) in this frame: a drawing and one line, centred. */
+.h2h-identity.dashboard-state .id-header h1 { font-size: inherit; line-height: 1; }
+.h2h-identity .dashboard-state__body { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 0 96px; text-align: center; }
+.h2h-identity .dashboard-state__message { max-width: 36rem; font-size: 20px; overflow-wrap: anywhere; }
+.h2h-identity .dashboard-state__body .h2h-pen-line { width: 200px; margin: 0; }
+.h2h-identity .dashboard-state__body .id-actions { justify-content: center; margin-top: 4px; }
+.h2h-identity .dashboard-state__body .id-links { margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .h2h-identity[aria-busy="true"] .h2h-pen-line path { animation: id-pen 1.6s cubic-bezier(0.55, 0.05, 0.35, 1) infinite; }
 }

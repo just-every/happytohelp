@@ -14,11 +14,11 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
     page.on('response', response => { if (response.status() >= 400) failedResponses.push({status: response.status(), path: new URL(response.url()).pathname}); });
     await page.addScriptTag({path: axePath});
     await page.goto(runtime.origin + '/setup');
-    await page.getByLabel('Owner password', {exact: true}).waitFor();
+    await page.getByLabel('Password', {exact: true}).waitFor();
     assertAxeClean(await scan(page, 'setup'), 'setup');
-    await keyboardPass(page, 'setup', {count: 14});
+    await keyboardPass(page, 'setup', {count: 6});
     await measureContrast(page, 'setup', [
-        {label: 'owner password label', selector: '.setup-field span'},
+        {label: 'setup field label', selector: '.setup-field span'},
         {label: 'primary setup button', selector: '.setup-primary'},
     ]);
     checks.push('first-owner setup page rendered and axe scanned before account creation');
@@ -121,7 +121,7 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
         {label: 'transcript note label', selector: '#chat .transcript-note-label'},
         {label: 'composer reply placeholder', selector: '#chat textarea', pseudo: '::placeholder'},
         {label: 'account initials', selector: '.avatar-title.rounded-circle > span'},
-        {label: 'unoccluded Settings navigation label', selector: '.navbar-settings-toggle > .navbar-link-label'},
+        {label: 'unoccluded Settings navigation label', selector: '[data-testid="nav-settings"] > .navbar-link-label'},
     ]);
 
     await page.getByRole('button', {name: 'Account menu', exact: true}).click();

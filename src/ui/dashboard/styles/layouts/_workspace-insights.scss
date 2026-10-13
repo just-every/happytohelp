@@ -8,7 +8,7 @@ body.workspace-page .workspace-insights {
 
         th {
             padding: 0 12px 10px;
-            color: var(--conversation-muted, #536080);
+            color: var(--ink-soft);
             font-size: 11px;
             font-weight: 600;
             line-height: 1.35;
@@ -19,11 +19,11 @@ body.workspace-page .workspace-insights {
             border: 0;
         }
 
-        tbody tr:hover { background: var(--workspace-primary-hover, #faf9fd); }
+        tbody tr:hover { background: var(--hover); }
 
         &__insight { width: 100%; min-width: 420px; }
         &__status { min-width: 134px; }
-        &__seen { width: 76px; color: var(--conversation-muted, #536080); font-size: 12px; }
+        &__seen { width: 76px; color: var(--ink-soft); font-size: 12px; }
         &__actions { width: 34px; }
     }
 
@@ -34,7 +34,7 @@ body.workspace-page .workspace-insights {
         color: inherit;
         text-decoration: none;
 
-        &:hover { color: rgb(var(--bs-primary-rgb)); }
+        &:hover { color: var(--ink); }
         .fe { font-size: 11px; }
     }
 
@@ -64,14 +64,14 @@ body.workspace-page .workspace-insights {
         gap: 6px;
         min-width: 0;
         overflow: hidden;
-        color: var(--conversation-muted, #536080);
+        color: var(--ink-soft);
         font-size: 12px;
         line-height: 1.35;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .insight-identity__context span:first-child { color: var(--conversation-ink, #19153d); font-weight: 600; }
+    .insight-identity__context span:first-child { color: var(--ink); font-weight: 600; }
 
     .insight-identity__context a {
         overflow: hidden;
@@ -81,13 +81,13 @@ body.workspace-page .workspace-insights {
         text-overflow: ellipsis;
     }
 
-    .insight-identity__context a:hover { color: rgb(var(--bs-primary-rgb)); }
-    .insight-identity__separator { color: var(--conversation-quiet, #747f9b); }
+    .insight-identity__context a:hover { color: var(--ink); }
+    .insight-identity__separator { color: var(--ink-soft); }
 
     .insight-content {
         display: block;
         max-width: 720px;
-        color: var(--conversation-ink, #19153d);
+        color: var(--ink);
         font-size: 13px;
         line-height: 1.5;
     }
@@ -110,28 +110,28 @@ body.workspace-page .workspace-insights {
     .insight-status + .insight-status { margin-top: 5px; }
 
     .insight-status--active {
-        color: rgb(var(--bs-primary-rgb));
-        background: var(--workspace-primary-soft, #f5f2fd);
+        color: var(--ink);
+        background: var(--d-cyan-tint);
     }
 
-    .insight-status--closed { color: var(--conversation-muted, #536080); background: var(--conversation-hover, #faf9fd); }
-    .insight-status--quiet { color: var(--conversation-muted, #536080); background: transparent; }
+    .insight-status--closed { color: var(--ink-soft); background: var(--hover); }
+    .insight-status--quiet { color: var(--ink-soft); background: transparent; }
 
     .insights-list__empty {
         padding-block: 48px !important;
-        color: var(--conversation-muted, #536080);
+        color: var(--ink-soft);
         text-align: center;
     }
 
     .insights-list__empty p {
         margin: 0 0 4px;
-        color: var(--conversation-ink, #19153d);
+        color: var(--ink);
         font-size: 13px;
         font-weight: 600;
     }
 
     .insights-list__empty span { font-size: 12px; }
-    .insights-list__empty a { margin-left: 8px; color: rgb(var(--bs-primary-rgb)); font-size: 12px; font-weight: 600; }
+    .insights-list__empty a { margin-left: 8px; color: var(--ink); font-size: 12px; font-weight: 600; }
 
     @media (max-width: 767.98px) {
         .insights-list, .insights-list thead, .insights-list tbody { display: block; }

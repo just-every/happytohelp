@@ -43,7 +43,7 @@ test('a verified registration creates a project with its own server secret',asyn
  const proxy=await getPlatformProxy({configPath,persist:false,envFiles:[]})
  try{
   const DB=proxy.env.DB
-  for(const file of ['0001_identity.sql','0003_identity_credentials.sql','0005_widget_identity.sql','0006_registration.sql','0102_public_abuse_limits.sql'])for(const sql of migration(file).split(';').filter(statement=>statement.trim()))await DB.prepare(sql).run()
+  for(const file of ['0001_identity.sql','0003_identity_credentials.sql','0005_widget_identity.sql','0006_registration.sql','0070_management.sql','0102_public_abuse_limits.sql'])for(const sql of migration(file).split(';').filter(statement=>statement.trim()))await DB.prepare(sql).run()
   const verify=async token=>{
    await DB.prepare('INSERT INTO registrations VALUES(?,?,?,?,?,?,?,NULL)').bind(await hashToken(token),token+'@example.test','Owner','hash','Project '+token,'https://'+token+'.example.test',Date.now()+60000).run()
    const response=await registration.request('http://app.test/verify-email',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token})},proxy.env)

@@ -4,6 +4,9 @@ import {providerJson,bearer} from './provider-http'
 // @ts-ignore Use the same model identity mapping as the generation adapter.
 import {findModel} from '../../ai-support/vendor/ensemble/data/model_data.js'
 
+/** Providers whose key can be checked here with a non-generative metadata request. Any other provider's key is installed but unconfirmable. */
+export const metadataProviders:ReadonlySet<string>=new Set(['openai','anthropic','google','openrouter'])
+
 /** Non-generative metadata APIs. These calls do not ask a model to generate tokens.
  * https://platform.openai.com/docs/api-reference/models/retrieve
  * https://platform.claude.com/docs/en/api/models/retrieve

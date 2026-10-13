@@ -17,20 +17,20 @@ const { repositoryTools } = await import('../../src/modules/ai-support/repositor
 const { generateTwoPassSuggestions } = await import('../../src/modules/ai-support/assist/twoPassSuggestions.js');
 
 const env = {
-    DB: { prepare: sql => ({ bind: () => ({ first: async () => sql.includes('github_connections') ? null : ({ repositories_json: '["just-every/happytohelp"]', allow_agents: 1, allow_contacts: 1 }) }) }) },
+    DB: { prepare: sql => ({ bind: () => ({ first: async () => sql.includes('github_connections') ? null : ({ repositories_json: '["just-every/run-happytohelp"]', allow_agents: 1, allow_contacts: 1 }) }) }) },
     GITHUB_TOKENS: JSON.stringify({ project: 'mapped-token' }),
 };
 
 test('a real repository read result supplies the exact ID accepted by the suggestion validator', async () => {
     const originalFetch = globalThis.fetch;
     globalThis.fetch = async url => {
-        assert.equal(String(url), 'https://api.github.com/repos/just-every/happytohelp/contents/README.md');
+        assert.equal(String(url), 'https://api.github.com/repos/just-every/run-happytohelp/contents/README.md');
         return Response.json({
             type: 'file',
             encoding: 'base64',
             size: 24,
             sha: 'sha-readme',
-            html_url: 'https://github.com/just-every/happytohelp/blob/sha-readme/README.md',
+            html_url: 'https://github.com/just-every/run-happytohelp/blob/sha-readme/README.md',
             content: btoa('Product README evidence.\n'),
         });
     };
@@ -38,7 +38,7 @@ test('a real repository read result supplies the exact ID accepted by the sugges
         const evidenceIds = new Set();
         const tools = await repositoryTools(env, 'project', 'agent', evidenceIds);
         const read = tools.find(tool => tool.definition.function.name === 'repo_read_file');
-        const toolOutput = await read.function('just-every/happytohelp', 'README.md', null, 0, null);
+        const toolOutput = await read.function('just-every/run-happytohelp', 'README.md', null, 0, null);
         const evidenceId = toolOutput.evidence_ids[0];
 
         const result = await generateTwoPassSuggestions({
@@ -77,7 +77,7 @@ test('a real repository read result supplies the exact ID accepted by the sugges
 
 test('a repository read cannot be replaced by an empty evidence result', async () => {
     await assert.rejects(generateTwoPassSuggestions({
-        context: { options: {}, assist: { evidenceIds: new Set(['repo:just-every/happytohelp:sha-readme:README.md']) } },
+        context: { options: {}, assist: { evidenceIds: new Set(['repo:just-every/run-happytohelp:sha-readme:README.md']) } },
         buildMessages: () => [],
         runPass: async pass => pass.stage === 'primary'
             ? {

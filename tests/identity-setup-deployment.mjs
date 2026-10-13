@@ -9,20 +9,21 @@ const {Hono}=await import('hono'),{getPlatformProxy}=await import('wrangler'),{s
 const directory=await mkdtemp(join(tmpdir(),'h2h-owner-setup-deployment-')),configPath=join(directory,'wrangler.json')
 await writeFile(configPath,JSON.stringify({name:'owner-setup-deployment-test',compatibility_date:'2026-09-01',d1_databases:[{binding:'DB',database_name:'isolated-setup-deployment',database_id:'isolated-setup-deployment-test'}]}))
 const proxy=await getPlatformProxy({configPath,persist:false,envFiles:[]})
-const tables=['owner_setup','users','projects','project_settings','memberships','credentials','sessions']
+const tables=['owner_setup','users','projects','project_settings','memberships','credentials','sessions','ai_profiles']
 try {
  const env=proxy.env,db=env.DB,app=new Hono();app.route('/',setup)
  for(const file of ['0001_identity.sql','0003_identity_credentials.sql'])for(const sql of readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8').split(';').filter(s=>s.trim()))await db.prepare(sql).run()
  await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN metadata_json'))).run()
  await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN verification_secret'))).run()
  for(const statement of readFileSync(new URL('../migrations/0097_owner_setup.sql',import.meta.url),'utf8').split(/;\s*(?=(?:--|CREATE|INSERT)|$)/).filter(s=>s.trim()))await db.prepare(statement).run()
- await db.prepare(readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';')[0]).run()
+ // Setup provisions a starter assistant with the workspace, so the schema includes project settings and assistants.
+ for(const sql of readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';').slice(0,2))await db.prepare(sql).run()
  const entry={name:'First Owner',email:'owner@example.invalid',password:'long-test-password',allowedOrigin:'https://example.invalid'}
  const submit=(origin,body=entry)=>app.request(origin+'/bootstrap',{method:'POST',headers:{'content-type':'application/json',origin},body:JSON.stringify(body)},env)
  const state=async origin=>(await app.request(origin+'/setup',{},env)).json()
  const counts=async()=>Promise.all(tables.map(async table=>(await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n))
  const empty=async()=>assert.deepEqual(await counts(),tables.map(()=>0))
- const reset=async()=>{for(const table of ['sessions','credentials','memberships','project_settings','users','projects','owner_setup'])await db.prepare(`DELETE FROM ${table}`).run();delete env.H2H_SETUP_TOKEN;delete env.RER_INSTALLATION_ID;delete env.APP_ORIGIN;await empty()}
+ const reset=async()=>{for(const table of ['sessions','credentials','memberships','project_settings','ai_profiles','users','projects','owner_setup'])await db.prepare(`DELETE FROM ${table}`).run();delete env.H2H_SETUP_TOKEN;delete env.RER_INSTALLATION_ID;delete env.APP_ORIGIN;await empty()}
  const deployed='https://help.example.test'
 
  // A directly deployed Worker without a configured token refuses every unauthenticated claim.

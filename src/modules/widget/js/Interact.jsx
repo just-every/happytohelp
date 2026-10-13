@@ -4,6 +4,7 @@ import ChatHeader from './ChatHeader';
 import ChatList from './ChatList';
 import SendMessage from './SendMessage';
 import ConversationWelcome from './ConversationWelcome';
+import ConnectionNotice from './ConnectionNotice';
 import ResolutionRating from './ResolutionRating';
 
 
@@ -127,6 +128,7 @@ export default function Interact({ setOpen }) {
                 <div className={overlayClass.join(" ")}/>
                 <div
                     className={"happytohelp-content" + (mainView === 'conversation' ? " happytohelp-content-full" : "")}>
+                    <ConnectionNotice />
                     <div className="happytohelp-chatlist-container" ref={nodeRefChatList} role="region" aria-label="Conversation transcript" tabIndex={0}>
                         <ConversationWelcome empty={!messages.length} />
                         <ChatList messages={messages} contact={contact} sendContact={sendContact}

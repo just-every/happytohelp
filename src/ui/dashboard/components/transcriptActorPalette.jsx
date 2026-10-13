@@ -1,9 +1,9 @@
 import { resolveContactProfilePaletteForContact } from './avatar-symbols';
 
-const TRANSCRIPT_AGENT_TILE = '#b2e2ff';
-const TRANSCRIPT_CLAUDE_TILE = '#fff0e9';
-const TRANSCRIPT_PHOTO_TILE = '#b2d6fd';
-const TRANSCRIPT_CODEX_TILE = 'var(--local-agent-codex-color, #737aff)';
+const TRANSCRIPT_AGENT_TILE = 'var(--d-cyan-tint)';
+const TRANSCRIPT_CLAUDE_TILE = 'var(--avatar-blush)';
+const TRANSCRIPT_PHOTO_TILE = 'var(--d-cyan-tint)';
+const TRANSCRIPT_CODEX_TILE = 'var(--avatar-sage)';
 
 export function resolveTranscriptActorTile(actor, contact) {
     if (actor?.kind === 'contact') {

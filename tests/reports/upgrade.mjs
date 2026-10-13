@@ -19,6 +19,8 @@ const end=Math.max(...m9Migrations.map(name=>completeMigrations.findIndex(m=>m.n
 const migrations=completeMigrations.slice(0,end+1);
 const stagedNames=new Set([...migrations.map(m=>m.name),...integrationMigrations,...importEvolutionMigrations,...localMailMigrations,...importRuntimeMigrations]);
 const remaining=completeMigrations.filter(m=>!stagedNames.has(m.name));
+// Columns the additional stages add to existing tables; every other part of those tables' schema must stay as it was.
+const addedColumns=remaining.flatMap(m=>[...m.sql.matchAll(/ALTER TABLE (\w+) ADD COLUMN ([^;]+);/gi)].map(([,table,column])=>({table,column:column.trim()})));
 const original=migrations.filter(m=>!m9Migrations.includes(m.name));
 const directory=await mkdtemp(join(tmpdir(),'reports-upgrade-'));
 let runtime;
@@ -141,7 +143,11 @@ try {
       else if(name==='sqlite_sequence')assert.deepEqual(final.rows[name].map(JSON.parse).filter(row=>row.name!=='d1_migrations'),rows.map(JSON.parse).filter(row=>row.name!=='d1_migrations'));
       else assert.deepEqual(final.rows[name],rows,'additional stages preserve every prior row: '+name);
     }
-    for(const entry of beforeAdditional.schema)assert.deepEqual(final.schema.find(candidate=>candidate.name===entry.name),entry,'additional stages preserve prior schema: '+entry.name);
+    for(const entry of beforeAdditional.schema){
+      const current=final.schema.find(candidate=>candidate.name===entry.name),added=addedColumns.filter(a=>a.table===entry.name);
+      for(const {column} of added)assert.ok(current.sql.includes(', '+column),'additional stage adds '+column+' to '+entry.name);
+      assert.deepEqual({...current,sql:added.reduce((sql,{column})=>sql.replace(', '+column,''),current.sql)},entry,'additional stages preserve prior schema: '+entry.name);
+    }
     assert.deepEqual(final.rows.d1_migrations.map(JSON.parse).map(row=>row.name).sort(),completeMigrations.map(m=>m.name).sort(),'the actual final migration ledger is complete');
     for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
   });

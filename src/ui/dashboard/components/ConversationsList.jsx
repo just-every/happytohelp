@@ -1,6 +1,4 @@
 import React, { useCallback, useContext, useMemo } from 'react';
-import {ActivationChecklist} from '../../native/activation';
-import InboxNextSteps from './InboxNextSteps';
 import ConversationItem from "./ConversationItem";
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { ChatContext } from "../contexts/ChatContext";
@@ -8,20 +6,29 @@ import { useNavigate } from '@tanstack/react-router';
 import { useDashboardSettings, useDashboardLocation } from '../../native/dashboard-state';
 import InboxTagFilter from './InboxTagFilter';
 import InboxSearch from './InboxSearch';
+import InboxViews from './InboxViews';
+import InboxStart from './InboxStart';
+import { InboxTray } from '../../native/drawings';
 import { inboxViewFilter, inboxViewPhrase, normalizeInboxView } from './inboxViewDefinitions';
 import useConversationList from '../hooks/useConversationList';
 import useScrollEdge from '../hooks/useScrollEdge';
+import useLiveInboxLocation from '../hooks/useLiveInboxLocation';
 
-function ConversationsList({ canTryDemo = false, hideBehindConversation = false }) {
+// `isFirstRun` is a new workspace's empty inbox. Its start block sits in this column on a phone (`startHere`) and in the
+// main pane otherwise, so only one of them is ever on the page.
+function ConversationsList({ isFirstRun = false, startHere = false, hideBehindConversation = false }) {
     const {
         conversationLists,
         setConversationLists,
         fetchConversationList,
         inboxDataVersion,
         inboxViewCounts,
+        currentAgent,
     } = useContext(ChatContext);
     const settings = useDashboardSettings();
     const searchParams = useDashboardLocation().search;
+    // The list shows what the loader finished; actions start from the router's live location so a quick second one keeps `q` and `tag`.
+    const liveSearch = useLiveInboxLocation().search;
     const navigate = useNavigate();
     const selectedView = normalizeInboxView(searchParams.view, inboxViewCounts);
     const searchQuery = searchParams.q == null ? '' : String(searchParams.q);
@@ -57,13 +64,14 @@ function ConversationsList({ canTryDemo = false, hideBehindConversation = false 
     }, [ rootRef, scrollEdgeRef ]);
 
     const handleSearch = query => {
-        navigate({ search: { ...searchParams, view: selectedView, q: query.trim() || undefined } });
+        navigate({ search: { ...liveSearch, view: normalizeInboxView(liveSearch.view, inboxViewCounts), q: query.trim() || undefined } });
     };
 
     return (
         <div className={ `sidebar conversation-inbox px-4 py-3${isScrolled ? ' is-scrolled' : ''}` } aria-hidden={ hideBehindConversation ? 'true' : undefined } inert={ hideBehindConversation || undefined }>
+            <InboxViews />
             <div className="conversation-inbox-header">
-                <InboxSearch query={ searchQuery } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } /><InboxTagFilter projectId={settings.isGlobalInbox?null:settings.project?.id} value={String(searchParams.tag||'')} onChange={tag=>navigate({search:{...searchParams,tag:tag||undefined}})}/>
+                <InboxSearch query={ searchQuery } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } /><InboxTagFilter projectId={settings.isGlobalInbox?null:settings.project?.id} value={String(searchParams.tag||'')} onChange={tag=>navigate({search:{...liveSearch,tag:tag||undefined}})}/>
             </div>
             <div className="conversation-list-items" ref={ setListRefs }>
                 { conversations.map(conversation => <ConversationItem key={ conversation.id } conversation={ conversation } />) }
@@ -72,8 +80,9 @@ function ConversationsList({ canTryDemo = false, hideBehindConversation = false 
                     searchQuery.trim()
                         ? <p className="conversation-empty-state" role="status">No results for “{ searchQuery.trim() }” in { inboxViewPhrase(selectedView) }. Search looks at customer names and email addresses.</p>
                         : <>
-                            {!canTryDemo && <p className="conversation-empty-state">No conversations match this view.</p>}
-                            {canTryDemo && <div className="conversation-empty-state d-xl-none"><ActivationChecklist projectId={settings.project.id} compact/><InboxNextSteps /></div>}
+                            { startHere
+                                ? <InboxStart name={ currentAgent.name }/>
+                                : <div className="conversation-empty-state">{ !isFirstRun && <InboxTray/> }<p>No conversations match this view.</p></div> }
                         </>
                 ) }
                 { refreshError?.status === 400 && <p className="conversation-search-notice" role="alert">{ refreshError.message }</p> }

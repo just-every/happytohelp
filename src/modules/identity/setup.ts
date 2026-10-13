@@ -6,6 +6,9 @@ import { id, requiredString, serverSecret } from '../../platform/db'
 import { passwordHash } from './credentials'
 import { sessionCookie } from './session'
 import { localDevelopmentRequest } from '../../platform/local-host'
+import { workspaceDefaults } from '../management/provisioning/index'
+import { DEFAULT_WORKSPACE_COLOUR, deriveOwnerName, deriveWorkspaceName } from './workspace-defaults'
+import { sendWelcomeEmail } from './welcome-email'
 
 export const setup = new Hono<AppEnv>()
 const available = 'NOT EXISTS(SELECT 1 FROM owner_setup) AND NOT EXISTS(SELECT 1 FROM users) AND NOT EXISTS(SELECT 1 FROM projects)'
@@ -39,7 +42,7 @@ setup.post('/bootstrap', async c => {
  try {
   body = await c.req.json()
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error()
- } catch { throw new HTTPException(400, {message: 'Submit a JSON object with name, email, password and allowedOrigin'}) }
+ } catch { throw new HTTPException(400, {message: 'Submit a JSON object with email, password and allowedOrigin'}) }
  const expectedToken = configuredToken(c.env)
  if (!expectedToken && tokenRequired(c.env, c.req.url)) {
   throw new HTTPException(503, {message: c.env.RER_INSTALLATION_ID ? 'Owner setup is awaiting its installation credential' : 'Owner setup on this deployment requires a private H2H_SETUP_TOKEN. Configure it, deploy again, then enter it here.'})
@@ -51,8 +54,7 @@ setup.post('/bootstrap', async c => {
   for (let index = 0; index < expected.length; index++) difference |= expected.charCodeAt(index) ^ supplied.charCodeAt(index)
   if (difference) throw new HTTPException(403, {message: 'A valid owner setup token is required'})
  }
- const name = requiredString(body.name, 'name', 200).trim()
- const ownerName = body.ownerName === undefined ? name : requiredString(body.ownerName, 'ownerName', 200).trim()
+ // Name, owner name and colour are optional: what is missing is derived, what is given is used as given. An explicit empty value is still refused.
  const primaryColor = body.primaryColor
  if (primaryColor !== undefined && (typeof primaryColor !== 'string' || !/^#[0-9a-f]{6}$/i.test(primaryColor))) {
   throw new HTTPException(400, {message: 'Choose a six-digit brand colour'})
@@ -68,20 +70,27 @@ setup.post('/bootstrap', async c => {
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error()
   allowedOrigin = url.origin
  } catch { throw new HTTPException(400, {message: 'Website URL must be a valid http:// or https:// URL'}) }
+ const derivedName = body.name === undefined ? deriveWorkspaceName(allowedOrigin, email) : null
+ const name = derivedName ?? requiredString(body.name, 'name', 200).trim()
+ const ownerName = body.ownerName === undefined ? deriveOwnerName(email) : requiredString(body.ownerName, 'ownerName', 200).trim()
  const password = await passwordHash(body.password as string)
  const projectId = id(), userId = id(), token = id() + id(), now = Date.now()
- const guard = 'EXISTS(SELECT 1 FROM owner_setup WHERE singleton=1 AND claim_id=?)'
+ const claim = 'SELECT 1 FROM owner_setup WHERE singleton=1 AND claim_id=?', guard = `EXISTS(${claim})`
+ const defaults = workspaceDefaults(c.env, {projectId, name, website: allowedOrigin, ownerEmail: email}, {sql: claim, params: [userId]})
  const results = await c.env.DB.batch([
   c.env.DB.prepare(`INSERT INTO owner_setup SELECT 1,? WHERE ${available} ON CONFLICT(singleton) DO NOTHING`).bind(userId),
   c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) SELECT ?,?,?,?,?,? WHERE ${guard}`).bind(projectId,name,id(),allowedOrigin,now,serverSecret(),userId),
-  ...(primaryColor === undefined ? [] : [c.env.DB.prepare(`INSERT INTO project_settings(project_id,settings_json,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(projectId,JSON.stringify({primary_color: primaryColor.toLowerCase()}),now,userId)]),
+  // The `derived` marker records what setup chose for the owner, so a later reading of their site replaces only what they have not touched.
+  c.env.DB.prepare(`INSERT INTO project_settings(project_id,settings_json,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(projectId,JSON.stringify({primary_color: (primaryColor ?? DEFAULT_WORKSPACE_COLOUR).toLowerCase(), derived: {name: derivedName, colour: primaryColor === undefined}}),now,userId),
   c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,?,?,? WHERE ${guard}`).bind(userId,email,ownerName,now,userId),
   c.env.DB.prepare(`INSERT INTO credentials(user_id,password_hash,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(userId,password,now,userId),
   c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' WHERE ${guard}`).bind(projectId,userId,userId),
   c.env.DB.prepare(`INSERT INTO sessions SELECT ?,?,?,'owner',NULL,?,NULL WHERE ${guard}`).bind(await hashToken(token),userId,projectId,now+86400000,userId),
+  ...defaults.statements,
  ])
  if (!results[0].meta.changes) throw new HTTPException(409, {message: 'Owner setup is already complete. Sign in with your existing account.'})
  c.header('Set-Cookie', sessionCookie(token,c.req.url))
  c.header('Cache-Control', 'no-store')
- return c.json({projectId,userId,token},201)
+ await defaults.after()
+ return c.json({projectId,userId,token,welcomeEmail:await sendWelcomeEmail(c.env,{projectId,workspaceName:name,ownerEmail:email})},201)
 })

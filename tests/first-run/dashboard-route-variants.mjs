@@ -9,7 +9,8 @@ export async function routeVariants({page,origin,projectId,width,records,evidenc
  routes.push({path:'/projects/missing-project/conversations',name:'missing-workspace',header:'Workspace unavailable'});
  for(const {path,name,header} of routes)await run(`${width}-route-${name}`,async()=>{
   await page.goto(origin+path);assert.equal(new URL(page.url()).pathname,new URL(origin+path).pathname);
-  await page.getByTestId('workspace-header-name').filter({hasText:header}).waitFor();
+  // The workspace is named by the sidebar's switcher (the administration rail has none).
+  await (path.startsWith('/admin')?page.locator('#sidebar'):page.getByRole('button',{name:'Switch workspace: '+header,exact:true})).waitFor();
   await page.waitForLoadState('networkidle');await inspectState(page,records,evidence,`${width}-route-${name.replaceAll('/','-')}`);
   return {workspaceHeader:header};
  });

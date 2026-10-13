@@ -24,7 +24,7 @@ export async function widgetJourney({browser,runtime,projectId,token,width,evide
    const icons=visible('button[aria-label="Close chat"] svg'),avatars=visible('.happytohelp-agent-avatar,.happytohelp-workspace-brand');
    return icons.some(icon=>avatars.some(avatar=>icon.left<avatar.right&&icon.right>avatar.left&&icon.top<avatar.bottom&&icon.bottom>avatar.top));
   });assert.equal(overlap,false,'every visible close X avoids every visible avatar');
-  const name=await page.locator('.happytohelp-insight-agent-name').first().innerText();assert.equal(name,mailMode==='local'?'Local owner':'Provider owner','the visitor sees the operator display name');
+  const name=await page.locator('.happytohelp-insight-agent-name').first().innerText();assert.equal(name,mailMode==='local'?`Local ${width}`:'Provider owner','the visitor sees the operator display name: derived from the sign-up email local-<width>@example.test for a one-screen setup, as given for an explicit ownerName');
   const message='A test message from this website '+width;
   await page.locator('textarea[name=content]').fill(message);await page.locator('button[name=submit]').click();await page.getByText(message,{exact:true}).waitFor();await page.waitForTimeout(500);
   if(mailMode==='unavailable')assert.equal(await page.locator('.happytohelp-collect-notify-email').count(),0);

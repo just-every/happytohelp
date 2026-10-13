@@ -18,15 +18,23 @@ export function apiKit(runtime,token){
  };
 }
 export async function setup(page,origin){
- await page.goto(origin+'/setup');await page.getByLabel('Your name',{exact:true}).fill('Activation owner');await page.getByLabel('Owner email').fill('activation-browser@example.test');await page.getByLabel('Owner password',{exact:true}).fill('activation-browser-local-password');
- await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByLabel('Workspace name').fill('Fresh activation workspace');await page.getByRole('button',{name:'Review setup',exact:true}).click();await page.getByRole('button',{name:'Create workspace',exact:true}).click();await page.waitForURL(/\/projects\/[^/]+\/widget-settings$/);return new URL(page.url()).pathname.split('/')[2];
+ // The one-screen first-run form: email, password, website. Name and colour are derived; the owner lands on the Setup page.
+ await page.goto(origin+'/setup');await page.getByLabel('Your email',{exact:true}).fill('activation-browser@example.test');await page.getByLabel('Password',{exact:true}).fill('activation-browser-local-password');
+ await page.getByLabel('Your website',{exact:true}).fill(origin);await page.getByRole('button',{name:'Create workspace',exact:true}).click();await page.waitForURL(/\/projects\/[^/]+\/activation$/);return new URL(page.url()).pathname.split('/')[2];
 }
-export async function noOverflow(page,label){assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,label+' document overflow');const clipped=await page.locator('.activation-checklist a, .activation-checklist button, .activation-spend button').evaluateAll(elements=>elements.filter(element=>{const rect=element.getBoundingClientRect();return rect.width&&rect.height&&(rect.left< -1||rect.right>innerWidth+1)}).map(element=>element.textContent.trim()));assert.deepEqual(clipped,[],label+' checklist/spend controls clipped horizontally');}
+export async function noOverflow(page,label){assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,label+' document overflow');const clipped=await page.locator('.setup-list a, .setup-list button, .activation-spend button').evaluateAll(elements=>elements.filter(element=>{const rect=element.getBoundingClientRect();return rect.width&&rect.height&&(rect.left< -1||rect.right>innerWidth+1)}).map(element=>element.textContent.trim()));assert.deepEqual(clipped,[],label+' setup list/spend controls clipped horizontally');}
 export async function visibleControl(locator,label){assert.equal(await locator.count(),1,label+' single control');assert.ok(await locator.isVisible(),label+' visible');const box=await locator.boundingBox(),viewport=locator.page().viewportSize();assert.ok(box&&box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width+1&&box.y+box.height<=viewport.height+1,label+' within viewport');}
 export async function capture(page,evidence,name,artifacts){const path=join(evidence,name+'.jpg');await page.screenshot({path,type:'jpeg',quality:85,fullPage:true});artifacts.push({file:name+'.jpg',sha256:createHash('sha256').update(await readFile(path)).digest('hex'),url:page.url(),viewport:page.viewportSize()});}
 export async function axeChecklist(page,evidence,name){
  const axePath=new URL('../../node_modules/axe-core/axe.min.js',import.meta.url).pathname;await page.addScriptTag({path:axePath});
- await page.locator('.activation-checklist').waitFor();assert.equal(await page.locator('.activation-checklist').count(),1,'one checklist audited');
- const result=await page.evaluate(async()=>window.axe.run(document.querySelector('.activation-checklist')));
+ await page.locator('.setup-list[data-applicable]:visible').first().waitFor();assert.equal(await page.locator('.setup-list:visible').count(),1,'one visible setup list audited');
+ const result=await page.evaluate(async()=>window.axe.run([...document.querySelectorAll('.setup-list')].find(node=>node.offsetParent)));
  await writeFile(join(evidence,name+'.axe.json'),JSON.stringify(result,null,2));assert.deepEqual(result.violations.filter(v=>['serious','critical'].includes(v.impact)),[],name+' serious/critical checklist issues');
+}
+// The empty inbox's start block: the one visible block is audited the way the Setup list is.
+export async function axeInboxStart(page,evidence,name){
+ const axePath=new URL('../../node_modules/axe-core/axe.min.js',import.meta.url).pathname;await page.addScriptTag({path:axePath});
+ assert.equal(await page.locator('[data-testid="inbox-start"]:visible').count(),1,'one visible start block audited');
+ const result=await page.evaluate(async()=>window.axe.run([...document.querySelectorAll('[data-testid="inbox-start"]')].find(node=>node.offsetParent)));
+ await writeFile(join(evidence,name+'.axe.json'),JSON.stringify(result,null,2));assert.deepEqual(result.violations.filter(v=>['serious','critical'].includes(v.impact)),[],name+' serious/critical start-block issues');
 }

@@ -3,14 +3,13 @@ import { useNavigate } from '@tanstack/react-router';
 import { useNavigationGuard } from '../../native/NavigationGuard';
 import { nativeRequest } from '../../native/transport';
 import { useDashboardSettings } from '../../native/dashboard-state';
-import { realWorkspaces, rememberDemoReturn, returnWorkspace } from '../../native/demo/return-workspace';
+import { rememberDemoReturn, returnWorkspace } from '../../native/demo/return-workspace';
 
+/** The empty inbox's quiet way to look around: opens the fictional demo project and remembers this workspace as the way back. */
 export default function DemoInboxInvitation() {
     const navigate = useNavigate();
     const settings = useDashboardSettings();
-    const projects = realWorkspaces(settings);
-    const [selected, setSelected] = useState('');
-    const originId = !settings.isGlobalInbox && !settings.project?.is_demo ? settings.project?.id : selected || (projects.length === 1 ? projects[0].id : '');
+    const originId = settings.project.id;
     const { confirmNavigation } = useNavigationGuard();
     const pending = useRef(false);
     const [loading, setLoading] = useState(false);
@@ -41,13 +40,11 @@ export default function DemoInboxInvitation() {
         }
     };
 
-    return <div className="demo-inbox-invitation mx-auto">
-        <p>Explore fictional conversations in a separate demo project.</p>
-        {settings.isGlobalInbox && <label className="d-block mb-2">Return workspace<select className="form-select form-select-sm mt-1" value={originId} onChange={event => setSelected(event.target.value)} disabled={loading}><option value="">Choose your workspace</option>{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}
-        <button type="button" className="btn btn-sm btn-primary" disabled={loading || !originId} onClick={openDemo}>
-            {loading ? 'Opening demo inbox…' : 'Try a demo inbox'}
+    return <div className="inbox-start__demo">
+        <button type="button" className="inbox-start__quiet" data-testid="inbox-demo" disabled={ loading } onClick={ openDemo }>
+            { loading ? 'Opening demo inbox…' : 'Try a demo inbox' }
         </button>
-        {loading && <p className="mt-2" role="status">Preparing your demo project…</p>}
-        {error && <p className="mt-2 text-danger" role="alert">{error}</p>}
+        { loading && <p role="status">Preparing your demo project…</p> }
+        { error && <p className="text-danger" role="alert">{ error }</p> }
     </div>;
 }

@@ -120,7 +120,7 @@ complete export of your Cloudflare account.
 5. Keep the old resources until you have accepted the restore.
 
 After a restore, every member who had connected Slate (an outside application
-that members can connect under **More settings → Connected applications**) must
+that members can connect under **Settings → Connected applications**) must
 give consent again. Otherwise, normal sign-in sessions work as before.
 
 ## Where an installation can run

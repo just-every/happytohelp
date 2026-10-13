@@ -14,6 +14,14 @@ Public helpers for the signed-out pages:
   `missing`, `invalid`, `expired`, `used` or `valid` (with the workspace and email, and for invitations whether the
   invitee already has an account and which account is signed in). It consumes nothing and counts against no limit.
 
+First-run setup (`setup.ts`) is one screen: email, password, the setup token only when the server needs one, and the website.
+`POST /bootstrap` derives what is missing (`workspace-defaults.ts`: the workspace name from the public website or the company
+email domain, the owner name from the email, a default colour), keeps explicit values as given, writes the `derived` marker
+into the project settings, adds the workspace defaults from `management/provisioning` to the same batch, and then sends the
+owner one welcome email (`welcome-email.ts`) through the durable send path under `welcome:<projectId>`. An uncertain send is
+never repeated. The response says what happened to it (`welcomeEmail`: `sent`, `not_configured`, `failed` or `uncertain`).
+Tests: `tests/identity-setup.mjs`, `tests/identity-setup-deployment.mjs`, `tests/setup-browser.mjs`.
+
 Accepting one invitation link retires the other links issued for the same email in that workspace. Pending
 invitation management (copy link, resend, revoke) lives in the management module.
 Tests: `tests/identity.mjs`, `tests/identity-setup.mjs`, `tests/identity-links.mjs`.

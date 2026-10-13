@@ -43,7 +43,7 @@ Favcount.prototype.set = function (count) {
         fontSize = multiplier * 10.3;
         xOffset = multiplier * 1.78;
         yOffset = multiplier * 11.3;
-        color = '#211e44';
+        color = '#141414';
         if(count < 10) {
             opacity = 1;
         }

@@ -2,11 +2,11 @@
 .workspace-brand {
     margin-top: 28px;
     [hidden] { display: none !important; }
-    &__title { margin: 0 0 14px; font-size: 13px; font-weight: 600; color: var(--conversation-ink); }
+    &__title { margin: 0 0 14px; font-size: 13px; font-weight: 600; color: var(--ink); }
     &__layout { display: grid; grid-template-columns: 80px minmax(0, 1fr); align-items: start; gap: 24px; max-width: 760px; }
     &__preview {
         display: grid; place-items: center; width: 80px; height: 80px; overflow: hidden;
-        border-radius: 10px; background: var(--bs-primary); color: #fff;
+        border-radius: 10px; background: var(--bs-primary); color: var(--on-ink);
         font-size: 32px; font-weight: 500;
         img { width: 100%; height: 100%; object-fit: contain; }
     }
@@ -14,28 +14,28 @@
     &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
     .btn-link { padding-inline: 5px; font-size: 12px; }
-    &__help { margin: 10px 0 0; color: var(--conversation-muted); font-size: 12px; line-height: 1.55; }
-    &__selection { margin: 8px 0 0; font-size: 12px; color: var(--conversation-accent); }
+    &__help { margin: 10px 0 0; color: var(--ink-soft); font-size: 12px; line-height: 1.55; }
+    &__selection { margin: 8px 0 0; font-size: 12px; color: var(--ink); }
     &__error { margin: 8px 0 0; font-size: 12px; color: var(--bs-danger); }
     &__generator { margin-top: 18px; }
-    &__generator > label { margin-bottom: 7px; color: var(--conversation-ink); font-size: 12px; }
+    &__generator > label { margin-bottom: 7px; color: var(--ink); font-size: 12px; }
     &__composer {
-        padding: 10px; border: 1px solid var(--conversation-line); border-radius: 9px;
-        background: var(--workspace-surface-raised, #fff); transition: border-color .15s, box-shadow .15s;
-        &:focus-within { border-color: var(--bs-primary); box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), .1); }
-        textarea { display: block; width: 100%; min-height: 48px; padding: 0; resize: vertical; border: 0; outline: 0; box-shadow: none; background: transparent; color: var(--conversation-ink); font: inherit; font-size: 13px; line-height: 1.6; }
-        textarea::placeholder { color: var(--conversation-muted); opacity: .85; }
+        padding: 10px; border: 1px solid var(--rule); border-radius: 9px;
+        background: var(--surface); transition: border-color .15s, box-shadow .15s;
+        &:focus-within { border-color: var(--bs-primary); box-shadow: 0 0 0 2px rgba(var(--ink-rgb), .1); }
+        textarea { display: block; width: 100%; min-height: 48px; padding: 0; resize: vertical; border: 0; outline: 0; box-shadow: none; background: transparent; color: var(--ink); font: inherit; font-size: 13px; line-height: 1.6; }
+        textarea::placeholder { color: var(--ink-soft); opacity: .85; }
     }
     &__composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
-    &__composer-actions > span { color: var(--conversation-muted); font-size: 12px; }
+    &__composer-actions > span { color: var(--ink-soft); font-size: 12px; }
     &__result { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
-    &__result > img { width: 88px; height: 88px; object-fit: contain; border-radius: 9px; background: var(--workspace-surface-raised, #fff); }
+    &__result > img { width: 88px; height: 88px; object-fit: contain; border-radius: 9px; background: var(--surface); }
     &__preview:has(img:not([hidden])), &__result > img {
-        background-color: var(--workspace-surface-raised, #fff);
-        background-image: repeating-conic-gradient(var(--conversation-line) 0% 25%, transparent 0% 50%);
+        background-color: var(--surface);
+        background-image: repeating-conic-gradient(var(--rule) 0% 25%, transparent 0% 50%);
         background-size: 12px 12px;
     }
-    &__result p { margin: 0 0 7px; font-size: 12px; color: var(--conversation-ink); }
+    &__result p { margin: 0 0 7px; font-size: 12px; color: var(--ink); }
 
     @media (max-width: 575.98px) {
         &__layout { grid-template-columns: 60px minmax(0, 1fr); gap: 16px; }

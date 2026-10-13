@@ -23,7 +23,7 @@ try{
     await run(`${width}-${section}`,async()=>{
      const path=section.startsWith('delegation/')?`/${section}?account_id=${owner.projectId}`:`/projects/${owner.projectId}/${section}`;
      await page.goto(runtime.origin+path);assert.equal(new URL(page.url()).pathname,new URL(runtime.origin+path).pathname);
-     await page.getByTestId('workspace-header-name').filter({hasText:'Route workspace'}).waitFor();
+     await page.getByRole('button',{name:'Switch workspace: Route workspace',exact:true}).waitFor();
      await page.waitForLoadState('networkidle');
      await inspectState(page,records,evidence,`${width}-${section.replaceAll('/','-')}`);
      return {workspaceHeader:true};
@@ -39,13 +39,13 @@ try{
    const contact=await post(runtime.origin,`/api/management/projects/${owner.projectId}/contacts`,{name:'Route contact',email:'route-contact@example.test'},owner.token);
    const contactId=contact.data?.id||contact.id;
    for(const path of [`contacts/${contactId}`,'contacts/missing-contact','articles/missing-article']){
-    await page.goto(runtime.origin+`/projects/${owner.projectId}/${path}`);await page.getByTestId('workspace-header-name').filter({hasText:'Route workspace'}).waitFor();await page.waitForLoadState('networkidle');
+    await page.goto(runtime.origin+`/projects/${owner.projectId}/${path}`);await page.getByRole('button',{name:'Switch workspace: Route workspace',exact:true}).waitFor();await page.waitForLoadState('networkidle');
     await inspectState(page,records,evidence,`${width}-${path.replaceAll('/','-')}`);
    }
    for(const mode of ['dark','light']){
     const response=await fetch(runtime.origin+`/api/management/projects/${owner.projectId}/settings`,{method:'PUT',headers:{Authorization:'Bearer '+owner.token,'Content-Type':'application/json'},body:JSON.stringify({display_mode:mode})});assert.ok(response.ok);
     if(mode==='dark')for(const path of [`contacts/${contactId}`,'contacts/missing-contact']){
-     await page.goto(runtime.origin+`/projects/${owner.projectId}/${path}`);await page.waitForFunction(()=>document.body.dataset.workspaceMode==='dark');await page.waitForLoadState('networkidle');
+     await page.goto(runtime.origin+`/projects/${owner.projectId}/${path}`);await page.waitForFunction(()=>document.body.dataset.theme==='dark');await page.waitForLoadState('networkidle');
      await inspectState(page,records,evidence,`${width}-dark-${path.replaceAll('/','-')}`);
     }
    }
@@ -68,11 +68,12 @@ try{
    });
    const navigation=page.getByRole('navigation',{name:'Main navigation'});
    await navigation.getByRole('button',{name:/Switch workspace:/}).click();await navigation.getByRole('button',{name:'Second route workspace',exact:true}).click();
-   await page.getByTestId('workspace-header-name').filter({hasText:'Second route workspace'}).waitFor();assert.ok(new URL(page.url()).pathname.includes(second.id));
-   await page.reload();await page.getByTestId('workspace-header-name').filter({hasText:'Second route workspace'}).waitFor();await inspectState(page,records,evidence,`${width}-switched-reloaded`);
-   await page.goto(runtime.origin+`/projects/${owner.projectId}/conversations`);await page.getByRole('button',{name:'Try a demo inbox',exact:true}).waitFor();
-   await page.getByRole('link',{name:'Install the widget',exact:true}).click();await page.getByRole('heading',{name:'Install the widget',exact:false}).waitFor();
-   await page.goto(runtime.origin+`/projects/${owner.projectId}/conversations`);assert.equal(await page.getByRole('link',{name:'Send yourself a test message',exact:true}).getAttribute('href'),runtime.origin);
+   await page.getByRole('button',{name:'Switch workspace: Second route workspace',exact:true}).waitFor();assert.ok(new URL(page.url()).pathname.includes(second.id));
+   await page.reload();await page.getByRole('button',{name:'Switch workspace: Second route workspace',exact:true}).waitFor();await inspectState(page,records,evidence,`${width}-switched-reloaded`);
+   await page.goto(runtime.origin+`/projects/${owner.projectId}/conversations`);const start=page.locator('[data-testid="inbox-start"]:visible');await start.getByTestId('inbox-demo').waitFor();
+   assert.ok((await start.getByTestId('inbox-setup-link').getAttribute('href')).endsWith('/activation'));
+   await start.getByTestId('inbox-primary-action').click();await page.waitForURL('**/widget-settings');await page.getByRole('heading',{name:'Widget',level:1}).waitFor();
+   await page.goto(runtime.origin+`/projects/${owner.projectId}/conversations`);await start.getByTestId('inbox-demo').waitFor();
    await inspectState(page,records,evidence,`${width}-empty-actions`);
    // Observe the genuine enabled transition frame by frame; never pause motion,
    // change styles, or settle past unreadable intermediate frames.

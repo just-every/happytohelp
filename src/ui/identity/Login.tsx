@@ -27,7 +27,7 @@ export default function Login() {
             location.assign(loginDestination(requestedDestination(), location.origin, result.accountOnly));
         } catch (failure: any) { setError(failure.message); setBusy(false); }
     };
-    return <IdentityFrame drawing={<SignInDrawing />}>
+    return <IdentityFrame drawing={<SignInDrawing intro />}>
         <h1>Welcome back</h1>
         <p className="id-lede">Log in to your HappyToHelp workspace.</p>
         {options?.setupRequired && <p className="id-note" role="status">This installation has not been set up yet. <a href="/setup">Set up your workspace</a> to create the first owner account.</p>}

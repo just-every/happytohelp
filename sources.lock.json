@@ -6372,7 +6372,7 @@
       "executable": false
     },
     "src/ui/identity/Login.tsx": {
-      "sha256": "7687b24f1f11afca52bd351e7ed45bc1f287e7d91a3b9cd91b44b5923ab0e885",
+      "sha256": "8ebc4b2fdd14036d87a31a9d03adfe77bb68b16e828970823cd55c8b8ebf7e82",
       "executable": false
     },
     "src/ui/identity/MagicLogin.tsx": {
@@ -6392,7 +6392,7 @@
       "executable": false
     },
     "src/ui/identity/SignInDrawing.tsx": {
-      "sha256": "9820a71437ba8743c2208663539450406c57ab4c663fa3ee7951b80ea564abed",
+      "sha256": "5a49534f8bc58ffc06611ddd91a22b4aa341a8fdd74633ddbc3c65e7e52caa8b",
       "executable": false
     },
     "src/ui/identity/VerifyEmail.tsx": {

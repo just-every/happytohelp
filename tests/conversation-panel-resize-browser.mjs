@@ -23,7 +23,7 @@ try {
   await page.getByLabel('Password', {exact:true}).fill(fixture.password);
   await page.getByRole('button', {name:'Login',exact:true}).click();
   await page.waitForURL('**/projects/**');
-  await page.getByRole('link',{name:/All open/}).click();
+  await page.locator('nav[data-testid="inbox-views"] a[href*="view=open"]').click();
   await page.locator('.conversation-list-items').getByText('Alpha Visitor',{exact:true}).click();
   await page.locator('#chat .main').getByText(fixture.projects[0].message,{exact:true}).waitFor({state:'visible'});
   const panel = page.locator('#conversation-assistant');

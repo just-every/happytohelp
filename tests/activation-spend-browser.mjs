@@ -40,7 +40,9 @@ try {
  await context.addCookies([{name:'h2h_session',value:owner.token,url:origin}])
  const page=await context.newPage(), errors=[]
  page.on('pageerror',error=>errors.push(error.message))
- const refresh=async text=>{await page.getByRole('button',{name:'Refresh spend'}).click();await page.getByText(text,{exact:true}).waitFor()}
+ const summary=page.getByTestId('spend-summary'),details=page.getByTestId('spend-details')
+ const openDetails=async()=>{await details.getByText('Details and guards',{exact:true}).click()}
+ const refresh=async text=>{await page.getByRole('button',{name:'Refresh spend'}).click();await summary.getByText(text,{exact:true}).waitFor()}
  const seed=async(cost)=>{
   const now=new Date().toISOString()
   await db.prepare("INSERT INTO ai_generations(id,project_id,conversation_id,state,source_revision,actor_json,model,ai_id,ai_profile_json,created_at,updated_at) VALUES('browser-generation',?,'conversation','completed',0,'{\"role\":\"operator\"}','model','ai','{}',?,?)").bind(owner.projectId,now,now).run()
@@ -50,32 +52,38 @@ try {
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:980})
   await page.goto(origin)
-  await page.getByText('No recorded spend',{exact:true}).waitFor()
+  await summary.getByText('No recorded spend today',{exact:true}).waitFor()
+  assert.doesNotMatch(await summary.innerText(),/\$/)
+  assert.equal(await details.evaluate(el=>el.open),false)
+  const box=await page.locator('.activation-spend').boundingBox();assert.ok(box.height<(width===390?260:160),'the closed card is one line')
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
   await page.screenshot({path:join(evidence,`empty-${width}.jpg`),fullPage:true})
  }
  await seed(0)
- await refresh('$0.00')
+ await refresh('$0.00 today')
  await db.prepare("UPDATE ai_round_usage SET usage_json=? WHERE attempt_id='browser-attempt'").bind(JSON.stringify({cost:null})).run()
- await refresh('Unknown')
+ await refresh('Spend today is unknown')
  await db.prepare("INSERT INTO ai_round_usage(attempt_id,request_id,usage_json,observed) VALUES('browser-attempt','second-request','{\"cost\":0.025,\"metadata\":{\"source\":\"xai\",\"provider_cost_ticks\":250000000}}',1)").run()
- await refresh('$0.025 reported')
+ await refresh('$0.025 reported today, total unknown')
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:980})
+  if(!await details.evaluate(el=>el.open))await openDetails()
   assert.equal(await page.getByText('Partial cost: the total is unknown.',{exact:true}).count(),1)
+  assert.equal(await page.getByText('Replies admitted',{exact:true}).isVisible(),true)
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
   await page.screenshot({path:join(evidence,`partial-${width}.jpg`),fullPage:true})
   await page.getByRole('button',{name:'Refresh spend'}).focus()
   assert.equal(await page.getByRole('button',{name:'Refresh spend'}).evaluate(el=>el===document.activeElement),true)
  }
  await db.prepare("UPDATE ai_round_usage SET usage_json='{\"cost\":0}' WHERE attempt_id='browser-attempt'").run()
- await refresh('Unknown')
+ await refresh('Spend today is unknown')
+ await openDetails()
  await page.getByText(/Estimated recorded cost \(USD\): \$0.00/).waitFor()
  await db.prepare('DELETE FROM memberships WHERE project_id=?').bind(owner.projectId).run()
  await page.getByRole('button',{name:'Refresh spend'}).click()
  await page.getByRole('alert').waitFor()
  assert.match(await page.getByRole('alert').innerText(),/Could not load AI spend/)
- assert.equal(await page.getByText('$0.025 reported',{exact:true}).count(),0)
+ assert.equal(await page.getByText('$0.025 reported today, total unknown',{exact:true}).count(),0)
  assert.equal(harness.outbound(),0);assert.deepEqual(errors,[])
  const receipt={scope:'component with real route and local D1; shell mounting requires integrated activation suite',widths:[1440,390],states:['empty','known-zero','unknown','partial','estimated-zero-actual-unknown','revoked-membership-error'],outboundCalls:harness.outbound(),screenshots:evidence}
  await writeFile(join(evidence,'receipt.json'),JSON.stringify(receipt,null,2))

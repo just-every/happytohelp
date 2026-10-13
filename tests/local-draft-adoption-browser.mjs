@@ -105,8 +105,7 @@ try {
                 assert.equal(await ready,200);
                 await page.keyboard.press('Escape');
                 const nav=page.getByRole('button',{name:'Toggle navigation',exact:true});if(await nav.isVisible())await nav.click();
-                await page.getByRole('button',{name:'Settings',exact:true}).click();
-                await page.getByRole('link',{name:'Project',exact:true}).click();
+                await page.getByTestId('nav-settings').click();
                 await page.waitForURL('**/edit');await composer.waitFor({state:'detached'});
                 release();await page.unrouteAll({behavior:'wait'});
                 await page.goBack();await page.waitForURL(url);await composer.waitFor();

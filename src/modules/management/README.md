@@ -29,6 +29,20 @@ canonical storage and maps original status/assignment/cursor contracts. Widget
 collector actions use the customer-context module; selected insight pairs use
 conversation admission; generation and operator suggestions use AI support.
 
+Every workspace created by first-owner setup, `POST /projects` or email-verified registration is provisioned in its
+creation batch by `provisioning/` (`workspaceDefaults`): one enabled starter assistant whose model follows the
+installed provider key (`provisioning/models.ts`, OpenAI's when none), made the default for visitors and signed-in
+users; a `starter_ai` settings marker recording what it was created with, so an untouched starter can be told from an
+edited one; and, when the installation holds `INBOUND_EMAIL_TOKEN`, a reply-by-email mailbox named after the
+workspace on `INBOUND_EMAIL_DOMAIN`, else `in.<website domain>`, else `localhost.test`, suffixed instead of conflicting
+and enabled only when the installation sends mail. The workspace sends from the installation sender (`EMAIL_FROM`)
+until its own domain is verified; `proposed_sender` (`support@<website domain>`) records the address it moves to.
+Settings merge with `json_insert`, so nothing already present is
+replaced; after the batch commits the one-time site read is queued. Demo inboxes are never provisioned. A default
+assistant takes a new widget conversation only while its provider key is installed (`GET /projects/:id/ai` reports
+which secret it needs, never key material), so without a key visitors stay with the team and no reply fails; an
+explicit AI request still fails naming the missing secret. `tests/provisioning.mjs` covers this through public routes.
+
 Pending invitations (`invitations.ts`, `invitation-store.ts`) are the unused invite links for one email in one
 workspace, listed on `GET /projects/:projectId/agents` with `invitation_id` (the lower-cased email), `expires_at`
 and a per-row `canManage` computed from the caller's role (owners: all; admins: invitations that grant the operator

@@ -4,7 +4,7 @@
     "schema": 1,
     "projectId": "just-every/happytohelp",
     "name": "HappyToHelp",
-    "sourceRepository": "just-every/happytohelp",
+    "sourceRepository": "just-every/run-happytohelp",
     "license": "MIT",
     "deployment": {
       "target": "cloudflare-workers",
@@ -42,6 +42,7 @@
         "APP_ORIGIN",
         "EMAIL_PROVIDER",
         "EMAIL_ACCOUNT_ID",
+        "INBOUND_EMAIL_DOMAIN",
         "RER_INSTALLATION_ID",
         "RER_MANAGEMENT_ORIGIN",
         "H2H_SETUP_OWNER_EMAIL",

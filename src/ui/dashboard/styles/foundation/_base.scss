@@ -1,16 +1,61 @@
-// Element defaults for the dashboard on top of Bootstrap's reboot.
+// Element defaults for the dashboard on top of Bootstrap's reboot. Bootstrap's
+// runtime custom properties read the brand tokens (src/ui/homepage/brand-tokens.css),
+// so a Dark workspace (data-theme="dark" on the body) needs no second palette.
 
-[data-bs-theme="dark"] {
-  --bs-light: #{$gray-800-dark};
-  --bs-light-rgb: #{to-rgb($gray-800-dark)};
+body {
+  --bs-body-bg: var(--paper);
+  --bs-body-color: var(--ink);
+  --bs-body-font-family: var(--font-sans);
+  --bs-emphasis-color: var(--ink);
+  --bs-heading-color: var(--ink);
+  --bs-secondary-color: var(--ink-soft);
+  --bs-tertiary-color: var(--ink-soft);
+  --bs-secondary-bg: var(--paper-deep);
+  --bs-tertiary-bg: var(--paper-deep);
+  --bs-border-color: var(--rule);
+  --bs-border-color-translucent: var(--rule);
+  --bs-primary: var(--ink);
+  --bs-primary-rgb: var(--ink-rgb);
+  --bs-link-color: var(--ink);
+  --bs-link-color-rgb: var(--ink-rgb);
+  --bs-link-hover-color: var(--ink);
+  --bs-link-hover-color-rgb: var(--ink-rgb);
+  --bs-primary-bg-subtle: var(--d-cyan-tint);
+  --bs-primary-text-emphasis: var(--ink);
+  --bs-secondary-bg-subtle: var(--muted-chip);
+  --bs-secondary-text-emphasis: var(--ink);
+  --bs-danger: var(--danger);
+  --bs-danger-text-emphasis: var(--danger);
+  --bs-danger-bg-subtle: transparent;
+  --bs-danger-border-subtle: var(--danger);
+  --bs-success-text-emphasis: var(--ink);
+  --bs-success-bg-subtle: var(--d-cyan-tint);
+  --bs-success-border-subtle: var(--d-cyan);
+  --bs-info-text-emphasis: var(--ink);
+  --bs-info-bg-subtle: var(--d-cyan-tint);
+  --bs-info-border-subtle: var(--d-cyan);
+  --bs-warning-text-emphasis: var(--ink);
+  --bs-warning-bg-subtle: var(--note);
+  --bs-warning-border-subtle: var(--rule);
+  --bs-light: var(--paper-deep);
+  --bs-light-rgb: var(--ink-rgb);
+  --bs-white: var(--surface);
+  --bs-form-valid-color: var(--ink);
+  --bs-form-valid-border-color: var(--ink);
+  --bs-form-invalid-color: var(--danger);
+  --bs-form-invalid-border-color: var(--danger);
+  // Keyboard focus stays in ink on paper (dashboard.scss draws the ring).
+  --accessibility-focus-ring: var(--ink);
+  --accessibility-focus-halo: var(--paper);
+  min-height: 100%;
+  color: var(--ink);
+  background-color: var(--paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 html {
   height: 100%;
-}
-
-body {
-  min-height: 100%;
 }
 
 ul,
@@ -22,9 +67,10 @@ ol {
   -webkit-appearance: none;
 }
 
-// Headings: tighter tracking, and bottom margins that shrink with the level.
+// Headings: the landing's tracking, and bottom margins that shrink with the level.
 h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-  letter-spacing: -.02em;
+  font-weight: 500;
+  letter-spacing: -.015em;
 
   > a {
     color: inherit;
@@ -52,10 +98,27 @@ h6.text-uppercase {
 }
 
 .display-1, .display-2, .display-3, .display-4 {
-  letter-spacing: -.02em;
+  letter-spacing: -.03em;
 }
 
 b,
 strong {
   font-weight: $font-weight-bold;
 }
+
+// Text links: ink with the landing's aqua underline; the underline turns ink on hover.
+.h2h-link,
+.workspace-page-content p a:not(.btn),
+.workspace-page-content .settings-note a:not(.btn) {
+  color: var(--ink);
+  text-decoration: underline 2px var(--d-cyan-deep);
+  text-underline-offset: 5px;
+
+  &:hover { text-decoration-color: var(--ink); }
+}
+
+.text-muted, .text-body-secondary { color: var(--ink-soft) !important; }
+.text-danger { color: var(--danger) !important; }
+.bg-white { background-color: var(--surface) !important; }
+.bg-light { background-color: var(--paper-deep) !important; }
+.border, .border-top, .border-bottom, .border-start, .border-end { border-color: var(--rule) !important; }

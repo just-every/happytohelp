@@ -3,10 +3,8 @@
 // Cards ------------------------------------------------------------------------
 
 .card {
-  --bs-card-outline-color: var(--bs-gray-200);
   margin-bottom: 1.5rem;
-  border-color: var(--bs-card-outline-color);
-  box-shadow: var(--bs-card-box-shadow);
+  box-shadow: none;
 
   > * {
     flex-shrink: 0;
@@ -46,27 +44,22 @@
   }
 }
 
-[data-bs-theme="dark"] .card {
-  --bs-card-border-color: var(--bs-border-color);
-  --bs-card-bg: #{$gray-800-dark};
-  --bs-card-outline-color: #{$gray-800-dark};
-  --bs-card-box-shadow: 0 .75rem 1.5rem rgba(var(--bs-black-rgb), .5);
-}
 
 // Tables -----------------------------------------------------------------------
 
+// Header row 13px uppercase in the soft ink; rows 56px with a rule between them.
 .table {
-  --bs-table-head-bg: var(--bs-gray-100);
-  --bs-table-head-color: var(--bs-secondary-color);
-
   thead th {
-    background-color: var(--bs-table-head-bg);
-    color: var(--bs-table-head-color);
-    font-size: $font-size-sm;
-    font-weight: $font-weight-bold;
-    letter-spacing: .08em;
+    padding-block: 12px;
+    color: var(--ink-soft);
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .06em;
     text-transform: uppercase;
   }
+
+  tbody td { height: 56px; padding-block: 10px; }
 
   td,
   th {
@@ -93,67 +86,15 @@ tbody td {
   }
 }
 
-[data-bs-theme="dark"] .table {
-  --bs-table-border-color: var(--bs-border-color);
-  --bs-table-hover-bg: #{$gray-900-dark};
-  --bs-table-head-bg: var(--bs-black);
-}
 
 // Tabs -------------------------------------------------------------------------
+// ./_controls.scss draws every tab rail; the saved replies picker's compact tabs are a little smaller.
 
-// Underlined tabs: the active tab is marked by a primary-coloured rule.
-.nav-tabs {
-  --bs-nav-link-color: var(--bs-gray-600);
-  --bs-nav-link-hover-color: var(--bs-gray-700);
-
-  .nav-item {
-    margin-left: .75rem;
-    margin-right: .75rem;
-
-    &:first-child {
-      margin-left: 0;
-    }
-
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-
-  .nav-link {
-    padding: 1rem 0;
-    border-width: 0 0 1px;
-    border-bottom: 1px solid transparent;
-  }
-}
-
-// Compact tabs (saved replies picker): smaller type, tighter spacing and a
-// body-coloured active tab.
 .nav-tabs.nav-tabs-sm {
-  --bs-nav-link-font-size: #{$font-size-sm};
-  --bs-nav-tabs-border-color: var(--bs-border-color);
-  --bs-nav-tabs-link-active-border-color: transparent transparent var(--bs-body-color);
+  gap: 16px;
+  border-bottom: 0;
 
-  .nav-item {
-    margin-left: .5rem;
-    margin-right: .5rem;
-
-    &:first-child {
-      margin-left: 0;
-    }
-
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-
-  .nav-link {
-    padding: .25em 0;
-    color: var(--bs-gray-500);
-
-    &.active {
-      color: var(--bs-body-color);
-    }
-  }
+  .nav-link { padding: 4px 0 6px; font-size: 14px; }
 }
 
 // Menus ------------------------------------------------------------------------
@@ -176,13 +117,6 @@ tbody td {
   mask-image: url("../../../../../node_modules/feather-icons/dist/icons/chevron-up.svg");
 }
 
-[data-bs-theme="dark"] .dropdown-menu {
-  --bs-dropdown-bg: #{$gray-800-dark};
-  --bs-dropdown-border-color: var(--bs-black);
-  --bs-dropdown-divider-bg: var(--bs-black);
-  --bs-dropdown-link-color: var(--bs-secondary-color);
-  --bs-dropdown-link-hover-color: var(--bs-white);
-}
 
 // Dialogs ----------------------------------------------------------------------
 
@@ -206,32 +140,7 @@ tbody td {
   margin: -1.5rem -1.5rem -1.5rem auto;
 }
 
-// Secondary dialog actions use the same blue-grey palette at text contrast.
-.modal .btn-secondary {
-  --bs-btn-bg: #{$gray-800};
-  --bs-btn-border-color: #{$gray-800};
-  --bs-btn-hover-bg: #{$gray-900};
-  --bs-btn-hover-border-color: #{$gray-900};
-  --bs-btn-active-bg: #{$gray-900};
-  --bs-btn-active-border-color: #{$gray-900};
-}
-
-[data-bs-theme="dark"] .modal {
-  --bs-modal-bg: #{$gray-800-dark};
-  --bs-modal-border-color: var(--bs-black);
-}
-
 // Alerts -----------------------------------------------------------------------
-
-// Alerts are filled with their state colour, with contrasting text.
-@each $state, $value in $theme-colors {
-  .alert-#{$state} {
-    --bs-alert-color: #{color-contrast($value)};
-    --bs-alert-bg: var(--bs-#{$state});
-    --bs-alert-border-color: var(--bs-#{$state});
-    --bs-alert-link-color: #{color-contrast($value)};
-  }
-}
 
 .alert-link {
   text-decoration: underline;

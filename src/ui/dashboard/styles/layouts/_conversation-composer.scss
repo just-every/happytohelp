@@ -1,5 +1,5 @@
-// Composer-specific layout replaces the old suggestion rail now that suggestions
-// live in the dedicated assistant column.
+// The composer: a drawn card pinned to the conversation's foot, the reply field borderless inside it, the tools at the
+// left (the round "+" button) and the black Send pill at the right.
 body.conversation-workspace {
     #chat .chat > .chat-body > .chat-footer {
         box-sizing: border-box;
@@ -10,19 +10,18 @@ body.conversation-workspace {
         height: auto;
         min-height: 116px;
         max-height: none;
-        margin: 0 auto 1rem !important;
-        padding: .75rem !important;
+        margin: 0 auto 16px !important;
+        padding: 14px 16px 12px 20px !important;
         overflow: visible;
-        background: var(--workspace-surface-raised, #fff);
-        border: 1px solid var(--conversation-line) !important;
-        border-radius: 0.55rem !important;
-        box-shadow: 0 1px 3px rgba(32, 53, 87, 0.04);
+        background: var(--surface);
+        border: 2px solid var(--ink) !important;
+        border-radius: var(--card-radius) !important;
+        box-shadow: var(--card-shadow);
         cursor: text;
-        transition: border-color .15s ease, box-shadow .15s ease;
+        transition: box-shadow .15s ease;
 
         &:focus-within {
-            border-color: var(--conversation-accent) !important;
-            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), .12);
+            box-shadow: var(--card-shadow), 0 0 0 3px var(--d-cyan-deep);
         }
     }
 
@@ -54,8 +53,8 @@ body.conversation-workspace {
             min-height: 24px !important;
             max-height: min(18rem, 32dvh) !important;
             padding: 0;
-            font-size: .8125rem;
-            line-height: 1.45;
+            font-size: 16px;
+            line-height: 1.5;
             overflow-y: auto !important;
             overflow-wrap: break-word;
             resize: none;
@@ -76,7 +75,7 @@ body.conversation-workspace {
         .loading-content {
             top: 0;
             max-height: min(18rem, 32dvh);
-            font-size: .8125rem;
+            font-size: 16px;
         }
     }
 
@@ -111,8 +110,8 @@ body.conversation-workspace {
         gap: 0.5rem;
 
         .btn {
-            min-height: 2.25rem;
-            padding: 0.5rem 0.875rem;
+            min-height: 44px;
+            padding: 0 24px;
             white-space: nowrap;
         }
 
@@ -124,13 +123,40 @@ body.conversation-workspace {
 
             > svg { width: 1rem; height: 1rem; }
         }
+
+        // Send stays the black pill while there is nothing to send yet (it is inert, not faded to grey).
+        .btn-primary:disabled { opacity: 1; cursor: default; }
     }
 
+    // A phone composer is one row, as the pick: the reply field, then "+" and Send beside it; the field still grows.
     @media (max-width: 575.98px) {
         #chat .chat > .chat-body > .chat-footer {
+            min-height: 0;
             margin: 0 auto 0.5rem !important;
-            padding: 0.75rem !important;
+            padding: 6px 6px 6px 14px !important;
         }
+
+        #chat .chat-footer .chat-entry > .flex-grow-1 {
+            flex-direction: row !important;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        #chat .chat-footer .chat-entry-form {
+            align-self: center;
+            min-width: 0;
+        }
+
+        #chat .chat-footer .chat-buttons {
+            flex: 0 0 auto;
+            flex-wrap: nowrap;
+            width: auto;
+            min-height: 0;
+            margin: 0;
+        }
+
+        // Attachments need the full width: the buttons go back under the field while files are attached.
+        #chat .chat-footer:has(.conversation-composer__files) .chat-entry > .flex-grow-1 { flex-direction: column !important; align-items: stretch; }
 
         #chat .chat-footer .chat-entry-form textarea {
             max-height: min(12rem, 28dvh) !important;
@@ -148,9 +174,8 @@ body.conversation-workspace {
             gap: 0.375rem;
 
             .btn {
-                padding-right: 0.625rem;
-                padding-left: 0.625rem;
-                font-size: 0.75rem;
+                padding-right: 18px;
+                padding-left: 18px;
             }
         }
     }
@@ -160,20 +185,6 @@ body.conversation-workspace {
     @media (max-width: 600px) {
         &:has(> [data-rer-editor]) #chat .chat-footer .chat-buttons {
             padding-inline-end: 60px;
-        }
-    }
-
-    @media (min-width: 1200px) {
-        #chat .chat-footer .chat-entry-form textarea,
-        #chat .chat-footer .chat-entry-form .loading-content {
-            font-size: .875rem;
-        }
-    }
-
-    @media (min-width: 1600px) {
-        #chat .chat-footer .chat-entry-form textarea,
-        #chat .chat-footer .chat-entry-form .loading-content {
-            font-size: .9375rem;
         }
     }
 

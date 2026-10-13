@@ -7,6 +7,7 @@ import { passwordHash } from './credentials'
 import { sendEmail } from '../integrations/email'
 import { registrationAvailable } from './availability'
 import { setupAvailable } from './setup'
+import { workspaceDefaults } from '../management/provisioning/index'
 import { clientAddress,enforceRateLimit } from '../../platform/rate-limits'
 export const registration=new Hono<AppEnv>()
 registration.post('/register',async c=>{
@@ -24,6 +25,10 @@ registration.post('/register',async c=>{
 registration.post('/verify-email',async c=>{
  await enforceRateLimit(c.env,'projectsPerIpDay',clientAddress(c.req))
  const b=await c.req.json(),hash=await hashToken(requiredString(b.token,'token')),now=Date.now(),userId=id(),projectId=id();const guard='token_hash=? AND consumed_at IS NULL AND expires_at>?'
- const row=await c.env.DB.prepare(`SELECT email FROM registrations WHERE ${guard}`).bind(hash,now).first();if(!row)throw new HTTPException(400,{message:'Verification token invalid or expired'})
- const results=await c.env.DB.batch([c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,email,name,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) SELECT ?,project_name,?,allowed_origin,?,? FROM registrations WHERE ${guard}`).bind(projectId,id(),now,serverSecret(),hash,now),c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' FROM registrations WHERE ${guard}`).bind(projectId,userId,hash,now),c.env.DB.prepare(`INSERT INTO credentials SELECT ?,password_hash,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`UPDATE registrations SET consumed_at=? WHERE ${guard}`).bind(now,hash,now)]);if(!results[4].meta.changes)throw new HTTPException(409,{message:'Verification already consumed'});return c.json({verified:true,projectId,loginRequired:true})
+ const row=await c.env.DB.prepare(`SELECT email,project_name,allowed_origin FROM registrations WHERE ${guard}`).bind(hash,now).first<{email:string;project_name:string;allowed_origin:string}>();if(!row)throw new HTTPException(400,{message:'Verification token invalid or expired'})
+ // Provisioning follows the guarded inserts, so a consumed or expired token creates no workspace and no defaults.
+ const defaults=workspaceDefaults(c.env,{projectId,name:row.project_name,website:row.allowed_origin,ownerEmail:row.email})
+ const results=await c.env.DB.batch([c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,email,name,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) SELECT ?,project_name,?,allowed_origin,?,? FROM registrations WHERE ${guard}`).bind(projectId,id(),now,serverSecret(),hash,now),c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' FROM registrations WHERE ${guard}`).bind(projectId,userId,hash,now),c.env.DB.prepare(`INSERT INTO credentials SELECT ?,password_hash,? FROM registrations WHERE ${guard}`).bind(userId,now,hash,now),c.env.DB.prepare(`UPDATE registrations SET consumed_at=? WHERE ${guard}`).bind(now,hash,now),...defaults.statements]);if(!results[4].meta.changes)throw new HTTPException(409,{message:'Verification already consumed'})
+ await defaults.after()
+ return c.json({verified:true,projectId,loginRequired:true})
 })

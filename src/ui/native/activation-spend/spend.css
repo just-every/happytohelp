@@ -1,2 +1,18 @@
-.activation-spend{border:1px solid var(--bs-border-color,#d9dee5);border-radius:12px;padding:20px;margin:20px 0;min-width:0;color:var(--bs-body-color,#25334a);background:var(--bs-body-bg,#fff);overflow-wrap:anywhere}
-.activation-spend__header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.activation-spend h2{font-size:1.15rem;margin:0}.activation-spend h3{font-size:1rem;margin-top:22px}.activation-spend p{margin:10px 0}.activation-spend__amount{font-size:1.8rem;font-weight:650}.activation-spend__scope,.activation-spend__note{font-size:.9rem}.activation-spend__limits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}.activation-spend__limits div{padding:12px;background:var(--bs-tertiary-bg,#f5f7fa);border-radius:8px}.activation-spend dt{font-size:.85rem;font-weight:500}.activation-spend dd{font-size:1.05rem;margin:4px 0 0}.activation-spend button{min-height:36px}@media(max-width:500px){.activation-spend{padding:16px}.activation-spend__limits{grid-template-columns:1fr}}
+/* The AI spend card (AiSpendCard.jsx): one line and the Refresh button, with the rest in a disclosure. The card's own frame is .h2h-card. */
+.activation-spend { margin: 20px 0; min-width: 0; overflow-wrap: anywhere; font-size: 16px; }
+.activation-spend__header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; }
+.activation-spend h2 { margin: 0; font-size: 20px; font-weight: 500; letter-spacing: -.01em; }
+.activation-spend__summary { flex: 1 1 200px; min-width: 0; margin: 0; font-size: 16px; }
+.activation-spend p { margin: 10px 0; }
+.activation-spend__header p { margin: 0; }
+.activation-spend__details > summary { width: fit-content; margin-top: 12px; color: var(--ink); cursor: pointer; font-weight: 500; text-decoration: underline 1.5px var(--d-cyan-deep); text-underline-offset: 5px; }
+.activation-spend__details[open] > summary { margin-bottom: 8px; }
+.activation-spend h3 { margin: 22px 0 0; font-size: 16px; font-weight: 500; }
+.activation-spend__amount { font-size: 28px; font-weight: 500; letter-spacing: -.02em; }
+.activation-spend__scope, .activation-spend__note { color: var(--ink-soft); font-size: 14px; }
+.activation-spend__limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; }
+.activation-spend__limits div { padding: 12px; border-radius: 10px; background: var(--paper); }
+.activation-spend dt { font-size: 14px; font-weight: 500; }
+.activation-spend dd { margin: 4px 0 0; font-size: 16px; }
+.activation-spend button { min-height: 36px; }
+@media (max-width: 500px) { .activation-spend__limits { grid-template-columns: 1fr; } }

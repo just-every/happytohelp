@@ -34,8 +34,9 @@ try{
  await page.getByRole('button',{name:'Login',exact:true}).click()
  await page.waitForURL(url=>url.pathname===inboxPath&&!url.search)
 
- const waitForView=label=>page.waitForFunction(expected=>
-  document.querySelector('.inbox-view-link.is-active .inbox-view-label')?.textContent.trim()===expected,label)
+ const waitForView=view=>page.waitForFunction(expected=>{
+  const current=document.querySelectorAll('nav[data-testid="inbox-views"] a[aria-current="page"]')
+  return current.length===1&&new URL(current[0].href).searchParams.get('view')===expected},view)
  const rows=page.locator('.conversation-list-items .conversation-item')
  const checkOpenRows=async()=>{
   await page.getByText('Rate 100% Rhea',{exact:true}).waitFor()
@@ -46,12 +47,12 @@ try{
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:900})
   await page.goto(runtime.origin+inboxPath)
-  await waitForView('All open')
+  await waitForView('open')
   await checkOpenRows()
   assert.equal(new URL(page.url()).searchParams.has('view'),false,`${width}px keeps the default implicit`)
 
   await page.goto(runtime.origin+inboxPath+'?view=mine')
-  await waitForView('Your inbox')
+  await waitForView('mine')
   await page.getByText('No conversations match this view.',{exact:true}).waitFor()
   assert.equal(await rows.count(),0,`${width}px preserves an explicit Your inbox choice with zero assignments`)
  }
@@ -67,13 +68,13 @@ try{
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:900})
   await page.goto(runtime.origin+inboxPath)
-  await waitForView('Your inbox')
+  await waitForView('mine')
   await page.getByText('Row Alpha',{exact:true}).waitFor()
   assert.equal(await rows.count(),1,`${width}px defaults to the operator's one assigned conversation`)
   assert.equal(await page.getByText('Row Beta',{exact:true}).count(),0,`${width}px Your inbox applies its real assignment filter`)
 
   await page.goto(runtime.origin+inboxPath+'?view=open')
-  await waitForView('All open')
+  await waitForView('open')
   await page.getByText('Row Alpha',{exact:true}).waitFor()
   await page.getByText('Row Beta',{exact:true}).waitFor()
   assert.ok(await rows.count()>1,`${width}px preserves explicit All open and includes unassigned conversations`)

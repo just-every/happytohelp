@@ -35,7 +35,7 @@ export function validateReceipt(kind, receipt, config, records) {
   if (owner && receipt.projectId) invariant(receipt.projectId === owner.projectId, 'Receipt belongs to another project');
   if (kind === 'deployment') {
     invariant(receipt.sourceSha === config.sourceSha && /^[0-9a-f]{64}$/.test(receipt.buildSha256), 'Deployment source/build mismatch');
-    invariant(/^https:\/\/github\.com\/just-every\/happytohelp\/actions\/runs\/\d+/.test(receipt.workflowUrl), 'Actual project workflow run URL required');
+    invariant(/^https:\/\/github\.com\/just-every\/run-happytohelp\/actions\/runs\/\d+/.test(receipt.workflowUrl), 'Actual project workflow run URL required');
   }
   if (kind === 'fresh-storage') {
     const deployment = prior('deployment'); invariant(deployment, 'Deployment receipt must precede storage inspection');

@@ -1,66 +1,44 @@
-// Shared signed-in page frame, expanded from the approved inbox and 12UI kit.
+// The signed-in page frame: content on paper, 40px above and 48px at the sides on a wide screen, 20/16 on a phone.
 body.workspace-page {
-    --bs-body-color: var(--conversation-ink);
-    --bs-body-bg: var(--workspace-surface, #fff);
-    --bs-secondary-color: var(--conversation-muted);
-    --bs-heading-color: var(--conversation-ink);
-    --bs-border-color: var(--conversation-line);
-    color: var(--conversation-ink);
-    background: var(--workspace-surface, #fff);
-    font-family: 'Inter', Helvetica, Arial, sans-serif;
-    font-size: 13px;
-    line-height: 1.55;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.5;
 
     .main-content { min-width: 0; }
     .workspace-page-container {
         width: 100%;
-        max-width: 1184px;
-        margin-inline: auto;
-        padding: 32px;
+        max-width: 1280px;
+        margin-inline: 0;
+        padding: 40px 48px 48px;
     }
     .workspace-wide .workspace-page-container { max-width: none; }
-    .workspace-page-header {
-        margin: 0 0 28px;
-        .header-body { padding: 0; border: 0; }
-        .header-body > .row { row-gap: 12px; align-items: center !important; }
-        .header-pretitle {
-            margin-bottom: 6px;
-            color: var(--conversation-muted);
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: .03em;
-        }
-        .header-title { color: var(--conversation-ink); font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -.025em; }
-        .header-tabs { margin: 20px 0 0; }
-        .header-tabs .nav-link { padding: 10px 0; }
-    }
     .workspace-page-content {
         padding-bottom: 24px;
         > form:not(:has(.card, .table, #editor)),
         > .tab-content > .tab-pane > form { max-width: 800px; }
-        h2 { font-size: 20px; }
-        h3 { font-size: 17px; }
-        h4, .h4 { font-size: 14px; }
-        h5, .h5 { font-size: 13px; }
-        h2, h3, h4, h5 { color: var(--conversation-ink); font-weight: 600; }
-        .text-muted { color: var(--conversation-muted) !important; }
-        .fs-base { font-size: 13px !important; }
-        small, .small { font-size: 12px; line-height: 1.5; }
-        pre { max-width: 100%; overflow: auto; font-size: 12px; }
+        h2 { font-size: 24px; }
+        h3 { font-size: 20px; }
+        h4, .h4 { font-size: 16px; }
+        h5, .h5 { font-size: 15px; }
+        h2, h3, h4, h5 { color: var(--ink); font-weight: 500; }
+        .fs-base { font-size: 16px !important; }
+        small, .small { font-size: 13px; line-height: 1.5; }
+        pre { max-width: 100%; overflow: auto; font-size: 14px; }
         .row > .col, .row > [class*="col-"] { min-width: 0; }
         .list-group-item .col-auto { max-width: 100%; overflow-wrap: anywhere; }
-        .fe { vertical-align: -.05em; }
+        .fe { vertical-align: -.1em; }
     }
     &.workspace-onboarding {
         padding-top: 80px;
         .main-content { width: 100%; max-width: 960px; padding-inline: 24px; }
     }
 
+    @media (max-width: 1199.98px) {
+        .workspace-page-container { padding: 32px 32px 40px; }
+    }
+
     @media (max-width: 767.98px) {
-        .workspace-page-container { padding: 24px 16px; }
-        .workspace-page-header { margin-bottom: 24px; }
-        .workspace-page-header .header-title { font-size: 22px; }
-        .workspace-page-header .col-auto { max-width: 100%; }
+        .workspace-page-container { padding: 20px 16px 32px; }
         .workspace-page-content > .row { row-gap: 20px; }
     }
 }

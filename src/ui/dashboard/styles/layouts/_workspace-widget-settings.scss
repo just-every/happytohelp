@@ -7,15 +7,15 @@ body.workspace-page {
     .widget-settings-layout .nav-tabs { margin-bottom: 0; }
     .widget-color-field { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .widget-color-field label { margin: 0 !important; }
-    .widget-color-field .form-control-color { flex: 0 0 40px; width: 40px; height: 34px; padding: 3px; border-radius: 7px; border-color: var(--conversation-line); }
+    .widget-color-field .form-control-color { flex: 0 0 40px; width: 40px; height: 34px; padding: 3px; border-radius: 7px; border-color: var(--rule); }
     .widget-settings-preview { position: sticky; top: 24px; min-width: 0; }
     .widget-settings-preview #happytohelp { max-width: 100%; }
     .widget-settings-preview__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; margin-bottom: 12px; font-size: 12px; font-weight: 600; }
     .widget-settings-preview__states { display: flex; gap: 4px; }
-    .widget-settings-preview__states button { border: 0; border-radius: 6px; padding: 6px 8px; color: var(--conversation-muted); background: transparent; font-size: 11px; }
-    .widget-settings-preview__states button[aria-pressed=true] { color: var(--bs-primary); background: var(--workspace-primary-soft); }
+    .widget-settings-preview__states button { border: 0; border-radius: 6px; padding: 6px 8px; color: var(--ink-soft); background: transparent; font-size: 11px; }
+    .widget-settings-preview__states button[aria-pressed=true] { color: var(--bs-primary); background: var(--d-cyan-tint); }
     .widget-settings-preview__states button:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
-    .widget-settings-preview__stage { min-height: 560px; border-radius: 12px; background: var(--workspace-primary-hover); }
+    .widget-settings-preview__stage { min-height: 560px; border-radius: 12px; background: var(--hover); }
     .widget-settings-preview__note { margin: 12px 0 0; font-size: 11px; }
     @media (max-width: 991.98px) {
         .widget-settings-layout { grid-template-columns: minmax(0, 1fr); }
@@ -23,4 +23,4 @@ body.workspace-page {
     }
 }
 
-.widget-settings-load-error { padding: 1rem; color: #172533; background: #fff1f1; border: 1px solid #a12f42; border-radius: .5rem; }
+.widget-settings-load-error { padding: 1rem; color: var(--ink); background: var(--surface); border: 1px solid var(--danger); border-radius: .5rem; }

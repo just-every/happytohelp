@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { on, once } from 'node:events';
 import { mkdtemp, mkdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -24,18 +25,24 @@ const until = async (check, label) => {
 const site = pages => JSON.stringify({ sections: [{ title: 'Guide', pages }], githubOnly: [] });
 const home = { slug: '', source: 'README.md', label: 'Home' };
 
-test('the docs plugin follows edits to Markdown and docs/site.json in a running dev server', async () => {
+test('the docs plugin follows edits to Markdown and docs/site.json in a running dev server', { timeout: 60000 }, async ({ signal }) => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'h2h-docs-sync-')));
   await mkdir(join(root, 'docs'));
   const files = {
-    'package.json': JSON.stringify({ repository: { url: 'https://github.com/just-every/happytohelp' } }),
+    'package.json': JSON.stringify({ repository: { url: 'https://github.com/just-every/run-happytohelp' } }),
     'docs/site.json': site([home, { slug: 'guide', source: 'docs/GUIDE.md', label: 'Guide' }]),
     'README.md': '# Fixture\n\nRead [the second part](docs/GUIDE.md#second).\n',
     'docs/GUIDE.md': '# Guide\n\n## Second\n',
   };
   for (const [path, text] of Object.entries(files)) await writeFile(join(root, path), text);
   // No WebSocket server: the plugin's full-reload goes nowhere here, and no fixed HMR port is taken.
-  const server = await createServer({ root, configFile: false, logLevel: 'silent', appType: 'custom', server: { middlewareMode: true, ws: false }, plugins: [docsSite()] });
+  // Use Vite's real fs.watch transport on every host. m1's default FSEvents stream can omit events for a new
+  // fixture tree even after 'ready'; this suite checks docs synchronization once the filesystem reports the change.
+  const server = await createServer({
+    root, configFile: false, logLevel: 'silent', appType: 'custom',
+    server: { middlewareMode: true, ws: false, watch: { useFsEvents: false, usePolling: false } },
+    plugins: [docsSite()],
+  });
   // What each environment is sent: the browser's full reload when the docs change, an error if the plugin throws.
   const sent = [];
   for (const environment of Object.values(server.environments)) {
@@ -44,8 +51,14 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
   }
   const errors = () => sent.filter(payload => payload.type === 'error');
   const reloaded = () => [...new Set(sent.filter(payload => payload.type === 'full-reload').map(payload => payload.environment))];
-  const settled = async () => new Promise(resolve => setTimeout(resolve, 1500));
+  // Observe real filesystem events before checking the plugin: a fixed sleep can read the previous manifest
+  // or remove a folder before the watcher has seen its files.
+  // The public-door assertions still have their own 5 s bound; the test timeout bounds filesystem event delivery.
+  const observe = async (event, path) => {
+    for await (const [file] of on(server.watcher, event, { signal })) if (file === join(root, path)) return;
+  };
   try {
+    if (!server.watcher._readyEmitted) await once(server.watcher, 'ready', { signal });
     const page = async slug => (await server.ssrLoadModule(`virtual:happytohelp-docs/page/${slug}`)).default;
     const index = () => server.ssrLoadModule('virtual:happytohelp-docs');
     const { loadDocsPage } = await server.ssrLoadModule(loaderPath);
@@ -54,7 +67,9 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
     const first = await loadDocsPage('guide');
     assert.match(first.page.html, /<h2 id="second">Second<\/h2>/);
 
+    const guideChanged = observe('change', 'docs/GUIDE.md');
     await writeFile(join(root, 'docs/GUIDE.md'), '# Guide\n\n## Second\n\n## Third\n');
+    await guideChanged;
     await until(async () => assert.match((await page('guide')).html, /<h2 id="third">Third<\/h2>/), 'an edited page is served');
     const edited = await loadDocsPage('guide');
     assert.match(edited.page.html, /<h2 id="third">Third<\/h2>/);
@@ -62,7 +77,9 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
     assert.ok(edited.version > first.version, 'the docs version moves on with the edit');
     assert.equal((await index()).version, edited.version);
 
+    const readmeBroken = observe('change', 'README.md');
     await writeFile(join(root, 'README.md'), '# Fixture\n\nRead [the missing part](docs/MISSING.md).\n');
+    await readmeBroken;
     await until(async () => {
       const error = await page('index').then(() => null, rejection => rejection);
       assert.ok(error, 'a broken link fails the load');
@@ -74,36 +91,48 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
     assert.deepEqual(Object.keys(broken.pages), ['', 'guide']);
     await assert.rejects(loadDocsPage('guide'), /README\.md: docs\/MISSING\.md \(docs\/MISSING\.md does not exist\)/);
 
+    const thirdAdded = [observe('add', 'docs/THIRD.md'), observe('change', 'docs/site.json')];
     await writeFile(join(root, 'README.md'), files['README.md']);
     await writeFile(join(root, 'docs/THIRD.md'), '# Third page\n');
     await writeFile(join(root, 'docs/site.json'), site([home, { slug: 'guide', source: 'docs/GUIDE.md', label: 'Guide' }, { slug: 'third', source: 'docs/THIRD.md', label: 'Third' }]));
+    await Promise.all(thirdAdded);
     await until(async () => {
       const { sections, repository } = await loadDocsPage('third');
       assert.deepEqual(sections[0].pages.map(entry => entry.href), ['/docs', '/docs/guide', '/docs/third']);
-      assert.deepEqual(repository, { url: 'https://github.com/just-every/happytohelp', branch: 'main' });
+      assert.deepEqual(repository, { url: 'https://github.com/just-every/run-happytohelp', branch: 'main' });
     }, 'a page added to docs/site.json is listed');
     assert.equal((await page('third')).title, 'Third page');
     assert.equal((await index()).problem, null);
 
     // A folder removed with its files, as tests/delivery-base.mjs does in the repository root: nothing to do with the docs.
+    sent.length = 0;
+    const scratchAdded = [observe('add', '.scratch/inner/notes.md'), observe('add', '.scratch/inner/data.txt')];
     await mkdir(join(root, '.scratch/inner'), { recursive: true });
     await writeFile(join(root, '.scratch/inner/notes.md'), '# Scratch\n');
     await writeFile(join(root, '.scratch/inner/data.txt'), 'scratch\n');
-    await settled();
+    await Promise.all(scratchAdded);
+    await until(async () => assert.deepEqual(reloaded(), ['client']), 'the scratch Markdown addition finishes reloading');
     sent.length = 0;
+    const scratchRemoved = [observe('unlink', '.scratch/inner/notes.md'), observe('unlink', '.scratch/inner/data.txt'), observe('unlinkDir', '.scratch')];
     await rm(join(root, '.scratch'), { recursive: true, force: true });
-    await settled();
+    await Promise.all(scratchRemoved);
+    await until(async () => assert.deepEqual(reloaded(), ['client']), 'the scratch Markdown removal finishes reloading');
     assert.deepEqual(errors(), [], 'removing a folder sends no error');
 
     // A published page whose Markdown is removed with its folder is dropped, not served from the cache.
+    sent.length = 0;
+    const subAdded = [observe('add', 'docs/sub/PAGE.md'), observe('change', 'docs/site.json')];
     await mkdir(join(root, 'docs/sub'));
     await writeFile(join(root, 'docs/sub/PAGE.md'), '# Sub page\n\n## Inside\n');
     await writeFile(join(root, 'docs/site.json'), site([home, { slug: 'sub', source: 'docs/sub/PAGE.md', label: 'Sub' }]));
-    await settled();
-    // Loaded after the watcher has settled, so the plugin's cache holds the page when its folder goes.
-    assert.match((await loadDocsPage('sub')).page.html, /<h2 id="inside">Inside<\/h2>/);
+    await Promise.all(subAdded);
+    await until(async () => assert.match((await loadDocsPage('sub')).page.html, /<h2 id="inside">Inside<\/h2>/), 'the added docs folder is served');
+    // Drain the addition's browser reload before observing the removal; the plugin's cache holds the page.
+    await until(async () => assert.deepEqual(reloaded(), ['client']), 'the added docs folder finishes reloading');
     sent.length = 0;
+    const subRemoved = [observe('unlink', 'docs/sub/PAGE.md'), observe('unlinkDir', 'docs/sub')];
     await rm(join(root, 'docs/sub'), { recursive: true, force: true });
+    await Promise.all(subRemoved);
     await until(async () => assert.deepEqual(reloaded(), ['client']), 'the browser reloads when a docs folder is removed');
     assert.deepEqual(errors(), [], 'removing a docs folder sends no error');
     assert.match((await index()).problem ?? '', /docs\/sub\/PAGE\.md" does not exist/);

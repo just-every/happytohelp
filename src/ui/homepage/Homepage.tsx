@@ -1,4 +1,4 @@
-import { Divider } from './Divider';
+import { Divider, dividerLines } from './Divider';
 import { Free } from './Free';
 import { GetStarted } from './GetStarted';
 import { Hero } from './Hero';
@@ -18,7 +18,7 @@ export default function Homepage() {
   return <div className="h2h-home">
     <a className="skip-link" href="#product">Skip to the product</a>
     <SiteHeader />
-    <main><Hero /><Free /><Divider /><HelpBeforeTheyAsk /><Product /><Divider /><MoveIn /><GetStarted /></main>
+    <main><Hero /><Free /><Divider line={dividerLines.first} /><HelpBeforeTheyAsk /><Product /><Divider line={dividerLines.second} /><MoveIn /><GetStarted /></main>
     <SiteFooter />
   </div>;
 }

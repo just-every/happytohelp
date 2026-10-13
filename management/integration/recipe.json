@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "source": "just-every/happytohelp",
+  "source": "just-every/run-happytohelp",
   "variableNames": [
     "EMAIL_PROVIDER",
     "EMAIL_ACCOUNT_ID",

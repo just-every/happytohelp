@@ -38,7 +38,7 @@ try {
     DB.prepare("INSERT INTO memberships VALUES('p','u','owner')"),
     DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'), Date.now() + 999999),
     DB.prepare("INSERT INTO sessions VALUES(?,'c','p','contact','ct',?,NULL)").bind(await hashToken('contact-token'), Date.now() + 999999),
-    DB.prepare("INSERT INTO github_settings VALUES('p',?,1,0,1)").bind(JSON.stringify(['just-every/happytohelp'])),
+    DB.prepare("INSERT INTO github_settings VALUES('p',?,1,0,1)").bind(JSON.stringify(['just-every/run-happytohelp'])),
   ])
 
   globalThis.fetch = async (_url, init) => {
@@ -59,8 +59,8 @@ try {
   const calls = []
   globalThis.fetch = async url => {
     calls.push(String(url))
-    assert.equal(String(url), 'https://api.github.com/repos/just-every/happytohelp')
-    return Response.json({ id: 1378012333, full_name: 'just-every/happytohelp', private: true, default_branch: 'main' })
+    assert.equal(String(url), 'https://api.github.com/repos/just-every/run-happytohelp')
+    return Response.json({ id: 1378012333, full_name: 'just-every/run-happytohelp', private: true, default_branch: 'main' })
   }
 
   const response = await integrations.request('https://app.example/projects/p/github/repositories', {
@@ -69,9 +69,9 @@ try {
   const body = await response.json()
   assert.equal(response.status, 200, JSON.stringify(body))
   assert.deepEqual(body, {
-    data: [{ id: 1378012333, full_name: 'just-every/happytohelp', private: true, default_branch: 'main' }],
+    data: [{ id: 1378012333, full_name: 'just-every/run-happytohelp', private: true, default_branch: 'main' }],
   })
-  assert.deepEqual(calls, ['https://api.github.com/repos/just-every/happytohelp'])
+  assert.deepEqual(calls, ['https://api.github.com/repos/just-every/run-happytohelp'])
   console.log('GitHub mapped-token discovery: exact project allowlist uses repository metadata reads and never calls /user/repos')
 
   env.INTEGRATION_ENCRYPTION_KEY = btoa('1'.repeat(32))
@@ -100,16 +100,16 @@ try {
   calls.length = 0
   globalThis.fetch = async url => {
     calls.push(String(url))
-    assert.equal(String(url), 'https://api.github.com/repos/just-every/happytohelp')
-    return Response.json({ id: 1378012333, full_name: 'just-every/happytohelp', private: true, default_branch: 'main' })
+    assert.equal(String(url), 'https://api.github.com/repos/just-every/run-happytohelp')
+    return Response.json({ id: 1378012333, full_name: 'just-every/run-happytohelp', private: true, default_branch: 'main' })
   }
   const singleResponse = await integrations.request('https://app.example/projects/p/github/repositories', {
     headers: { Authorization: 'Bearer token' },
   }, env)
   const singleBody = await singleResponse.json()
   assert.equal(singleResponse.status, 200, JSON.stringify(singleBody))
-  assert.deepEqual(singleBody.data, [{ id: 1378012333, full_name: 'just-every/happytohelp', private: true, default_branch: 'main' }])
-  assert.deepEqual(calls, ['https://api.github.com/repos/just-every/happytohelp'])
+  assert.deepEqual(singleBody.data, [{ id: 1378012333, full_name: 'just-every/run-happytohelp', private: true, default_branch: 'main' }])
+  assert.deepEqual(calls, ['https://api.github.com/repos/just-every/run-happytohelp'])
 
   env.GITHUB_PROJECT_ID = undefined
   env.GITHUB_TOKEN = undefined

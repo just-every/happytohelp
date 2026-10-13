@@ -2,31 +2,32 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { BrandLockup } from '../homepage/BrandLockup';
 import { Flourish } from '../homepage/drawings/Flourish';
 import SetupNotice from '../identity/SetupNotice';
+import { publicHost } from '../../modules/identity/workspace-defaults';
 import { nativeRequest } from './transport';
-import KnownDetails from './setup/KnownDetails';
 import SetupFields from './setup/SetupFields';
-import SetupSteps from './setup/SetupSteps';
-import SetupWindow from './setup/SetupWindow';
-import { clearDraft, emptyDraft, loadDraft, saveDraft, type SetupDraft } from './setup/draft';
+import { cooldownRef } from './drawings/cooldown';
+import { derivedName, emptyDraft, problem, readFragment, submittedWebsite, type SetupDraft } from './setup/draft';
 import '../homepage/outfit.css';
 import '../homepage/brand-tokens.css';
 import './setup/setup.css';
 import './setup/setup-form.css';
 import './setup/setup-drawings.css';
 
+// The colour is only taken from a public website; a local or internal address is never read, so it promises the name alone.
+const promise = (name: string | null, readsSite: boolean) => readsSite
+    ? (name ? <>We’ll call your workspace <b>{name}</b> and pick a colour from your site.</> : <>We’ll name your workspace and pick a colour from your site.</>)
+    : (name ? <>We’ll call your workspace <b>{name}</b>.</> : <>We’ll name your workspace for you.</>);
 type SetupState = 'loading' | 'available' | 'complete' | 'unavailable';
 export default function Setup() {
     const [state, setState] = useState<SetupState>('loading');
     const [draft, setDraft] = useState(emptyDraft);
-    const [step, setStep] = useState(0);
     const [error, setError] = useState('');
     const [tokenRequired, setTokenRequired] = useState(false);
     const [busy, setBusy] = useState(false);
-    const [saved, setSaved] = useState(false);
     const loaded = useRef(false);
     useEffect(() => {
         let active = true;
-        if (!loaded.current) { setDraft(loadDraft()); loaded.current = true; }
+        if (!loaded.current) { setDraft(readFragment()); loaded.current = true; }
         nativeRequest('/api/identity/setup').then(result => {
             // A claimed installation sends its signed-in owner on to the workspace (first-run steps, then the inbox).
             if (result.signedIn) { if (active) location.replace('/projects?onboarding=setup'); return; }
@@ -34,47 +35,40 @@ export default function Setup() {
         }).catch(error => { if (active) { setError(error.message); setState('unavailable'); } });
         return () => { active = false; };
     }, []);
-    const update = (key: keyof SetupDraft, value: string) => { setDraft(current => ({ ...current, [key]: value })); setSaved(false); };
+    const update = (key: keyof SetupDraft, value: string) => setDraft(current => ({ ...current, [key]: value }));
     const submit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (busy || state !== 'available') return;
-        setError(''); saveDraft(draft);
-        if (step < 2) { setStep(step + 1); return; }
-        if (!draft.ownerName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email) || draft.password.length < 12 || (tokenRequired && !draft.setupToken)) { setStep(0); setError('Complete your owner details before creating the workspace.'); return; }
-        if (!draft.name.trim() || !/^#[0-9a-f]{6}$/i.test(draft.primaryColor)) { setStep(1); setError('Complete your workspace details before creating it.'); return; }
-        setBusy(true);
+        const invalid = problem(draft, tokenRequired);
+        if (invalid) { setError(invalid); return; }
+        setError(''); setBusy(true);
         try {
-            const created = await nativeRequest('/api/identity/bootstrap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft) });
-            clearDraft();
-            const section=new URLSearchParams(location.search).get('onboarding')==='setup'?'activation':'widget-settings';
-            location.assign(`/projects/${encodeURIComponent(created.projectId)}/${section}`);
+            const created = await nativeRequest('/api/identity/bootstrap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: draft.email.trim(), password: draft.password, allowedOrigin: submittedWebsite(draft), ...(tokenRequired || draft.setupToken ? { setupToken: draft.setupToken } : {}) }) });
+            location.assign(`/projects/${encodeURIComponent(created.projectId)}/activation`);
         } catch (error: any) {
             setError(error.message);
             if (error.status === 409) setState('complete');
             setBusy(false);
         }
     };
-    // Setup has a wizard only while nobody has claimed the installation; every other state is a plain public page.
+    // Setup has a form only while nobody has claimed the installation; every other state is a plain public page.
     if (state !== 'available') return <SetupNotice state={state} error={error} />;
-    // One grid, read in this order on a phone: the welcome, the step and its form, then what is already known and the drawing.
-    // From tablet width up, the welcome, the known details and the drawing take the left column and the step the right.
+    const name = derivedName(draft), readsSite = Boolean(publicHost(submittedWebsite(draft)));
+    // One grid, read in this order on a phone: the welcome, the form, then the drawing. From tablet width up, the welcome and
+    // the drawing take the left column and the form the right.
     return <div className="h2h-setup"><main className="setup-page">
         <div className="setup-brand"><BrandLockup home="/" /></div>
         <div className="setup-intro">
-            <h1>A new home for <span>helpful conversations.</span></h1>
-            <p>Let’s make this workspace yours. Review what’s already known, then add the few details we still need.</p>
+            <h1>Set up HappyToHelp</h1>
+            <p>Tell us who you are. We’ve filled in the rest, and you can change any of it afterwards.</p>
         </div>
         <section className="setup-panel" aria-label="Set up HappyToHelp">
-            <SetupSteps step={step} />
-            <h2>{['A little about you', 'Make it your workspace', 'Ready when you are'][step]}</h2>
-            <p className="setup-lede">{['Your account will own this installation.', 'Choose your workspace name, website and colour.', 'Check your details before we create your workspace.'][step]}</p>
             {error && <p className="setup-error" role="alert">{error}</p>}
-            <form onSubmit={submit}><SetupFields draft={draft} update={update} tokenRequired={tokenRequired} step={step} />
-                <footer className="setup-actions"><button className="setup-secondary" type="button" disabled={busy} onClick={() => { if (step) setStep(step - 1); else { saveDraft(draft); setSaved(true); } }}>{step ? 'Back' : 'Save for later'}</button><button className="setup-primary" disabled={busy}>{busy ? 'Creating…' : step === 2 ? 'Create workspace' : step === 1 ? 'Review setup' : 'Continue'}</button></footer>
-                {saved && <p role="status" className="setup-status">Details saved in this browser tab. Passwords and setup tokens are never saved.</p>}
+            <form onSubmit={submit} noValidate><SetupFields draft={draft} update={update} tokenRequired={tokenRequired} />
+                <p className="setup-promise">{promise(name, readsSite)} {readsSite ? 'Both are' : 'It is'} easy to change.</p>
+                <footer className="setup-actions"><button type="submit" className="setup-primary" disabled={busy}>{busy ? 'Creating…' : 'Create workspace'}</button></footer>
             </form>
         </section>
-        <KnownDetails draft={draft} onEdit={() => setStep(1)} />
-        <div className="setup-drawing" aria-hidden="true">{step ? <SetupWindow name={draft.name} colour={draft.primaryColor} /> : <Flourish />}</div>
+        <div className="setup-drawing" ref={cooldownRef('setup-flourish')} aria-hidden="true"><Flourish /></div>
     </main></div>;
 }

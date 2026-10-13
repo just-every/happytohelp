@@ -4,6 +4,7 @@ import {PageHeaderActions} from '../PageHeader';
 import InvitationActions from './InvitationActions';
 import RowMenu from './RowMenu';
 import './stack-table.css';
+import { Notepad } from '../drawings';
 export function PersonAvatar({person}) {return person.avatar_url?<img className="management-avatar" src={person.avatar_url} alt=""/>:<span className="management-avatar">{(person.name||person.email||'?').slice(0,1).toUpperCase()}</span>}
 const date=value=>value?new Date(value).toLocaleDateString():'';
 const labels={macros:'Save a Reply',agents:'Invite Agent',plugins:'Add Custom Plugin'};
@@ -44,5 +45,5 @@ export default function ManagementLists({section,items,base,onMove,projectId,ema
  {(section!=='plugins'||rows.length>0)&&<div className="table-responsive"><table className="table table-sm table-hover management-table stack-table"><thead><tr>{shown.map((column,index)=><th key={index}>{column.label||hidden(column.actions)}</th>)}</tr></thead><tbody>{rows.map((item,index)=>{
   const context={item,index,rows,onMove,href:`${base}/${item.id}`,metadata:section==='contacts'?contactMetadata(item):{},invitationProps:{projectId,emailConfigured,onChanged,onNotice,onError}};
   return <tr key={item.id||item.email}>{shown.map((column,position)=><td key={position} data-label={column.label} className={column.label?undefined:'stack-table__actions'}>{column.cell(context)}</td>)}</tr>;
- })}{section==='macros'&&items&&rows.length===0&&<tr><td colSpan="3"><strong>No saved replies yet</strong><p>Save a reply to reuse it in your conversations.</p></td></tr>}</tbody></table></div>}</>;
+ })}{section==='macros'&&items&&rows.length===0&&<tr><td colSpan="3"><div className="management-empty"><Notepad/><div><strong>No saved replies yet</strong><p>Save a reply to reuse it in your conversations.</p></div></div></td></tr>}</tbody></table></div>}</>;
 }

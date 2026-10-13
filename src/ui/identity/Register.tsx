@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import IdentityFrame from './IdentityFrame';
+import SignInDrawing from './SignInDrawing';
 import { Alert, Field, NewPasswordField, SubmitButton } from './fields';
 import { postJson, useAuthOptions, useHydrated } from './hooks';
 
@@ -30,7 +31,7 @@ export default function Register() {
             {options.setupRequired && <a href="/setup">Set up this installation</a>}
         </div>
     </IdentityFrame>;
-    return <IdentityFrame wide>
+    return <IdentityFrame wide drawing={<SignInDrawing />}>
         <h1>Create your account</h1>
         <p className="id-lede">Start a workspace for your support team. We will email you a link to confirm your address.</p>
         <Alert>{error}</Alert>

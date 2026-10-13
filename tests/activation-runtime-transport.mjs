@@ -45,7 +45,7 @@ try{
    if(wrapped){
     assert.equal(fixture.state.calls.length,0,'GET never invokes external provider HTTP')
     const assistant=(await api(`/api/management/projects/${boot.projectId}/ais`,{body:{name:'Transport metadata',role:'Support',model:'gpt-5-mini',prompt:'Answer from sources.',is_enabled:true},status:201})).data
-    await api(`/api/management/projects/${boot.projectId}/settings`,{method:'PUT',body:{default_responder:assistant.id}})
+    await api(`/api/management/projects/${boot.projectId}/ai`,{method:'PUT',body:{default_visitor_ai_id:assistant.id}})
     let release
     fixture.state.modelGate=new Promise(done=>{release=done})
     const pending=api(activation+'/check',{body:{step:'model_key'}})

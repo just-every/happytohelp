@@ -3,7 +3,7 @@
 //
 // Each icon is a CSS mask over a 1em square, so it scales with font-size and
 // follows `color` like a glyph. The icon element uses a metrics-only face
-// (the bundled Inter file with overridden vertical metrics: 0.9375em above
+// (the bundled Outfit file with overridden vertical metrics: 0.9375em above
 // and 0.0625em below the baseline, no line gap), so an icon occupies the same
 // line box as a 1em icon glyph and sits on the text baseline in inline,
 // inline-block and flex layouts alike.
@@ -12,7 +12,7 @@
 
 @font-face {
   font-family: "Dashboard Icon Metrics";
-  src: url("/fonts/inter/InterVariable.woff2") format("woff2");
+  src: url("/fonts/outfit/outfit-latin-wght-normal.woff2") format("woff2");
   font-display: swap;
   ascent-override: 93.75%;
   descent-override: 6.25%;

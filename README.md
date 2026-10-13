@@ -50,8 +50,8 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 1. Use Git, **Node.js 22.20.0** and **pnpm 10.12.4**, then acquire the release:
 
    ```sh
-   git clone --branch v0.4.1 https://github.com/just-every/happytohelp
-   cd happytohelp
+   git clone --branch v0.4.1 https://github.com/just-every/run-happytohelp
+   cd run-happytohelp
    ```
 
    Already running 0.3? Keep your checkout and data, and follow
@@ -77,7 +77,8 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
    app. Dev stays in the foreground with assets and HMR. It prints `RER_READY` with
    the app address and `RER_SIGN_IN` with the development outbox. Open the outbox,
    choose the newest sign-in message, follow its link and press **Sign in**. No
-   email is sent. Native password sign-in also works. Ctrl+C stops dev and its
+   email is sent; the owner's welcome email and every other message are captured
+   in that outbox. Native password sign-in also works. Ctrl+C stops dev and its
    children. Setup reruns preserve the owner, data and saved private settings.
 
 4. Stop dev before the remaining commands:
@@ -135,43 +136,57 @@ support work and has its own runtime prerequisites.
 
 ## After you install
 
-Sign in and use **Setup** in the workspace sidebar. Its eight observed checks
-cover owner mail, sender DNS, inbound mail, model access, spend ceilings,
-published knowledge, widget origin and an authenticated widget visit. Saved
-settings alone do not complete them. Add the widget through **Settings → Widget**,
-set its exact [website origin](docs/SETUP-WORKFLOW.md#the-widget-website-origin),
+Your workspace is already set up when you first sign in. It has a starter
+assistant for visitors, a reply-by-email mailbox when the installation holds an
+`INBOUND_EMAIL_TOKEN`, and mail that leaves from the installation's own sender
+until your sending domain is verified. Creating the workspace may send you one
+welcome email. Use **Setup** in the workspace sidebar: **Needs you** lists what
+cannot be done for you (the widget on your website, an AI key and, with a hosted
+email provider, your sending domain's DNS records), and **What we've set** lists
+the rest. Anything under **Needs you** can be skipped for now and picked up later
+from **Skipped**. The system runs its own checks while Setup is open, and what it
+confirms is counted ("N of M confirmed", without what you skipped): mail to you,
+sender DNS, inbound mail, model access, spend ceilings, widget origin and an
+authenticated widget visit. Saved settings alone do not complete them. Add the widget through **Settings →
+Widget**, set its exact [website origin](docs/SETUP-WORKFLOW.md#the-widget-website-origin),
 publish useful articles and invite teammates through **Settings → Agents**.
 
 ## Set up AI replies
 
-AI replies need two things: a key from an AI provider, and an assistant in your
-workspace that uses one of that provider's models.
+Your starter assistant answers visitors by itself, from the help articles you
+publish and from what we read on your website, and within your daily limits, as soon as the installation has a key from
+an AI provider. Until then, new conversations stay with your team and the AI page
+and Setup say a key is missing.
 
 1. **Get an API key** from OpenAI, Anthropic, Google, DeepSeek, xAI or
    OpenRouter. The provider bills you for what you use.
 2. **Add the key to your installation** under the name for that provider:
    `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` (or
    `GEMINI_API_KEY`), `DEEPSEEK_API_KEY`, `XAI_API_KEY` or
-   `OPENROUTER_API_KEY`.
+   `OPENROUTER_API_KEY`. The setup answers can store one at install time (see
+   [Install](docs/INSTALLER.md#private-setup-answers)).
    - **On Cloudflare:** in the Cloudflare dashboard, open your Worker, go to
      **Settings → Variables and Secrets** and add the key as a secret. You can
      also set it in your terminal before you run `node scripts/rer.mjs deploy --environment production` (see
      [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)).
    - **On your own computer:** add a line such as `OPENAI_API_KEY=your-key` to
      a file named `.dev.vars` in the `happytohelp` folder, then restart the app.
-3. **Choose an assistant.** In your workspace, open **AI** in the sidebar. Add an
-   assistant (or choose **Customize** on an existing one), enter the **Model**
-   it uses and keep it **Enabled**. Then, under **Responder defaults**, choose
-   which assistant answers visitors.
+3. **Setup notices the key.** While the starter assistant is untouched it uses a
+   model of whichever provider's key is installed, and Setup confirms the key with
+   the provider. To use a different assistant, open **AI** in the sidebar, add one
+   (or choose **Customize** on an existing one), enter the **Model** it uses and
+   keep it **Enabled**. Then, under **Responder defaults**, choose which assistant
+   answers visitors.
 
 Keep key values out of chat messages and the browser. To cap what visitors can
 spend, see [Limits and AI ceilings](docs/PUBLIC-LIMITS.md).
 
 ## Try a demo inbox
 
-When your workspace has no conversations yet, the inbox shows a **Try a demo
-inbox** button. It creates a separate, clearly labelled workspace called
-**Demo inbox · Northstar Outfitters**, with:
+When your workspace has no conversations yet, the inbox greets you with one
+next action and a quiet **Try a demo inbox** link under it. The link creates a
+separate, clearly labelled workspace called **Demo inbox · Northstar Outfitters**,
+with:
 
 - fictional customer conversations
 - a drafting assistant you can edit
@@ -221,9 +236,10 @@ explicit test sends and safe attempt logs; public HTTPS destinations are checked
 against SSRF. Slack has incoming-webhook and bot-plus-channel modes. Both have
 recorded-response checks only; **live Slack: not-supplied**. Deliveries use ordinary platform HTTPS fetch with manual redirects. Every 3xx fails without following its Location. Requests are limited to 1 MiB, responses (including streams) to 64 KiB, and the entire request/response to 10 seconds. Public HTTPS destination syntax and literal IP validation remain enforced; this edition does not claim DNS pinning. Base HTTP 500 remains uncertain without automatic replay; 429 retains four bounded attempts with the same logical identity and exact body.
 
-Installed owners land on the plain setup checklist; new workspaces lead with the
-widget snippet, with secrets and verification controls under **Advanced**. Empty
-inboxes offer widget installation, a real test conversation and a demo. Workspace
+Installed owners land on the Setup page, where the system has already done what
+it can and lists only what needs them; new workspaces lead with the widget
+snippet, with secrets and verification controls under **Advanced**. Empty
+inboxes offer widget installation, a link to Setup and a demo. Workspace
 headers follow the selected workspace; visitors intentionally see the operator's
 display name. Local mail is sensitive captured data, not a provider receipt.
 
@@ -244,8 +260,10 @@ require separate evidence. Preserve [the current holds](HANDOVER.md#acceptance-b
 
 ## Where to go next
 
+Development lives in [just-every/run-happytohelp](https://github.com/just-every/run-happytohelp); the private repository is retained for research and evidence only.
+
 - [Install](docs/INSTALLER.md): private answers and the rer journey.
-- [First-run setup](docs/SETUP-WORKFLOW.md): native owner and workspace checklist.
+- [First-run setup](docs/SETUP-WORKFLOW.md): one-screen first run and the Setup page.
 - [Operations](OPERATIONS.md): configuration, data movement, deployment and recovery.
 - [Updates and recovery](docs/INDEPENDENT-RELEASE.md): owner customizations and backups.
 - [Product contract](CONTRACT.md) and [acceptance](ACCEPTANCE.md): requirements and proof.

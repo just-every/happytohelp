@@ -107,16 +107,46 @@ try {
   await check('/projects/<id>/settings highlights Project like /edit',async()=>{
     for(const path of ['edit','settings']){
       await page.goto(`${runtime.origin}/projects/${bound.id}/${path}`);await ready();await page.getByLabel('Website',{exact:true}).waitFor();
-      assert.deepEqual(await nav().locator('#sidebarSettings .nav-link.active').allInnerTexts(),['Project'],path);
+      assert.deepEqual(await page.getByTestId('settings-menu').locator('[aria-current="page"]').allInnerTexts(),['Project'],path);
+      assert.equal(await nav().getByTestId('nav-settings').getAttribute('aria-current'),'page',path);
     }
   });
-  for(const height of [700,900]) await check(`the active sidebar item is fully visible at ${height}px height`,async()=>{
-    await page.setViewportSize({width:1440,height});
+  await check('a project sidebar is one short list; the twelve Settings pages share one menu',async()=>{
+    await page.setViewportSize({width:1440,height:900});
+    await bindSession(bound.id);
+    await page.goto(`${runtime.origin}/projects/${bound.id}/conversations`);await ready();
+    const rows=await nav().locator('#sidebar a, #sidebar button, #sidebar summary').evaluateAll(items=>items.filter(item=>item.checkVisibility()&&!item.closest('.navbar-lockup,.navbar-workspace,.navbar-account-menu')).map(item=>item.textContent.trim().replace(/\s+/g,' ')));
+    assert.ok(rows.length<=8,`the sidebar lists ${rows.length} rows: ${rows}`);
+    assert.equal(await nav().locator('a[href*="view="]').count(),0,'the inbox views are not in the sidebar');
+    assert.equal(await nav().getByTestId('nav-primary').locator('> li').count(),6);
+    const more=nav().getByTestId('nav-more');assert.equal(await more.getAttribute('open'),null,'More is closed on the inbox');
+    await more.locator('summary').focus();await page.keyboard.press('Enter');
+    assert.deepEqual(await more.locator('a').evaluateAll(links=>links.map(a=>new URL(a.href).pathname.split('/').pop())),['local-agent','reports','insights']);
+    assert.equal(await page.getByTestId('settings-menu').count(),0,'the inbox has no Settings menu');
+    await nav().getByTestId('nav-settings').click();
+    const menu=page.getByTestId('settings-menu');await menu.waitFor();
+    const paths=new Set();
+    for(const name of ['Project','Agents','Email','Widget','Saved Replies','API tokens','Webhooks','Slack','Delivery log','Integrations','GitHub','Connected applications']){
+      const entry=menu.getByRole('link',{name,exact:true});
+      if(!await entry.isVisible())await menu.getByTestId('settings-menu-more').locator('summary').click();
+      await entry.click();await entry.and(menu.locator('[aria-current="page"]')).waitFor();
+      assert.equal(await menu.locator('[aria-current="page"]').count(),1,name);
+      assert.equal(await nav().getByTestId('nav-settings').getAttribute('aria-current'),'page',name);
+      assert.equal(await page.locator('h1').count(),1,name);paths.add(new URL(page.url()).pathname);
+    }
+    assert.equal(paths.size,12,'each destination is its own page');
+    await nav().getByRole('link',{name:'Contacts',exact:true}).click();await page.getByRole('heading',{name:'Contacts',level:1}).waitFor();
+    assert.equal(await page.getByTestId('settings-menu').count(),0,'Contacts has no Settings menu');
+  });
+  for(const [width,height] of [[1440,700],[1440,900],[1280,800]]) await check(`the active sidebar item and Settings are fully visible at ${width}x${height}`,async()=>{
+    await page.setViewportSize({width,height});
     await page.goto(`${runtime.origin}/projects/${bound.id}/local-agent`);await ready();
     await page.getByRole('heading',{name:'Local computers',level:1}).waitFor();
     await page.waitForFunction(()=>document.querySelector('.navbar-scroll .nav-link.active'));
     const rects=await page.evaluate(()=>{const box=document.querySelector('.navbar-scroll').getBoundingClientRect(),link=document.querySelector('.navbar-scroll .nav-link.active').getBoundingClientRect();return {boxTop:box.top,boxBottom:box.bottom,top:link.top,bottom:link.bottom}});
     assert.ok(rects.top>=rects.boxTop-1&&rects.bottom<=rects.boxBottom+1,`active link ${rects.top}-${rects.bottom} must sit inside the sidebar ${rects.boxTop}-${rects.boxBottom}`);
+    const settings=await nav().getByTestId('nav-settings').evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {top:r.top,bottom:r.bottom,reachable:el.contains(hit),height:innerHeight}});
+    assert.ok(settings.top>=0&&settings.bottom<=settings.height&&settings.reachable,`Settings ${settings.top}-${settings.bottom} must be visible in a ${settings.height}px viewport`);
     if(height===700)await shot('sidebar-active-visible-700');
     await page.setViewportSize({width:1440,height:900});
   });
@@ -166,7 +196,8 @@ try {
       assert.equal(await toggle.locator('img').count(),0,'no image mark');
       assert.equal(await adminPage.getByRole('link',{name:'HappyToHelp Administration',exact:true}).count(),1,'the toggle is named HappyToHelp Administration');
       const mark=await toggle.evaluate(link=>{const svg=link.querySelector('svg.brand-mark'),box=svg.getBoundingClientRect(),outer=link.getBoundingClientRect(),paths=[...svg.querySelectorAll('path')];return {ink:getComputedStyle(link).color,bubble:getComputedStyle(paths[0]).stroke,sparks:[...new Set(paths.slice(4).map(path=>getComputedStyle(path).stroke))],filter:getComputedStyle(svg).filter,height:box.height,inside:box.left>=outer.left&&box.right<=outer.right&&box.top>=outer.top&&box.bottom<=outer.bottom}});
-      assert.equal(mark.ink,'rgb(250, 248, 255)','the balanced nav\'s light ink');
+      const ink=await adminPage.evaluate(()=>{const hex=getComputedStyle(document.body).getPropertyValue('--ink').trim();return 'rgb('+hex.slice(1).match(/../g).map(v=>parseInt(v,16)).join(', ')+')'});
+      assert.equal(mark.ink,ink,'the nav\'s ink is the brand ink');
       assert.equal(mark.bubble,mark.ink,'the bubble is drawn in the nav\'s ink');
       assert.deepEqual(mark.sparks,['rgb(143, 227, 238)'],'aqua sparks');
       assert.equal(mark.filter,'none','no filter recolours the mark');
@@ -197,7 +228,7 @@ try {
     await page.goto(runtime.origin+'/projects');await page.locator('.project-list-table tbody tr').nth(fixture.projects.length-1).waitFor();
     const roles=await page.locator('.project-list-table tbody tr td:nth-child(2)').allInnerTexts();
     assert.deepEqual(roles,fixture.projects.map(()=>'Owner'));
-    assert.equal(await page.locator('.project-list-table thead th').first().innerText(),'Name');
+    assert.equal((await page.locator('.project-list-table thead th').first().textContent()).trim(),'Name');
     for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
       await page.setViewportSize(viewport);await page.reload();await page.locator('.project-list-table tbody tr').nth(fixture.projects.length-1).waitFor();
       for(const box of await page.locator('.project-list-menu summary').evaluateAll(items=>items.map(i=>{const r=i.getBoundingClientRect();return [r.width,r.height]})))

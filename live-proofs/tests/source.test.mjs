@@ -14,7 +14,7 @@ test('fresh integration/release ancestry admits exact commits and rejects featur
     g(['init','-b','main']);writeFileSync(join(root,'file'),'one');g(['add','.']);g(['commit','-m','initial']);const first=g(['rev-parse','HEAD']);
     writeFileSync(join(root,'file'),'two');g(['commit','-am','second']);const tip=g(['rev-parse','HEAD']);
     g(['checkout','-b','feature']);writeFileSync(join(root,'file'),'three');g(['commit','-am','feature']);const feature=g(['rev-parse','HEAD']);
-    const args={cwd:root,sha:first,dispatchSha:tip,dispatchRef:'refs/heads/main',event:'workflow_dispatch',repo:'just-every/happytohelp',mode:'stage',remote:root,env:localEnv};
+    const args={cwd:root,sha:first,dispatchSha:tip,dispatchRef:'refs/heads/main',event:'workflow_dispatch',repo:'just-every/run-happytohelp',mode:'stage',remote:root,env:localEnv};
     assert.equal(validateSource(args),first);
     for (const mutation of [{sha:feature},{sha:'HEAD'},{sha:'--help'},{sha:tip+'\necho bad'},{sha:tip.toUpperCase()},
       {repo:'octocat/Hello-World'},{event:'pull_request'},{dispatchRef:'refs/heads/feature'},{dispatchSha:feature},{mode:'proof',proof:'../../package.json'}])

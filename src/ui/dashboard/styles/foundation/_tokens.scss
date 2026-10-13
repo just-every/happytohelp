@@ -2,47 +2,41 @@
 //
 // This is the Bootstrap configuration layer for the dashboard: it sets the
 // Bootstrap variables that differ from Bootstrap's defaults before Bootstrap's
-// own variables are imported. Workspace colours are applied at runtime through
-// CSS custom properties (see ../user/_site.scss and the layouts), so these
-// values are the neutral product palette and the type/spacing scale.
+// own variables are imported. ./_base.scss points Bootstrap's runtime custom
+// properties at the brand tokens, so these values only seed Bootstrap's build.
 
 // Palette ------------------------------------------------------------------
+// The landing's paper and ink (src/ui/homepage/brand-tokens.css holds the same values as CSS custom properties, which
+// every rule reads at runtime, so Dark display mode only swaps the tokens). Bootstrap needs literal colours to build its
+// variants, so the light values appear here once more; nothing else has a hue but the aqua family.
 
 $white: #FFFFFF;
-$gray-100: #F9FBFD;
-$gray-200: #EDF2F9;
-$gray-300: #E3EBF6;
-$gray-400: #D2DDEC;
-$gray-500: #B1C2D9;
-$gray-600: #95AAC9;
-$gray-700: #6E84A3;
-$gray-800: #3B506C;
-$gray-900: #283E59;
-$black: #12263F;
+$gray-100: #f6f2ea;
+$gray-200: #efe9dd;
+$gray-300: #ebe5d8;
+$gray-400: #d6d0c4;
+$gray-500: #a8a39a;
+$gray-600: #66635d;
+$gray-700: #4a4843;
+$gray-800: #2b2a27;
+$gray-900: #1d1c1a;
+$black: #141414;
 
-$blue: #2C7BE5;
-$indigo: #727cf5;
-$purple: #6b5eae;
-$pink: #ff679b;
-$red: #bf2d48;
-$orange: #fd7e14;
-$yellow: #F6C343;
-$green: #00D97E;
-$teal: #02a8b5;
-$cyan: #39afd1;
+$red: #a8322a;
+$cyan: #5ad8ec;
 
-$primary: $blue;
-$secondary: $gray-700;
-$success: $green;
+$primary: $black;
+$secondary: $gray-600;
+$success: $cyan;
 $info: $cyan;
-$warning: $yellow;
+$warning: #8fe3ee;
 $danger: $red;
 $light: $gray-200;
 $dark: $black;
 
-// Buttons on light fills keep white text; the palette is light-leaning.
+// Filled buttons carry white text on ink.
 $min-contrast-ratio: 1.75;
-$color-contrast-dark: $gray-900;
+$color-contrast-dark: $black;
 $color-contrast-light: $white;
 
 // Behaviour switches --------------------------------------------------------
@@ -74,16 +68,16 @@ $body-secondary-color: $gray-600;
 $body-secondary-bg: $gray-200;
 $body-tertiary-bg: $gray-100;
 $body-emphasis-color: $black;
-$link-color: $primary;
+$link-color: $black;
 $link-decoration: none;
 $link-hover-decoration: none;
-$border-color: $gray-300;
+$border-color: rgba(20, 20, 20, .16);
 $container-max-widths: (sm: 540px, md: 720px, lg: 960px, xl: 1140px);
 
 // Type -----------------------------------------------------------------------
 
-$font-family-sans-serif: 'Inter', Helvetica, Arial, sans-serif;
-$font-size-base: .9375rem;
+$font-family-sans-serif: Outfit, 'Outfit Fallback', 'Avenir Next', 'Segoe UI', sans-serif;
+$font-size-base: 1rem;
 $font-size-sm: .8125rem;
 $font-size-lg: 1.0625rem;
 $font-weight-light: 400;
@@ -108,7 +102,7 @@ $hr-color: var(--bs-border-color);
 $hr-opacity: 1;
 $dt-font-weight: 600;
 $code-font-size: 87.5%;
-$code-color: $primary;
+$code-color: $black;
 $kbd-font-size: 87.5%;
 
 // Tables -------------------------------------------------------------------

@@ -6,6 +6,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {chromium} from 'playwright';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {firstOwner} from './first-run/browser-kit.mjs';
 
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-demo-activation-'));
 await mkdir(evidence,{recursive:true});
@@ -21,16 +22,7 @@ const api=async(path,method='GET',body)=>page.evaluate(async({path,method,body})
 },{path,method,body});
 let success=false;
 try {
-  await page.goto(runtime.origin+'/setup');
-  await page.getByLabel('Your name',{exact:true}).fill('Demo return owner');
-  await page.getByLabel('Owner email').fill('demo-return@example.test');
-  await page.getByLabel('Owner password',{exact:true}).fill('demo-return-browser-password');
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await page.getByLabel('Workspace name').fill('Original workspace');
-  await page.getByRole('button',{name:'Review setup',exact:true}).click();
-  await page.getByRole('button',{name:'Create workspace',exact:true}).click();
-  await page.waitForURL(/\/projects\/[^/]+\/widget-settings$/);
-  const originalId=new URL(page.url()).pathname.split('/')[2];
+  const originalId=await firstOwner(page,runtime.origin,{email:'demo-return@example.test',password:'demo-return-browser-password',workspaceName:'Original workspace'});
   const initial=await api('/api/management/bootstrap'),userId=initial.currentAgent.id;
   const second=await api('/api/management/projects','POST',{name:'Second workspace',allowed_origin:'https://second.example.test'});
   let demoId;

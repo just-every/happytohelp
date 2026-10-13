@@ -24,9 +24,8 @@
       "origin": "Third-party, BSD-3-Clause."
     },
     {
-      "source": "public/fonts/inter/InterVariable.woff2",
-      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
-      "origin": "Third-party, SIL Open Font License 1.1 (public/fonts/inter/LICENSE.txt). Unchanged."
+      "source": "public/fonts/outfit/outfit-latin-wght-normal.woff2",
+      "origin": "The homepage's Outfit (SIL Open Font License 1.1, public/fonts/outfit/LICENSE.txt), shared: the dashboard sets its text in it and its icon metrics face reads it (foundation/_icons.scss). Unchanged."
     }
   ],
   "removed": [

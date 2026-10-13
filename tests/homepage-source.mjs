@@ -46,7 +46,9 @@ test('the HappyToHelp mark has one geometry: the header draws it and the brand f
   assert.match(component, /aria-hidden="true" focusable="false"/);
   assert.match(component, /stroke="currentColor"/);
   assert.match(await read('src/ui/homepage/SiteHeader.tsx'), /<BrandLockup home=\{home\} \/>/, 'the header carries the lockup');
-  assert.match(await read('src/ui/homepage/BrandLockup.tsx'), /<a className="brand" href=\{home\}><BrandMark \/><BrandWord \/><span className="brand-name">HappyToHelp<\/span><\/a>/, 'one link: the mark, then the drawn wordmark, named by its hidden text');
+  const lockup = await read('src/ui/homepage/BrandLockup.tsx');
+  assert.match(lockup, /const content = <><BrandMark \/><BrandWord \/><span className="brand-name">HappyToHelp<\/span><\/>;/, 'the mark, then the drawn wordmark, named by its hidden text');
+  assert.match(lockup, /<Anchor className="brand" to=\{home\}>\{content\}<\/Anchor> : <a className="brand" href=\{home\}>\{content\}<\/a>/, 'one link carries them: a page link, or the router\'s inside the workspace');
   const root = await read('src/routes/__root.tsx');
   for (const link of [/rel: 'icon', type: 'image\/svg\+xml', sizes: 'any', href: `\$\{brands\}\/happytohelp-favicon\.svg`/, /rel: 'icon', type: 'image\/png', sizes: '512x512', href: `\$\{brands\}\/happytohelp-favicon\.png`/, /rel: 'apple-touch-icon', sizes: '180x180', href: `\$\{brands\}\/happytohelp-apple-touch-icon\.png`/]) assert.match(root, link);
   assert.equal([...root.matchAll(/\.\.\.favicons|links: favicons/g)].length, 2, 'the homepage, every other route and the 404 carry the icons');
@@ -249,7 +251,7 @@ test('the drawings below the hero speak the hero\'s language: blobs, the mark\'s
   assert.match(drawings.OfferDrawing, /<span className="offer-typing"><i \/><i \/><i \/><\/span>/, 'typing dots before the offer');
   assert.doesNotMatch(drawings.ProductDrawings + drawings.SuggestedReply, /d-window|d-bar/, 'the desk cards drop their window chrome');
   assert.match(await read('src/ui/homepage/SiteFooter.tsx'), /<BrandLockup home=\{home\} \/>/, 'the footer signs off with the lockup');
-  assert.match(await read('src/ui/homepage/Homepage.tsx'), /<Free \/><Divider \/><HelpBeforeTheyAsk \/><Product \/><Divider \/><MoveIn \/>/, 'dividers between Free and Help before they ask, and between the desk and Try it');
+  assert.match(await read('src/ui/homepage/Homepage.tsx'), /<Free \/><Divider line=\{dividerLines\.first\} \/><HelpBeforeTheyAsk \/><Product \/><Divider line=\{dividerLines\.second\} \/><MoveIn \/>/, 'dividers between Free and Help before they ask, and between the desk and Try it');
   assert.match(await read('src/ui/homepage/GetStarted.tsx'), /<h2 id="get-started-title" ref=\{reveal\}>Ready when you are\.<svg className="ready-line"[^>]*aria-hidden="true" focusable="false">/, 'the closing headline carries its aqua line, decorative');
   for (const [file, pattern] of [['Free.tsx', /<span className="proof-icon">/], ['Product.tsx', /<span className="step" aria-hidden="true">\{number\}<\/span>/]]) assert.match(await read(`src/ui/homepage/${file}`), pattern, file);
   const homepage = await read('src/ui/homepage/homepage.css');

@@ -1,46 +1,128 @@
-// Buttons and form controls.
+// Buttons, fields, tabs, menus, chips and the two frames (drawn card, tile), in the landing's language: black pills,
+// ink-outlined secondary pills, 48px fields with an aqua focus halo, aqua-underlined tabs. Every surface of the workspace
+// (pages, the inbox, dialogs) uses these; layouts only place them.
 
-// Buttons -------------------------------------------------------------------
+// Pills -----------------------------------------------------------------------
 
-.btn-lg {
-  line-height: $line-height-lg;
+.btn {
+  --bs-btn-font-family: var(--font-sans);
+  --bs-btn-font-weight: 500;
+  --bs-btn-font-size: 16px;
+  --bs-btn-line-height: 1.2;
+  --bs-btn-padding-x: 24px;
+  --bs-btn-padding-y: 0;
+  --bs-btn-border-width: 1.5px;
+  --bs-btn-border-radius: 999px;
+  --bs-btn-box-shadow: none;
+  --bs-btn-focus-box-shadow: none;
+  --bs-btn-disabled-opacity: .5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  white-space: nowrap;
+  // A pill's fill and ink change together, at once: a fade would pass through a pair below text contrast.
+  transition: none;
 }
 
 .btn-sm {
-  line-height: $line-height-sm;
+  --bs-btn-font-size: 14px;
+  --bs-btn-padding-x: 16px;
+  min-height: 36px;
 }
 
-// A white button with a light outline, used for secondary actions.
-.btn-white {
-  --bs-btn-bg: var(--bs-white);
-  --bs-btn-border-color: var(--bs-gray-300);
-  --bs-btn-hover-bg: var(--bs-gray-100);
-  --bs-btn-hover-border-color: var(--bs-gray-400);
-  --bs-btn-active-bg: var(--bs-gray-100);
-  --bs-btn-active-border-color: var(--bs-gray-400);
-  --bs-btn-disabled-bg: var(--bs-white);
-  --bs-btn-disabled-border-color: var(--bs-gray-300);
+.btn-lg {
+  --bs-btn-font-size: 16px;
+  --bs-btn-padding-x: 32px;
+  min-height: 48px;
 }
 
-[data-bs-theme="dark"] {
-  .btn-white,
-  .btn-light {
-    --bs-btn-bg: #{$gray-800-dark};
-    --bs-btn-border-color: #{$gray-600-dark};
-    --bs-btn-color: var(--bs-white);
-    --bs-btn-hover-bg: var(--bs-black);
-    --bs-btn-hover-border-color: #{$gray-700-dark};
-    --bs-btn-hover-color: var(--bs-white);
-    --bs-btn-active-bg: var(--bs-black);
-    --bs-btn-active-border-color: #{$gray-700-dark};
-    --bs-btn-active-color: var(--bs-white);
-    --bs-btn-disabled-bg: #{$gray-800-dark};
-    --bs-btn-disabled-border-color: #{$gray-600-dark};
-    --bs-btn-disabled-color: var(--bs-white);
-  }
+.btn-primary,
+.btn-dark {
+  --bs-btn-color: var(--on-ink);
+  --bs-btn-bg: var(--ink);
+  --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-color: var(--on-ink);
+  --bs-btn-hover-bg: var(--ink-hover);
+  --bs-btn-hover-border-color: var(--ink-hover);
+  --bs-btn-active-color: var(--on-ink);
+  --bs-btn-active-bg: var(--ink-hover);
+  --bs-btn-active-border-color: var(--ink-hover);
+  --bs-btn-disabled-color: var(--on-ink);
+  --bs-btn-disabled-bg: var(--ink);
+  --bs-btn-disabled-border-color: var(--ink);
 }
 
-// Labels and groups ------------------------------------------------------------
+// Secondary: an ink outline on whatever it sits on; hover inverts.
+.btn-white,
+.btn-light,
+.btn-secondary,
+.btn-outline-primary,
+.btn-outline-secondary {
+  --bs-btn-color: var(--ink);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-color: var(--on-ink);
+  --bs-btn-hover-bg: var(--ink);
+  --bs-btn-hover-border-color: var(--ink);
+  --bs-btn-active-color: var(--on-ink);
+  --bs-btn-active-bg: var(--ink);
+  --bs-btn-active-border-color: var(--ink);
+  --bs-btn-disabled-color: var(--ink);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--ink);
+}
+
+// Destructive: the secondary pill in the danger ink. No fill.
+.btn-danger,
+.btn-outline-danger {
+  --bs-btn-color: var(--danger);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--danger);
+  --bs-btn-hover-color: var(--danger);
+  --bs-btn-hover-bg: var(--hover);
+  --bs-btn-hover-border-color: var(--danger);
+  --bs-btn-active-color: var(--danger);
+  --bs-btn-active-bg: var(--hover);
+  --bs-btn-active-border-color: var(--danger);
+  --bs-btn-disabled-color: var(--danger);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--danger);
+}
+
+// Text buttons read as the landing's links: ink with an aqua underline.
+.btn-link {
+  --bs-btn-color: var(--ink);
+  --bs-btn-hover-color: var(--ink);
+  --bs-btn-active-color: var(--ink);
+  --bs-btn-disabled-color: var(--ink-soft);
+  --bs-btn-padding-x: 2px;
+  min-height: 0;
+  max-width: 100%;
+  padding: 4px 2px;
+  font-weight: 500;
+  // Text buttons wrap like the links they look like (a long import filename never widens the page).
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+  text-decoration: underline 2px var(--d-cyan-deep);
+  text-underline-offset: 5px;
+
+  &:hover { text-decoration-color: var(--ink); }
+}
+
+// The round icon button ("+" in the composer).
+.btn-icon,
+.btn-rounded-circle {
+  --bs-btn-padding-x: 0;
+  width: 40px;
+  min-height: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+// Fields ----------------------------------------------------------------------
 
 label {
   margin-bottom: .5rem;
@@ -50,47 +132,96 @@ label.form-check-label {
   margin-bottom: 0;
 }
 
-.form-group {
-  margin-bottom: 1.375rem;
+// The workspace's field labels. First-run setup shares this stylesheet in the app bundle and keeps its own labels.
+.form-label,
+form:not(.h2h-setup form) label:not(.form-check-label):not(.btn) {
+  margin-bottom: 6px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
-// Text inputs ------------------------------------------------------------------
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-text,
+.valid-feedback,
+.invalid-feedback {
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.invalid-feedback { color: var(--danger); }
 
 .form-control,
 .form-select {
-  --bs-input-bg: #{$input-bg};
-  --bs-input-border-color: #{$input-border-color};
-  --bs-input-color: var(--bs-body-color);
-  --bs-input-disabled-bg: #{$input-disabled-bg};
-  --bs-input-placeholder-color: #{$input-placeholder-color};
-  background-color: var(--bs-input-bg);
-  border-color: var(--bs-input-border-color);
-  color: var(--bs-input-color);
+  --bs-body-bg: var(--surface);
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--field-line);
+  border-radius: 8px;
+  color: var(--ink);
+  background-color: var(--surface);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.4;
+  box-shadow: none;
 
-  &::placeholder {
-    color: var(--bs-input-placeholder-color);
-  }
+  &::placeholder { color: var(--ink-soft); opacity: 1; }
+
+  &:hover { border-color: var(--ink); }
 
   &:focus {
-    background-color: var(--bs-input-bg);
-    border-color: var(--bs-primary);
-    color: var(--bs-input-color);
-  }
-}
-
-.form-control {
-  font-size: .9rem;
-
-  &:not(.form-select) {
-    padding-right: 0;
+    border-color: var(--ink);
+    color: var(--ink);
+    background-color: var(--surface);
+    box-shadow: 0 0 0 3px var(--d-cyan-deep);
+    outline: 0;
   }
 
   &:disabled,
   &[readonly] {
-    background-color: #e9ecef;
-    border-color: $gray-400;
+    border-color: var(--rule);
+    color: var(--ink-soft);
+    background-color: var(--paper-deep);
     opacity: 1;
   }
+
+  &.is-invalid,
+  &.is-invalid:focus {
+    border-color: var(--danger);
+    background-image: none;
+  }
+}
+
+.form-select {
+  padding-right: 40px;
+  background-image: none;
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") right 14px center / 18px 18px no-repeat,
+    var(--surface);
+}
+
+[data-theme="dark"] .form-select {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f3efe7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") right 14px center / 18px 18px no-repeat,
+    var(--surface);
+}
+
+textarea.form-control {
+  min-height: 96px;
+  line-height: 1.5;
+}
+
+.form-control-sm,
+.form-select-sm {
+  min-height: 36px;
+  padding-block: 6px;
+  font-size: 14px;
 }
 
 .form-control-lg {
@@ -102,76 +233,47 @@ label.form-check-label {
   padding-left: 0;
   border-color: transparent !important;
   background-color: transparent !important;
+  box-shadow: none !important;
   resize: none;
 }
 
-.form-control-color {
-  width: 50px;
-  padding: 3px !important;
+.form-control-color,
+.form-control[type=color] {
+  width: 48px;
+  min-height: 48px;
+  padding: 4px !important;
 }
-
-[data-bs-theme="dark"] {
-  .form-control,
-  .form-select {
-    --bs-input-bg: #{$gray-700-dark};
-    --bs-input-border-color: #{$gray-700-dark};
-    --bs-input-color: var(--bs-white);
-    --bs-input-disabled-bg: #{$gray-700-dark};
-    --bs-input-placeholder-color: var(--bs-gray-600);
-  }
-}
-
-// Input groups ---------------------------------------------------------------
 
 .input-group > :not(:first-child):not(.dropdown-menu) {
   margin-left: 0;
 }
 
-.input-group > .input-group-append > .btn,
-.input-group > .input-group-append > .input-group-text {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
 .input-group-text {
-  background-color: $input-group-addon-bg;
-  border-color: $input-group-addon-border-color;
+  border: 1.5px solid var(--field-line);
+  color: var(--ink-soft);
+  background-color: var(--surface);
 }
 
-[data-bs-theme="dark"] .input-group-text {
-  background-color: #{$gray-700-dark};
-  border-color: #{$gray-700-dark};
+// A search field: the magnifier sits inside the field's left edge.
+.input-group:has(> .input-group-text .fe-search),
+.input-group:has(> .input-group-append .fe-search) {
+  flex-wrap: nowrap;
+  border: 1.5px solid var(--field-line);
+  border-radius: 8px;
+  background: var(--surface);
+
+  &:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
+
+  > .form-control,
+  > .input-group-text,
+  > .input-group-append > .btn,
+  > .input-group-append > .input-group-text { border: 0; background: transparent; box-shadow: none; }
+  > .input-group-text,
+  > .input-group-append > .btn,
+  > .input-group-append > .input-group-text { color: var(--ink); }
 }
 
-// Inbox search: the field and its button read as one control.
-.search-query {
-  .form-control {
-    color: #62697b;
-    background-color: #F9FBFD;
-    background-clip: padding-box;
-    border: 1px solid #e2e6ed;
-    border-right: none;
-  }
-
-  .btn,
-  .btn:hover {
-    color: #62697b;
-    background-color: #F9FBFD;
-    border: 1px solid #e2e6ed;
-    border-left: none;
-  }
-
-  .btn:hover {
-    color: #333;
-  }
-}
-
-#chat .sidebar .search-query input:focus,
-#chat .sidebar .search-query input:focus + div > button {
-  border-color: $primary;
-}
-
-// Checks and switches --------------------------------------------------------
+// Checks and switches ----------------------------------------------------------
 
 .form-check {
   margin-bottom: 0;
@@ -182,52 +284,330 @@ label.form-check-label {
 }
 
 .form-check-input {
-  width: 1rem;
-  height: 1rem;
-  margin-top: calc((#{$line-height-base} * 1em - 1rem) / 2);
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  border: 1.5px solid var(--ink);
+  background-color: var(--surface);
   cursor: pointer;
 
   &:checked {
-    background-color: rgb(var(--bs-primary-rgb));
-    border-color: rgb(var(--bs-primary-rgb));
+    border-color: var(--ink);
+    background-color: var(--ink);
   }
 
-  &:focus:not(:checked) {
-    background-color: lighten($primary, 35%);
-  }
+  &:focus { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
+  &:disabled { opacity: .5; }
 }
 
 .form-check:not(.form-switch) .form-check-input:checked {
   background-size: 75% 75%;
 }
 
+.form-check-label {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+// The toggle: 44 by 24, off on the muted chip with an ink-outlined knob, on an ink track with a white knob.
 .form-switch {
-  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 24px;
+  padding-left: 0;
 
   > .form-check-input {
-    height: 1.5rem;
-    margin-top: 0;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 24px;
+    margin: 0;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background-color: var(--muted-chip);
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2.9' fill='white' stroke='%23141414' stroke-width='.55'/></svg>");
+    background-position: left center;
+    float: none;
+
+    &:checked {
+      background-color: var(--ink);
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2.9' fill='white'/></svg>");
+      background-position: right center;
+    }
   }
 
-  > .form-check-label {
-    margin-top: calc((1.5rem - #{$line-height-base} * 1em) / 2);
+  > .form-check-label { margin: 0; }
+  > .form-text, > .invalid-feedback { flex-basis: 100%; margin: 0 0 0 56px; }
+}
+
+.form-switch { flex-wrap: wrap; }
+
+// Tabs ------------------------------------------------------------------------
+// A 1px rule rail; the current item is ink 500 over a 3px aqua bar.
+
+.nav-tabs,
+.project-parity-tabs {
+  --bs-nav-tabs-border-width: 0;
+  --bs-nav-link-padding-x: 0;
+  --bs-nav-link-padding-y: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--rule);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+
+  .nav-link,
+  > button {
+    position: relative;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 10px 0 12px;
+    border: 0;
+    border-radius: 0;
+    color: var(--ink-soft);
+    background: none;
+    font-size: 16px;
+    font-weight: 400;
+    white-space: nowrap;
+
+    &:hover { color: var(--ink); }
+
+    &.active {
+      color: var(--ink);
+      background: none;
+      font-weight: 500;
+
+      &::after { content: ''; position: absolute; right: 0; bottom: -1px; left: 0; height: 3px; border-radius: 2px; background: var(--d-cyan-deep); }
+    }
+  }
+
+  // A phone wraps the tabs onto a second line rather than hiding the last one past the edge.
+  @media (max-width: 575.98px) {
+    flex-wrap: wrap;
+    gap: 0 20px;
+    overflow-x: visible;
+
+    .nav-link, > button { padding: 8px 0 10px; font-size: 15px; }
   }
 }
 
-[data-bs-theme="dark"] {
-  .form-check-input {
-    --bs-form-check-bg: #{$gray-600-dark};
-  }
+// Menus -----------------------------------------------------------------------
+// Menus are drawn cards.
 
-  .form-switch .form-check-input:focus {
-    --bs-form-switch-bg: #{escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$gray-800-dark}'/></svg>"))};
-  }
+.dropdown-menu {
+  --bs-dropdown-bg: var(--surface);
+  --bs-dropdown-color: var(--ink);
+  --bs-dropdown-border-color: var(--ink);
+  --bs-dropdown-border-width: 2px;
+  --bs-dropdown-border-radius: var(--card-radius);
+  --bs-dropdown-link-color: var(--ink);
+  --bs-dropdown-link-hover-color: var(--ink);
+  --bs-dropdown-link-hover-bg: var(--hover);
+  --bs-dropdown-link-active-color: var(--ink);
+  --bs-dropdown-link-active-bg: var(--d-cyan-tint);
+  --bs-dropdown-header-color: var(--ink-soft);
+  --bs-dropdown-divider-bg: var(--rule);
+  padding: 6px;
+  box-shadow: var(--card-shadow);
 
-  .form-switch .form-check-input:checked {
-    --bs-form-switch-bg: #{escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$white}'/></svg>"))};
-  }
+  .dropdown-item {
+    border-radius: 8px;
+    font-size: 15px;
 
-  .form-check-input:focus:not(:checked) {
-    background-color: #{$gray-700-dark};
+    &.text-danger,
+    &.text-danger:hover { color: var(--danger) !important; background-color: var(--hover); }
+    &.disabled, &:disabled { color: var(--ink-soft); }
   }
 }
+
+// Chips -----------------------------------------------------------------------
+// 24px pills: aqua for open, draft, verified and checked; the muted chip for unverified, not checked and closed.
+
+.badge,
+.h2h-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--d-cyan);
+  border-radius: 999px;
+  color: var(--ink) !important;
+  background: var(--d-cyan-tint) !important;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badge:is(.text-bg-light, .text-bg-secondary, .text-bg-secondary-subtle, .bg-secondary, .bg-light, .bg-secondary-subtle),
+.h2h-chip--muted {
+  border-color: transparent;
+  background: var(--muted-chip) !important;
+}
+
+// Count discs: aqua circles with an ink numeral, pills when three digits.
+.h2h-count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  color: var(--on-aqua);
+  background: var(--d-cyan);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+// Frames ----------------------------------------------------------------------
+// A card is a 1px rule on slightly deeper paper: no ink border, no shadow, no drawing on it.
+
+.h2h-card {
+  position: relative;
+  padding: 24px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 14px;
+  color: var(--ink);
+  background: var(--paper-deep);
+
+  @media (max-width: 575.98px) { padding: 18px; }
+}
+
+// Notices ---------------------------------------------------------------------
+// Alerts are drawn cards: aqua tint for notes and successes, the surface with danger ink for errors.
+
+.alert {
+  --bs-alert-color: var(--ink);
+  --bs-alert-bg: var(--d-cyan-tint);
+  --bs-alert-border-color: var(--ink);
+  --bs-alert-link-color: var(--ink);
+  --bs-alert-border-radius: var(--card-radius);
+  --bs-alert-padding-x: 18px;
+  --bs-alert-padding-y: 14px;
+  border-width: 2px;
+  box-shadow: var(--card-shadow);
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.alert-danger {
+  --bs-alert-color: var(--danger);
+  --bs-alert-bg: var(--surface);
+}
+
+.alert-warning,
+.alert-secondary,
+.alert-light {
+  --bs-alert-bg: var(--surface);
+}
+
+// Pagination: small secondary pills.
+.pagination {
+  --bs-pagination-color: var(--ink);
+  --bs-pagination-bg: transparent;
+  --bs-pagination-border-color: var(--ink);
+  --bs-pagination-border-width: 1.5px;
+  --bs-pagination-hover-color: var(--on-ink);
+  --bs-pagination-hover-bg: var(--ink);
+  --bs-pagination-hover-border-color: var(--ink);
+  --bs-pagination-focus-color: var(--ink);
+  --bs-pagination-focus-bg: var(--hover);
+  --bs-pagination-focus-box-shadow: none;
+  --bs-pagination-active-color: var(--on-ink);
+  --bs-pagination-active-bg: var(--ink);
+  --bs-pagination-active-border-color: var(--ink);
+  --bs-pagination-disabled-color: var(--ink-soft);
+  --bs-pagination-disabled-bg: transparent;
+  --bs-pagination-disabled-border-color: var(--rule);
+  --bs-pagination-border-radius: 999px;
+  gap: 6px;
+
+  .page-link { min-width: 36px; min-height: 36px; border-radius: 999px !important; font-size: 14px; text-align: center; }
+}
+
+// Confirm and other dialogs: drawn cards on an ink scrim.
+.modal {
+  --bs-modal-bg: var(--surface);
+  --bs-modal-color: var(--ink);
+  --bs-modal-border-color: var(--ink);
+  --bs-modal-border-width: 2px;
+  --bs-modal-border-radius: var(--card-radius);
+  --bs-modal-box-shadow: var(--card-shadow);
+  --bs-modal-header-border-color: var(--rule);
+  --bs-modal-footer-border-color: var(--rule);
+}
+
+.modal-backdrop {
+  --bs-backdrop-bg: #141414;
+  --bs-backdrop-opacity: .32;
+}
+
+// Lists and cards keep Bootstrap's structure on the brand surfaces.
+.card {
+  --bs-card-bg: var(--surface);
+  --bs-card-color: var(--ink);
+  --bs-card-border-color: var(--rule);
+  --bs-card-cap-bg: transparent;
+}
+
+.list-group {
+  --bs-list-group-bg: transparent;
+  --bs-list-group-color: var(--ink);
+  --bs-list-group-border-color: var(--rule);
+  --bs-list-group-action-hover-bg: var(--hover);
+  --bs-list-group-action-hover-color: var(--ink);
+  --bs-list-group-active-bg: var(--d-cyan-tint);
+  --bs-list-group-active-color: var(--ink);
+  --bs-list-group-active-border-color: var(--rule);
+}
+
+.table {
+  --bs-table-color: var(--ink);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--rule);
+  --bs-table-hover-bg: var(--hover);
+  --bs-table-hover-color: var(--ink);
+  --bs-table-striped-bg: var(--hover);
+  --bs-table-active-bg: var(--d-cyan-tint);
+  --bs-table-active-color: var(--ink);
+}
+
+.tooltip {
+  --bs-tooltip-color: var(--on-ink);
+  --bs-tooltip-bg: var(--ink);
+  // Ink tooltips appear at once: a fade would pass through grey, below text contrast.
+  transition: none;
+}
+
+.popover {
+  --bs-popover-bg: var(--surface);
+  --bs-popover-body-color: var(--ink);
+  --bs-popover-border-color: var(--ink);
+}
+
+.offcanvas {
+  --bs-offcanvas-bg: var(--paper);
+  --bs-offcanvas-color: var(--ink);
+}
+
+.progress {
+  --bs-progress-bg: var(--muted-chip);
+  --bs-progress-bar-bg: var(--d-cyan);
+  --bs-progress-bar-color: var(--ink);
+  --bs-progress-border-radius: 999px;
+}
+
+.spinner-border, .spinner-grow { color: var(--ink); }
+
+::placeholder { color: var(--ink-soft); opacity: 1; }

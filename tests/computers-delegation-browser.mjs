@@ -60,7 +60,7 @@ try{
  // Connected applications render in the application shell.
  await page.goto(`${app.origin}/delegation/settings?account_id=${projectId}`);await page.getByRole('heading',{name:'Connected applications',level:1}).waitFor()
  await shell.waitFor();assert.ok(await page.evaluate(()=>document.styleSheets.length>0),'the page loads the application stylesheet')
- assert.notEqual(await page.evaluate(()=>getComputedStyle(document.body).fontFamily.split(',')[0].replace(/["']/g,'')),'Times');assert.ok(await shell.getByRole('link',{name:'Connected applications'}).isVisible())
+ assert.notEqual(await page.evaluate(()=>getComputedStyle(document.body).fontFamily.split(',')[0].replace(/["']/g,'')),'Times');assert.ok(await page.getByTestId('settings-menu').getByRole('link',{name:'Connected applications'}).isVisible(),'Connected applications is current in the Settings menu')
  await page.getByLabel('Client identifier').fill('pages-slate');await page.getByLabel('Slate origin').fill(app.origin);await page.getByLabel('Exact callback URL').fill(app.origin+'/pages-callback');await page.getByLabel('Allow loopback development').check();await page.getByRole('button',{name:'Register client'}).click()
  await page.getByText('pages-slate —',{exact:false}).waitFor();assert.equal(await page.getByLabel('Client identifier').inputValue(),'')
  await page.getByLabel('Client identifier').fill('pages-slate');await page.getByLabel('Slate origin').fill(app.origin);await page.getByLabel('Exact callback URL').fill(app.origin+'/pages-callback');await page.getByLabel('Allow loopback development').check();await page.getByRole('button',{name:'Register client'}).click()

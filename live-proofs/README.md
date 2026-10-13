@@ -1,7 +1,7 @@
 # Manual HappyToHelp validation workflows
 
 Both workflows are `workflow_dispatch` only, from `main` in
-`just-every/happytohelp`. Dispatch with an exact lowercase 40-character
+`just-every/run-happytohelp`. Dispatch with an exact lowercase 40-character
 `sha`. `live-proof` also takes `proof: secrets-present`. Controller files come
 from immutable `github.workflow_sha`, never the candidate. Source ancestry is
 checked against fresh integration and semantic `vX.Y.Z[-prerelease]` release

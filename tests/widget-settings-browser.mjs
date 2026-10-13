@@ -22,6 +22,8 @@ const call=async(path,body,token,method=body===undefined?'GET':'POST')=>{const r
 const f={email:'widget-settings@example.test',password:'widget-settings-test-password-2026'};
 const setup=await call('/api/identity/bootstrap',{password:f.password,name:'Widget Settings Workspace',email:f.email,allowedOrigin:origin});
 const owner=await call('/api/identity/login',{email:f.email,password:f.password});
+// Setup gives every new workspace a colour; clear it so the first checks read the widget's own defaults.
+await call(`/api/management/projects/${setup.projectId}/settings`,{primary_color:''},owner.token,'PUT');
 const settingsApi=(projectId=setup.projectId)=>call(`/api/management/projects/${projectId}/widget-settings`,undefined,owner.token);
 const browser=await chromium.launch({headless:true,channel:'chrome'});
 const context=await browser.newContext({viewport:{width:1440,height:900},permissions:['clipboard-read','clipboard-write']});const page=await context.newPage();

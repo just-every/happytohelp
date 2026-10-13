@@ -1,6 +1,7 @@
 import {isProjectActive,requireActiveProject} from '../../platform/project-status'
 import type { Env,Job } from '../../platform/env'
 import { HTTPException } from 'hono/http-exception'
+import { DEFAULT_WORKSPACE_COLOUR } from '../management/workspace-colour'
 export function imageType(bytes:Uint8Array){if(bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71)return 'image/png';if(bytes[0]===255&&bytes[1]===216&&bytes[2]===255)return 'image/jpeg';if(new TextDecoder().decode(bytes.slice(0,4))==='RIFF'&&new TextDecoder().decode(bytes.slice(8,12))==='WEBP')return 'image/webp';throw new HTTPException(400,{message:'PNG, JPEG or WebP image bytes required'})}
 export async function consumeJob(job:Job,env:Env){
  if(job.type!=='brand.generate')return false
@@ -10,7 +11,7 @@ export async function consumeJob(job:Job,env:Env){
  if(!env.OPENAI_API_KEY){await env.DB.prepare("UPDATE brand_generations SET state='failed',error='Image provider is not configured' WHERE id=? AND state='queued'").bind(row.id).run();return true}
  const claim=await env.DB.prepare("UPDATE brand_generations SET state='running',started_at=? WHERE id=? AND state='queued' AND EXISTS(SELECT 1 FROM memberships WHERE project_id=brand_generations.project_id AND user_id=brand_generations.actor_id AND role IN('owner','admin')) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=brand_generations.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)").bind(Date.now(),row.id).run();if(!claim.meta.changes)return true
  try{
- const color=JSON.parse(row.settings_json||'{}').primary_color||'#713ee0';const prompt=`Create one simple, flat workspace brand mark that reads clearly in a square application icon. Render only the mark on a transparent background; do not add a black, white, or colored canvas behind it. Prefer flat solid shapes and crisp edges, without a tile, glow, or 3D effects unless the user requests them. Workspace name: ${row.name}. Use ${color} as the default mark color, honoring any colors the user explicitly requests. The user's description is: ${row.prompt}`
+ const color=JSON.parse(row.settings_json||'{}').primary_color||DEFAULT_WORKSPACE_COLOUR;const prompt=`Create one simple, flat workspace brand mark that reads clearly in a square application icon. Render only the mark on a transparent background; do not add a black, white, or colored canvas behind it. Prefer flat solid shapes and crisp edges, without a tile, glow, or 3D effects unless the user requests them. Workspace name: ${row.name}. Use ${color} as the default mark color, honoring any colors the user explicitly requests. The user's description is: ${row.prompt}`
  await requireActiveProject(env,row.project_id)
  const response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${env.OPENAI_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({model:row.model,prompt,size:row.size,quality:row.quality,output_format:'png',background:'transparent',n:1}),signal:AbortSignal.timeout(240000)})
  const providerRequestId=response.headers.get('x-request-id');await env.DB.prepare('UPDATE brand_generations SET provider_request_id=? WHERE id=?').bind(providerRequestId,row.id).run()

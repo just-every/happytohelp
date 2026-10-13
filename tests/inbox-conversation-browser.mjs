@@ -125,6 +125,7 @@ try{
   for(const length of [48,49,200]) assert.equal((await page.request.get(runtime.origin+api+'a'.repeat(length))).status(),200,`${length} characters`)
   for(const length of [201,400,6000]){const response=await page.request.get(runtime.origin+api+'a'.repeat(length));assert.equal(response.status(),400);assert.match((await response.json()).error,/too long/i)}
   check('search API: literal wildcards, 200 up to the limit, friendly 400 beyond it')
+  assert.equal(await page.getByRole('combobox',{name:'Filter conversations by tag'}).count(),0,'no tag filter while the workspace has no tag')
   const tagged=await fx.api(`/api/dashboard/projects/${fx.projectId}/conversations/${fx.contacts.percent.id}/tags`,{method:'POST',body:{name:'Search scope'}})
   await page.goto(runtime.origin+inboxPath({tag:tagged.data.id}))
   await page.getByRole('combobox',{name:'Filter conversations by tag'}).waitFor()

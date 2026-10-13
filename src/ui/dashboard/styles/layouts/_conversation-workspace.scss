@@ -1,15 +1,13 @@
-// The inbox owns one viewport: only the list, transcript, and assistant scroll.
+// The inbox owns one viewport: only the list, transcript, and assistant scroll. Three columns from xl up (list 320,
+// conversation, panel 320); below xl the list is the page and the conversation slides over it.
 body.conversation-workspace {
-    --conversation-inbox-width: 372px;
-    --conversation-assistant-width: 344px;
-    --conversation-mobile-nav-height: 73px;
-    --conversation-top-height: 72px;
+    --conversation-inbox-width: 352px;
+    --conversation-assistant-width: 320px;
+    --conversation-top-height: 96px;
     --conversation-content-width: 46rem;
     --conversation-content-gutter: 1.5rem;
-    color: var(--conversation-ink);
-    background: var(--workspace-surface, #fff);
-    font-family: 'Inter', Helvetica, Arial, sans-serif;
-    font-size: 14px;
+    color: var(--ink);
+    font-size: 16px;
 
     .main-content, #chat, #chat > .layout, #chat .main, #chat .chat, #chat .chat-content {
         min-width: 0;
@@ -17,7 +15,7 @@ body.conversation-workspace {
     }
 
     #chat > .layout { overflow: hidden; }
-    #chat .chat { position: relative; background: var(--workspace-surface, #fff); }
+    #chat .chat { position: relative; background: transparent; }
 
     #chat .chat > .chat-body {
         display: flex;
@@ -33,7 +31,6 @@ body.conversation-workspace {
         flex: 1 1 auto;
         min-height: 0;
         overflow: hidden;
-        background: var(--workspace-surface, #fff);
         overscroll-behavior: contain;
     }
 
@@ -43,53 +40,101 @@ body.conversation-workspace {
         padding: 0 !important;
     }
 
-    #chat .btn-primary {
-        --bs-btn-bg: var(--conversation-accent);
-        --bs-btn-border-color: var(--conversation-accent);
-        --bs-btn-hover-bg: var(--conversation-accent-strong);
-        --bs-btn-hover-border-color: var(--conversation-accent-strong);
-        --bs-btn-active-bg: var(--conversation-accent-strong);
-        --bs-btn-active-border-color: var(--conversation-accent-strong);
-        --bs-btn-disabled-bg: var(--conversation-accent);
-        --bs-btn-disabled-border-color: var(--conversation-accent);
-    }
-
-    #chat :is(button, a, input, textarea, select):focus-visible {
-        outline: 2px solid var(--conversation-accent);
-        outline-offset: 3px;
-    }
-
     @media (min-width: 1200px) {
         & { overflow: hidden; }
         .main-content, #chat, #chat > .layout, #chat .main, #chat .main > .chat { height: 100dvh; }
         #chat > .layout { flex-direction: row; }
         #chat .sidebar { flex: 0 0 var(--conversation-inbox-width); width: var(--conversation-inbox-width); height: 100dvh; }
-        #chat .main { flex: 1 1 auto; overflow: hidden; }
+        #chat .main { flex: 1 1 auto; overflow: hidden; background: transparent; }
     }
 
-    @media (min-width: 1440px) and (max-width: 1519.98px) {
-        --conversation-inbox-width: 344px;
-        --conversation-assistant-width: 320px;
-    }
-
-    @media (min-width: 1280px) and (max-width: 1439.98px) {
-        --conversation-rail-width: 200px;
-        --conversation-inbox-width: 280px;
-        --conversation-assistant-width: 300px;
+    @media (min-width: 1200px) and (max-width: 1439.98px) {
+        --conversation-inbox-width: 288px;
+        --conversation-assistant-width: 296px;
     }
 
     @media (max-width: 1199.98px) {
-        & { padding-top: var(--conversation-mobile-nav-height); }
-        #chat .main { left: 0; top: var(--conversation-mobile-nav-height); bottom: 0; height: auto; overflow: hidden; }
+        #chat .main { left: 0; top: var(--top-bar-height); bottom: 0; height: auto; overflow: hidden; }
         #chat .main > .chat { height: 100%; min-height: 0; }
-        #chat .sidebar { height: calc(100dvh - var(--conversation-mobile-nav-height)); }
+        #chat .sidebar { height: calc(100dvh - var(--top-bar-height)); }
     }
 
     @media (max-width: 575.98px) {
-        --conversation-content-gutter: .5rem;
+        --conversation-content-gutter: 1rem;
     }
 
     @media (prefers-reduced-motion: reduce) {
         #chat .main { transition: none; }
+    }
+}
+
+// With no chat open: the welcome, centred on paper under its drawing.
+body.conversation-workspace #chat .inbox-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 40px 24px;
+    text-align: center;
+
+    .h2h-drawing { margin-bottom: 20px; }
+    h4 { margin: 0; color: var(--ink); font-size: 44px; font-weight: 500; letter-spacing: -.03em; line-height: 1.1; }
+    p { margin: 4px 0 0; color: var(--ink-soft); font-size: 20px; }
+}
+
+// A new workspace's empty inbox: the greeting (with the pen line on a wide screen), the one next action as the black pill,
+// a quiet way to Setup and a quiet demo link. In the main pane on a wide screen, in the list column on a phone.
+body.conversation-workspace #chat .inbox-start-pane {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 72px 80px;
+    overflow-y: auto;
+
+    @media (max-width: 1199.98px) { padding: 0 16px; }
+}
+
+body.conversation-workspace #chat .inbox-start {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 520px;
+    overflow-wrap: anywhere;
+
+    .h2h-pen-line { display: block; width: 150px; margin: 4px 0 22px; }
+    .inbox-start__lede { margin: 0 0 28px; color: var(--ink-soft); font-size: 18px; line-height: 1.5; }
+    .inbox-start__action { display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; font-size: 16px; font-weight: 500; }
+    .inbox-start__demo { margin-top: 14px; }
+
+    .inbox-start__quiet {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        margin-top: 18px;
+        padding: 0;
+        border: 0;
+        color: var(--ink-soft);
+        background: none;
+        font: inherit;
+        font-size: 15px;
+        text-align: left;
+        text-decoration: underline 1.5px var(--d-cyan-deep);
+        text-underline-offset: 5px;
+        cursor: pointer;
+
+        &:hover:not(:disabled) { color: var(--ink); }
+        &:disabled { cursor: progress; }
+        &:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    }
+    .inbox-start__demo .inbox-start__quiet { margin-top: 0; }
+    .inbox-start__demo p { margin: 8px 0 0; font-size: 14px; }
+
+    // In the list column of a phone: the same block, tighter.
+    @media (max-width: 1199.98px) {
+        padding: 8px 4px 24px;
+        .inbox-greeting { font-size: 30px; }
+        .inbox-start__lede { margin-bottom: 20px; font-size: 17px; }
     }
 }

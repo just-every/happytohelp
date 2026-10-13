@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception'
 import type { AppEnv, Env } from '../../platform/env'
 import { id } from '../../platform/db'
 import { scope } from './common'
+import { DEFAULT_WORKSPACE_COLOUR } from './workspace-colour'
 
 export const workspaceArtwork = new Hono<AppEnv>()
 const prefix = '/projects/:projectId'
@@ -14,7 +15,7 @@ export async function workspaceAppearanceFor(env: Env, projectId: string) {
  const row = await env.DB.prepare('SELECT p.name,p.allowed_origin,s.settings_json FROM projects p LEFT JOIN project_settings s ON s.project_id=p.id WHERE p.id=?').bind(projectId).first<{name:string;allowed_origin:string;settings_json:string|null}>()
  if (!row) throw new HTTPException(404)
  const settings = JSON.parse(row.settings_json || '{}')
- return {website:row.allowed_origin,name:row.name,primaryColor:(settings.primary_color || '#713ee0').toLowerCase(),artwork_url:artworkUrl(projectId,settings.sidebar_artwork_id),artwork_enabled:settings.sidebar_artwork_enabled === true}
+ return {website:row.allowed_origin,name:row.name,primaryColor:(settings.primary_color || DEFAULT_WORKSPACE_COLOUR).toLowerCase(),artwork_url:artworkUrl(projectId,settings.sidebar_artwork_id),artwork_enabled:settings.sidebar_artwork_enabled === true}
 }
 workspaceArtwork.get(`${prefix}/appearance`,async c => c.json({data:await workspaceAppearanceFor(c.env,(await scope(c)).projectId)}))
 workspaceArtwork.put(`${prefix}/appearance`,async c => {
@@ -48,7 +49,7 @@ workspaceArtwork.put(`${prefix}/artwork`,bodyLimit({maxSize:12*1024*1024}),async
   await c.env.DB.prepare("INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES(?,'{}',?) ON CONFLICT(project_id) DO NOTHING").bind(projectId,Date.now()).run()
   const query = "UPDATE project_settings SET settings_json=json_set(settings_json,'$.sidebar_artwork_id',?,'$.sidebar_artwork_enabled',json('true'),'$.sidebar_artwork_context',json(?)),updated_at=? WHERE project_id=?"
   const result = expected
-   ? await c.env.DB.prepare(query+" AND json_extract(settings_json,'$.sidebar_artwork_id') IS NULL AND lower(coalesce(json_extract(settings_json,'$.primary_color'),'#713ee0'))=? AND EXISTS(SELECT 1 FROM projects WHERE id=? AND allowed_origin=? AND name=?)").bind(artworkId,context,Date.now(),projectId,expected.primaryColor.toLowerCase(),projectId,expected.website,expected.name).run()
+   ? await c.env.DB.prepare(query+" AND json_extract(settings_json,'$.sidebar_artwork_id') IS NULL AND lower(coalesce(json_extract(settings_json,'$.primary_color'),'"+DEFAULT_WORKSPACE_COLOUR+"'))=? AND EXISTS(SELECT 1 FROM projects WHERE id=? AND allowed_origin=? AND name=?)").bind(artworkId,context,Date.now(),projectId,expected.primaryColor.toLowerCase(),projectId,expected.website,expected.name).run()
    : await c.env.DB.prepare(query).bind(artworkId,context,Date.now(),projectId).run()
   if (!result.meta.changes) throw new HTTPException(409,{message:'The workspace changed before this artwork arrived.'})
  } catch (error) { await c.env.FILES.delete(objectKey); throw error }

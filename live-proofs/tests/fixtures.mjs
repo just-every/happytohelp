@@ -16,7 +16,7 @@ export function policy(artifact=candidate()) {
 }
 export function env(overrides={}) {
   const p = policy();
-  return {VALIDATED_SHA:sha,CONTROL_SHA:'2'.repeat(40),GITHUB_REPOSITORY:'just-every/happytohelp',GITHUB_RUN_ID:'123',GITHUB_RUN_ATTEMPT:'1',
+  return {VALIDATED_SHA:sha,CONTROL_SHA:'2'.repeat(40),GITHUB_REPOSITORY:'just-every/run-happytohelp',GITHUB_RUN_ID:'123',GITHUB_RUN_ATTEMPT:'1',
     MODE:'proof',INPUT_PROOF:'secrets-present',PREPARE_RESULT:'success',JOB_RESULT:'success',EXECUTION_RESULT:'passed',
     CLOUDFLARE_API_TOKEN:'test-provider-token',H2H_SETUP_TOKEN:'test-setup-token-that-is-at-least-32-characters',
     CLOUDFLARE_ACCOUNT_ID:p.accountId,H2H_RESOURCE_PREFIX:p.prefix,H2H_PUBLIC_ORIGIN:p.origin,H2H_STAGE_POLICY_JSON:JSON.stringify(p),...overrides};

@@ -25,8 +25,9 @@ const providerById = {
 
 export default function ConversationSuggestions({ hasHiddenAbove, hasHiddenBelow, scrollRef }) {
     const {
-        currentAI, disabled, projectId, selectSuggestion, selectedSuggestion, suggestions,
+        canGenerateSuggestions, currentAI, disabled, projectId, selectSuggestion, selectedSuggestion, suggestions,
     } = useReplySuggestions();
+    const isEmpty = canGenerateSuggestions && !suggestions.error && !suggestions.loading && !suggestions.responses.some(suggestion => suggestion?.response);
     const isProviderConfigurationError = /^(?:CONFIGURATION_REQUIRED|PROVIDER_NOT_SELECTED):/.test(suggestions.error);
     const missingSecretName = suggestions.error.match(/^CONFIGURATION_REQUIRED:\s*([A-Z][A-Z0-9_]*_API_KEY)$/)?.[1];
     const unselectedProviderId = suggestions.error.match(/^PROVIDER_NOT_SELECTED:\s*([a-z][a-z0-9_-]*)$/i)?.[1]?.toLowerCase();
@@ -52,6 +53,10 @@ export default function ConversationSuggestions({ hasHiddenAbove, hasHiddenBelow
                             />
                             : <span>{ suggestions.error }</span> }
                     </div> }
+                    { isEmpty && <p className="conversation-suggestions__empty">
+                        <strong>No suggested replies yet.</strong>
+                        <span>Press Generate for replies drafted for this conversation.</span>
+                    </p> }
                     { suggestions.loading && <div className="conversation-suggestions__loading" role="status">
                         <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
                         <span>{ suggestions.loading_message || 'Generating reply suggestions…' }</span>

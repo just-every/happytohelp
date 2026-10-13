@@ -6,12 +6,13 @@ body.conversation-workspace #chat {
         gap: 1.75rem;
         min-height: 100%;
         padding-bottom: .5rem;
-        color: var(--conversation-ink);
-        font-size: .8125rem;
+        color: var(--ink);
+        font-size: 15px;
         line-height: 1.5;
     }
 
-    .conversation-details-section { min-width: 0; }
+    // Each section is a tile under a 13px uppercase heading.
+    .conversation-details-section { min-width: 0; padding: 16px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); }
 
     .conversation-details-section-heading {
         display: flex;
@@ -22,11 +23,12 @@ body.conversation-workspace #chat {
 
         h3 {
             margin: 0;
-            color: var(--conversation-ink);
-            font-size: .8125rem;
-            font-weight: 650;
+            color: var(--ink-soft);
+            font-size: 13px;
+            font-weight: 500;
             line-height: 1.5;
-            letter-spacing: -.01em;
+            letter-spacing: .06em;
+            text-transform: uppercase;
         }
     }
 
@@ -35,39 +37,24 @@ body.conversation-workspace #chat {
         align-items: center;
         justify-content: center;
         gap: .5rem;
-        padding: .5rem .75rem;
-        border-radius: .5rem;
-        font-size: .8125rem;
-        line-height: 1.5;
+        min-height: 36px;
+        padding: 0 16px;
+        border-radius: 999px;
+        font-size: 14px;
+        line-height: 1.2;
         box-shadow: none;
 
         > svg { flex-shrink: 0; width: 1rem; height: 1rem; }
     }
 
-    .conversation-details .btn-white {
-        color: var(--conversation-ink);
-        border-color: var(--conversation-line);
-        background: var(--workspace-surface-raised, #fff);
-
-        &:hover, &[aria-expanded=true] {
-            color: var(--conversation-accent);
-            background: var(--conversation-accent-soft);
-        }
-    }
-
-    .conversation-details .btn-link {
-        color: var(--conversation-accent);
-        text-decoration: none;
-
-        &:hover { background: var(--conversation-accent-soft); }
-    }
+    .conversation-details .btn-white[aria-expanded=true] { color: var(--on-ink); background: var(--ink); }
 
     .conversation-details-section-heading .btn-link {
         min-height: 1.75rem;
         margin: -.25rem 0;
         padding: .25rem;
         gap: .25rem;
-        font-size: .75rem;
+        font-size: 13px;
     }
 
     .conversation-details-assignment .dropdown-toggle {
@@ -83,29 +70,26 @@ body.conversation-workspace #chat {
     .conversation-details .dropdown-menu {
         min-width: min(15rem, 100%);
         max-width: 100%;
-        padding: .375rem;
-        border: 1px solid var(--conversation-line);
-        border-radius: .625rem;
-        box-shadow: 0 8px 24px rgba(24, 33, 61, .1);
+        padding: 6px;
 
         .btn, .dropdown-item {
             width: 100%;
             min-height: 2.25rem;
             justify-content: flex-start;
             padding: .5rem;
-            color: var(--conversation-ink);
+            color: var(--ink);
             text-align: left;
             white-space: normal;
             overflow-wrap: anywhere;
-            font-size: .8125rem;
+            font-size: 15px;
             border: 0;
-            border-radius: .375rem;
+            border-radius: 8px;
             background: transparent;
         }
 
         .is-selected, .btn:hover, .dropdown-item:hover {
-            color: var(--conversation-accent);
-            background: var(--conversation-accent-soft);
+            color: var(--ink);
+            background: var(--d-cyan-tint);
         }
     }
 
@@ -117,13 +101,13 @@ body.conversation-workspace #chat {
         gap: .5rem;
 
         li { display: flex; align-items: center; min-width: 0; gap: .5rem; }
-        li > svg { flex-shrink: 0; width: 1rem; height: 1rem; color: var(--conversation-muted); }
+        li > svg { flex-shrink: 0; width: 1rem; height: 1rem; color: var(--ink-soft); }
         li > span { min-width: 0; flex: 1; overflow-wrap: anywhere; }
-        .btn { flex: 0 0 auto; padding: .25rem; color: var(--conversation-muted); }
-        .btn:hover { color: #b42338; background: #fff1f2; }
+        .btn { flex: 0 0 auto; padding: .25rem; color: var(--ink-soft); }
+        .btn:hover { color: var(--danger); background: var(--surface); }
     }
 
-    .conversation-details-empty { margin: 0; color: var(--conversation-muted); font-size: .75rem; }
+    .conversation-details-empty { margin: 0; color: var(--ink-soft); font-size: 13px; }
     .conversation-details-fields { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
     .conversation-detail-field { display: flex; align-items: flex-start; gap: .75rem; min-width: 0; }
     .conversation-detail-field__icon {
@@ -133,29 +117,29 @@ body.conversation-workspace #chat {
         height: 2.25rem;
         padding-top: .125rem;
         place-items: start center;
-        color: var(--conversation-ink);
+        color: var(--ink);
 
         svg { width: 1.125rem; height: 1.125rem; }
     }
 
     .conversation-detail-field__body { min-width: 0; flex: 1; }
-    .conversation-detail-field__label { display: block; margin: 0 0 .125rem; color: var(--conversation-muted); font-size: .75rem; }
+    .conversation-detail-field__label { display: block; margin: 0 0 .125rem; color: var(--ink-soft); font-size: 13px; }
     .conversation-detail-field__value {
         display: block;
         margin: 0;
-        color: var(--conversation-ink);
-        font-size: .8125rem;
+        color: var(--ink);
+        font-size: 15px;
         overflow-wrap: anywhere;
 
         p { margin: 0; }
-        a { color: var(--conversation-accent); }
+        a { color: var(--ink); }
         a:hover { text-decoration: underline; }
-        .text-muted { color: var(--conversation-muted) !important; }
+        .text-muted { color: var(--ink-soft) !important; }
     }
 
-    .conversation-detail-field__value .conversation-detail-field__secondary-value { display: block; color: var(--conversation-muted); }
-    .conversation-detail-field__online { color: #087e5a; }
-    .conversation-detail-field__timezone { display: block; color: var(--conversation-muted); font-size: .75rem; white-space: nowrap; }
+    .conversation-detail-field__value .conversation-detail-field__secondary-value { display: block; color: var(--ink-soft); }
+    .conversation-detail-field__online { color: var(--ink); }
+    .conversation-detail-field__timezone { display: block; color: var(--ink-soft); font-size: 13px; white-space: nowrap; }
     .conversation-detail-field--metadata .conversation-detail-field__label { text-transform: capitalize; }
 
     .conversation-detail-grid {
@@ -168,12 +152,13 @@ body.conversation-workspace #chat {
         display: flex;
         margin: 0;
 
-        > .btn:first-child { flex: 1; border-radius: .5rem 0 0 .5rem; }
+        > .btn:first-child { flex: 1; border-radius: 999px 0 0 999px; }
         > .dropdown-toggle-split {
-            flex: 0 0 2.25rem;
-            width: 2.25rem;
-            padding: .5rem;
-            border-radius: 0 .5rem .5rem 0;
+            flex: 0 0 2.75rem;
+            width: 2.75rem;
+            padding: 0;
+            border-left-width: 0;
+            border-radius: 0 999px 999px 0;
 
             &::after { content: none; }
         }
@@ -182,3 +167,17 @@ body.conversation-workspace #chat {
 
     .conversation-details-plugin__frame { display: block; width: 100%; border: 0; }
 }
+
+// Conversation tags: aqua chips (the list rows show them small; Details lets the team add and remove them).
+body.conversation-workspace #chat .conversation-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    &:empty { display: none; }
+    .conversation-tag { display: inline-flex; align-items: center; gap: 4px; min-height: 22px; padding: 0 9px; border: 1px solid var(--d-cyan); border-radius: 999px; color: var(--ink); background: var(--d-cyan-tint); font-size: 12px; font-weight: 500; }
+    button.conversation-tag { min-height: 28px; font-size: 13px; cursor: pointer; }
+}
+body.conversation-workspace #chat .conversation-item .conversation-tags { margin: 2px 0 4px; }
+body.conversation-workspace #chat .conversation-tags-form { display: flex; gap: 8px; margin-top: 10px; }
+body.conversation-workspace #chat .conversation-tags-form input { min-width: 0; }

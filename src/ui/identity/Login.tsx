@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { loginDestination } from '../native/dashboard-path';
 import IdentityFrame from './IdentityFrame';
+import SignInDrawing from './SignInDrawing';
 import { Alert, Field, SubmitButton } from './fields';
 import { postJson, useAuthOptions, useSignInMail } from './hooks';
 
@@ -19,14 +20,14 @@ export default function Login() {
             location.assign(loginDestination(new URLSearchParams(location.search).get('returnTo'), location.origin, result.accountOnly));
         } catch (failure: any) { setError(failure.message); setBusy(false); }
     };
-    return <IdentityFrame>
+    return <IdentityFrame drawing={<SignInDrawing />}>
         <h1>Welcome back</h1>
         <p className="id-lede">Log in to your HappyToHelp workspace.</p>
         {options?.setupRequired && <p className="id-note" role="status">This installation has not been set up yet. <a href="/setup">Set up your workspace</a> to create the first owner account.</p>}
         <Alert>{error}</Alert>
         <form method="post" onSubmit={submit}>
-            <Field id="email" label="Email" type="email" autoComplete="username" />
-            <Field id="password" label="Password" type="password" autoComplete="current-password" />
+            <Field id="email" label="Email" type="email" autoComplete="username" placeholder="you@example.com" />
+            <Field id="password" label="Password" type="password" autoComplete="current-password" placeholder="Your password" />
             <SubmitButton busy={busy} ready={true} busyLabel="Signing in…">Login</SubmitButton>
         </form>
         <div className="id-links">

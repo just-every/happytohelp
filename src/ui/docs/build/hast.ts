@@ -104,7 +104,8 @@ export function docsHast(state: HastState) {
     const tree = node as Root;
     const first = tree.children.find(isElement);
     const before = first ? tree.children.slice(0, tree.children.indexOf(first)) : tree.children;
-    if (first?.tagName === 'h1' && before.every(child => child.type === 'text' && !child.value.trim())) {
+    // Block HTML ahead of the H1 is the README's GitHub banner (a picture and a link line); the site draws its own header, so it is dropped with the H1.
+    if (first?.tagName === 'h1' && before.every(child => child.type === 'raw' || (child.type === 'text' && !child.value.trim()))) {
       state.title = collapse(textOf(first));
       state.titleId = state.slug(textOf(first));
       tree.children.splice(0, tree.children.indexOf(first) + 1);

@@ -1,3 +1,15 @@
+<p align="center">
+  <a href="https://justevery.com/#vol-happytohelp">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.webp">
+      <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner-light.webp">
+      <img src=".github/assets/banner-light.webp" width="100%" alt="HappyToHelp: Customer Support, Solved. 100% free, open source alternative to Zendesk, Intercom, Help Scout and Freshdesk.">
+    </picture>
+  </a>
+</p>
+
+<p align="center"><a href="https://justevery.com">Part of Just Every</a> · <a href="LICENSE">MIT licensed</a></p>
+
 # HappyToHelp
 
 HappyToHelp is an open-source support workspace with a customer chat widget,

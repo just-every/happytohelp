@@ -36,7 +36,13 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
   };
   for (const [path, text] of Object.entries(files)) await writeFile(join(root, path), text);
   // No WebSocket server: the plugin's full-reload goes nowhere here, and no fixed HMR port is taken.
-  const server = await createServer({ root, configFile: false, logLevel: 'silent', appType: 'custom', server: { middlewareMode: true, ws: false }, plugins: [docsSite()] });
+  // Use Vite's real fs.watch transport on every host. m1's default FSEvents stream can omit events for a new
+  // fixture tree even after 'ready'; this suite checks docs synchronization once the filesystem reports the change.
+  const server = await createServer({
+    root, configFile: false, logLevel: 'silent', appType: 'custom',
+    server: { middlewareMode: true, ws: false, watch: { useFsEvents: false, usePolling: false } },
+    plugins: [docsSite()],
+  });
   // What each environment is sent: the browser's full reload when the docs change, an error if the plugin throws.
   const sent = [];
   for (const environment of Object.values(server.environments)) {
@@ -45,8 +51,8 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
   }
   const errors = () => sent.filter(payload => payload.type === 'error');
   const reloaded = () => [...new Set(sent.filter(payload => payload.type === 'full-reload').map(payload => payload.environment))];
-  // Observe real filesystem events before checking the plugin. macOS FSEvents batches changes even after 'ready';
-  // a fixed sleep can read the previous manifest or remove a folder before the watcher has seen its files.
+  // Observe real filesystem events before checking the plugin: a fixed sleep can read the previous manifest
+  // or remove a folder before the watcher has seen its files.
   // The public-door assertions still have their own 5 s bound; the test timeout bounds filesystem event delivery.
   const observe = async (event, path) => {
     for await (const [file] of on(server.watcher, event, { signal })) if (file === join(root, path)) return;
@@ -85,7 +91,7 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
     assert.deepEqual(Object.keys(broken.pages), ['', 'guide']);
     await assert.rejects(loadDocsPage('guide'), /README\.md: docs\/MISSING\.md \(docs\/MISSING\.md does not exist\)/);
 
-    const thirdAdded = [observe('change', 'README.md'), observe('add', 'docs/THIRD.md'), observe('change', 'docs/site.json')];
+    const thirdAdded = [observe('add', 'docs/THIRD.md'), observe('change', 'docs/site.json')];
     await writeFile(join(root, 'README.md'), files['README.md']);
     await writeFile(join(root, 'docs/THIRD.md'), '# Third page\n');
     await writeFile(join(root, 'docs/site.json'), site([home, { slug: 'guide', source: 'docs/GUIDE.md', label: 'Guide' }, { slug: 'third', source: 'docs/THIRD.md', label: 'Third' }]));

@@ -10259,7 +10259,7 @@
       "executable": false
     },
     "src/ui/docs/build/hast.ts": {
-      "sha256": "79508e7d5099098acffe6ad588e23a5da01971c33dc11a34daac8c05cc1df9e0",
+      "sha256": "bccd852af68bead2a5b3ec058d087d44ee6ad90c88651fa2e5992f26391c7d1a",
       "executable": false
     },
     "src/ui/docs/build/highlight-modules.d.ts": {
@@ -10282,12 +10282,8 @@
       "sha256": "44ad9348a024074320b219559619f9d494a750ae337b01c590c4a6052f68e451",
       "executable": false
     },
-    "src/ui/docs/build/preamble.ts": {
-      "sha256": "195f429474426711a9952bd5f448a3c22853a1507cb8437f207da9ae3288a078",
-      "executable": false
-    },
     "src/ui/docs/build/render.ts": {
-      "sha256": "86c3d3c25b8b509f9c1258a105be74b5bb196c628b168db2ac9019e6d510a66d",
+      "sha256": "fc56bdab01d31a14977dfd1a098a4d6d6b2b2549a00bafbed771a6511474b410",
       "executable": false
     },
     "src/ui/docs/build/site.ts": {
@@ -11923,7 +11919,7 @@
       "executable": false
     },
     "tests/docs-site.mjs": {
-      "sha256": "cd0f36ae13db6579e104dfbb0e132144571de66f721102cdc70f698c04e31b99",
+      "sha256": "cf57b28f761fc4dd87d473eddfb7c31b9aa0869c2c38cdfebc355a9b04b7c000",
       "executable": false
     },
     "tests/email-classification.mjs": {

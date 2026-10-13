@@ -11919,7 +11919,7 @@
       "executable": false
     },
     "tests/docs-dev-sync.mjs": {
-      "sha256": "5621604b3dd4e27606038832518983b349c2bc3bf076229724319554506ca8d9",
+      "sha256": "781a665fe5fc31c9ecdaea9cd6577ade89d17ec10f4746d58f32707cd94b8ae9",
       "executable": false
     },
     "tests/docs-site.mjs": {

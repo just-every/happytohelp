@@ -34,7 +34,7 @@ export const install=(root,input,store,onApp,signal)=>installOperator(root,input
 const transfer=localPortability({database:'DB',buckets:{FILES:'FILES'},policy:archivePolicy,transient:['ConversationSocket connections (messages are in D1)','queue execution leases','development outbox','active sessions and one-use sign-in links','GitHub and integration credentials','local computer pairing, grants and job execution records']});
 const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async context=>{await context.store.run('Collecting local migrations',process.execPath,['scripts/migrations.mjs'],{cwd:context.root,signal:context.signal});return transfer[verb](context);} ]));
 export const commandAdapter=createCommandAdapter(adapter,{
- generatedOutputs:['.generated','delivery-artifact','public/downloads','public/widget.js'],
+ generatedOutputs:['.generated','migrations/core','delivery-artifact','public/downloads','public/widget.js'],
  product:model.product.name,dev,preview,verify:['pnpm',['run','verify:app']],deploy:ownerDeploy('deploy.json',adapter),
  portability,
  setup:{manifestFile:'rer-setup.json'},browserModule:'scripts/installer/ui/seed.mjs',input:{names:{email:'OWNER_EMAIL',name:'OWNER_NAME'},defaults:async root=>({target:'local',EMAIL_PROVIDER:'later'})},

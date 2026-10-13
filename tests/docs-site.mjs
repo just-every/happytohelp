@@ -66,7 +66,7 @@ test('the docs build renders every page with no problems, one title, unique ids 
   for (const page of site.pages) {
     const markdown = readFileSync(join(root, page.source), 'utf8');
     assert.equal(page.title, /^# (.+)$/m.exec(markdown)[1].replace(/`/g, ''), `${page.source} title`);
-    assert.match(markdown.trimStart(), /^# /, `${page.source} starts with its H1`);
+    assert.match(markdown.replace(/^(\s*<[^\n]*(\n(?!\n)[^\n]*)*\n)+/, '').trimStart(), /^# /, `${page.source} starts with its H1, after any HTML banner block`);
     assert.doesNotMatch(page.html, /<h1\b/, `${page.source} has exactly one H1, rendered by the page`);
     assert.equal(new Set(page.ids).size, page.ids.length, `${page.source} heading ids are unique`);
     assert.doesNotMatch(page.html, /\s(style|on[a-z]+)=|<script/i, `${page.source} has no inline style, handler or script`);

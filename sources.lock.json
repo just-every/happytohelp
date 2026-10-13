@@ -3602,6 +3602,14 @@
     }
   ],
   "files": {
+    ".github/assets/banner-dark.webp": {
+      "sha256": "bcb7c9017528f0ee6002bde11bdc5ce82975e972882b7b61d431def4c621a430",
+      "executable": false
+    },
+    ".github/assets/banner-light.webp": {
+      "sha256": "cd4e8635bb9cd89447c3e37ae5346eddac81f0fefd8d41b8d21519935d157559",
+      "executable": false
+    },
     ".github/workflows/delivery.yml": {
       "sha256": "1da145182edaa18b40f9ee8edc263498f2f9e6018b613f8a3504db8df2464c10",
       "executable": false
@@ -4319,7 +4327,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "6b2da3fd30de74b84438265c893b9d55a9d338ed49d44c8e9d6c23e2fab7d196",
+      "sha256": "2e4c686a8df700f5bb19ac7aceb44684336645a5569d19e8567f6d580c2d6e22",
       "executable": false
     },
     "RELEASE.json": {
@@ -10279,7 +10287,7 @@
       "executable": false
     },
     "src/ui/docs/build/hast.ts": {
-      "sha256": "79508e7d5099098acffe6ad588e23a5da01971c33dc11a34daac8c05cc1df9e0",
+      "sha256": "bccd852af68bead2a5b3ec058d087d44ee6ad90c88651fa2e5992f26391c7d1a",
       "executable": false
     },
     "src/ui/docs/build/highlight-modules.d.ts": {
@@ -11867,7 +11875,7 @@
       "executable": false
     },
     "tests/docs-site.mjs": {
-      "sha256": "c4271b2b71a0b13db834dbb53aa48af561991f0d2994dbd8b46ba15df08df34a",
+      "sha256": "e90ba11b097344d1ee1838d19e54ee14adf3503f585466122adde18c757ce661",
       "executable": false
     },
     "tests/email-classification.mjs": {

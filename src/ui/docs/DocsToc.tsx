@@ -1,3 +1,4 @@
+import { HydrationUnit } from '../../vendor/base/hydration/unit';
 import type { DocsTocEntry } from './types';
 
 type Group = DocsTocEntry & { children: DocsTocEntry[] };
@@ -24,17 +25,17 @@ function TocList({ toc }: { toc: DocsTocEntry[] }) {
 /** The contents list beside the page, from 1200px. */
 export function DocsToc({ toc }: { toc: DocsTocEntry[] }) {
   if (!groups(toc).length) return null;
-  return <nav className="docs-toc" aria-label="On this page">
+  return <HydrationUnit><nav className="docs-toc" aria-label="On this page">
     <p className="docs-toc-title">On this page</p>
     <TocList toc={toc} />
-  </nav>;
+  </nav></HydrationUnit>;
 }
 
 /** The same list above the page body below 1200px, folded away until asked for. */
 export function DocsTocCompact({ toc }: { toc: DocsTocEntry[] }) {
   if (!groups(toc).length) return null;
-  return <details className="docs-toc-compact">
+  return <HydrationUnit><details className="docs-toc-compact">
     <summary>On this page</summary>
     <TocList toc={toc} />
-  </details>;
+  </details></HydrationUnit>;
 }

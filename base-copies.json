@@ -1641,6 +1641,23 @@
       }
     },
     {
+      "path": "src/vendor/base/hydration",
+      "originPath": "foundation/runtime/hydration",
+      "revision": "79e70e60eae6277b2f35be58258d0e9d2ffa4dc0",
+      "files": {
+        "src/vendor/base/hydration/intro-guard.ts": "abc289d53537b631ad6de323b9123c843aea7498aa50d429a4786d7819194fcd",
+        "src/vendor/base/hydration/README.md": "a25e8a1a787e141590c9b46efb313b8ba6d9b135fad880d3aacfd5289c205244",
+        "src/vendor/base/hydration/report.ts": "38792ad67dc33c9ccd9537bcfc41b7f21a57f0d6f6266d045cb71d70630cf3d7",
+        "src/vendor/base/hydration/unit.tsx": "932bf2aa40a05c76f3a2c25a121db282e17c7bc839f9c37cd102ffe7f4e7ceca"
+      },
+      "modes": {
+        "src/vendor/base/hydration/intro-guard.ts": "100644",
+        "src/vendor/base/hydration/README.md": "100644",
+        "src/vendor/base/hydration/report.ts": "100644",
+        "src/vendor/base/hydration/unit.tsx": "100644"
+      }
+    },
+    {
       "path": "src/vendor/base/modules/integrations",
       "originPath": "modules/integrations",
       "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",

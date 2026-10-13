@@ -137,7 +137,7 @@ test('the page is composed from one component per section', async () => {
   assert.ok(!(await exists('src/ui/homepage/drawings/Callout.tsx')), 'the hero callouts stay removed');
   const heroSource = await read('src/ui/homepage/Hero.tsx');
   assert.match(heroSource, /<HeroHandoff \/>/);
-  assert.match(heroSource, /<p className="hero-free">100% free, open source alternative to <strong>Zendesk<\/strong>, <strong>Intercom<\/strong>, <strong>Help&nbsp;Scout<\/strong> and <strong>Freshdesk<\/strong><\/p>\s*<Flourish \/>\s*<\/div>/, 'the flourish follows the copy column, under the calls to action');
+  assert.match(heroSource, /<p className="hero-free">100% free, open source alternative to <strong>Zendesk<\/strong>, <strong>Intercom<\/strong>, <strong>Help&nbsp;Scout<\/strong> and <strong>Freshdesk<\/strong><\/p>\s*<Flourish intro \/>\s*<\/div>/, 'the flourish follows the copy column, under the calls to action');
   const ids = [['Hero', 'top'], ['Free', 'free'], ['HelpBeforeTheyAsk', 'help-before-they-ask'], ['Product', 'product'], ['MoveIn', 'move-in'], ['GetStarted', 'get-started']];
   for (const [name, id] of ids) assert.match(await read(`src/ui/homepage/${name}.tsx`), new RegExp(`id="${id}"`), `${name} keeps the anchor #${id}`);
   assert.match(home, /href="#product"/, 'the skip link still targets #product');
@@ -174,7 +174,7 @@ test('the hero flourish is an inline svg that draws itself in once, and stands d
   const flourish = await read('src/ui/homepage/drawings/Flourish.tsx');
   assert.match(flourish, /<svg className="hero-flourish" viewBox="0 0 640 150" fill="none" stroke="currentColor"[^>]* aria-hidden="true" focusable="false">/);
   assert.equal([...flourish.matchAll(/<path /g)].length, 1, 'one continuous pen stroke');
-  assert.match(flourish, /<path pathLength=\{1\} d="M[^"]+" \/>/, 'the stroke is measured as length 1, so the dash animation is independent of its size');
+  assert.match(flourish, /<path data-intro=\{intro \? '' : undefined\} pathLength=\{1\} d="M[^"]+" \/>/, 'the stroke is measured as length 1, so the dash animation is independent of its size');
   const css = await read('src/ui/homepage/drawings.css');
   assert.match(css, /\.h2h-home \.hero-flourish \{[^}]*aspect-ratio: 640 \/ 150;[^}]*color: var\(--d-cyan-deep\);/, 'its box is reserved from the first paint and it is drawn in the deep aqua');
   assert.match(css, /\.h2h-home \.hero-flourish path \{ stroke-dasharray: 1 2; stroke-dashoffset: 0; \}/, 'without animation the stroke is fully drawn');

@@ -61,6 +61,32 @@
       }
     },
     {
+      "id": "runeditrun/hydration",
+      "role": "module",
+      "requires": [
+        "runeditrun/base"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "src/vendor/base/hydration"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "79e70e60eae6277b2f35be58258d0e9d2ffa4dc0",
+          "paths": [
+            "foundation/runtime/hydration"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "src/vendor/base/hydration",
+            "originPath": "foundation/runtime/hydration"
+          }
+        ]
+      }
+    },
+    {
       "id": "runeditrun/sendgrid-email",
       "role": "module",
       "requires": [

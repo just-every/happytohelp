@@ -1,3 +1,4 @@
+import { HydrationUnit } from '../../vendor/base/hydration/unit';
 import { Icon } from './drawings/Icons';
 import { LicenceDrawing } from './drawings/LicenceDrawing';
 import { sourceUrl } from './repository';
@@ -9,7 +10,7 @@ const proofIcons = [<Icon name="people" />, <Icon name="plans" />, <Icon name="f
 
 export function Free() {
   const reveal = useReveal<HTMLUListElement>();
-  return <section className="section free" id="free" aria-labelledby="free-title">
+  return <HydrationUnit><section className="section free" id="free" aria-labelledby="free-title">
     <div className="split">
       <div className="split-copy">
         <h2 id="free-title">Not just better. Free.</h2>
@@ -19,5 +20,5 @@ export function Free() {
       <LicenceDrawing />
     </div>
     <ul className="proof" ref={reveal}>{proof.map((item, index) => <li key={item}><span className="proof-icon">{proofIcons[index]}</span>{item}</li>)}</ul>
-  </section>;
+  </section></HydrationUnit>;
 }

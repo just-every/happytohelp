@@ -15,7 +15,7 @@ export default function SignInDrawing() {
             <div className="id-line id-line--fix"><InkArrow variant="long" /><p className="id-bubble id-bubble--team">It ships today. Here is your tracking link.</p></div>
             <div className="id-line id-line--reply"><InkArrow variant="short" /><p className="id-bubble id-bubble--composer"><span>Thanks, that’s perfect!</span><span className="id-send">Send</span></p></div>
         </div>
-        <svg ref={cooldownRef('sign-in')} suppressHydrationWarning className="id-pen" viewBox="0 0 240 60" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path pathLength={1} d={penLoop} /></svg>
+        <svg ref={cooldownRef('sign-in')} suppressHydrationWarning className="id-pen" viewBox="0 0 240 60" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path data-intro="" pathLength={1} d={penLoop} /></svg>
         <CooldownScript name="sign-in" />
     </figure>;
 }

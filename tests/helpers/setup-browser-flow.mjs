@@ -18,6 +18,8 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         // An agent- or hosted-driven link prefills email and website through the fragment, which the page reads once and removes.
         await page.goto(origin + '/setup#email=' + encodeURIComponent(email) + '&allowedOrigin=' + encodeURIComponent(origin));
         await page.getByLabel('Password', { exact: true }).waitFor();
+        // The form is now SSR content; visibility no longer means its fragment effect has run.
+        await page.waitForFunction(({ email, origin }) => location.hash === '' && document.querySelector('input[name=email]')?.value === email && document.querySelector('input[name=allowedOrigin]')?.value === origin, { email, origin });
         assert.equal(await page.getByLabel('Setup token').count(), 0);
         assert.equal(new URL(page.url()).hash, '');
         assert.equal(await page.getByLabel('Your email', { exact: true }).inputValue(), email);
@@ -29,7 +31,7 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         checks.push('agent fragment consumed; one form with email, password and website only');
         await page.getByLabel('Password', { exact: true }).fill('temporary-password');
         assert.equal(await page.evaluate(() => JSON.stringify([{ ...sessionStorage }, { ...localStorage }, location.href]).includes('temporary-password')), false);
-        await page.reload();
+        await page.reload({ waitUntil: 'networkidle' });
         await page.getByLabel('Password', { exact: true }).waitFor();
         assert.equal(await page.getByLabel('Password', { exact: true }).inputValue(), '');
         assert.equal(await page.getByLabel('Your website', { exact: true }).inputValue(), '', 'the website never starts as this app\'s own address');

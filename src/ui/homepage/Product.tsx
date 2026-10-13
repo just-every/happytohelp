@@ -1,3 +1,4 @@
+import { HydrationUnit } from '../../vendor/base/hydration/unit';
 import type { ComponentType } from 'react';
 
 import { ChatWidgetDrawing, HelpCentreDrawing, InboxDrawing, SuggestedReplyDrawing } from './drawings/ProductDrawings';
@@ -23,8 +24,8 @@ function Part({ title, text, number, Art }: { title: string; text: string; numbe
 }
 
 export function Product() {
-  return <section className="section product" id="product" aria-labelledby="product-title">
+  return <HydrationUnit><section className="section product" id="product" aria-labelledby="product-title">
     <div className="section-head"><h2 id="product-title">The rest of your support desk</h2></div>
     <ol className="parts">{parts.map((part, index) => <Part key={part.title} number={index + 1} {...part} />)}</ol>
-  </section>;
+  </section></HydrationUnit>;
 }

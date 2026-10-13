@@ -1,3 +1,4 @@
+import { HydrationUnit } from '../../vendor/base/hydration/unit';
 import type { ReactNode } from 'react';
 import { BrandLockup } from '../homepage/BrandLockup';
 import '../homepage/outfit.css';
@@ -8,8 +9,8 @@ import './identity.css';
  *  Sign-in and sign-up add a drawing beside the panel (below it on a phone). */
 export default function IdentityFrame({ children, wide = false, drawing }: { children: ReactNode; wide?: boolean; drawing?: ReactNode }) {
     return <div className="h2h-identity">
-        <header className="id-header"><BrandLockup home="/" /></header>
-        <main className={drawing ? 'id-main id-main--drawn' : 'id-main'}><div className={wide ? 'id-panel id-panel--wide' : 'id-panel'}>{children}</div>{drawing}</main>
-        <footer className="id-footer"><a href="/">Back to home</a></footer>
+        <HydrationUnit><header className="id-header"><BrandLockup home="/" /></header></HydrationUnit>
+        <HydrationUnit><main className={drawing ? 'id-main id-main--drawn' : 'id-main'}><div className={wide ? 'id-panel id-panel--wide' : 'id-panel'}>{children}</div>{drawing}</main></HydrationUnit>
+        <HydrationUnit><footer className="id-footer"><a href="/">Back to home</a></footer></HydrationUnit>
     </div>;
 }

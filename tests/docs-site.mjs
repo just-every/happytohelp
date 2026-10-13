@@ -124,7 +124,7 @@ test('tables, code, callouts and raw HTML render safely with classes only', () =
   const long = render(`| ${Array.from({ length: 12 }, (_, i) => `Column number ${i}`).join(' | ')} |\n|${'---|'.repeat(12)}`).html;
   assert.ok(/aria-label="([^"]+)"/.exec(long)[1].length <= 80, 'the table label stays short');
   const code = render('```sh\n# install\npnpm install --frozen-lockfile\n```').html;
-  assert.match(code, /^<pre><code class="language-sh"><span class="hljs-comment"># install<\/span>\npnpm install --frozen-lockfile<\/code><\/pre>$/);
+  assert.match(code, /^<pre><code class="language-sh"><span class="hljs-comment"><span># install<\/span><\/span><span>\npnpm install --frozen-lockfile<\/span><\/code><\/pre>$/);
   assert.doesNotMatch(code, /class="(?:[^"]*\s)?hljs[\s"]/, 'the global dark .hljs theme never applies');
   assert.equal(render('```\nplain <b>text</b>\n```').html, '<pre><code>plain &lt;b&gt;text&lt;/b&gt;</code></pre>');
   assert.equal(render('```unknownlang\nx = 1\n```').html, '<pre><code class="language-unknownlang">x = 1</code></pre>');

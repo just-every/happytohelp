@@ -22,5 +22,8 @@ hljs.registerAliases(['text', 'txt'], { languageName: 'plaintext' });
 /** Highlighted HTML for a registered language (hljs escapes the text), or null to render the block as plain text. */
 export function highlight(code: string, language: string) {
   if (!language || !hljs.getLanguage(language)) return null;
-  return hljs.highlight(code, { language, ignoreIllegals: true }).value;
+  // Keep every escaped text run alone in its element, including commands and
+  // addresses beside highlighted tokens. Inline spans do not change the drawing.
+  return hljs.highlight(code, { language, ignoreIllegals: true }).value
+    .replace(/(^|>)([^<]+)(?=<|$)/g, '$1<span>$2</span>');
 }

@@ -1,5 +1,3 @@
-# HappyToHelp
-
 <p align="center">
   <a href="https://justevery.com/#vol-happytohelp">
     <picture>
@@ -11,6 +9,8 @@
 </p>
 
 <p align="center"><a href="https://justevery.com">Part of Just Every</a> · <a href="LICENSE">MIT licensed</a></p>
+
+# HappyToHelp
 
 HappyToHelp is an open-source support workspace with a customer chat widget,
 shared inbox, AI-assisted replies, help centers, customer context and optional

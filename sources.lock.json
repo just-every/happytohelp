@@ -7643,6 +7643,10 @@
       "sha256": "c8e44cb3f0ca24f5fce355b2cf5f4e9375e3397cffc6f249a2ffce13da08bfc3",
       "executable": false
     },
+    "tests/connections/resend-races.mjs": {
+      "sha256": "c68ea51da0f64dec80facc26443f03525488b2925b87e242cc7ddebb29e41bf8",
+      "executable": false
+    },
     "tests/connections/slack.mjs": {
       "sha256": "564d5320bcd7634dc7f1cc361b8da440bdaa0665fd354c6ed3f20e5025bae585",
       "executable": false

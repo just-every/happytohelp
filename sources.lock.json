@@ -7600,7 +7600,7 @@
       "executable": false
     },
     "tests/connections/browser-network.mjs": {
-      "sha256": "0eaac610125afb74be548a34775bd78a71154204e056bed093e0817b80fc0913",
+      "sha256": "3a255a9fd665d3ec620dedb695861e3fd1a832057afc48885cc84f4bafcbc338",
       "executable": false
     },
     "tests/connections/browser.mjs": {
@@ -8512,7 +8512,7 @@
       "executable": false
     },
     "tests/local-draft-adoption.mjs": {
-      "sha256": "dcf69e650e7ca303b62a817f33fd3d21d3c09fdc986b766cda730d1521bd27eb",
+      "sha256": "d4fee9ef7ca409637bf09298f42d26371a191ff5f6179bad8479cf33651a586d",
       "executable": false
     },
     "tests/login-return.mjs": {

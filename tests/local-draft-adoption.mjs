@@ -54,11 +54,27 @@ test('body-only draft validates authority and never creates a message or media',
     assert.equal((await f.adopt()).status,409);await noAdoption(f);
 });
 
-test('unverified completed reports remain editable for manual review; automatic send stays denied',async()=>{
-    const f=await runtime.fixture({verified:false});
-    assert.equal((await f.adopt()).status,200);assert.equal((await f.media()).length,1);assert.deepEqual(await f.messages(),[]);
-    assert.equal((await runtime.request(f.draftPath.replace('/draft','/replies/selected/send'),{},f.token)).status,409);
-    assert.deepEqual(await f.messages(),[]);
+test('unverified fixes need input and cannot become drafts; investigation reports remain editable without automatic send',async()=>{
+    for(const mode of ['resolve','resolve_reply','investigate']) {
+        const f=await runtime.fixture({verified:false,mode});
+        const listed=await runtime.request(`/api/projects/${f.projectId}/conversations/${f.conversationId}/delegations`,undefined,f.token);
+        assert.equal(listed.status,200);
+        const job=listed.body.data.find(job=>job.id===f.jobId);
+        assert.equal(job.result.verified,false);
+        if(mode==='investigate') {
+            assert.equal(job.status,'completed');
+            assert.equal((await f.adopt()).status,200);
+            assert.equal((await f.media()).length,1);
+            assert.deepEqual(await f.messages(),[]);
+        } else {
+            assert.equal(job.status,'needs_input','a reported fix cannot complete without verification');
+            assert.equal((await f.adopt()).status,409);
+            assert.equal((await f.adopt({proposal_id:null})).status,409,'legacy draft cannot bypass unverified-fix review');
+            await noAdoption(f);
+        }
+        assert.equal((await runtime.request(f.draftPath.replace('/draft','/replies/selected/send'),{},f.token)).status,409);
+        assert.deepEqual(await f.messages(),[]);
+    }
 });
 
 test('actor, tenant, conversation, device and job selection cannot adopt another result',async()=>{

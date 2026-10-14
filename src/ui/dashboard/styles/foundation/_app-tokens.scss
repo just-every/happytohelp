@@ -1,0 +1,38 @@
+// The workspace's own palette and surfaces, layered over the brand tokens (src/ui/homepage/brand-tokens.css) only on the
+// signed-in workspace's body (DashboardClient.jsx sets .workspace-themed). The homepage, docs, first-run setup and the
+// identity pages keep the landing's paper; the workspace sits on a cool blue-white canvas with a faintly blue rail, white
+// surfaces, 1px hairlines and soft shadows, and keeps the aqua, the Outfit type, the pastel avatars and deep navy ink pills
+// for its warmth.
+
+body.workspace-themed:not([data-theme="dark"]) {
+  --paper: #f7f9fc;
+  --paper-deep: #edf1f8;
+  --ink: #1a2535;
+  --ink-rgb: 26, 37, 53;
+  --ink-hover: #2c3a4f;
+  --d-ink: var(--ink);
+  --ink-soft: #5b6577;
+  --rule: rgba(26, 37, 53, 0.09);
+  --rule-strong: rgba(26, 37, 53, 0.14);
+  // Field and control outlines: 3:1 or more against the surface, the canvas and the rail (WCAG 1.4.11).
+  --field-line: #7f8999;
+  --field-line-hover: #5b6577;
+  --hover: rgba(26, 37, 53, 0.05);
+  --note: #fcf6ea;
+  --note-line: #ecdcbd;
+  --muted-chip: #eceff3;
+  --card-shadow: 0 1px 2px rgba(26, 37, 53, 0.04), 0 2px 8px -4px rgba(26, 37, 53, 0.08);
+  --popover-shadow: 0 2px 6px rgba(26, 37, 53, 0.06), 0 16px 36px -14px rgba(26, 37, 53, 0.28);
+}
+
+// Dark display mode keeps the brand's dark palette; the shapes and shadows soften the same way.
+body.workspace-themed[data-theme="dark"] {
+  --field-line-hover: #b5afa4;
+  --note-line: #4a3f2a;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --popover-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.7);
+}
+
+body.workspace-themed {
+  --card-radius: 12px;
+}

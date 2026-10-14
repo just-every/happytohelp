@@ -24,8 +24,8 @@ body.workspace-page .widget-code {
     &__copy,
     &__secret-action {
         display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-        min-height: 36px; padding: 0 16px; border: 1.5px solid var(--ink); border-radius: 999px;
-        background: transparent; color: var(--ink);
+        min-height: 36px; padding: 0 16px; border: 1px solid var(--field-line); border-radius: 999px;
+        background: var(--surface); color: var(--ink);
         font: inherit; font-size: 12px; font-weight: 500; white-space: nowrap;
         &:hover { background: var(--hover); }
         &:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
@@ -47,7 +47,7 @@ body.workspace-page .widget-code {
     &__snippet-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; padding: 10px 12px; }
     &__snippet-buttons { display: flex; align-items: center; gap: 6px; }
     &__snippet .widget-code__copy,
-    &__secret-frame .widget-code__secret-action { min-height: 36px; padding: 0 14px; border: 1.5px solid #f6f2ea; border-radius: 999px; background: transparent; color: #f6f2ea; }
+    &__secret-frame .widget-code__secret-action { min-height: 36px; padding: 0 14px; border: 1px solid #f6f2ea; border-radius: 999px; background: transparent; color: #f6f2ea; }
     &__snippet .widget-code__copy:hover,
     &__secret-frame .widget-code__secret-action:hover { background: #f6f2ea; color: #141414; }
     &__snippet .widget-code__copy:focus-visible,
@@ -71,7 +71,7 @@ body.workspace-page .widget-code {
     &__snippet .hljs-type,
     &__snippet .hljs-attr,
     &__snippet .hljs-attribute { color: #5ad8ec; }
-    &__languages { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; margin-bottom: 10px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--surface); }
+    &__languages { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; margin-bottom: 10px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--surface); }
     &__languages button { border: 0; border-radius: 999px; padding: 6px 16px; background: transparent; color: var(--ink-soft); font: inherit; font-size: 12px; line-height: 1.4; }
     &__languages button.is-active,
     &__languages button[aria-selected=true] { color: var(--ink); background: var(--d-cyan-tint); }

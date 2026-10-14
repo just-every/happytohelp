@@ -11,8 +11,8 @@ body.conversation-workspace #chat {
         line-height: 1.5;
     }
 
-    // Each section is a tile under a 13px uppercase heading.
-    .conversation-details-section { min-width: 0; padding: 16px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); }
+    // Each section is a white tile with a hairline and a soft shadow under a 13px uppercase heading.
+    .conversation-details-section { min-width: 0; padding: 16px; border: 1px solid var(--rule-strong); border-radius: 12px; background: var(--surface); box-shadow: var(--card-shadow); }
 
     .conversation-details-section-heading {
         display: flex;

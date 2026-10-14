@@ -1,4 +1,4 @@
-// The composer: a drawn card pinned to the conversation's foot, the reply field borderless inside it, the tools at the
+// The composer: a white card pinned to the conversation's foot, the reply field borderless inside it, the tools at the
 // left (the round "+" button) and the black Send pill at the right.
 body.conversation-workspace {
     #chat .chat > .chat-body > .chat-footer {
@@ -14,14 +14,16 @@ body.conversation-workspace {
         padding: 14px 16px 12px 20px !important;
         overflow: visible;
         background: var(--surface);
-        border: 2px solid var(--ink) !important;
-        border-radius: var(--card-radius) !important;
+        border: 1px solid var(--field-line) !important;
+        border-radius: 14px !important;
         box-shadow: var(--card-shadow);
         cursor: text;
-        transition: box-shadow .15s ease;
+        transition: box-shadow .15s ease, border-color .15s ease;
 
+        &:hover { border-color: var(--field-line-hover) !important; }
         &:focus-within {
-            box-shadow: var(--card-shadow), 0 0 0 3px var(--d-cyan-deep);
+            border-color: var(--ink) !important;
+            box-shadow: var(--card-shadow), 0 0 0 3px color-mix(in srgb, var(--d-cyan-deep) 55%, transparent);
         }
     }
 

@@ -11,9 +11,9 @@ body.conversation-workspace #chat {
             padding: 0;
             color: var(--ink);
             text-decoration: none;
-            border: 1.5px solid var(--ink);
+            border: 1px solid var(--field-line);
             border-radius: 50%;
-            background: transparent;
+            background: var(--surface);
             font-size: 20px;
             transition: background .15s ease, color .15s ease;
 

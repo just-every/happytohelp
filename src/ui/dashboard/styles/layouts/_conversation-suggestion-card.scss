@@ -17,10 +17,10 @@ body.conversation-workspace {
         color: var(--ink);
         text-align: left;
         background: var(--surface);
-        border: 2px solid var(--ink);
+        border: 1px solid var(--rule-strong);
         border-radius: var(--card-radius);
         box-shadow: var(--card-shadow);
-        transition: background .15s ease;
+        transition: background .15s ease, border-color .15s ease;
 
         &:hover:not(:disabled):not(.is-selected) {
             background: var(--hover);
@@ -31,6 +31,7 @@ body.conversation-workspace {
         }
 
         &.is-selected {
+            border-color: var(--d-cyan-deep);
             background: var(--d-cyan-tint);
 
             .conversation-suggestion-card__heading,
@@ -179,7 +180,7 @@ body.conversation-workspace #chat .conversation-suggestions__error {
     justify-content: space-between;
     gap: .75rem;
     padding: .75rem 1rem;
-    border: 1.5px solid var(--ink);
+    border: 1px solid var(--note-line);
     border-radius: var(--card-radius);
     color: var(--ink);
     background: var(--note);

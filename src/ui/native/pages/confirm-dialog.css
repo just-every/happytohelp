@@ -1,13 +1,14 @@
-/* Confirm dialogs (ConfirmDialog.jsx): a drawn card on an ink scrim. The destructive action is the danger-ink pill. */
-.confirm-dialog { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; padding: 24px; border: 2px solid var(--ink); border-radius: var(--card-radius); color: var(--ink); background: var(--surface); box-shadow: var(--card-shadow); }
-.confirm-dialog::backdrop { background: rgba(20, 20, 20, .32); }
+/* Confirm dialogs (ConfirmDialog.jsx): a white card with a 1px rule and a lifted shadow on an ink scrim. The destructive
+   action is the danger-ink pill. */
+.confirm-dialog { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; padding: 24px; border: 1px solid var(--rule-strong); border-radius: 14px; color: var(--ink); background: var(--surface); box-shadow: var(--popover-shadow); }
+.confirm-dialog::backdrop { background: rgba(26, 37, 53, .28); }
 .confirm-dialog__title { margin: 0 0 12px; font-size: 24px; font-weight: 500; letter-spacing: -.015em; overflow-wrap: anywhere; }
 .confirm-dialog__body { margin-bottom: 20px; line-height: 1.5; }
 .confirm-dialog__body p { margin: 0 0 10px; }
 .confirm-dialog__body ul { margin: 0 0 10px; padding-left: 20px; }
 .confirm-dialog .form-group { margin-bottom: 16px; }
 .confirm-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
-.confirm-dialog .confirm-dialog__cancel { color: var(--ink); border-color: var(--ink); background: transparent; }
-.confirm-dialog .confirm-dialog__cancel:hover:not(:disabled) { color: var(--on-ink); background: var(--ink); }
-.confirm-dialog .confirm-dialog__confirm { color: var(--danger); border-color: var(--danger); background: transparent; }
+.confirm-dialog .confirm-dialog__cancel { color: var(--ink); border-color: var(--field-line); background: var(--surface); }
+.confirm-dialog .confirm-dialog__cancel:hover:not(:disabled) { color: var(--ink); border-color: var(--field-line-hover); background: var(--hover); }
+.confirm-dialog .confirm-dialog__confirm { color: var(--danger); border-color: var(--danger); background: var(--surface); }
 .confirm-dialog .confirm-dialog__confirm:hover:not(:disabled) { color: var(--danger); background: var(--hover); }

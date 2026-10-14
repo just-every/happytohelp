@@ -5,7 +5,7 @@
 .reports-range input,.reports-range select { min-height:42px; }
 .reports-downloads { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 24px; }
 .reports-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; }
-.reports-metric,.reports-section { border:1.5px solid var(--ink); border-radius:12px; padding:20px; background:var(--surface); }
+.reports-metric,.reports-section { border:1px solid var(--rule-strong); border-radius:12px; padding:20px; background:var(--surface); box-shadow:var(--card-shadow); }
 .reports-metric h2 { font-size:15px; font-weight:500; color:var(--ink-soft); margin:0 0 12px; }
 .reports-metric>strong { font-size:36px; font-weight:500; letter-spacing:-.03em; line-height:1.1; }
 .reports-metric p { font-size:13px; margin:10px 0 0; }

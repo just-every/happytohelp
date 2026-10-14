@@ -6,7 +6,7 @@ body.conversation-workspace {
     .avatar-agent.avatar-fallback .avatar-title {
         color: var(--ink) !important;
         background: var(--surface) !important;
-        border: 1.5px solid var(--ink) !important;
+        border: 1px solid rgba(var(--ink-rgb), .24) !important;
         font-weight: 500;
     }
 }
@@ -19,7 +19,7 @@ body.conversation-workspace #chat {
         justify-content: center;
         color: var(--contact-profile-symbol-ink, var(--ink)) !important;
         background: var(--contact-profile-symbol-tile, var(--d-cyan-tint)) !important;
-        border: 1.5px solid var(--ink) !important;
+        border: 1px solid rgba(var(--ink-rgb), .24) !important;
         overflow: hidden;
     }
 

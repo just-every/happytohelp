@@ -17,6 +17,8 @@ export default function DashboardClient({ settings }) {
     useSessionProjectGuard(settings.projectId);
     useEffect(() => {
         document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed`;
+        // Leaving the workspace (signing out to /login) hands the body back to the paper pages without the workspace's tokens.
+        return () => { document.body.classList.remove('conversation-workspace', 'workspace-page', 'workspace-themed'); };
     }, [isInbox]);
     // The workspace chrome is always paper, ink and aqua; the workspace's own colour belongs to its widget and help centre.
     // Dark display mode swaps the brand tokens (brand-tokens.css); Light and Balanced both render the light tokens.

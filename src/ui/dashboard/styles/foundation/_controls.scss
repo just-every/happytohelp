@@ -1,6 +1,6 @@
-// Buttons, fields, tabs, menus, chips and the two frames (drawn card, tile), in the landing's language: black pills,
-// ink-outlined secondary pills, 48px fields with an aqua focus halo, aqua-underlined tabs. Every surface of the workspace
-// (pages, the inbox, dialogs) uses these; layouts only place them.
+// Buttons, fields, tabs, menus, chips and frames for the workspace: ink pills, hairline secondary pills, 44px hairline
+// fields with an aqua focus halo, aqua-underlined tabs, white cards and menus with a 1px rule and a soft shadow. Every
+// surface of the workspace (pages, the inbox, dialogs) uses these; layouts only place them.
 
 // Pills -----------------------------------------------------------------------
 
@@ -11,7 +11,7 @@
   --bs-btn-line-height: 1.2;
   --bs-btn-padding-x: 24px;
   --bs-btn-padding-y: 0;
-  --bs-btn-border-width: 1.5px;
+  --bs-btn-border-width: 1px;
   --bs-btn-border-radius: 999px;
   --bs-btn-box-shadow: none;
   --bs-btn-focus-box-shadow: none;
@@ -54,31 +54,32 @@
   --bs-btn-disabled-border-color: var(--ink);
 }
 
-// Secondary: an ink outline on whatever it sits on; hover inverts.
+// Secondary: a hairline pill on the surface; hover deepens the line and tints the fill.
 .btn-white,
 .btn-light,
 .btn-secondary,
 .btn-outline-primary,
 .btn-outline-secondary {
   --bs-btn-color: var(--ink);
-  --bs-btn-bg: transparent;
-  --bs-btn-border-color: var(--ink);
-  --bs-btn-hover-color: var(--on-ink);
-  --bs-btn-hover-bg: var(--ink);
-  --bs-btn-hover-border-color: var(--ink);
+  --bs-btn-bg: var(--surface);
+  --bs-btn-border-color: var(--field-line);
+  --bs-btn-hover-color: var(--ink);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--ink) 5%, var(--surface));
+  --bs-btn-hover-border-color: var(--field-line-hover);
+  // A pressed or selected secondary (a segmented choice) still fills with ink.
   --bs-btn-active-color: var(--on-ink);
   --bs-btn-active-bg: var(--ink);
   --bs-btn-active-border-color: var(--ink);
   --bs-btn-disabled-color: var(--ink);
-  --bs-btn-disabled-bg: transparent;
-  --bs-btn-disabled-border-color: var(--ink);
+  --bs-btn-disabled-bg: var(--surface);
+  --bs-btn-disabled-border-color: var(--field-line);
 }
 
 // Destructive: the secondary pill in the danger ink. No fill.
 .btn-danger,
 .btn-outline-danger {
   --bs-btn-color: var(--danger);
-  --bs-btn-bg: transparent;
+  --bs-btn-bg: var(--surface);
   --bs-btn-border-color: var(--danger);
   --bs-btn-hover-color: var(--danger);
   --bs-btn-hover-bg: var(--hover);
@@ -87,7 +88,7 @@
   --bs-btn-active-bg: var(--hover);
   --bs-btn-active-border-color: var(--danger);
   --bs-btn-disabled-color: var(--danger);
-  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-bg: var(--surface);
   --bs-btn-disabled-border-color: var(--danger);
 }
 
@@ -160,9 +161,9 @@ form:not(.h2h-setup form) label:not(.form-check-label):not(.btn) {
 .form-control,
 .form-select {
   --bs-body-bg: var(--surface);
-  min-height: 48px;
-  padding: 10px 14px;
-  border: 1.5px solid var(--field-line);
+  min-height: 44px;
+  padding: 9px 13px;
+  border: 1px solid var(--field-line);
   border-radius: 8px;
   color: var(--ink);
   background-color: var(--surface);
@@ -173,13 +174,13 @@ form:not(.h2h-setup form) label:not(.form-check-label):not(.btn) {
 
   &::placeholder { color: var(--ink-soft); opacity: 1; }
 
-  &:hover { border-color: var(--ink); }
+  &:hover { border-color: var(--field-line-hover); }
 
   &:focus {
     border-color: var(--ink);
     color: var(--ink);
     background-color: var(--surface);
-    box-shadow: 0 0 0 3px var(--d-cyan-deep);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--d-cyan-deep) 55%, transparent);
     outline: 0;
   }
 
@@ -239,8 +240,8 @@ textarea.form-control {
 
 .form-control-color,
 .form-control[type=color] {
-  width: 48px;
-  min-height: 48px;
+  width: 44px;
+  min-height: 44px;
   padding: 4px !important;
 }
 
@@ -249,7 +250,7 @@ textarea.form-control {
 }
 
 .input-group-text {
-  border: 1.5px solid var(--field-line);
+  border: 1px solid var(--field-line);
   color: var(--ink-soft);
   background-color: var(--surface);
 }
@@ -258,11 +259,12 @@ textarea.form-control {
 .input-group:has(> .input-group-text .fe-search),
 .input-group:has(> .input-group-append .fe-search) {
   flex-wrap: nowrap;
-  border: 1.5px solid var(--field-line);
+  border: 1px solid var(--field-line);
   border-radius: 8px;
   background: var(--surface);
 
-  &:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
+  &:hover { border-color: var(--field-line-hover); }
+  &:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--d-cyan-deep) 55%, transparent); }
 
   > .form-control,
   > .input-group-text,
@@ -287,7 +289,7 @@ textarea.form-control {
   width: 18px;
   height: 18px;
   margin-top: 3px;
-  border: 1.5px solid var(--ink);
+  border: 1px solid var(--field-line);
   background-color: var(--surface);
   cursor: pointer;
 
@@ -296,7 +298,7 @@ textarea.form-control {
     background-color: var(--ink);
   }
 
-  &:focus { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
+  &:focus { border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--d-cyan-deep) 55%, transparent); }
   &:disabled { opacity: .5; }
 }
 
@@ -310,7 +312,7 @@ textarea.form-control {
   line-height: 1.4;
 }
 
-// The toggle: 44 by 24, off on the muted chip with an ink-outlined knob, on an ink track with a white knob.
+// The toggle: 40 by 24, off a hairline track with a white knob, on an aqua track with a white knob.
 .form-switch {
   display: flex;
   align-items: center;
@@ -319,26 +321,27 @@ textarea.form-control {
   padding-left: 0;
 
   > .form-check-input {
-    flex: 0 0 44px;
-    width: 44px;
+    flex: 0 0 40px;
+    width: 40px;
     height: 24px;
     margin: 0;
-    border: 1.5px solid var(--ink);
+    border: 1px solid var(--field-line);
     border-radius: 999px;
     background-color: var(--muted-chip);
-    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2.9' fill='white' stroke='%23141414' stroke-width='.55'/></svg>");
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='white' stroke='%237f8999' stroke-width='.3'/></svg>");
     background-position: left center;
     float: none;
 
     &:checked {
+      border-color: var(--ink);
       background-color: var(--ink);
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2.9' fill='white'/></svg>");
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='%235ad8ec'/></svg>");
       background-position: right center;
     }
   }
 
   > .form-check-label { margin: 0; }
-  > .form-text, > .invalid-feedback { flex-basis: 100%; margin: 0 0 0 56px; }
+  > .form-text, > .invalid-feedback { flex-basis: 100%; margin: 0 0 0 52px; }
 }
 
 .form-switch { flex-wrap: wrap; }
@@ -398,13 +401,13 @@ textarea.form-control {
 }
 
 // Menus -----------------------------------------------------------------------
-// Menus are drawn cards.
+// Menus are white popovers: a 1px rule and a soft lifted shadow.
 
 .dropdown-menu {
   --bs-dropdown-bg: var(--surface);
   --bs-dropdown-color: var(--ink);
-  --bs-dropdown-border-color: var(--ink);
-  --bs-dropdown-border-width: 2px;
+  --bs-dropdown-border-color: var(--rule-strong);
+  --bs-dropdown-border-width: 1px;
   --bs-dropdown-border-radius: var(--card-radius);
   --bs-dropdown-link-color: var(--ink);
   --bs-dropdown-link-hover-color: var(--ink);
@@ -414,7 +417,7 @@ textarea.form-control {
   --bs-dropdown-header-color: var(--ink-soft);
   --bs-dropdown-divider-bg: var(--rule);
   padding: 6px;
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--popover-shadow);
 
   .dropdown-item {
     border-radius: 8px;
@@ -471,32 +474,33 @@ textarea.form-control {
 }
 
 // Frames ----------------------------------------------------------------------
-// A card is a 1px rule on slightly deeper paper: no ink border, no shadow, no drawing on it.
+// A card is a white surface with a 1px rule and a soft shadow: no ink border, no drawing on it.
 
 .h2h-card {
   position: relative;
   padding: 24px;
   border: 1px solid var(--rule-strong);
-  border-radius: 14px;
+  border-radius: 12px;
   color: var(--ink);
-  background: var(--paper-deep);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
 
   @media (max-width: 575.98px) { padding: 18px; }
 }
 
 // Notices ---------------------------------------------------------------------
-// Alerts are drawn cards: aqua tint for notes and successes, the surface with danger ink for errors.
+// Alerts are quiet cards: aqua tint for notes and successes, the surface with danger ink for errors.
 
 .alert {
   --bs-alert-color: var(--ink);
-  --bs-alert-bg: var(--d-cyan-tint);
-  --bs-alert-border-color: var(--ink);
+  --bs-alert-bg: var(--d-cyan-wash);
+  --bs-alert-border-color: color-mix(in srgb, var(--d-cyan-deep) 45%, var(--surface));
   --bs-alert-link-color: var(--ink);
   --bs-alert-border-radius: var(--card-radius);
   --bs-alert-padding-x: 18px;
   --bs-alert-padding-y: 14px;
-  border-width: 2px;
-  box-shadow: var(--card-shadow);
+  border-width: 1px;
+  box-shadow: none;
   font-size: 16px;
   overflow-wrap: anywhere;
 }
@@ -504,23 +508,25 @@ textarea.form-control {
 .alert-danger {
   --bs-alert-color: var(--danger);
   --bs-alert-bg: var(--surface);
+  --bs-alert-border-color: var(--danger);
 }
 
 .alert-warning,
 .alert-secondary,
 .alert-light {
   --bs-alert-bg: var(--surface);
+  --bs-alert-border-color: var(--rule-strong);
 }
 
 // Pagination: small secondary pills.
 .pagination {
   --bs-pagination-color: var(--ink);
-  --bs-pagination-bg: transparent;
-  --bs-pagination-border-color: var(--ink);
-  --bs-pagination-border-width: 1.5px;
-  --bs-pagination-hover-color: var(--on-ink);
-  --bs-pagination-hover-bg: var(--ink);
-  --bs-pagination-hover-border-color: var(--ink);
+  --bs-pagination-bg: var(--surface);
+  --bs-pagination-border-color: var(--field-line);
+  --bs-pagination-border-width: 1px;
+  --bs-pagination-hover-color: var(--ink);
+  --bs-pagination-hover-bg: var(--hover);
+  --bs-pagination-hover-border-color: var(--field-line-hover);
   --bs-pagination-focus-color: var(--ink);
   --bs-pagination-focus-bg: var(--hover);
   --bs-pagination-focus-box-shadow: none;
@@ -536,21 +542,21 @@ textarea.form-control {
   .page-link { min-width: 36px; min-height: 36px; border-radius: 999px !important; font-size: 14px; text-align: center; }
 }
 
-// Confirm and other dialogs: drawn cards on an ink scrim.
+// Confirm and other dialogs: white cards with a 1px rule and a lifted shadow on an ink scrim.
 .modal {
   --bs-modal-bg: var(--surface);
   --bs-modal-color: var(--ink);
-  --bs-modal-border-color: var(--ink);
-  --bs-modal-border-width: 2px;
-  --bs-modal-border-radius: var(--card-radius);
-  --bs-modal-box-shadow: var(--card-shadow);
+  --bs-modal-border-color: var(--rule-strong);
+  --bs-modal-border-width: 1px;
+  --bs-modal-border-radius: 14px;
+  --bs-modal-box-shadow: var(--popover-shadow);
   --bs-modal-header-border-color: var(--rule);
   --bs-modal-footer-border-color: var(--rule);
 }
 
 .modal-backdrop {
-  --bs-backdrop-bg: #141414;
-  --bs-backdrop-opacity: .32;
+  --bs-backdrop-bg: #1a2535;
+  --bs-backdrop-opacity: .28;
 }
 
 // Lists and cards keep Bootstrap's structure on the brand surfaces.
@@ -593,7 +599,8 @@ textarea.form-control {
 .popover {
   --bs-popover-bg: var(--surface);
   --bs-popover-body-color: var(--ink);
-  --bs-popover-border-color: var(--ink);
+  --bs-popover-border-color: var(--rule-strong);
+  --bs-popover-box-shadow: var(--popover-shadow);
 }
 
 .offcanvas {

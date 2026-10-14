@@ -3,6 +3,25 @@
 // `.sidebar` and the open conversation in `.main`). From xl up the three sit side by side; below xl the sidebar is
 // the fixed top bar and the conversation slides over the list.
 
+// The workspace canvas: the homepage's paper gives way to a neutral canvas, rail and muted chip (light mode only; Dark
+// keeps its tokens), fields take a hairline at 3:1 and menus lift on a soft shadow instead of the drawn card's ink
+// offset. Scoped to the signed-in workspace (DashboardClient sets the class), so the homepage, setup and sign-in keep
+// their paper.
+body.workspace-themed {
+  --menu-shadow: 0 8px 24px -12px rgba(20, 20, 20, .25);
+}
+
+body.workspace-themed:not([data-theme="dark"]) {
+  --paper: #f6f7f8;
+  --paper-deep: #eceef1;
+  --muted-chip: #e7e9ec;
+  --field-line: rgba(20, 20, 20, .5);
+}
+
+body.workspace-themed[data-theme="dark"] {
+  --menu-shadow: 0 8px 24px -12px rgba(0, 0, 0, .6);
+}
+
 @mixin app-scroll-without-scrollbar {
   overflow-x: hidden;
   overflow-y: auto;

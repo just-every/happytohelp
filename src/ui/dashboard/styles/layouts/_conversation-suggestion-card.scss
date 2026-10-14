@@ -1,4 +1,4 @@
-// Each suggested reply is a drawn card with the logo's sparks on its corner; the chosen one turns aqua.
+// Each suggested reply is a hairline card with the logo's sparks on its corner; the chosen one turns aqua.
 body.conversation-workspace {
     #chat .conversation-suggestion-card {
         position: relative;
@@ -17,9 +17,9 @@ body.conversation-workspace {
         color: var(--ink);
         text-align: left;
         background: var(--surface);
-        border: 2px solid var(--ink);
+        border: 1px solid var(--rule-strong);
         border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
+        box-shadow: none;
         transition: background .15s ease;
 
         &:hover:not(:disabled):not(.is-selected) {
@@ -179,7 +179,7 @@ body.conversation-workspace #chat .conversation-suggestions__error {
     justify-content: space-between;
     gap: .75rem;
     padding: .75rem 1rem;
-    border: 1.5px solid var(--ink);
+    border: 1px solid var(--rule-strong);
     border-radius: var(--card-radius);
     color: var(--ink);
     background: var(--note);

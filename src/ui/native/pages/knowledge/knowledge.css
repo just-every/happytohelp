@@ -8,7 +8,7 @@
 .knowledge-empty { max-width: 520px; }
 .knowledge-empty h4 { margin-bottom: 12px; font-size: 20px; font-weight: 500; }
 .knowledge-empty p { margin-bottom: 20px; line-height: 1.5; }
-.knowledge-table { width: 100%; overflow: hidden; border: 1.5px solid var(--ink); border-radius: 12px; color: var(--ink); background: var(--surface); }
+.knowledge-table { width: 100%; overflow: hidden; border: 1px solid var(--rule-strong); border-radius: 12px; color: var(--ink); background: var(--surface); }
 .knowledge-table th { padding: 14px 20px; border: 0; color: var(--ink-soft); font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 .knowledge-table td { height: 56px; padding: 12px 20px; border: 0; border-top: 1px solid var(--rule); vertical-align: middle; }
 .knowledge-table td:first-child a { color: inherit; font-weight: 600; }
@@ -18,7 +18,7 @@
 .knowledge-row-menu { position: relative; }
 .knowledge-row-menu summary { padding: 4px 10px; color: var(--ink); font-size: 20px; cursor: pointer; list-style: none; }
 .knowledge-row-menu summary::-webkit-details-marker { display: none; }
-.knowledge-row-menu > div { position: absolute; top: 100%; right: 0; z-index: 5; min-width: 140px; padding: 6px; border: 2px solid var(--ink); border-radius: var(--card-radius); background: var(--surface); box-shadow: var(--card-shadow); }
+.knowledge-row-menu > div { position: absolute; top: 100%; right: 0; z-index: 5; min-width: 140px; padding: 6px; border: 1px solid var(--rule-strong); border-radius: var(--card-radius); background: var(--surface); box-shadow: var(--menu-shadow); }
 .knowledge-row-menu a, .knowledge-row-menu button { display: block; width: 100%; padding: 8px; border: 0; border-radius: 8px; color: var(--ink); background: none; text-align: left; }
 .knowledge-row-menu a:hover, .knowledge-row-menu button:hover { background: var(--hover); }
 .knowledge-website-title { margin-bottom: 24px; font-size: 24px; }
@@ -31,7 +31,7 @@
 .knowledge-ai-status--used { border: 1px solid var(--d-cyan); background: var(--d-cyan-tint); }
 .knowledge-ai-status--unknown { background: var(--note); }
 
-/* The status bar: a drawn card with "Status" and its chip at the left and the actions at the right, kept in view. */
+/* The status bar: a card with "Status" and its chip at the left and the actions at the right, kept in view. */
 .article-editor-actions { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 24px; padding: 14px 16px 14px 22px; }
 .article-editor-actions__status { display: flex; align-items: center; gap: 12px; margin: 0; color: var(--ink); font-size: 16px; font-weight: 500; }
 .article-editor-actions__status .h2h-chip { font-size: 14px; }
@@ -50,7 +50,7 @@
   .article-editor-actions__buttons { position: fixed; right: 0; bottom: 0; left: 0; z-index: 1030; flex-wrap: nowrap; gap: 10px; height: calc(64px + env(safe-area-inset-bottom)); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--rule); background: var(--paper); }
   .article-editor-actions__buttons > .btn:not(.article-editor-actions__more-toggle) { flex: 1 1 0; min-width: 0; }
   .article-editor-actions__more-toggle { display: inline-flex; flex: 0 0 44px; width: 44px; height: 44px; }
-  .article-editor-actions__more { position: absolute; bottom: calc(100% + 8px); left: 16px; display: none; flex-direction: column; align-items: stretch; min-width: 180px; padding: 8px; border: 2px solid var(--ink); border-radius: var(--card-radius); background: var(--surface); box-shadow: var(--card-shadow); }
+  .article-editor-actions__more { position: absolute; bottom: calc(100% + 8px); left: 16px; display: none; flex-direction: column; align-items: stretch; min-width: 180px; padding: 8px; border: 1px solid var(--rule-strong); border-radius: var(--card-radius); background: var(--surface); box-shadow: var(--menu-shadow); }
   .article-editor-actions__more.is-open { display: flex; }
   .knowledge-table th, .knowledge-table td { padding: 12px; }
   .knowledge-empty { max-width: 100%; }

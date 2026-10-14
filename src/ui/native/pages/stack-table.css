@@ -5,7 +5,7 @@
  .table-responsive:has(.stack-table){overflow:visible}
  .stack-table,.stack-table tbody,.stack-table tr,.stack-table td{display:block;width:100%}
  .stack-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
- .stack-table tr{border:1.5px solid var(--ink);border-radius:12px;padding:6px 14px;margin-bottom:12px;background:var(--surface)}
+ .stack-table tr{border:1px solid var(--rule-strong);border-radius:12px;padding:6px 14px;margin-bottom:12px;background:var(--surface)}
  .stack-table td{display:flex;align-items:center;justify-content:space-between;gap:16px;border:0;padding:8px 0;text-align:right;overflow-wrap:anywhere;min-width:0}
  .stack-table td+td{border-top:1px solid var(--rule)}
  .table.stack-table{overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none}

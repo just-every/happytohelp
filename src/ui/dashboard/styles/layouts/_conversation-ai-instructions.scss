@@ -12,15 +12,15 @@ body.conversation-workspace #chat {
         margin-top: 1rem;
         padding: 12px 14px;
         background: var(--surface);
-        border: 1.5px solid var(--field-line);
+        border: 1px solid var(--field-line);
         border-radius: 8px;
         cursor: text;
         transition: border-color .15s ease, box-shadow .15s ease;
 
-        &:hover { border-color: var(--ink); }
+        &:hover { border-color: rgba(var(--ink-rgb), .7); }
         &:focus-within {
             border-color: var(--ink);
-            box-shadow: 0 0 0 3px var(--d-cyan-deep);
+            box-shadow: 0 0 0 2px var(--d-cyan-deep);
         }
 
         textarea {

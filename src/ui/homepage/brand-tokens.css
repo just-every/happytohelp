@@ -1,7 +1,8 @@
 /* The brand's tokens, defined once for every surface: the homepage and the pages built on it (the docs and the 404),
    first-run setup, the identity pages and the signed-in workspace. Paper, ink and one geometric sans-serif's chrome, and the
    drawings' ink and aqua family; the workspace adds its surfaces, lines, chips and the one danger ink below. No other
-   stylesheet defines them, so no surface can drift from the homepage. Nothing else has a hue. */
+   stylesheet defines them, so no surface can drift from the homepage; the one exception is the signed-in workspace's neutral
+   canvas, which re-points paper and the field line at its root (dashboard foundation/_app-shell.scss). Nothing else has a hue. */
 :root {
   --paper: #f6f2ea;
   --paper-deep: #efe9dd;

@@ -157,7 +157,32 @@ destinationId, event, id, timestamp, exactBody]`. Headers are `webhook-tenant`,
 destination, timestamp freshness and replay identity before applying an effect.
 See the copied Base [receiver guide](../src/vendor/base/modules/integrations/receiver.md).
 
-Deliveries use ordinary platform HTTPS fetch with manual redirects. Every 3xx fails without following its Location. Requests are limited to 1 MiB, responses (including streams) to 64 KiB, and the entire request/response to 10 seconds. Public HTTPS destination syntax and literal IP validation remain enforced; this edition does not claim DNS pinning. Explicit HTTP 5xx and 429 responses retry within Base’s four-attempt policy, retaining the same logical identity and exact signed body. A timeout or redirect remains uncertain and is not automatically replayed. Receivers must deduplicate the webhook ID before applying effects.
+Deliveries use ordinary platform HTTPS fetch with manual redirects. Every 3xx fails without following its Location. Requests are limited to 1 MiB, responses (including streams) to 64 KiB, and the entire request/response to 10 seconds. Public HTTPS destination syntax and literal IP validation remain enforced; this edition does not claim DNS pinning. HTTP 5xx, 408, timeouts and redirects remain uncertain and are never automatically replayed. Only HTTP 429 retries automatically within Base’s four-attempt policy, retaining the same logical identity and exact signed body. Receivers must deduplicate the webhook ID before applying effects.
+
+In Connections → Delivery log, a current owner/admin can deliberately resend an
+uncertain webhook after checking its receiver. The warning matters: the receiver
+may already have applied it, so resending can duplicate effects. There is one
+action per logical delivery, with its original attempt history retained.
+`POST /api/management/projects/:projectId/connections/deliveries/:id/resend`
+uses the native session and JSON `{ "attempt": <observed attempt number> }`.
+It returns HTTP 202 with the same ID queued; dispatch happens separately. It
+requires the current owner/admin, the same workspace, the original enabled
+webhook destination, and unerased event/contact data at commit. Changed state,
+stale attempt, destination/configuration or authority is refused; refresh and
+inspect the new outcome before deciding again. Anonymous users, operators and
+foreign-workspace deliveries cannot approve a resend. Slack and other states
+have no resend action.
+
+A deliberate resend does not reset the automatic retry budget: before four
+attempts, a 429 may use the remaining original attempts. At or beyond four,
+each explicit approval authorizes exactly one additional attempt; a 429 then
+ends as rejected. If that additional attempt is uncertain, a fresh deliberate
+approval may authorize another. Attempt numbers keep increasing, and each
+approval records the actor, time, delivery ID and approved next attempt in the
+workspace audit. The original destination reference, exact body, fingerprint,
+four-attempt policy and existing attempts are retained. No request redirects,
+new destinations or automatic replay of uncertainty are enabled.
+
 Slack supports both incoming webhooks and bot tokens with channel IDs, escapes
 text, and shares conservative durable delivery. Local recorded responses do not
 establish live Slack acceptance: **live Slack: not-supplied**.

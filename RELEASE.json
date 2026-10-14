@@ -1,7 +1,7 @@
 {
   "version": "0.4.1",
   "previousVersion": "0.4.0",
-  "date": "2026-10-13",
+  "date": "2026-10-14",
   "contractChanges": {},
   "proseChanges": [
     {
@@ -23,6 +23,41 @@
       "was": "Step 3 merged v0.4.0.",
       "now": "Step 3 merges v0.4.1, which contains 0.4.0 and adds no migration; the steps are otherwise unchanged.",
       "ownerAction": "Merge v0.4.1 instead of v0.4.0 when upgrading from 0.3.x."
+    },
+    {
+      "document": "docs/api.md",
+      "change": "changed",
+      "date": "2026-10-14",
+      "summary": "Signed webhook delivery policy and deliberate resend match the runtime.",
+      "was": "The reference promised automatic retries for explicit HTTP 5xx and had no deliberate uncertain-delivery resend command.",
+      "now": "HTTP 5xx, 408, timeouts and redirects remain uncertain without automatic replay. Only 429 uses the original four-attempt automatic budget. Owners and admins can deliberately requeue an uncertain webhook with its original identity and body, current checks and an audit; each approval beyond that budget allows one attempt.",
+      "ownerAction": "Inspect the receiver before resending an uncertain webhook; deduplicate its original delivery ID."
+    },
+    {
+      "document": "docs/SOURCE-PROVENANCE.md",
+      "change": "changed",
+      "date": "2026-10-14",
+      "summary": "The provenance reference describes the maintained Base policy and native resend boundary.",
+      "was": "The reference said HappyToHelp retried explicit server failures.",
+      "now": "The reference distinguishes bounded automatic 429 attempts from audited native approval of uncertain webhook resends, without modifying copied Base sources.",
+      "ownerAction": "No migration or configuration change."
+    },
+    {
+      "document": "docs/AGENT-FIX.md",
+      "change": "added",
+      "date": "2026-10-14",
+      "summary": "A seven-step agent-fix guide explains investigation, explicit fix approval, separate observation and human Send.",
+      "now": "The guide describes the real local connector journey, authority and uncertainty refusals, fixture proof boundaries and the operator responsibility to inspect independent evidence.",
+      "ownerAction": "Use a throwaway target when repeating the case with your own provider account; local fixture checks do not establish live-provider or hosted acceptance."
+    },
+    {
+      "document": "ACCEPTANCE.md",
+      "change": "changed",
+      "date": "2026-10-14",
+      "summary": "Delegation evidence includes the joined emitted-Worker and real-connector journey.",
+      "was": "The delegation evidence row listed component state, authority and recovery requirements without the joined case.",
+      "now": "The required check includes all seven steps, four refusal branches and the fresh local browser journey; it is a check requirement, not a hosted or live-provider acceptance claim.",
+      "ownerAction": "Retain the existing local, provider, hosted and accessibility qualification boundaries."
     }
   ],
   "extensionPointChanges": [],

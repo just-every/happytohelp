@@ -168,3 +168,53 @@ test('HTTPS delivery bounds outgoing bytes and both declared and streamed respon
   }await h.restart();await h.dispatch();assert.equal(h.received.length,3);assert.equal(h.external,0);
  }finally{await h.close()}
 });
+
+test('deliberate uncertain resend preserves exact delivery and history, serializes approvals, and never renews the automatic retry budget',async()=>{
+ const h=await harness();try{
+  const a=await webhook(h);h.responses.push({status:429});const job=await h.call(root+'/webhooks/'+a.id+'/test',body({}));
+  for(const status of [429,429,500]){h.responses.push({status});await h.db.prepare('UPDATE integration_deliveries SET next_at=0 WHERE id=?').bind(job.id).run();await h.dispatch()}
+  const original=await h.db.prepare('SELECT * FROM integration_deliveries WHERE id=?').bind(job.id).first(),history=(await h.db.prepare('SELECT * FROM integration_attempts WHERE delivery_id=? ORDER BY number').bind(job.id).all()).results;
+  assert.equal(original.state,'uncertain');assert.equal(original.attempts,original.max_attempts);const path=root+'/deliveries/'+job.id+'/resend';
+  const concurrent=await Promise.all([h.raw(path,body({attempt:original.attempts})),h.raw(path,body({attempt:original.attempts}))]);assert.deepEqual(concurrent.map(r=>r.status).sort(),[202,409]);assert.equal(h.received.length,4,'approval queues without sending');
+  h.responses.push({status:500});await h.restart();await h.call('/_test/scheduled',body({}));assert.equal(h.received.length,5);
+  assert.equal((await h.raw(path,body({attempt:4}))).status,409,'stale approval cannot authorize a later uncertain attempt');
+  await h.db.prepare("INSERT INTO users VALUES('admin','admin@example.test','Admin',1)").run();await h.db.prepare("INSERT INTO memberships VALUES('p','admin','admin')").run();await h.session('admin','p','admin','admin');
+  await h.call(path,{actor:'admin',...body({attempt:5})});h.responses.push({status:429});await h.call('/_test/scheduled',body({}));await h.restart();await h.dispatch();assert.equal(h.received.length,6);
+  const current=await h.db.prepare('SELECT * FROM integration_deliveries WHERE id=?').bind(job.id).first();assert.equal(current.state,'rejected');assert.equal(current.attempts,6);
+  for(const field of ['id','namespace','envelope','fingerprint','destination_hash','max_attempts','retry_delays'])assert.equal(current[field],original[field],field+' retained');
+  assert.deepEqual((await h.db.prepare('SELECT * FROM integration_attempts WHERE delivery_id=? AND number<=4 ORDER BY number').bind(job.id).all()).results,history);
+  for(const receipt of h.received){assert.ok(receipt.body.equals(h.received[0].body));assert.ok(verifyIndependent(receipt,a.secret,{tenant:'p',destination:a.id,event:'integration.test',id:job.id}))}
+  const audits=(await h.db.prepare("SELECT * FROM native_integration_audit WHERE action LIKE 'delivery.resend.%' ORDER BY created_at").all()).results;assert.deepEqual(audits.map(r=>[r.actor_id,r.resource_id,r.action]),[['owner',job.id,'delivery.resend.5'],['admin',job.id,'delivery.resend.6']]);assert.ok(audits.every(r=>r.created_at>=original.created_at));
+  assert.equal((await h.raw(path,body({attempt:6}))).status,409);assert.equal(h.external,0);
+  // An earlier deliberate resend consumes the remaining original budget.
+  h.responses.push({status:408});const early=await h.call(root+'/webhooks/'+a.id+'/test',body({}));const beforeApproval=h.received.length;await h.restart();await h.dispatch();assert.equal(h.received.length,beforeApproval,'HTTP 408 stays uncertain without automatic replay');await h.call(root+'/deliveries/'+early.id+'/resend',body({attempt:1}));
+  for(const status of [429,429,429]){h.responses.push({status});await h.db.prepare('UPDATE integration_deliveries SET next_at=0 WHERE id=?').bind(early.id).run();await h.dispatch()}
+  const exhausted=await h.db.prepare('SELECT * FROM integration_deliveries WHERE id=?').bind(early.id).first();assert.equal(exhausted.state,'rejected');assert.equal(exhausted.attempts,exhausted.max_attempts);assert.equal((await h.db.prepare("SELECT count(*) n FROM native_integration_audit WHERE resource_id=? AND action LIKE 'delivery.resend.%'").bind(early.id).first()).n,1);
+ }finally{await h.close()}
+});
+
+test('resend refuses anonymous, operator, foreign, stale state, destination and erasure authority including commit races',async()=>{
+ const h=await harness();try{
+  const a=await webhook(h);await h.contact();await h.conversation();h.responses.push({status:500});await h.dispatch();
+  const job=await h.db.prepare('SELECT id FROM integration_deliveries').first(),path=root+'/deliveries/'+job.id+'/resend';
+  await h.db.prepare("INSERT INTO users VALUES('operator','op@example.test','Operator',1)").run();await h.db.prepare("INSERT INTO memberships VALUES('p','operator','operator')").run();await h.session('operator','p','operator','operator');
+  assert.equal((await h.raw(path,{token:null,...body({attempt:1})})).status,401);assert.equal((await h.raw(path,{actor:'operator',...body({attempt:1})})).status,403);assert.equal((await h.raw(path,{actor:'foreign',...body({attempt:1})})).status,403);
+  assert.equal((await h.raw('/api/management/projects/q/connections/deliveries/'+job.id+'/resend',{actor:'foreign',...body({attempt:1})})).status,404);
+  for(const state of ['queued','sending','accepted','rejected']){await h.db.prepare('UPDATE integration_deliveries SET state=? WHERE id=?').bind(state,job.id).run();assert.equal((await h.raw(path,body({attempt:1}))).status,409)}await h.db.prepare("UPDATE integration_deliveries SET state='uncertain' WHERE id=?").bind(job.id).run();
+  const before=await h.db.prepare('SELECT * FROM integration_deliveries WHERE id=?').bind(job.id).first();
+  const changed=await webhook(h,'/changed'),cipher=(await h.db.prepare('SELECT secret_ciphertext FROM native_integration_destinations WHERE id=?').bind(a.id).first()).secret_ciphertext;
+  for(const [race,restore] of [
+   [[{sql:"UPDATE sessions SET revoked_at=1 WHERE actor_id='owner'"}],[{sql:"UPDATE sessions SET revoked_at=NULL WHERE actor_id='owner'"}]],
+   [[{sql:"UPDATE memberships SET role='operator' WHERE project_id='p' AND user_id='owner'"},{sql:"UPDATE memberships SET role='owner' WHERE project_id='p' AND user_id='owner'"}],[]],
+   [[{sql:"INSERT INTO project_settings VALUES('p','{\"deleted_at\":1}',1)"}],[{sql:"DELETE FROM project_settings WHERE project_id='p'"}]],
+   [[{sql:'UPDATE native_integration_destinations SET enabled=0 WHERE id=?',params:[a.id]}],[{sql:'UPDATE native_integration_destinations SET enabled=1 WHERE id=?',params:[a.id]}]],
+   [[{sql:'UPDATE native_integration_destinations SET secret_ciphertext=(SELECT secret_ciphertext FROM native_integration_destinations WHERE id=?) WHERE id=?',params:[changed.id,a.id]}],[{sql:'UPDATE native_integration_destinations SET secret_ciphertext=? WHERE id=?',params:[cipher,a.id]}]]
+  ]){
+   const response=await h.raw('/_test/race',body({path,body:{attempt:1},match:'INSERT INTO native_integration_audit(id,project_id,actor_id,action',race}));assert.equal(response.status,409);assert.deepEqual(await h.db.prepare('SELECT * FROM integration_deliveries WHERE id=?').bind(job.id).first(),before);assert.equal((await h.db.prepare("SELECT count(*) n FROM native_integration_audit WHERE action LIKE 'delivery.resend.%'").first()).n,0);for(const command of restore)await h.db.prepare(command.sql).bind(...(command.params||[])).run();
+  }
+  // A changed URL before validation is refused, as is a disabled destination.
+  await h.db.prepare('UPDATE native_integration_destinations SET secret_ciphertext=(SELECT secret_ciphertext FROM native_integration_destinations WHERE id=?) WHERE id=?').bind(changed.id,a.id).run();assert.equal((await h.raw(path,body({attempt:1}))).status,409);await h.db.prepare('UPDATE native_integration_destinations SET secret_ciphertext=?,enabled=0 WHERE id=?').bind(cipher,a.id).run();assert.equal((await h.raw(path,body({attempt:1}))).status,409);await h.db.prepare('UPDATE native_integration_destinations SET enabled=1 WHERE id=?').bind(a.id).run();
+  h.responses.push({status:500});const missing=await h.call(root+'/webhooks/'+changed.id+'/test',body({}));await h.db.prepare('DELETE FROM native_integration_intents WHERE id=?').bind(missing.id).run();await h.db.prepare('DELETE FROM native_integration_destinations WHERE id=?').bind(changed.id).run();assert.equal((await h.raw(root+'/deliveries/'+missing.id+'/resend',body({attempt:1}))).status,409);
+  const erased=await h.raw('/_test/race',body({path,body:{attempt:1},match:'INSERT INTO native_integration_audit(id,project_id,actor_id,action',race:[{sql:"UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_erasing',1) WHERE id='visitor'"}]}));assert.equal(erased.status,409);assert.equal((await h.raw(path,body({attempt:1}))).status,404);await h.db.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_erased',1) WHERE id='visitor'").run();assert.equal((await h.raw(path,body({attempt:1}))).status,404);await h.dispatch();assert.equal(h.received.length,2);assert.equal((await h.db.prepare("SELECT count(*) n FROM native_integration_audit WHERE action LIKE 'delivery.resend.%'").first()).n,0);assert.equal(h.external,0);
+ }finally{await h.close()}
+});

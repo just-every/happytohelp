@@ -47,6 +47,13 @@ export default function DelegationJob({ job, isDraftDisabled, onCancel, onInsert
         ? 'Workspace access ended · local outcome unconfirmed'
         : statusNames[job.status] || job.status;
     const latestProgress = progress[progress.length - 1] || null;
+    const authority = <small className="delegation-job__authority">
+        Authorized by operator { job.operator_id }{ ' · ' }
+        <time dateTime={ job.created_at }>{ new Date(job.created_at).toLocaleString() }</time>
+        { job.parent_delegation_id && <span>{ ' · ' }Approved follow-up of{ ' ' }
+            <a href={ '#delegation-job-' + job.parent_delegation_id }>investigation { job.parent_delegation_id }</a>
+        </span> }
+    </small>;
 
     useEffect(() => {
         // A confirmation applies only to the exact conversation position that
@@ -114,6 +121,7 @@ export default function DelegationJob({ job, isDraftDisabled, onCancel, onInsert
                 <div>
                     <h3 id={ 'delegation-job-' + job.id }>{ modeNames[job.mode] || 'Task' } completed</h3>
                     { result?.summary && <p className="delegation-job__summary">{ result.summary }</p> }
+                    { authority }
                     { completionNotices[job.delivery_state] && <p className="delegation-job__summary" role="status">{ completionNotices[job.delivery_state] }</p> }
                 </div>
             </div>
@@ -131,6 +139,7 @@ export default function DelegationJob({ job, isDraftDisabled, onCancel, onInsert
             <div>
                 <span className={ 'delegation-status is-' + job.status }>{ statusLabel }</span>
                 <h3 id={ 'delegation-job-' + job.id }>{ modeNames[job.mode] || 'Local delegation' }</h3>
+                { authority }
             </div>
             { active && <button type="button" className="btn btn-link delegation-job__cancel" onClick={ cancel } disabled={ isCancelling || job.cancel_requested }>
                 { job.cancel_requested ? 'Cancellation requested' : isCancelling ? 'Cancelling…' : 'Cancel' }

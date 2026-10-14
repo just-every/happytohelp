@@ -6,6 +6,7 @@ import {tokens,issuerGuard,SCOPES,type Issuer} from '../../platform/integration-
 import {saveDestination,disableDestination} from './destinations'
 import {dispatchIntegrations} from './dispatch'
 import {iso} from './http'
+import {resendDelivery} from './resend'
 export const integrationSettings=new Hono<AppEnv>()
 const root='/projects/:projectId/connections'
 async function issuer(c:any):Promise<Issuer>{const actor=await scope(c,true);if(actor.role!=='owner'&&actor.role!=='admin')throw new HTTPException(403);return {actor:{...actor,role:actor.role},sessionHash:c.get('sessionHash')}}
@@ -34,8 +35,9 @@ for(const kind of ['webhook','slack'] as const){
   return c.json({id:intent,state:'recorded',error:null},202)
  })
 }
+integrationSettings.post(root+'/deliveries/:id/resend',async c=>{const who=await issuer(c),input=await c.req.json();return c.json(await resendDelivery(c.env,who,c.req.param('id')!,input.attempt),202)})
 integrationSettings.get(root+'/deliveries',async c=>{
  const who=await issuer(c);await audit(c,who,'deliveries.list')
- const rows=await c.env.DB.prepare(`SELECT i.id,i.destination_id,d.name,e.event,e.created_at,i.error_code,coalesce(v.state,CASE WHEN i.error_code IS NULL THEN 'pending' ELSE 'blocked' END) state,a.number,a.started_at,a.finished_at,a.outcome FROM native_integration_intents i JOIN native_integration_events e ON e.id=i.event_id JOIN native_integration_destinations d ON d.id=i.destination_id LEFT JOIN integration_deliveries v ON v.namespace=i.project_id AND v.id=i.id LEFT JOIN integration_attempts a ON a.namespace=i.project_id AND a.delivery_id=i.id WHERE i.project_id=? ORDER BY e.created_at DESC,i.id,a.number LIMIT 200`).bind(who.actor.projectId).all<any>()
+ const rows=await c.env.DB.prepare(`SELECT i.id,i.destination_id,d.name,d.kind,v.attempts,e.event,e.created_at,i.error_code,coalesce(v.state,CASE WHEN i.error_code IS NULL THEN 'pending' ELSE 'blocked' END) state,a.number,a.started_at,a.finished_at,a.outcome FROM native_integration_intents i JOIN native_integration_events e ON e.id=i.event_id JOIN native_integration_destinations d ON d.id=i.destination_id LEFT JOIN integration_deliveries v ON v.namespace=i.project_id AND v.id=i.id LEFT JOIN integration_attempts a ON a.namespace=i.project_id AND a.delivery_id=i.id WHERE i.project_id=? ORDER BY e.created_at DESC,i.id,a.number LIMIT 200`).bind(who.actor.projectId).all<any>()
  return c.json({data:rows.results.map(({outcome,...row})=>{const result=outcome?JSON.parse(outcome):null;return {...iso(row),status:result?.status??null,error_class:result?.code??row.error_code,duration_ms:row.finished_at===null?null:row.finished_at-row.started_at}})})
 })

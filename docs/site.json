@@ -22,6 +22,11 @@
           "slug": "local-agent",
           "source": "local-agent/README.md",
           "label": "Local agent"
+        },
+        {
+          "slug": "agent-fix",
+          "source": "docs/AGENT-FIX.md",
+          "label": "What an agent fix looks like"
         }
       ]
     },

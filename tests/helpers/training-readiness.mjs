@@ -58,7 +58,10 @@ export async function switchTrainingProject(page, name, projectId) {
     await nav.getByRole('button', {name: /Switch workspace:/}).click();
     await nav.getByRole('button', {name, exact: true}).click();
     await page.waitForURL('**/projects/' + projectId + '/conversations');
-    await nav.getByRole('link', {name: 'Knowledge', exact: true}).click();
-    await page.getByRole('navigation', {name: 'Knowledge sections'}).getByRole('link', {name: 'Evaluation runs', exact: true}).click();
+    // The URL can change before the new workspace's scoped navigation commits.
+    await nav.getByRole('button', {name: `Switch workspace: ${name}`, exact: true}).waitFor();
+    await nav.getByRole('link', {name: 'Knowledge', exact: true}).and(page.locator(`a[href="/projects/${projectId}/articles"]`)).click();
+    await page.getByRole('heading', {name: 'Knowledge', exact: true}).waitFor();
+    await page.getByRole('navigation', {name: 'Knowledge sections'}).getByRole('link', {name: 'Evaluation runs', exact: true}).and(page.locator(`a[href="/projects/${projectId}/training-runs"]`)).click();
     await page.waitForURL('**/projects/' + projectId + '/training-runs');
 }

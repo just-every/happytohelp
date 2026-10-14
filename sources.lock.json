@@ -8192,7 +8192,7 @@
       "executable": false
     },
     "tests/helpers/training-readiness.mjs": {
-      "sha256": "e72eb1ed4d45d91b8b4f1bf69f67ad48f8aca0979ea45b90348fbe0ea2551da6",
+      "sha256": "283c64f88c79d94877b5d3c72af3f5cbdac28efd7afd9d42b21b29a8f3d05914",
       "executable": false
     },
     "tests/helpers/ui-parity.mjs": {

@@ -10,6 +10,7 @@ import {recoveryRuntime} from '../helpers/recovery/runtime.mjs';
 import {snapshot} from '../helpers/recovery/snapshot.mjs';
 import {m9Migrations} from '../helpers/recovery/m9-inventory.mjs';
 import {createHash} from 'node:crypto';
+import {seedCategoryUpgrade,assertCategoryUpgrade} from './upgrade-categories.mjs';
 const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
 const completeMigrations=artifact.deploymentSpec.migrations;
 assert.deepEqual(completeMigrations.filter(m=>importRuntimeMigrations.includes(m.name)).map(m=>m.name),importRuntimeMigrations);
@@ -131,9 +132,9 @@ try {
     for(const entry of beforeRuntime.schema)assert.deepEqual(current.schema.find(row=>row.name===entry.name),entry,'runtime closure preserves prior schema: '+entry.name);
     assert.deepEqual(current.rows.d1_migrations.map(JSON.parse).slice(-importRuntimeMigrations.length).map(row=>row.name),importRuntimeMigrations);
   });
-  // Apply new additive stages too, proving they retain the complete prior data.
+  // Later stages retain all prior data, including article publication state.
   let beforeAdditional,final;
-  await runtime.withStorage(async storage=>{beforeAdditional=await snapshot(storage)});
+  await runtime.withStorage(async storage=>{await seedCategoryUpgrade(storage);beforeAdditional=await snapshot(storage)});
   for(const migration of remaining)await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
   await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
   await runtime.withStorage(async storage=>{
@@ -145,15 +146,27 @@ try {
     }
     for(const entry of beforeAdditional.schema){
       const current=final.schema.find(candidate=>candidate.name===entry.name),added=addedColumns.filter(a=>a.table===entry.name);
+      // Category creation no longer invalidates articles. Deletion now scopes
+      // invalidation to linked ancestry; its behavior is exercised below on D1.
+      if(entry.name==='edition_category_insert'){
+        assert.equal(current,undefined,'category creation has no blanket invalidation trigger');
+        continue;
+      }
+      if(entry.name==='edition_category_delete'){
+        assert.ok(current,'category deletion retains its invalidation trigger');
+        assert.deepEqual({...current,sql:entry.sql},entry,'category deletion retains its schema identity');
+        continue;
+      }
       for(const {column} of added)assert.ok(current.sql.includes(', '+column),'additional stage adds '+column+' to '+entry.name);
       assert.deepEqual({...current,sql:added.reduce((sql,{column})=>sql.replace(', '+column,''),current.sql)},entry,'additional stages preserve prior schema: '+entry.name);
     }
     assert.deepEqual(final.rows.d1_migrations.map(JSON.parse).map(row=>row.name).sort(),completeMigrations.map(m=>m.name).sort(),'the actual final migration ledger is complete');
     for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
   });
+  await assertCategoryUpgrade(runtime.directory);
   artifact.deploymentSpec.migrations=completeMigrations;
   await runtime.start();const health=await fetch(runtime.origin+'/health');assert.equal(health.status,200);await runtime.close();
-  const receipt={oldTables:Object.keys(before.rows).length,newTables:Object.keys(after.rows).length,oldMigrations:original.length,newMigrations:migrations.length,finalTables:Object.keys(final.rows).length,finalMigrations:final.rows.d1_migrations.length,added:completeMigrations.filter(m=>!original.some(old=>old.name===m.name)).map(m=>m.name),checks:['real native Wrangler prior ledger and append-only apply','every original row retained','SQLite ledger sequence growth only','prior schema exact except two specified A110 trigger fences','historical unknown outcome','unknown first resolution retained','Base strict defaults and exact prior original bytes retained','all additional stages preserve prior schema and rows','actual emitted Worker health after upgrade']};
+  const receipt={oldTables:Object.keys(before.rows).length,newTables:Object.keys(after.rows).length,oldMigrations:original.length,newMigrations:migrations.length,finalTables:Object.keys(final.rows).length,finalMigrations:final.rows.d1_migrations.length,added:completeMigrations.filter(m=>!original.some(old=>old.name===m.name)).map(m=>m.name),checks:['real native Wrangler prior ledger and append-only apply','every original row retained','SQLite ledger sequence growth only','prior schema exact except two specified A110 trigger fences','historical unknown outcome','unknown first resolution retained','Base strict defaults and exact prior original bytes retained','additional stages retain every row and prior schema except added columns and category insert/delete trigger evolution','upgraded category create/delete preserves unrelated article state','upgraded linked and ancestor deletion invalidates primary and additional category article revisions','actual emitted Worker health after upgrade']};
   if(process.env.H2H_EVIDENCE_DIR){await mkdir(resolve(process.env.H2H_EVIDENCE_DIR),{recursive:true});await writeFile(join(resolve(process.env.H2H_EVIDENCE_DIR),'upgrade.json'),JSON.stringify(receipt,null,2)+'\n')}
   console.log(JSON.stringify(receipt));
 }finally{artifact.deploymentSpec.migrations=completeMigrations;if(runtime)await runtime.close();await rm(directory,{recursive:true,force:true});}

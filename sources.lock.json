@@ -8875,8 +8875,12 @@
       "sha256": "e2595ba253ed0723d70dce2ad2cf4c9979f73232dc7a79054965459331fed27a",
       "executable": false
     },
+    "tests/reports/upgrade-categories.mjs": {
+      "sha256": "a12576a5feaea1d887c117f55b847d519260691432cd9ef95f048b1f4166222f",
+      "executable": false
+    },
     "tests/reports/upgrade.mjs": {
-      "sha256": "e52d9b0e4523c1b50fe3b7e66692fb6170e53df9dba81528740e6854bc9cf852",
+      "sha256": "b5174efd27fbcd9f40ee6e7107bdec67882926cc3c980020fe018c5dd6466676",
       "executable": false
     },
     "tests/reports/widget-races.mjs": {

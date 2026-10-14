@@ -1464,7 +1464,7 @@
       "executable": false
     },
     "AGENTS.md": {
-      "sha256": "446c911d5192db0cb3bf528b700000b1454955db9654cdf813a805af1e7afa63",
+      "sha256": "9fa4e77cb7b65da29a7b3b4a9e1eb89ea05d890bc791e7c8aa5994556a21159a",
       "executable": false
     },
     "base-copies.json": {
@@ -1508,11 +1508,11 @@
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
-      "sha256": "b356cd1718522c411935630a810a02ee7caf1241cc3aea923a7706001c63b154",
+      "sha256": "4655c6b20df546b5a667b353cf2807919a7a234fb7d14fd123027a2ceaf6b726",
       "executable": false
     },
     "docs/INSTALLER.md": {
-      "sha256": "92826c29d0bad900cbad4014fbd6913b89894f4009f9cd5416007e4e8772ab4d",
+      "sha256": "e703dd69feeb48cd95e49d44e25f468d6a855cc65716b3cab5d713707e58ae80",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2152,7 +2152,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "cbc649059abde98a83e7fff63d99415626d76250d780b578c68ac7cefd7a8363",
+      "sha256": "82d0b61b5d85015fe3ef415a6288903cc89ef5ed429c7b4750c32e4b412e838a",
       "executable": false
     },
     "RELEASE.json": {
@@ -2164,7 +2164,7 @@
       "executable": false
     },
     "rer-setup.json": {
-      "sha256": "7b5444c5cac36ce297a3b83b86bad10a4c766b049a7fab2d39e258570d7a8cc9",
+      "sha256": "67d813d4cc1145a02fd7c1ba772ec1c3779c68969775d89dd7ab7b83208d5a46",
       "executable": false
     },
     "RUN-LOCALLY.md": {
@@ -2448,11 +2448,11 @@
       "executable": false
     },
     "scripts/installer/local.mjs": {
-      "sha256": "ec70147a85377f3c8a334bfe0c542b961cc6c8bf6848ea6eaded0dce9a4d1a6b",
+      "sha256": "de201c9cca4ee63d00b44642936f9b61c45e5f8ff0c54b53b0b22e6ed96faa53",
       "executable": false
     },
     "scripts/installer/native-local.mjs": {
-      "sha256": "f6d5192cf83ad88223db39a53968a58f068d054ebc6c096ae68e219d9044e50b",
+      "sha256": "f564ec22bf6ccebbadbc307a62e5f6542f4f2d75ed136b51c2d25185b798d16a",
       "executable": false
     },
     "scripts/installer/portability-policy.mjs": {

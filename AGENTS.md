@@ -1,14 +1,13 @@
 # Run it locally
 
-Use Node **22.20.0** and pnpm **10.12.4**, from the checkout root. Prepare a
-private `.seed/local-answers.json` using [the manifest fields](docs/INSTALLER.md#private-setup-answers);
-HappyToHelp requires only the widget origin and the native owner password; the workspace
-name, colour, owner name and an AI key are optional.
-Keep secrets in that file, never command arguments.
+Use Node **22.20.0** and pnpm **10.12.4**, from the checkout root. `rer dev`
+automatically uses its local origin and generates a private native owner password.
+For an explicit website, email or password, use the optional
+[private-answer setup](docs/INSTALLER.md#private-setup-answers). Keep secrets in
+that file, never command arguments.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
 pnpm exec rer dev --foreground
 ```
 

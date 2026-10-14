@@ -7,6 +7,14 @@ import {readSettings} from '@runeditrun/rer/adapter-settings';
 import {writePrivateFile} from '@runeditrun/rer/private-files';
 
 const generatedToken='INBOUND_EMAIL_TOKEN';
+export async function localInputDefaults(root){
+ const defaults={target:'local',EMAIL_PROVIDER:'later'};
+ // Rer fills localDefault before reading entered secrets from the environment.
+ // Preserve that explicit input, while saved settings and private answers keep precedence.
+ if(process.env.OWNER_PASSWORD&&!(await readSettings(root,{file:'.dev.vars'})).values.OWNER_PASSWORD)
+  defaults.OWNER_PASSWORD=process.env.OWNER_PASSWORD;
+ return defaults;
+}
 // A key answered for a provider other than the chosen one is contradictory; refuse it before any file is written.
 function refuseUnchosenAiKeys(context){
  const chosen=context.input.AI_PROVIDER||'later';

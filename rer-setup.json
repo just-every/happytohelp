@@ -34,6 +34,9 @@
       "kind": "url",
       "group": "workspace",
       "required": true,
+      "localDefault": {
+        "from": "origin"
+      },
       "placeholder": "https://example.com",
       "help": "The chat widget will be allowed on this website."
     },
@@ -69,6 +72,9 @@
       "required": true,
       "ownerVisible": true,
       "input": "entered",
+      "localDefault": {
+        "generate": "hex"
+      },
       "when": {
         "field": "OWNER_EMAIL",
         "nonEmpty": true

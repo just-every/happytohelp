@@ -9,11 +9,10 @@ git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp && rer dev
 ```
 
-On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
-have not been supplied. Follow the private-answer setup instructions below
-before running `rer dev` again. Once setup completes, dev prints the sign-in
-outbox link. No email or AI account is needed. Use `rer dev --stop` from the
-checkout to stop the managed app.
+Dev uses its local address for the chat widget and generates a private owner
+password, then prints the development sign-in outbox link. No private answers,
+email service or AI account are needed. Open the link and sign in to your
+workspace. Use `rer dev --stop` from the checkout to stop the managed app.
 
 ## Contributor setup
 
@@ -26,13 +25,14 @@ pnpm exec rer check --profile first-party
 ```
 
 This installs frozen dependencies without creating an owner or starting the app.
-The following private-answer path is also available for scripted setup.
+The following private-answer path is also available for scripted setup or to
+choose your own website and password.
 
 ## Private setup answers
 
 Create `.seed` with mode 0700 and `.seed/local-answers.json` with mode 0600 using
-your editor. Keep the file inside the checkout. Use your own values. Only the
-website, the owner email and the owner password are required:
+your editor. Keep the file inside the checkout. Use your own values. Explicit
+`rer setup` requires the website, owner email and owner password:
 
 ```json
 {
@@ -65,6 +65,13 @@ identity is retained. Local setup explicitly selects development capture; it
 refuses to overwrite a saved remote provider.
 
 ## Generated and optional settings
+
+Automatic `rer dev` setup uses the selected local origin as `WIDGET_ORIGIN` and
+generates `OWNER_PASSWORD` when unanswered. The password is stored only in the
+checkout's private `.dev.vars`, never printed. Supplied private answers and saved
+settings take precedence; an `OWNER_PASSWORD` environment value is used when no
+password was saved or answered. These local defaults do not relax explicit setup
+or hosted owner password requirements.
 
 Setup generates three private secrets in `.dev.vars`: `H2H_SETUP_TOKEN`,
 `INTEGRATION_ENCRYPTION_KEY` and `INBOUND_EMAIL_TOKEN`. None is printed in

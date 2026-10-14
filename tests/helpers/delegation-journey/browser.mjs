@@ -11,29 +11,32 @@ import {command,run} from '../rer-command.mjs';
 import {customerFixture} from './fixture.mjs';
 import {report,client,runCase,until} from './case.mjs';
 import {browserUI} from './browser-ui.mjs';
+import {failureDiagnostics} from './diagnostics.mjs';
 
 export async function browserJourney(evidence){
  const scratch=await mkdtemp(join(tmpdir(),'h2h-agent-fix-rer-')),checkout=join(scratch,'checkout');
  const fixture=await customerFixture();let server,browser;const captions=[],checks=[];
  const socket=createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
  const origin=`http://127.0.0.1:${port}`,email='agent-fix@example.test',password=randomBytes(24).toString('base64url');
- let success=false;
+ let success=false,stage='clone',freshInstalledRer=false,ordinaryOutboxSignIn=false;
  try{
   await promisify(execFile)('git',['clone','--quiet','--no-local','--depth','1',resolve('.'),checkout]);
-  await run(checkout,['install']);
+  stage='install';await run(checkout,['install']);freshInstalledRer=true;
   await mkdir(join(checkout,'.seed'),{mode:0o700,recursive:true});
   await writeFile(join(checkout,'.seed/local-answers.json'),JSON.stringify({WORKSPACE_NAME:'Agent fix journey',WIDGET_ORIGIN:origin,OWNER_NAME:'Journey owner',OWNER_PASSWORD:password,EMAIL_PROVIDER:'later'}),{mode:0o600});
-  await run(checkout,['setup','--owner-email',email,'--answers','.seed/local-answers.json','--port',String(port)]);
+  stage='setup';await run(checkout,['setup','--owner-email',email,'--answers','.seed/local-answers.json','--port',String(port)]);
   await assert.rejects(fetch(origin+'/health',{signal:AbortSignal.timeout(2000)}),'setup leaves no server');
-  server=command(checkout,['dev']);const ready=await server.waitFor(event=>event.event==='ready',180000);assert.equal(ready.url,origin);assert.equal(ready.signInUrl,origin+'/__dev/outbox');
+  stage='dev';server=command(checkout,['dev']);const ready=await server.waitFor(event=>event.event==='ready',180000);assert.equal(ready.url,origin);assert.equal(ready.signInUrl,origin+'/__dev/outbox');
+  stage='outbox sign-in';
   browser=await chromium.launch({headless:true});
   const loginContext=await browser.newContext(),loginPage=await loginContext.newPage();
   await loginPage.goto(origin+'/__dev/outbox');await loginPage.getByRole('link',{name:'Read message'}).first().click();await loginPage.getByRole('link',{name:'Open this link'}).click();
   await loginPage.getByRole('button',{name:'Sign in',exact:true}).waitFor();assert.equal((await loginContext.request.get(origin+'/api/identity/session')).status(),401);
   await loginPage.getByRole('button',{name:'Sign in',exact:true}).click();await loginPage.waitForURL(/\/projects\/[^/]+\/activation$/);
-  const session=await loginContext.request.get(origin+'/api/identity/session');assert.equal(session.status(),200);const actor=await session.json();assert.equal(actor.role,'owner');
+  const session=await loginContext.request.get(origin+'/api/identity/session');assert.equal(session.status(),200);const actor=await session.json();assert.equal(actor.role,'owner');ordinaryOutboxSignIn=true;
   const state=await loginContext.storageState();await loginContext.close();
   for(const width of [1440,390]){
+   stage=`operator and visitor journey ${width}`;
    const viewport={width,height:width===390?844:1000},context=await browser.newContext({viewport,storageState:state}),page=await context.newPage();
    const cookie=(await context.cookies()).find(c=>c.name==='h2h_session');assert.ok(cookie);const api=client(origin,cookie.value);
    const project=await api('/api/identity/projects/'+actor.projectId);const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -59,9 +62,14 @@ export async function browserJourney(evidence){
    try{checks.push({width,...await runCase({origin,api,actor,fixture,directory,ui})});assert.deepEqual(errors,[])}finally{await visitorContext?.close();await context.close()}
   }
   success=true;console.log('Fresh rer install/setup/dev/outbox agent-fix browser journey passed at 1440 and 390 with operator and widget screenshots for all seven steps.');
+ }catch(error){
+  await failureDiagnostics({evidence,stage,error,server,scratch,secrets:[password]});throw error;
  }finally{
-  await browser?.close();if(server){await run(checkout,['dev','--stop']);await server.stop()}
-  await fixture.close();await writeFile(join(evidence,'browser-result.json'),JSON.stringify({success,layer:'LOCAL TEST',provider:'scripted Codex CLI boundary',liveProvider:false,customerSystem:'loopback fixture only',freshInstalledRer:true,ordinaryOutboxSignIn:true,checks},null,2));
-  await writeFile(join(evidence,'SCREENSHOTS.md'),captions.join('\n')+'\n');await rm(scratch,{recursive:true,force:true});
+  const cleanup=await Promise.allSettled([browser?.close(),fixture.close(),(async()=>{if(server){try{await run(checkout,['dev','--stop'])}finally{await server.stop()}}})()]);
+  const cleanupFailed=cleanup.some(result=>result.status==='rejected');
+  await writeFile(join(evidence,'browser-result.json'),JSON.stringify({success:success&&!cleanupFailed,stage,cleanupSucceeded:!cleanupFailed,layer:'LOCAL TEST',provider:'scripted Codex CLI boundary',liveProvider:false,customerSystem:'loopback fixture only',freshInstalledRer,ordinaryOutboxSignIn,checks},null,2));
+  await writeFile(join(evidence,'SCREENSHOTS.md'),captions.join('\n')+'\n');
+  if(success&&!cleanupFailed)await rm(scratch,{recursive:true,force:true});
+  if(cleanupFailed)throw Error('Journey process cleanup failed; private scratch retained for inspection');
  }
 }

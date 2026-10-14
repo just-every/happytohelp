@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {randomBytes} from 'node:crypto';
 import {chromium} from 'playwright';
 import {createRuntime} from '../helpers/emitted-runtime.mjs';
+import {helpScoutBrowserFlow} from './helpscout-browser-flow.mjs';
 import {generate,generateDiagnostics} from './generator.mjs';
 const evidence=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-move-in-browser-'));await mkdir(evidence,{recursive:true});
 const runtime=await createRuntime();let browser,success=false;const results=[],errors=[];
@@ -19,7 +20,7 @@ try{
  await page.goto(runtime.origin+base+'/settings');await page.getByRole('link',{name:'Move in existing support history',exact:true}).click();await page.getByRole('heading',{name:'Move in',exact:true}).waitFor();
  await page.goto(runtime.origin+base+'/activation');await page.getByRole('link',{name:'Move in your existing support history',exact:true}).click();
  await page.getByLabel('Export file',{exact:true}).setInputFiles({name:'too-large.jsonl',mimeType:'application/octet-stream',buffer:Buffer.alloc(2*1024*1024+1)});assert.equal(await page.getByRole('button',{name:'Upload and review',exact:true}).isDisabled(),true);await page.getByText('This file exceeds the 2 MiB upload limit.',{exact:false}).waitFor();await page.getByLabel('Export format',{exact:true}).selectOption('intercom');assert.equal(await page.getByLabel('Export file',{exact:true}).evaluate(input=>input.files.length),0);assert.equal(await page.getByRole('button',{name:'Upload and review',exact:true}).isDisabled(),true);
- for(const width of [1440,390])for(const vendor of ['zendesk','intercom']){
+ for(const width of [1440,390])for(const vendor of (process.env.MOVE_IN_BROWSER_VENDOR==='helpscout'?[]:['zendesk','intercom'])){
   const label=`${vendor}-${width}`,content=generate(vendor,6,width),filename=`${label}.jsonl`;await page.setViewportSize({width,height:1000});await page.goto(runtime.origin+base+'/move-in');
   await page.getByLabel('Export format',{exact:true}).selectOption(vendor);await page.getByLabel('Export file',{exact:true}).setInputFiles({name:filename,mimeType:'application/octet-stream',buffer:Buffer.from(content)});await page.getByRole('button',{name:'Upload and review',exact:true}).click();
   await page.getByRole('heading',{name:`Ready for review: ${filename}`,exact:true}).waitFor({timeout:120000});assert.match(await page.locator('.move-in-page').innerText(),/1 articles will be published; 1 will remain drafts/);await inspect(`${label}-plan`);
@@ -38,6 +39,7 @@ try{
   const negativeName=`${label}-diagnostics.jsonl`,negative=generateDiagnostics(vendor,2,width+1).body.replace(vendor==='zendesk'?'\"draft\":false,\"user_segment_id\":null':'\"state\":\"published\"',vendor==='zendesk'?'\"draft\":false,\"user_segment_id\":7':'\"state\":\"published\",\"audience\":{\"type\":\"restricted\"}');await page.getByLabel('Export format',{exact:true}).selectOption(vendor);await page.getByLabel('Export file',{exact:true}).setInputFiles({name:negativeName,mimeType:'application/octet-stream',buffer:Buffer.from(negative)});await page.getByRole('button',{name:'Upload and review',exact:true}).click();await page.getByText('Upload refused:',{exact:false}).waitFor();assert.match(await page.locator('.move-in-page').innerText(),/No source files or import were saved/);await inspect(`${label}-upload-refused`);
   await page.getByLabel('Export file',{exact:true}).setInputFiles({name:negativeName,mimeType:'application/octet-stream',buffer:Buffer.from(negative.slice(0,negative.lastIndexOf('{malformed')))});await page.getByRole('button',{name:'Upload and review',exact:true}).click();await page.getByRole('heading',{name:`Ready for review: ${negativeName}`,exact:true}).waitFor({timeout:120000});await page.getByText('The export contains conflicting records for this ID.',{exact:false}).first().waitFor();await page.getByText('This article has a restricted audience that cannot be preserved.',{exact:false}).first().waitFor();assert.match(await page.locator('.move-in-page').innerText(),new RegExp(`${negativeName}:(?:9|10|11)`));await inspect(`${label}-diagnostics`);
  }
+ await helpScoutBrowserFlow({page,origin:runtime.origin,base,inspect,request,project,token});
  // Hand-written late-native conflict: the stopped review exposes exact progress
  // and undo while preserving the contact created after review.
  await page.goto(runtime.origin+base+'/move-in');await page.getByLabel('Export format',{exact:true}).selectOption('intercom');

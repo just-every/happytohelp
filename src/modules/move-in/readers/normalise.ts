@@ -2,20 +2,22 @@ import type { SourceBundle, SourceRecord } from '../../import-kit/src/types'
 import type { MappingInput, PreparedMapping, Vendor } from '../types'
 import { recordKey,LIMITS } from '../types'
 import { completeNativeValue,nativeStatementCount } from '../targets'
+import {prepareHelpScout,helpScoutTags} from './helpscout-mapping'
 import {auditShape,shapeReason} from './shapes'
 import {htmlToMarkdown} from '../../knowledge/importers'
 import { nativeId, object, sourceId, sourceRecord, tagKey, text, time } from './common'
 export interface NativeValue { tables:Record<string,Record<string,any>[]>; source:Record<string,any> }
 const email=(value:unknown)=>typeof value==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?value:null
 const array=(value:unknown):any[]=>Array.isArray(value)?value:[]
-const tags=(record:SourceRecord):string[]=>record.namespace==='zendesk'?array((record.payload as any)?.tags).filter(v=>typeof v==='string'&&v.trim()):array((record.payload as any)?.tags?.tags ?? (record.payload as any)?.tags?.data).filter(v=>object(v)&&typeof v.name==='string'&&v.name.trim()).map(v=>v.name)
+const tags=(record:SourceRecord):string[]=>record.namespace==='helpscout'?helpScoutTags(record):record.namespace==='zendesk'?array((record.payload as any)?.tags).filter(v=>typeof v==='string'&&v.trim()):array((record.payload as any)?.tags?.tags ?? (record.payload as any)?.tags?.data).filter(v=>object(v)&&typeof v.name==='string'&&v.name.trim()).map(v=>v.name)
 export function withTags(source:SourceBundle,vendor:Vendor):SourceBundle {
  const seen=new Set<string>(),added:SourceRecord[]=[]
- for(const record of source.records.filter(r=>['ticket','conversation'].includes(r.kind)))for(const name of tags(record)){if(name.trim().length>80){source.diagnostics.push({severity:'error',code:'tag_name_limit',message:'Tag names longer than 80 characters are not imported',location:record.location});continue}const key=tagKey(name);if(seen.has(key))continue;if(source.records.length+added.length>=LIMITS.records)throw new Error('export_record_limit');seen.add(key);added.push(sourceRecord(vendor,'tag-name',key,{name:name.trim()},record.location.artifact,record.artifactHash,record.location.row??1,`${record.location.pointer??''}/tags`))}
+ for(const record of source.records.filter(r=>['ticket','conversation'].includes(r.kind)||vendor==='helpscout'&&r.kind==='tag'))for(const name of tags(record)){if(name.trim().length>80){source.diagnostics.push({severity:'error',code:'tag_name_limit',message:'Tag names longer than 80 characters are not imported',location:record.location});continue}const key=tagKey(name);if(seen.has(key))continue;if(source.records.length+added.length>=LIMITS.records)throw new Error('export_record_limit');seen.add(key);added.push(sourceRecord(vendor,'tag-name',key,{name:name.trim()},record.location.artifact,record.artifactHash,record.location.row??1,`${record.location.pointer??''}/tags`))}
  return {...source,records:[...added,...source.records].sort((a,b)=>rank(a.kind)-rank(b.kind))}
 }
-const rank=(kind:string)=>kind==='tag-name'?0:kind==='user'||kind==='contact'?1:2
+const rank=(kind:string)=>kind==='tag-name'?0:kind==='user'||kind==='contact'?1:kind==='collection'?2:kind==='category'?3:4
 export async function prepareMapping(input:MappingInput):Promise<PreparedMapping> {
+ if(input.vendor==='helpscout')return prepareHelpScout(input)
  const {projectId,actorId,vendor,source,tagIds}=input,result:PreparedMapping={effects:new Map(),rejections:new Map(),omissions:new Map()}
  const records=new Map(source.records.map(r=>[recordKey(r),r])),id=(kind:string,source:string)=>nativeId(projectId,vendor,kind,source)
  const author=(value:any)=>{if(vendor==='zendesk'){const sid=sourceId(value,vendor),user=records.get(`user/${sid}`)?.payload as any;if(!user||!['end-user','agent','admin'].includes(user.role))throw new Error('comment_author_role_missing');return {id:sid,name:typeof user.name==='string'?user.name:null,role:user.role==='end-user'?'contact':'operator'}}

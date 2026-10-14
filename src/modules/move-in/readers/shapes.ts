@@ -1,3 +1,4 @@
+import {helpScoutShapes} from './helpscout-shapes'
 import {object,sourceId,time} from './common'
 import type {Vendor} from '../types'
 
@@ -38,7 +39,10 @@ export const recordShapes:Record<string,Shape>={
  // are retained/reported as unsupported envelope content, including cursor trees.
  'intercom/$envelope':record({type:string,kind:string,total_count:integer,pages:nullable(record({}))})
 }
-for(const [key,schema] of Object.entries(recordShapes)){const kind=key.split('/')[1];if(!kind.startsWith('$')){schema.fields!.type=oneOf(kind);schema.fields!.kind=oneOf(kind)}}
+Object.assign(recordShapes,helpScoutShapes({record,array,nullable,string,integer,id,reference,opaque,boolean}))
+for(const [plural,singular] of Object.entries({conversations:'conversation',customers:'contact',tags:'tag'}))recordShapes[`helpscout/inbox-list:${plural}`]=record({_embedded:record({[plural]:array(recordShapes[`helpscout/${singular}`])}),page:recordShapes['helpscout/$page'].fields!.value,_links:recordShapes['helpscout/$links'].fields!.value})
+for(const [plural,singular] of Object.entries({collections:'collection',categories:'category',articles:'article-ref'}))recordShapes[`helpscout/docs-list:${plural}`]=record({page:integer,pages:integer,count:integer,items:array(recordShapes[`helpscout/${singular}`])})
+for(const [key,schema] of Object.entries(recordShapes)){const kind=key.split('/')[1];if(!key.startsWith('helpscout/')&&!kind.startsWith('$')){schema.fields!.type=oneOf(kind);schema.fields!.kind=oneOf(kind)}}
 // The wrapper determines Zendesk record kind. Ticket type is a nullable
 // business classification, not the Intercom document discriminator.
 recordShapes['zendesk/ticket'].fields!.type=nullable(oneOf('problem','incident','question','task'))
@@ -50,7 +54,7 @@ export const SHAPE_NODE_LIMIT=4096
 /** Depth is bounded by the static, acyclic schema; work and diagnostics also have
  * explicit per-record caps. Unknown/opaque subtrees are classified at their root. */
 export function auditShape(vendor:Vendor,kind:string,payload:unknown):ShapeAudit {
- const result:ShapeAudit={complete:true,issues:[],people:[],references:[],uninterpreted:[],nodes:0},shape=recordShapes[`${vendor}/${kind}`]
+ const result:ShapeAudit={complete:true,issues:[],people:[],references:[],uninterpreted:[],nodes:0},shape=recordShapes[`${vendor}/${vendor==='helpscout'&&kind.startsWith('metadata:')?(kind.endsWith('/page')?'$page':kind.endsWith('/_links')?'$links':/\/(pages|count)$/.test(kind)?'$count':kind):kind}`]
  let nodes=0,stopped=false
  const issue=(code:ShapeIssue['code'],path:string,reason:string)=>{result.complete=false;if(result.issues.length<128)result.issues.push({code,path,reason});else if(result.issues.length===128)result.issues.push({code:'source_shape_limit',path,reason:'field_diagnostics_truncated'})}
  const count=(path:string)=>{result.nodes=++nodes;if(nodes<=SHAPE_NODE_LIMIT)return true;result.complete=false;result.exhausted=path;stopped=true;return false}
@@ -82,6 +86,6 @@ export function auditShape(vendor:Vendor,kind:string,payload:unknown):ShapeAudit
   else if(!valid){issue('malformed_source_field',path,`expected_${schema.type}`);result.uninterpreted.push(value)}
   else if(schema.reference)result.references.push(value)
  }
- visit(payload,shape,'');return result
+ visit(payload,shape,'');if(vendor==='helpscout'&&kind==='contact'&&object(payload)&&Array.isArray(payload._embedded?.emails))for(const entry of payload._embedded.emails)if(object(entry)&&typeof entry.value==='string')result.people.push({id:payload.id,email:entry.value});return result
 }
 export function shapeReason(issue:ShapeIssue){const path=issue.code==='unsupported_source_field'&&/^\/[^/]+$/.test(issue.path)?issue.path.slice(1):issue.path;return `${issue.code}:${path}${issue.code==='unsupported_source_field'?'':`:${issue.reason}`}`}

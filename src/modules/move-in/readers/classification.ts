@@ -1,3 +1,4 @@
+import {sha256,canonicalJson} from '../../import-kit/src/provenance/identity'
 import {object,sourceId} from './common'
 import {LIMITS} from '../types'
 import type {Vendor} from '../types'
@@ -12,6 +13,10 @@ export function recordSourceId(kind:string,payload:Record<string,any>,vendor:Ven
  // A standalone Zendesk tag inventory can identify tags by their actual names.
  // Prefer an explicit original ID when supplied; never invent a fallback ID.
  if(vendor==='zendesk'&&kind==='tag'&&!Object.hasOwn(payload,'id')&&typeof payload.name==='string'&&payload.name.trim())return payload.name
+ if(vendor==='helpscout'&&(kind.startsWith('inbox-list:')||kind.startsWith('docs-list:')))return sha256(canonicalJson(payload))
+ if(vendor==='helpscout'&&kind==='article-draft')return sourceId(payload.article?.id,vendor)
+ if(vendor==='helpscout'&&kind==='thread-page'){const match=typeof payload._links?.self?.href==='string'?payload._links.self.href.match(/\/v2\/conversations\/([1-9][0-9]*)\/threads(?:[?#]|$)/):null;if(!match)throw new RecordStructureError('thread_page_conversation_link_required');return `${match[1]}:${sourceId(payload.page?.number,vendor)}`}
+ if(vendor==='helpscout'&&kind.startsWith('metadata:'))return `${kind}:${sha256(canonicalJson(payload))}`
  return sourceId(payload.id,vendor)
 }
 export interface DocumentField {key:string;array:boolean;value?:unknown}
@@ -62,7 +67,8 @@ export function classifyRecord(value:unknown,vendor:Vendor):{kind:string;payload
  * never examines text or enters an already identified record's payload. Nested
  * wrappers are refused as a whole, rather than inventing a kind for their record.
  * The check also applies to older persisted source offsets on queue resume. */
-export function lowerPosition(value:unknown,vendor:Vendor,unsupported?:string){
+export function lowerPosition(value:unknown,vendor:Vendor,unsupported?:string,sourceKind?:string){
+ if(vendor==='helpscout'){if(!sourceKind||!sourceKind.startsWith('metadata:')&&!object(value))throw new RecordStructureError('helpscout_document_shape_required');return {kind:sourceKind,payload:sourceKind.startsWith('metadata:')?{value}:value as Record<string,any>,prefix:''}}
  if(unsupported!==undefined&&(!object(value)||!Object.hasOwn(value,'type')&&!Object.hasOwn(value,'kind'))){
   let nodes=0
   const inspect=(current:unknown,depth:number):void=>{

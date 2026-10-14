@@ -4,7 +4,7 @@ import type { Vendor } from '../types'
 export const object = (value:unknown):value is Record<string,any> => value !== null && typeof value === 'object' && !Array.isArray(value)
 export function sourceId(value:unknown,vendor:Vendor):string {
  if(vendor==='zendesk' && (typeof value==='number'&&Number.isSafeInteger(value)&&value>0 || typeof value==='string'&&/^[1-9][0-9]*$/.test(value)))return String(value)
- if(vendor==='intercom' && (typeof value==='string'&&!!value.trim()&&value.length<=512 || typeof value==='number'&&Number.isSafeInteger(value)&&value>=0))return String(value)
+ if((vendor==='intercom'||vendor==='helpscout') && (typeof value==='string'&&!!value.trim()&&value.length<=512 || typeof value==='number'&&Number.isSafeInteger(value)&&value>=0))return String(value)
  throw new Error('invalid_source_id')
 }
 export function time(value:unknown,format:'iso'|'unix'):number {

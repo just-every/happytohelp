@@ -22,9 +22,11 @@ export async function uploadIdentities(project:string,vendor:Vendor,name:string,
   const refuse=(code:string):never=>{throw new AdmissionError(code,location.artifact,location.row,location.pointer)}
   const digest=(kind:string,value:string)=>{if(++hashes>LIMITS.identityHashes)refuse('upload_identity_hash_limit');return identityDigest(project,kind,value)}
   const add=(source:string,value=source)=>{const key=`${source}/${value}`;if(!links.has(key)&&links.size>=LIMITS.identityLinks)refuse('upload_identity_link_limit');links.set(key,{source,digest:value})}
-  const ref=(id:unknown)=>{let value:string;try{value=sourceId(id,vendor)}catch{aliasComplete=false;retained.push(id);return null}const hash=digest(`source:${vendor}`,value);add(hash);return {hash,value}}
+  const ref=(id:unknown,prefix='')=>{let value:string;try{value=sourceId(id,vendor)}catch{aliasComplete=false;retained.push(id);return null}value=prefix+value;const hash=digest(`source:${vendor}`,value);add(hash);return {hash,value}}
   for(const reference of references)ref(reference)
-  for(const person of people){const source=ref(person.id)
+  for(const person of people){
+   // Help Scout user and customer IDs are separate provider identity spaces.
+   const prefix=vendor==='helpscout'&&['user','team','system_user'].includes(person.type)?`staff:${person.type}:`:'',source=ref(person.id,prefix)
    if(typeof person.email==='string'&&person.email.trim()){const email=digest('email',person.email.trim().toLowerCase());add(source?.hash??email,email)}
    if(typeof person.external_id==='string'&&person.external_id){const external=digest('external',person.external_id);add(source?.hash??external,external)}
    if(source)add(source.hash,digest('external',`import:${vendor}:${source.value}`))

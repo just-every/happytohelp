@@ -1,5 +1,7 @@
+import {generateHelpScout} from './helpscout-fixtures.mjs';
 // Synthetic, deterministic source documents. This generator does not import product readers.
 export function generate(vendor,count=1000,seed=271828){
+ if(vendor==='helpscout')return generateHelpScout(count,seed);
  let state=seed>>>0;const random=()=>{state=(1664525*state+1013904223)>>>0;return state},stamp=1704067200,records=[];
  const iso=seconds=>new Date(seconds*1000).toISOString(),customers=Math.min(count,100);
  if(vendor==='zendesk'){

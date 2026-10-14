@@ -57,3 +57,39 @@ test('contact tags remain contact metadata and plain_body takes precedence in Ze
 });
 
 test('original ISO timestamps reject normalized invalid dates and preserve explicit offsets',async()=>{const {time}=await import('../../src/modules/move-in/readers/common.ts');assert.throws(()=>time('2024-02-30T00:00:00Z','iso'),/original_timestamp_missing_or_invalid/);assert.throws(()=>time('2024-01-01T24:00:00Z','iso'),/original_timestamp_missing_or_invalid/);assert.equal(time('2024-01-01T10:00:00+10:00','iso'),1704067200000)});
+
+test('Help Scout response envelopes and detail grouping map only documented content and preserve private publication',async()=>{
+ const {responses}=await import('./helpscout-fixtures.mjs'),input=responses(),parsed=read(JSON.stringify({responses:input}),'helpscout','export.json');assert.ok(parsed.every(item=>item.record),JSON.stringify(parsed.filter(i=>i.diagnostic)));
+ const records=parsed.map(item=>item.record),source=withTags({records,artifacts:[],diagnostics:[]},'helpscout'),result=await prepareMapping({projectId:'workspace',actorId:'owner',vendor:'helpscout',source,tagIds:new Map()});assert.deepEqual([...result.rejections],[]);
+ const tables=result.effects.get('conversation/901')[0].value.tables;assert.deepEqual(tables.messages.toSorted((a,b)=>a.revision-b.revision).map(m=>[m.content,m.actor_role]),[['Please help','contact'],['Historical reply','operator']]);assert.equal(tables.move_in_notes[0].content,'Private note');assert.equal(tables.move_in_notes[0].created_at,1704067290000);assert.equal(result.effects.get('contact/7')[0].value.tables.contacts[0].email,'ada@example.test');assert.equal(result.effects.get('article/article-1')[0].value.tables.knowledge_articles[0].status,'published');assert.equal(result.effects.get('article/article-2')[0].value.tables.knowledge_articles[0].status,'draft');assert.equal([...result.effects.values()].flat().some(e=>e.targetKind==='macro'),false);
+});
+
+test('Help Scout complete history requires thread pages, terminal evidence, all notes and bodies; unknown states never publish',async()=>{
+ const {customer,history}=await import('./helpscout-fixtures.mjs');
+ for(const [mutate,reason] of [
+  [h=>{h.conversation._embedded={threads:h.page._embedded.threads};h.page=null},'thread_pages_required_embedded_history_not_complete'],
+  [h=>{h.conversation.type='chat';h.conversation._embedded={threads:h.page._embedded.threads};h.page=null},'thread_pages_required_embedded_history_not_complete'],
+  [h=>{h.page.page.totalPages=2;h.page.page.totalElements=4},'thread_pages_incomplete'],
+  [h=>{h.page._links.next={href:'https://api.helpscout.net/v2/conversations/901/threads?page=2'}},'thread_terminal_page_missing'],
+  [h=>{h.page.page.totalElements=4},'thread_total_incomplete'],
+  [h=>{h.page._embedded.threads[1].body=null},'thread_body_required'],
+  [h=>{h.page._embedded.threads[0].state='unknown';h.conversation.threads=1},'thread_state_unknown'],
+  [h=>{h.page._embedded.threads[1].id=h.page._embedded.threads[0].id},'duplicate_thread_id'],
+  [h=>{h.conversation.threads=3},'published_non_note_thread_count_mismatch']
+ ]){const h=history();mutate(h);const result=await map([customer(),h.conversation,h.page].filter(Boolean).map(JSON.stringify).join('\n'),'helpscout');assert.equal(result.rejections.get('conversation/901'),reason,reason);assert.deepEqual(result.effects.get('conversation/901'),[])}
+ const h=history();h.page._embedded.threads.push(...['draft','bounced','hidden','review','underreview'].map((state,i)=>({id:9900+i,type:'message',state,body:`Unsafe ${state}`,createdAt:'2024-01-01T00:01:00Z'})));h.page.page.totalElements=8;
+ const result=await map([customer(),h.conversation,h.page].map(JSON.stringify).join('\n'),'helpscout');assert.deepEqual([...result.rejections],[]);assert.equal(result.effects.get('conversation/901')[0].value.tables.messages.length,2);assert.equal(result.omissions.get('conversation/901').filter(r=>r.startsWith('unsent_or_hidden_thread')).length,5);
+});
+
+test('Help Scout Docs body detail and explicit ancestry prevent private, draft, missing or unknown publication',async()=>{
+ const {docs}=await import('./helpscout-fixtures.mjs');
+ for(const [change,expected] of [[rows=>{rows[0].collections.items[0].visibility='private'},'draft'],[rows=>{rows[1].categories.items[0].visibility='private'},'draft'],[rows=>{delete rows[1].categories.items[0].visibility},'article_category_visibility_unknown'],[rows=>{rows[2].article.status='unknown'},'article_publication_required'],[rows=>{delete rows[2].article.text},'article_body_required']]){const rows=docs();change(rows);const result=await map(rows.map(JSON.stringify).join('\n'),'helpscout');if(expected==='draft')assert.equal(result.effects.get('article/article-1')[0].value.tables.knowledge_articles[0].status,'draft');else assert.equal(result.rejections.get('article/article-1'),expected)}
+ const rows=docs(),draft=structuredClone(rows[2]);draft.article.text='Unpublished edits';const result=await map(JSON.stringify({responses:rows,articleDrafts:[draft],articles:[{id:'ref-only',collectionId:'collection-1',name:'Only metadata',status:'published',hasDraft:false}]}),'helpscout');assert.deepEqual(result.effects.get('article-draft/article-1'),[]);assert.deepEqual(result.effects.get('article-ref/ref-only'),[]);assert.equal(result.effects.get('article/article-1')[0].value.tables.knowledge_articles[0].content,'Public help');
+});
+
+test('Help Scout real paginated notes reconcile independently of public count; truncated list ancestry and ambiguous draft bodies never publish',async()=>{
+ const {customer,history,docs}=await import('./helpscout-fixtures.mjs'),h=history(),first=structuredClone(h.page),last=structuredClone(h.page);first.page={number:1,size:2,totalElements:3,totalPages:2};first._embedded.threads=h.page._embedded.threads.slice(0,2);first._links.next={href:'https://api.helpscout.net/v2/conversations/901/threads?page=2'};last.page={number:2,size:2,totalElements:3,totalPages:2};last._embedded.threads=h.page._embedded.threads.slice(2);last._links.self.href+='?page=2';
+ const accepted=await map([customer(),h.conversation,first,last].map(JSON.stringify).join('\n'),'helpscout');assert.deepEqual([...accepted.rejections],[]);assert.equal(accepted.effects.get('conversation/901')[0].value.tables.move_in_notes.length,1);
+ for(const mutate of [rows=>rows[0].collections.pages=2,rows=>rows[1].categories.count=2]){const rows=docs();mutate(rows);const result=await map(rows.map(JSON.stringify).join('\n'),'helpscout');assert.equal(result.rejections.get('article/article-1'),'article_ancestry_incomplete_or_conflicting');assert.deepEqual(result.effects.get('article/article-1'),[])}
+ const ambiguous=docs();ambiguous[2].article.hasDraft=true;ambiguous[2].article.text='Could be draft-request body';const result=await map(ambiguous.map(JSON.stringify).join('\n'),'helpscout');assert.equal(result.effects.get('article/article-1')[0].value.tables.knowledge_articles[0].status,'draft');
+});

@@ -17,7 +17,7 @@ export async function planningState(env:Env,run:Run,records:SourceRecord[],prepa
  const identities=records.map(record=>sourceIdentity(run.project_id,run.vendor,record.kind,record.sourceId))
  const claims=(await env.DB.prepare('SELECT s.identity,s.source_hash FROM ik_sources s JOIN ik_jobs j ON j.id=s.job_id WHERE j.destination=? AND j.namespace=? AND s.identity IN (SELECT value FROM json_each(?))').bind(run.project_id,run.vendor,JSON.stringify(identities)).all<{identity:string;source_hash:string}>()).results
  const nativeIds=new Map<string,Set<string>>()
- for(const [kind,table] of [['contact','contacts'],['conversation','conversations'],['macro','macros'],['article','knowledge_articles'],['tag','workspace_tags']]){
+ for(const [kind,table] of [['contact','contacts'],['conversation','conversations'],['macro','macros'],['article','knowledge_articles'],['category','knowledge_categories'],['tag','workspace_tags']]){
   const ids=candidates.filter(candidate=>candidate.kind===kind).map(candidate=>candidate.id)
   nativeIds.set(kind,new Set((await env.DB.prepare(`SELECT n.id FROM json_each(?2) wanted CROSS JOIN ${table} n ON n.id=wanted.value AND n.project_id=?1`).bind(run.project_id,JSON.stringify(ids)).all<{id:string}>()).results.map(row=>row.id)))
  }

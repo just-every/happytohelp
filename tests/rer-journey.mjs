@@ -12,6 +12,8 @@ import {createServer} from 'node:net';
 import {chromium} from 'playwright';
 import {command,run} from './helpers/rer-command.mjs';
 import {waitForServingCapacity} from './helpers/serving-capacity.mjs';
+import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive} from './helpers/rer-archive.mjs';
+import {seedPortableData,verifyPortableData} from './helpers/rer-data.mjs';
 
 // One maintained public command journey replaces the standalone installer flow.
 const source=fileURLToPath(new URL('..',import.meta.url));
@@ -89,23 +91,45 @@ try{
  await start();const retained=await json('/api/identity/login',{email,password});
  assert.equal(retained.actor.id,actor.id);
  assert.ok((await json('/api/management/projects',undefined,retained.token)).data.some(row=>row.id===project.id));
+ const portable=await seedPortableData(origin,project.id,retained.token,json);
  await stop();
+ const historical=await retainHistoricalLedger(root);
+ const before=await archiveSnapshot(root);
+ assert.ok(before.rows.move_in_runs.length>0 && before.rows.contact_erasures.length>0 && before.objects.length>0);
  await run(root,['export','--output','exports/support.rer']);
  assert.equal((await stat(join(root,'exports/support.rer'))).mode&0o777,0o600);
+ await assertHistoricalLedger(root,historical);
+ await run(root,['import','--input','exports/support.rer','--yes'],4);
+ compareArchive(before,await archiveSnapshot(root));
+ // A valid archive with unknown schema must refuse on an empty target;
+ // the known older archive must bridge to a later additive migration.
+ const additive=join(root,'migrations/9999_rer_journey.sql');
+ await archiveStorage(root,async({DB})=>DB.prepare('CREATE TABLE unknown_archive_table(id TEXT PRIMARY KEY)').run());
+ // A valid archive of an unknown source schema must still be refused.
+ await run(root,['export','--output','exports/later.rer']);
  await run(root,['reset'],4);await access(join(root,'.dev.vars'));
  await run(root,['reset','--yes']);await access(join(root,'exports/support.rer'));await access(__rerTestEntry);
  await run(root,['reset','--yes']);
+ await run(root,['import','--input','exports/later.rer','--yes'],4);
+ const empty=await archiveSnapshot(root);assert.equal(empty.rows.users.length,0);assert.equal(empty.objects.length,0);
+ await writeFile(additive,'CREATE TABLE rer_journey_additive(id TEXT PRIMARY KEY, value TEXT);\n');
  await run(root,['import','--input','exports/support.rer','--yes']);
+ compareArchive(before,await archiveSnapshot(root),['rer_journey_additive']);
+ const migrationCount=()=>archiveStorage(root,async({DB})=>(await DB.prepare("SELECT count(*) n FROM d1_migrations WHERE name='9999_rer_journey.sql'").first()).n);
+ assert.equal(await migrationCount(),1);
  await run(root,setup);await start();
  const restored=await json('/api/identity/login',{email,password});assert.equal(restored.actor.id,actor.id);
  assert.ok((await json('/api/management/projects',undefined,restored.token)).data.some(row=>row.id===project.id));
- await stop();await run(root,['reset','--yes']);await run(root,setup);await start();
+ await verifyPortableData(origin,portable,restored.token,json);
+ await stop();assert.equal(await migrationCount(),1);
+ await run(root,['deploy','--dry-run']);
+ await run(root,['reset','--yes']);await rm(additive);await run(root,setup);await start();
  const fresh=await json('/api/identity/login',{email,password});assert.notEqual(fresh.actor.id,actor.id);
  assert.equal((await json('/api/management/projects',undefined,fresh.token)).data.length,1);
  await stop();
  // The owner's export remains in the checkout; generated files do not alter source.
  assert.equal((await execute('git',['status','--porcelain','--untracked-files=no'],{cwd:root})).stdout,'','journey preserves tracked source');
- console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, reset and fresh owner.');
+ console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, import custody and erasure fences, deploy dry-run, reset and fresh owner.');
 }catch(error){
  // Browser diagnostics can contain one-use fragment capabilities; emit only a safe source location.
  const line=/rer-journey\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';

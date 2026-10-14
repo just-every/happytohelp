@@ -4,10 +4,10 @@ import {LIMITS} from '../types'
 import {IndexLimitError} from './admission-error'
 import {auditShape} from './shapes'
 import {collectionNames,intercomDocument,RecordStructureError} from './classification'
-export interface JsonPosition {start:number;end:number;row:number;pointer:string;unsupported?:string;error?:string}
+export interface JsonPosition {start:number;end:number;row:number;pointer:string;unsupported?:string;error?:string;sourceKind?:string}
 class LocatedError extends Error {offset:number;pointer:string;constructor(offset:number,pointer:string,code='invalid_json'){super(code);this.offset=offset;this.pointer=pointer}}
 const escapePointer=(key:string)=>key.replace(/~/g,'~0').replace(/\//g,'~1')
-export function jsonPositions(raw:string,maxRecords:number=LIMITS.records,recordOnly=false):JsonPosition[] {
+export function jsonPositions(raw:string,maxRecords:number=LIMITS.records,recordOnly=false,observe?:(position:JsonPosition)=>void):JsonPosition[] {
  let p=0,indexed=0,rootStart=0;const output:JsonPosition[]=[],properties:{key:string;position:JsonPosition;children?:JsonPosition[]}[]=[]
  // Potential collection entries and object fields are structural scan work.
  // A typed record can contain either without consuming extra source positions.
@@ -26,7 +26,7 @@ export function jsonPositions(raw:string,maxRecords:number=LIMITS.records,record
    p++;space();const keys=new Set<string>();if(raw[p]==='}')p++;else for(;;){if(raw[p]!=='"')fail(pointer);const key=quoted(pointer)!,child=`${pointer}/${escapePointer(key)}`;if(keys.has(key))fail(child,'duplicate_json_field');keys.add(key);space();if(raw[p++]!==':'){p--;fail(child)}const position=value(child,depth+1);if(depth===0&&!recordOnly)property({key,position});space();if(raw[p]==='}'){p++;break}if(raw[p++]!==','){p--;fail(pointer)}space()}
   }else if(raw[p]==='['){p++;space();if(raw[p]===']')p++;else for(let i=0;;i++){const item=value(`${pointer}/${i}`,depth+1);if(children)keep(children,item);space();if(raw[p]===']'){p++;break}if(raw[p++]!==','){p--;fail(`${pointer}/${i}`)}space()}}
   else{const match=/^(?:-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null)/.exec(raw.slice(p));if(!match)fail(pointer);p+=match![0].length;if(p<raw.length&&!/[\x20\t\n\r,}\]]/.test(raw[p]))fail(pointer)}
-  return {start,end:p,row:row(start),pointer}
+  const position={start,end:p,row:row(start),pointer};observe?.(position);return position
  }
  // Top-level object scanning records each collection's children without keeping
  // their values. Valid earlier records remain diagnosable after a later error.

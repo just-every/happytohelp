@@ -1,3 +1,4 @@
+import {categoryPublicationPredicates} from './category-publication'
 import type {Env} from '../../platform/env'
 import {custodyHash} from './custody-hash'
 import {createD1ImportJob,applyD1ImportBatches,undoD1Import,rollbackD1Import,type ImportPlan,type ImportJob} from '../import-kit/src/d1/index'
@@ -37,9 +38,11 @@ export async function advanceBatch(env:Env,run:Run){
  if(undo&&!batch.kit_job_id){await skipUnstartedUndo(env,run,batch.ordinal);return}
  if(undo)await assertUndoReferences(env,run,batch.kit_job_id??undefined)
  const fence={sql:`EXISTS(SELECT 1 FROM move_in_runs WHERE id=? AND state=? AND artifact_hash=? AND object_key=? AND bytes=? AND json_extract(plan_json,'$.fingerprint')=? AND review_fingerprint=json_extract(plan_json,'$.fingerprint') AND total=?) AND (SELECT json_group_array(json_array(ordinal,plan_key,fingerprint,total)) FROM (SELECT ordinal,plan_key,fingerprint,total FROM move_in_batches WHERE run_id=? ORDER BY ordinal))=? AND EXISTS(SELECT 1 FROM move_in_batches WHERE run_id=? AND ordinal=? AND kit_job_id IS ?)`,params:[run.id,run.state,review.original.sha256,review.original.key,review.original.size,review.fingerprint,review.batches.reduce((n,child)=>n+child.total,0),run.id,JSON.stringify(review.batches.map(child=>[child.ordinal,child.key,child.fingerprint,child.total])),run.id,batch.ordinal,batch.kit_job_id]}
+ const categoryPredicates=undo?[]:categoryPublicationPredicates(run.project_id,review.categories??[])
+ for(const predicate of categoryPredicates)if(!(await env.DB.prepare(`SELECT (${predicate.sql}) allowed`).bind(...predicate.params!).first<{allowed:number}>())?.allowed)throw new Error('native_category_changed_since_review')
  const publication=undo?[]:publicationPredicates(run.project_id,await reviewedContacts(env,review))
  for(const predicate of publication)if(!(await env.DB.prepare(`SELECT (${predicate.sql}) allowed`).bind(...predicate.params!).first<{allowed:number}>())?.allowed)throw new Error('native_contact_changed_since_review')
- const context={...importContext({...env,DB:publicationDatabase(env.DB,publication)},{...run,kit_job_id:batch.kit_job_id},fence),operationKey:`${run.id}/${batch.ordinal}`}
+ const context={...importContext({...env,DB:publicationDatabase(env.DB,[...publication,...categoryPredicates])},{...run,kit_job_id:batch.kit_job_id},fence),operationKey:`${run.id}/${batch.ordinal}`}
  if(!batch.kit_job_id){if(undo)throw new Error('import_job_missing');const object=await env.FILES.get(batch.plan_key);if(!object||object.size>LIMITS.planBytes)throw new Error('reviewed_plan_missing');const plan=await object.json<ImportPlan>();if(plan.fingerprint!==batch.fingerprint||plan.entries.length!==batch.total)throw new Error('reviewed_plan_changed');const job=await createD1ImportJob(plan,{...context,reviewedFingerprint:batch.fingerprint});await publishCheckpoint(env,run,batch,job);return}
  // Both entry points perform Base current authorization, stored-plan validation,
  // custody/inventory checks and atomic fences. No redundant read-and-reload.

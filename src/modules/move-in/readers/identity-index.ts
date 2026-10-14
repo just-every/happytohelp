@@ -21,7 +21,7 @@ export async function indexUpload(vendor:Vendor,name:string,bytes:Uint8Array,acc
     const body=raw.slice(position.start,position.end);if(new TextEncoder().encode(body).length>LIMITS.recordBytes)refuse('record_size_limit')
     let record:unknown;try{record=JSON.parse(body)}catch{refuse('invalid_json')}
     if(position.unsupported!==undefined)complete=false
-    let classification;try{classification=lowerPosition(record,vendor,position.unsupported)}catch(error){if(error instanceof RecordStructureError)refuse(error.message,position.pointer+error.pointer);throw error}
+    let classification;try{classification=lowerPosition(record,vendor,position.unsupported,position.sourceKind)}catch(error){if(error instanceof RecordStructureError)refuse(error.message,position.pointer+error.pointer);throw error}
     if('field' in classification){opaqueNodes+=classification.nodes;if(opaqueNodes>LIMITS.opaqueUploadNodes)refuse('upload_opaque_structure_node_limit');accept([],[],location,[classification.payload]);continue}
     const {kind,payload,prefix}=classification
     const shape=auditShape(vendor,['user','lead'].includes(kind)&&vendor==='intercom'?'contact':kind,payload);nodes+=shape.nodes

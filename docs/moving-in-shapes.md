@@ -169,3 +169,19 @@ R2/D1 custody or queue publication. Queue extraction uses the same validated
 physical cursor on resume; directories cannot alter file identity or reuse a
 previous chunk's storage keys. Pre-audit originals that fail these checks use
 the documented workspace/vendor erasure fence.
+
+## Help Scout response custody
+
+Inbox v2 `_embedded` list envelopes, direct customer/conversation objects,
+per-conversation thread pages and Docs v1 `items`/`article` envelopes use a
+separate shape reader. The shared strict JSON scanner validates their original
+syntax before extraction, including escaped duplicate member names. List
+receipts remain source records and are reconciled before native mapping; embedded
+chat/thread arrays do not replace per-conversation page receipts. Customer
+`_embedded.emails[].value`, primary customers and thread customer/creator IDs are
+indexed before private custody, including records later rejected at review.
+A thread customer may have no `type`; the documented `type:customer` thread
+itself determines the incoming customer role. Unread or unsupported content is
+retained with source-located diagnostics and participates in the conservative
+whole-value erasure index. See [Help Scout inputs](moving-in.md#help-scout-inbox-v2-and-docs-v1)
+for exact grouping, pagination and publication rules.

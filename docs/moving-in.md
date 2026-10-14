@@ -90,3 +90,80 @@ The 9 October Base refresh requires additive migration
 previous 50 migration files and back up journals, identity tombstones and private
 source objects together. This supplies the current official runtime dependency
 schema; it does not expose new streaming or staging import workflows.
+
+## Help Scout Inbox v2 and Docs v1
+
+Choose **Help Scout Inbox v2 + Docs v1** in Move in. Upload unmodified API response
+bodies in a JSON file, a JSON array, one response per JSONL line, or a ZIP of those
+files. A convenience JSON object may group responses as
+`{"responses":[...],"articleDrafts":[...]}`. The `articleDrafts` group holds the
+original `{ "article": {...} }` responses fetched with `draft=true`; these bodies
+are retained privately and never replace a published article. The alternative
+`conversations`, `customers`, `tags`, `collections`, `categories`, `articles`
+(list summaries), `threadPages`, and `articleDetails` arrays hold their named
+records/responses. These are packaging conventions, not claimed provider exports.
+All grouping uses the same syntax, identity and size admission checks.
+
+Inbox accepts [v2 conversation lists and direct conversation details](https://developer.helpscout.com/mailbox-api/endpoints/conversations/get/),
+[customer details](https://developer.helpscout.com/mailbox-api/endpoints/customers/get/),
+[tag lists](https://developer.helpscout.com/mailbox-api/endpoints/tags/list/), and
+[per-conversation thread-list responses](https://developer.helpscout.com/mailbox-api/endpoints/conversations/threads/list/).
+HAL lists use `_embedded`, `page` and `_links`. Fetch conversations with the
+intended mailbox and `status=all`, retain every page and its scope, and include
+customer details with `_embedded.emails[].value`. One customer email is required
+for a native contact; additional emails are identity-indexed but an ambiguous
+native contact is rejected. Inline `primaryCustomer.email` alone is not a
+customer detail. Staff authors never create users, memberships or assignments.
+
+Each conversation requires every separate thread-list page with original
+`page.number`, `size`, `totalElements`, `totalPages`, and `_links.self.href` under
+`https://api.helpscout.net/v2/conversations/{id}/threads`. Intermediate pages need
+the correct `next` link; the terminal page must have no `next`. Page numbers,
+counts and distinct thread IDs must reconcile. The conversation's `threads`
+count reconciles **published non-note threads only**. It cannot prove note or
+draft coverage. Bare `_embedded.threads` arrays, truncated embedded chats,
+`preview`, missing bodies, missing pages, and custom `complete:true` flags cannot
+establish complete history. Inbox v3 is not selected by this format.
+
+Published customer messages and replies become native messages; published
+`type:note` threads become private notes. `draft`, `bounced`, `hidden`, `review`
+and `underreview` threads are explicitly omitted from native sent history.
+Unknown states and unsupported public thread kinds reject the conversation;
+line-item events remain metadata. Attachments retain metadata, not downloaded
+bytes. A thread's `savedReplyId` is only a reference: this format does **not**
+claim to import saved replies. Unsupported fields and records appear in review.
+
+Docs accepts [collection](https://developer.helpscout.com/docs-api/collections/list/)
+and [category](https://developer.helpscout.com/docs-api/categories/list/) list
+responses `{collections|categories:{page,pages,count,items}}`, abbreviated article
+lists, and [article details](https://developer.helpscout.com/docs-api/articles/get/)
+`{article:{...}}`. Exhaust each list's pages; counts and IDs must reconcile.
+Collect article lists by collection to avoid overlapping category inventories.
+A list summary without `text` is metadata only; include each article's body
+detail, collection and every referenced category. Collections become native root
+categories, their categories become children, and article/category links are
+preserved. Site IDs, provider sorting options and other unrepresented fields
+remain source provenance. Explicit private ancestry becomes unpublished native
+categories and draft articles. Missing/unknown visibility or status rejects
+publication. `notpublished` stays draft. Because a Docs detail body does not
+identify the request's `draft` flag, `hasDraft:true` is ambiguous and is imported
+only as a draft, even when its status says `published`. Keep separately fetched
+draft bodies in `articleDrafts`; they never enter the public help center.
+
+List counts establish only that the supplied scoped pages reconcile; they do
+not prove provider permissions, snapshot consistency, inaccessible history or
+site-wide completeness. Real account compatibility remains unverified: tests
+use documented, synthetic API bodies only. The existing 1,000-conversation
+capacity command now includes Help Scout under the same byte, heap, request,
+statement, exact repeat and whole-import undo checks as the other formats.
+
+Migration `121_move_in_categories.sql` narrows category deletion freshness to
+articles linked to the affected category or descendants, and removes the
+blanket article revision bump for inserting a new category. Existing article
+foreign keys cannot refer to a category before it exists. This preserves exact
+unrelated article state during reviewed category import and undo; category
+updates continue to invalidate their existing publication evidence. Every publication batch rechecks already-created category fields against the
+reviewed snapshot inside the transaction, so an intervening native privacy edit
+stops remaining articles. Later native articles or child categories referencing
+an imported category block whole-import
+undo rather than losing those edits.

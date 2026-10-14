@@ -5,6 +5,7 @@ import {emailKey} from './contact-keys'
 interface Table {name:string;key:string;columns:string[];order:string;generated?:string[];nativeOnly?:boolean}
 const table=(name:string,key:string,columns:string,order=key,generated?:string[]):Table=>({name,key,columns:columns.split(','),order,generated})
 const entities:Record<string,Table[]>={
+ category:[table('knowledge_categories','id','id,project_id,parent_id,name,slug,summary,is_published,position')],
  tag:[table('workspace_tags','id','id,project_id,name,normalized_name')],
  contact:[table('contacts','id','id,project_id,name,email,external_id,created_at,is_verified,metadata_json'),table('context_subjects','subject_id','project_id,subject_id,consent,revision,help_types,bot_enabled')],
  macro:[table('macros','id','id,project_id,title,content,created_by,created_at,updated_at')],

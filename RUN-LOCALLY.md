@@ -1,12 +1,25 @@
 # Run it on your computer
 
-Use Node 22.20.0 and pnpm 10.12.4. Select those tools before running commands;
-rer checks them and never changes global tools. From the project root:
+You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
+and pnpm, installs dependencies and starts local setup:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
-pnpm exec rer dev --foreground
+npm install -g @runeditrun/rer
+git clone https://github.com/just-every/run-happytohelp
+cd run-happytohelp && rer dev
+```
+
+On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
+have not been supplied. Follow [private-answer setup](docs/INSTALLER.md#private-setup-answers)
+before running `rer dev` again. Once setup completes, dev prints the sign-in
+outbox link. No email or AI account is needed. Use `rer dev --stop` from the
+checkout to stop the managed app.
+
+## Scripted setup and command reference
+
+```sh
+rer setup --owner-email you@example.com --answers .seed/local-answers.json
+rer dev --foreground
 ```
 
 Prepare private answers as described in [Install](docs/INSTALLER.md#private-setup-answers).
@@ -18,19 +31,19 @@ Open the outbox, choose the newest message and follow its link. No email was sen
 The confirmation form consumes the link once through POST.
 
 ```sh
-pnpm run outbox
-pnpm run outbox -- --owner-email you@example.com --open
+rer outbox
+rer outbox --owner-email you@example.com --open
 ```
 
 `--open` explicitly asks to open a browser. JSON and non-interactive commands
 never open a browser or ask stdin questions. Stop dev with Ctrl-C before:
 
 ```sh
-pnpm run verify
-pnpm run build
-pnpm run doctor
-pnpm run describe -- --json
-pnpm run check -- --profile first-party
+rer verify
+rer build
+rer doctor
+rer describe --json
+rer check --profile first-party
 ```
 
 Every new verb supports `--help`, `--cwd PATH`, `--non-interactive` and `--json`.
@@ -41,7 +54,7 @@ drift. Hosts are exactly 127.0.0.1, localhost or ::1. Setup rejects a conflictin
 saved owner or origin and preserves existing data and exact private settings.
 
 ```sh
-pnpm run reset -- --yes
+rer reset --yes
 ```
 
 Review reset's printed inventory first. It removes only canonical local state,
@@ -50,10 +63,10 @@ dependencies, exports and deployment receipts survive. Active operations,
 symlinks and ambiguous legacy state cause a refusal. A second reset succeeds.
 A subsequent setup creates a fresh owner without previous domain rows.
 
-Stop dev, then use `pnpm run export -- --output exports/installation.rer`.
+Stop dev, then use `rer export --output exports/installation.rer`.
 The new private archive includes supported domain tables with an integrity hash
-and explicit exclusions. After `pnpm run reset -- --yes`, restore with
-`pnpm run import -- --input exports/installation.rer --yes`. Import validates the
+and explicit exclusions. After `rer reset --yes`, restore with
+`rer import --input exports/installation.rer --yes`. Import validates the
 archive and restores atomically into an empty destination. Run setup afterwards
 to re-enter local configuration. Native identities/password hashes are retained;
 sessions, one-use links, outbox, private settings and transient execution state
@@ -63,11 +76,11 @@ Setup uses the shared manifest reader and browser installer model. Private
 answers use the declared `rer-setup.json` field names.
 
 ```sh
-pnpm run deploy -- --dry-run
+rer deploy --dry-run
 ```
 
 Dry run validates the real owner-account deployment declaration and build locally;
-no deployment occurs and no provider request is made. Real `pnpm run deploy`
+no deployment occurs and no provider request is made. Real `rer deploy`
 requires the documented owner-account credentials, committed source and real mail
 configuration in `deploy.json`; it provisions, migrates and checks health through
 Base deploy-kit. The default environment is production; choose one with
@@ -92,14 +105,14 @@ environment. Neither establishes remote or application acceptance.
 ## Fixed preview and bounded serving
 
 After the pinned Node 22.20.0 / pnpm 10.12.4 frozen installation and ordinary
-`pnpm run setup`, inspect production output with:
+`rer setup`, inspect production output with:
 
 ```sh
-pnpm run preview
+rer preview
 # In another terminal:
-pnpm run preview -- --stop
-pnpm exec rer dev --idle-timeout 1800 --foreground
-pnpm exec rer dev --stop
+rer preview --stop
+rer dev --idle-timeout 1800 --foreground
+rer dev --stop
 ```
 
 Use preview for fixed production output; use dev for live edits and HMR.
@@ -128,6 +141,9 @@ position. Package mode has no queue status command. Labels identify project,
 initiating command/phase and checkout. Nested jobs share only validated live
 membership. Original `CI=true` skips admission and permits heavy-command
 `--no-queue`; ordinary calls and `CI=false` queue. Help/check/describe/doctor,
-outbox URL, stop and reset inspection remain light. Keep `pnpm install
---frozen-lockfile` or `pnpm exec rer install` for dependencies and `pnpm run deploy`
-for deployment; pnpm's built-in deploy is a different command.
+outbox URL, stop and reset inspection remain light. Use `rer install` for dependencies and `rer deploy` for deployment.
+
+## Contributor setup
+
+For source work, select Node 22.20.0 and pnpm 10.12.4, then run
+`pnpm install --frozen-lockfile`. See [contributor setup](README.md#contributor-setup).

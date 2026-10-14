@@ -148,19 +148,23 @@ give consent again. Otherwise, normal sign-in sessions work as before.
 
 ### On your computer
 
-Use Node **22.20.0** and pnpm **10.12.4**. Prepare private manifest answers
-as described in [Install](INSTALLER.md), then run:
+You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
+and pnpm, installs dependencies and starts local setup:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json --port 12401
-pnpm exec rer dev --foreground
+npm install -g @runeditrun/rer
+git clone https://github.com/just-every/run-happytohelp
+cd run-happytohelp && rer dev
 ```
 
-Setup prepares the native owner and stops its temporary app. Dev prints the
-app address and development outbox; choose its newest message, follow the link
-and press Sign in. No email is sent. Port 12401 is an explicit example; the
-saved loopback origin is reused. Stop dev with Ctrl+C.
+On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
+have not been supplied. Follow [private-answer setup](INSTALLER.md#private-setup-answers)
+before running `rer dev` again. Once setup completes, dev prints the sign-in
+outbox link. No email or AI account is needed. Use `rer dev --stop` from the
+checkout to stop the managed app.
+
+See [Install](INSTALLER.md) for scripted private answers and
+[contributor setup](../README.md#contributor-setup) for pnpm commands.
 
 You do not need an email or AI account to set up the owner, hold conversations,
 let visitors in through the widget, or answer from knowledge content you supply

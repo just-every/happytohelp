@@ -66,57 +66,25 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 
 ## Run it on your computer
 
-1. Use Git, **Node.js 22.20.0** and **pnpm 10.12.4**, then acquire the current public source:
+You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
+and pnpm, installs dependencies and starts local setup:
 
-   ```sh
-   git clone --branch main https://github.com/just-every/run-happytohelp
-   cd run-happytohelp
-   ```
+```sh
+npm install -g @runeditrun/rer
+git clone https://github.com/just-every/run-happytohelp
+cd run-happytohelp && rer dev
+```
 
-   Already running 0.3? Keep your checkout and data, and follow
-   [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) instead.
+On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
+have not been supplied. Follow [private-answer setup](docs/INSTALLER.md#private-setup-answers)
+before running `rer dev` again. Once setup completes, dev prints the sign-in
+outbox link. No email or AI account is needed. Use `rer dev --stop` from the
+checkout to stop the managed app.
 
-2. From that checkout, install its frozen dependencies:
-
-   ```sh
-   pnpm install --frozen-lockfile
-   pnpm exec rer describe --json
-   pnpm exec rer check --profile first-party
-   ```
-
-3. Create a private `.seed/local-answers.json` as described in
-   [Install](docs/INSTALLER.md#private-setup-answers). Then:
-
-   ```sh
-   pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
-   pnpm exec rer dev --foreground
-   ```
-
-   Setup builds, migrates, prepares the native first owner and stops its temporary
-   app. Dev stays in the foreground with assets and HMR. It prints `RER_READY` with
-   the app address and `RER_SIGN_IN` with the development outbox. Open the outbox,
-   choose the newest sign-in message, follow its link and press **Sign in**. No
-   email is sent; the owner's welcome email and every other message are captured
-   in that outbox. Native password sign-in also works. Ctrl+C stops dev and its
-   children. Setup reruns preserve the owner, data and saved private settings.
-
-4. Stop dev before the remaining commands:
-
-   ```sh
-   pnpm exec rer verify
-   pnpm exec rer export --output exports/support.rer
-   pnpm exec rer reset --yes
-   pnpm exec rer import --input exports/support.rer --yes
-   pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
-   pnpm exec rer dev --foreground
-   ```
-
-   Export before reset to preserve data. Import requires an empty destination;
-   native identities/password hashes survive, while sessions, one-use links,
-   provider credentials and transient execution state do not. Re-enter private
-   configuration. Archives are private backups. See [Operations](OPERATIONS.md)
-   for the exact inventory and [Local command reference](RUN-LOCALLY.md) for ports,
-   fixed preview, idle shutdown and command inspection.
+Already running 0.3? Keep your checkout and data, and follow
+[Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) instead.
+See [Install](docs/INSTALLER.md) for private setup answers and
+[Local command reference](RUN-LOCALLY.md) for ports, preview and idle shutdown.
 
 ## Choose how to run it
 
@@ -131,8 +99,8 @@ Read [deployment prerequisites](OPERATIONS.md#deploy-to-your-cloudflare-account)
 configure the real declaration and private account credentials, then:
 
 ```sh
-pnpm exec rer deploy --dry-run
-pnpm exec rer deploy --environment production
+rer deploy --dry-run
+rer deploy --environment production
 ```
 
 Dry run validates/builds locally and makes no provider request. Deployment
@@ -186,7 +154,7 @@ and Setup say a key is missing.
    [Install](docs/INSTALLER.md#private-setup-answers)).
    - **On Cloudflare:** in the Cloudflare dashboard, open your Worker, go to
      **Settings → Variables and Secrets** and add the key as a secret. You can
-     also set it in your terminal before you run `pnpm exec rer deploy --environment production` (see
+     also set it in your terminal before you run `rer deploy --environment production` (see
      [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)).
    - **On your own computer:** add a line such as `OPENAI_API_KEY=your-key` to
      a file named `.dev.vars` in the `happytohelp` folder, then restart the app.
@@ -264,10 +232,20 @@ display name. Local mail is sensitive captured data, not a provider receipt.
 
 
 
+## Contributor setup
+
+For work on the source, select Node **22.20.0** and pnpm **10.12.4**:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm exec rer describe --json
+pnpm exec rer check --profile first-party
+```
+
 ## Verify
 
 ```sh
-pnpm exec rer verify
+rer verify
 ```
 
 The complete target checks the contract, real build, typecheck, native runtime,

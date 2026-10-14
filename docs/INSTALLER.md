@@ -1,7 +1,23 @@
 # Install HappyToHelp
 
-Use Node **22.20.0** and pnpm **10.12.4**. Install the checkout's exact command package before inspecting its descriptor; no private
-configuration is needed:
+You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
+and pnpm, installs dependencies and starts local setup:
+
+```sh
+npm install -g @runeditrun/rer
+git clone https://github.com/just-every/run-happytohelp
+cd run-happytohelp && rer dev
+```
+
+On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
+have not been supplied. Follow the private-answer setup instructions below
+before running `rer dev` again. Once setup completes, dev prints the sign-in
+outbox link. No email or AI account is needed. Use `rer dev --stop` from the
+checkout to stop the managed app.
+
+## Contributor setup
+
+For source work, select Node **22.20.0** and pnpm **10.12.4**:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -9,8 +25,8 @@ pnpm exec rer describe --json
 pnpm exec rer check --profile first-party
 ```
 
-Install uses the pinned package manager and frozen lockfile. It does not set up
-an owner, start the app, change global tools or deploy.
+This installs frozen dependencies without creating an owner or starting the app.
+The following private-answer path is also available for scripted setup.
 
 ## Private setup answers
 
@@ -73,8 +89,8 @@ deploy unchanged and older archives still import.
 ## Run it locally
 
 ```sh
-pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
-pnpm exec rer dev --foreground
+rer setup --owner-email you@example.com --answers .seed/local-answers.json
+rer dev --foreground
 ```
 
 Setup builds, applies local migrations, prepares private settings and the first
@@ -88,7 +104,8 @@ Dev reports readiness only after real health and sign-in checks. Open the
 `/__dev/outbox` address it prints, select the newest message, follow its link and
 press **Sign in**. No mail is sent. Link-scanner GETs do not consume the link;
 confirmation uses an ordinary single-use POST. Native password sign-in remains
-available. Keep dev in the foreground and stop with Ctrl+C.
+available. Use `rer dev --stop` to stop the managed app, or `rer dev --foreground`
+to keep it in the terminal and stop with Ctrl+C.
 
 Choose an explicit loopback port with `--port 8788`, using the same saved origin
 for setup. See [Local command reference](../RUN-LOCALLY.md) for preview and
@@ -97,8 +114,8 @@ bounded serving. Sign-in takes you to the workspace Setup page described in
 
 ## Verify, reset and move data
 
-Stop dev, then run `pnpm exec rer verify`. Export before destructive reset
-if you need the data. Reset requires `pnpm exec rer reset --yes` after
+Stop dev, then run `rer verify`. Export before destructive reset
+if you need the data. Reset requires `rer reset --yes` after
 reviewing its printed inventory. Export/import use `--output FILE` and
 `--input FILE --yes`; import requires an empty destination. Native owners survive
 restore. Re-enter private configuration before setup/dev. See
@@ -106,10 +123,10 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-`pnpm exec rer deploy --dry-run` builds and validates locally without
-provider requests. `pnpm exec rer deploy --environment production`
+`rer deploy --dry-run` builds and validates locally without
+provider requests. `rer deploy --environment production`
 requires owner authorization and the private credentials/declaration described
 in [Operations](../OPERATIONS.md#deploy-to-your-cloudflare-account).
-`pnpm exec rer describe` lists the remaining commands and real flags.
+`rer describe` lists the remaining commands and real flags.
 All new verbs accept `--help`, `--cwd PATH`, `--non-interactive` and `--json`;
 release has its own preserved parser. No command implies provider acceptance.

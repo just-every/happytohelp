@@ -1,27 +1,29 @@
 # HappyToHelp operations
 
-The maintained entry point is `pnpm exec rer`, using the exact `@runeditrun/rer`
-**0.2.4** package pin after `pnpm install --frozen-lockfile`. The CLI and kit
-come from the installed package; no vendored CLI or kit is required. Use Node **22.20.0** and
-pnpm **10.12.4**. `describe --json` describes real flags without effects;
-`check --profile first-party` validates structure before private configuration exists. `doctor` checks installed tools and local inputs.
-
 ## Run it on your computer
 
-Prepare the private manifest answers in [Install](docs/INSTALLER.md#private-setup-answers), then:
+You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
+and pnpm, installs dependencies and starts local setup:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
-pnpm exec rer dev --foreground
+npm install -g @runeditrun/rer
+git clone https://github.com/just-every/run-happytohelp
+cd run-happytohelp && rer dev
 ```
 
-Install is frozen dependency installation. Setup builds, migrates, prepares the
-native first owner and stops its temporary app. Dev stays in the foreground with
-assets and HMR. Open the printed `RER_SIGN_IN` outbox, choose the newest message,
-follow its link and press **Sign in**. No email is sent. Password sign-in remains
-available. Ctrl+C stops owned children. Setup reruns preserve owner/data/private
-settings; a conflicting saved email or origin is refused.
+On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
+have not been supplied. Follow [private-answer setup](docs/INSTALLER.md#private-setup-answers)
+before running `rer dev` again. Once setup completes, dev prints the sign-in
+outbox link. No email or AI account is needed. Use `rer dev --stop` from the
+checkout to stop the managed app.
+
+The checkout retains its exact **0.2.4** command package pin. The global rer
+entry point uses that local package after provisioning its tools.
+For scripted setup, prepare [private answers](docs/INSTALLER.md#private-setup-answers),
+then run `rer setup --owner-email you@example.com --answers .seed/local-answers.json`.
+Setup reruns preserve owner, data and private settings; conflicting saved email
+or origin is refused. See [contributor setup](README.md#contributor-setup) for
+working directly with pnpm.
 
 ### Find your way around
 
@@ -49,10 +51,10 @@ rer never silently moves or removes it.
 Stop dev before export, import or reset:
 
 ```sh
-pnpm exec rer export --output exports/support.rer
-pnpm exec rer reset --yes
-pnpm exec rer import --input exports/support.rer --yes
-pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
+rer export --output exports/support.rer
+rer reset --yes
+rer import --input exports/support.rer --yes
+rer setup --owner-email you@example.com --answers .seed/local-answers.json
 ```
 
 Export creates a new owner-only archive with integrity and explicit exclusions.
@@ -115,8 +117,8 @@ supported runtime declaration and native workspace settings. Deployment never
 converts remote mail into development capture.
 
 ```sh
-pnpm exec rer deploy --dry-run
-pnpm exec rer deploy --environment production
+rer deploy --dry-run
+rer deploy --environment production
 ```
 
 Default environment is production. Dry run validates the declaration and real
@@ -124,7 +126,7 @@ build locally with zero provider requests. Real deploy builds, provisions,
 applies migrations, publishes and checks health in the owner account. It is an
 external change requiring owner authorization. Release produces source/artifacts
 with its existing `--repo` and `--output` arguments and never pushes or deploys.
-Inspect `pnpm exec rer describe` and per-command `--help` for other flags.
+Inspect `rer describe` and per-command `--help` for other flags.
 
 ### If setup fails at the R2 step
 
@@ -190,7 +192,7 @@ token-bearing command arguments. Incomplete inventories are not teardown proof.
 
 Runtime allowlists live in `scripts/deployment/environment.mjs`; native secrets
 remain private. Local settings changes need an explicit restart. For online
-changes update the real declaration and private inputs, then use pnpm exec rer deploy.
+changes update the real declaration and private inputs, then use rer deploy.
 Do not rotate encryption keys without migrating encrypted stored connections.
 
 ### Which settings matter for a small team
@@ -494,7 +496,7 @@ Back up the selected database, private FILES objects and configuration before
 upgrading. Keep applied migration names and bytes immutable. Read RELEASE.json
 for the revision's additive migration order and buyer recovery obligations.
 Update source while preserving owner customizations and private settings, then
-use the pnpm exec rer setup/build path locally or authorized pnpm exec rer deploy remotely before
+use the rer setup/build path locally or authorized rer deploy remotely before
 serving updated code. Never reset as an upgrade mechanism.
 
 Test restoration in separate resources before switching traffic. Retain private
@@ -537,8 +539,8 @@ On your computer:
    password. Then run setup with your existing owner email:
 
    ```sh
-   pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json
-   pnpm exec rer dev --foreground
+   rer setup --owner-email you@example.com --answers .seed/local-answers.json
+   rer dev --foreground
    ```
 
    Setup applies `0110_move_in.sql` to `119_local_portability.sql` to the local
@@ -554,8 +556,8 @@ On your computer:
 On Cloudflare, back up the D1 database, every R2 object with its metadata and
 your Worker secrets, including `INTEGRATION_ENCRYPTION_KEY`, as in
 [Back up your data](docs/INDEPENDENT-RELEASE.md#back-up-your-data). Then run
-`pnpm exec rer deploy --dry-run` and
-`pnpm exec rer deploy --environment production`, which applies the
+`rer deploy --dry-run` and
+`rer deploy --environment production`, which applies the
 migrations before publishing. This release's upgrade evidence covers local
 installations; a hosted upgrade is not part of it.
 
@@ -651,8 +653,8 @@ fidelity remains held; D1/R2 backup does not qualify Durable Object storage.
 ### Check that everything works
 
 ```sh
-pnpm exec rer check --profile first-party
-pnpm exec rer verify
+rer check --profile first-party
+rer verify
 ```
 
 Verify runs the real build, typecheck, selected module tests, native runtime,
@@ -678,7 +680,7 @@ missing credentials or delivery failure never select a local fallback.
 
 Native magic links require explicit single-use confirmation POST; scanner GETs
 do not consume them. Native passwords and tenant/session checks are retained.
-`pnpm exec rer outbox --owner-email you@example.com` requests a new
+`rer outbox --owner-email you@example.com` requests a new
 ordinary message while the app runs; `--open` explicitly opens the browser.
 Never print message contents, cookies or token-bearing sign-in URLs.
 

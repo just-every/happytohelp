@@ -1508,11 +1508,11 @@
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
-      "sha256": "12ec81c0b1d1259e3e4cb5121abf950c87d752aa7c50d23a45f6329e30465abd",
+      "sha256": "b356cd1718522c411935630a810a02ee7caf1241cc3aea923a7706001c63b154",
       "executable": false
     },
     "docs/INSTALLER.md": {
-      "sha256": "757eb5b063f16048cc073d667099fa6338a55d5c37e9fe751790b23cf61da075",
+      "sha256": "92826c29d0bad900cbad4014fbd6913b89894f4009f9cd5416007e4e8772ab4d",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2092,7 +2092,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "f20b8d5d276e9cdecd9cc778b535f87f6d15d1730724d85003b792f168753690",
+      "sha256": "29b28e72fbfd589ae0556e3e3cf53df38fa7df18d5639362e1e0ce2a4c4efe55",
       "executable": false
     },
     "package.json": {
@@ -2152,7 +2152,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "1631fbddd9e9bac14aeff7cf5cf9883138a24f9b37e7c90b833feb657221050a",
+      "sha256": "cbc649059abde98a83e7fff63d99415626d76250d780b578c68ac7cefd7a8363",
       "executable": false
     },
     "RELEASE.json": {
@@ -2168,7 +2168,7 @@
       "executable": false
     },
     "RUN-LOCALLY.md": {
-      "sha256": "57c193cbc3752a2db5336a51c80194e9cc284773c73dc3dac735dfd204459e52",
+      "sha256": "a155c2e0291ce6074730ef87fbf6987515b022fb7c17b7deb457621e2e0495f1",
       "executable": false
     },
     "scripts/build-local-agent.cjs": {

@@ -12,7 +12,7 @@ import {createServer} from 'node:net';
 import {chromium} from 'playwright';
 import {command,run} from './helpers/rer-command.mjs';
 import {waitForServingCapacity} from './helpers/serving-capacity.mjs';
-import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive} from './helpers/rer-archive.mjs';
+import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive,compareSignInArchive} from './helpers/rer-archive.mjs';
 import {seedPortableData,verifyPortableData} from './helpers/rer-data.mjs';
 
 // One maintained public command journey replaces the standalone installer flow.
@@ -117,7 +117,7 @@ try{
  compareArchive(before,await archiveSnapshot(root),['rer_journey_additive']);
  const migrationCount=()=>archiveStorage(root,async({DB})=>(await DB.prepare("SELECT count(*) n FROM d1_migrations WHERE name='9999_rer_journey.sql'").first()).n);
  assert.equal(await migrationCount(),1);
- const restoredData=await archiveSnapshot(root);
+ let restoredData=await archiveSnapshot(root);
  const ledgerSnapshot=()=>archiveStorage(root,async({DB})=>{
   const ledgers={};for(const {name} of (await DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('d1_migrations','_rer_deploy_migrations') ORDER BY name").all()).results)ledgers[name]=(await DB.prepare(`SELECT * FROM ${name} ORDER BY name`).all()).results;
   return ledgers;
@@ -125,8 +125,10 @@ try{
  const restoredLedgers=await ledgerSnapshot();
  let restoredPrivate;
  for(let i=0;i<2;i++){
-  await run(root,setup);
-  compareArchive(restoredData,await archiveSnapshot(root));
+  const since=Date.now();await run(root,setup);
+  const afterSetup=await archiveSnapshot(root);
+  await compareSignInArchive(root,restoredData,afterSetup,{email,ownerId:actor.id,origin,since});
+  restoredData=afterSetup;
   assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore setup preserves every migration ledger row');
   const currentPrivate=await readFile(join(root,'.dev.vars'));
   if(restoredPrivate)assert.ok(restoredPrivate.equals(currentPrivate),'second post-restore setup preserves exact private bytes');
@@ -137,10 +139,10 @@ try{
  assert.ok((await json('/api/management/projects',undefined,restored.token)).data.some(row=>row.id===project.id));
  // Login legitimately advances the portable integration authority epoch.
  // Snapshot after login so replay/read checks still compare every portable row.
- await stop();const beforeRestoredReads=await archiveSnapshot(root);await start();
+ await stop();const beforeRestoredReads=await archiveSnapshot(root),readStart=Date.now();await start();
  await verifyPortableData(origin,portable,restored.token,json);
  await stop();assert.equal(await migrationCount(),1);
- compareArchive(beforeRestoredReads,await archiveSnapshot(root));
+ await compareSignInArchive(root,beforeRestoredReads,await archiveSnapshot(root),{email,ownerId:actor.id,origin,since:readStart});
  assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore reads and refused replays preserve migration history');
  await run(root,['deploy','--dry-run']);
  await run(root,['reset','--yes']);await rm(additive);await run(root,setup);await start();
@@ -149,7 +151,7 @@ try{
  await stop();
  // The owner's export remains in the checkout; generated files do not alter source.
  assert.equal((await execute('git',['status','--porcelain','--untracked-files=no'],{cwd:root})).stdout,'','journey preserves tracked source');
- console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, completed/repeated/undone/erased import custody, restored erasure replay fences, two post-restore setups without data or ledger changes, deploy dry-run, reset and fresh owner.');
+ console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, completed/repeated/undone/erased import custody, restored erasure replay fences, two post-restore setups preserving data/ledgers with verified local sign-ins, deploy dry-run, reset and fresh owner.');
 }catch(error){
  // Browser diagnostics can contain one-use fragment capabilities; emit only a safe source location.
  const line=/rer-journey\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';

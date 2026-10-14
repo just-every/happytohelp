@@ -8192,7 +8192,7 @@
       "executable": false
     },
     "tests/helpers/rer-archive.mjs": {
-      "sha256": "01d791314bb7bb6453fd84e7bd225b2713fc07c14c5c60f0a704576832e5fa10",
+      "sha256": "8513b752d0195edba42a66ac0193a47dfffda0d98ba1ff7fda6b58f9f4fb5810",
       "executable": false
     },
     "tests/helpers/rer-command.mjs": {
@@ -8896,7 +8896,7 @@
       "executable": false
     },
     "tests/rer-journey.mjs": {
-      "sha256": "cd3ba038d196e2ceb566b456d1898dac15419f99907d1532397bfe8da915a3dc",
+      "sha256": "0519df689454463859485d44980a8b77e332a61c1d29e4c75409328c7eae4bb4",
       "executable": false
     },
     "tests/runtime.mjs": {

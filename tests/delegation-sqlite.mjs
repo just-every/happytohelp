@@ -16,7 +16,38 @@ export async function runContract(DB){const app=new Hono().route('/api/delegatio
  assert.equal((await call('/api/delegation/v1/identity',{token:'native-session'})).status,401);assert.equal((await call('/api/delegation/v1/identity',{cookie:token})).status,401);assert.equal((await api('/identity')).status,200);assert.equal((await api('/evidence?target=projects/q/articles/article')).status,403);const first=await source();assert.equal(first.audience.kind,'source-principals');assert.match((await (await api('/evidence?target='+caseTarget)).json()).text,/Private question/);const draftAudience=await audience();assert.deepEqual(draftAudience.principalIds,['owner','peer']);const pubAudience=await audience('published');assert.equal(pubAudience.kind,'public');assert.notEqual(draftAudience.audienceRevision,pubAudience.audienceRevision);
  const content={title:'Repaired guide',content:'Publication safe text',summary:'Fixed',status:'published'};const effect={operationKey:'repair-one',operation:'happytohelp.article.update',target,expectedRevision:first.revision,expectedAudienceRevision:pubAudience.audienceRevision,content};let result=await api('/effects',effect);assert.equal(result.status,200,await result.clone().text());const confirmed=await result.json();assert.equal(confirmed.receipt.afterRevision,(await source()).revision);assert.equal((await api('/effects',effect)).status,200);assert.equal((await api('/effects',{...effect,content:{...content,title:'Changed replay'}})).status,409);assert.equal((await one('SELECT count(*) n FROM edition_receipts')).n,1);assert.equal((await api('/effects/repair-one')).status,200);assert.equal((await api('/effects/missing')).status,404);
  await run("UPDATE knowledge_articles SET content='Native edit',updated_at=1 WHERE id='article'");assert.notEqual((await source()).revision,confirmed.receipt.afterRevision);const reconciled=await (await api('/effects/repair-one')).json();assert.equal(reconciled.receipt.afterRevision,confirmed.receipt.afterRevision);assert.notEqual(reconciled.observed.revision,reconciled.receipt.afterRevision);assert.equal((await api('/effects',{...effect,operationKey:'stale'})).status,409);
- const beforeCategory=(await source()).revision;await run("INSERT INTO knowledge_categories(id,project_id,name,slug) VALUES('cat','p','Category','category')");assert.notEqual((await source()).revision,beforeCategory);const oldAudience=await audience();await run("DELETE FROM memberships WHERE user_id='peer'");const current=await source();assert.equal((await api('/effects',{...effect,operationKey:'audience-race',expectedRevision:current.revision,expectedAudienceRevision:oldAudience.audienceRevision,content:{...content,status:'draft'}})).status,409);
+ // New, unlinked categories cannot change an existing article's evidence or stored state.
+ const beforeCategory=await source(),beforeArticle=await one("SELECT * FROM knowledge_articles WHERE id='article'");
+ await run("INSERT INTO knowledge_categories(id,project_id,name,slug) VALUES('cat-root','p','Root','root'),('cat-other','p','Other root','other-root'),('unrelated','p','Unrelated','unrelated')");
+ await run("INSERT INTO knowledge_categories(id,project_id,parent_id,name,slug) VALUES('cat','p','cat-root','Category','category')");
+ const afterCategory=await source();assert.equal(afterCategory.revision,beforeCategory.revision);assert.equal(afterCategory.text,beforeCategory.text);
+ assert.deepEqual(await one("SELECT * FROM knowledge_articles WHERE id='article'"),beforeArticle);
+ await run("DELETE FROM knowledge_categories WHERE id='unrelated'");
+ assert.equal((await source()).revision,beforeCategory.revision);
+ assert.deepEqual(await one("SELECT * FROM knowledge_articles WHERE id='article'"),beforeArticle);
+ // Every relevant link or ancestry mutation must reject an effect based on the prior evidence.
+ async function categoryChange(operationKey,sql){
+  const before=await source(),intendedAudience=await audience(content.status);
+  await run(sql);
+  const after=await source(),article=await one("SELECT * FROM knowledge_articles WHERE id='article'");
+  assert.notEqual(after.revision,before.revision,operationKey);
+  const rejected=await api('/effects',{...effect,operationKey,expectedRevision:before.revision,expectedAudienceRevision:intendedAudience.audienceRevision});
+  assert.equal(rejected.status,409,operationKey);assert.equal((await rejected.json()).error.code,'REVISION_CONFLICT',operationKey);
+  assert.deepEqual(await one("SELECT * FROM knowledge_articles WHERE id='article'"),article,operationKey);
+  assert.equal((await api('/effects/'+operationKey)).status,404,operationKey);
+  const observed=await (await api('/effects/repair-one')).json();
+  assert.equal(observed.receipt.afterRevision,confirmed.receipt.afterRevision);assert.equal(observed.observed.revision,after.revision);
+ }
+ await categoryChange('category-linked',"INSERT INTO knowledge_article_categories(article_id,category_id) VALUES('article','cat')");
+ await categoryChange('category-ancestor-edited',"UPDATE knowledge_categories SET name='Renamed root' WHERE id='cat-root'");
+ await categoryChange('category-reparented',"UPDATE knowledge_categories SET parent_id='cat-other' WHERE id='cat'");
+ await categoryChange('category-unlinked',"DELETE FROM knowledge_article_categories WHERE article_id='article' AND category_id='cat'");
+ await categoryChange('primary-category-linked',"UPDATE knowledge_articles SET category_id='cat' WHERE id='article'");
+ await categoryChange('primary-category-unlinked',"UPDATE knowledge_articles SET category_id=NULL WHERE id='article'");
+ await categoryChange('category-relinked',"INSERT INTO knowledge_article_categories(article_id,category_id) VALUES('article','cat')");
+ await categoryChange('category-deleted',"DELETE FROM knowledge_categories WHERE id='cat'");
+ assert.deepEqual(JSON.parse((await source()).text).categories,[]);
+ const oldAudience=await audience();await run("DELETE FROM memberships WHERE user_id='peer'");const current=await source();assert.equal((await api('/effects',{...effect,operationKey:'audience-race',expectedRevision:current.revision,expectedAudienceRevision:oldAudience.audienceRevision,content:{...content,status:'draft'}})).status,409);
  const narrow=await connect('knowledge.article.read knowledge.article.update');const narrowA=await call('/api/delegation/v1/audience?'+new URLSearchParams({target,operation:'happytohelp.article.update',intendedStatus:'published'}),{token:narrow});assert.equal(narrowA.status,403);
  await run("UPDATE messages SET content='',erased_at=1 WHERE id='msg'");assert.equal((await api('/check?target='+caseTarget)).status,404);const settings=await call('/delegation/settings/data?account_id=p',{cookie:'native-session'});assert.equal(settings.status,200);assert.ok((await settings.json()).data.grants.some(g=>!g.revokedAt));
  await run("DELETE FROM memberships WHERE user_id='owner'");assert.equal((await api('/identity')).status,401);assert.equal((await api('/effects/repair-one')).status,401);await run("INSERT INTO memberships VALUES('p','owner','owner')");assert.equal((await api('/revoke',{})).status,200);assert.equal((await api('/identity')).status,401);assert.equal((await api('/effects/repair-one')).status,401);

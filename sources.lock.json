@@ -7752,7 +7752,7 @@
       "executable": false
     },
     "tests/delegation-sqlite.mjs": {
-      "sha256": "c8a869424182ec92938eaa39628914686bf154693a76ad1113ca2fdf66f6fd48",
+      "sha256": "0e87689a837b0a7eebe70c6d2c0905f0cc7afd713b33c88438a5fa10bb1dd614",
       "executable": false
     },
     "tests/deleted-background-worker.ts": {

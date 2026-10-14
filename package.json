@@ -159,7 +159,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.54.5",
     "@cloudflare/workers-types": "5.20260908.1",
-    "@runeditrun/rer": "0.2.2",
+    "@runeditrun/rer": "0.2.4",
     "@tanstack/router-generator": "1.167.34",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",

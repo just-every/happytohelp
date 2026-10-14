@@ -1,7 +1,8 @@
 # HappyToHelp operations
 
 The maintained entry point is `pnpm exec rer`, using the exact `@runeditrun/rer`
-pin after `pnpm install --frozen-lockfile`. Use Node **22.20.0** and
+**0.2.4** package pin after `pnpm install --frozen-lockfile`. The CLI and kit
+come from the installed package; no vendored CLI or kit is required. Use Node **22.20.0** and
 pnpm **10.12.4**. `describe --json` describes real flags without effects;
 `check --profile first-party` validates structure before private configuration exists. `doctor` checks installed tools and local inputs.
 

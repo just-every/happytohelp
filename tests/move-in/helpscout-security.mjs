@@ -19,6 +19,13 @@ test('Help Scout native edit and current authority changes prevent destructive u
  const h=await nativeHarness();try{
   const run=await upload(h,responses());await h.drain();const ready=await read(h,run);assert.equal((await h.raw(`${base}/${run.id}/apply`,{...json({fingerprint:ready.plan.fingerprint}),actor:'operator'})).response.status,403);assert.equal((await h.raw(`${base}/${run.id}`,{actor:'foreign'})).response.status,404);assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM conversations').first()).n,0);await apply(h,run);
   const conversation=await h.db.prepare('SELECT id FROM conversations').first();await h.db.prepare("INSERT INTO conversation_notes VALUES('later-note',?,'owner','Retain my later edit',123)").bind(conversation.id).run();const before=await h.snapshot();await h.call(`${base}/${run.id}/undo`,json({}));await h.drain();assert.equal((await read(h,run)).error,'NATIVE_EDIT_CONFLICT');const after=await h.snapshot();for(const table of ['contacts','conversations','messages','move_in_notes','conversation_notes','conversation_tags'])assert.deepEqual(after[table],before[table]);assert.equal(h.outbound,0);
+  const knowledge=await upload(h,docs());await apply(h,knowledge);
+  await h.db.prepare("UPDATE knowledge_categories SET name='Renamed natively' WHERE name='Getting started'").run();
+  const existing=(await h.db.prepare('SELECT * FROM knowledge_articles ORDER BY id').all()).results,later=docs();later.push({article:{...later[2].article,id:'article-3',name:'New guide',text:'New body'}});
+  const reimport=await upload(h,later);await h.drain();const reviewed=await read(h,reimport);await h.call(`${base}/${reimport.id}/apply`,json({fingerprint:reviewed.plan.fingerprint}));await h.drain();
+  const finished=await read(h,reimport),articles=(await h.db.prepare('SELECT * FROM knowledge_articles ORDER BY id').all()).results;
+  assert.deepEqual({state:finished.state,error:finished.error,categories:(await h.db.prepare('SELECT name FROM knowledge_categories ORDER BY name').all()).results,existing:articles.filter(article=>existing.some(prior=>prior.id===article.id)),added:articles.filter(article=>!existing.some(prior=>prior.id===article.id)).map(({title,content,status})=>({title,content,status})),outbound:h.outbound},{state:'completed',error:null,categories:[{name:'Help'},{name:'Renamed natively'}],existing,added:[{title:'New guide',content:'New body',status:'published'}],outbound:0});
+
  }finally{await h.close()}
 });
 

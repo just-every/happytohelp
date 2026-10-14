@@ -3,7 +3,7 @@ import type {Env} from '../../platform/env'
 import {sourceIdentity} from '../import-kit/src/provenance/identity'
 import type {SourceRecord} from '../import-kit/src/types'
 import {readNativeCandidates} from './targets'
-import type {PreparedMapping,Run} from './types'
+import type {PreparedMapping,Run,SourceClaim} from './types'
 /** Each query is driven by this bounded upload. Unrelated workspace content never
  * crosses the planning boundary. JSON arrays keep statement bindings independent of size. */
 export async function relevantTags(env:Env,projectId:string,records:SourceRecord[]){
@@ -15,7 +15,7 @@ export async function planningState(env:Env,run:Run,records:SourceRecord[],prepa
  const {rows:nativeRows,oversized}=await readNativeCandidates(env.DB,run.project_id,candidates)
  for(const record of records)for(const effect of prepared.effects.get(`${record.kind}/${record.sourceId}`)??[])if(oversized.has(`${effect.targetKind}/${effect.targetId}`))prepared.rejections.set(`${record.kind}/${record.sourceId}`,'native_target_review_size_limit')
  const identities=records.map(record=>sourceIdentity(run.project_id,run.vendor,record.kind,record.sourceId))
- const claims=(await env.DB.prepare('SELECT s.identity,s.source_hash FROM ik_sources s JOIN ik_jobs j ON j.id=s.job_id WHERE j.destination=? AND j.namespace=? AND s.identity IN (SELECT value FROM json_each(?))').bind(run.project_id,run.vendor,JSON.stringify(identities)).all<{identity:string;source_hash:string}>()).results
+ const claims=(await env.DB.prepare('SELECT s.identity,s.source_hash,s.mapping_version,s.effects_hash,s.job_id FROM ik_sources s JOIN ik_jobs j ON j.id=s.job_id WHERE j.destination=? AND j.namespace=? AND s.identity IN (SELECT value FROM json_each(?))').bind(run.project_id,run.vendor,JSON.stringify(identities)).all<SourceClaim>()).results
  const nativeIds=new Map<string,Set<string>>()
  for(const [kind,table] of [['contact','contacts'],['conversation','conversations'],['macro','macros'],['article','knowledge_articles'],['category','knowledge_categories'],['tag','workspace_tags']]){
   const ids=candidates.filter(candidate=>candidate.kind===kind).map(candidate=>candidate.id)
@@ -29,5 +29,5 @@ export async function planningState(env:Env,run:Run,records:SourceRecord[],prepa
  EXISTS(SELECT 1 FROM move_in_contact_keys p WHERE p.project_id=?1 AND p.contact_id<>json_extract(c.value,'$.id') AND p.email_digest=json_extract(c.value,'$.email')) email,
  EXISTS(SELECT 1 FROM contacts p WHERE p.project_id=?1 AND p.id<>json_extract(c.value,'$.id') AND p.external_id=json_extract(c.value,'$.external')) external
  FROM json_each(?2) c`).bind(run.project_id,JSON.stringify(contacts.slice(start,start+100))).all<{id:string;email:number;external:number}>()).results)
- return {nativeById:new Map(nativeRows.map(row=>[`${row.targetKind}/${row.targetId}`,row])),claimById:new Map(claims.map(claim=>[claim.identity,claim.source_hash])),nativeIds,collisions:new Map(collisions.map(row=>[row.id,row]))}
+ return {nativeById:new Map(nativeRows.map(row=>[`${row.targetKind}/${row.targetId}`,row])),sourceClaims:new Map(claims.map(claim=>[claim.identity,claim])),claimById:new Map(claims.map(claim=>[claim.identity,claim.source_hash])),nativeIds,collisions:new Map(collisions.map(row=>[row.id,row]))}
 }

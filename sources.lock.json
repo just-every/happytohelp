@@ -8080,7 +8080,7 @@
       "executable": false
     },
     "tests/helpers/delegation-journey/browser-ui.mjs": {
-      "sha256": "19df22d1b60aa100e40ecc17ed1317dbe370ef9d51a245a4028fc5ba8adc1a2a",
+      "sha256": "267060d745bd214b252b62665f2b9e9a014701414b19aa472015056a1df59f55",
       "executable": false
     },
     "tests/helpers/delegation-journey/browser.mjs": {
@@ -8088,7 +8088,7 @@
       "executable": false
     },
     "tests/helpers/delegation-journey/case.mjs": {
-      "sha256": "f8185dd85874d8a7cb6803a12cbbdf9f9667e5a4b37f59990edb17233128a1fd",
+      "sha256": "fc7084077ec12246ef93cb450e8a58603675d4ee42dc76d85c898fd3f7b80984",
       "executable": false
     },
     "tests/helpers/delegation-journey/connector.mjs": {

@@ -33,7 +33,7 @@ export async function runCase({origin,api,actor,fixture,directory,ui}){
  const transcript=()=>visitor.transcript();
  const noReply=async()=>assert.equal((await transcript()).messages.filter(message=>message.actor_role!=='contact').length,0);
  const screenshot=async(step,caption)=>ui?.shot(step,caption);
- await noReply();await ui?.open(conversationId);await screenshot('a','Visitor reports the disabled Spanish setting; operator sees the same report.');
+ await noReply();await ui?.open(conversationId,{panel:false});await screenshot('a','Visitor reports the disabled Spanish setting; operator sees the same report.');
  const code=ui?await ui.pair():(await api(`/api/projects/${projectId}/local-agents/pairings`,{})).data.code;
  const worker=await connector({origin,directory:join(directory,'connector'),code});
  const task=phase=>({phase,fixture:fixture.origin,conversationId,projectId});

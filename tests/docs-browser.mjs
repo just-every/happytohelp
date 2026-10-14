@@ -72,7 +72,7 @@ try {
     assert.deepEqual(await page.locator('h1').allTextContents(), [h1], `${label} h1 is the Markdown H1`)
     assert.deepEqual((await page.locator('.docs-prose h2').allTextContents()).map(text => text.trim()), h2, `${label} h2s are the Markdown's, in order`)
     assert.equal(await page.locator('.site-header .brand').getAttribute('href'), '/', label)
-    assert.deepEqual(await page.locator('.site-header nav a').evaluateAll(links => links.map(link => [link.textContent, link.getAttribute('href'), link.getAttribute('aria-current')])), [['Docs', '/docs', 'true'], ['GitHub', repository, null], ['Get the code', repository, null]], `${label} header`)
+    assert.deepEqual(await page.locator('.site-header nav a').evaluateAll(links => links.map(link => [link.textContent, link.getAttribute('href'), link.getAttribute('aria-current')])), [['Docs', '/docs', 'true'], ['GitHub', repository, null], ['Sign in', '/login', null], ['Get the code', repository, null]], `${label} header`)
     assert.deepEqual(await page.locator('footer a').allInnerTexts(), footerLinks, `${label} footer`)
     assert.equal(await page.locator('footer a', { hasText: 'MIT licence' }).getAttribute('href'), `${repository}/blob/main/LICENSE`)
     // Landmarks: one banner, one visible Documentation navigation, main with the pager, the footer, one h1.

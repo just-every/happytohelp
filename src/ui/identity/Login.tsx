@@ -5,9 +5,16 @@ import SignInDrawing from './SignInDrawing';
 import { Alert, Field, SubmitButton } from './fields';
 import { postJson, useAuthOptions, useSignInMail } from './hooks';
 
+// HTTP redirects inherit a document fragment that the server never receives.
+// Carry that fragment into the same validated destination for client sign-in.
+function requestedDestination() {
+    const destination = new URLSearchParams(location.search).get('returnTo');
+    return destination && !destination.includes('#') ? destination + location.hash : destination;
+}
+
 export default function Login() {
     const [magicPath,setMagicPath]=useState('/login/magic');
-    useEffect(()=>{const destination=new URLSearchParams(location.search).get('returnTo');if(destination)setMagicPath('/login/magic?returnTo='+encodeURIComponent(loginDestination(destination,location.origin)));},[]);
+    useEffect(()=>{const destination=requestedDestination();if(destination)setMagicPath('/login/magic?returnTo='+encodeURIComponent(loginDestination(destination,location.origin)));},[]);
     const { options } = useAuthOptions();
     const {options:mail}=useSignInMail();
     const [error, setError] = useState(''), [busy, setBusy] = useState(false);
@@ -17,10 +24,10 @@ export default function Login() {
         const form = new FormData(event.currentTarget);
         try {
             const result = await postJson('/api/identity/login', { email: form.get('email'), password: form.get('password') });
-            location.assign(loginDestination(new URLSearchParams(location.search).get('returnTo'), location.origin, result.accountOnly));
+            location.assign(loginDestination(requestedDestination(), location.origin, result.accountOnly));
         } catch (failure: any) { setError(failure.message); setBusy(false); }
     };
-    return <IdentityFrame drawing={<SignInDrawing />}>
+    return <IdentityFrame drawing={<SignInDrawing intro />}>
         <h1>Welcome back</h1>
         <p className="id-lede">Log in to your HappyToHelp workspace.</p>
         {options?.setupRequired && <p className="id-note" role="status">This installation has not been set up yet. <a href="/setup">Set up your workspace</a> to create the first owner account.</p>}

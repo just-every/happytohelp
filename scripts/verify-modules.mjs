@@ -17,7 +17,7 @@ const standalone = [
   'ui-transport.mjs', 'workspace-scope.mjs', 'dashboard-styles.mjs', 'login-return.mjs', 'abuse-limits.mjs', 'widget-rate-limit.mjs', 'local-agent-archive.mjs', 'reproducible-output.mjs', 'widget-transport.mjs', 'widget-connection-recovery.mjs',
   'project-verification-secret.mjs', 'widget-settings-model.mjs', 'identity-setup-deployment.mjs', 'security-headers.mjs', 'search-codec.mjs', 'delegation-documents.mjs', 'user-agent-parser.mjs', 'inbox-search.mjs', 'contact-timezone.mjs', 'saved-reply-insertion.mjs',
 ].map(name => `tests/${name}`);
-const groups = ['scripts/edition-authoring','scripts/base-onboarding', 'tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test', 'live-proofs/tests', 'tests/live/recorder'];
+const groups = ['scripts/edition-authoring', 'tests/ai-support', 'tests/customer-context', 'tests/eval-harness', 'tests/training', 'local-agent/test', 'live-proofs/tests', 'tests/live/recorder'];
 async function collectTests(group){
  const entries=await readdir(new URL(`../${group}/`,import.meta.url),{withFileTypes:true});
  for(const entry of entries){const path=`${group}/${entry.name}`;if(entry.isDirectory())await collectTests(path);else if(/\.test\.(?:mjs|cjs|js)$/.test(entry.name))standalone.push(path);}

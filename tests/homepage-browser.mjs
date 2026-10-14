@@ -157,6 +157,31 @@ try {
   assert.deepEqual(hrefOf('GitHub'), [repository, repository]);
   assert.ok(!links.some(link => /runeditrun|before-you-start/i.test(`${link.text} ${link.href}`)), 'no Run Edit Run or costs link');
   for (const href of ['/projects', '/setup', '/login']) assert.ok(links.some(link => link.href === href), href);
+  for (const [width, height] of [[1440, 900], [390, 844], [320, 844]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(origin, { waitUntil: 'networkidle' });
+    await page.evaluate(() => document.fonts.ready);
+    const clippedHeaderLinks = await page.locator('.site-header a').evaluateAll(links => links.filter(link => {
+      const box = link.getBoundingClientRect();
+      return box.width <= 0 || box.height <= 0 || box.left < 0 || box.top < 0 || box.right > innerWidth || box.bottom > innerHeight;
+    }).map(link => link.textContent.trim()));
+    assert.deepEqual(clippedHeaderLinks, [], `every header link is fully inside the viewport at ${width}px`);
+    for (const link of await page.locator('.site-header a').all()) await link.click({ trial: true });
+    await page.locator('.site-header nav a[href="/login"]').click();
+    await page.waitForURL(url => url.pathname === '/login');
+    const email = page.getByLabel('Email', { exact: true });
+    const password = page.getByLabel('Password', { exact: true });
+    const form = page.locator('.id-panel form');
+    await email.waitFor({ state: 'visible' });
+    await password.waitFor({ state: 'visible' });
+    assert.equal(await form.locator('button').evaluate(button => button.type), 'submit');
+    assert.equal(await email.inputValue(), '', `email remains empty at ${width}px`);
+    assert.equal(await password.inputValue(), '', `password remains empty at ${width}px`);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(origin, { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
+  checks.push('all header links are fully visible and hittable at 320px, 390px and 1440px; following Sign in opens native /login with the email, password and submit controls visible, without entering credentials');
   checks.push('every link is the repository or its licence, the documentation at /docs (home and installation guide, both served as HTML), or a local workspace route; no Run Edit Run or costs link');
 
   // One open-licensed geometric sans-serif for every piece of type, actually loaded.
@@ -239,7 +264,7 @@ try {
   assert.deepEqual(await page.locator('#free .proof li').evaluateAll(items => items.map(item => { const circle = item.firstElementChild, style = getComputedStyle(circle), icon = circle.querySelector('svg'); return [item.textContent, circle.className, style.backgroundColor, style.borderTopLeftRadius, style.width === style.height, icon.getAttribute('aria-hidden'), getComputedStyle(icon).stroke]; })), ['No seats.', 'No plans.', 'No fees.'].map(text => [text, 'proof-icon', 'rgb(214, 245, 250)', '50%', true, 'true', 'rgb(20, 20, 20)']), 'each promise has an ink line icon in a pale aqua circle');
   const discs = await page.locator('.hero-steps li').evaluateAll(items => items.map(item => { const disc = getComputedStyle(item, '::before'); return [disc.content, disc.backgroundColor, disc.color, disc.width, disc.height, disc.borderTopLeftRadius, disc.borderTopWidth]; }));
   assert.deepEqual(discs, Array(3).fill(['counter(step)', 'rgb(143, 227, 238)', 'rgb(20, 20, 20)', '40px', '40px', '50%', '0px']), 'each caption step has a filled aqua number disc');
-  assert.deepEqual(await page.locator('.site-header').evaluate(header => [getComputedStyle(header).backgroundColor, header.querySelector('.brand').textContent, [...header.querySelectorAll('nav a')].map(a => a.textContent)]), ['rgba(0, 0, 0, 0)', 'HappyToHelp', ['Docs', 'GitHub', 'Get the code']], 'the header is the plain paper with the wordmark, Docs, GitHub and the pill');
+  assert.deepEqual(await page.locator('.site-header').evaluate(header => [getComputedStyle(header).backgroundColor, header.querySelector('.brand').textContent, [...header.querySelectorAll('nav a')].map(a => a.textContent)]), ['rgba(0, 0, 0, 0)', 'HappyToHelp', ['Docs', 'GitHub', 'Sign in', 'Get the code']], 'the header is the plain paper with the wordmark, Docs, GitHub, Sign in and the pill');
   const cyan = await page.locator('.drawing *').evaluateAll(elements => elements.filter(el => getComputedStyle(el).backgroundColor === 'rgb(214, 245, 250)' || getComputedStyle(el).borderTopColor === 'rgb(143, 227, 238)').length);
   assert.ok(cyan >= 5, `soft cyan accents inside the drawings: the hero's fix bubble and code glyph, and three below it (${cyan})`);
   const aquaPerDrawing = await page.locator('figure.drawing:not(.hero-art)').evaluateAll((figures, palette) => figures.map(figure => [...figure.querySelectorAll('*')].filter(el => {
@@ -415,7 +440,6 @@ try {
     const buttonsOk = await page.locator('.pill').evaluateAll(els => els.filter(el => el.getBoundingClientRect().width > 0).every(el => el.getBoundingClientRect().height >= 40));
     assert.ok(buttonsOk, `pill targets at ${width}px`);
     if (width <= 390) {
-      for (const name of ['Docs', 'GitHub', 'Get the code']) assert.ok(await page.locator('header nav').getByRole('link', { name, exact: true }).isVisible(), `header ${name} visible at ${width}px`);
       const fold = await page.evaluate(() => ({ h1: document.querySelector('h1').getBoundingClientRect().bottom, cta: document.querySelector('.hero .pill').getBoundingClientRect().bottom }));
       assert.ok(fold.h1 < 844 && fold.cta < 844, `headline and Get the code above the fold at ${width}px: ${JSON.stringify(fold)}`);
     }

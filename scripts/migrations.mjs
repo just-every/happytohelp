@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,11 +16,16 @@ export async function collectMigrations() {
     }
   }
   const directory = resolve(root, '.generated/migrations');
-  await mkdir(directory, { recursive: true });
-  // Never leave a removed SQL file runnable in a previously generated directory.
-  const { rm } = await import('node:fs/promises');
-  for (const name of await readdir(directory)) if (!files.has(name)) await rm(join(directory, name));
-  for (const [name, text] of [...files].sort(([a], [b]) => a.localeCompare(b))) await writeFile(join(directory, name), text);
-  return { directory, files: [...files.keys()].sort() };
+  const ordered = [...files.keys()].sort().map(name => [name, files.get(name)]);
+  // Local Wrangler and deploy-kit consume the same collected SQL. deploy-kit's
+  // package contract currently reads migrations/core; this is generated output,
+  // never the source of a migration.
+  for (const output of [directory, resolve(root, 'migrations/core')]) {
+    await mkdir(output, { recursive: true });
+    // Never leave a removed SQL file runnable in a previously generated directory.
+    for (const name of await readdir(output)) if (!files.has(name)) await rm(join(output, name));
+    for (const [name, text] of ordered) await writeFile(join(output, name), text);
+  }
+  return { directory, files: ordered.map(([name]) => name) };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) console.log(JSON.stringify(await collectMigrations(), null, 2));

@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import {readdir,readFile} from 'node:fs/promises'
 import {secretNames,variableNames,serviceBindingNames,runtimeVariables,runtimeSecrets,validateRuntimeEnvironment} from '../scripts/deployment/environment.mjs'
 const known=new Set([...secretNames,...variableNames,...serviceBindingNames,'APP_ORIGIN','DB','FILES','JOBS','CONVERSATIONS'])
-async function inspect(directory){for(const item of await readdir(directory,{withFileTypes:true})){if(item.name==='vendor')continue;const path=directory+'/'+item.name;if(item.isDirectory())await inspect(path);else if(/\.(?:ts|tsx)$/.test(item.name))for(const [,key]of(await readFile(path,'utf8')).matchAll(/(?:\benv\.|\bsecret\(')([A-Z][A-Z0-9_]+)/g))assert.ok(known.has(key),`Undeclared native runtime binding ${key} in ${path}`)}}
+// Vite substitutes import.meta.env at compile time; it is not a Worker binding.
+async function inspect(directory){for(const item of await readdir(directory,{withFileTypes:true})){if(item.name==='vendor')continue;const path=directory+'/'+item.name;if(item.isDirectory())await inspect(path);else if(/\.(?:ts|tsx)$/.test(item.name))for(const [,key]of(await readFile(path,'utf8')).matchAll(/(?:(?<!import\.meta\.)\benv\.|\bsecret\(')([A-Z][A-Z0-9_]+)/g))assert.ok(known.has(key),`Undeclared native runtime binding ${key} in ${path}`)}}
 await inspect('src/modules');await inspect('src/platform')
 const fixture={EMAIL_API_KEY:'private-fixture',EMAIL_FROM:'sender@example.invalid',OPENAI_API_KEY:'model-fixture',DEEPSEEK_API_KEY:'selected-fixture',CONTEXT_MODEL:'selected-model',PREVIEW_ORIGIN:'https://preview.example.invalid',APP_ORIGIN:'https://app.example.invalid'}
 assert.deepEqual(runtimeVariables(fixture),{CONTEXT_MODEL:'selected-model',PREVIEW_ORIGIN:'https://preview.example.invalid'})

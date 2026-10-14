@@ -1,9 +1,9 @@
 # First-run setup
 
 Prepare the first owner through [Install](INSTALLER.md), using
-`node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json`.
+`pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json`.
 Setup creates the native owner and first workspace before it exits. Start with
-`node scripts/rer.mjs dev` and sign in through the printed development outbox.
+`pnpm exec rer dev` and sign in through the printed development outbox.
 The owner decision retains native passwords, prior account/workspace data and
 HappyToHelp's own tenant/permission checks.
 
@@ -114,7 +114,7 @@ explicit and never replaces customer data. See [Workspace workflows](WORKSPACE-W
 Only explicit trusted local configuration selects development mail. The outbox
 is loopback-only, escaped and non-cacheable; it stores sensitive local captures.
 Production has neither this sender nor viewer. Failed real delivery never falls
-back to capture. Open the newest message from `node scripts/rer.mjs outbox` while
+back to capture. Open the newest message from `pnpm exec rer outbox` while
 dev is running, follow its link and press **Sign in**. No email is sent.
 
 Stop dev before reset/export/import. Use [Operations](../OPERATIONS.md#local-data-and-backups)

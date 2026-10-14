@@ -1,3 +1,5 @@
+import { fileURLToPath as __rerTestEntryPath } from 'node:url';
+const __rerTestEntry = __rerTestEntryPath(import.meta.resolve('@runeditrun/rer/internal/global/rer.mjs'));
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -91,7 +93,7 @@ try{
  await run(root,['export','--output','exports/support.rer']);
  assert.equal((await stat(join(root,'exports/support.rer'))).mode&0o777,0o600);
  await run(root,['reset'],4);await access(join(root,'.dev.vars'));
- await run(root,['reset','--yes']);await access(join(root,'exports/support.rer'));await access(join(root,'scripts/rer.mjs'));
+ await run(root,['reset','--yes']);await access(join(root,'exports/support.rer'));await access(__rerTestEntry);
  await run(root,['reset','--yes']);
  await run(root,['import','--input','exports/support.rer','--yes']);
  await run(root,setup);await start();

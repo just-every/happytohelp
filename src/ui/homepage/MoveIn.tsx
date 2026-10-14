@@ -1,3 +1,4 @@
+import { HydrationUnit } from '../../vendor/base/hydration/unit';
 import { ImportDrawing } from './drawings/ImportDrawing';
 import { installerUrl } from './repository';
 import { useReveal } from './reveal/useReveal';
@@ -10,7 +11,7 @@ const steps = [
 
 export function MoveIn() {
   const reveal = useReveal<HTMLOListElement>();
-  return <section className="section split" id="move-in" aria-labelledby="move-in-title">
+  return <HydrationUnit><section className="section split" id="move-in" aria-labelledby="move-in-title">
     <div className="split-copy">
       <h2 id="move-in-title">Try it beside what you have</h2>
       <p>Keep your current helpdesk running while you try it.</p>
@@ -18,5 +19,5 @@ export function MoveIn() {
       <div className="actions"><a className="text-link" href={installerUrl}>Read the installation guide</a></div>
     </div>
     <ImportDrawing />
-  </section>;
+  </section></HydrationUnit>;
 }

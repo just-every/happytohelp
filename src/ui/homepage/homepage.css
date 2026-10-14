@@ -156,9 +156,9 @@
   .h2h-home .site-header { height: 76px; }
 }
 @media (max-width: 640px) {
-  /* The header wraps to two rows so Docs, GitHub and Get the code stay visible at every width. */
+  /* The header wraps to two rows so Docs, GitHub, Sign in and Get the code stay visible at every width. */
   .h2h-home .site-header { flex-wrap: wrap; height: auto; gap: 10px; padding-top: 18px; padding-bottom: 4px; }
-  .h2h-home .site-header nav { flex: 1 0 100%; flex-wrap: nowrap; gap: 24px; }
+  .h2h-home .site-header nav { flex: 1 0 100%; flex-wrap: nowrap; gap: clamp(6px, calc(30vw - 90px), 24px); }
   .h2h-home .site-header nav > a:not(.pill) { padding: 8px 0; }
   .h2h-home .site-header nav .pill { margin-left: auto; }
   .h2h-home { font-size: 17px; }

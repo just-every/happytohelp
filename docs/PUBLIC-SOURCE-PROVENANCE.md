@@ -92,7 +92,7 @@ Its source and documentation links derive from the `repository` field in
 | favcount 1.5.0 (Copyright 2013 Chris Hunt) | `src/ui/dashboard/favcount.jsx` | MIT, notice inline at the top of that file |
 | Lucide reply icons | `src/ui/dashboard/components/reply-icons/` | ISC, `LUCIDE-LICENSE.txt` in that directory |
 | Ensemble model runtime | `src/modules/ai-support/vendor/ensemble/` | MIT, `LICENSE`, `SOURCE.json` and `SOURCE.patch` in that directory |
-| Run Edit Run Base | `src/base`, `scripts/edition-authoring`, `scripts/base-onboarding` | MIT, [`docs/licenses/base-MIT.txt`](licenses/base-MIT.txt) |
+| Run Edit Run Base | `src/base`, `src/vendor/base`, `scripts/edition-authoring`; CLI dependency `@runeditrun/rer` | MIT, [`docs/licenses/base-MIT.txt`](licenses/base-MIT.txt) |
 | npm dependencies | `package.json`, `pnpm-lock.yaml` | Each package's own licence |
 
 No Font Awesome Pro package or asset is included.

@@ -20,24 +20,36 @@ export function originFixture() {
   let seed;
   try {
     git(base, 'init', '--quiet');
-    const copies = productRecord.copies.map(({path: name, originPath}) => {
-      const names = files(name);
-      const digests = {},modes={};
-      for (const file of names) {
-        const bytes = fs.readFileSync(path.join(product, file));
-        write(base, originPath + file.slice(name.length), bytes);
-        digests[file] = sha(bytes);
-        modes[file]=(fs.statSync(path.join(product,file)).mode&0o100)?'100755':'100644';
-        fs.chmodSync(path.join(base,originPath+file.slice(name.length)),modes[file]==='100755'?0o755:0o644);
+    const copies = [];
+    // Commit one group before introducing the last copy, then change an older
+    // source at HEAD. Neither one global revision nor HEAD can qualify all copies.
+    for (const group of [productRecord.copies.slice(0, -1), productRecord.copies.slice(-1)].filter(group => group.length)) {
+      if (copies.length) {
+        const earlier = copies[0];
+        const name = Object.keys(earlier.files)[0];
+        const originPath = earlier.originPath + name.slice(earlier.path.length);
+        fs.appendFileSync(path.join(base, originPath), '\n// Later origin change, not selected by this product copy.\n');
       }
-      return {path: name, originPath, files: digests,modes};
-    });
-    git(base, 'add', '--all');
-    git(base, '-c', 'user.name=Product origin fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Locally constructed origin test data');
-    const pin = git(base, 'rev-parse', 'HEAD').toString().trim();
-    const record = {schemaVersion: 1, repository: base, copies: copies.map(copy => ({...copy, revision: pin}))};
+      const selected = group.map(({path: name, originPath}) => {
+        const names = files(name);
+        const digests = {},modes={};
+        for (const file of names) {
+          const bytes = fs.readFileSync(path.join(product, file));
+          write(base, originPath + file.slice(name.length), bytes);
+          digests[file] = sha(bytes);
+          modes[file]=(fs.statSync(path.join(product,file)).mode&0o100)?'100755':'100644';
+          fs.chmodSync(path.join(base,originPath+file.slice(name.length)),modes[file]==='100755'?0o755:0o644);
+        }
+        return {path: name, originPath, files: digests,modes};
+      });
+      git(base, 'add', '--all');
+      git(base, '-c', 'user.name=Product origin fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--quiet', '-m', 'Locally constructed origin test data');
+      const revision = git(base, 'rev-parse', 'HEAD').toString().trim();
+      copies.push(...selected.map(copy => ({...copy, revision})));
+    }
+    const record = {schemaVersion: 1, repository: base, copies};
     seed = fixture(record);
-    return {base, pin, record, product: seed.root, close() { seed.close(); fs.rmSync(base, {recursive: true, force: true}); }};
+    return {base, record, product: seed.root, close() { seed.close(); fs.rmSync(base, {recursive: true, force: true}); }};
   } catch (error) {
     seed?.close();
     fs.rmSync(base, {recursive: true, force: true});

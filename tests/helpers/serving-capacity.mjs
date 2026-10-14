@@ -1,6 +1,6 @@
 import {loadavg} from 'node:os';
 import {setTimeout} from 'node:timers/promises';
-import {servingLoadThreshold} from '../../scripts/base-cli/cli/server-resources.mjs';
+import {servingLoadThreshold} from '@runeditrun/rer/server-resources';
 
 // Setup can leave the machine temporarily busy. Admit the test's single public
 // server launch without overriding its policy or retrying a refused command.

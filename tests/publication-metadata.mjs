@@ -109,11 +109,13 @@ test('public Base selection keeps licensed local source and only selected compar
   // publication-only interpretation of the recipe.
   const recipe = manifest(fileURLToPath(new URL('../', import.meta.url)));
   assert.equal(recipe.parent, undefined);
-  for (const id of ['runeditrun/base', 'runeditrun/onboarding', 'runeditrun/sendgrid-email', 'runeditrun/import-kit', 'runeditrun/mail']) {
-    const component = recipe.components.find(component => component.id === id);
-    assert.ok(component, id + ': original capability identity retained');
-    assert.equal(component.source.kind, 'local');
-    assert.equal(component.source.origin.repository, recipe.components.find(c=>c.role==='foundation').source.origin.repository);
+  const foundation = recipe.components.find(component => component.role === 'foundation');
+  assert.ok(foundation?.source.origin, 'selected runtime foundation retains its comparison origin');
+  // The published CLI replaces the vendored onboarding capability; validate
+  // every origin selected by the current recipe without pinning removed modules.
+  for (const component of recipe.components.filter(component => component.source.origin)) {
+    assert.equal(component.source.kind, 'local', component.id + ': selected origin retains local source');
+    assert.equal(component.source.origin.repository, foundation.source.origin.repository);
     assert.ok(component.source.origin.paths.length > 0);
     assert.ok(component.source.mappings.length > 0);
   }

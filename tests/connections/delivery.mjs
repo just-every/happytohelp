@@ -34,28 +34,53 @@ test('response timeout remains uncertain across dispatch and Worker restart',asy
   const row=(await h.call(root+'/deliveries')).data.find(x=>x.id===job.id);assert.equal(row.state,'uncertain');assert.equal(row.status,null);assert.equal(row.error_class,'response_unknown');
  }finally{await h.close()}
 });
-test('server errors and rate limits retry exact signed delivery after restart and give up at the bounded policy',async()=>{
- for(const status of [500,429]){
-  const h=await harness();try{
-   const a=await webhook(h);h.responses.push({status,body:'PRIVATE_PROVIDER_CANARY',headers:{'Retry-After':'0'}},{status:204});const job=await h.call(root+'/webhooks/'+a.id+'/test',body({}));assert.equal(h.received.length,1);
-   const scheduled=await h.db.prepare("SELECT next_at FROM integration_deliveries WHERE state='queued'").first();assert.ok(scheduled.next_at>Date.now()-1000);
-   assert.ok(!JSON.stringify(await h.call(root+'/deliveries')).includes('PRIVATE_PROVIDER_CANARY'));
-   await h.restart();await new Promise(resolve=>setTimeout(resolve,Math.max(0,scheduled.next_at-Date.now())+25));await h.dispatch();assert.equal(h.received.length,2);
-   assert.ok(h.received[0].body.equals(h.received[1].body));assert.equal(h.received[0].headers['webhook-id'],h.received[1].headers['webhook-id']);
-   for(const receipt of h.received)assert.ok(verifyIndependent(receipt,a.secret,{tenant:'p',destination:a.id,event:'integration.test',id:job.id}));
-   assert.equal((await h.call(root+'/deliveries')).data.find(row=>row.id===job.id).state,'accepted');
-   const sentBeforeFailure=h.received.length;
-   h.responses.push(...Array.from({length:40},()=>({status})));const failed=await h.call(root+'/webhooks/'+a.id+'/test',body({}));
-   let row;
-   for(let i=0;i<40;i++){
-    row=await h.db.prepare('SELECT state,attempts FROM integration_deliveries WHERE id=?').bind(failed.id).first();
-    if(row.state==='rejected')break;
-    await h.db.prepare("UPDATE integration_deliveries SET next_at=0 WHERE state='queued'").run();await h.dispatch();
+test('all server errors and after-send timeout remain uncertain without replay while rate limits retry exact signed delivery within the bounded policy',async()=>{
+ const h=await harness();try{
+  const a=await webhook(h),uncertain=[];
+  // Exercise the management action and actual receiver for the entire 5xx
+  // range, including status codes with no standard name.
+  for(let status=500;status<600;status++){
+   h.responses.push({status,body:'PRIVATE_PROVIDER_CANARY',headers:{'Retry-After':'0'}});
+   const job=await h.call(root+'/webhooks/'+a.id+'/test',body({}));uncertain.push({id:job.id,status,error:'webhook_response_uncertain'});
+   const row=(await h.call(root+'/deliveries')).data.find(row=>row.id===job.id);
+   assert.equal(row.state,'uncertain',`HTTP ${status} must not schedule a replay`);assert.equal(row.status,status);
+  }
+  h.responses.push({status:204,delay:11000});const timedOut=await h.call(root+'/webhooks/'+a.id+'/test',body({}));
+  uncertain.push({id:timedOut.id,status:null,error:'response_unknown'});
+  assert.equal(h.received.length,uncertain.length,'each uncertain result follows one received request');
+  for(const receipt of h.received)assert.ok(verifyIndependent(receipt,a.secret,{tenant:'p',destination:a.id,event:'integration.test',id:JSON.parse(receipt.body).id}));
+  async function assertUncertain(){
+   const logs=await h.call(root+'/deliveries');assert.ok(!JSON.stringify(logs).includes('PRIVATE_PROVIDER_CANARY'));
+   for(const expected of uncertain){
+    const rows=logs.data.filter(row=>row.id===expected.id);assert.equal(rows.length,1);
+    assert.equal(rows[0].state,'uncertain');assert.equal(rows[0].status,expected.status);assert.equal(rows[0].error_class,expected.error);
    }
-   assert.equal(row.state,'rejected');assert.equal(row.attempts,h.received.length-sentBeforeFailure);
-   const terminalReceipts=h.received.length;await h.restart();await h.dispatch();assert.equal(h.received.length,terminalReceipts,'terminal failure never resumes sending');
-  }finally{await h.close()}
- }
+   assert.equal(h.received.length,uncertain.length,'uncertain delivery never resumes sending');
+  }
+  await assertUncertain();await h.dispatch();await h.call('/_test/scheduled',body({}));await assertUncertain();
+  await h.restart();await h.dispatch();await h.call('/_test/scheduled',body({}));await assertUncertain();
+
+  const sentBeforeRetry=h.received.length;
+  h.responses.push({status:429,body:'PRIVATE_PROVIDER_CANARY',headers:{'Retry-After':'0'}},{status:204});
+  const job=await h.call(root+'/webhooks/'+a.id+'/test',body({}));assert.equal(h.received.length,sentBeforeRetry+1);
+  const scheduled=await h.db.prepare("SELECT next_at FROM integration_deliveries WHERE id=? AND state='queued'").bind(job.id).first();assert.ok(scheduled.next_at>Date.now()-1000);
+  assert.ok(!JSON.stringify(await h.call(root+'/deliveries')).includes('PRIVATE_PROVIDER_CANARY'));
+  await h.restart();await new Promise(resolve=>setTimeout(resolve,Math.max(0,scheduled.next_at-Date.now())+25));await h.call('/_test/scheduled',body({}));assert.equal(h.received.length,sentBeforeRetry+2);
+  const retries=h.received.slice(sentBeforeRetry);assert.ok(retries[0].body.equals(retries[1].body));assert.equal(retries[0].headers['webhook-id'],retries[1].headers['webhook-id']);
+  for(const receipt of retries)assert.ok(verifyIndependent(receipt,a.secret,{tenant:'p',destination:a.id,event:'integration.test',id:job.id}));
+  assert.equal((await h.call(root+'/deliveries')).data.find(row=>row.id===job.id).state,'accepted');
+  const sentBeforeFailure=h.received.length;
+  h.responses.push(...Array.from({length:40},()=>({status:429})));const failed=await h.call(root+'/webhooks/'+a.id+'/test',body({}));
+  let row;
+  for(let i=0;i<40;i++){
+   row=await h.db.prepare('SELECT state,attempts,max_attempts FROM integration_deliveries WHERE id=?').bind(failed.id).first();
+   if(row.state==='rejected')break;
+   await h.db.prepare("UPDATE integration_deliveries SET next_at=0 WHERE id=? AND state='queued'").bind(failed.id).run();await h.dispatch();
+  }
+  assert.equal(row.state,'rejected');assert.equal(row.attempts,row.max_attempts);assert.equal(row.attempts,h.received.length-sentBeforeFailure);
+  const terminalReceipts=h.received.length;await h.restart();await h.dispatch();await h.call('/_test/scheduled',body({}));assert.equal(h.received.length,terminalReceipts,'terminal failure never resumes sending');assert.equal(h.external,0);
+  console.log(JSON.stringify({proof:'webhook-uncertain-and-bounded-retry',serverStatuses:uncertain.length-1,afterSendTimeouts:1,uncertainReceipts:uncertain.length,rateLimitSuccessReceipts:retries.length,rateLimitExhaustedReceipts:row.attempts,externalRequests:h.external}));
+ }finally{await h.close()}
 });
 test('destination policy, disabled configuration and contact erasure refuse pending work without leaking secrets',async()=>{
  const h=await harness();try{

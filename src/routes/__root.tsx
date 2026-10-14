@@ -1,3 +1,4 @@
+import { introGuardScript, introCss } from '../vendor/base/hydration/intro-guard';
 import { CompiledVisualEdits } from '../editor/EditorLauncher';
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 import NotFound from '../ui/homepage/NotFound'
@@ -24,5 +25,5 @@ export const Route = createRootRoute({
     };
   },
   notFoundComponent: NotFound,
-  component: () => <html lang="en"><head><HeadContent /></head><body><CompiledVisualEdits /><Outlet /><Scripts /></body></html>,
+  component: () => <html lang="en"><head><script dangerouslySetInnerHTML={{ __html: introGuardScript }} /><style>{introCss}</style><HeadContent /></head><body><CompiledVisualEdits /><Outlet /><Scripts /></body></html>,
 })

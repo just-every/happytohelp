@@ -30,11 +30,32 @@ Keep these, so you can always rebuild or roll back:
 - your own customizations
 - your migration receipts (the record of which database migrations you applied)
 
-Update the way you would take in any upstream change: merge the new source into
-your fork with Git.
+For a checkout cloned from the public repository, stop dev or preview and back
+up its state and private settings before updating. Keep your own commits and
+merge public main into them:
+
+```sh
+git fetch origin main
+git merge origin/main
+pnpm install --frozen-lockfile
+pnpm exec rer build
+pnpm exec rer deploy --dry-run
+```
+
+These commands use Node **22.20.0** and pnpm **10.12.4**. If `origin` is your own
+fork, fetch the public repository through your upstream remote and merge that
+remote's main instead. Resolve conflicts while retaining your customizations.
+The current package-mode instructions require current public source; the
+older `v0.4.1` tag does not contain this command-package conversion.
+
+The build and deployment dry run preserve local data and private settings and
+make no deployment. Do not reset or replace `.wrangler/state` during an update.
+Run setup with your existing owner and private answers to apply local migrations,
+then start `pnpm exec rer dev --foreground`. For a hosted installation, apply the
+reviewed update only through the owner-authorized deployment path.
 [Upgrade an existing installation](../OPERATIONS.md#upgrade-an-existing-installation)
-in the Operations guide lists the steps. The worked example below gives the
-exact Git commands for one release and shows how to roll back.
+covers backup and rollback; [Upgrading from 0.3.x](../OPERATIONS.md#upgrading-from-03x)
+covers retained owners and settings from the older local installer.
 
 > [!IMPORTANT]
 > Never overwrite SQL migrations that have already been applied, and never
@@ -131,9 +152,9 @@ Use Node **22.20.0** and pnpm **10.12.4**. Prepare private manifest answers
 as described in [Install](INSTALLER.md), then run:
 
 ```sh
-node scripts/rer.mjs install
-node scripts/rer.mjs setup --owner-email you@example.com --answers .seed/local-answers.json --port 12401
-node scripts/rer.mjs dev
+pnpm install --frozen-lockfile
+pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json --port 12401
+pnpm exec rer dev --foreground
 ```
 
 Setup prepares the native owner and stops its temporary app. Dev prints the
@@ -153,11 +174,11 @@ To hand support work to your own computer, use the local agent's pairing steps
 
 ### On your own Cloudflare account
 
-Use `node scripts/rer.mjs deploy --environment production` with the real
+Use `pnpm exec rer deploy --environment production` with the real
 `deploy.json` declaration and private owner-account credentials.
 [Deploy to your Cloudflare account](../OPERATIONS.md#deploy-to-your-cloudflare-account)
 covers prerequisites, secret custody and health boundaries. Local
-`node scripts/rer.mjs deploy --dry-run` builds/validates without provider requests.
+`pnpm exec rer deploy --dry-run` builds/validates without provider requests.
 
 **Website preview** lets owners and admins see their website with the chat
 widget on it. It needs its own custom-domain origin (`PREVIEW_ORIGIN`), pointed
@@ -195,7 +216,7 @@ it at `/setup`. Creating the first owner closes setup permanently.
 
 The **artifact** is the deployable package of your installation. You only need
 it if you deliver builds yourself or want to check a published build. To build
-it, run `node scripts/rer.mjs build` or `node scripts/rer.mjs verify`. Both run the pinned Base producer
+it, run `pnpm exec rer build` or `pnpm exec rer verify`. Both run the pinned Base producer
 (the packaging step, fixed to an exact upstream version) after Vite.
 
 - The producer writes `delivery-artifact/happytohelp-worker-artifact.json`.

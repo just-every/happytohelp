@@ -6,8 +6,8 @@ retained comparison archives; it does not generate the product or restrict owner
 changes to configuration. `base-copies.json` records byte-exact Base copies and
 Git modes. [Source origins](SOURCE-PROVENANCE.md) retains attribution/licensing.
 
-Run the app through `node scripts/rer.mjs`. The self-contained CLI export contains
-the shared operations implementation. Setup reads `rer-setup.json` with the
+Run the app through `pnpm exec rer` after `pnpm install --frozen-lockfile`.
+The exact `@runeditrun/rer` dependency supplies the shared command implementation. Setup reads `rer-setup.json` with the
 maintained manifest reader, while native owner/password identity stays in this
 edition's adapter. Do not patch copied Base files or create another setup schema,
 secret generator, process runner, readiness loop or archive engine.
@@ -34,6 +34,8 @@ pnpm run test:base-origin -- --base /absolute/base-checkout
 
 Use maintained `record-base` for new official copies. Preserve the selected
 archives and dependency closure, asset provenance and immutable applied SQL.
+`SEED-COMMAND-CONTRACT.md` is locally maintained documentation derived from Base;
+it is selected as HappyToHelp source rather than recorded as a byte-exact copy.
 Native passwords, tenant authority, privacy and import/undo equality remain
 product requirements. Public projection identities preserve approved original
 bytes separately from public source; never waive a publication scanner finding.

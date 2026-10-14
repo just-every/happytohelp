@@ -1,7 +1,6 @@
 import {scheduledProjects,advanceDispatchCursor,readyIntentSql} from './scheduling'
 import type {Env} from '../../platform/env'
-import {DeliveryService,createSlackNotifier} from '../../vendor/base/modules/integrations/index.ts'
-import {webhookProtocol} from './webhook-protocol'
+import {DeliveryService,createSlackNotifier,createWebhookProtocol} from '../../vendor/base/modules/integrations/index.ts'
 import {repository} from '../../platform/integration-authority'
 import {destination,DestinationUnavailable} from './destinations'
 import {httpsTransport} from './transport'
@@ -11,7 +10,7 @@ export const slackTemplates={
 }
 export function services(env:Env,projectId:string,transport= httpsTransport){
  const repo=repository(env,projectId),read=(id:string)=>destination(env,projectId,id)
- const webhook=new DeliveryService({repository:repo,transport,protocols:[webhookProtocol({resolveDestination:async id=>(await read(id)).secret.url,signingKey:async envelope=>{
+ const webhook=new DeliveryService({repository:repo,transport,protocols:[createWebhookProtocol({resolveDestination:async id=>(await read(id)).secret.url,signingKey:async envelope=>{
   const intent=await env.DB.prepare('SELECT e.erased_at FROM native_integration_intents i JOIN native_integration_events e ON e.id=i.event_id WHERE i.id=? AND i.project_id=? AND e.project_id=?').bind(envelope.id,projectId,projectId).first<any>()
   if(!intent||intent.erased_at!==null)throw Error('Event unavailable')
   const key=(await read(envelope.destinationId)).secret.key;return Uint8Array.from(key.match(/../g),(part:string)=>parseInt(part,16))

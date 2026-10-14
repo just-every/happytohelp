@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {createHmac,randomBytes} from 'node:crypto';
 import {harness,body} from './harness.mjs';
+import {assertResendPreparationRaces} from './resend-races.mjs';
 const root='/api/management/projects/p/connections';const events=['conversation.created','message.created','conversation.resolved','conversation.rated'];
 const webhook=(h,path='/all',project='p')=>h.call(`/api/management/projects/${project}/connections/webhooks`,{actor:project==='p'?'owner':'foreign',...body({name:'Receiver',url:'https://receiver.example.com'+path,events})});
 test('bounded scheduling bypasses historical workspaces and empty Slack conversations without starving ready work',async()=>{
@@ -217,4 +218,5 @@ test('resend refuses anonymous, operator, foreign, stale state, destination and 
   h.responses.push({status:500});const missing=await h.call(root+'/webhooks/'+changed.id+'/test',body({}));await h.db.prepare('DELETE FROM native_integration_intents WHERE id=?').bind(missing.id).run();await h.db.prepare('DELETE FROM native_integration_destinations WHERE id=?').bind(changed.id).run();assert.equal((await h.raw(root+'/deliveries/'+missing.id+'/resend',body({attempt:1}))).status,409);
   const erased=await h.raw('/_test/race',body({path,body:{attempt:1},match:'INSERT INTO native_integration_audit(id,project_id,actor_id,action',race:[{sql:"UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_erasing',1) WHERE id='visitor'"}]}));assert.equal(erased.status,409);assert.equal((await h.raw(path,body({attempt:1}))).status,404);await h.db.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_erased',1) WHERE id='visitor'").run();assert.equal((await h.raw(path,body({attempt:1}))).status,404);await h.dispatch();assert.equal(h.received.length,2);assert.equal((await h.db.prepare("SELECT count(*) n FROM native_integration_audit WHERE action LIKE 'delivery.resend.%'").first()).n,0);assert.equal(h.external,0);
  }finally{await h.close()}
+ await assertResendPreparationRaces();
 });

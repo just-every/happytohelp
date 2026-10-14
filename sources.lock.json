@@ -1491,6 +1491,10 @@
       "sha256": "b5d63c287f209e4c36cfe6cdd4d74cac66f6a55d1ffb47a6b5f6948350e284a1",
       "executable": false
     },
+    "docs/AGENT-FIX.md": {
+      "sha256": "462182695b6aff5a709ca94c88f96399eeaa999b4d20f4284756554410d11505",
+      "executable": false
+    },
     "docs/api.md": {
       "sha256": "a8e054738e097596ffdb603b79ce1b076ada0894b489f0f86f093d7803c57853",
       "executable": false
@@ -3111,12 +3115,16 @@
       "sha256": "0b6bd4d483207fb39537f7fd75b82b7798b3df35c7800db7d15ec0ac325f4def",
       "executable": false
     },
+    "src/modules/api-integrations/delivery-repository.ts": {
+      "sha256": "8abffce2b7dd9a25661273bb313ccb8aae2d90a151868b136ab38106d54eae32",
+      "executable": false
+    },
     "src/modules/api-integrations/destinations.ts": {
       "sha256": "97bbf45a18fd7e89ba3e2e5a6450a212c36afbc0cc5d4bcb3d0c4e2a5ed16aa4",
       "executable": false
     },
     "src/modules/api-integrations/dispatch.ts": {
-      "sha256": "aa17d1ff8d9edcc8260cda87f5e2057c57a56ea78006589f02f54992d5938a3c",
+      "sha256": "c72dd29aa8912212b62aa8f0addf6ba78119a0fd64cac89c5a0a66b7480ea463",
       "executable": false
     },
     "src/modules/api-integrations/egress.ts": {
@@ -3133,6 +3141,10 @@
     },
     "src/modules/api-integrations/README.md": {
       "sha256": "1504263b4cf3b97a2c97001c37416f6c7bdff1ae15d8e4cc11400e7102cc79fb",
+      "executable": false
+    },
+    "src/modules/api-integrations/resend.ts": {
+      "sha256": "7e3e2f6edeccb3057349bb8ce2480b1db40c8eb2f1a4192992fe9168eaadee54",
       "executable": false
     },
     "src/modules/api-integrations/routes.ts": {
@@ -6683,6 +6695,10 @@
       "sha256": "75d49280248fc0f64ec82bdb00cf33b5b5faf6a0c2ec53e8a3980e8f887ee5b8",
       "executable": false
     },
+    "src/ui/native/pages/connections/Deliveries.jsx": {
+      "sha256": "ed42418d0857c88c4c00f39ff4bcf15a4076a9990bddec3a55ccb2e9962b3f54",
+      "executable": false
+    },
     "src/ui/native/pages/connections/Destinations.jsx": {
       "sha256": "42f2f7bb6af9e28ea413041ea69f7bfd35de6a3c6e040b5bdc3aa0f26c098d25",
       "executable": false
@@ -7592,7 +7608,7 @@
       "executable": false
     },
     "tests/connections/delivery.mjs": {
-      "sha256": "4b98308796ebe7b0d2f0442871ec068a3f6ce33cc70cbddc3739181fb564313a",
+      "sha256": "bc146bb89096ff3f7dabaa6c744b3e50437eac47b1cc896b90a3dae848cacac8",
       "executable": false
     },
     "tests/connections/docs.mjs": {
@@ -7741,6 +7757,10 @@
     },
     "tests/delegation-documents.mjs": {
       "sha256": "1054e6c81438b7e7082e8d63acecea598c65c86529413a796df947224a6f76e7",
+      "executable": false
+    },
+    "tests/delegation-journey.mjs": {
+      "sha256": "bbb9ebd338c4d1eb2b3c2996f93e58851006b1f812c83a455126e3fe4750c806",
       "executable": false
     },
     "tests/delegation-runtime.mjs": {
@@ -8053,6 +8073,34 @@
     },
     "tests/helpers/base-origin-fixture.mjs": {
       "sha256": "cc12f4fe83366979a999c5df88cfae52b28f1c5efd693f966cc2460264ba4a25",
+      "executable": false
+    },
+    "tests/helpers/delegation-journey/browser-ui.mjs": {
+      "sha256": "19df22d1b60aa100e40ecc17ed1317dbe370ef9d51a245a4028fc5ba8adc1a2a",
+      "executable": false
+    },
+    "tests/helpers/delegation-journey/browser.mjs": {
+      "sha256": "98d58ad9f331e8ae625b3fdb23d27461915fbdf4439e4917ffc678bc60ce4a8b",
+      "executable": false
+    },
+    "tests/helpers/delegation-journey/case.mjs": {
+      "sha256": "f8185dd85874d8a7cb6803a12cbbdf9f9667e5a4b37f59990edb17233128a1fd",
+      "executable": false
+    },
+    "tests/helpers/delegation-journey/connector.mjs": {
+      "sha256": "5e3e209fb8861f51333221fb123e35de631dafbff97a6a0ec0af7db4c7c5f7c8",
+      "executable": false
+    },
+    "tests/helpers/delegation-journey/fixture.mjs": {
+      "sha256": "752b140e4e644b41227b1df7ff9dbc55afbe21a4470228812325d5a3a565f761",
+      "executable": false
+    },
+    "tests/helpers/delegation-journey/provider.mjs": {
+      "sha256": "8778366bb7e0cf1fca8d6fa79ecbdd637aadb30ee5bb4dacc476e4cc2bf367e1",
+      "executable": true
+    },
+    "tests/helpers/delegation-journey/refusals.mjs": {
+      "sha256": "2d325c37bab3317d0eff1839b1790a659eecd52e03cc0759d214da6577d82f8e",
       "executable": false
     },
     "tests/helpers/delegation-worker.mjs": {

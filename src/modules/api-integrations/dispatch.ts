@@ -9,7 +9,11 @@ export const slackTemplates={
  'integration.test':()=>({summary:'Slack connection test',sections:['This is an explicit test from your support workspace.']})
 }
 export function services(env:Env,projectId:string,transport= httpsTransport){
- const repo=new NativeDeliveryRepository(env,projectId),read=(id:string)=>destination(env,projectId,id)
+ const repo=new NativeDeliveryRepository(env,projectId),read=async(id:string)=>{
+  const target=await destination(env,projectId,id)
+  repo.observeDestination(id,target.secret_ciphertext)
+  return target
+ }
  const webhook=new DeliveryService({repository:repo,transport,protocols:[createWebhookProtocol({resolveDestination:async id=>(await read(id)).secret.url,signingKey:async envelope=>{
   const intent=await env.DB.prepare('SELECT e.erased_at FROM native_integration_intents i JOIN native_integration_events e ON e.id=i.event_id WHERE i.id=? AND i.project_id=? AND e.project_id=?').bind(envelope.id,projectId,projectId).first<any>()
   if(!intent||intent.erased_at!==null)throw Error('Event unavailable')

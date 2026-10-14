@@ -27,7 +27,7 @@ const origin=`http://127.0.0.1:${port}`;
 const setup=['setup','--owner-email',email,'--answers','.seed/local-answers.json','--port',String(port)];
 const json=async(path,body,token)=>{
  const response=await fetch(origin+path,{method:body?'POST':'GET',headers:{Origin:origin,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},...(body?{body:JSON.stringify(body)}:{})});
- assert.equal(response.ok,true,`Native ${path} must succeed`);return response.json();
+ assert.equal(response.ok,true,`Native ${body?'POST':'GET'} ${path} returned HTTP ${response.status}`);return response.json();
 };
 async function start(){
  await waitForServingCapacity();
@@ -88,8 +88,8 @@ try{
  await run(root,['reset','--yes'],4); // Active-state refusal.
  await stop();await run(root,setup);
  assert.ok(privateBefore.equals(await readFile(join(root,'.dev.vars'))),'setup must preserve exact private bytes');
- await start();const retained=await json('/api/identity/login',{email,password});
- assert.equal(retained.actor.id,actor.id);
+ await start();const retained=await json('/api/identity/login',{email,password,projectId:project.id});
+ assert.equal(retained.actor.id,actor.id);assert.equal(retained.actor.projectId,project.id);
  assert.ok((await json('/api/management/projects',undefined,retained.token)).data.some(row=>row.id===project.id));
  const portable=await seedPortableData(origin,project.id,retained.token,json);
  await stop();
@@ -117,11 +117,31 @@ try{
  compareArchive(before,await archiveSnapshot(root),['rer_journey_additive']);
  const migrationCount=()=>archiveStorage(root,async({DB})=>(await DB.prepare("SELECT count(*) n FROM d1_migrations WHERE name='9999_rer_journey.sql'").first()).n);
  assert.equal(await migrationCount(),1);
- await run(root,setup);await start();
- const restored=await json('/api/identity/login',{email,password});assert.equal(restored.actor.id,actor.id);
+ const restoredData=await archiveSnapshot(root);
+ const ledgerSnapshot=()=>archiveStorage(root,async({DB})=>{
+  const ledgers={};for(const {name} of (await DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('d1_migrations','_rer_deploy_migrations') ORDER BY name").all()).results)ledgers[name]=(await DB.prepare(`SELECT * FROM ${name} ORDER BY name`).all()).results;
+  return ledgers;
+ });
+ const restoredLedgers=await ledgerSnapshot();
+ let restoredPrivate;
+ for(let i=0;i<2;i++){
+  await run(root,setup);
+  compareArchive(restoredData,await archiveSnapshot(root));
+  assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore setup preserves every migration ledger row');
+  const currentPrivate=await readFile(join(root,'.dev.vars'));
+  if(restoredPrivate)assert.ok(restoredPrivate.equals(currentPrivate),'second post-restore setup preserves exact private bytes');
+  restoredPrivate=currentPrivate;
+ }
+ await start();
+ const restored=await json('/api/identity/login',{email,password,projectId:project.id});assert.equal(restored.actor.id,actor.id);assert.equal(restored.actor.projectId,project.id);
  assert.ok((await json('/api/management/projects',undefined,restored.token)).data.some(row=>row.id===project.id));
+ // Login legitimately advances the portable integration authority epoch.
+ // Snapshot after login so replay/read checks still compare every portable row.
+ await stop();const beforeRestoredReads=await archiveSnapshot(root);await start();
  await verifyPortableData(origin,portable,restored.token,json);
  await stop();assert.equal(await migrationCount(),1);
+ compareArchive(beforeRestoredReads,await archiveSnapshot(root));
+ assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore reads and refused replays preserve migration history');
  await run(root,['deploy','--dry-run']);
  await run(root,['reset','--yes']);await rm(additive);await run(root,setup);await start();
  const fresh=await json('/api/identity/login',{email,password});assert.notEqual(fresh.actor.id,actor.id);
@@ -129,12 +149,12 @@ try{
  await stop();
  // The owner's export remains in the checkout; generated files do not alter source.
  assert.equal((await execute('git',['status','--porcelain','--untracked-files=no'],{cwd:root})).stdout,'','journey preserves tracked source');
- console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, import custody and erasure fences, deploy dry-run, reset and fresh owner.');
+ console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, completed/repeated/undone/erased import custody, restored erasure replay fences, two post-restore setups without data or ledger changes, deploy dry-run, reset and fresh owner.');
 }catch(error){
  // Browser diagnostics can contain one-use fragment capabilities; emit only a safe source location.
  const line=/rer-journey\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';
- const diagnostic=/^Rer (?:dev|preview) (?:exited \d+ before the required event|exceeded its deadline); [a-z_]+, (?:machine load|disk space|server capacity|active operation|see private capture)$/.test(error.message??'')?`; ${error.message}`:'';
- throw Error(`Rer journey failed (${error.name}, source line ${line}${diagnostic}); private browser diagnostics withheld.`);
+ const diagnostic=/^(?:Rer (?:dev|preview) (?:exited \d+ before the required event|exceeded its deadline); [a-z_]+, (?:machine load|disk space|server capacity|active operation|see private capture)|Native (?:GET|POST) \/[a-zA-Z0-9_/-]+ returned HTTP \d{3})(?:\n|$)/.exec(error.message??'')?.[0].trim();
+ throw Error(`Rer journey failed (${error.name}, source line ${line}${diagnostic?'; '+diagnostic:''}); private browser diagnostics withheld.`);
 }finally{
  if(browser)await browser.close();if(server)await server.stop();
  await rm(scratch,{recursive:true,force:true});

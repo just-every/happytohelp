@@ -1,5 +1,38 @@
 import assert from 'node:assert/strict';
 import {generate} from '../move-in/generator.mjs';
+import {customer,history} from '../move-in/helpscout-fixtures.mjs';
+
+export async function seedImportHistory(origin,projectId,token,json){
+ const base=`/api/move-in/projects/${projectId}/imports`;
+ const upload=async(body,status=201)=>{
+  const response=await fetch(origin+base+'?vendor=helpscout',{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Import-Filename':'archive-history.jsonl'},body});
+  assert.equal(response.status,status);return response.json();
+ };
+ const wait=async(id,state)=>{for(let i=0;i<240;i++){const run=(await json(base+'/'+id,undefined,token)).data;if(run.state===state)return run;assert.equal(run.error,null);await new Promise(resolve=>setTimeout(resolve,250))}assert.fail(`Import did not reach ${state}`)};
+ const apply=async body=>{const {data:uploaded}=await upload(body),ready=await wait(uploaded.id,'ready');assert.equal(ready.plan.counts.rejected,0);await json(base+'/'+ready.id+'/apply',{fingerprint:ready.plan.fingerprint},token);return wait(ready.id,'completed')};
+ const completedBody=generate('helpscout',1),completed=await apply(completedBody);
+ const repeat=await upload(completedBody,200);assert.equal(repeat.alreadyImported,true);assert.equal(repeat.writes,0);assert.equal(repeat.data.id,completed.id);
+ // Disjoint source identities keep erasure and undo from altering retained history.
+ const bodyFor=(id,contact)=>{const record=history(id,contact);record.conversation.tags=[];return [customer(contact,`person${contact}@example.test`),record.conversation,record.page].map(JSON.stringify).join('\n')};
+ const undone=await apply(bodyFor(20002,1002));await json(base+'/'+undone.id+'/undo',{},token);await wait(undone.id,'undone');
+ const erasedBody=bodyFor(20003,1003),erased=await apply(erasedBody);
+ const contacts=(await json(`/api/management/projects/${projectId}/contacts`,undefined,token)).data;
+ const contact=contacts.find(row=>row.email==='person1003@example.test');assert.ok(contact);
+ await json(`/api/management/projects/${projectId}/contacts/${contact.id}/erase`,{},token);await wait(erased.id,'erased');
+ return {completedId:completed.id,undoneId:undone.id,erasedId:erased.id,erasedContactId:contact.id,completedBody,erasedBody};
+}
+
+export async function verifyImportHistory(origin,projectId,state,token,json){
+ const base=`/api/move-in/projects/${projectId}/imports`;
+ for(const [id,expected] of [[state.completedId,'completed'],[state.undoneId,'undone'],[state.erasedId,'erased']])assert.equal((await json(base+'/'+id,undefined,token)).data.state,expected);
+ const contact=(await json(`/api/management/projects/${projectId}/contacts/${state.erasedContactId}`,undefined,token)).data;
+ assert.equal(contact.email,null);assert.equal(JSON.parse(contact.metadata_json).is_erased,1);
+ const upload=body=>fetch(origin+base+'?vendor=helpscout',{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Import-Filename':'restored-history.jsonl'},body});
+ const repeat=await upload(state.completedBody);assert.equal(repeat.status,200);const result=await repeat.json();assert.equal(result.alreadyImported,true);assert.equal(result.writes,0);assert.equal(result.data.id,state.completedId);
+ for(const body of [state.erasedBody,'\n'+state.erasedBody,state.erasedBody.replaceAll('person1003@example.test','changed-after-restore@example.test')]){
+  const replay=await upload(body);assert.equal(replay.status,410);await replay.arrayBuffer();
+ }
+}
 
 export async function seedPortableData(origin,projectId,token,json){
  const project=await json(`/api/identity/projects/${projectId}`,undefined,token);
@@ -11,15 +44,12 @@ export async function seedPortableData(origin,projectId,token,json){
  const retained=await json('/api/conversations',{projectId},kept.token);
  const bytes=Uint8Array.from([0,255,128,42,13,10]);
  const upload=await fetch(origin+`/api/conversations/${retained.id}/media`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Filename':'retained.bin'},body:bytes});assert.equal(upload.status,201);const media=await upload.json();
- const base=`/api/move-in/projects/${projectId}/imports`;
- const response=await fetch(origin+base+'?vendor=helpscout',{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Import-Filename':'archive-history.jsonl'},body:generate('helpscout',1)});assert.equal(response.status,201);let run=(await response.json()).data;
- const wait=async state=>{for(let i=0;i<240;i++){run=(await json(base+'/'+run.id,undefined,token)).data;if(run.state===state)return;assert.equal(run.error,null);await new Promise(resolve=>setTimeout(resolve,250))}assert.fail(`Import did not reach ${state}`)};
- await wait('ready');await json(base+'/'+run.id+'/apply',{fingerprint:run.plan.fingerprint},token);await wait('completed');
- return {projectId,erasedContactId:visitor.contactId,conversationId:retained.id,mediaId:media.id,bytes:[...bytes],runId:run.id};
+ const imports=await seedImportHistory(origin,projectId,token,json);
+ return {projectId,erasedContactId:visitor.contactId,conversationId:retained.id,mediaId:media.id,bytes:[...bytes],imports};
 }
 export async function verifyPortableData(origin,state,token,json){
  const contact=(await json(`/api/management/projects/${state.projectId}/contacts/${state.erasedContactId}`,undefined,token)).data;
  assert.equal(contact.email,null);assert.equal(JSON.parse(contact.metadata_json).is_erased,1);
- const run=(await json(`/api/move-in/projects/${state.projectId}/imports/${state.runId}`,undefined,token)).data;assert.equal(run.state,'completed');
+ await verifyImportHistory(origin,state.projectId,state.imports,token,json);
  const response=await fetch(origin+`/api/conversations/${state.conversationId}/media/${state.mediaId}`,{headers:{Authorization:`Bearer ${token}`}});assert.equal(response.status,200);assert.deepEqual([...new Uint8Array(await response.arrayBuffer())],state.bytes);
 }

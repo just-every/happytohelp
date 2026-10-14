@@ -52,17 +52,17 @@ body.conversation-workspace #chat .conversation-inbox {
     .search-query { flex: 0 0 auto; width: 100%; margin: 0; }
     .search-query .input-group {
         flex-wrap: nowrap;
-        border: 1.5px solid var(--field-line);
+        border: 1px solid var(--field-line);
         border-radius: 8px;
         background: var(--surface);
         transition: border-color .15s ease, box-shadow .15s ease;
 
-        &:hover { border-color: var(--ink); }
-        &:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
+        &:hover { border-color: rgba(var(--ink-rgb), .7); }
+        &:focus-within { border-color: var(--ink); box-shadow: 0 0 0 2px var(--d-cyan-deep); }
     }
     .search-query .form-control,
     .search-query .btn {
-        min-height: 41px;
+        min-height: 42px;
         border: 0;
         background: transparent !important;
         box-shadow: none;

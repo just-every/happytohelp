@@ -1,8 +1,8 @@
-/* The article's Markdown editor: a tile (ink outline, 12px radius) with a toolbar of ink icons, groups split by rules,
+/* The article's Markdown editor: a tile (hairline field outline, 12px radius) with a toolbar of ink icons, groups split by rules,
    and Write / Preview as a segmented control whose current half is the aqua pill. */
 .article-markdown-editor {
     overflow: hidden;
-    border: 1.5px solid var(--ink);
+    border: 1px solid var(--field-line);
     border-radius: 12px;
     background: var(--surface);
     color: var(--ink);
@@ -12,7 +12,7 @@
 
 .article-markdown-editor:focus-within {
     border-color: var(--ink);
-    box-shadow: 0 0 0 3px var(--d-cyan-deep);
+    box-shadow: 0 0 0 2px var(--d-cyan-deep);
 }
 
 .article-markdown-header {
@@ -182,7 +182,7 @@
 
 /* Categories: aqua chips with remove buttons and the inline input, in one field. */
 .category-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 56px; padding: 8px 12px; cursor: text; }
-.category-chips:focus-within { border-color: var(--ink); box-shadow: 0 0 0 3px var(--d-cyan-deep); }
+.category-chips:focus-within { border-color: var(--ink); box-shadow: 0 0 0 2px var(--d-cyan-deep); }
 .category-chips__chip { min-height: 32px; padding: 0 6px 0 14px; font-size: 15px; }
 .category-chips__chip button { display: inline-grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; color: var(--ink); background: none; }
 .category-chips__chip button:hover { background: var(--surface); }

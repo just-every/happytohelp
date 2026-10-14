@@ -1,5 +1,5 @@
-// The conversation drawn like the landing's hero thread: the customer's messages in white ink-outlined bubbles (the
-// drawn card), the team's in aqua. These rules only change the rows inside the transcript, so paging and
+// The conversation drawn like the landing's hero thread: the customer's messages in white hairline bubbles (the
+// drawn card's shape), the team's in aqua. These rules only change the rows inside the transcript, so paging and
 // follow-to-bottom behaviour remain intact.
 body.conversation-workspace #chat {
 
@@ -103,12 +103,12 @@ body.conversation-workspace #chat {
         .transcript-message-main,
         .transcript-note-main { min-width: 0; }
 
-        // The customer's bubble: the landing's drawn card.
+        // The customer's bubble: a hairline card in the landing's drawn shape.
         [data-transcript-side="left"] .transcript-message-card {
-            border: 1.5px solid var(--ink);
+            border: 1px solid var(--rule-strong);
             border-radius: var(--card-radius);
             background: var(--surface);
-            box-shadow: var(--card-shadow);
+            box-shadow: none;
         }
 
         .transcript-message-section + .transcript-message-section {
@@ -363,7 +363,7 @@ body.conversation-workspace #chat {
             width: 100%;
             box-sizing: border-box;
             padding: 12px 16px 14px;
-            border: 1.5px dashed var(--ink);
+            border: 1px dashed var(--ink);
             border-radius: 12px;
             background: var(--note);
             box-shadow: none;

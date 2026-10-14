@@ -28,7 +28,7 @@
 .project-account .project-avatar:has(img) .d-flex input { margin-left: 0; }
 .project-account .project-avatar img { width: 82px; height: 82px; border-radius: 50% !important; object-fit: cover; }
 
-.project-list-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; }
+.project-list-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 12px; overflow: hidden; }
 .project-list-table th { padding: 14px 20px; color: var(--ink-soft); font-size: 14px; font-weight: 500; letter-spacing: 0.06em; text-align: left; text-transform: uppercase; }
 .project-list-table td { height: 56px; padding: 10px 20px; border-top: 1px solid var(--rule); }
 .project-list-table th:first-child { width: 74%; }
@@ -37,7 +37,7 @@
 .project-list-menu summary { display: flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; margin: -6px 0; cursor: pointer; list-style: none; }
 .project-list-menu summary::-webkit-details-marker { display: none; }
 .project-list-menu a { display: block; padding: 6px; }
-.project-list-menu[open] > div { position: absolute; right: 0; z-index: 2; min-width: 120px; padding: 8px; border: 2px solid var(--ink); border-radius: var(--card-radius); background: var(--surface); box-shadow: var(--card-shadow); }
+.project-list-menu[open] > div { position: absolute; right: 0; z-index: 2; min-width: 120px; padding: 8px; border: 1px solid var(--rule-strong); border-radius: var(--card-radius); background: var(--surface); box-shadow: var(--menu-shadow); }
 .project-list-create { float: right; margin-top: -64px; }
 
 @media (max-width: 767px) {

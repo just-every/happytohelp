@@ -9,11 +9,10 @@ git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp && rer dev
 ```
 
-On this revision, automatic setup stops if `WIDGET_ORIGIN` and `OWNER_PASSWORD`
-have not been supplied. Follow [private-answer setup](docs/INSTALLER.md#private-setup-answers)
-before running `rer dev` again. Once setup completes, dev prints the sign-in
-outbox link. No email or AI account is needed. Use `rer dev --stop` from the
-checkout to stop the managed app.
+`rer dev` uses its local address for the chat widget and generates a private
+owner password, then prints the development sign-in outbox link. No private
+answers, email service or AI account are needed. Open the link and sign in to
+your workspace. Use `rer dev --stop` from the checkout to stop the managed app.
 
 ## Scripted setup and command reference
 

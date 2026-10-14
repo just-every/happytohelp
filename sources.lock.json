@@ -2092,7 +2092,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "29b28e72fbfd589ae0556e3e3cf53df38fa7df18d5639362e1e0ce2a4c4efe55",
+      "sha256": "c9afe3508b5deb0d81089b39dc078308512cbd14adf9acfb9c11645c7b9a6840",
       "executable": false
     },
     "package.json": {
@@ -2168,7 +2168,7 @@
       "executable": false
     },
     "RUN-LOCALLY.md": {
-      "sha256": "a155c2e0291ce6074730ef87fbf6987515b022fb7c17b7deb457621e2e0495f1",
+      "sha256": "569c17b09e0c2b39eb085e70c4a9c23e161638a8592fcb85ce6ec9bda2ee2cd6",
       "executable": false
     },
     "scripts/build-local-agent.cjs": {

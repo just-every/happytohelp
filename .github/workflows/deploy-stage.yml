@@ -55,15 +55,17 @@ jobs:
     timeout-minutes: 60
     # Selected source can execute ONLY here, without any Environment credentials.
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          ref: ${{ needs.validate.outputs.sha }}
-          persist-credentials: false
+      # Tooling is installed before the candidate source exists on disk, so no
+      # candidate .npmrc or package file can influence it.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '26.8.1'
       - name: Install declared package manager
         run: npm install --global pnpm@10.12.4 --ignore-scripts
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+          persist-credentials: false
       - name: Verify then package native Worker
         env:
           WRANGLER_SEND_METRICS: 'false'

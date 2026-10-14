@@ -3631,7 +3631,7 @@
       "executable": false
     },
     ".github/workflows/deploy-stage.yml": {
-      "sha256": "5e578cec3e3aacda557b8209eec37fa7ffc5ca4e8f44a0b3b1357d2ac0f30e44",
+      "sha256": "522ca7463ec40e8dac751b8f10afd878f0d90d988e1d05b00adcc033897c95a5",
       "executable": false
     },
     ".github/workflows/live-proof.yml": {

@@ -22,7 +22,7 @@ await call(`/api/conversations/${f.conversationId}/messages`,{localId:'ui-initia
 await mkdir(evidenceDir,{recursive:true});
 const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[],failed=[],checks=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)failed.push({status:r.status(),path:new URL(r.url()).pathname});});
 try{
- await page.goto(origin+'/login');await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
+ await page.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${f.projectId}/conversations`));await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
  await page.goto(`${origin}/projects/${f.projectId}/conversations/${f.conversationId}`);await page.locator('.transcript-message-content').getByText('Can you help me update my account?',{exact:true}).waitFor();
  assert.equal(await page.getByRole('link',{name:'Billing',exact:true}).count(),0);
  assert.equal((await page.request.get(`${origin}/projects/${f.projectId}/billing`)).status(),404);

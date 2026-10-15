@@ -9,6 +9,7 @@ import externalLinks from 'remark-external-links';
 import '../styles/components/MessageItem.scss';
 import LocalAgentBadge from './LocalAgentBadge';
 import MessageTimestamp from './MessageTimestamp';
+import MessageMailStatus from './MessageMailStatus';
 import {visibleMessageContent} from '../../../modules/conversations/citations.js';
 
 function MessageItem({ message, conversation, showActor = true, grouped = false, showHeader = true }) {
@@ -29,6 +30,7 @@ function MessageItem({ message, conversation, showActor = true, grouped = false,
             { message.erased_at && <p className="mb-1 transcript-message-erased"><em>Message erased</em></p> }
             { message.content && <ReactMarkdown remarkPlugins={[gfm, externalLinks]} className="mb-1">{ visibleMessageContent(message.content) }</ReactMarkdown> }
             <MessageCitations message={message} />
+            <MessageMailStatus status={message.email_status} />
             { message.media && message.media.map(media => (
                 <Media key={ media.id } media={ media }/>
             )) }

@@ -52,7 +52,15 @@ export class WidgetTransport {
     try { return await this.reconnecting; } finally { this.reconnecting = null; }
   }
   async initialize(contact) {
-    const configuration = await this.request(`/api/widget/settings?widgetKey=${encodeURIComponent(this.widgetKey)}${contact?.preview_token ? `&previewToken=${encodeURIComponent(contact.preview_token)}` : ""}`);
+    let configuration;
+    try {
+      configuration = await this.request(`/api/widget/settings?widgetKey=${encodeURIComponent(this.widgetKey)}${contact?.preview_token ? `&previewToken=${encodeURIComponent(contact.preview_token)}` : ""}`);
+    } catch (error) {
+      if (error.status === 403 || error instanceof TypeError) {
+        throw new Error(`Support could not connect on ${location.origin}. Site owner: open HappyToHelp > Settings > Widget and allow this exact Website origin. Also check that the HappyToHelp address is reachable.`);
+      }
+      throw error;
+    }
     this.configuration = configuration;
     this.onEvent({type: 'configuration', configuration});
     try { this.session = JSON.parse(localStorage.getItem(this.storageKey)); } catch { this.session = null; }

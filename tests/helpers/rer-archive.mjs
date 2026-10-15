@@ -38,7 +38,7 @@ export function compareArchive(before,after,added=[]){
  assert.deepEqual(after.objects,before.objects,'all R2 bytes and metadata survive');
 }
 
-// Setup/dev intentionally issue one fresh local sign-in. Validate its entire
+// An explicit native magic-link request issues one fresh local sign-in. Validate its entire
 // receipt against native token and outbox custody, then compare every table.
 export async function compareSignInArchive(root,before,after,{email,ownerId,origin,since}){
  const previous=new Set(before.rows.email_deliveries),added=after.rows.email_deliveries.filter(row=>!previous.has(row));

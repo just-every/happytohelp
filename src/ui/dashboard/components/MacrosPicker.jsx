@@ -28,7 +28,7 @@ export default function MacrosPicker({ onPicked, projectId }) {
     const conversation = conversationData[activeConversationId];
 
     const handleClick = (macro) => {
-        const contactName = conversation.contact.provided_name ? conversation.contact.provided_name : conversation.contact.name;
+        const contactName = conversation.contact.provided_name?.trim() || conversation.contact.name?.trim();
         const agentName = currentAgent.name;
 
         const regexp = /{{([^{}]+)}}/g;
@@ -42,7 +42,7 @@ export default function MacrosPicker({ onPicked, projectId }) {
             const key = split[0].trim();
             return (Object.hasOwn(map, key) && map[key])
                 ? map[key]
-                : fallback;
+                : fallback || (key === 'contact.name' ? 'there' : '');
         });
 
         onPicked(content);

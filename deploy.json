@@ -53,6 +53,10 @@
       "environment": "INTEGRATION_ENCRYPTION_KEY"
     },
     {
+      "binding": "INBOUND_EMAIL_TOKEN",
+      "environment": "INBOUND_EMAIL_TOKEN"
+    },
+    {
       "binding": "EMAIL_PROVIDER",
       "environment": "EMAIL_PROVIDER"
     },
@@ -62,6 +66,18 @@
     },
     {
       "binding": "EMAIL_API_KEY",
+      "environment": "EMAIL_API_KEY"
+    },
+    {
+      "binding": "MAIL_PROVIDER",
+      "environment": "EMAIL_PROVIDER"
+    },
+    {
+      "binding": "MAIL_FROM",
+      "environment": "EMAIL_FROM"
+    },
+    {
+      "binding": "MAIL_API_KEY",
       "environment": "EMAIL_API_KEY"
     }
   ]

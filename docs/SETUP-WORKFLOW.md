@@ -3,7 +3,12 @@
 Prepare the first owner through [Install](INSTALLER.md), using
 `pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json`.
 Setup creates the native owner and first workspace before it exits. Start with
-`pnpm exec rer dev` and sign in through the printed development outbox.
+`pnpm exec rer dev` and wait for `RER_READY` and the app address. Open
+`/login/magic` on that address, enter the local owner's email shown by dev and
+choose **Create local sign-in link**. Then open `/__dev/outbox` on the same app
+address, choose the newest sign-in email, follow its link and press **Sign in**.
+The outbox may initially contain only a welcome email; request the sign-in link
+first. No mail is sent.
 The owner decision retains native passwords, prior account/workspace data and
 HappyToHelp's own tenant/permission checks.
 
@@ -24,8 +29,10 @@ hosted installation, the private setup token. Local setup takes the same
 answers from the private file; only the website and the owner password are
 required, and the owner email comes from the command. Anything you do not give is
 derived: the workspace name from your website (or your company email domain), your
-name from your email and a default colour. Each can be changed afterwards. Native
-bootstrap checks origin, validates inputs and claims the first owner atomically.
+name from your email and a default colour. When the website is a `workers.dev`
+deployment address, the default workspace name is **My workspace** regardless of
+the owner email; an explicitly chosen native workspace name takes precedence.
+Each can be changed afterwards. Native bootstrap checks origin, validates inputs and claims the first owner atomically.
 Failed claims do not leave partial credentials or memberships. Concurrent claims
 cannot create two owners. Imported identity state also closes first-owner setup.
 
@@ -45,9 +52,11 @@ whatever happens to that email.
 
 The website hosting the widget is separate from the HappyToHelp app origin.
 Supply an exact HTTP(S) origin: scheme and hostname, with an explicit port when
-needed, but no path, query, credentials or fragment. The widget is admitted only
-on the saved origin. Configure it through **Settings → Widget**; do not expose
-an operator token or the server verification secret to customer code.
+needed, but no path, query, credentials or fragment. The widget is admitted on
+the saved website origin and always on the HappyToHelp app's own origin. Configure
+the external website through **Settings → Widget → Settings**; keep the app address
+in the installation snippet. Do not expose an operator token or the server
+verification secret to customer code. See [the local widget walkthrough](INSTALLER.md#try-the-customer-widget-locally).
 
 ## After setup
 
@@ -116,8 +125,12 @@ explicit and never replaces customer data. See [Workspace workflows](WORKSPACE-W
 Only explicit trusted local configuration selects development mail. The outbox
 is loopback-only, escaped and non-cacheable; it stores sensitive local captures.
 Production has neither this sender nor viewer. Failed real delivery never falls
-back to capture. Open the newest message from `pnpm exec rer outbox` while
-dev is running, follow its link and press **Sign in**. No email is sent.
+back to capture. While dev is running, open `/login/magic` on its printed app
+address, enter the local owner's email shown by dev and choose **Create local
+sign-in link**. Then open `/__dev/outbox` on that app address, choose the newest
+sign-in email, follow its link and press **Sign in**. No email is sent.
+Alternatively, `pnpm exec rer outbox --owner-email you@example.com` requests a new
+sign-in email for your actual local owner and reports the viewer address.
 
 Stop dev before reset/export/import. Use [Operations](../OPERATIONS.md#local-data-and-backups)
 for confirmed reset and private backups. Re-running setup preserves existing

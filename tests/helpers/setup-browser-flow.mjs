@@ -85,7 +85,7 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         checks.push('owner cookie and dashboard survive reload');
         await page.screenshot({ path: join(evidenceDir, 'created-workspace.png'), fullPage: true });
         assert.equal(await page.evaluate(async () => (await fetch('/api/identity/session', { method: 'DELETE' })).status), 200);
-        await page.goto(origin + '/login');
+        await page.goto(origin + '/login?returnTo=' + encodeURIComponent(`/projects/${projectId}/conversations`));
         await page.getByLabel('Email',{exact:true}).fill(email);
         await page.getByLabel('Password', { exact: true }).fill(password);
         await page.getByRole('button', { name: 'Login', exact: true }).click();

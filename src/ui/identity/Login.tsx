@@ -4,6 +4,7 @@ import IdentityFrame from './IdentityFrame';
 import SignInDrawing from './SignInDrawing';
 import { Alert, Field, SubmitButton } from './fields';
 import { postJson, useAuthOptions, useSignInMail } from './hooks';
+import { signInDestination } from './sign-in-destination';
 
 // HTTP redirects inherit a document fragment that the server never receives.
 // Carry that fragment into the same validated destination for client sign-in.
@@ -24,7 +25,7 @@ export default function Login() {
         const form = new FormData(event.currentTarget);
         try {
             const result = await postJson('/api/identity/login', { email: form.get('email'), password: form.get('password') });
-            location.assign(loginDestination(requestedDestination(), location.origin, result.accountOnly));
+            location.assign(await signInDestination(requestedDestination(), location.origin, result.accountOnly));
         } catch (failure: any) { setError(failure.message); setBusy(false); }
     };
     return <IdentityFrame drawing={<SignInDrawing intro />}>

@@ -23,7 +23,7 @@ try{
  assert.equal((await request(`/api/conversations/${keptConversation.id}/messages`,{token:kept.token,body:{localId:'keep-1',content:'I am staying',expectedRevision:0}})).accepted,true);
 
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[],checks=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(origin+'/login');await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
+ await page.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${projectId}/conversations`));await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
  await page.goto(`${origin}/projects/${projectId}/contacts`);await page.getByRole('link',{name:'Erasure Visitor',exact:true}).click();
  await page.waitForURL(`**/projects/${projectId}/contacts/${visitor.contactId}`);await page.getByRole('heading',{name:'Erasure Visitor'}).waitFor();
  const start=page.getByRole('button',{name:'Erase personal data…',exact:true});await start.click();

@@ -8,7 +8,7 @@ export function loopSuppressionHeaders(message:{actor_role?:unknown}){return {'A
 export async function notifyMessage(env:Env,message:any,actor:Actor){
  const deliveryId=`message:${message.id}:notification`,prior=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(deliveryId).first<any>();if(prior)return {state:prior.state,id:prior.provider_id,recipient:prior.recipient};if(!await isProjectActive(env,actor.projectId))return {state:'project_deleted'};if(!emailConfigured(env))return {state:'not_configured'}
  const conversation=await env.DB.prepare('SELECT c.*,ct.email,ct.metadata_json FROM conversations c JOIN contacts ct ON ct.id=c.contact_id AND ct.project_id=c.project_id WHERE c.id=? AND c.project_id=?').bind(message.conversation_id,actor.projectId).first<any>();if(!conversation)return {state:'not_found'}
- const settings=await env.DB.prepare('SELECT * FROM email_settings WHERE project_id=? AND is_enabled=1').bind(actor.projectId).first<any>();if(!settings)return {state:'disabled'};const replyTo=replyAddress(settings.inbound_address,conversation.id)||undefined
+ const settings=await env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(actor.projectId).first<any>();if(settings?.is_enabled===0)return {state:'disabled'};const replyTo=settings&&env.INBOUND_EMAIL_TOKEN?replyAddress(settings.inbound_address,conversation.id)||undefined:undefined
  // RFC 3834: mark every notification as automatic so the recipient's autoresponder
  // stays quiet. An AI reply is auto-replied; any other notification is auto-generated.
  const headers=loopSuppressionHeaders(message)
@@ -18,7 +18,5 @@ export async function notifyMessage(env:Env,message:any,actor:Actor){
   return deliver(env,{replyTo,projectId:actor.projectId,to:user.email,subject:'New HappyToHelp conversation reply',text:String(message.content),headers,idempotencyKey:deliveryId})
  }
  if(!conversation.email)return {state:'no_recipient'}
- // Avoid notifying a contact actively reading the widget.
- if(Date.now()-Number(JSON.parse(conversation.metadata_json||'{}').last_seen_at||0)<90000)return {state:'online'}
  return deliver(env,{replyTo,projectId:actor.projectId,to:conversation.email,subject:'Reply to your support conversation',text:String(message.content),headers,idempotencyKey:deliveryId})
 }

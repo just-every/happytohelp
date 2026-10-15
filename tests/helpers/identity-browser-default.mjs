@@ -128,7 +128,7 @@ export async function checkInvitationAcceptance({ origin, kit, runtime }, ownerS
     await kit.done(page, 'accept-invitation-created');
     kit.pass('signed-out new invitee: sees workspace and email on load, short password stopped in the browser, valid account created without an error');
 
-    page = await kit.open(origin, '/login');
+    page = await kit.open(origin, '/login?returnTo=' + encodeURIComponent(`/projects/${ownerSession.projectId}/conversations`));
     await kit.login(page, 'nia@review.test', invitedPassword);
     await page.waitForURL('**/conversations');
     const session = await page.evaluate(async () => (await fetch('/api/identity/session')).json());

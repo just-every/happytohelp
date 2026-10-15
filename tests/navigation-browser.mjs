@@ -34,7 +34,7 @@ const ready=()=>nav.getByRole('button',{name:/Switch workspace:/}).waitFor();
 const switchProject=async name=>{await nav.getByRole('button',{name:/Switch workspace:/}).click();await nav.getByRole('button',{name,exact:true}).click();await nav.getByRole('button',{name:`Switch workspace: ${name}`,exact:true}).waitFor();};
 try {
   const fixture=await navigationFixture(runtime.origin),[alpha,beta]=fixture.projects;
-  const login=async()=>{await page.goto(runtime.origin+'/login');await page.getByLabel('Email',{exact:true}).fill(fixture.email);await page.getByLabel('Password',{exact:true}).fill(fixture.password);await page.getByRole('button',{name:'Login',exact:true}).click();await ready();};
+  const login=async()=>{await page.goto(runtime.origin+'/login?returnTo='+encodeURIComponent('/conversations?view=open'));await page.getByLabel('Email',{exact:true}).fill(fixture.email);await page.getByLabel('Password',{exact:true}).fill(fixture.password);await page.getByRole('button',{name:'Login',exact:true}).click();await ready();};
   await login();
   await switchProject('Navigation Alpha');
   // Reproduce the CI condition with real server counts before testing navigation.

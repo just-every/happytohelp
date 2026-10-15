@@ -13,7 +13,9 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   operating description before installing dependencies, install locked source,
   prepare local or selected remote bindings/migrations, build, verify and deploy
   through `rer`. Local setup exits with no app running; dev
-  uses the printed development outbox. Reset is explicitly confirmed and local;
+  uses `/login/magic` on the printed app origin to request a local sign-in link,
+  then the development outbox at that origin plus `/__dev/outbox`.
+  Reset is explicitly confirmed and local;
   export/import preserve supported native data with documented exclusions.
   Deployment dry-run makes no provider requests. The delivered runtime requires no original checkout or PHP service.
 - **IDENTITY-002 — Retained native password identity (owner decision 2026-10-08).**

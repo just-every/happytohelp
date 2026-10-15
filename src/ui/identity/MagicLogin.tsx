@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import IdentityFrame from './IdentityFrame';
 import { Alert, Field, SubmitButton } from './fields';
 import { postJson, useSignInMail, useHydrated } from './hooks';
+import { signInDestination } from './sign-in-destination';
 
 export default function MagicLogin() {
  const ready = useHydrated();
@@ -29,7 +30,7 @@ export default function MagicLogin() {
   try {
    if (token) {
     const result=await postJson('/api/identity/magic-link/consume', { token,returnTo });
-    location.assign(result.destination);
+    location.assign(await signInDestination(result.destination, location.origin));
    } else {
     const result = await postJson('/api/identity/magic-link', { email: new FormData(event.currentTarget).get('email'),returnTo });
     setSent(result.message); setBusy(false);

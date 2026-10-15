@@ -122,7 +122,7 @@ try {
         if (url.pathname === '/api/knowledge/' + projectId + '/articles' && requestEvent.method() === 'POST') articleWrites.push(requestEvent);
     });
 
-    await page.goto(origin + '/login');
+    await page.goto(origin + '/login?returnTo=' + encodeURIComponent(`/projects/${projectId}/conversations`));
     await page.getByLabel('Email', { exact: true }).fill(owner.email);
     await page.getByLabel('Password', { exact: true }).fill(owner.password);
     await page.getByRole('button', { name: 'Login', exact: true }).click();

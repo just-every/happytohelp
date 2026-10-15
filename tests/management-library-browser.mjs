@@ -41,7 +41,7 @@ try{
  page.on('pageerror',error=>pageErrors.push(error.message));
  page.on('dialog',async dialog=>{nativeDialogs.push(`${dialog.type()}: ${dialog.message()}`);await dialog.dismiss();});
  page.on('request',req=>{const url=new URL(req.url());if(!url.pathname.startsWith('/api/'))return;if(req.method()==='DELETE')deletes.push(url.pathname);if(req.method()==='POST')posts.push(url.pathname);});
- await page.goto(origin+'/login');await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
+ await page.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${projectId}/conversations`));await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
  const base=`${origin}/projects/${projectId}`,shot=name=>page.screenshot({path:join(evidenceDir,name),fullPage:true});
 
  // 1. One shared in-app confirmation for every destructive delete.
@@ -106,7 +106,7 @@ try{
  },page);
  // 2. Mobile management tables keep every column and action reachable.
  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),m=await mobile.newPage();
- await m.goto(origin+'/login');await m.getByLabel('Email',{exact:true}).fill(owner.email);await m.getByLabel('Password',{exact:true}).fill(owner.password);await m.getByRole('button',{name:'Login',exact:true}).click();await m.waitForURL('**/conversations');
+ await m.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${projectId}/conversations`));await m.getByLabel('Email',{exact:true}).fill(owner.email);await m.getByLabel('Password',{exact:true}).fill(owner.password);await m.getByRole('button',{name:'Login',exact:true}).click();await m.waitForURL('**/conversations');
  await make('contacts',{name:'Mobile Contact',email:'a.very.long.contact.address.for.mobile@studio-marin-long-domain.example.test'}); await make('macros',{title:'Mobile reply',content:'x'});await make('plugins',{name:'Mobile plugin',url:'https://example.test/m'});
  await request(`${knowledge}/datasets`,{token,body:{name:'Mobile docs',url:'https://example.test/mobile-docs-with-a-long-address',max_crawl_depth:3,max_crawl_pages:50}});
  await request(`${knowledge}/articles`,{token,body:{title:'Mobile article',slug:'mobile-article',content:'Steps.',status:'published'}});
@@ -122,7 +122,7 @@ try{
  // 3. Training runs form: field-level validation, empty state, one name, explained limits.
  const ctx=await browser.newContext({viewport:{width:1440,height:1000}}),t=await ctx.newPage();
  const trainingPosts=[];t.on('request',req=>{if(req.method()==='POST'&&new URL(req.url()).pathname.includes('/training/'))trainingPosts.push(req.url())});
- await t.goto(origin+'/login');await t.getByLabel('Email',{exact:true}).fill(owner.email);await t.getByLabel('Password',{exact:true}).fill(owner.password);await t.getByRole('button',{name:'Login',exact:true}).click();await t.waitForURL('**/conversations');
+ await t.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${projectId}/conversations`));await t.getByLabel('Email',{exact:true}).fill(owner.email);await t.getByLabel('Password',{exact:true}).fill(owner.password);await t.getByRole('button',{name:'Login',exact:true}).click();await t.waitForURL('**/conversations');
  await check('training runs: one name, empty state, explained limits',async()=>{
   await t.goto(`${base}/training-runs`);await t.getByRole('button',{name:'Create run'}).waitFor();
   const headings=await t.getByRole('heading',{level:1}).allInnerTexts(),activeTab=await t.locator('.header-tabs .nav-link.active').innerText();
@@ -159,7 +159,7 @@ try{
 
  // 4. Create forms validate in the browser and on the server.
  const forms=await browser.newContext({viewport:{width:1440,height:1000}}),f=await forms.newPage();const formPosts=[];f.on('request',req=>{if(req.method()==='POST'||req.method()==='PUT'){const path=new URL(req.url()).pathname;if(/\/(datasets|contacts|plugins)(\/|$)/.test(path))formPosts.push(path)}});
- await f.goto(origin+'/login');await f.getByLabel('Email',{exact:true}).fill(owner.email);await f.getByLabel('Password',{exact:true}).fill(owner.password);await f.getByRole('button',{name:'Login',exact:true}).click();await f.waitForURL('**/conversations');
+ await f.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${projectId}/conversations`));await f.getByLabel('Email',{exact:true}).fill(owner.email);await f.getByLabel('Password',{exact:true}).fill(owner.password);await f.getByRole('button',{name:'Login',exact:true}).click();await f.waitForURL('**/conversations');
  await check('dataset form: negative and absurd crawl limits are refused in the browser',async()=>{
   formPosts.length=0;await f.goto(`${base}/datasets/create`);await f.getByLabel('Starting URL').fill('https://example.test');
   await f.getByLabel('Max Crawl Depth').fill('-5');await f.getByLabel('Max Crawl Pages').fill('99999999');await f.getByRole('button',{name:'Add URL'}).click();

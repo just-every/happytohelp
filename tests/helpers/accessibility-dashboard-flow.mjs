@@ -41,7 +41,7 @@ export async function runDashboardAccessibility({browser, page, runtime, hostOri
     await call(`/api/conversations/${conversation.id}/messages`, {localId: 'accessibility-customer-1', content: 'I need help updating my account.', expectedRevision: 0, mediaIds: [media.id]}, customer.token);
     await call(`/api/conversations/${conversation.id}/messages`, {localId: 'accessibility-customer-2', content: 'The attached receipt shows the problem.', expectedRevision: 1}, customer.token);
 
-    await page.goto(runtime.origin + '/login');
+    await page.goto(runtime.origin + '/login?returnTo=' + encodeURIComponent(`/projects/${bootstrap.projectId}/conversations`));
     await page.getByLabel('Email', {exact: true}).waitFor();
     // The public identity pages use the homepage look: a black pill action on paper (rgb(20, 20, 20) ink).
     await page.waitForFunction(() => document.querySelector('.h2h-identity .pill--ink')

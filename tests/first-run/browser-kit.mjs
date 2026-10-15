@@ -13,7 +13,7 @@ export async function audit(page,evidence,name,{mask=[]}={}){
  await page.screenshot({path:join(evidence,name+'.png'),fullPage:true,mask});
 }
 export async function passwordLogin(page,origin,email,password,destination='/projects?onboarding=setup'){
- await page.goto(origin+'/login?returnTo='+encodeURIComponent(destination));
+ await page.goto(origin+'/login'+(destination?'?returnTo='+encodeURIComponent(destination):''));
  await page.getByLabel('Email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);
  await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL(url=>url.pathname!=='/login');
 }

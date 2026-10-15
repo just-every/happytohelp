@@ -1,11 +1,15 @@
 # HappyToHelp acceptance
 
-The useful outcome is the HappyToHelp owner workspace described in
-[CONTRACT.md](CONTRACT.md): durable conversations, the operator dashboard and
-customer widget, configured AI/knowledge/context, explicit local delegation,
-training/evaluation, management/integrations and an owned operating/source
-workflow. The public surface is the “Customer Support, Solved.” homepage, the
-documentation at `/docs` built from the repository's Markdown, and dynamic
+The useful outcome is a support desk that handles real customer work: a customer
+opens the widget and sends a message or attachment; the team sees it in the shared
+inbox, replies and sees the reply reach the widget. Customers who enter an email
+can also receive replies by email. Operators can insert saved replies, publish
+knowledge in a help center and use Reports to understand response times,
+resolutions and customer feedback. These jobs, together with configured AI and
+customer context, explicit local delegation, training/evaluation,
+management/integrations and an owned operating/source workflow, are governed by
+[CONTRACT.md](CONTRACT.md). The public surface is the “Customer Support, Solved.”
+homepage, the documentation at `/docs` built from the repository's Markdown, and dynamic
 published help centers. Pricing, legal, waitlist, referrer and public auto-widget behavior are
 outside this edition's scope.
 
@@ -87,7 +91,7 @@ identity and prior owner data under the recorded 8 October decision.
 | AI-001, CONTEXT-001 | Retained source regressions, configured execution graph, context/evidence/schema bounds, raw per-round provider usage, bounded budgets, daily AI ceilings (skipped replies recorded, never replayed) and uncertain-attempt behavior. Test fixtures and live provider execution reported separately. |
 | KNOWLEDGE-001, PUBLIC-001 | Published corpus survives failed refresh, scoped retrieval/citations, article/category publication, dynamic help URLs/search and approved “Customer Support, Solved.” homepage behavior, including its drawings and typeface, and the `/docs` documentation built from repository Markdown. Customer widget remains a separately installed product surface; pricing, legal, waitlist, referrer and public auto-widget behavior are not active acceptance. |
 | DELEGATION-001, TRAINING-001 | Real persisted pairing/grant/work/run state, revocation, resolve/reply authority, recovery/cancellation, budget and ambiguous provider fences; separately packaged local connector. Required check: `tests/delegation-journey.mjs` and its `--browser` mode exercise the seven-step fixture case, a distinct read-only observation after the approved child fix, human Send with exact-request replay, and stale/revoked/offline/unverified/uncertain-delivery refusals. Browser mode uses fresh installed rer setup/dev and ordinary outbox sign-in at 1440 and 390. The provider is scripted and customer-system changes affect a loopback fixture only; this is a required check, not qualification or a live-provider acceptance claim. |
-| INTEGRATION-001 | Provider-boundary fixtures for email/GitHub/branding and knowledge imports, idempotency and no ambiguous replay; real separate-origin preview/network denial. Live account/provider effects require their own evidence. |
+| INTEGRATION-001 | Provider-boundary fixtures for email/GitHub/branding and knowledge imports, idempotency and no ambiguous replay; real separate-origin preview/network denial. A widget visitor's entered email receives an operator reply even with an online widget and an unverified identity, without requiring an inbound token or mailbox. The reply shows **Sent to email provider** only on provider acceptance, distinct from confirmed delivery; local capture is labelled and never claimed as external mail. Provider failure and uncertain outcomes remain visible without automatic replay. A generated inbound token is deployed but receiving mail still requires the provider's domain routing and webhook. Live account/provider effects require their own evidence. |
 | MIGRATION-001 | Explicit representative legacy IDs, permissions, exact historical financial values, content/media hashes and pending holds through real local D1/R2; deterministic resume, conflict refusal and no hidden provider work. Historical financial SQL/imported records remain immutable custody and do not activate payment or balance behavior, except that an explicit owner/admin contact erasure redacts that contact's imported personal data and archive copies and leaves a `contact_erasures` tombstone (`tests/contact-erasure.mjs`). |
 
 `pnpm exec rer verify` is the common verification command. It includes the
@@ -107,11 +111,21 @@ in [Acceptance holds](#acceptance-holds). Operating costs remain unmeasured unle
 ## Command journeys
 
 `tests/rer-journey.mjs` drives a fresh clone through the installed pinned `@runeditrun/rer` launcher: structural
-check, frozen dependency installation, manifest setup and teardown, foreground dev,
-ordinary one-use outbox confirmation, owner/data/private-settings retention,
+check, `rer install` with frozen dependencies, manifest setup and teardown, foreground
+dev with `RER_READY` and an app origin, an explicit local sign-in request through
+`/login/magic` for the local owner, then ordinary one-use confirmation through the
+newest sign-in email at that origin plus `/__dev/outbox`, owner/data/private-settings retention,
 active/unconfirmed reset refusal, private export/import, confirmed reset and
 fresh setup. It replaces the standalone installer qualification. Native auth,
 tenant, secrets, destructive operations and restore require actual runtime proof.
+A hosted first claim derives the owner's name from the actual configured owner
+email and lands email sign-in on Setup. A `workers.dev` website defaults to
+**My workspace** regardless of the owner email; an explicitly chosen native
+workspace name takes precedence. An infrastructure hostname never becomes the
+business name. A real separate-origin widget page and the app origin must both work after
+saving the website origin. Normal deployment removal must remove an installation
+with an uploaded attachment in one pass through rer, with absence readback; manual
+bucket emptying is not the person-facing removal path.
 
 ## Acceptance holds
 

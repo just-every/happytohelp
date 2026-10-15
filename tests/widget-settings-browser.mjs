@@ -42,7 +42,7 @@ const launcher=preview.locator('.happytohelp-button').first();
 const launcherBackground=async expected=>{let actual;for(const deadline=Date.now()+5000;Date.now()<deadline;await page.waitForTimeout(100)){actual=await launcher.evaluate(element=>getComputedStyle(element).backgroundColor);if(actual===expected)return}assert.equal(actual,expected,'closed launcher background in the preview')};
 const checks=[];
 try{
- await page.goto(origin+'/login');await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL(/\/conversations/);
+ await page.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${setup.projectId}/conversations`));await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL(/\/conversations/);
 
  // A project made by setup already has a server secret and no saved widget settings.
  const initial=await settingsApi();assert.deepEqual(initial.settings,{});assert.match(initial.verificationSecret,/^[0-9a-f]{64}$/);checks.push('setup project has a 256-bit server secret');

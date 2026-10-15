@@ -42,9 +42,9 @@ Hono, D1, R2, Queues and Durable Objects.
 Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.19; local dev starts without private setup
-answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you, who then
-sign in by email; existing owners are preserved.
+`@runeditrun/rer` package pinned to 0.2.21; local dev starts without private setup
+answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
+that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
 `121_move_in_categories.sql` before the updated Worker starts. See
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md) and [the changelog](CHANGELOG.md).
@@ -78,23 +78,36 @@ You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`
 if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
 or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
 on macOS). The global `rer` command itself needs that Node. It then provisions the
-checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
+checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer
+npm install -g @runeditrun/rer@0.2.21
 git clone https://github.com/just-every/run-happytohelp
-cd run-happytohelp && rer dev
+cd run-happytohelp
+rer install
+rer dev
 ```
 
 Dev uses its local address for the chat widget and generates a private owner
-password, then prints the development sign-in outbox link. No private answers,
-email service or AI account are needed. Open the link and sign in to your
-workspace. Use `rer dev --stop` from the checkout to stop the managed app.
+password. Wait for `RER_READY` and the app address. Open `/login/magic` on that
+address, enter the local owner's email shown by dev (for example `owner@app.test`)
+and choose **Create local sign-in link**. Then open `/__dev/outbox` on the same
+app address, choose the newest **sign-in** email, follow its link and press
+**Sign in** to open **Setup**. The outbox may initially contain only a welcome
+email; request the sign-in link first. No private answers, email service or AI
+account are needed, and no email leaves your computer. Use `rer dev --stop` from the checkout to stop the managed app.
 
 Already running 0.3? Keep your checkout and data, and follow
 [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) instead.
 See [Install](docs/INSTALLER.md) for private setup answers and
 [Local command reference](RUN-LOCALLY.md) for ports, preview and idle shutdown.
+
+To try the customer flow, [install the widget on a local page](docs/INSTALLER.md#try-the-customer-widget-locally),
+send a visitor message and reply from **Inbox**. Set that page's exact origin in
+**Settings → Widget → Settings**; the app's own origin remains allowed. A visitor's
+entered email can receive operator replies even when their identity is labelled
+**Unverified**. Local email is captured in `/__dev/outbox`. With a hosted sender,
+**Sent to email provider** on a reply means acceptance, not confirmed inbox delivery.
 
 ## Choose how to run it
 
@@ -113,18 +126,25 @@ rer deploy --dry-run
 rer deploy --environment production
 ```
 
-Dry run validates/builds locally and makes no provider request. Deployment
+With rer 0.2.21, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+`EMAIL_API_KEY` inputs for dry run and real deployment. Dry run validates their
+shape and the build locally, makes no provider request and sends no mail. Deployment
 provisions declared resources, applies migrations, publishes and checks health
 through Base deploy-kit. After a healthy deploy, `rer deploy` claims the owner named
 by `OWNER_EMAIL` (the setup owner, or the value you supply privately) with a one-time
-token it then removes. Open your Worker's address and sign in by email as that owner.
+token it then removes. Open your Worker's address and sign in by email as that
+owner to reach **Setup**. The owner's name is derived from their email. A Workers
+hostname does not name your business: a `workers.dev` website defaults to
+**My workspace** regardless of owner email. An explicitly chosen native workspace
+name takes precedence; you can change it in Project settings.
 `rer signin` (a single-use owner link without mail) does not work with HappyToHelp yet:
 its native sign-in has no owner sign-in table, so rer stops with exit 4 and says so; if
 mail is not delivering, use the `/setup` recovery in [operations](OPERATIONS.md#claim-your-new-installation).
 `rer deploy --environment NAME --remove --yes`
-deletes what that environment's deploy created (Worker, D1, R2, queues) and reads back
-that each is gone. Hosted installation and real provider execution are not
-qualified by this release.
+removes that environment's created Worker, D1, R2 and queues in one pass,
+including uploaded attachments in its R2 bucket, and reads back that each is gone.
+Export anything you need before removal. Hosted installation and real provider
+execution are not qualified by this release.
 
 ## What you need and what it costs
 
@@ -144,9 +164,10 @@ support work and has its own runtime prerequisites.
 Your workspace is already set up when you first sign in. It has a starter
 assistant for visitors, a reply-by-email mailbox when the installation holds an
 `INBOUND_EMAIL_TOKEN`, and mail that leaves from the installation's own sender
-until your sending domain is verified. Creating the workspace may send you one
-welcome email. Use **Setup** in the workspace sidebar: **Needs you** lists what
-cannot be done for you (the widget on your website, an AI key and, with a hosted
+until your sending domain is verified. The inbound token authenticates incoming
+mail; configure your email provider's domain routing and webhook before replies
+can arrive. Creating the workspace may send you one welcome email. Use **Setup**
+in the workspace sidebar: **Needs you** lists what cannot be done for you (the widget on your website, an AI key and, with a hosted
 email provider, your sending domain's DNS records), and **What we've set** lists
 the rest. Anything under **Needs you** can be skipped for now and picked up later
 from **Skipped**. The system runs its own checks while Setup is open, and what it

@@ -36,8 +36,11 @@ export function publicHost(website: string): string | null {
     return host;
 }
 const words = (text: string, separator: RegExp) => text.split(separator).filter(Boolean).map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
+const deploymentHost = (host: string) => host === 'workers.dev' || host.endsWith('.workers.dev');
 /** "support.acme-widgets.co.uk" becomes "Acme Widgets": its registrable label, as words. */
 function nameFromHost(host: string): string | null {
+    // A deployment address names the hosting platform, not the owner's business.
+    if (deploymentHost(host)) return null;
     const labels = host.split('.').filter(Boolean);
     if (labels[0] === 'www') labels.shift();
     labels.pop();
@@ -48,6 +51,7 @@ function nameFromHost(host: string): string | null {
 /** The workspace name for a website and owner email: the public website's, else the company email domain's, else the fallback. */
 export function deriveWorkspaceName(website: string, email: string): string {
     const host = publicHost(website), domain = companyDomain(email);
+    if (host && deploymentHost(host)) return FALLBACK_WORKSPACE_NAME;
     return ((host && nameFromHost(host)) || (domain && nameFromHost(domain)) || FALLBACK_WORKSPACE_NAME).slice(0, 200);
 }
 /** The owner's name from the part of their address before the @: "ada.lovelace+work" is "Ada Lovelace". */

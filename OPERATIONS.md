@@ -6,20 +6,26 @@ You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`
 if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
 or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
 on macOS). The global `rer` command itself needs that Node. It then provisions the
-checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
+checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer
+npm install -g @runeditrun/rer@0.2.21
 git clone https://github.com/just-every/run-happytohelp
-cd run-happytohelp && rer dev
+cd run-happytohelp
+rer install
+rer dev
 ```
 
-`rer dev` uses its local address for the chat widget and generates a private
-owner password, then prints the development sign-in outbox link. No private
-answers, email service or AI account are needed. Open the link and sign in to
-your workspace. Use `rer dev --stop` from the checkout to stop the managed app.
+Dev uses its local address for the chat widget and generates a private owner
+password. Wait for `RER_READY` and the app address. Open `/login/magic` on that
+address, enter the local owner's email shown by dev (for example `owner@app.test`)
+and choose **Create local sign-in link**. Then open `/__dev/outbox` on the same
+app address, choose the newest **sign-in** email, follow its link and press
+**Sign in** to open **Setup**. The outbox may initially contain only a welcome
+email; request the sign-in link first. No private answers, email service or AI
+account are needed, and no email leaves your computer. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout pins **`@runeditrun/rer` 0.2.19** in `package.json` and
+The checkout pins **`@runeditrun/rer` 0.2.21** in `package.json` and
 `pnpm-lock.yaml`. The global launcher installed by npm may have a different
 version; inside the checkout it provisions the tools and delegates to the pinned
 local package. Updating the global launcher does not change the project's pin.
@@ -42,6 +48,12 @@ See [Local command reference](RUN-LOCALLY.md) for loopback ports, production
 preview, explicit stop and idle shutdown. An occupied explicit port refuses;
 rer never chooses another silently. Saved remote mail is preserved: use a
 separate checkout for a local outbox trial.
+
+For a visitor-to-inbox-to-reply check, follow
+[Try the customer widget locally](docs/INSTALLER.md#try-the-customer-widget-locally).
+The external customer page needs its own exact **Widget website origin** under
+**Settings → Widget → Settings**. The HappyToHelp app origin always remains
+allowed; saving an external website origin does not change the app or script address.
 
 ## Local data and backups
 
@@ -115,25 +127,35 @@ not a prerequisite for an account-owned token or a reason to broaden its scope.
 
 The declaration names DB, FILES, CONVERSATIONS, JOBS, its dead-letter queue and
 scheduled recovery. Declared secret bindings include `OWNER_EMAIL`,
-`H2H_SETUP_TOKEN`, `INTEGRATION_ENCRYPTION_KEY`, `EMAIL_PROVIDER`, `EMAIL_FROM`
-and `EMAIL_API_KEY`. Before the first hosted deployment, supply the mail provider
-(`resend`, `sendgrid` or `cloudflare`), verified sender address and sending token
-in private environment variables or an owned 0600 `--env-file`. Provider and
+`H2H_SETUP_TOKEN`, `INTEGRATION_ENCRYPTION_KEY`, `INBOUND_EMAIL_TOKEN`,
+`EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`. Before a deployment dry run
+or real deployment, supply the mail provider (`resend`, `sendgrid` or `cloudflare`),
+verified sender address and sending token in private environment variables or an
+owned 0600 `--env-file`. Provider and
 sender are stored as secret bindings too, so the deployment declaration contains
 no account-specific values. Rer supplies the owner email (`OWNER_EMAIL`) from local setup, or from the environment
-when you set it, and generates missing setup/encryption secrets. Existing Worker secrets are retained;
-use `rer deploy --set-secret NAME` to change one deliberately.
+when you set it, and generates missing setup/encryption secrets. It also deploys
+the generated `INBOUND_EMAIL_TOKEN` for reply-mailbox authentication. Existing
+Worker secrets are retained; use `rer deploy --set-secret NAME` to change one
+deliberately.
+
+The declaration maps the same `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
+inputs to rer's shared `MAIL_PROVIDER`, `MAIL_FROM` and `MAIL_API_KEY` preflight
+bindings as well as HappyToHelp's native bindings. Rer 0.2.21 requires these same
+mail inputs for both `rer deploy --dry-run` and real deployment. Dry run validates
+their shape and the build locally; it makes no provider requests and sends no mail.
 
 Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
-declaration's `secrets` array and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.19 requires
+declaration's `secrets` array, plus
+`{"binding":"MAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}`, and supply that account ID privately before deploying
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.21 requires
 every declared secret on a new Worker and has no conditional secret declaration.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
 through the supported runtime declaration and native workspace settings. Local
-development keeps its outbox without a mail account, and deploy dry-run needs no
-mail credentials. Deployment never converts remote mail into development capture.
+development keeps its outbox without a mail account. Deployment never converts
+remote mail into development capture.
 
 ```sh
 rer deploy --dry-run
@@ -161,7 +183,10 @@ and then removes the token. It prints the address and a line such as
 *Claimed the hosted owner (the OWNER_EMAIL already set on the Worker)*. Open that
 address and **sign in by email** as the owner: the sign-in message goes through your
 configured mail sender, so the mail variables above must be right before you deploy.
-Running `rer deploy` again keeps the owner and changes nothing.
+Sign-in opens **Setup**. The owner's name is derived from that actual email, and a
+`workers.dev` website defaults to **My workspace** regardless of the owner email.
+An explicitly chosen native workspace name takes precedence. You can set the
+business website and name in Project settings. Running `rer deploy` again preserves the existing owner and workspace.
 
 `rer signin --environment production` is rer's mail-free way back in: it writes one
 single-use sign-in grant for the recorded owner and prints the link once. **It does not
@@ -178,9 +203,11 @@ closes permanently and never bypasses tenant authority. See
 
 ### Remove a deployment
 
-`rer deploy --environment NAME --remove --yes` deletes the Worker, D1 database, R2
-bucket and queues that this environment's deploy record says rer created, reads back
-that each is gone, and touches nothing else. Run it again and it finds nothing to do.
+`rer deploy --environment NAME --remove --yes` removes the Worker, D1 database,
+R2 bucket and queues that this environment's deploy record says rer created.
+It removes uploaded attachments and other objects in the owned bucket, detaches
+owned queue consumers and deletes the resources in one pass, then reads back that
+each is gone. It touches nothing else. Run it again and it finds nothing to do.
 Export what you need first: removal deletes the installation's data.
 
 ### What `/health` does and does not tell you
@@ -203,33 +230,19 @@ observations outside product source; never include tokens or customer content
 in public evidence.
 
 After observations are complete, stop the journey and any other producers.
-Delete only resources whose exact identity and ownership match that list:
+Run the normal removal command for the disposable environment:
 
-1. Enumerate uploaded object keys in the owned FILES bucket, remove those
-   objects, and list the bucket again to prove it is empty. A partial listing
-   or unexpected object needs reconciliation before deleting the bucket.
-2. Enumerate consumers of each owned queue with
-   `GET /accounts/<account-id>/queues/<queue-id>/consumers`. Check every
-   consumer's `script` (or `script_name`) against the exact owned Worker name
-   and its `consumer_id` against readback. Stop on an unrelated consumer.
-   Detach the verified consumer with
-   `DELETE /accounts/<account-id>/queues/<queue-id>/consumers/<consumer-id>`
-   and read back the empty consumer list **before** deleting the Worker.
-   Cloudflare error **10064** means the Worker still consumes a queue; inspect
-   and detach that owned consumer instead of replaying Worker deletion blindly.
-3. Delete the owned Worker (and thus its schedules/bindings), then the main
-   JOBS queue **before** its JOBS_DEAD_LETTER queue. Delete the emptied FILES
-   bucket and the owned DB database by their verified names/IDs.
-4. Take complete post-delete Worker, D1, R2, Queue and Durable Object namespace
-   inventories; confirm all owned names/IDs, including the derived namespace,
-   are absent. Do not assume Worker deletion proves namespace removal. Compare
-   against the before inventory and account for unrelated resources without
-   deleting them. Record failed requests and the corrected ordering as evidence.
+```sh
+rer deploy --environment NAME --remove --yes
+```
 
-These are destructive steps for an explicitly disposable, authorized scope.
-They are not an upgrade, reset or cleanup procedure for a retained installation.
-Use authenticated account API tooling that loads credentials privately, never
-token-bearing command arguments. Incomplete inventories are not teardown proof.
+The command removes the recorded resources, including uploaded attachments.
+Compare complete post-removal Worker, D1, R2, Queue and Durable Object namespace
+inventories with the saved inventory. Confirm the owned names and IDs are absent,
+including the derived namespace, and account for unrelated resources without
+changing them. Keep removal output and readback outside product source. Incomplete
+inventories are not teardown proof. Removal is destructive and applies only to
+the explicitly authorized disposable installation; it is not an upgrade procedure.
 
 ## Optional features and their settings
 
@@ -260,7 +273,7 @@ platform administrators (see [the integrations guide](src/modules/integrations/R
 | AI replies, assist, profiles and monitoring (Ensemble) | The installer's `AI_PROVIDER` answer (`openai`, `anthropic`, `google`, `deepseek`, `xai`, `openrouter` or `later`, the default) chooses which key to store at setup; models are selected in workspace and AI configuration (the dashboard's **AI** page); `CONTEXT_MODEL` for widget-triggered context work. Every new workspace's starter assistant answers visitors by itself once any provider key is installed, within `AI_DAILY_CEILINGS`; with none, new conversations stay with the team | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`; the key is optional at setup and never stored with `later` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`. Keyword search over content you supply needs none of these providers. |
 | Help center import from another provider (Intercom, Freshdesk or Zendesk) | Platform/subdomain and destination workspace chosen for each import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |
-| Email, sending and receiving | `EMAIL_PROVIDER` (`resend`, `cloudflare` or `sendgrid`), `EMAIL_ACCOUNT_ID` for Cloudflare, optional `INBOUND_EMAIL_DOMAIN` (the domain new workspaces' reply mailboxes are created under; default `in.` plus the workspace's website host), workspace email settings; built-in inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM` (the installation sender every new workspace uses until its own domain is verified), `INBOUND_EMAIL_TOKEN` (generated by local setup, optional on a hosted installation; with it every new workspace gets a reply-by-email mailbox, without it none is created) |
+| Email, sending and receiving | `EMAIL_PROVIDER` (`resend`, `cloudflare` or `sendgrid`), `EMAIL_ACCOUNT_ID` for Cloudflare, optional `INBOUND_EMAIL_DOMAIN` (the domain new workspaces' reply mailboxes are created under; default `in.` plus the workspace's website host), workspace email settings; built-in inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM` (the installation sender every new workspace uses until its own domain is verified), `INBOUND_EMAIL_TOKEN` (generated by local setup and deployed for inbound authentication; with it every new workspace gets a reply-by-email mailbox; provider domain routing and a webhook still need configuration) |
 | Lead research and reviewed outreach | `LEAD_MODEL`; each lead is saved and reviewed before sending | `OPENAI_API_KEY`, selected email configuration |
 | GitHub | `GITHUB_CLIENT_ID`, optionally `GITHUB_PROJECT_ID` for one fixed credential | `GITHUB_CLIENT_SECRET`, `INTEGRATION_ENCRYPTION_KEY`; optional `GITHUB_TOKEN` or JSON `GITHUB_TOKENS` map keyed by project ID |
 | Brand image generation | Explicit `BRAND_IMAGE_MODEL`, `BRAND_IMAGE_SIZE`, `BRAND_IMAGE_QUALITY` | `OPENAI_API_KEY` |
@@ -288,7 +301,20 @@ installation for your own team doesn't need it: invite teammates from
 
 **Email.** Email setup, including the Cloudflare Email Sending prerequisites and SendGrid
 Inbound Parse, is covered in [the integrations guide](src/modules/integrations/README.md).
-Configure inbound email webhooks with the actual deployed URLs.
+Configure inbound email webhooks with the actual deployed URLs and the matching
+`INBOUND_EMAIL_TOKEN`. The generated token authenticates inbound requests; it
+cannot configure your provider's domain, mail forwarding or webhook. A provisioned
+reply mailbox starts receiving only after you configure that routing.
+
+A customer who types an email in the widget can receive operator replies there,
+even while online and without a signed identity. Outbound sending needs a configured
+sender, not an inbound token or reply mailbox. **Unverified** means the customer's
+identity has not been signed by your server; it does not block replies to their
+entered email address. For each reply, **Sent to email provider** means the provider
+accepted the send; it does not confirm delivery to the customer's inbox. A provider
+failure or unknown outcome remains visible and is not automatically replayed.
+With local development mail, the reply is labelled as captured in the local outbox
+and no external email is sent.
 
 **Import an existing help center.** Open Knowledge → Import. The form chooses the
 provider and subdomain; the credentials come from the server secrets in the

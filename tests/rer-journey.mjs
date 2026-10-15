@@ -33,7 +33,7 @@ async function start(){
  await waitForServingCapacity();
  server=command(root,['dev']);
  const ready=await server.waitFor(event=>event.event==='ready',180000);
- assert.equal(ready.url,origin);assert.equal(ready.signInUrl,origin+'/__dev/outbox');
+ assert.equal(ready.url,origin);assert.equal((await fetch(origin+'/__dev/outbox')).status,200);
  assert.equal((await json('/health')).status,'ok');
 }
 async function stop(){
@@ -46,8 +46,14 @@ async function stop(){
 async function signIn(){
  const context=await browser.newContext(),page=await context.newPage();
  try{
+  await page.goto(origin+'/login/magic');
+  await page.getByLabel('Email',{exact:true}).fill(email);
+  const requested=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/identity/magic-link'&&response.request().method()==='POST');
+  await page.getByRole('button',{name:'Create local sign-in link',exact:true}).click();
+  assert.equal((await requested).status(),202);
+  await page.getByRole('status').filter({hasText:'local outbox'}).waitFor();
   await page.goto(origin+'/__dev/outbox');
-  await page.getByRole('link',{name:'Read message'}).first().click();
+  await page.locator('article').filter({has:page.getByRole('heading',{name:'Sign in to HappyToHelp',exact:true})}).first().getByRole('link',{name:'Read message'}).click();
   const link=await page.getByRole('link',{name:'Open this link'}).getAttribute('href');
   assert.ok(link,'ordinary outbox sign-in must exist');
   assert.equal((await context.request.get(link)).status(),200);
@@ -56,7 +62,7 @@ async function signIn(){
   await page.getByRole('button',{name:'Sign in',exact:true}).waitFor();
   assert.equal((await context.request.get(origin+'/api/identity/session')).status(),401);
   await page.getByRole('button',{name:'Sign in',exact:true}).click();
-  await page.waitForURL(/\/projects\/[^/]+\/activation$/); // Sign-in returns to /setup, which sends the claimed owner on to first-run steps.
+  await page.waitForURL(/\/projects\/[^/]+\/activation$/); // Default sign-in selects the owner's workspace and its unfinished setup.
   const response=await context.request.get(origin+'/api/identity/session');assert.equal(response.status(),200);
   const actor=await response.json();
   const replay=await browser.newContext();
@@ -127,8 +133,11 @@ try{
  for(let i=0;i<2;i++){
   const since=Date.now();await run(root,setup);
   const afterSetup=await archiveSnapshot(root);
-  await compareSignInArchive(root,restoredData,afterSetup,{email,ownerId:actor.id,origin,since});
-  restoredData=afterSetup;
+  compareArchive(restoredData,afterSetup);
+  await start();await json('/api/identity/magic-link',{email,returnTo:'/setup'});await stop();
+  const afterSignIn=await archiveSnapshot(root);
+  await compareSignInArchive(root,afterSetup,afterSignIn,{email,ownerId:actor.id,origin,since});
+  restoredData=afterSignIn;
   assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore setup preserves every migration ledger row');
   const currentPrivate=await readFile(join(root,'.dev.vars'));
   if(restoredPrivate)assert.ok(restoredPrivate.equals(currentPrivate),'second post-restore setup preserves exact private bytes');
@@ -141,10 +150,12 @@ try{
  // Snapshot after login so replay/read checks still compare every portable row.
  await stop();const beforeRestoredReads=await archiveSnapshot(root),readStart=Date.now();await start();
  await verifyPortableData(origin,portable,restored.token,json);
+ await json('/api/identity/magic-link',{email,returnTo:'/setup'});
  await stop();assert.equal(await migrationCount(),1);
  await compareSignInArchive(root,beforeRestoredReads,await archiveSnapshot(root),{email,ownerId:actor.id,origin,since:readStart});
  assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore reads and refused replays preserve migration history');
- await run(root,['deploy','--dry-run']);
+ // Dry-run validates the real production mail contract with test-only inputs and makes no provider request.
+ await run(root,['deploy','--dry-run'],0,{env:{EMAIL_PROVIDER:'sendgrid',EMAIL_FROM:'support@dry-run.example.test',EMAIL_API_KEY:'test-only-dry-run-sendgrid-key'}});
  await run(root,['reset','--yes']);await rm(additive);await run(root,setup);await start();
  const fresh=await json('/api/identity/login',{email,password});assert.notEqual(fresh.actor.id,actor.id);
  assert.equal((await json('/api/management/projects',undefined,fresh.token)).data.length,1);
@@ -155,8 +166,9 @@ try{
 }catch(error){
  // Browser diagnostics can contain one-use fragment capabilities; emit only a safe source location.
  const line=/rer-journey\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';
- const diagnostic=/^(?:Rer (?:dev|preview) (?:exited \d+ before the required event|exceeded its deadline); [a-z_]+, (?:machine load|disk space|server capacity|active operation|see private capture)|Native (?:GET|POST) \/[a-zA-Z0-9_/-]+ returned HTTP \d{3})(?:\n|$)/.exec(error.message??'')?.[0].trim();
- throw Error(`Rer journey failed (${error.name}, source line ${line}${diagnostic?'; '+diagnostic:''}); private browser diagnostics withheld.`);
+ const diagnostic=/^(?:Rer [a-z-]+ exited \d+; expected \d+|Rer (?:dev|preview) (?:exited \d+ before the required event|exceeded its deadline); [a-z_]+, (?:machine load|disk space|server capacity|active operation|see private capture)|Native (?:GET|POST) \/[a-zA-Z0-9_/-]+ returned HTTP \d{3})(?:\n|$)/.exec(error.message??'')?.[0].trim();
+ const code=/^[A-Z][A-Z0-9_]{1,30}$/.test(error.code??'')?`; code ${error.code}`:'';
+ throw Error(`Rer journey failed (${error.name}, source line ${line}${diagnostic?'; '+diagnostic:''}${code}); private browser diagnostics withheld.`);
 }finally{
  if(browser)await browser.close();if(server)await server.stop();
  await rm(scratch,{recursive:true,force:true});

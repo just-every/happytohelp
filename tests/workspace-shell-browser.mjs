@@ -38,7 +38,7 @@ try {
   const consoleLines=[];
   page.on('console',message=>consoleLines.push(`${message.type()}: ${message.text()}`));
   page.on('request',request=>requests.push({method:request.method(),url:request.url()}));
-  await page.goto(runtime.origin+'/login');
+  await page.goto(runtime.origin+'/login?returnTo='+encodeURIComponent(`/projects/${bound.id}/conversations`));
   await page.getByLabel('Email',{exact:true}).fill(fixture.email);await page.getByLabel('Password',{exact:true}).fill(fixture.password);
   await page.getByRole('button',{name:'Login',exact:true}).click();await ready();
 

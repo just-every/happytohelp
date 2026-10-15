@@ -38,13 +38,14 @@ export default function ConversationContactDetails({ conversation, onEdit, onEma
         </ConversationDetailField> }
         { email && <ConversationDetailField className="conversation-detail-field--primary" icon="mail" label="Email">
             <a href={ `mailto:${ email }` }>{ email }</a>
+            <small className="d-block text-muted">Replies are emailed to this address. Delivery status appears below each reply.</small>
             { hasDifferentProvidedEmail && <a href={ `mailto:${ contact.provided_email }` } className="conversation-detail-field__secondary-value">{ contact.provided_email }</a> }
         </ConversationDetailField> }
         <ConversationDetailField
             className="conversation-detail-field--primary"
             icon="circle-check"
-            label="Verified"
-            value={ contact.is_verified ? 'Yes' : 'No' }
+            label="Signed identity"
+            value={ contact.is_verified ? 'Verified by your website' : 'Visitor provided · email replies allowed' }
         />
 
         <div className="conversation-details-contact-actions btn-group dropdown" ref={ actionsRef } onKeyDown={ handleActionsKeyDown }>

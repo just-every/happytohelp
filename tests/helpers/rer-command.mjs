@@ -11,9 +11,9 @@ export function commandEnvironment(input=process.env){
  return env;
 }
 
-export function command(root,args,{timeout=1200000}={}){
+export function command(root,args,{timeout=1200000,env={}}={}){
  const child=spawn(process.execPath,__rerTestEntryArgs([__rerTestEntry,...args,'--non-interactive','--json']),{
-  cwd:root,env:commandEnvironment(),detached:process.platform!=='win32',stdio:['ignore','pipe','pipe'],
+  cwd:root,env:commandEnvironment({...process.env,...env}),detached:process.platform!=='win32',stdio:['ignore','pipe','pipe'],
  });
  let output='',exited=false;
  child.stdout.on('data',chunk=>{output+=chunk;});
@@ -47,8 +47,8 @@ export function command(root,args,{timeout=1200000}={}){
  return {child,events,waitFor,result,stop};
 }
 
-export async function run(root,args,expected=0){
- const process=command(root,args);
+export async function run(root,args,expected=0,options={}){
+ const process=command(root,args,options);
  try{
   const result=await process.result();
   if(result.code!==expected)throw Error(`Rer ${args[0]} exited ${result.code}; expected ${expected}`);

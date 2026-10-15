@@ -1,0 +1,16 @@
+import React from 'react';
+const labels = {
+ sent: 'Email sent to provider · delivery not confirmed',
+ captured: 'Email captured in local outbox',
+ sending: 'Email send in progress',
+ failed: 'Email failed · provider rejected the send',
+ uncertain: 'Email outcome unknown · check your provider before resending',
+ not_configured: 'Email not sent · configure an email provider',
+ disabled: 'Email not sent · workspace email is disabled',
+ no_recipient: 'Email not sent · visitor has not left an email',
+ not_recorded: 'Email not sent · no attempt recorded',
+};
+export default function MessageMailStatus({status}) {
+ if (!status) return null;
+ return <small className="d-block text-muted mt-1" role="status">{labels[status.state] || 'Email status unknown'}</small>;
+}

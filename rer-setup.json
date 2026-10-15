@@ -340,7 +340,7 @@
       "name": "INBOUND_EMAIL_TOKEN",
       "label": "Private inbound email token",
       "kind": "secret",
-      "required": false,
+      "required": true,
       "generate": "hex",
       "ownerVisible": true,
       "help": "Generated for you. Your email provider presents it when it forwards replies to this workspace."

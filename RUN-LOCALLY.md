@@ -4,18 +4,23 @@ You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`
 if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
 or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
 on macOS). The global `rer` command itself needs that Node. It then provisions the
-checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
+checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer
+npm install -g @runeditrun/rer@0.2.21
 git clone https://github.com/just-every/run-happytohelp
-cd run-happytohelp && rer dev
+cd run-happytohelp
+rer install
+rer dev
 ```
 
 `rer dev` uses its local address for the chat widget and generates a private
-owner password, then prints the development sign-in outbox link. No private
-answers, email service or AI account are needed. Open the link and sign in to
-your workspace. Use `rer dev --stop` from the checkout to stop the managed app.
+owner password. Wait for `RER_READY` and the app address. Open `/login/magic` on
+that address, enter the local owner's email shown by dev and choose **Create local
+sign-in link**. Then open `/__dev/outbox` on the same address, choose the newest
+sign-in email, follow its link and press **Sign in**. The outbox may initially
+contain only a welcome email; request the sign-in link first. No private answers,
+email service or AI account are needed; no email is sent. Use `rer dev --stop` from the checkout to stop the managed app.
 
 ## Scripted setup and command reference
 
@@ -25,11 +30,13 @@ rer dev --foreground
 ```
 
 Prepare private answers as described in [Install](docs/INSTALLER.md#private-setup-answers).
-Setup builds, applies local migrations, prepares the real first owner, checks a
-fresh ordinary sign-in message and stops its temporary app. Dev provides Vite
-assets and HMR and stays in the foreground. It prints `RER_READY URL` after the
-real health check and `RER_SIGN_IN URL/__dev/outbox` after a fresh sign-in message.
-Open the outbox, choose the newest message and follow its link. No email was sent.
+Setup builds, applies local migrations, prepares the real first owner and stops
+its temporary app. Dev provides Vite assets and HMR and stays in the foreground
+with `--foreground`. It prints `RER_READY URL` after real health checks. On that
+app origin, open `/login/magic`, enter your local owner email and choose **Create
+local sign-in link**. Open `/__dev/outbox` on the same app origin; dev does not
+print that suffix or automatically create the sign-in email. Choose the newest
+sign-in email, follow its link and press **Sign in**. No email was sent.
 The confirmation form consumes the link once through POST.
 
 ```sh
@@ -81,8 +88,11 @@ answers use the declared `rer-setup.json` field names.
 rer deploy --dry-run
 ```
 
-Dry run validates the real owner-account deployment declaration and build locally;
-no deployment occurs and no provider request is made. Real `rer deploy`
+With rer 0.2.21, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+`EMAIL_API_KEY` inputs for dry run and real deployment, as described in
+[Operations](OPERATIONS.md#deploy-to-your-cloudflare-account). Dry run validates
+the input shape, real deployment declaration and build locally; no deployment
+occurs, no provider request is made and no mail is sent. Real `rer deploy`
 requires the documented owner-account credentials, committed source and real mail
 configuration in `deploy.json`; it provisions, migrates and checks health through
 Base deploy-kit. The default environment is production; choose one with
@@ -120,8 +130,9 @@ rer dev --stop
 Use preview for fixed production output; use dev for live edits and HMR.
 Preview reuses an intact build only when the actual public inputs and output
 bytes match its nonsecret receipt. Neither mode resets the saved owner or
-`.wrangler/state`; both request ordinary sign-in through the local outbox before
-readiness. Open the newest message; no email was sent. The same checkout has one
+`.wrangler/state`. For local email sign-in, open `/login/magic` on the app origin
+and choose **Create local sign-in link** with your owner email, then open
+`/__dev/outbox` and follow the newest sign-in email. No email was sent. The same checkout has one
 managed instance. A compatible duplicate prints its URL, while another mode
 or explicit conflicting option refuses with exit 4 and its stop instruction.
 

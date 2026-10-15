@@ -11,8 +11,11 @@ pnpm install --frozen-lockfile
 pnpm exec rer dev --foreground
 ```
 
-Dev prints the app address and its `/__dev/outbox`. Open the outbox, choose the
-newest sign-in message, follow its link and press **Sign in**. No email is sent.
+Wait for `RER_READY` and the app address. Open `/login/magic` on that address,
+enter the local owner's email shown by dev and choose **Create local sign-in link**.
+Then open `/__dev/outbox` on the same address, choose the newest sign-in email,
+follow its link and press **Sign in**. The welcome email is not a sign-in link.
+No email is sent.
 Stop dev with Ctrl+C before verification or data operations.
 
 ```sh
@@ -28,8 +31,9 @@ pnpm exec rer describe
 Reset erases the printed local inventory; export your data **before** resetting
 if you need it. Import requires an empty destination and retains native owners.
 Deploy requires explicit owner authorization and private account configuration;
-`--dry-run` validates locally without deployment. See [OPERATIONS.md](OPERATIONS.md)
-for state, deployment and restore requirements.
+`--dry-run` requires the same private mail inputs as real deployment in rer 0.2.21;
+it validates input shape and the build locally without provider requests or mail.
+See [OPERATIONS.md](OPERATIONS.md) for state, deployment and restore requirements.
 
 ## Working on HappyToHelp
 

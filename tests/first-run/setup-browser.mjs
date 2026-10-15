@@ -67,7 +67,7 @@ export async function setupJourney({browser,runtime,width,evidence,password,emai
   assert.doesNotMatch(await list.innerText(),/Not needed for a local trial/);
   await audit(page,evidence,`${width}-first-owner-setup-list`);
   await skipFlow({page,list,evidence,width});
-  await page.context().clearCookies();await passwordLogin(page,runtime.origin,email,password);await page.waitForURL(/\/activation$/);
+  await page.context().clearCookies();await passwordLogin(page,runtime.origin,email,password,'');await page.waitForURL(url=>url.pathname===`/projects/${projectId}/activation`);
   await audit(page,evidence,`${width}-existing-owner-setup-list`);
   const login=await post(runtime.origin,'/api/identity/login',{email,password});
   for(const section of ['activation','widget-settings','articles','reports','contacts','api-settings','webhook-settings','slack-settings','delivery-log','conversations']){

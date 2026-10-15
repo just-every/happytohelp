@@ -32,7 +32,8 @@ ownerClaim.post('/bootstrap', async c => {
  try {
   await createNativeOwner(c, {
    email, password: serverSecret(), allowedOrigin: c.env.WIDGET_ORIGIN || c.env.APP_ORIGIN || new URL(c.req.url).origin,
-   ...(typeof body.displayName === 'string' && body.displayName.trim() ? {ownerName: body.displayName} : {}),
+   // Rer's hosted claim has no owner answers and supplies a generic "Owner".
+   // Derive the native name from the actual owner email configured on this Worker.
   })
  } catch (error) {
   if (error instanceof HTTPException && error.status === 409) return c.json({error: 'already_initialized'}, 409)

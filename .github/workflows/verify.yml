@@ -94,9 +94,18 @@ jobs:
               pnpm run test:activation
               pnpm run test:activation-spend
               node scripts/ci/node-tests.mjs test:first-run
-          - name: move-in-contracts
+          - name: move-in-contracts-1
             commands: |
-              node scripts/ci/node-tests.mjs test:move-in
+              node scripts/ci/node-tests.mjs test:move-in 1/4
+          - name: move-in-contracts-2
+            commands: |
+              node scripts/ci/node-tests.mjs test:move-in 2/4
+          - name: move-in-contracts-3
+            commands: |
+              node scripts/ci/node-tests.mjs test:move-in 3/4
+          - name: move-in-contracts-4
+            commands: |
+              node scripts/ci/node-tests.mjs test:move-in 4/4
           - name: reports-and-recovery
             commands: |
               node scripts/ci/node-tests.mjs test:reports

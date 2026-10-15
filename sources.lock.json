@@ -1444,7 +1444,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "3f68c93aa6e654e5d3f367ed47c9b98f0664c282069911f636612f175723c223",
+      "sha256": "af848b0ce44a2eafba8f3241b8517bbcce439e85f5c2b70baedc70bd62526320",
       "executable": false
     },
     ".gitignore": {
@@ -9040,7 +9040,7 @@
       "executable": false
     },
     "tests/sendgrid-email.mjs": {
-      "sha256": "66930e2b52b0fbefa64f204d94e11634286c19efad6add6cd967d79739c023d5",
+      "sha256": "13eb2c4d29858691f464731376efbe2086cd0481060400073938d78058a7131e",
       "executable": false
     },
     "tests/sendgrid-inbound.mjs": {

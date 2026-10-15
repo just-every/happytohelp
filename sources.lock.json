@@ -2232,7 +2232,7 @@
       "executable": false
     },
     "scripts/delivery/base/packaging.json": {
-      "sha256": "59518e7c312e37cde8354fd3f1dcb8cb81e8c4fb6fd6420715f2cf3dd5b1fe89",
+      "sha256": "ee2730a6e5211b0bda4891705049c2068447856bca45b5f4d6a2da0c4ac9d504",
       "executable": false
     },
     "scripts/delivery/base/paths.mjs": {

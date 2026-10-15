@@ -2160,7 +2160,7 @@
       "executable": false
     },
     "rer-project.json": {
-      "sha256": "d337db66a1e967a5c5c117075d01a666c19ab3f86fae58a33c4c5b9cc311b97e",
+      "sha256": "31dbd31a8a662757c494345da677bddcb69fb72a4907bf7c974388b1eee64c1d",
       "executable": false
     },
     "rer-setup.json": {
@@ -2232,7 +2232,7 @@
       "executable": false
     },
     "scripts/delivery/base/packaging.json": {
-      "sha256": "ee2730a6e5211b0bda4891705049c2068447856bca45b5f4d6a2da0c4ac9d504",
+      "sha256": "b62416dde8459b9cafa05cd4919e2fbf0a4779f8b8ee49dc935854c88afc9f71",
       "executable": false
     },
     "scripts/delivery/base/paths.mjs": {
@@ -2440,7 +2440,7 @@
       "executable": false
     },
     "scripts/independent/setup-build.mjs": {
-      "sha256": "4bea55cf46a954b2c16f1c1983c6b6c351aea098f1bf849f67f0703a9eb14e97",
+      "sha256": "0fce369d93832fb1ec475103156499fa466b8d0a1b3c9ef7dfb86658dd379854",
       "executable": false
     },
     "scripts/independent/source-snapshot.mjs": {

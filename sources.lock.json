@@ -1431,6 +1431,10 @@
       "sha256": "522ca7463ec40e8dac751b8f10afd878f0d90d988e1d05b00adcc033897c95a5",
       "executable": false
     },
+    ".github/workflows/installer-journeys.yml": {
+      "sha256": "66961e415c1753a563d6fc0ef2d8c9eeaf3b8ac8eda66562a581dd848c193ab8",
+      "executable": false
+    },
     ".github/workflows/live-proof.yml": {
       "sha256": "793aa18c0d8cdaa836dcffe38d5afba3e9b1520ab77959f61dacb284a503df53",
       "executable": false
@@ -2181,6 +2185,14 @@
     },
     "scripts/build.mjs": {
       "sha256": "d77a09affe2affaca32fb483b349b55aae3aea2a2e120826db83de0c16ac5b6c",
+      "executable": false
+    },
+    "scripts/ci/node-tests.mjs": {
+      "sha256": "b33df60daf2cf36c6fa3b6dce2950bd9d559644585238c4ef366f0200e3457c0",
+      "executable": false
+    },
+    "scripts/ci/run-checks.mjs": {
+      "sha256": "230957a92bcd7ac4ef9ecf822e04adcee9c7269bab8905f899eb011ab92782f7",
       "executable": false
     },
     "scripts/delivery/base/artifact.mjs": {

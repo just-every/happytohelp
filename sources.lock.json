@@ -7866,6 +7866,10 @@
       "sha256": "cc12f4fe83366979a999c5df88cfae52b28f1c5efd693f966cc2460264ba4a25",
       "executable": false
     },
+    "tests/helpers/configured-mail-runtime.mjs": {
+      "sha256": "6c67eb9c304b22e09bf1c918c4c57ebbca8659e40887371bd864e6419f634d37",
+      "executable": false
+    },
     "tests/helpers/delegation-journey/browser-ui.mjs": {
       "sha256": "df97a0ee4ebc88af1b32ddc204c554adb7020c661fc6ac11266b9d003d378a28",
       "executable": false
@@ -8000,6 +8004,10 @@
     },
     "tests/helpers/local-mail-runtime.mjs": {
       "sha256": "3c83d514e3ccd14ac86e52eeb68b4ab881731269a1a93391307e601cbc0e04d6",
+      "executable": false
+    },
+    "tests/helpers/mail-provider-network.mjs": {
+      "sha256": "fcab75aa5b5a99f23575e18d57673f7a21f05480876505a22b1c16badc69f8be",
       "executable": false
     },
     "tests/helpers/migration-statements.mjs": {
@@ -8855,7 +8863,7 @@
       "executable": false
     },
     "tests/widget-browser-runtime.mjs": {
-      "sha256": "ca17055827f0b6d90cb1107afab521ed08d760708014b82194a808e3d78a0530",
+      "sha256": "3911de0e90ba8cc047cb4b284d3d89130a7a09de0d54db9b8b6e7dfd1f28eb84",
       "executable": false
     },
     "tests/widget-browser.mjs": {
@@ -8887,7 +8895,7 @@
       "executable": false
     },
     "tests/widget-opening-contrast-browser.mjs": {
-      "sha256": "28bc88daa8aa739d67da7abc5f6bca9f5a2eaee33dbcd46db3481c640ab22e48",
+      "sha256": "b2a34afade02b2cd57fed72a5f24c10e6411962b4ef78f0c4e8ca94a6a682032",
       "executable": false
     },
     "tests/widget-pointer-send-browser.mjs": {

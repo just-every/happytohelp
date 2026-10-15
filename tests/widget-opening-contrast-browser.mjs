@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {chromium} from 'playwright';
-import {createLocalMailRuntime} from './helpers/local-mail-runtime.mjs';
+import {createConfiguredMailRuntime} from './helpers/configured-mail-runtime.mjs';
 import {decodePng, measureContrastInRegions} from './helpers/accessibility-contrast.mjs';
 
 const evidence = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/widget-opening-contrast');
 await mkdir(evidence, {recursive: true});
-const runtime = await createLocalMailRuntime();
+const runtime = await createConfiguredMailRuntime();
 const records = [];
 let browser, success = false;
 const call = async (path, body, token) => {
@@ -75,6 +75,17 @@ try {
             settings: {collector: {enabled: false}, collect: {require_name: true, require_email: true}},
         });
         await page.getByRole('button', {name: 'Open chat', exact: true}).waitFor();
+        // A configured provider and an existing reply make the email-notification
+        // offer meaningful. Seed the reply through the native conversation API.
+        const storageKey = `rer-widget:${runtime.origin}:${project.widget_key}`;
+        await page.waitForFunction(key => JSON.parse(localStorage.getItem(key) || 'null')?.conversationId, storageKey);
+        const session = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey);
+        const initial = await call(`/api/conversations/${session.conversationId}/messages`, undefined, tenant.token);
+        const reply = await call(`/api/conversations/${session.conversationId}/messages`, {
+            localId: `opening-contrast-${viewport.width}-initial`, content: 'Your support reply is ready. How can we help further?',
+            expectedRevision: initial.revision, expectedLastMessageId: initial.lastMessageId,
+        }, tenant.token);
+        assert.equal(reply.accepted, true);
         await page.evaluate(() => {
             const style = document.createElement('style');
             style.id = 'pause-opening-motion';
@@ -84,6 +95,7 @@ try {
         await page.evaluate(() => window.h2h('open'));
         await page.locator('textarea[name=content]').waitFor();
         await page.locator('.happytohelp-insight-agent-info').waitFor();
+        await page.getByText('Your support reply is ready. How can we help further?', {exact: true}).waitFor();
         for (const time of [0, 16, 75, 150, 300]) {
             await page.locator('.happytohelp-interact-container').evaluate((panel, time) => {
                 for (const animation of panel.getAnimations()) {animation.pause(); animation.currentTime = time;}
@@ -99,9 +111,6 @@ try {
         await page.locator('textarea[name=content]').fill('A real conversation for the scrolled composer contrast check.');
         await measure(page, `${viewport.width}-composing-response`, '.happytohelp-insight-agent-info');
         await measure(page, `${viewport.width}-composing-notification`, '.happytohelp-collect-notify-email');
-        const storageKey = `rer-widget:${runtime.origin}:${project.widget_key}`;
-        await page.waitForFunction(key => JSON.parse(localStorage.getItem(key) || 'null')?.conversationId, storageKey);
-        const session = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey);
         for (let index = 0; index < 12; index++) {
             const transcript = await call(`/api/conversations/${session.conversationId}/messages`, undefined, tenant.token);
             const result = await call(`/api/conversations/${session.conversationId}/messages`, {

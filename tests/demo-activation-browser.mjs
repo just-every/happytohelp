@@ -22,7 +22,7 @@ const api=async(path,method='GET',body)=>page.evaluate(async({path,method,body})
 },{path,method,body});
 let success=false;
 try {
-  const originalId=await firstOwner(page,runtime.origin,{email:'demo-return@example.test',password:'demo-return-browser-password',workspaceName:'Original workspace'});
+  const originalId=await firstOwner(page,runtime.origin,{email:'demo-return@example.test',password:'synthetic-demo-return-browser-password',workspaceName:'Original workspace'});
   const initial=await api('/api/management/bootstrap'),userId=initial.currentAgent.id;
   const second=await api('/api/management/projects','POST',{name:'Second workspace',allowed_origin:'https://second.example.test'});
   let demoId;

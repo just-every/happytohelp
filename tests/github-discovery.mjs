@@ -28,7 +28,7 @@ try {
     }
   }
 
-  const env = { ...proxy.env, GITHUB_TOKENS: JSON.stringify({ p: 'mapped-installation-token' }) }
+  const env = { ...proxy.env, GITHUB_TOKENS: JSON.stringify({ p: 'synthetic-mapped-installation-token' }) }
   const DB = env.DB
   await DB.batch([
     DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)"),
@@ -48,12 +48,12 @@ try {
   }
   assert.equal((await githubApiRequest('health', 'scoped-token')).status, 200)
 
-  assert.deepEqual(await githubCredential(env, 'p'), { mode: 'mapped', token: 'mapped-installation-token' })
+  assert.deepEqual(await githubCredential(env, 'p'), { mode: 'mapped', token: 'synthetic-mapped-installation-token' })
   env.GITHUB_TOKENS = undefined
   env.GITHUB_PROJECT_ID = 'p'
-  env.GITHUB_TOKEN = 'single-project-token'
-  assert.deepEqual(await githubCredential(env, 'p'), { mode: 'single', token: 'single-project-token' })
-  env.GITHUB_TOKENS = JSON.stringify({ p: 'mapped-installation-token' })
+  env.GITHUB_TOKEN = 'synthetic-single-project-token'
+  assert.deepEqual(await githubCredential(env, 'p'), { mode: 'single', token: 'synthetic-single-project-token' })
+  env.GITHUB_TOKENS = JSON.stringify({ p: 'synthetic-mapped-installation-token' })
   env.GITHUB_TOKEN = undefined
 
   const calls = []
@@ -96,7 +96,7 @@ try {
 
   await DB.prepare("DELETE FROM github_connections WHERE project_id='p'").run()
   env.GITHUB_PROJECT_ID = 'p'
-  env.GITHUB_TOKEN = 'single-project-token'
+  env.GITHUB_TOKEN = 'synthetic-single-project-token'
   calls.length = 0
   globalThis.fetch = async url => {
     calls.push(String(url))
@@ -113,7 +113,7 @@ try {
 
   env.GITHUB_PROJECT_ID = undefined
   env.GITHUB_TOKEN = undefined
-  env.GITHUB_TOKENS = JSON.stringify({ p: 'mapped-installation-token' })
+  env.GITHUB_TOKENS = JSON.stringify({ p: 'synthetic-mapped-installation-token' })
   globalThis.fetch = async url => {
     calls.push(String(url))
     return Response.json({ message: 'forbidden' }, { status: 403 })

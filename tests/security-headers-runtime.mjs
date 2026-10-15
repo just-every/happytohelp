@@ -19,7 +19,7 @@ try{
  const {origin}=runtime
  const call=(path,{body,token,method=body===undefined?'GET':'POST',headers={}}={})=>fetch(origin+path,{method,redirect:'manual',headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)})
  for(const path of ['/','/login','/setup','/docs','/docs/install']){const response=await call(path);assert.equal(response.status,200,path);assert.match(response.headers.get('content-type'),/text\/html/,path);application(response,path)}
- const created=await call('/api/identity/bootstrap',{body:{password:'security-header-password-123',name:'Header project',email:'header-owner@example.com',allowedOrigin:customer},headers:{Origin:origin}})
+ const created=await call('/api/identity/bootstrap',{body:{password:'synthetic-security-header-password-123',name:'Header project',email:'header-owner@example.com',allowedOrigin:customer},headers:{Origin:origin}})
  assert.equal(created.status,201);application(created,'bootstrap API')
  const owner=await created.json()
  const dashboard=await call(`/projects/${owner.projectId}/conversations`,{headers:{Cookie:created.headers.get('set-cookie').split(';')[0]}})

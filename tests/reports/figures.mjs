@@ -130,7 +130,7 @@ test('invitation acceptance rechecks target and signed-in session at the native 
    const email=race.startsWith('new-account')?'race-new@example.test':'owner@example.test';
    const response=await h.raw('/api/identity/invitations',{actor:'foreign',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});assert.equal(response.status,201);const {token}=await response.json();
    const sql=race.includes('target-deleted')?"INSERT INTO project_settings VALUES('q','{\"deleted_at\":1}',1)":race==='session-revoked'?"UPDATE sessions SET revoked_at=1 WHERE actor_id='owner'":"DELETE FROM memberships WHERE project_id='p' AND user_id='owner'";
-   const result=await h.raw('/_test/invitation-race',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sql,newAccount:race.startsWith('new-account'),command:{token,name:'Race New',password:'long-native-test-password'}})});
+   const result=await h.raw('/_test/invitation-race',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sql,newAccount:race.startsWith('new-account'),command:{token,name:'Race New',password:'synthetic-long-native-test-password'}})});
    assert.equal(result.status,race.startsWith('new-account')?409:400,race);
    assert.equal((await h.db.prepare("SELECT count(*) n FROM memberships WHERE project_id='q' AND user_id='owner'").first()).n,0,race);
    assert.equal((await h.db.prepare("SELECT count(*) n FROM users WHERE email='race-new@example.test'").first()).n,0,race);

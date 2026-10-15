@@ -51,7 +51,7 @@ async function start(name, bindings) {
  const script = (await bundle).outputFiles[0].text, log = []
  const mf = new Miniflare(convertV4MiniflareOptions({
   name, modules: true, script, compatibilityDate: '2026-09-14', compatibilityFlags: ['nodejs_compat'],
-  bindings: {H2H_SETUP_TOKEN: 'provisioning-setup-token', RATE_LIMITS: JSON.stringify({projectsPerAccountDay: 100, projectsPerIpDay: 100, registrationsPerIpDay: 100, widgetSessionsPerIpHour: 100}), ...bindings},
+  bindings: {H2H_SETUP_TOKEN: 'synthetic-provisioning-setup-token', RATE_LIMITS: JSON.stringify({projectsPerAccountDay: 100, projectsPerIpDay: 100, registrationsPerIpDay: 100, widgetSessionsPerIpHour: 100}), ...bindings},
   d1Databases: ['DB'], r2Buckets: ['FILES'], queueProducers: {JOBS: {queueName: `${name}-jobs`}},
   queueConsumers: {[`${name}-jobs`]: {maxBatchSize: 1, maxBatchTimeout: 0, maxRetries: 0}},
   durableObjects: {CONVERSATIONS: {className: 'ConversationSocket', useSQLite: true}}, outboundService: edge(log),
@@ -67,7 +67,7 @@ async function start(name, bindings) {
    let json = null; try { json = JSON.parse(text) } catch {}
    return {status: response.status, body: json, text}
   }
-  const owner = await call('/api/identity/bootstrap', {body: {name: 'Owner workspace', email: `owner@${name}.example`, password: 'provisioning-owner-password-123', allowedOrigin: 'https://owner.example', setupToken: 'provisioning-setup-token'}})
+  const owner = await call('/api/identity/bootstrap', {body: {name: 'Owner workspace', email: `owner@${name}.example`, password: 'synthetic-provisioning-owner-password-123', allowedOrigin: 'https://owner.example', setupToken: 'synthetic-provisioning-setup-token'}})
   assert.equal(owner.status, 201, owner.text)
   return {mf, db, log, call, owner: owner.body}
  } catch (error) { await mf.dispose(); throw error }
@@ -179,7 +179,7 @@ test('with a key and mail, a registered workspace answers visitors by itself wit
  })
  try {
   const register = async (email, projectName, allowedOrigin) => {
-   ok(await call('/api/identity/register', {body: {email, name: 'Rae', password: 'registered-owner-password-123', projectName, allowedOrigin}}), 202)
+   ok(await call('/api/identity/register', {body: {email, name: 'Rae', password: 'synthetic-registered-owner-password-123', projectName, allowedOrigin}}), 202)
    return new URL(log.findLast(entry => entry.provider === 'resend' && entry.to.includes(email)).text.match(/https:\S+/)[0]).searchParams.get('token')
   }
   const totals = async () => Object.fromEntries(await Promise.all(['projects', 'ai_profiles', 'email_settings', 'project_settings'].map(async table => [table, (await db.prepare(`SELECT count(*) n FROM ${table}`).first()).n])))
@@ -193,7 +193,7 @@ test('with a key and mail, a registered workspace answers visitors by itself wit
   assert.equal((await call('/api/identity/verify-email', {body: {token: firstToken}})).status, 400)
   assert.deepEqual(await totals(), before, 'a failed or repeated creation provisions nothing')
 
-  const login = ok(await call('/api/identity/login', {body: {email: 'rae@bakery.example', password: 'registered-owner-password-123'}}))
+  const login = ok(await call('/api/identity/login', {body: {email: 'rae@bakery.example', password: 'synthetic-registered-owner-password-123'}}))
   const token = login.token, projectId = verified.projectId, origin = 'https://rae-bakes.example'
   const {starter} = await assertStarter(call, token, projectId)
   const readiness = ok(await call(`/api/management/projects/${projectId}/ai`, {token})).data

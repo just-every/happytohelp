@@ -13,13 +13,13 @@ const proxy=await getPlatformProxy({configPath,persist:false,envFiles:[]})
 try{
 const DB=proxy.env.DB;for(const file of ['0001_identity.sql','0003_identity_credentials.sql','0005_widget_identity.sql','0008_account_sessions.sql','0070_management.sql','0097_owner_setup.sql','0102_public_abuse_limits.sql'])for(const sql of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).split(file==='0097_owner_setup.sql'?/;\s*(?=(?:--|CREATE|INSERT)|$)/:';').filter(s=>s.trim()))await DB.prepare(sql).run()
 // Public-host owner setup requires the installation's private setup token.
-const env=proxy.env;env.H2H_SETUP_TOKEN='identity-fixture-setup-token-0123456789abcdef'
+const env=proxy.env;env.H2H_SETUP_TOKEN='synthetic-identity-fixture-setup-token-0123456789abcdef'
 async function call(path,body,token){return routes.request('https://app.example'+path,{method:body===undefined?'GET':'POST',headers:{...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env)}
 assert.equal((await call('/session')).status,401)
-const bootstrap=await call('/bootstrap',{password:'test-setup-password-123',email:'owner@example.com',name:'Owner',allowedOrigin:'https://widget.example',setupToken:env.H2H_SETUP_TOKEN});assert.equal(bootstrap.status,201);const owner=await bootstrap.json()
-assert.equal((await call('/password',{currentPassword:'test-setup-password-123',password:'test-correct-horse-battery'},owner.token)).status,200)
+const bootstrap=await call('/bootstrap',{password:'synthetic-test-setup-password-123',email:'owner@example.com',name:'Owner',allowedOrigin:'https://widget.example',setupToken:env.H2H_SETUP_TOKEN});assert.equal(bootstrap.status,201);const owner=await bootstrap.json()
+assert.equal((await call('/password',{currentPassword:'synthetic-test-setup-password-123',password:'test-correct-horse-battery'},owner.token)).status,200)
 assert.equal((await call('/session',undefined,owner.token)).status,401,'password change revokes setup session')
-assert.equal((await call('/login',{email:'owner@example.com',password:'invalid-password'})).status,401)
+assert.equal((await call('/login',{email:'owner@example.com',password:'synthetic-invalid-password'})).status,401)
 const login=await call('/login',{email:'owner@example.com',password:'test-correct-horse-battery'});assert.equal(login.status,200);assert.match(login.headers.get('Set-Cookie'),/HttpOnly/);const session=await login.json()
 assert.equal((await call('/switch-project',{projectId:'foreign'},session.token)).status,403)
 const invitation=await (await call('/invitations',{email:'new@example.com'},session.token)).json();assert.equal((await call('/accept-token',{token:invitation.token,name:'New',password:'new-correct-horse-battery'})).status,200);assert.equal((await call('/accept-token',{token:invitation.token,name:'New',password:'new-correct-horse-battery'})).status,400)

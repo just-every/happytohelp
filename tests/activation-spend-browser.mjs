@@ -17,7 +17,7 @@ const harness = await createSpendHarness()
 let server, browser
 try {
  const origin='http://127.0.0.1:16042'
- const setup = await harness.call('/api/identity/bootstrap',{name:'Spend browser',email:'spend-browser@example.test',password:'local-spend-browser-password',allowedOrigin:origin})
+ const setup = await harness.call('/api/identity/bootstrap',{name:'Spend browser',email:'spend-browser@example.test',password:'synthetic-local-spend-browser-password',allowedOrigin:origin})
  assert.equal(setup.status,201)
  const owner=await setup.json(), db=harness.db
  const component = `import React from 'react'; import {createRoot} from 'react-dom/client'; import AiSpendCard from './src/ui/native/activation-spend/AiSpendCard'; createRoot(document.getElementById('root')).render(<AiSpendCard projectId={${JSON.stringify(owner.projectId)}}/>);`

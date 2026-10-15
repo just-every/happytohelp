@@ -42,7 +42,7 @@ const pendingRows = async (workspace, token = workspace.tokens.owner, env = emai
   const body = await json(response)
   return { rows: body.data.filter(row => row.pending), emailConfigured: body.emailConfigured }
 }
-const acceptWithNewAccount = (url, name = 'New Person') => call('/accept-token', { app: identity, body: { token: tokenOf(url), name, password: 'a-long-enough-password' } })
+const acceptWithNewAccount = (url, name = 'New Person') => call('/accept-token', { app: identity, body: { token: tokenOf(url), name, password: 'synthetic-a-long-enough-password' } })
 
 test('the pending list gives each invitation a stable id, its expiry and who may manage it', async () => {
   const created = await invite(acme, 'Pat@Example.test')

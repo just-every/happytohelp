@@ -33,7 +33,7 @@ test('pinned Wrangler packages the fixed native topology offline without evaluat
     await writeCandidate(join(root, 'input.json'), artifact);
     await materializeArtifact(join(root, 'input.json'), output, target.artifactSha256);
     await writeFile(join(output, 'wrangler.json'), JSON.stringify(configuration(target)));
-    await writeFile(join(output, 'secrets.json'), JSON.stringify({H2H_SETUP_TOKEN:'test-setup-token-that-is-at-least-32-characters'}));
+    await writeFile(join(output, 'secrets.json'), JSON.stringify({H2H_SETUP_TOKEN:'synthetic-test-setup-token-that-is-at-least-32-characters'}));
     const tool = fileURLToPath(new URL('../toolchain/node_modules/wrangler/bin/wrangler.js', import.meta.url));
     const run = args => {
       const result = spawnSync(process.execPath, ['--require', guard, tool, ...args], {

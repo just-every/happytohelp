@@ -1,4 +1,4 @@
-export const AGENT_TOKEN = 'happytohelp-site-reader'
+export const AGENT_NAME = 'happytohelp-site-reader'
 export const USER_AGENT = `HappyToHelp-Site-Reader/1.0 (+https://happytohelp.com; reads your public help pages once after setup; honours robots.txt)`
 
 export type Robots = (pathAndQuery: string) => boolean
@@ -25,7 +25,7 @@ export function parseRobots(text: string): Robots {
    if (value) groups[groups.length - 1].rules.push({allow: field === 'allow', pattern: rulePattern(value), length: value.length})
   } else open = false
  }
- const own = groups.filter(group => group.agents.some(agent => agent && agent !== '*' && AGENT_TOKEN.includes(agent)))
+ const own = groups.filter(group => group.agents.some(agent => agent && agent !== '*' && AGENT_NAME.includes(agent)))
  const chosen = (own.length ? own : groups.filter(group => group.agents.includes('*'))).flatMap(group => group.rules)
  return path => {
   let best: Rule | undefined

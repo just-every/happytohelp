@@ -19,7 +19,7 @@ const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVID
 await mkdir(evidenceDir,{recursive:true});console.log('Widget settings evidence:',evidenceDir);
 const runtime=await createRuntime({port:Number(process.env.H2H_TEST_PORT||0)});const origin=runtime.origin;let success=false;
 const call=async(path,body,token,method=body===undefined?'GET':'POST')=>{const r=await fetch(origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(r.ok,`${path}: ${r.status}`);return r.json()};
-const f={email:'widget-settings@example.test',password:'widget-settings-test-password-2026'};
+const f={email:'widget-settings@example.test',password:'synthetic-widget-settings-test-password-2026'};
 const setup=await call('/api/identity/bootstrap',{password:f.password,name:'Widget Settings Workspace',email:f.email,allowedOrigin:origin});
 const owner=await call('/api/identity/login',{email:f.email,password:f.password});
 // Setup gives every new workspace a colour; clear it so the first checks read the widget's own defaults.

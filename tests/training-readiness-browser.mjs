@@ -17,7 +17,7 @@ try {
         assert.ok(response.ok, path + ': ' + response.status + ' ' + await response.clone().text());
         return response.json();
     };
-    const owner = {email: 'training-readiness@example.test', password: 'native-training-readiness-2026'};
+    const owner = {email: 'training-readiness@example.test', password: 'synthetic-native-training-readiness-2026'};
     const setup = await api('/api/identity/bootstrap', {...owner, name: 'Training Alpha', allowedOrigin: runtime.origin});
     const {token} = await api('/api/identity/login', owner);
     const beta = await api('/api/management/projects', {name: 'Training Beta', allowed_origin: runtime.origin}, token);

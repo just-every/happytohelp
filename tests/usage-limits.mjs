@@ -11,7 +11,7 @@ const {Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',
 test('configured request and daily AI count ceilings enforce real local admissions without inference',async()=>{
  const script=(await build({stdin:{contents:"export {app as default} from './src/app'; export {ConversationSocket} from './src/modules/conversations/socket'",resolveDir:process.cwd(),loader:'ts'},bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})).outputFiles[0].text
  let outbound=0
- const mf=new Miniflare(convertV4MiniflareOptions({name:'usage-limits',port:8786,inspectorPort:8787,modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{RATE_LIMITS:JSON.stringify({widgetSessionsPerIpHour:2}),AI_DAILY_CEILINGS:JSON.stringify({repliesPerProject:2,repliesPerInstallation:3}),OPENAI_API_KEY:'inert-admission-test-key'},d1Databases:['DB'],r2Buckets:['FILES'],queueProducers:{JOBS:{queueName:'usage-limits'}},durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}},outboundService:async()=>{outbound++;throw new Error('Outbound requests prohibited')}}))
+ const mf=new Miniflare(convertV4MiniflareOptions({name:'usage-limits',port:8786,inspectorPort:8787,modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{RATE_LIMITS:JSON.stringify({widgetSessionsPerIpHour:2}),AI_DAILY_CEILINGS:JSON.stringify({repliesPerProject:2,repliesPerInstallation:3}),OPENAI_API_KEY:'synthetic-inert-admission-test-key'},d1Databases:['DB'],r2Buckets:['FILES'],queueProducers:{JOBS:{queueName:'usage-limits'}},durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}},outboundService:async()=>{outbound++;throw new Error('Outbound requests prohibited')}}))
  try{
   const db=await mf.getD1Database('DB')
   for(const file of (await readdir('.generated/migrations')).filter(f=>f.endsWith('.sql')).sort()){
@@ -20,7 +20,7 @@ test('configured request and daily AI count ceilings enforce real local admissio
   }
   const call=(path,body,token)=>mf.dispatchFetch('http://localhost'+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',Origin:'http://localhost',...(token?{Authorization:'Bearer '+token}:{})},body:body===undefined?undefined:JSON.stringify(body)})
   await awaitWindowRoom(3600,10000)
-  const owner=await(await call('/api/identity/bootstrap',{name:'Limits',email:'usage-limits@example.com',password:'local-limit-test-password-123',allowedOrigin:'http://localhost'})).json()
+  const owner=await(await call('/api/identity/bootstrap',{name:'Limits',email:'usage-limits@example.com',password:'synthetic-local-limit-test-password-123',allowedOrigin:'http://localhost'})).json()
   const project=await(await call('/api/identity/projects/'+owner.projectId,undefined,owner.token)).json()
   const session=()=>call('/api/identity/widget/session',{widgetKey:project.widget_key})
   const visitor=await(await session()).json();assert.equal((await session()).status,201)

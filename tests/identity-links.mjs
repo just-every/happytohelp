@@ -34,7 +34,7 @@ test('auth options report an unclaimed install, then a claimed one, and what the
   const response = await call('/auth-options', { env: configured })
   assert.equal(response.headers.get('Cache-Control'), 'no-store')
   assert.deepEqual(await response.json(), { setupRequired: true, registrationAvailable: false, recoveryAvailable: true }, 'sign-up waits for the first owner')
-  const early = await call('/register', { body: { name: 'X', email: 'x@example.test', password: 'a-long-enough-password', projectName: 'X', allowedOrigin: 'https://x.example' }, env: configured })
+  const early = await call('/register', { body: { name: 'X', email: 'x@example.test', password: 'synthetic-a-long-enough-password', projectName: 'X', allowedOrigin: 'https://x.example' }, env: configured })
   assert.equal(early.status, 503)
   assert.match(await early.text(), /Set up this installation first/)
   assert.equal((await DB.prepare('SELECT count(*) n FROM registrations').first()).n, 0, 'nothing was stored or mailed')
@@ -52,7 +52,7 @@ test('registration and recovery refuse, with a plain reason, when the deployment
   assert.equal(forgot.status, 503)
   assert.match(await forgot.text(), /workspace owner must reset your password/)
   assert.equal((await DB.prepare("SELECT count(*) n FROM identity_tokens WHERE kind='reset'").first()).n, 0, 'no reset token is written')
-  assert.equal((await call('/register', { body: { name: 'X', email: 'x@example.test', password: 'a-long-enough-password', projectName: 'X', allowedOrigin: 'https://x.example' } })).status, 503)
+  assert.equal((await call('/register', { body: { name: 'X', email: 'x@example.test', password: 'synthetic-a-long-enough-password', projectName: 'X', allowedOrigin: 'https://x.example' } })).status, 503)
   assert.equal(mail.length, 0)
 })
 
@@ -136,7 +136,7 @@ test('accepting an invitation link retires the other links issued for the same e
     return tokenOf((await response.json()).data.invitationUrl)
   }
   const [first, second] = [await issue(), await issue()]
-  assert.equal((await call('/accept-token', { body: { token: first, name: 'Twice', password: 'a-long-enough-password' } })).status, 200)
+  assert.equal((await call('/accept-token', { body: { token: first, name: 'Twice', password: 'synthetic-a-long-enough-password' } })).status, 200)
   assert.deepEqual(await status('invitation', second), { state: 'used' })
-  assert.equal((await call('/accept-token', { body: { token: second, name: 'Twice', password: 'a-long-enough-password' } })).status, 400)
+  assert.equal((await call('/accept-token', { body: { token: second, name: 'Twice', password: 'synthetic-a-long-enough-password' } })).status, 400)
 })

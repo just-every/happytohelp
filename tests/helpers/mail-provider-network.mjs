@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 export default async request => {
     assert.equal(request.url, 'https://api.resend.com/emails', 'unexpected outbound request');
     assert.equal(request.method, 'POST');
-    assert.equal(request.headers.get('Authorization'), 'Bearer fixture-mail-provider');
+    assert.equal(request.headers.get('Authorization'), 'Bearer synthetic-fixture-mail-provider');
     const message = await request.json();
     assert.equal(message.from, 'support@example.test');
     assert.ok(message.to.length > 0);

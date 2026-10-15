@@ -17,14 +17,14 @@ let diagnostic;
 const only=process.env.H2H_CHECK_FILTER?new RegExp(process.env.H2H_CHECK_FILTER,'i'):null;
 const check=async(name,work,page)=>{if(only&&!only.test(name))return;try{await work();results.push(name);console.log('PASS',name);}catch(error){failures.push({name,message:String(error?.message||error).split('\n').slice(0,6).join(' | ')});console.log('FAIL',name,'-',String(error?.message||error).split('\n')[0]);if(page)await page.screenshot({path:join(evidenceDir,`failure-${name.replace(/\W+/g,'-').slice(0,60)}.png`)}).catch(()=>{});if(page)console.log('   html',(await page.locator('details').first().evaluate(e=>e.outerHTML).catch(()=>'no details')).slice(0,300));if(page)console.log('   at',page.url(),(await page.locator('body').innerText().catch(()=>'')).slice(0,200).replace(/\n/g,' / '));}};
 try{
- const owner={email:'library-owner@example.test',password:'native-library-test-password-2026'};
+ const owner={email:'library-owner@example.test',password:'synthetic-native-library-test-password-2026'};
  const setup=await request('/api/identity/bootstrap',{body:{...owner,name:'Library Owner',allowedOrigin:origin}}),projectId=setup.projectId;
  const login=await request('/api/identity/login',{body:owner}),token=login.token,api=`/api/management/projects/${projectId}`,knowledge=`/api/knowledge/${projectId}`;
  const project=await request(`/api/identity/projects/${projectId}`,{token});
  const make=async(kind,body)=>(await request(`${api}/${kind}`,{token,body})).data;
  const remaining=async(kind,id)=>(await request(`${api}/${kind}`,{token})).data.some(row=>row.id===id);
  // A second owner (so self-removal is possible without orphaning the project) and a plain agent.
- const joinAs=async(email,name)=>{const invite=await request('/api/identity/invitations',{token,body:{email,role:'operator'}});await request('/api/identity/accept-token',{body:{token:invite.token,name,password:'native-library-member-2026'}});const row=(await request(`${api}/agents`,{token})).data.find(agent=>agent.email===email);assert.ok(row?.id,'member joined');return row;};
+ const joinAs=async(email,name)=>{const invite=await request('/api/identity/invitations',{token,body:{email,role:'operator'}});await request('/api/identity/accept-token',{body:{token:invite.token,name,password:'synthetic-native-library-member-2026'}});const row=(await request(`${api}/agents`,{token})).data.find(agent=>agent.email===email);assert.ok(row?.id,'member joined');return row;};
  const second=await joinAs('second-owner@example.test','Second Owner'),helper=await joinAs('helper-agent@example.test','Helper Agent');
  await request(`${api}/agents/${second.id}`,{token,method:'PUT',body:{role:'owner'}});
  const macro=await make('macros',{title:'Greeting reply',content:'Hello {{contact.name}}'});

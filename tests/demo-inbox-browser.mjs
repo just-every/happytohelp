@@ -13,7 +13,7 @@ const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 let success=false;
 try {
-  const originalId=await firstOwner(page,runtime.origin,{email:'demo-browser@example.test',password:'demo-inbox-browser-password',workspaceName:'Real empty workspace'});
+  const originalId=await firstOwner(page,runtime.origin,{email:'demo-browser@example.test',password:'synthetic-demo-inbox-browser-password',workspaceName:'Real empty workspace'});
   await page.goto(`${runtime.origin}/projects/${originalId}/conversations`);
   await page.getByRole('button',{name:'Try a demo inbox',exact:true}).waitFor();
   await page.screenshot({path:join(evidence,'empty-invitation.png'),fullPage:true});

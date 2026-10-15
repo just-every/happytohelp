@@ -19,7 +19,7 @@ export function apiKit(runtime,token){
 }
 export async function setup(page,origin){
  // The one-screen first-run form: email, password, website. Name and colour are derived; the owner lands on the Setup page.
- await page.goto(origin+'/setup');await page.getByLabel('Your email',{exact:true}).fill('activation-browser@example.test');await page.getByLabel('Password',{exact:true}).fill('activation-browser-local-password');
+ await page.goto(origin+'/setup');await page.getByLabel('Your email',{exact:true}).fill('activation-browser@example.test');await page.getByLabel('Password',{exact:true}).fill('synthetic-activation-browser-local-password');
  await page.getByLabel('Your website',{exact:true}).fill(origin);await page.getByRole('button',{name:'Create workspace',exact:true}).click();await page.waitForURL(/\/projects\/[^/]+\/activation$/);return new URL(page.url()).pathname.split('/')[2];
 }
 export async function noOverflow(page,label){assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,label+' document overflow');const clipped=await page.locator('.setup-list a, .setup-list button, .activation-spend button').evaluateAll(elements=>elements.filter(element=>{const rect=element.getBoundingClientRect();return rect.width&&rect.height&&(rect.left< -1||rect.right>innerWidth+1)}).map(element=>element.textContent.trim()));assert.deepEqual(clipped,[],label+' setup list/spend controls clipped horizontally');}

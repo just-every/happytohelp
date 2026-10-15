@@ -7,7 +7,7 @@ const root=project=>`/api/management/projects/${project}/connections`;
 const actors={p:'owner',q:'foreign'};
 const config=kind=>kind==='webhooks'
  ? {name:'Private webhook',url:'https://receiver.example.com/private',events:['conversation.created']}
- : {name:'Private Slack',mode:'bot',token:'xoxb-native-boundary-fixture',channel:'C12345678'};
+ : {name:'Private Slack',mode:'bot',token:'xoxb-synthetic-test-only-native-boundary-fixture',channel:'C12345678'};
 
 // Include audit, quotas, jobs, delivery state and every business table. D1's own
 // platform accounting is not business state; all row values remain unnormalized.

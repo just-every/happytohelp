@@ -19,9 +19,9 @@ try{
  step(1,'health: emitted Worker serves /health with reachable D1 database and R2 files')
 
  // 2. Owner setup and login.
- const password='journey-owner-password-123',email='journey-owner@example.com'
+ const password='synthetic-journey-owner-password-123',email='journey-owner@example.com'
  const bootstrap=await json('/api/identity/bootstrap',{name:'Journey project',email,password,allowedOrigin:origin});assert.equal(bootstrap.status,201);assert.ok(bootstrap.body.projectId&&bootstrap.body.userId&&bootstrap.body.token)
- const secondBootstrap=await json('/api/identity/bootstrap',{name:'Second owner',email:'intruder@example.com',password:'another-password-123',allowedOrigin:origin});assert.equal(secondBootstrap.status,409);assert.match(JSON.stringify(secondBootstrap.body),/already complete/i)
+ const secondBootstrap=await json('/api/identity/bootstrap',{name:'Second owner',email:'intruder@example.com',password:'synthetic-another-password-123',allowedOrigin:origin});assert.equal(secondBootstrap.status,409);assert.match(JSON.stringify(secondBootstrap.body),/already complete/i)
  const loginResponse=await call('/api/identity/login',{email,password});assert.equal(loginResponse.status,200);const setCookie=loginResponse.headers.get('Set-Cookie');assert.match(setCookie,/HttpOnly/);assert.match(setCookie,/h2h_session=/);const cookie=setCookie.split(';')[0]
  const login=await loginResponse.json();assert.equal(login.actor.projectId,bootstrap.body.projectId);assert.equal(login.actor.role,'owner');assert.equal(login.accountOnly,false)
  const cookieSession=await json('/api/identity/session',undefined,undefined,'GET',{Cookie:cookie});assert.equal(cookieSession.status,200);assert.equal(cookieSession.body.id,bootstrap.body.userId);assert.equal(cookieSession.body.projectId,bootstrap.body.projectId)

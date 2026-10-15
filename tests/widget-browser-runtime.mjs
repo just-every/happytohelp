@@ -12,7 +12,7 @@ const evidenceRoot=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE
 const call=async(path,body,token,extra={})=>{const response=await fetch(runtime.origin+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} :{}),...extra},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,`${path}: ${response.status} ${await response.clone().text()}`);return response.json()};
 try{
  const socket=createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));const origin=`http://127.0.0.1:${port}`;
- const owner=await call('/api/identity/bootstrap',{password:'test-setup-password-123',name:'Widget runtime proof',email:'widget-runtime@example.test',allowedOrigin:origin});
+ const owner=await call('/api/identity/bootstrap',{password:'synthetic-test-setup-password-123',name:'Widget runtime proof',email:'widget-runtime@example.test',allowedOrigin:origin});
  const project=await call(`/api/identity/projects/${owner.projectId}`,undefined,owner.token);
  const foreignOwner=await runtime.seedTenant({name:'Other tenant',email:'foreign-widget@example.test',allowedOrigin:origin});
  const foreignProject=await call(`/api/identity/projects/${foreignOwner.projectId}`,undefined,foreignOwner.token);

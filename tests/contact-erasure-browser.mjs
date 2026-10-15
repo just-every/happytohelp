@@ -11,7 +11,7 @@ await mkdir(evidenceDir,{recursive:true});console.log('Contact erasure browser e
 const runtime=await createRuntime({port:Number(process.env.H2H_TEST_PORT)||0}),origin=runtime.origin;let success=false,browser;
 const request=async(path,{token,body,method=body===undefined?'GET':'POST',headers={},raw=false}={})=>{const response=await fetch(origin+path,{method,headers:{...(body!==undefined&&!(body instanceof Uint8Array)?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)});if(raw)return response;assert.ok(response.ok,`${method} ${path}: ${response.status} ${await response.clone().text()}`);return response.json();};
 try{
- const owner={email:'erasure-owner@example.test',password:'native-erasure-test-password-2026'};
+ const owner={email:'erasure-owner@example.test',password:'synthetic-native-erasure-test-password-2026'};
  const setup=await request('/api/identity/bootstrap',{body:{...owner,name:'Erasure Workspace',allowedOrigin:origin}}),projectId=setup.projectId;
  const login=await request('/api/identity/login',{body:owner}),project=await request(`/api/identity/projects/${projectId}`,{token:login.token});
  const secret='Please delete my account, my phone is 0400 123 456';

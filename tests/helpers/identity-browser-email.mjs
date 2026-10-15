@@ -53,8 +53,8 @@ export async function checkForgotPasswordWithEmail({ origin, kit }) {
 
 export async function checkResetPassword({ origin, kit }, owner) {
     const invitation = await kit.api(origin, '/api/identity/invitations', { body: { email: 'kim@review.test' }, token: owner.token });
-    await kit.api(origin, '/api/identity/accept-token', { body: { token: invitation.json.token, name: 'Kim', password: 'kim-first-password-1' } });
-    const kim = await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'kim-first-password-1' } });
+    await kit.api(origin, '/api/identity/accept-token', { body: { token: invitation.json.token, name: 'Kim', password: 'synthetic-kim-first-password-1' } });
+    const kim = await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'synthetic-kim-first-password-1' } });
     const reset = await kit.api(origin, '/api/identity/password-reset', { body: { userId: kim.json.actor.id }, token: owner.token });
     assert.equal(reset.status, 201, reset.text);
     const page = await kit.open(origin, '/reset-password?token=' + reset.json.token);
@@ -63,12 +63,12 @@ export async function checkResetPassword({ origin, kit }, owner) {
     await kit.assertHomepageLook(page, 'reset-password form');
     await kit.assertShortPasswordBlocked(page, () => page.getByRole('button', { name: 'Set new password' }).click(), 'reset-password');
     await kit.shot(page, 'reset-password-form');
-    await page.locator('input[type=password]').fill('kim-second-password-2');
+    await page.locator('input[type=password]').fill('synthetic-kim-second-password-2');
     await page.getByRole('button', { name: 'Set new password' }).click();
     await kit.expectText(page, /Password updated/);
     assert.equal(await page.getByRole('alert').count(), 0);
-    assert.equal((await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'kim-second-password-2' } })).status, 200);
-    assert.equal((await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'kim-first-password-1' } })).status, 401);
+    assert.equal((await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'synthetic-kim-second-password-2' } })).status, 200);
+    assert.equal((await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'synthetic-kim-first-password-1' } })).status, 401);
     await kit.done(page, 'reset-password-done');
     kit.pass('reset-password: names the account, enforces the rule in the browser, sets the new password and retires the old');
 }

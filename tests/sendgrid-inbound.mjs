@@ -23,7 +23,7 @@ try {
   const files = new Map()
   const env = {
     ...proxy.env,
-    INBOUND_EMAIL_TOKEN: 'fixture-inbound-token',
+    INBOUND_EMAIL_TOKEN: 'synthetic-fixture-inbound-token',
     OPENAI_API_KEY: undefined,
     FILES: { async put(key, content) { files.set(key, content) }, async get(key) { const content = files.get(key); return content === undefined ? null : { arrayBuffer: async () => content } } },
     CONVERSATIONS: { idFromName: id => id, get: () => ({ fetch: async () => new Response('ok') }) },
@@ -35,7 +35,7 @@ try {
 
   const pending = []
   const execution = { waitUntil(promise) { pending.push(Promise.resolve(promise).catch(() => {})) } }
-  const authorization = `Basic ${Buffer.from('sendgrid:fixture-inbound-token').toString('base64')}`
+  const authorization = `Basic ${Buffer.from('sendgrid:synthetic-fixture-inbound-token').toString('base64')}`
   const makeForm = ({ messageId, envelopeTo, visibleTo, text, attachment }) => {
     const form = new FormData()
     form.set('envelope', JSON.stringify({ to: [envelopeTo], from: 'customer@example.com' }))

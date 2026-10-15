@@ -38,7 +38,7 @@ try {
  env.RER_INSTALLATION_ID='managed-fixture'
  assert.deepEqual(await state(),{available:true,tokenRequired:true})
  assert.equal((await submit()).status,503)
- env.H2H_SETUP_TOKEN='private-owner-setup-fixture'
+ env.H2H_SETUP_TOKEN='synthetic-private-owner-setup-fixture'
  env.H2H_SETUP_OWNER_EMAIL='owner@example.invalid'
  assert.equal((await submit()).status,403)
  assert.equal((await submit({...entry,setupToken:'incorrect'})).status,403)
@@ -103,7 +103,7 @@ try {
  assert.deepEqual(await state(),{available:false})
  // The managed credential shares the permanent atomic claim, even after owner deletion.
  await db.prepare('DELETE FROM owner_setup').run()
- env.RER_INSTALLATION_ID='managed-fixture';env.H2H_SETUP_TOKEN='private-owner-setup-fixture';env.H2H_SETUP_OWNER_EMAIL='OWNER@example.invalid'
+ env.RER_INSTALLATION_ID='managed-fixture';env.H2H_SETUP_TOKEN='synthetic-private-owner-setup-fixture';env.H2H_SETUP_OWNER_EMAIL='OWNER@example.invalid'
  const mapped={ownerName:'  Actual Owner  ',email:entry.email,password:entry.password,allowedOrigin:entry.allowedOrigin,primaryColor:'#AABBCC'};
  const managedEntry={...entry,name:'First Owner',setupToken:env.H2H_SETUP_TOKEN,...Object.fromEntries(['ownerName','email','password','allowedOrigin','primaryColor'].map(key=>[key,mapped[key]]))}
  // A hosted provider whose connection drops after the request left: the owner and workspace still exist and are signed in, the

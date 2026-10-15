@@ -1,5 +1,5 @@
-export const ARTICLE_RETRIEVAL_TOKEN = 'T022ArticleRetrievalMarker';
-export const DATASET_RETRIEVAL_TOKEN = 'T022DatasetRetrievalMarker';
+export const ARTICLE_RETRIEVAL_TOKEN = 'synthetic-T022ArticleRetrievalMarker';
+export const DATASET_RETRIEVAL_TOKEN = 'synthetic-T022DatasetRetrievalMarker';
 
 export function articleFixture({ title = 'First-run article', status = 'draft', token = ARTICLE_RETRIEVAL_TOKEN } = {}) {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');

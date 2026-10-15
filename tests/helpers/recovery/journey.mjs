@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
-const credentials = {name: 'Recovery comparison fixture', email: 'recovery@example.test', password: 'recovery-comparison-test-password', allowedOrigin: 'https://recovery.example.test'};
-export const setupToken = 'local-recovery-comparison-setup-token';
+const credentials = {name: 'Recovery comparison fixture', email: 'recovery@example.test', password: 'synthetic-recovery-comparison-test-password', allowedOrigin: 'https://recovery.example.test'};
+export const setupToken = 'synthetic-local-recovery-comparison-setup-token';
 export async function call(runtime, path, body, token, headers = {}) {
   return fetch(runtime.origin + path, {method: body === undefined ? 'GET' : 'POST', headers: {'Content-Type': 'application/json', ...(token ? {Authorization: `Bearer ${token}`} : {}), ...headers}, ...(body === undefined ? {} : {body: JSON.stringify(body)})});
 }

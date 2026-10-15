@@ -61,7 +61,7 @@ presence and receipt access, not Cloudflare permissions or runtime health.
 For both workflows, configure the receipt destination and writer token below.
 For `stage`, also supply the provider secrets and target variables:
 
-- Secrets: `CLOUDFLARE_API_TOKEN`, `H2H_SETUP_TOKEN` (at least 32 characters),
+- Secret environment variables: `CLOUDFLARE_API_TOKEN`, `H2H_SETUP_TOKEN` (at least 32 characters),
   `EVIDENCE_WRITE_TOKEN` (contents write to the owner-selected receipt repository).
 - Protected Environment variable `H2H_EVIDENCE_REPOSITORY`: a credential-free
   `https://github.com/<owner>/<repository>.git` URL for an existing receipt

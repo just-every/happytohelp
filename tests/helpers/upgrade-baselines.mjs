@@ -29,13 +29,13 @@ export function client(origin) {
 // Genuine v0.2.1 setup and journey API writes, with no direct fixture INSERTs.
 async function populate021(origin) {
   const call = client(origin);
-  const owner = await call('/api/identity/bootstrap', {body: {name: 'Upgrade owner workspace', email: 'upgrade@example.test', password: 'upgrade-proof-password-2026', allowedOrigin: origin}});
+  const owner = await call('/api/identity/bootstrap', {body: {name: 'Upgrade owner workspace', email: 'upgrade@example.test', password: 'synthetic-upgrade-proof-password-2026', allowedOrigin: origin}});
   const project = await call(`/api/identity/projects/${owner.projectId}`, {token: owner.token});
   const visitor = await call('/api/identity/widget/session', {body: {widgetKey: project.widget_key, name: 'Upgrade customer', email: 'customer@example.test'}, headers: {Origin: origin}});
   const conversation = await call('/api/conversations', {body: {projectId: owner.projectId}, token: visitor.token});
   await call(`/api/conversations/${conversation.id}/messages`, {body: {localId: 'upgrade-customer-message', content: 'Retain this exact transcript through upgrade.', expectedRevision: 0}, token: visitor.token});
   await call(`/api/knowledge/${owner.projectId}/articles`, {body: {title: 'Upgrade knowledge', slug: 'upgrade-knowledge', content: 'Retain this published article through upgrade.', status: 'published'}, token: owner.token});
-  return {owner: {email: 'upgrade@example.test', password: 'upgrade-proof-password-2026', projectId: owner.projectId}, visitor: {token: visitor.token, conversationId: conversation.id, transcript: ['Retain this exact transcript through upgrade.']}, article: {projectId: owner.projectId, slug: 'upgrade-knowledge', content: 'Retain this published article through upgrade.'}};
+  return {owner: {email: 'upgrade@example.test', password: 'synthetic-upgrade-proof-password-2026', projectId: owner.projectId}, visitor: {token: visitor.token, conversationId: conversation.id, transcript: ['Retain this exact transcript through upgrade.']}, article: {projectId: owner.projectId, slug: 'upgrade-knowledge', content: 'Retain this published article through upgrade.'}};
 }
 
 // A populated 0.3 installation, written only through its own API: owner with a
@@ -44,14 +44,14 @@ async function populate021(origin) {
 // operator replies, and a published article in a category.
 async function populate03(origin) {
   const call = client(origin);
-  const owner = {email: 'owner-03@example.test', password: 'upgrade-03-owner-password'};
+  const owner = {email: 'owner-03@example.test', password: 'synthetic-upgrade-03-owner-password'};
   const setup = await call('/api/identity/bootstrap', {body: {name: 'Upgrade 0.3 desk', ownerName: 'Upgrade Owner', email: owner.email, password: owner.password, allowedOrigin: origin, primaryColor: '#204b3a'}});
   const token = setup.token, projectId = setup.projectId;
   const appearance = {brand_name: 'Upgrade Desk', welcome_message: 'Hello from 0.3', primary_color: '#204b3a', color: '#f4efe6', timezone: 'Europe/London', display_mode: 'light'};
   await call(`/api/management/projects/${projectId}/settings`, {method: 'PUT', body: appearance, token});
   await call(`/api/management/projects/${projectId}/appearance`, {method: 'PUT', body: {artwork_enabled: false}, token});
   const second = await call('/api/management/projects', {body: {name: 'Upgrade 0.3 second desk', allowed_origin: origin}, token});
-  const member = {email: 'member-03@example.test', password: 'upgrade-03-member-password'};
+  const member = {email: 'member-03@example.test', password: 'synthetic-upgrade-03-member-password'};
   const invitation = await call(`/api/management/projects/${projectId}/agents`, {body: {email: member.email, role: 'operator'}, token});
   await call('/api/identity/accept-token', {body: {token: new URL(invitation.data.invitationUrl).searchParams.get('token'), name: 'Upgrade Member', password: member.password}});
   await call(`/api/management/projects/${projectId}/agents`, {body: {email: 'pending-03@example.test', role: 'operator'}, token});

@@ -6,7 +6,7 @@ import {selectLocalState} from '@runeditrun/rer/local/state';
 import {readSettings} from '@runeditrun/rer/adapter-settings';
 import {writePrivateFile} from '@runeditrun/rer/private-files';
 
-const generatedToken='INBOUND_EMAIL_TOKEN';
+const generatedTokenEnvironment='INBOUND_EMAIL_TOKEN';
 export async function localInputDefaults(root){
  const defaults={target:'local',EMAIL_PROVIDER:'later'};
  // Rer fills localDefault before reading entered secrets from the environment.
@@ -25,11 +25,11 @@ function refuseUnchosenAiKeys(context){
 // Base keeps an existing .dev.vars as it is, so a checkout set up before the token existed never gets one from the
 // manifest. Append only the missing generated token; every other byte and secret stays as it was.
 async function addMissingToken(context,saved){
- if(saved.text===undefined||Object.hasOwn(saved.values,generatedToken))return;
- const field=context.manifest?.fields.find(item=>item.name===generatedToken);
+ if(saved.text===undefined||Object.hasOwn(saved.values,generatedTokenEnvironment))return;
+ const field=context.manifest?.fields.find(item=>item.name===generatedTokenEnvironment);
  const value=randomBytes(32).toString(field?.generate??'hex');
  context.store?.addSecrets?.([value]);
- await writePrivateFile(saved.path,saved.text.replace(/\n*$/,'\n')+`${generatedToken}=${value}\n`);
+ await writePrivateFile(saved.path,saved.text.replace(/\n*$/,'\n')+`${generatedTokenEnvironment}=${value}\n`);
 }
 
 export async function prepareNativeLocal(context){

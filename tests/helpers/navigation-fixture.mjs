@@ -6,7 +6,7 @@ export async function navigationFixture(origin) {
     assert.ok(response.ok, `${method} ${path}: ${response.status} ${await response.clone().text()}`);
     return response.json();
   };
-  const email='navigation@example.test', password='navigation-regression-password-2026';
+  const email='navigation@example.test', password='synthetic-navigation-regression-password-2026';
   const initial=await call('/api/identity/bootstrap',{email,password,name:'Navigation Alpha',allowedOrigin:origin});
   const owner=await call('/api/identity/login',{email,password});
   const second=await call('/api/management/projects',{name:'Navigation Beta',allowed_origin:origin},owner.token);

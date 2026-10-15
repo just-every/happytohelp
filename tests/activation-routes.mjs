@@ -16,7 +16,7 @@ for(const name of (await readdir(new URL('../migrations/',import.meta.url))).fil
  for(const [,sql] of source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))if(sql.trim()!==';')await DB.prepare(sql).run()
 }
 const primary=await seedWorkspace(DB,'activation'),other=await seedWorkspace(DB,'other')
-const base={...proxy.env,EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-email-key',EMAIL_FROM:'support@example.test',OPENAI_API_KEY:'fixture-model-key',INBOUND_EMAIL_TOKEN:'fixture-inbound-key',PREVIEW_ORIGIN:'https://preview.example'}
+const base={...proxy.env,EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-fixture-email-key',EMAIL_FROM:'support@example.test',OPENAI_API_KEY:'synthetic-fixture-model-key',INBOUND_EMAIL_TOKEN:'synthetic-fixture-inbound-key',PREVIEW_ORIGIN:'https://preview.example'}
 const path=`/projects/${primary.projectId}/activation`,origin='https://desk.example'
 const call=(suffix='',{body,token=primary.tokens.owner,env=base}={})=>activation.request(origin+path+suffix,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)},env)
 const snapshot=async(options)=>{const response=await call('',options);assert.equal(response.status,200,await response.clone().text());return(await response.json()).data}
@@ -108,7 +108,7 @@ test('test email is idempotent, queued is pending, wrong identity is unknown and
  assert.equal((await check('owner_mail')).state,'done');assert.equal(step(await snapshot(),'owner_mail').state,'done')
  event='bounced';assert.equal((await check('owner_mail')).state,'failed')
  const before=sendCount;sendUncertain=true
- const env={...base,EMAIL_API_KEY:'rotated-fixture-key'}
+ const env={...base,EMAIL_API_KEY:'synthetic-rotated-fixture-key'}
  assert.equal(step((await(await call('/test-mail',{body:{},env})).json()).data,'owner_mail').state,'unknown')
  await call('/test-mail',{body:{},env});assert.equal(sendCount,before+1,'uncertain message never replayed');sendUncertain=false
 })
@@ -142,7 +142,7 @@ test('deleted project denies activation even if a membership was retained',async
 })
 
 // Automatic checks, placement, owner-mail evidence, sender records and the starter, each in a workspace of its own.
-const localEnv={...proxy.env,H2H_LOCAL:'true',EMAIL_PROVIDER:'development',APP_ORIGIN:'http://127.0.0.1:8787',EMAIL_FROM:'support@local.test',INBOUND_EMAIL_TOKEN:'fixture-inbound-key',PREVIEW_ORIGIN:'https://preview.example'}
+const localEnv={...proxy.env,H2H_LOCAL:'true',EMAIL_PROVIDER:'development',APP_ORIGIN:'http://127.0.0.1:8787',EMAIL_FROM:'support@local.test',INBOUND_EMAIL_TOKEN:'synthetic-fixture-inbound-key',PREVIEW_ORIGIN:'https://preview.example'}
 const kit=(ws,env=base)=>{
  const send=async(suffix,body,options={})=>{
   const response=await activation.request(`${origin}/projects/${ws.projectId}/activation${suffix}`,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${ws.tokens.owner}`},body:body===undefined?undefined:JSON.stringify(body)},options.env||env)
@@ -430,7 +430,7 @@ test('an untouched starter moves to the installed provider before validation; an
  assert.equal(step(data,'model_key').state,'done')
  // With its own provider's key installed it stays where it is.
  const own=await starter('starter-own')
- assert.equal(step(await own.api.check({step:'model_key'},{env:{...base,ANTHROPIC_API_KEY:'fixture-anthropic-key'}}),'model_key').state,'done');assert.equal((await stored(own)).model,seed.model)
+ assert.equal(step(await own.api.check({step:'model_key'},{env:{...base,ANTHROPIC_API_KEY:'synthetic-fixture-anthropic-key'}}),'model_key').state,'done');assert.equal((await stored(own)).model,seed.model)
  // An assistant the owner edited is never changed, and the missing key stays stated.
  const edited=await starter('starter-edited',{...seed,prompt:'My own instructions.'})
  const kept=await edited.api.check({auto:true}),missing=step(kept,'model_key')

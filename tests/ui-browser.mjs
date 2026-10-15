@@ -11,7 +11,7 @@ const evidenceDir=join(evidenceRoot,'ui-native');
 console.log('UI browser evidence:',evidenceDir);
 const runtime=await createRuntime();const origin=runtime.origin;let success=false;
 const call=async(path,body,token,headers={})=>{const r=await fetch(origin+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} :{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(r.ok,`${path}: ${r.status}`);return r.json();};
-const f={email:'ui-test@example.test',password:'native-ui-test-password-2026'};
+const f={email:'ui-test@example.test',password:'synthetic-native-ui-test-password-2026'};
 const setup=await call('/api/identity/bootstrap',{password:f.password,name:'UI Acceptance Workspace',email:f.email,allowedOrigin:origin});f.projectId=setup.projectId;
 
 const owner=await call('/api/identity/login',{email:f.email,password:f.password});

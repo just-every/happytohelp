@@ -39,7 +39,7 @@ try {
     const conversationId = fixture.projects[0].conversationId;
     const owner = await call(runtime.origin, '/api/identity/login', {
         email: 'navigation@example.test',
-        password: 'navigation-regression-password-2026',
+        password: 'synthetic-navigation-regression-password-2026',
     });
     const conversationPath = `/projects/${projectId}/conversations/${conversationId}`;
     const conversation = (await call(
@@ -102,7 +102,7 @@ try {
         page.on('pageerror', error => errors.push(`${width}px: ${error.message}`));
         await page.goto(runtime.origin + '/login?' + new URLSearchParams({ returnTo: conversationPath }));
         await page.getByLabel('Email', { exact: true }).fill('navigation@example.test');
-        await page.getByLabel('Password', { exact: true }).fill('navigation-regression-password-2026');
+        await page.getByLabel('Password', { exact: true }).fill('synthetic-navigation-regression-password-2026');
         await page.getByRole('button', { name: 'Login', exact: true }).click();
         await page.waitForURL(url => url.pathname === conversationPath);
 

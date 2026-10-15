@@ -19,7 +19,7 @@ test('real Wrangler accepts controller topology and packages malicious module as
     const p=policy(a);await writeCandidate(join(root,'a.json'),a);
     await materializeArtifact(join(root,'a.json'),join(root,'out'),p.artifactSha256);
     await writeFile(join(root,'out/wrangler.json'),JSON.stringify(configuration(p)));
-    await writeFile(join(root,'out/secrets.json'),JSON.stringify({H2H_SETUP_TOKEN:'test-private-setup-token-with-32-characters'}));
+    await writeFile(join(root,'out/secrets.json'),JSON.stringify({H2H_SETUP_TOKEN:'synthetic-test-private-setup-token-with-32-characters'}));
     const result=spawnSync(process.execPath,[resolve('live-proofs/toolchain/node_modules/wrangler/bin/wrangler.js'),'deploy','--dry-run','--no-bundle','--config','wrangler.json','--secrets-file','secrets.json'],
       {cwd:join(root,'out'),env:{PATH:process.env.PATH,HOME:root,CI:'true',WRANGLER_SEND_METRICS:'false'},encoding:'utf8',timeout:60000});
     assert.equal(result.status,0,`${result.stdout}\n${result.stderr}`);

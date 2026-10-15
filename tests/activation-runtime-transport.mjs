@@ -15,7 +15,7 @@ let fixture
 try{
  for(const wrapped of [false,true]){
   if(wrapped)fixture=await providerFixture({port:0})
-  const runtime=await createRuntime(wrapped?{providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'activation-inert-model-key'}}:{})
+  const runtime=await createRuntime(wrapped?{providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'synthetic-activation-inert-model-key'}}:{})
   let success=false
   try{
    const config=JSON.parse(await readFile(join(runtime.directory,'wrangler.json'),'utf8'))
@@ -39,7 +39,7 @@ try{
    const sql=await runtime.execute('SELECT name FROM d1_migrations ORDER BY name;')
    const migrationNames=(await readdir(config.d1_databases[0].migrations_dir)).filter(name=>name.endsWith('.sql')).sort()
    assert.deepEqual([...sql.matchAll(/"name": "([^"]+)"/g)].map(match=>match[1]),migrationNames,'all migrations actually applied in filename order')
-   const boot=await apiKit(runtime)('/api/identity/bootstrap',{body:{email:'transport-activation@example.test',password:'activation-transport-password',name:'Transport activation',allowedOrigin:runtime.origin},status:201})
+   const boot=await apiKit(runtime)('/api/identity/bootstrap',{body:{email:'transport-activation@example.test',password:'synthetic-activation-transport-password',name:'Transport activation',allowedOrigin:runtime.origin},status:201})
    const api=apiKit(runtime,boot.token),activation=`/api/management/projects/${boot.projectId}/activation`
    assert.equal(snapshot(await api(activation)).done,0)
    if(wrapped){

@@ -3,7 +3,7 @@ import {apiKit,snapshot} from './browser-kit.mjs';
 import {domainRecords} from './browser-provider-fixture.mjs';
 
 export async function providerProbes({runtime,page,fixture,checks}){
- const boot=await apiKit(runtime)('/api/identity/bootstrap',{body:{email:'activation-browser@example.test',password:'activation-provider-local-password',name:'Provider activation workspace',allowedOrigin:runtime.origin},status:201});
+ const boot=await apiKit(runtime)('/api/identity/bootstrap',{body:{email:'activation-browser@example.test',password:'synthetic-activation-provider-local-password',name:'Provider activation workspace',allowedOrigin:runtime.origin},status:201});
  const projectId=boot.projectId,token=boot.token,api=apiKit(runtime,token),activation=`/api/management/projects/${projectId}/activation`,settings=`/api/management/projects/${projectId}`;
  await page.context().addCookies([{name:'h2h_session',value:token,url:runtime.origin}]);
  const step=(data,id)=>data.steps.find(s=>s.id===id),check=async id=>snapshot(await api(activation+'/check',{body:{step:id}}));
@@ -26,7 +26,7 @@ export async function providerProbes({runtime,page,fixture,checks}){
  assert.equal(step(await check('inbound_address'),'inbound_address').state,'pending','address saved is no receiving proof');
  await api('/api/integrations/email/inbound',{auth:'wrong-gateway-token',body:{messageId:'activation-invalid-inbound',to:'inbound@activation.example.test',from:'activation-visitor@example.test',text:'Inbound challenge'},status:403});
  assert.equal(step(await check('inbound_address'),'inbound_address').state,'pending','invalid authenticated gateway does not qualify');
- await api('/api/integrations/email/inbound',{auth:'activation-inert-inbound-token',body:{messageId:'activation-real-local-challenge',to:'inbound@activation.example.test',from:'activation-visitor@example.test',text:'Actual local inbound challenge'},status:201});
+ await api('/api/integrations/email/inbound',{auth:'synthetic-activation-inert-inbound-token',body:{messageId:'activation-real-local-challenge',to:'inbound@activation.example.test',from:'activation-visitor@example.test',text:'Actual local inbound challenge'},status:201});
  assert.equal(step(await check('inbound_address'),'inbound_address').state,'done');
  await api(settings+'/email-settings',{method:'PUT',body:{from_address:'support@activation.example.test',inbound_address:'changed@activation.example.test',is_enabled:true}});
  assert.notEqual(step(snapshot(await api(activation)),'inbound_address').state,'done','changed mailbox invalidates delivered receipt');assert.equal(step(await check('inbound_address'),'inbound_address').state,'pending');
@@ -40,7 +40,7 @@ export async function providerProbes({runtime,page,fixture,checks}){
  assert.equal(step(snapshot(await api(activation+'/test-mail',{body:{}})),'owner_mail').state,'unknown');const uncertainSends=fixture.state.sendCalls;
  await api(activation);await check('owner_mail');await auto();await api(activation+'/test-mail',{body:{}});assert.equal(fixture.state.sendCalls,uncertainSends,'uncertain send cannot replay');
  for(const body of [{done:true},{recipient:'someone@example.test'}])await api(activation+'/test-mail',{body,status:400});for(const body of [{done:true},{auto:false}])await api(activation+'/check',{body,status:400});
- const serialized=JSON.stringify(await api(activation));assert.doesNotMatch(serialized,/activation-inert-(?:model|mail)-key|activation-inert-inbound-token/,'no secrets in response');
+ const serialized=JSON.stringify(await api(activation));assert.doesNotMatch(serialized,/activation-inert-(?:model|mail)-key|synthetic-activation-inert-inbound-token/,'no secrets in response');
  // While a model check is in flight, automatic checks wait on its lease; once done, repeated automatic checks reuse it.
  let release;fixture.state.modelGate=new Promise(resolve=>{release=resolve});const before=modelCalls();
  try{

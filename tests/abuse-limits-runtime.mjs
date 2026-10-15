@@ -8,7 +8,7 @@ const runtime=await createRuntime();let success=false
 try{
  const {origin}=runtime,widgetOrigin='https://customer-site.example'
  const call=(path,body,token,headers={})=>fetch(origin+path,{method:body===undefined?'GET':'POST',headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)})
- const owner=await(await call('/api/identity/bootstrap',{password:'test-setup-password-123',name:'Limits project',email:'limits-owner@example.com',allowedOrigin:widgetOrigin})).json()
+ const owner=await(await call('/api/identity/bootstrap',{password:'synthetic-test-setup-password-123',name:'Limits project',email:'limits-owner@example.com',allowedOrigin:widgetOrigin})).json()
  const project=await(await call('/api/identity/projects/'+owner.projectId,undefined,owner.token)).json()
  // Each burst must fall inside one UTC-aligned window of the limit it exercises.
  await awaitWindowRoom(3600,30000)

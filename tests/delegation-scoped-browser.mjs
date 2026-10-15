@@ -7,7 +7,7 @@ import {join,resolve} from 'node:path'
 import {chromium} from 'playwright'
 const root=new URL('..',import.meta.url).pathname,dir=await mkdtemp(join(tmpdir(),'h2h-scoped-browser-')),persist=join(dir,'state'),configPath=join(dir,'wrangler.json')
 const output=process.env.H2H_EVIDENCE_DIR||dir,origin='http://127.0.0.1:8700',server=join(root,'dist/server'),wrangler=join(root,'node_modules/wrangler/bin/wrangler.js'),emitted=JSON.parse(await readFile(join(server,'wrangler.json'),'utf8'))
-const setupToken='scoped-browser-setup-private-token',env={...process.env,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'}
+const setupToken='synthetic-scoped-browser-setup-private-token',env={...process.env,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'}
 let child,browser,logs=''
 try{
  await mkdir(output,{recursive:true})

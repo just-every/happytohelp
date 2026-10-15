@@ -1,5 +1,5 @@
 // Fixture for the inbox/conversation browser regression: an owner, contacts and conversations built through the real HTTP APIs.
-export const OWNER={email:'inbox-owner@example.test',password:'inbox-conversation-test-2026',name:'Inbox Owner',ownerName:'Alex Rivers'}
+export const OWNER={email:'inbox-owner@example.test',password:'synthetic-inbox-conversation-test-2026',name:'Inbox Owner',ownerName:'Alex Rivers'}
 export const REPLY={title:'Replacement buckle approved',content:'Hi {{contact.name}}, a black replacement buckle is approved for express dispatch tomorrow. — {{agent.name}}'}
 
 export async function buildInboxFixture(origin){

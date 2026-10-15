@@ -92,7 +92,7 @@ test('foreign webhook and Slack settings have the same refusal as missing worksp
  const h=await harness();try{
   const foreignRoot='/api/management/projects/q/connections',ownRoot='/api/management/projects/p/connections';
   for(const kind of ['webhooks','slack']){
-   const config=kind==='webhooks'?{name:'Foreign hook',url:'https://receiver.example.com/foreign',events:['conversation.created']}:{name:'Foreign Slack',mode:'bot',token:'xoxb-foreign-fixture',channel:'C12345678'};
+   const config=kind==='webhooks'?{name:'Foreign hook',url:'https://receiver.example.com/foreign',events:['conversation.created']}:{name:'Foreign Slack',mode:'bot',token:'xoxb-synthetic-test-only-foreign-fixture',channel:'C12345678'};
    const saved=await h.call(foreignRoot+'/'+kind,{actor:'foreign',...body(config)});
    for(const [method,suffix,input] of [['GET','',null],['POST','',config],['DELETE','/'+saved.id,null],['POST','/'+saved.id+'/test',{}]]){
     const options={method,...(input?{headers:{'Content-Type':'application/json'},body:JSON.stringify(input)}:{})};

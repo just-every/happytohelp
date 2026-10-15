@@ -12,7 +12,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms))
 const socket=async(id,token,after,expected)=>{const ws=new WebSocket(origin.replace('http','ws')+`/api/conversations/${id}/socket?token=${token}`+(after?'&after='+after:''));const got=[];ws.addEventListener('message',e=>{const frame=JSON.parse(e.data);got.push(frame);frames.push({phase,type:frame.type,bytes:Buffer.byteLength(e.data)})});await new Promise((yes,no)=>{ws.addEventListener('open',yes,{once:true});ws.addEventListener('error',no,{once:true})});for(let n=0;got.length<expected&&n<100;n++)await pause(30);assert.equal(got.length,expected);return {ws,got}}
 let completed=false
 try{
- const owner=await json('/api/identity/bootstrap',{name:'Usage workload',email:'usage@example.com',password:'local-measurement-password-123',allowedOrigin:origin},undefined,201)
+ const owner=await json('/api/identity/bootstrap',{name:'Usage workload',email:'usage@example.com',password:'synthetic-local-measurement-password-123',allowedOrigin:origin},undefined,201)
  const project=await json('/api/identity/projects/'+owner.projectId,undefined,owner.token)
  await pause(300);storage.push({phase:'before',...await(await fetch(origin+'/__usage/storage')).json()});mark('static_assets');const asset=await fetch(origin+'/widget.js');assert.equal(asset.status,200);const staticAssets={requests:1,bytes:(await asset.arrayBuffer()).byteLength};await pause(100);mark('new_visitor')
  const visitor=await json('/api/identity/widget/session',{widgetKey:project.widget_key,name:'Measured visitor'},undefined,201)

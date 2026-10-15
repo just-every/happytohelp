@@ -8,6 +8,10 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
+## Unreleased
+
+- Mark source fixtures as synthetic so hosted changes can admit the public source without changing test coverage.
+
 ## 0.5.0 — 2026-10-15
 
 ### Added

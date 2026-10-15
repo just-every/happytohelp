@@ -141,7 +141,7 @@ test('public request limits return 429 with Retry-After and stay per project, ad
 
   // Registration sends email and would create a project on installation keys: bounded per address.
   await awaitWindowRoom(86400,10000)
-  const register=(index,ip)=>call('/api/identity/register',{body:{email:`new-${index}@example.com`,name:'New',projectName:'New '+index,allowedOrigin:'https://new.example',password:'registration-fixture-password'},ip})
+  const register=(index,ip)=>call('/api/identity/register',{body:{email:`new-${index}@example.com`,name:'New',projectName:'New '+index,allowedOrigin:'https://new.example',password:'synthetic-registration-fixture-password'},ip})
   for(let index=0;index<2;index++){const response=await register(index,'192.0.2.30');assert.equal(response.status,202,await response.clone().text())}
   await expectLimited(await register(2,'192.0.2.30'),'registrationsPerIpDay')
   assert.equal(outbound.filter(url=>url==='https://api.resend.com/emails').length,2,'no email is sent for a refused registration')

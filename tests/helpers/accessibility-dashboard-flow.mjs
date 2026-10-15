@@ -8,7 +8,7 @@ import {contrastRatio, svgBackgroundStrokeColor} from './accessibility-contrast.
 export async function runDashboardAccessibility({browser, page, runtime, hostOrigin, call, axePath, audit, checks, errors, failedResponses, evidenceDir}) {
     const {scan, assertAxeClean, keyboardPass, measureLayout, measureContrast} = audit;
     let widgetConfig;
-    const password = 'accessibility-owner-password-2026';
+    const password = 'synthetic-accessibility-owner-password-2026';
     const email = 'accessibility-owner@example.test';
     page.on('pageerror', error => errors.push(error.message));
     page.on('response', response => { if (response.status() >= 400) failedResponses.push({status: response.status(), path: new URL(response.url()).pathname}); });

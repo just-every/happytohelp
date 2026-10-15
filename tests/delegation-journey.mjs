@@ -15,7 +15,7 @@ else{
  const scratch=await mkdtemp(join(tmpdir(),'h2h-delegation-journey-')),fixture=await customerFixture();let runtime,success=false;
  try{
   runtime=await createRuntime();const {origin}=runtime;
-  const password='journey-disposable-password-123',email='journey@example.test';
+  const password='synthetic-journey-disposable-password-123',email='journey@example.test';
   await client(origin)('/api/identity/bootstrap',{name:'Agent fix journey',email,password,allowedOrigin:origin},{status:201});
   const login=await client(origin)('/api/identity/login',{email,password}),api=client(origin,login.token);
   const outside=await newVisitor({origin,api,projectId:login.actor.projectId});await outside.say('OUTSIDE SCOPED CONVERSATION');

@@ -57,7 +57,7 @@ export async function createSpendHarness() {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) test('real D1 spend route scopes persisted costs, updates receipts once, preserves accounting and enforces current membership', async () => {
  const {mf,db,call,outbound} = await createSpendHarness()
  try {
-  const setup = await call('/api/identity/bootstrap',{name:'Spend',email:'spend@example.test',password:'local-spend-password-123',allowedOrigin:'http://localhost'})
+  const setup = await call('/api/identity/bootstrap',{name:'Spend',email:'spend@example.test',password:'synthetic-local-spend-password-123',allowedOrigin:'http://localhost'})
   assert.equal(setup.status,201)
   const owner = await setup.json(), endpoint = `/api/dashboard/projects/${owner.projectId}/ai-spend`
   assert.equal((await call(endpoint)).status,401)

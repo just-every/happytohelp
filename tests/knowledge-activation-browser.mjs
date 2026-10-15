@@ -80,7 +80,7 @@ const capture = async (page, name, viewport) => {
 };
 
 try {
-    const owner = { email: 'knowledge-owner@example.test', password: 'native-knowledge-test-password-2026' };
+    const owner = { email: 'knowledge-owner@example.test', password: 'synthetic-native-knowledge-test-password-2026' };
     const setup = await request('/api/identity/bootstrap', {
         authToken: undefined,
         body: { ...owner, name: 'Knowledge Owner', allowedOrigin: origin },
@@ -269,7 +269,7 @@ try {
     });
 
     const draftArticle = await request('/api/knowledge/' + projectId + '/articles', {
-        body: articleFixture({ title: 'Unpublished source remains excluded', status: 'draft', token: 'T022DraftArticleMarker' }),
+        body: articleFixture({ title: 'Unpublished source remains excluded', status: 'draft', token: 'synthetic-T022DraftArticleMarker' }),
     });
     const actualArticleCitations = await searchFor(ARTICLE_RETRIEVAL_TOKEN);
     const articleReturnedByRetrieval = actualArticleCitations.some(citation => citation.content.includes(ARTICLE_RETRIEVAL_TOKEN));

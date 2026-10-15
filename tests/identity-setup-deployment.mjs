@@ -18,7 +18,7 @@ try {
  for(const statement of readFileSync(new URL('../migrations/0097_owner_setup.sql',import.meta.url),'utf8').split(/;\s*(?=(?:--|CREATE|INSERT)|$)/).filter(s=>s.trim()))await db.prepare(statement).run()
  // Setup provisions a starter assistant with the workspace, so the schema includes project settings and assistants.
  for(const sql of readFileSync(new URL('../migrations/0070_management.sql',import.meta.url),'utf8').split(';').slice(0,2))await db.prepare(sql).run()
- const entry={name:'First Owner',email:'owner@example.invalid',password:'long-test-password',allowedOrigin:'https://example.invalid'}
+ const entry={name:'First Owner',email:'owner@example.invalid',password:'synthetic-long-test-password',allowedOrigin:'https://example.invalid'}
  const submit=(origin,body=entry)=>app.request(origin+'/bootstrap',{method:'POST',headers:{'content-type':'application/json',origin},body:JSON.stringify(body)},env)
  const state=async origin=>(await app.request(origin+'/setup',{},env)).json()
  const counts=async()=>Promise.all(tables.map(async table=>(await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n))
@@ -72,7 +72,7 @@ try {
   await reset();env.RER_INSTALLATION_ID='managed-fixture'
   assert.deepEqual(await state(origin),{available:true,tokenRequired:true})
   const waiting=await submit(origin);assert.equal(waiting.status,503);assert.match(await waiting.text(),/awaiting its installation credential/)
-  env.H2H_SETUP_TOKEN='managed-private-owner-setup-fixture'
+  env.H2H_SETUP_TOKEN='synthetic-managed-private-owner-setup-fixture'
   assert.equal((await submit(origin)).status,403)
   assert.equal((await submit(origin,{...entry,setupToken:env.H2H_SETUP_TOKEN})).status,201)
  }

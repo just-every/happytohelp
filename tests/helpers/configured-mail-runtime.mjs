@@ -7,7 +7,7 @@ export function createConfiguredMailRuntime() {
         inspectorPort: 0,
         vars: {
             EMAIL_PROVIDER: 'resend',
-            EMAIL_API_KEY: 'fixture-mail-provider',
+            EMAIL_API_KEY: 'synthetic-fixture-mail-provider',
             EMAIL_FROM: 'support@example.test',
         },
         outboundFixture: new URL('./mail-provider-network.mjs', import.meta.url).href,

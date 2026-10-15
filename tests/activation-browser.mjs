@@ -29,7 +29,7 @@ try{
  browser=await chromium.launch({headless:true});page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(15000);
  observePage(page);
  const projectId=await setup(page,runtime.origin);
- const login=await apiKit(runtime)('/api/identity/login',{body:{email:'activation-browser@example.test',password:'activation-browser-local-password'}}),token=login.token;
+ const login=await apiKit(runtime)('/api/identity/login',{body:{email:'activation-browser@example.test',password:'synthetic-activation-browser-local-password'}}),token=login.token;
  const activation=`/api/management/projects/${projectId}/activation`;
  const api=apiKit(runtime,token);snapshot(await api(activation));
  await freshViews({page,runtime,projectId,evidence,artifacts,checks});
@@ -40,7 +40,7 @@ try{
  await widgetProbes({runtime,projectId,token,activation,checks});
  await page.context().close();await runtime.close(true);runtime=null;
  fixture=await providerFixture({port:Number(process.env.H2H_PROVIDER_FIXTURE_PORT)||0});
- runtime=await createRuntime({providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'activation-inert-model-key',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'activation-inert-mail-key',EMAIL_FROM:'support@activation.example.test',INBOUND_EMAIL_TOKEN:'activation-inert-inbound-token'}});
+ runtime=await createRuntime({providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'synthetic-activation-inert-model-key',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-activation-inert-mail-key',EMAIL_FROM:'support@activation.example.test',INBOUND_EMAIL_TOKEN:'synthetic-activation-inert-inbound-token'}});
  page=await browser.newPage({viewport:{width:1440,height:1000}});observePage(page);
  await providerProbes({runtime,page,fixture,evidence,artifacts,checks});
  await Promise.all(responseChecks);assert.deepEqual(errors,[],'browser errors');assert.deepEqual(failed,[],'unexpected failed requests');success=true;

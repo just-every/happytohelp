@@ -12,7 +12,7 @@ const freePort=()=>new Promise((done,fail)=>{const s=createServer();s.once('erro
  */
 export async function startDelegationWorker({port=0,installation=true}={}){
  const directory=await mkdtemp(join(tmpdir(),'h2h-delegation-pages-')),configPath=join(directory,'wrangler.json'),persist=join(directory,'state'),server=join(root,'dist/server')
- const emitted=JSON.parse(await readFile(join(server,'wrangler.json'),'utf8')),wrangler=join(root,'node_modules/wrangler/bin/wrangler.js'),setupToken='delegation-pages-private-setup-token'
+ const emitted=JSON.parse(await readFile(join(server,'wrangler.json'),'utf8')),wrangler=join(root,'node_modules/wrangler/bin/wrangler.js'),setupToken='synthetic-delegation-pages-private-setup-token'
  const chosen=port||await freePort(),origin='http://127.0.0.1:'+chosen
  const config={...emitted,name:'h2h-delegation-pages',main:resolve(server,emitted.main),assets:{directory:resolve(server,emitted.assets.directory)},d1_databases:[{binding:'DB',database_name:'delegation-pages',database_id:'delegation-pages-local',migrations_dir:join(root,'.generated/migrations')}],r2_buckets:[{binding:'FILES',bucket_name:'delegation-pages-files'}],queues:{producers:[{binding:'JOBS',queue:'delegation-pages-jobs'}]},vars:{...(installation?{RER_INSTALLATION_ID:'delegation-pages-installation'}:{}),H2H_SETUP_TOKEN:setupToken},no_bundle:true}
  await writeFile(configPath,JSON.stringify(config))
@@ -22,5 +22,5 @@ export async function startDelegationWorker({port=0,installation=true}={}){
  const stop=async success=>{child.kill('SIGTERM');await Promise.race([new Promise(r=>child.exitCode!==null?r():child.once('exit',r)),new Promise(r=>setTimeout(r,3000))]);if(child.exitCode===null)child.kill('SIGKILL');if(success)await rm(directory,{recursive:true,force:true});else{await writeFile(join(directory,'runtime.log'),logs);console.error('Worker artifacts retained:',directory)}}
  let ready=false;for(let n=0;n<200;n++){try{if((await fetch(origin+'/health')).ok){ready=true;break}}catch{}if(child.exitCode!==null)break;await new Promise(r=>setTimeout(r,250))}
  if(!ready){await stop(false);throw new Error('Emitted Worker did not start:\n'+logs)}
- return {origin,setupToken,stop,async bootstrapOwner(context,name){const response=await context.request.post(origin+'/api/identity/bootstrap',{data:{name,ownerName:'Owner',email:'owner@delegation-pages.test',password:'delegation-pages-password',allowedOrigin:origin,setupToken}});if(response.status()!==201)throw new Error(await response.text());return (await response.json()).projectId}}
+ return {origin,setupToken,stop,async bootstrapOwner(context,name){const response=await context.request.post(origin+'/api/identity/bootstrap',{data:{name,ownerName:'Owner',email:'owner@delegation-pages.test',password:'synthetic-delegation-pages-password',allowedOrigin:origin,setupToken}});if(response.status()!==201)throw new Error(await response.text());return (await response.json()).projectId}}
 }

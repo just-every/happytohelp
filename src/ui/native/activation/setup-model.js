@@ -104,7 +104,7 @@ function rowFor(data, id) {
     const names = own?.state === 'unavailable' ? requiredNames(own.detail) : '';
     return {...base, state: 'unavailable', value: `Email isn’t configured, so we can’t email you.${names ? ` It needs ${names}.` : ''}`};
    }
-   return withObservation('set', facts.mail?.mode === 'local' ? 'Local trial: emails appear in your outbox.' : observed ? `${/delivered/i.test(own.receiptRef || '') ? 'Delivered' : 'Received'}. ${own.checkedAt ? `Confirmed ${utc(own.checkedAt)}.` : ''}`.trim() : 'Not confirmed yet. Signing in with an emailed link, or the test on the Email page, confirms it.');
+   return withObservation('set', facts.mail?.mode === 'local' ? 'Email is suppressed during local development. No email is sent.' : observed ? `${/delivered/i.test(own.receiptRef || '') ? 'Delivered' : 'Received'}. ${own.checkedAt ? `Confirmed ${utc(own.checkedAt)}.` : ''}`.trim() : 'Not confirmed yet. Signing in with an emailed link, or the test on the Email page, confirms it.');
   }
   case 'inbound_address': {
    const mailbox = facts.inboundAddress, lead = mailbox ? `${mailbox}. ` : '';

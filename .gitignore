@@ -26,3 +26,5 @@ local-agent/.state/
 .local-evidence/
 
 .rer/
+
+/exports/

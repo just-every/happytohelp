@@ -12,8 +12,9 @@ The public HTTP prefix is `/api/management`.
 
 Every route answers with the same snapshot (`ActivationSnapshot` in `types.ts`): the
 eight steps with their observed state, `total` (8), `done`, `checkedAt`, and for the
-Setup page `environment` (`local` for a loopback trial whose mail the local outbox
-captures, as `localMailOrigin` in `src/edition/local-mail` decides, else `hosted`), per-step
+Setup page `environment` (`local` for a trusted loopback trial whose development
+transport suppresses email, as `localMailOrigin` in `src/edition/local-mail` decides,
+else `hosted`), per-step
 `placement` (`needs_you`, `set`, `hidden` or `skipped`) and `applicable`, `applicableTotal`
 (without skipped and hidden steps), and `facts`. `done` counts only steps that are both
 observed `done` and applicable, so it never exceeds `applicableTotal`. Facts are stored or
@@ -71,11 +72,13 @@ it with no provider request, whichever workspace the link was issued for (links 
 issued for the person's first workspace, so one link confirms every workspace they
 own); password sign-in, an unused link, a link used by someone who is not an owner
 of this workspace, or a link to an address the owner no longer has do not count.
-Locally the confirmation describes capture in the outbox, never delivery. Otherwise the
-latest owner-requested mail (the activation test mail or the first-run welcome email,
-idempotency key `welcome:...`) is reported as its provider reports it: locally it is
-capture in the outbox, never delivery; providers without a status API report
-acceptance only; Resend completion requires a matching message ID, current sender,
+Local development reports mail as suppressed and leaves delivery pending: no
+email is sent, no message is stored and no viewer is exposed. Automatic dev owner
+entry and password sign-in do not confirm email delivery. On hosted installations,
+the latest owner-requested mail (the activation test mail or the first-run welcome
+email, idempotency key `welcome:...`) is reported as its provider reports it:
+providers without a status API report acceptance only; Resend completion requires
+a matching message ID, current sender,
 exact owner recipient and `last_event=delivered`. A durable sendEmail command fences
 repeated clicks and uncertain sends; uncertain mail is never resent.
 

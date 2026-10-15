@@ -9,31 +9,30 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {createServer} from 'node:net';
-import {chromium} from 'playwright';
 import {command,run} from './helpers/rer-command.mjs';
 import {waitForServingCapacity} from './helpers/serving-capacity.mjs';
-import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive,compareSignInArchive} from './helpers/rer-archive.mjs';
+import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive} from './helpers/rer-archive.mjs';
 import {seedPortableData,verifyPortableData} from './helpers/rer-data.mjs';
 
 // One maintained public command journey replaces the standalone installer flow.
 const source=fileURLToPath(new URL('..',import.meta.url));
 const scratch=await mkdtemp(join(tmpdir(),'h2h-rer-journey-')),root=join(scratch,'checkout');
 const execute=promisify(execFile);
-let server,browser;
+let server;
 const socket=createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));
 const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
 const email='rer-journey@example.test',password=randomBytes(24).toString('base64url');
 const origin=`http://127.0.0.1:${port}`;
 const setup=['setup','--owner-email',email,'--answers','.seed/local-answers.json','--port',String(port)];
-const json=async(path,body,token)=>{
- const response=await fetch(origin+path,{method:body?'POST':'GET',headers:{Origin:origin,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},...(body?{body:JSON.stringify(body)}:{})});
+const json=async(path,body,token,cookie)=>{
+ const response=await fetch(origin+path,{method:body?'POST':'GET',headers:{Origin:origin,...(cookie?{Cookie:cookie}:{}),...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},...(body?{body:JSON.stringify(body)}:{})});
  assert.equal(response.ok,true,`Native ${body?'POST':'GET'} ${path} returned HTTP ${response.status}`);return response.json();
 };
 async function start(){
  await waitForServingCapacity();
  server=command(root,['dev']);
  const ready=await server.waitFor(event=>event.event==='ready',180000);
- assert.equal(ready.url,origin);assert.equal((await fetch(origin+'/__dev/outbox')).status,200);
+ assert.equal(ready.url,origin);
  assert.equal((await json('/health')).status,'ok');
 }
 async function stop(){
@@ -44,38 +43,14 @@ async function stop(){
  await assert.rejects(fetch(origin+'/health',{signal:AbortSignal.timeout(2000)}));
 }
 async function signIn(){
- const context=await browser.newContext(),page=await context.newPage();
- try{
-  await page.goto(origin+'/login/magic');
-  await page.getByLabel('Email',{exact:true}).fill(email);
-  const requested=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/identity/magic-link'&&response.request().method()==='POST');
-  await page.getByRole('button',{name:'Create local sign-in link',exact:true}).click();
-  assert.equal((await requested).status(),202);
-  await page.getByRole('status').filter({hasText:'local outbox'}).waitFor();
-  await page.goto(origin+'/__dev/outbox');
-  await page.locator('article').filter({has:page.getByRole('heading',{name:'Sign in to HappyToHelp',exact:true})}).first().getByRole('link',{name:'Read message'}).click();
-  const link=await page.getByRole('link',{name:'Open this link'}).getAttribute('href');
-  assert.ok(link,'ordinary outbox sign-in must exist');
-  assert.equal((await context.request.get(link)).status(),200);
-  assert.equal((await context.request.get(origin+'/api/identity/session')).status(),401);
-  await page.getByRole('link',{name:'Open this link'}).click();
-  await page.getByRole('button',{name:'Sign in',exact:true}).waitFor();
-  assert.equal((await context.request.get(origin+'/api/identity/session')).status(),401);
-  await page.getByRole('button',{name:'Sign in',exact:true}).click();
-  await page.waitForURL(/\/projects\/[^/]+\/activation$/); // Default sign-in selects the owner's workspace and its unfinished setup.
-  const response=await context.request.get(origin+'/api/identity/session');assert.equal(response.status(),200);
-  const actor=await response.json();
-  const replay=await browser.newContext();
-  try{
-   const retry=await replay.newPage();await retry.goto(link);
-   const consumed=retry.waitForResponse(response=>new URL(response.url()).pathname==='/api/identity/magic-link/consume'&&response.request().method()==='POST');
-   await retry.getByRole('button',{name:'Sign in',exact:true}).click();
-   assert.equal((await consumed).status(),400,'replay must be refused after its POST completes');
-   assert.equal((await replay.request.get(origin+'/api/identity/session')).status(),401);
-  }finally{await replay.close();}
-  return actor;
- }finally{await context.close();}
+ const {readDevKey}=await import('@runeditrun/rer/dev-identity');
+ const {signInAs}=await import('@runeditrun/rer/internal/modules/operator-auth/dev/sign-in-as.mjs');
+ const identity=await signInAs({origin,key:await readDevKey(root),returnTo:'/setup'});
+ const native=identity.cookies.find(cookie=>cookie.name==='h2h_session');assert.ok(native);
+ assert.equal((await fetch(origin+'/api/identity/session',{headers:{Cookie:'h2h_session='+native.value}})).status,401,'a native dev session requires the checkout gate');
+ return json('/api/identity/session',undefined,undefined,identity.header);
 }
+
 try{
  await execute('git',['clone','--quiet','--no-local','--depth','1',source,root]);
  await run(root,['check','--profile','first-party']);
@@ -87,7 +62,7 @@ try{
  await run(root,['setup','--owner-email','other-owner@example.test','--answers','.seed/local-answers.json','--port',String(port)],4); // A different owner is refused before any change.
  const privateBefore=await readFile(join(root,'.dev.vars'));
  assert.equal((await stat(join(root,'.dev.vars'))).mode&0o777,0o600);
- await start();browser=await chromium.launch({headless:true});
+ await start();
  const actor=await signIn();assert.equal(actor.role,'owner');assert.ok(actor.id);
  const login=await json('/api/identity/login',{email,password});assert.equal(login.actor.id,actor.id);
  const project=await json('/api/management/projects',{name:'Retained workspace',allowedOrigin:origin},login.token);
@@ -134,9 +109,9 @@ try{
   const since=Date.now();await run(root,setup);
   const afterSetup=await archiveSnapshot(root);
   compareArchive(restoredData,afterSetup);
-  await start();await json('/api/identity/magic-link',{email,returnTo:'/setup'});await stop();
+  await start();await signIn();await stop();
   const afterSignIn=await archiveSnapshot(root);
-  await compareSignInArchive(root,afterSetup,afterSignIn,{email,ownerId:actor.id,origin,since});
+  compareDevEntryArchive(afterSetup,afterSignIn);
   restoredData=afterSignIn;
   assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore setup preserves every migration ledger row');
   const currentPrivate=await readFile(join(root,'.dev.vars'));
@@ -150,9 +125,9 @@ try{
  // Snapshot after login so replay/read checks still compare every portable row.
  await stop();const beforeRestoredReads=await archiveSnapshot(root),readStart=Date.now();await start();
  await verifyPortableData(origin,portable,restored.token,json);
- await json('/api/identity/magic-link',{email,returnTo:'/setup'});
+ await signIn();
  await stop();assert.equal(await migrationCount(),1);
- await compareSignInArchive(root,beforeRestoredReads,await archiveSnapshot(root),{email,ownerId:actor.id,origin,since:readStart});
+ compareDevEntryArchive(beforeRestoredReads,await archiveSnapshot(root));
  assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore reads and refused replays preserve migration history');
  // Dry-run validates the real production mail contract with test-only inputs and makes no provider request.
  await run(root,['deploy','--dry-run'],0,{env:{EMAIL_PROVIDER:'sendgrid',EMAIL_FROM:'support@dry-run.example.test',EMAIL_API_KEY:'test-only-dry-run-sendgrid-key'}});
@@ -162,7 +137,7 @@ try{
  await stop();
  // The owner's export remains in the checkout; generated files do not alter source.
  assert.equal((await execute('git',['status','--porcelain','--untracked-files=no'],{cwd:root})).stdout,'','journey preserves tracked source');
- console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, ordinary one-use outbox sign-in, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, completed/repeated/undone/erased import custody, restored erasure replay fences, two post-restore setups preserving data/ledgers with verified local sign-ins, deploy dry-run, reset and fresh owner.');
+ console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, automatic owner entry, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, completed/repeated/undone/erased import custody, restored erasure replay fences, two post-restore setups preserving data/ledgers with verified local sign-ins, deploy dry-run, reset and fresh owner.');
 }catch(error){
  // Browser diagnostics can contain one-use fragment capabilities; emit only a safe source location.
  const line=/rer-journey\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';
@@ -170,6 +145,6 @@ try{
  const code=/^[A-Z][A-Z0-9_]{1,30}$/.test(error.code??'')?`; code ${error.code}`:'';
  throw Error(`Rer journey failed (${error.name}, source line ${line}${diagnostic?'; '+diagnostic:''}${code}); private browser diagnostics withheld.`);
 }finally{
- if(browser)await browser.close();if(server)await server.stop();
+ if(server)await server.stop();
  await rm(scratch,{recursive:true,force:true});
 }

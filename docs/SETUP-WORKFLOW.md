@@ -3,12 +3,8 @@
 Prepare the first owner through [Install](INSTALLER.md), using
 `pnpm exec rer setup --owner-email you@example.com --answers .seed/local-answers.json`.
 Setup creates the native owner and first workspace before it exits. Start with
-`pnpm exec rer dev` and wait for `RER_READY` and the app address. Open
-`/login/magic` on that address, enter the local owner's email shown by dev and
-choose **Create local sign-in link**. Then open `/__dev/outbox` on the same app
-address, choose the newest sign-in email, follow its link and press **Sign in**.
-The outbox may initially contain only a welcome email; request the sign-in link
-first. No mail is sent.
+`pnpm exec rer dev` and wait for `RER_READY`. Open `RER_OPEN` to enter as the
+real local owner and reach **Setup**.
 The owner decision retains native passwords, prior account/workspace data and
 HappyToHelp's own tenant/permission checks.
 
@@ -44,9 +40,9 @@ logs. After a recovery claim sign in with the native password.
 Pressing **Create workspace** is your explicit action, and it may send you one
 welcome email at the address you gave. It goes through the same durable send path
 as every other mail, so it is never sent twice, and a send whose outcome is
-unknown is reported as unknown and never replayed. Locally the message lands in the
-development outbox and is described as captured, never delivered. Setup succeeds
-whatever happens to that email.
+unknown is reported as unknown and never replayed. Local mail uses rer dev v2;
+it is suppressed without storage or external sending. Setup succeeds whatever
+happens to that email.
 
 ### The widget website origin
 
@@ -108,9 +104,9 @@ a problem is not hidden by a skip.
 
 Mail to you is confirmed by using an emailed sign-in link, or by the provider's
 reported outcome for the welcome email or the test you send from the Email page
-(**Send me a test**). Provider acceptance is pending, and local capture is never
-delivery. GET inspection performs no provider work. The page's own checks read
-metadata and DNS, never send mail and never request a generation. Only your
+(**Send me a test**). Provider acceptance is pending, and suppressed local mail
+never confirms delivery. GET inspection performs no provider work. The page's
+own checks read metadata and DNS, never send mail and never request a generation. Only your
 explicit action sends mail, to your own mailbox; uncertain work is never replayed
 automatically. See [the activation module](../src/modules/management/activation/README.md)
 for the shape of the snapshot and the freshness windows.
@@ -122,14 +118,12 @@ explicit and never replaces customer data. See [Workspace workflows](WORKSPACE-W
 
 ## Local sign-in and private state
 
-Only explicit trusted local configuration selects development mail. The outbox
-is loopback-only, escaped and non-cacheable; it stores sensitive local captures.
-Production has neither this sender nor viewer. Failed real delivery never falls
-back to capture. While dev is running, open `/login/magic` on its printed app
-address, enter the local owner's email shown by dev and choose **Create local
-sign-in link**. Then open `/__dev/outbox` on that app address, choose the newest
-sign-in email, follow its link and press **Sign in**. No email is sent.
-The pinned CLI has retired its `outbox` command; use the native browser flow above.
+Only trusted local configuration enables rer dev v2 owner entry and mail.
+Open `RER_OPEN` to enter as the real local owner. Visitor and teammate mail use
+the development transport: it validates and suppresses messages, reports
+`development`, and keeps no message store or viewer. Production does not expose
+this local surface, and real mail failures remain failures. Native passwords and permissions remain
+in force.
 
 Stop dev before reset/export/import. Use [Operations](../OPERATIONS.md#local-data-and-backups)
 for confirmed reset and private backups. Re-running setup preserves existing

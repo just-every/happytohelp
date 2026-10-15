@@ -13,7 +13,7 @@ export async function profileEffects(runtime,contactId,email){
   const contact=db.prepare('SELECT * FROM contacts WHERE id=?').get(contactId);
   assert.equal(contact?.email===email,true,'the real saved contact retains the expected email');
   const result={contact:digest(contact),authorityEpoch:digest(db.prepare('SELECT * FROM integration_authority_epoch').all())};
-  for(const name of ['email_deliveries','rer_mail_development_outbox','ai_generations','native_integration_events','native_integration_intents']){
+  for(const name of ['email_deliveries','ai_generations','native_integration_events','native_integration_intents']){
    const rows=db.prepare('SELECT * FROM '+name).all().map(row=>JSON.stringify(row)).sort();result[name]={count:rows.length,digest:digest(rows)};
   }
   return result;

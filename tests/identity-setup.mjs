@@ -50,22 +50,23 @@ try {
  assert.equal((await submit({...entry,ownerName:'Actual Owner',primaryColor:'#AABBCC'})).status,500)
  for(const table of ['owner_setup','users','projects','project_settings','user_settings','memberships','credentials','sessions'])assert.equal((await db.prepare(`SELECT count(*) AS n FROM ${table}`).first()).n,0)
  await db.prepare('DROP TRIGGER reject_setup_credentials').run()
- // Local development mail: Create workspace sends the owner one welcome email, which lands in the development outbox.
+ // Local setup and its welcome retry complete without storing or sending email.
  for(const table of ['email_settings','email_deliveries'])await db.prepare(readFileSync(new URL('../migrations/0080_integrations.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('CREATE TABLE '+table+'('))).run()
- for(const sql of readFileSync(new URL('../migrations/117_development_outbox.sql',import.meta.url),'utf8').replace(/^--.*$/gm,'').split(';').filter(sql=>sql.trim()))await db.prepare(sql).run()
  Object.assign(env,{H2H_LOCAL:'true',EMAIL_PROVIDER:'development',APP_ORIGIN:'http://127.0.0.1',EMAIL_FROM:'HappyToHelp <noreply@localhost.test>'})
- const racers=[entry,{...entry,email:'racer@example.invalid'}],responses=await Promise.all(racers.map(body=>submit(body)))
+ const racers=[entry,{...entry,email:'racer@example.invalid'}],localFetch=globalThis.fetch
+ let localProviderCalls=0,responses
+ globalThis.fetch=async()=>{localProviderCalls++;throw new Error('Local setup must not contact a mail provider')}
+ try{responses=await Promise.all(racers.map(body=>submit(body)))}finally{globalThis.fetch=localFetch}
+ assert.equal(localProviderCalls,0)
  assert.deepEqual(responses.map(r=>r.status).sort(),[201,409])
  assert.equal((await db.prepare('SELECT count(*) n FROM user_settings').first()).n,0)
  // Either request may win the race; everything the winner did is checked against the winner's own email.
  const success=responses.find(r=>r.status===201),winner=racers[responses.indexOf(success)].email.toLowerCase(),owner=await success.json()
- assert.equal(owner.welcomeEmail,'sent')
- assert.equal((await db.prepare("SELECT count(*) n FROM email_deliveries WHERE state='sent' AND project_id=? AND id=?").bind(owner.projectId,'welcome:'+owner.projectId).first()).n,1)
- const welcome=async()=>(await db.prepare('SELECT message FROM rer_mail_development_outbox').all()).results.map(row=>JSON.parse(row.message))
- assert.equal((await welcome()).length,1);assert.deepEqual((await welcome())[0].to,[winner])
- // A retry or reload cannot send it again: the delivery is recorded under the workspace's own identity.
- assert.equal(await sendWelcomeEmail(env,{projectId:owner.projectId,workspaceName:'Example',ownerEmail:winner}),'sent')
- assert.equal((await welcome()).length,1)
+ assert.equal((await db.prepare('SELECT count(*) n FROM email_deliveries').first()).n,0)
+ globalThis.fetch=async()=>{localProviderCalls++;throw new Error('A local welcome retry must not contact a mail provider')}
+ try{await sendWelcomeEmail(env,{projectId:owner.projectId,workspaceName:'Example',ownerEmail:winner})}finally{globalThis.fetch=localFetch}
+ assert.equal(localProviderCalls,0)
+ assert.equal((await db.prepare('SELECT count(*) n FROM email_deliveries').first()).n,0)
  assert.equal((await db.prepare('SELECT name FROM projects').first()).name,'Example')
  assert.equal((await db.prepare('SELECT name FROM users').first()).name,deriveOwnerName(winner))
  // Provisioning adds the starter assistant, proposed sender and site read beside the colour and the derived marker.
@@ -125,7 +126,7 @@ try {
  assert.equal((await db.prepare("SELECT state FROM email_deliveries WHERE id=?").bind('welcome:'+managedOwner.projectId).first()).state,'uncertain')
  globalThis.fetch=async()=>{throw new Error('an uncertain welcome must not be sent again')}
  try{assert.equal(await sendWelcomeEmail(env,{projectId:managedOwner.projectId,workspaceName:'First Owner',ownerEmail:'owner@example.invalid'}),'uncertain')}finally{globalThis.fetch=realFetch}
- assert.equal((await welcome()).length,1,'a refused or lost welcome adds nothing to the local outbox')
+ assert.equal((await db.prepare('SELECT count(*) n FROM email_deliveries').first()).n,1,'only the hosted uncertain welcome is recorded')
  assert(await verifyPassword(entry.password,(await db.prepare('SELECT password_hash FROM credentials').first()).password_hash))
  assert.equal((await app.request('http://127.0.0.1/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:mapped.email,password:entry.password})},env)).status,200)
  const profile=(method='GET',body)=>app.request('http://127.0.0.1/management/profile',{method,headers:{authorization:`Bearer ${managedOwner.token}`,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})},env)

@@ -98,12 +98,12 @@ it cannot withdraw a message already accepted by a receiver.
 Follow [README](../README.md#run-it-on-your-computer). Password login is retained.
 Setup opens on a workspace that is already set up: its Setup page lists only what
 the owner must do (the widget, an AI key, sending-domain DNS), each of which can be skipped for now, and the system runs its
-own checks. Creating the workspace may send the owner one welcome email, captured
-in the outbox locally. A new workspace leads with the widget snippet and keeps
-secrets/verification under Advanced. Workspace headers show the
+own checks. Creating the workspace may send the owner one welcome email; local
+mail is suppressed without storage or external sending. A new workspace leads
+with the widget snippet and keeps secrets/verification under Advanced. Workspace headers show the
 current workspace and visitor agent headers intentionally show the operator's
-display name. With explicitly selected development mail, use `/__dev/outbox` at
-the exact app origin. Captured sign-in links require explicit **Sign in**. Capture
-is local evidence, not remote delivery. Without configured mail, links are
-unavailable with a plain explanation and the widget promises no email reply.
+display name. Open the private `RER_OPEN` address for automatic local owner
+entry. Visitor and teammate email is suppressed without storage or external
+sending by the rer dev v2 development transport. Without configured hosted mail,
+email links are unavailable with a plain explanation and the widget promises no email reply.
 Stop the installer or dev terminal with Ctrl+C; closing a browser leaves it running.

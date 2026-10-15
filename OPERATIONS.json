@@ -22,7 +22,7 @@
         "package.json",
         "scripts/installer/local.mjs"
       ],
-      "effects": "Foreground app with assets/HMR, health-gated readiness and development outbox sign-in."
+      "effects": "Foreground app with assets/HMR, health-gated readiness and automatic local owner entry."
     },
     "build": {
       "argv": [
@@ -101,17 +101,6 @@
       ],
       "effects": "See SEED-COMMAND-CONTRACT.md for release effects."
     },
-    "outbox": {
-      "argv": [
-        "rer",
-        "outbox"
-      ],
-      "inputs": [
-        "package.json",
-        "scripts/installer/local.mjs"
-      ],
-      "effects": "See SEED-COMMAND-CONTRACT.md for outbox effects."
-    },
     "doctor": {
       "argv": [
         "rer",
@@ -168,7 +157,7 @@
       "effects": "Serve fixed production output, preserve local owner and durable state, stop after idle timeout or explicit stop."
     }
   },
-  "authentication": "Owner-account deployment requires private CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN plus the secret environment inputs declared in deploy.json. Local native password/outbox sign-in requires no external provider credential. See OPERATIONS.md.",
+  "authentication": "Owner-account deployment requires private CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN plus the secret environment inputs declared in deploy.json. Local native password/development owner sign-in requires no external provider credential. See OPERATIONS.md.",
   "health": {
     "path": "/health",
     "meaning": "Native Worker with reachable D1 and R2; does not prove queues, sockets, providers or product acceptance."
@@ -205,7 +194,7 @@
   ],
   "notes": [
     "Node 22.20.0, pnpm 10.12.4 and frozen dependencies.",
-    "Native HappyToHelp owner/password and magic-link auth is retained. Local sign-in uses the development outbox.",
+    "Native HappyToHelp owner/password and magic-link auth is retained. Local sign-in uses automatic owner entry.",
     "No CLI operation implies hosted or provider acceptance."
   ],
   "project": "just-every/happytohelp",

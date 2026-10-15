@@ -37,8 +37,8 @@ export async function prepareNativeLocal(context){
  const saved=await readSettings(context.root,{file:'.dev.vars'});
  const legacy=await readFile(join(context.root,'.seed/installer/private/local.json'),'utf8').catch(error=>{if(error.code==='ENOENT')return null;throw error;});
  if(legacy){const prior=JSON.parse(legacy);if(prior.origin&&prior.origin!==saved.values.APP_ORIGIN)throw Error('Legacy installer origin differs from private settings. Preserve both and recover the intended origin before setup.');}
- if(saved.values.EMAIL_PROVIDER&&saved.values.EMAIL_PROVIDER!=='development')throw Error('The saved mail provider is retained. Use an isolated local checkout for the development-outbox command journey.');
- if(context.input.EMAIL_PROVIDER&&!['later','development'].includes(context.input.EMAIL_PROVIDER))throw Error('Local command setup uses the development outbox. Configure remote mail in the installed workspace.');
+ if(saved.values.EMAIL_PROVIDER&&saved.values.EMAIL_PROVIDER!=='development')throw Error('The saved mail provider is retained. Use an isolated local checkout for the local development command journey.');
+ if(context.input.EMAIL_PROVIDER&&!['later','development'].includes(context.input.EMAIL_PROVIDER))throw Error('Local command setup suppresses email during development. Configure remote mail in the installed workspace.');
  context.input.EMAIL_PROVIDER='development';
  refuseUnchosenAiKeys(context);
  await addMissingToken(context,saved);

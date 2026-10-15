@@ -1,6 +1,5 @@
 import {withDocumentHeaders} from './platform/document-headers'
 import {consumeQueue} from './queue'
-import {localOutboxResponse} from './edition/local-mail/outbox'
 import start from '@tanstack/react-start/server-entry'
 import type { Env,Job } from './platform/env'
 import { app } from './app'
@@ -22,7 +21,7 @@ async function route(request:Request,env:Env,execution:ExecutionContext,path:str
  if(isDelegationDocument(request))return delegationDocument(request,env,execution,()=>keepDevRenderAlive(request,execution));if(path.startsWith('/delegation/'))return app.fetch(request,env,execution);if(path.startsWith('/preview/'))return app.fetch(request,env,execution);if(publicSite)return publicSiteRoutes.fetch(request,env,execution);return dispatch(request,()=>app.fetch(request,env,execution),()=>keepDevRenderAlive(request,execution))
 }
 export default {
- async fetch(request:Request,env:Env,execution:ExecutionContext){const asset=await staticAssetResponse(request,env);if(asset)return withDocumentHeaders(asset);if(import.meta.env.DEV && import.meta.env.RER_LOCAL_ORIGIN && env.H2H_LOCAL==='true' && !env.RER_INSTALLATION_ID)env={...env,APP_ORIGIN:import.meta.env.RER_LOCAL_ORIGIN};const outbox=await localOutboxResponse(request,env);if(outbox)return withDocumentHeaders(outbox);const path=new URL(request.url).pathname,publicSite=!path.startsWith('/preview/')&&await isPublicSitePath(path,env);
+ async fetch(request:Request,env:Env,execution:ExecutionContext){const asset=await staticAssetResponse(request,env);if(asset)return withDocumentHeaders(asset);if(import.meta.env.DEV && import.meta.env.RER_LOCAL_ORIGIN && env.H2H_LOCAL==='true' && !env.RER_INSTALLATION_ID)env={...env,APP_ORIGIN:import.meta.env.RER_LOCAL_ORIGIN};const path=new URL(request.url).pathname,publicSite=!path.startsWith('/preview/')&&await isPublicSitePath(path,env);
  return withDocumentHeaders(withSecurityHeaders(await route(request,env,execution,path,publicSite),headerSurface(path,publicSite),env))},
  async queue(batch:MessageBatch<Job>,env:Env){await consumeQueue(batch,env)},
  async scheduled(_event:ScheduledController,env:Env){await runScheduled(env)},

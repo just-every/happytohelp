@@ -4,6 +4,13 @@ Hono routes for `/api/identity`: first-owner setup, login and sessions, invitati
 self-service registration and widget sessions. Passwords are PBKDF2 hashes of 12 to 1024 characters
 (`credentials.ts`); sessions, reset tokens, invitation tokens and verification tokens are stored only as SHA-256 hashes.
 
+Local development uses a native rer dev v2 wrapper: open the private `RER_OPEN`
+address after `RER_READY` to enter as the real owner through the checkout's key
+gate. It retains native passwords, sessions, roles and prior owner data. The
+wrapper is excluded from production output. Preview uses native password sign-in.
+Local visitor and teammate email is validated and suppressed with no message store,
+viewer or external sending; the signed-out UI offers no local email request flow.
+
 Public helpers for the signed-out pages:
 
 - `GET /auth-options` (`options.ts`) returns `{setupRequired, registrationAvailable, recoveryAvailable}`. Registration
@@ -19,7 +26,8 @@ First-run setup (`setup.ts`) is one screen: email, password, the setup token onl
 email domain, the owner name from the email, a default colour), keeps explicit values as given, writes the `derived` marker
 into the project settings, adds the workspace defaults from `management/provisioning` to the same batch, and then sends the
 owner one welcome email (`welcome-email.ts`) through the durable send path under `welcome:<projectId>`. An uncertain send is
-never repeated. The response says what happened to it (`welcomeEmail`: `sent`, `not_configured`, `failed` or `uncertain`).
+never repeated. The response says what happened to it (`welcomeEmail`: `suppressed`, `sent`, `not_configured`,
+`failed` or `uncertain`). Local development returns `suppressed` without storing the email or sending externally.
 Tests: `tests/identity-setup.mjs`, `tests/identity-setup-deployment.mjs`, `tests/setup-browser.mjs`.
 
 Accepting one invitation link retires the other links issued for the same email in that workspace. Pending

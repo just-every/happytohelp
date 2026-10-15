@@ -22,7 +22,7 @@ export default function SetupList({projectId,role}) {
   <header className="sl-head">
    <p className="sl-lede">{lede(needs.length,left.length>0)}</p>
    <p className="sl-quiet" role="status"><span className="sl-dots" aria-hidden="true">{Array.from({length:applicable},(_,index)=><i key={index} className={index<confirmed?'on':undefined}/>)}</span><span>{confirmed} of {applicable} confirmed. We check on our own, so there’s nothing to press.{looked&&<> Last looked at <time dateTime={looked}>{utc(looked)}</time>.</>}</span></p>
-   {local&&<p className="sl-local" data-local-only>This is a local trial. Emails land in your local outbox, and AI is optional.</p>}
+   {local&&<p className="sl-local" data-local-only>This is a local trial. You enter automatically as the owner through rer dev. Email is suppressed during local development. No email is sent, and AI is optional.</p>}
    {error&&<p role="alert" className="sl-error">{error}</p>}
   </header>
   <section className="sl-section" data-section="needs-you" aria-labelledby={needsId}>

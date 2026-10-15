@@ -7,20 +7,17 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.21
+npm install -g @runeditrun/rer@0.2.22
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
 rer dev
 ```
 
-`rer dev` uses its local address for the chat widget and generates a private
-owner password. Wait for `RER_READY` and the app address. Open `/login/magic` on
-that address, enter the local owner's email shown by dev and choose **Create local
-sign-in link**. Then open `/__dev/outbox` on the same address, choose the newest
-sign-in email, follow its link and press **Sign in**. The outbox may initially
-contain only a welcome email; request the sign-in link first. No private answers,
-email service or AI account are needed; no email is sent. Use `rer dev --stop` from the checkout to stop the managed app.
+Dev uses its local address for the chat widget and generates a private owner
+password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+real local owner and reach **Setup**. No private answers, email service or AI
+account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
 ## Scripted setup and command reference
 
@@ -32,14 +29,8 @@ rer dev --foreground
 Prepare private answers as described in [Install](docs/INSTALLER.md#private-setup-answers).
 Setup builds, applies local migrations, prepares the real first owner and stops
 its temporary app. Dev provides Vite assets and HMR and stays in the foreground
-with `--foreground`. It prints `RER_READY URL` after real health checks. On that
-app origin, open `/login/magic`, enter your local owner email and choose **Create
-local sign-in link**. Open `/__dev/outbox` on the same app origin; dev does not
-print that suffix or automatically create the sign-in email. Choose the newest
-sign-in email, follow its link and press **Sign in**. No email was sent.
-The confirmation form consumes the link once through POST.
-
-The pinned CLI has retired its `outbox` command; use the browser flow above.
+with `--foreground`. It prints `RER_READY URL` after real health checks and
+`RER_OPEN` for entry as the local owner. Native password sign-in is retained.
 JSON and non-interactive commands never open a browser or ask stdin questions.
 Stop dev with Ctrl-C before:
 
@@ -74,7 +65,7 @@ and explicit exclusions. After `rer reset --yes`, restore with
 `rer import --input exports/installation.rer --yes`. Import validates the
 archive and restores atomically into an empty destination. Run setup afterwards
 to re-enter local configuration. Native identities/password hashes are retained;
-sessions, one-use links, outbox, private settings and transient execution state
+sessions, one-use links, private settings and transient execution state
 are excluded. Remote transfer exits 4.
 
 Setup uses the shared manifest reader and browser installer model. Private
@@ -84,7 +75,7 @@ answers use the declared `rer-setup.json` field names.
 rer deploy --dry-run
 ```
 
-With rer 0.2.21, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+With rer 0.2.22, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
 `EMAIL_API_KEY` inputs for dry run and real deployment, as described in
 [Operations](OPERATIONS.md#deploy-to-your-cloudflare-account). Dry run validates
 the input shape, real deployment declaration and build locally; no deployment
@@ -126,14 +117,15 @@ rer dev --stop
 Use preview for fixed production output; use dev for live edits and HMR.
 Preview reuses an intact build only when the actual public inputs and output
 bytes match its nonsecret receipt. Neither mode resets the saved owner or
-`.wrangler/state`. For local email sign-in, open `/login/magic` on the app origin
-and choose **Create local sign-in link** with your owner email, then open
-`/__dev/outbox` and follow the newest sign-in email. No email was sent. The same checkout has one
+`.wrangler/state`. Dev prints the private `RER_OPEN` address for automatic owner
+entry. Preview serves production output and prints its ready app address; sign in
+with the existing native password. Preview has no automatic dev identity or
+local email viewer. The same checkout has one
 managed instance. A compatible duplicate prints its URL, while another mode
 or explicit conflicting option refuses with exit 4 and its stop instruction.
 
 Idle timeout precedence is `--idle-timeout`, `RER_SERVER_IDLE_SECONDS`, then
-43200 seconds (12 hours). Positive integer seconds only. Application HTTP/assets/outbox
+43200 seconds (12 hours). Positive integer seconds only. Application HTTP/assets
 activity resets the timer, active streams prevent expiry, and internal probes
 or HMR control traffic alone do not keep the app alive. Real application
 WebSocket messages count. `--stop` is idempotent and cannot take start flags.
@@ -150,7 +142,7 @@ position. Package mode has no queue status command. Labels identify project,
 initiating command/phase and checkout. Nested jobs share only validated live
 membership. Original `CI=true` skips admission and permits heavy-command
 `--no-queue`; ordinary calls and `CI=false` queue. Help/check/describe/doctor,
-outbox URL, stop and reset inspection remain light. Use `rer install` for dependencies and `rer deploy` for deployment.
+stop and reset inspection remain light. Use `rer install` for dependencies and `rer deploy` for deployment.
 
 ## Contributor setup
 

@@ -18,7 +18,7 @@ export async function browserJourney(evidence){
  const fixture=await customerFixture();let server,browser;const captions=[],checks=[];
  const socket=createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
  const origin=`http://127.0.0.1:${port}`,email='agent-fix@example.test',password=randomBytes(24).toString('base64url');
- let success=false,stage='clone',freshInstalledRer=false,ordinaryOutboxSignIn=false;
+ let success=false,stage='clone',freshInstalledRer=false,automaticOwnerEntry=false;
  try{
   await promisify(execFile)('git',['clone','--quiet','--no-local','--depth','1',resolve('.'),checkout]);
   stage='install';await run(checkout,['install']);freshInstalledRer=true;
@@ -26,20 +26,14 @@ export async function browserJourney(evidence){
   await writeFile(join(checkout,'.seed/local-answers.json'),JSON.stringify({WORKSPACE_NAME:'Agent fix journey',WIDGET_ORIGIN:origin,OWNER_NAME:'Journey owner',OWNER_PASSWORD:password,EMAIL_PROVIDER:'later'}),{mode:0o600});
   stage='setup';await run(checkout,['setup','--owner-email',email,'--answers','.seed/local-answers.json','--port',String(port)]);
   await assert.rejects(fetch(origin+'/health',{signal:AbortSignal.timeout(2000)}),'setup leaves no server');
-  stage='dev';server=command(checkout,['dev']);const ready=await server.waitFor(event=>event.event==='ready',180000);assert.equal(ready.url,origin);assert.equal((await fetch(origin+'/__dev/outbox')).status,200);
-  stage='outbox sign-in';
+  stage='dev';server=command(checkout,['dev']);const ready=await server.waitFor(event=>event.event==='ready',180000);assert.equal(ready.url,origin);
+  stage='automatic owner entry';
   browser=await chromium.launch({headless:true});
   const loginContext=await browser.newContext(),loginPage=await loginContext.newPage();
-  await loginPage.goto(origin+'/login/magic');
-  await loginPage.getByLabel('Email',{exact:true}).fill(email);
-  const requested=loginPage.waitForResponse(response=>new URL(response.url()).pathname==='/api/identity/magic-link'&&response.request().method()==='POST');
-  await loginPage.getByRole('button',{name:'Create local sign-in link',exact:true}).click();
-  assert.equal((await requested).status(),202);
-  await loginPage.getByRole('status').filter({hasText:'local outbox'}).waitFor();
-  await loginPage.goto(origin+'/__dev/outbox');await loginPage.locator('article').filter({has:loginPage.getByRole('heading',{name:'Sign in to HappyToHelp',exact:true})}).first().getByRole('link',{name:'Read message'}).click();await loginPage.getByRole('link',{name:'Open this link'}).click();
-  await loginPage.getByRole('button',{name:'Sign in',exact:true}).waitFor();assert.equal((await loginContext.request.get(origin+'/api/identity/session')).status(),401);
-  await loginPage.getByRole('button',{name:'Sign in',exact:true}).click();await loginPage.waitForURL(/\/projects\/[^/]+\/activation$/);
-  const session=await loginContext.request.get(origin+'/api/identity/session');assert.equal(session.status(),200);const actor=await session.json();assert.equal(actor.role,'owner');ordinaryOutboxSignIn=true;
+  const {readFile}=await import('node:fs/promises');
+  await loginPage.goto((await readFile(join(checkout,'.rer/local/open-url'),'utf8')).trim());
+  await loginPage.waitForURL(/\/projects\/[^/]+\/activation$/);
+  const session=await loginContext.request.get(origin+'/api/identity/session');assert.equal(session.status(),200);const actor=await session.json();assert.equal(actor.role,'owner');automaticOwnerEntry=true;
   const state=await loginContext.storageState();await loginContext.close();
   for(const width of [1440,390]){
    stage=`operator and visitor journey ${width}`;
@@ -67,13 +61,13 @@ export async function browserJourney(evidence){
    };
    try{checks.push({width,...await runCase({origin,api,actor,fixture,directory,ui})});assert.deepEqual(errors,[])}finally{await visitorContext?.close();await context.close()}
   }
-  success=true;console.log('Fresh rer install/setup/dev/outbox agent-fix browser journey passed at 1440 and 390 with operator and widget screenshots for all seven steps.');
+  success=true;console.log('Fresh rer install/setup/dev owner-entry agent-fix browser journey passed at 1440 and 390 with operator and widget screenshots for all seven steps.');
  }catch(error){
   await failureDiagnostics({evidence,stage,error,server,scratch,secrets:[password]});throw error;
  }finally{
   const cleanup=await Promise.allSettled([browser?.close(),fixture.close(),(async()=>{if(server){try{await run(checkout,['dev','--stop'])}finally{await server.stop()}}})()]);
   const cleanupFailed=cleanup.some(result=>result.status==='rejected');
-  await writeFile(join(evidence,'browser-result.json'),JSON.stringify({success:success&&!cleanupFailed,stage,cleanupSucceeded:!cleanupFailed,layer:'LOCAL TEST',provider:'scripted Codex CLI boundary',liveProvider:false,customerSystem:'loopback fixture only',freshInstalledRer,ordinaryOutboxSignIn,checks},null,2));
+  await writeFile(join(evidence,'browser-result.json'),JSON.stringify({success:success&&!cleanupFailed,stage,cleanupSucceeded:!cleanupFailed,layer:'LOCAL TEST',provider:'scripted Codex CLI boundary',liveProvider:false,customerSystem:'loopback fixture only',freshInstalledRer,automaticOwnerEntry,checks},null,2));
   await writeFile(join(evidence,'SCREENSHOTS.md'),captions.join('\n')+'\n');
   if(success&&!cleanupFailed)await rm(scratch,{recursive:true,force:true});
   if(cleanupFailed)throw Error('Journey process cleanup failed; private scratch retained for inspection');

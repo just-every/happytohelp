@@ -28,7 +28,7 @@ updating and backing up an installation, see
 
 - **First run and Setup.** The one-screen form derives optional names and colours. Setup separates Needs you from What we've set, observes applicable checks automatically with freshness bounds and permits durable owner/admin skips. A skip never counts as confirmation; rejected keys remain Needs you. Empty inboxes show one next action and a link to Setup.
 - **Workspace appearance and navigation.** A neutral light canvas, lighter fields and softer menus accompany the revised inbox and settings navigation. Dark-theme tokens remain.
-- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.19**. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. Sign in through the local outbox. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
+- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.22**. Rer dev v2 enters as the real native owner through `RER_OPEN`; local visitor and teammate email is suppressed without storage or external sending. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
 
 ### Updating from 0.4.1
 
@@ -88,8 +88,7 @@ No migration. A 0.4.0 installation merges `v0.4.1`; a 0.3 installation follows
   uncertain and never replayed.
 - **The rer local path.** `pnpm exec rer install`, `setup` and `dev`
   replace `scripts/install.mjs`, `scripts/setup.mjs` and `scripts/operations.mjs`.
-  Local sign-in links and customer mail go to a development outbox on your
-  computer; nothing is emailed. Native password sign-in is kept. `export`,
+  Native password sign-in is kept. `export`,
   `import` and `reset` move or clear local data.
 - Installation archives are refused in build output and are never served by the
   local app.

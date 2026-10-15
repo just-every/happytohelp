@@ -28,7 +28,7 @@ export default function InvitationActions({projectId,invitation,emailConfigured,
 export function InvitationNotice({notice}) {
  if(!notice)return null;
  if(notice.kind==='link')return <div className="alert alert-info management-invite-notice" role="status">Invitation link for {notice.email}, valid for 24 hours{notice.copied?' and copied to your clipboard':''}: <a href={notice.url}>{notice.url}</a></div>;
- if(notice.kind==='resent')return <div className="alert alert-success" role="status">{notice.delivery==='captured'?<>Invitation for {notice.email} captured in the <a href="/__dev/outbox">local outbox</a> with a fresh link. No email was sent.</>:<>Invitation sent to {notice.email} again with a fresh link.</>}</div>;
+ if(notice.kind==='resent')return <div className="alert alert-success" role="status">{notice.delivery==='suppressed'?<>Fresh invitation link created for {notice.email}. Email is suppressed during local development. No email was sent. Copy the link and share it.</>:<>Invitation sent to {notice.email} again with a fresh link.</>}</div>;
  return <div className="alert alert-success" role="status">Invitation for {notice.email} revoked. Its links no longer work.</div>;
 }
 
@@ -37,7 +37,7 @@ export function InvitationCreated({invitation}) {
  const [copied,setCopied]=useState(false),[manual,setManual]=useState(false);
  const copy=async()=>{try{await navigator.clipboard.writeText(invitation.invitationUrl);setCopied(true);setManual(false)}catch{setManual(true)}};
  return <div className="mb-3">
-  <div className="alert alert-info" role="status">Invitation created. {invitation.delivery==='captured'?<>Captured in the <a href="/__dev/outbox">local outbox</a>. No email was sent.</>:invitation.delivery==='sent'?'Email sent.':'Email delivery is not configured. Copy the invitation link and share it.'}</div>
+  <div className="alert alert-info" role="status">Invitation created. {invitation.delivery==='suppressed'?'Email is suppressed during local development. No email was sent. Copy the invitation link and share it.':invitation.delivery==='sent'?'Email sent.':'Email delivery is not configured. Copy the invitation link and share it.'}</div>
   <button type="button" className="btn btn-outline-secondary" onClick={copy}>Copy invitation link</button>
   {copied&&<p role="status">Invitation link copied. It works for 24 hours.</p>}
   {manual&&<label className="d-block mt-2">Invitation link to share<input className="form-control" readOnly value={invitation.invitationUrl} onFocus={event=>event.target.select()}/></label>}

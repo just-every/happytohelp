@@ -51,22 +51,21 @@ const at=(time:number)=>new Date(time).toISOString()
 /**
  * "Email to you". A used emailed sign-in link confirms it without any provider request. Otherwise the latest test or
  * welcome mail is reported as its provider reports it: Resend status is read for the exact message, sender and owner;
- * other providers report acceptance only; the local outbox is capture, never delivery. Nothing here sends or resends.
+ * other providers report acceptance only. Nothing here sends or resends.
  * https://resend.com/docs/api-reference/emails/retrieve-email
  */
 export async function checkOwnerMail(env:Env,config:Configuration,ownerId?:string):Promise<Probe> {
- const local=config.mailMode==='local'
+ if(config.mailMode==='local')return {state:'pending',detail:'Email is suppressed during local development. No email is sent. Configure a provider on your hosted installation to confirm delivery.'}
  const signIn=await usedSignInLink(env,config)
- if(signIn)return {state:'done',detail:local?`You signed in with a link captured in this computer's local outbox at ${at(signIn.consumed_at)}. This confirms local capture; no email left this computer.`:`You signed in with a link emailed to you at ${at(signIn.consumed_at)}, so mail from this installation reaches your mailbox.`,receiptRef:`signin:${signIn.user_id}:${signIn.consumed_at}`}
+ if(signIn)return {state:'done',detail:`You signed in with a link emailed to you at ${at(signIn.consumed_at)}, so mail from this installation reaches your mailbox.`,receiptRef:`signin:${signIn.user_id}:${signIn.consumed_at}`}
  const found=await latestOwnerDelivery(env,config,ownerId)
  if(!found) {
   if(config.mailMode==='unavailable')return {state:'unavailable',detail:'CONFIGURATION_REQUIRED: EMAIL_API_KEY and EMAIL_FROM. Add the email provider settings to the installation; mail to you cannot be sent or confirmed until then.'}
-  return {state:'pending',detail:local?'Emails are captured in the local outbox on this computer. Sign in once with a link from it to confirm mail reaches you.':'Not confirmed yet. Sign in once with an emailed link, or send yourself a test from Email settings.'}
+  return {state:'pending',detail:'Not confirmed yet. Sign in once with an emailed link, or send yourself a test from Email settings.'}
  }
  const {delivery,kind}=found,name=kind==='welcome'?'welcome email':'test message'
  if(delivery.state==='failed')return {state:'failed',detail:`The provider rejected the ${name}. Review the provider log; it will not be sent again automatically.`,receiptRef:delivery.id}
  if(delivery.state==='uncertain'||delivery.state==='sending')return {state:'unknown',detail:`The ${name} send outcome is unknown. Reconcile it with the provider; it is never resent.`,receiptRef:delivery.id}
- if(local)return {state:'pending',detail:`The ${name} was captured in the local outbox at ${at(delivery.created_at)}. Local capture is not delivery; sign in once with a link from the outbox to confirm.`,receiptRef:delivery.id}
  if(config.providerName!=='resend')return {state:'pending',detail:`${config.providerName||'The provider'} accepted the ${name} (sent). This provider reports no delivery status here; sign in once with an emailed link to confirm you received it.`,receiptRef:delivery.id}
  if(!env.EMAIL_API_KEY)return {state:'unavailable',detail:'CONFIGURATION_REQUIRED: EMAIL_API_KEY. Install the selected email provider key to read delivery status.',receiptRef:delivery.id}
  if(!delivery.provider_id)return {state:'unknown',detail:'The provider did not retain a message ID for delivery lookup.',receiptRef:delivery.id}

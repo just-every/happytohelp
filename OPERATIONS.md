@@ -9,7 +9,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.21
+npm install -g @runeditrun/rer@0.2.22
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -17,15 +17,11 @@ rer dev
 ```
 
 Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY` and the app address. Open `/login/magic` on that
-address, enter the local owner's email shown by dev (for example `owner@app.test`)
-and choose **Create local sign-in link**. Then open `/__dev/outbox` on the same
-app address, choose the newest **sign-in** email, follow its link and press
-**Sign in** to open **Setup**. The outbox may initially contain only a welcome
-email; request the sign-in link first. No private answers, email service or AI
-account are needed, and no email leaves your computer. Use `rer dev --stop` from the checkout to stop the managed app.
+password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+real local owner and reach **Setup**. No private answers, email service or AI
+account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout pins **`@runeditrun/rer` 0.2.21** in `package.json` and
+The checkout pins **`@runeditrun/rer` 0.2.22** in `package.json` and
 `pnpm-lock.yaml`. The global launcher installed by npm may have a different
 version; inside the checkout it provisions the tools and delegates to the pinned
 local package. Updating the global launcher does not change the project's pin.
@@ -47,7 +43,7 @@ with the widget snippet, and Advanced holds secrets/verification examples.
 See [Local command reference](RUN-LOCALLY.md) for loopback ports, production
 preview, explicit stop and idle shutdown. An occupied explicit port refuses;
 rer never chooses another silently. Saved remote mail is preserved: use a
-separate checkout for a local outbox trial.
+separate checkout for a local development trial.
 
 For a visitor-to-inbox-to-reply check, follow
 [Try the customer widget locally](docs/INSTALLER.md#try-the-customer-widget-locally).
@@ -75,7 +71,7 @@ rer setup --owner-email you@example.com --answers .seed/local-answers.json
 
 Export creates a new owner-only archive with integrity and explicit exclusions.
 It includes supported domain rows, native identities/password hashes and FILES
-objects. Sessions, one-use links, development outbox, private configuration,
+objects. Sessions, one-use links, private configuration,
 provider/integration credentials, outbound execution queues and local-computer
 pairing/grants/jobs are excluded. Signed visitor verification is reconfigured.
 Archives contain sensitive data and must be protected as backups.
@@ -88,7 +84,7 @@ is unsupported and refuses with exit 4. D1/R2 archives do not include Durable
 Object storage or establish full portable-storage fidelity.
 
 Reset prints its inventory and requires explicit confirmation. It removes only
-local state, owners/sessions/outbox, `.rer/local`, `.seed/installer` and declared
+local state, owners/sessions, `.rer/local`, `.seed/installer` and declared
 private settings/recovery copies. Source, dependencies, lockfiles, manifest,
 export archives and `.rer/deploy` receipts survive. Active operations refuse.
 A second reset succeeds with an empty inventory, and subsequent setup creates
@@ -141,7 +137,7 @@ deliberately.
 
 The declaration maps the same `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
 inputs to rer's shared `MAIL_PROVIDER`, `MAIL_FROM` and `MAIL_API_KEY` preflight
-bindings as well as HappyToHelp's native bindings. Rer 0.2.21 requires these same
+bindings as well as HappyToHelp's native bindings. Rer 0.2.22 requires these same
 mail inputs for both `rer deploy --dry-run` and real deployment. Dry run validates
 their shape and the build locally; it makes no provider requests and sends no mail.
 
@@ -149,13 +145,13 @@ Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
 declaration's `secrets` array, plus
 `{"binding":"MAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}`, and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.21 requires
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.22 requires
 every declared secret on a new Worker and has no conditional secret declaration.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
 through the supported runtime declaration and native workspace settings. Local
-development keeps its outbox without a mail account. Deployment never converts
-remote mail into development capture.
+development needs no mail account: its development transport suppresses email
+without storing it or sending externally. Deployment requires a real sender.
 
 ```sh
 rer deploy --dry-run
@@ -313,8 +309,8 @@ identity has not been signed by your server; it does not block replies to their
 entered email address. For each reply, **Sent to email provider** means the provider
 accepted the send; it does not confirm delivery to the customer's inbox. A provider
 failure or unknown outcome remains visible and is not automatically replayed.
-With local development mail, the reply is labelled as captured in the local outbox
-and no external email is sent.
+The local development transport reports `development`: it suppresses visitor and
+teammate email, stores no messages and sends no external email.
 
 **Import an existing help center.** Open Knowledge → Import. The form chooses the
 provider and subdomain; the credentials come from the server secrets in the
@@ -599,8 +595,8 @@ On your computer:
    you changed.
 4. Switch to Node.js 22.20.0 and run `pnpm install --frozen-lockfile`.
 5. If `.dev.vars` sets `EMAIL_PROVIDER` to a real provider, setup refuses to
-   replace it, because local 0.4 sends sign-in links and customer mail to the
-   development outbox. Move the `EMAIL_*` lines into your private backup and
+   replace it. Local development suppresses email without storage or sending.
+   Move the `EMAIL_*` lines into your private backup and
    configure provider mail on your deployed installation instead.
 6. Create `.seed/local-answers.json` as in
    [private setup answers](docs/INSTALLER.md#private-setup-answers), with your
@@ -617,9 +613,9 @@ On your computer:
    release's local settings after the lines already in `.dev.vars`, which stay
    unchanged. A different owner email is refused.
 7. Open the address dev prints, normally `http://127.0.0.1:8787` rather than port
-   5173. Sign in again with your existing password or the outbox link: sessions
-   from the old address do not carry over. Pending invitation and password-reset
-   links point at the old address; use **Copy link** on a pending invitation to
+   5173. Open `RER_OPEN` for automatic local owner entry; your existing native
+   password remains valid. Sessions from the old address do not carry over.
+   Pending invitation and password-reset links point at the old address; use **Copy link** on a pending invitation to
    issue a fresh one.
 
 On Cloudflare, back up the D1 database, every R2 object with its metadata and
@@ -739,22 +735,21 @@ Add an immutable migration in its owning module. `scripts/migrations.mjs` collec
 selected migrations for the real build/setup/transfer paths. Prove upgrade and
 prior-data custody through native D1/R2 flows; never edit applied SQL.
 
-### Local sign-in links and customer mail
+### Local owner entry and email
 
-Trusted `H2H_LOCAL=true`, the exact loopback `APP_ORIGIN` and development mail
-are supplied by local setup/dev. The bounded durable outbox prunes on capture;
-list/get enforce visibility without writes. Its viewer is escaped, non-cacheable
-and unavailable remotely. Headers/request origins cannot enable it. Remote
-missing credentials or delivery failure never select a local fallback.
+`rer dev` uses a local-only native identity wrapper. After `RER_READY`, open the
+private `RER_OPEN` address to enter as the real owner. It exchanges a per-checkout
+fragment key for a gate cookie before issuing a native dev session. The key and
+session are required together, and neither the wrapper nor its bindings belongs
+in deployed output. Native passwords, prior accounts, tenant checks and roles
+are retained. Preview serves production output and uses native password sign-in.
 
-Native magic links require explicit single-use confirmation POST; scanner GETs
-do not consume them. Native passwords and tenant/session checks are retained.
-While dev is running, open `/login/magic` on its printed app address, enter the
-local owner's email and choose **Create local sign-in link**. Open `/__dev/outbox`
-on the same address, choose the newest sign-in email, follow its link and press
-**Sign in**. No email is sent. The pinned CLI has retired its `outbox` command;
-the native browser flow remains available.
-Never print message contents, cookies or token-bearing sign-in URLs.
+Trusted local setup selects the development email transport. Visitor and teammate
+mail is validated and suppressed with status `development`, without storage,
+a viewer or external sending. Production requires its configured provider;
+missing credentials and uncertain sends remain explicit failures. Native hosted
+magic links require a single-use confirmation POST; scanner GETs do not consume
+them. Keep entry URLs, message contents, cookies and sign-in tokens private.
 
 ### Security headers
 

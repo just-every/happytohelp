@@ -260,7 +260,7 @@ test('a local install seeds its mailbox on localhost.test, sends from the instal
   await assertStarter(call, token, workspace.id)
   const mailbox = await mailboxOf(call, token, workspace.id)
   assert.equal(mailbox.email_to_address, 'northstar-outfitters@localhost.test')
-  assert.equal(mailbox.is_enabled, 1, 'local mail is captured, so the mailbox is on')
+  assert.equal(mailbox.is_enabled, 1, 'local mail is validated and suppressed, so the mailbox remains available')
   assert.equal(mailbox.from_address, 'owner-mail@localhost.test')
   assert.equal((await settingsOf(call, token, workspace.id)).proposed_sender, 'support@northstar.example')
  } finally { await mf.dispose() }

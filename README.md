@@ -42,7 +42,7 @@ Hono, D1, R2, Queues and Durable Objects.
 Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.21; local dev starts without private setup
+`@runeditrun/rer` package pinned to 0.2.22; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
@@ -52,7 +52,7 @@ Back up and apply `120_activation_observations.sql` then
 Version 0.4.0 adds Move in for reviewed support-history imports, resolution
 feedback with workspace-calendar Reports, Connections with scoped API tokens,
 signed webhook events and Slack delivery, and the `rer` local
-path with sign-in through a development outbox. Native passwords, owners and data
+path. Native passwords, owners and data
 are kept. Before the updated Worker serves traffic, back up and apply the ten
 additive migrations `0110_move_in.sql` to `119_local_portability.sql` in order;
 an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x).
@@ -81,7 +81,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.21
+npm install -g @runeditrun/rer@0.2.22
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -89,13 +89,9 @@ rer dev
 ```
 
 Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY` and the app address. Open `/login/magic` on that
-address, enter the local owner's email shown by dev (for example `owner@app.test`)
-and choose **Create local sign-in link**. Then open `/__dev/outbox` on the same
-app address, choose the newest **sign-in** email, follow its link and press
-**Sign in** to open **Setup**. The outbox may initially contain only a welcome
-email; request the sign-in link first. No private answers, email service or AI
-account are needed, and no email leaves your computer. Use `rer dev --stop` from the checkout to stop the managed app.
+password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+real local owner and reach **Setup**. No private answers, email service or AI
+account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
 Already running 0.3? Keep your checkout and data, and follow
 [Upgrading from 0.3.x](OPERATIONS.md#upgrading-from-03x) instead.
@@ -106,7 +102,8 @@ To try the customer flow, [install the widget on a local page](docs/INSTALLER.md
 send a visitor message and reply from **Inbox**. Set that page's exact origin in
 **Settings → Widget → Settings**; the app's own origin remains allowed. A visitor's
 entered email can receive operator replies even when their identity is labelled
-**Unverified**. Local email is captured in `/__dev/outbox`. With a hosted sender,
+**Unverified**. Local visitor and teammate mail is suppressed without storage or
+external sending. With a hosted sender,
 **Sent to email provider** on a reply means acceptance, not confirmed inbox delivery.
 
 ## Choose how to run it
@@ -126,7 +123,7 @@ rer deploy --dry-run
 rer deploy --environment production
 ```
 
-With rer 0.2.21, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+With rer 0.2.22, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
 `EMAIL_API_KEY` inputs for dry run and real deployment. Dry run validates their
 shape and the build locally, makes no provider request and sends no mail. Deployment
 provisions declared resources, applies migrations, publishes and checks health
@@ -267,7 +264,7 @@ it can and lists only what needs them; new workspaces lead with the widget
 snippet, with secrets and verification controls under **Advanced**. Empty
 inboxes offer widget installation, a link to Setup and a demo. Workspace
 headers follow the selected workspace; visitors intentionally see the operator's
-display name. Local mail is sensitive captured data, not a provider receipt.
+display name. Local development suppresses email without storing messages.
 
 
 

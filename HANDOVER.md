@@ -2,8 +2,8 @@
 
 Start with [AGENTS.md](AGENTS.md#run-it-locally): use `pnpm exec rer`
 for install, setup with private manifest answers/owner email, foreground dev,
-outbox sign-in and verification. [Operations](OPERATIONS.md) documents reset,
-private archives, restore and owner-account deployment. Inspect actual commands
+automatic local owner entry and verification. [Operations](OPERATIONS.md) documents
+reset, private archives, restore and owner-account deployment. Inspect actual commands
 with `describe --json`; `check --profile first-party` works before installation.
 
 ## Product and current scope

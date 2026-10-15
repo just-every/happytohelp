@@ -287,33 +287,20 @@ test('skip for now is durable per workspace, owner or admin only, never confirms
  assert.deepEqual([step(await keys.check({step:'model_key'}),'model_key').placement],['set'])
 })
 
-test('a used emailed sign-in link confirms owner mail; local capture is never called delivery',async()=>{
+test('local mail is suppressed and cannot confirm owner delivery or issue sign-in links',async()=>{
  const ws=await seedWorkspace(DB,'mail'),api=kit(ws,localEnv),owner='owner-mail@example.test'
  const identityCall=async(path,body)=>{const pending=[];const response=await identity.request('http://127.0.0.1:8787'+path,{method:'POST',headers:{'Content-Type':'application/json','CF-Connecting-IP':'127.0.0.9'},body:JSON.stringify(body)},localEnv,{waitUntil:task=>pending.push(task),passThroughOnException(){}});await Promise.all(pending);return response}
- const outbox=async()=>(await DB.prepare('SELECT count(*) n FROM rer_mail_development_outbox').first()).n
- const emailedToken=async email=>{
-  assert.equal((await identityCall('/magic-link',{email})).status,202)
-  const message=JSON.parse((await DB.prepare('SELECT message FROM rer_mail_development_outbox ORDER BY sequence DESC LIMIT 1').first()).message)
-  assert.deepEqual(message.to,[email]);return message.text.match(/token=([a-f0-9]{64})/)[1]
+ const deliveries=async()=>(await DB.prepare('SELECT count(*) n FROM email_deliveries WHERE project_id=?').bind(ws.projectId).first()).n
+ const start=requests.length
+ const result=await sendEmail(localEnv,{projectId:ws.projectId,to:owner,subject:'Welcome to HappyToHelp',text:'Your workspace is ready.',idempotencyKey:`welcome:${ws.projectId}`})
+ assert.deepEqual(result,{id:null,state:'suppressed',mode:'local'})
+ for(const data of [await api.check({step:'owner_mail'}),await api.testMail(),await api.testMail(),await api.check({auto:true})]){
+  const mail=step(data,'owner_mail')
+  assert.equal(mail.state,'pending');assert.ok(!mail.receiptRef)
  }
- const ownerMail=async(body={step:'owner_mail'})=>step(await api.check(body),'owner_mail')
- let mail=await ownerMail();assert.equal(mail.state,'pending');assert.doesNotMatch(mail.detail,/delivered/i)
- // The first-run welcome email lands in the local outbox: captured, not delivered, not confirmed.
- await sendEmail(localEnv,{projectId:ws.projectId,to:owner,subject:'Welcome to HappyToHelp',text:'Your workspace is ready.',idempotencyKey:`welcome:${ws.projectId}`})
- mail=await ownerMail();assert.deepEqual([mail.state,mail.receiptRef],['pending',`welcome:${ws.projectId}`]);assert.match(mail.detail,/local outbox/);assert.doesNotMatch(mail.detail,/delivered/i)
- // The owner's own test mail is captured too, once.
- let messages=await outbox();mail=step(await api.testMail(),'owner_mail');await api.testMail()
- assert.equal(await outbox(),messages+1);assert.equal(mail.state,'pending');assert.doesNotMatch(mail.detail,/delivered/i)
- // Another member's used link, and the owner's unused link, do not count; checks send nothing.
- assert.equal((await identityCall('/magic-link/consume',{token:await emailedToken('operator-mail@example.test')})).status,200)
- const token=await emailedToken(owner);messages=await outbox()
- assert.equal((await ownerMail()).state,'pending');assert.equal((await ownerMail({auto:true})).state,'pending');assert.equal(await outbox(),messages)
- // The owner uses their emailed link: the next automatic check confirms it without waiting.
- assert.equal((await identityCall('/magic-link/consume',{token})).status,200)
- mail=await ownerMail({auto:true});assert.equal(mail.state,'done');assert.match(mail.detail,/local outbox/);assert.doesNotMatch(mail.detail,/delivered/i);assert.equal(await outbox(),messages)
- // A changed owner address is a changed configuration; the old link proves nothing about the new address.
- await DB.prepare('UPDATE users SET email=? WHERE id=?').bind('owner-mail-new@example.test','owner-mail').run()
- assert.equal(step(await api.get(),'owner_mail').state,'unknown');assert.equal((await ownerMail({auto:true})).state,'pending')
+ assert.equal((await identityCall('/magic-link',{email:owner})).status,503)
+ assert.equal(await deliveries(),0,'suppressed welcome and test mail create no delivery records')
+ assert.equal(requests.length,start,'local sending and checks contact no provider')
 })
 
 test('one used sign-in link confirms owner mail in every workspace its owner owns, never where they are not an owner',async()=>{

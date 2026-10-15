@@ -12,12 +12,10 @@ import {
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {ConnectContext} from "./context/ConnectContext";
 
-export default function CollectCustomer({ setShowCollector, localContact, contact, sendContact }) {
+export default function CollectCustomer({ needsNotifyEmail, setShowCollector, localContact, contact, sendContact }) {
     const context = useContext(AppContext);
-    const { getCurrentAgent, conversationSettings } = useContext(ConnectContext);
+    const { getCurrentAgent } = useContext(ConnectContext);
     const currentAgent = getCurrentAgent();
-    const mailMode=conversationSettings.mailMode;
-    const needsNotifyEmail = (!currentAgent?.is_ai && !contact.email && ['remote','local'].includes(mailMode));
 
     const [name, setName] = useState(contact.name || localContact.provided_name);
     const [email, setEmail] = useState(contact.email || localContact.provided_email);
@@ -89,7 +87,7 @@ export default function CollectCustomer({ setShowCollector, localContact, contac
         if(needsNotifyEmail) {
             content.push(
                 <div key="collect-notify-email" className="happytohelp-send-message-row happytohelp-collect-notify-email">
-                    { mailMode==='local' ? 'Reply emails stay in the local outbox on this computer. No email is sent.' : context.text.prompt.email_prompt.replace("{agent_name}", (currentAgent?.first_name ?? currentAgent?.name) || "someone") }
+                    { context.text.prompt.email_prompt.replace("{agent_name}", (currentAgent?.first_name ?? currentAgent?.name) || "someone") }
                 </div>
             );
         }

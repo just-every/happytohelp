@@ -8,7 +8,7 @@ import {providerJson,bearer} from './provider-http'
 import {checkOwnerMail,testMailIdentity} from './owner-mail'
 
 /** The explicit owner action: one test message to the authenticated owner, under a durable identity that is never replayed.
- * Locally it is captured in the outbox like any other mail. */
+ * Local development validates and suppresses it without sending mail. */
 export async function sendOwnerTestMail(env:Env,config:Configuration,ownerId:string):Promise<Probe> {
  const identity=await testMailIdentity(config,ownerId)
  if(!identity)return {state:'unavailable',detail:'Only a workspace owner can send a test to their own mailbox.'}

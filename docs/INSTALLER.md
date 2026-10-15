@@ -7,7 +7,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.21
+npm install -g @runeditrun/rer@0.2.22
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -15,13 +15,9 @@ rer dev
 ```
 
 Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY` and the app address. Open `/login/magic` on that
-address, enter the local owner's email shown by dev (for example `owner@app.test`)
-and choose **Create local sign-in link**. Then open `/__dev/outbox` on the same
-app address, choose the newest **sign-in** email, follow its link and press
-**Sign in** to open **Setup**. The outbox may initially contain only a welcome
-email; request the sign-in link first. No private answers, email service or AI
-account are needed, and no email leaves your computer. Use `rer dev --stop` from the checkout to stop the managed app.
+password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+real local owner and reach **Setup**. No private answers, email service or AI
+account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
 ## Contributor setup
 
@@ -70,8 +66,8 @@ is refused. Setup does not contact the provider.
 
 `rer-setup.json` owns field names and conditional requirements. Secrets belong in
 the private answer file, never command arguments, logs or source. Native password
-identity is retained. Local setup explicitly selects development capture; it
-refuses to overwrite a saved remote provider.
+identity is retained. Local setup selects rer dev v2 mail and refuses to
+overwrite a saved remote provider.
 
 ## Generated and optional settings
 
@@ -116,19 +112,15 @@ rer dev --foreground
 ```
 
 Setup builds, applies local migrations, prepares private settings and the first
-owner and stops its temporary runtime. Creating
-the owner provisions the workspace and sends the owner one welcome email, which
-local setup captures in the development outbox. Reruns
+owner and stops its temporary runtime. Creating the owner provisions the
+workspace; local email is suppressed without storage or external sending. Reruns
 preserve the same owner, data and exact existing private settings. Conflicting
 saved email or origin is refused; preserve data before any recovery or reset.
 
-Dev reports `RER_READY` and the app origin after real health checks. Open
-`/login/magic` on that origin, enter your local owner email and choose **Create
-local sign-in link**. Then open `/__dev/outbox` on the same origin, select the newest
-sign-in email, follow its link and press **Sign in**. Local capture sends no mail. Link-scanner GETs do not
-consume the link; confirmation uses an ordinary single-use POST. Native password sign-in remains
-available. Use `rer dev --stop` to stop the managed app, or `rer dev --foreground`
-to keep it in the terminal and stop with Ctrl+C.
+Dev reports `RER_READY` after real health checks. Open `RER_OPEN` to enter as
+the local owner. Native password sign-in remains available. Use `rer dev --stop`
+to stop the managed app, or `rer dev --foreground` to keep it in the terminal and
+stop with Ctrl+C.
 
 Choose an explicit loopback port with `--port 8788`, using the same saved origin
 for setup. See [Local command reference](../RUN-LOCALLY.md) for preview and
@@ -155,9 +147,10 @@ Use a real page to send a customer message, then reply from your workspace inbox
    scheme, hostname and optional port, without a path. `localhost` and `127.0.0.1`
    are different hosts, and different ports are different origins.
 4. Open `http://127.0.0.1:8840` in another browser profile or private window. Open
-   the widget, enter an email address and send a message. In your signed-in app,
+   the widget and send a message. In your signed-in app,
    open **Inbox**, choose the conversation and reply. Check the reply in the
-   visitor's widget; local email copies appear in the app's `/__dev/outbox`.
+   visitor's widget. Local visitor and teammate email is suppressed without
+   storage or sending.
 
 The website origin is where your customer page runs. The app origin is the
 `RER_READY` address serving HappyToHelp, its API and `widget.js`; keep that app
@@ -167,9 +160,9 @@ An online website needs an online HappyToHelp installation reachable by its visi
 
 **Unverified** on the contact means the website has not signed the visitor's
 identity with the optional server secret. It does not prevent an operator reply
-from being emailed to the address the visitor entered. Local mail is labelled as
-capture and never leaves this computer. On a hosted installation with sending
-configured, **Sent to email provider** on a reply records provider acceptance,
+from being emailed to the address the visitor entered. Local mail uses rer dev v2
+and is suppressed without storage or external sending. On a hosted installation
+with sending configured, **Sent to email provider** on a reply records provider acceptance,
 not confirmed inbox delivery. Inbound mail routing is configured separately.
 
 ## Verify, reset and move data
@@ -183,7 +176,7 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-Rer 0.2.21 requires the same private mail inputs for deployment dry runs and real
+Rer 0.2.22 requires the same private mail inputs for deployment dry runs and real
 deployment: `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`. The declaration maps
 these to both rer's `MAIL_*` preflight bindings and HappyToHelp's native `EMAIL_*`
 bindings. For Cloudflare mail, supply the additional account ID described in

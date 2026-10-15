@@ -3,7 +3,7 @@ import {randomUUID} from 'node:crypto';
 import {post} from './browser-kit.mjs';
 
 /** Native widget admission and operator Send, with the real follow-up service. */
-export async function captureCustomerReply(runtime,{projectId,token}){
+export async function checkCustomerReply(runtime,{projectId,token}){
  const {origin}=runtime;
  const projectResponse=await fetch(origin+'/api/identity/projects/'+projectId,{headers:{Authorization:'Bearer '+token}});
  assert.equal(projectResponse.status,200);const project=await projectResponse.json();
@@ -13,16 +13,12 @@ export async function captureCustomerReply(runtime,{projectId,token}){
  const conversation=await post(origin,'/api/conversations',{projectId},contact.token);
  const question=await post(origin,`/api/conversations/${conversation.id}/messages`,{localId:randomUUID(),content:'Please help with my local trial',expectedRevision:0},contact.token);
  assert.equal(question.accepted,true);
- const text='A reply captured for the local customer';
+ const text='A local customer reply';
  const command={localId:randomUUID(),content:text,expectedRevision:1,expectedLastMessageId:question.message.id};
  const reply=await post(origin,`/api/conversations/${conversation.id}/messages`,command,token);assert.equal(reply.accepted,true);
  const duplicate=await post(origin,`/api/conversations/${conversation.id}/messages`,command,token);assert.equal(duplicate.duplicate,true);
- const deadline=Date.now()+30000;let captured=false;
- while(Date.now()<deadline){
-  const html=await (await fetch(origin+'/__dev/outbox')).text();
-  if(html.includes('Reply to your support conversation')&&html.includes('customer@example.test')){captured=true;break;}
-  await new Promise(resolve=>setTimeout(resolve,1000));
- }
- assert.equal(captured,true,'native operator reply reaches the persistent local outbox');
- return {conversationId:conversation.id,text};
+ const response=await fetch(origin+`/api/dashboard/projects/${projectId}/conversations/${conversation.id}/buckets/${conversation.id}`,{headers:{Authorization:'Bearer '+token}});
+ assert.equal(response.status,200);
+ const data=await response.json();
+ assert.ok(data.data.messages.some(row=>row.content===text&&row.email_status?.state==='suppressed'));
 }

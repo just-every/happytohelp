@@ -1,3 +1,4 @@
+import {devAdmitted} from '@runeditrun/rer/modules/operator-auth/dev-admission'
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { Actor, AppEnv } from './env'
@@ -6,6 +7,9 @@ export async function requireActor(c: Context<AppEnv>): Promise<Actor> {
  const token=c.req.header('Authorization')?.replace(/^Bearer /,'') || (c.req.path.endsWith('/socket') ? c.req.query('token') : undefined) || c.req.header('Cookie')?.match(/(?:^|;\s*)h2h_session=([^;]+)/)?.[1]
  if(!c.req.header('Authorization') && !['GET','HEAD','OPTIONS'].includes(c.req.method) && c.req.header('Origin') && c.req.header('Origin')!==new URL(c.req.url).origin)throw new HTTPException(403,{message:'Cross-origin cookie request denied'})
  if(!token) throw new HTTPException(401,{message:'Authentication required'})
+ // Dev bearer tokens remain native sessions, but require this checkout's gate on every request.
+ // Production and preview never register a gate, so copied dev cookies cannot admit there.
+ if(token.startsWith('dev_')&&!await devAdmitted(c.req.raw))throw new HTTPException(401,{message:'Local development entry required'})
  // Base workspace credentials authorize only the scoped API, never a native
  // actor. Conceal native resources without looking up token validity or scope.
  if(/^int_[a-f0-9]{64}$/.test(token))throw new HTTPException(404,{message:'Not found'})

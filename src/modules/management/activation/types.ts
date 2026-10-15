@@ -16,7 +16,7 @@ export const stepPaths:Record<StepId,string> = {
  spend_ceilings:'ais',published_article:'articles',widget_origin:'widget-settings',widget_seen:'widget-settings',
 }
 
-/** `local` is a loopback trial whose mail is captured in the local outbox (`localMailOrigin`); everything else is hosted. */
+/** `local` is a loopback trial whose mail is suppressed (`localMailOrigin`); everything else is hosted. */
 export type Environment = 'local'|'hosted'
 /** Where the Setup page shows a step: something only the owner can do, a row under "What we've set", nowhere, or
  * something the owner chose to leave for now (`skipped`, see skips.ts). */
@@ -38,7 +38,7 @@ export type ActivationFacts = {
  /** The project's allowed widget origin. */
  website:string|null
  colour:{hex:string; source:ColourSource}
- /** `local` captures mail in the local outbox; `statusApi` says whether the provider reports delivery status here.
+ /** `local` suppresses email without storage; `statusApi` says whether the provider reports delivery status here.
   * `sender` is the address mail goes out from now; `proposedSender` the workspace's own address whose domain sender_dns
   * checks while mail still goes out from the installation sender; `senderDnsDomain` is the domain sender_dns checks now, which
   * is the chosen sender's own once the owner has set one; `senderSwitch` is set once that domain was verified and mail switched to it from the installation sender. */

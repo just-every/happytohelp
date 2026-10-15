@@ -32,6 +32,7 @@ export default function Login() {
         <h1>Welcome back</h1>
         <p className="id-lede">Log in to your HappyToHelp workspace.</p>
         {options?.setupRequired && <p className="id-note" role="status">This installation has not been set up yet. <a href="/setup">Set up your workspace</a> to create the first owner account.</p>}
+        {mail?.mailMode === 'local' && <p className="id-note" role="status"><code>rer dev</code> signs you in automatically as the local owner. Open the app address it prints. Email is suppressed during local development. No email is sent.</p>}
         <Alert>{error}</Alert>
         <form method="post" onSubmit={submit}>
             <Field id="email" label="Email" type="email" autoComplete="username" placeholder="you@example.com" />
@@ -39,8 +40,8 @@ export default function Login() {
             <SubmitButton busy={busy} ready={true} busyLabel="Signing in…">Login</SubmitButton>
         </form>
         <div className="id-links">
-            <a href="/forgot-password">Forgot your password?</a>
-            {mail?.mailMode !== 'unavailable' && mail?.mailMode && <a href={magicPath}>{mail.mailMode==='local'?'Get a local sign-in link':'Email me a sign-in link'}</a>}
+            {mail?.mailMode !== 'local' && <a href="/forgot-password">Forgot your password?</a>}
+            {mail?.mailMode === 'remote' && <a href={magicPath}>Email me a sign-in link</a>}
             {options?.registrationAvailable && <a href="/register">Create an account</a>}
         </div>
     </IdentityFrame>;

@@ -49,7 +49,7 @@ The current package-mode instructions require current public source; the
 older `v0.4.1` tag does not contain this command-package conversion.
 
 The build and deployment dry run preserve local data and private settings and
-make no deployment. Rer 0.2.21's dry-run preflight requires the same private mail
+make no deployment. Rer 0.2.22's dry-run preflight requires the same private mail
 inputs as real deployment; see [deployment prerequisites](../OPERATIONS.md#deploy-to-your-cloudflare-account). Do not reset or replace `.wrangler/state` during an update.
 Run setup with your existing owner and private answers to apply local migrations,
 then start `pnpm exec rer dev --foreground`. For a hosted installation, apply the
@@ -156,7 +156,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.21
+npm install -g @runeditrun/rer@0.2.22
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -164,12 +164,9 @@ rer dev
 ```
 
 Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY` and the app address. Open `/login/magic` on that
-address, enter the local owner's email shown by dev and choose **Create local
-sign-in link**. Then open `/__dev/outbox` on the same app address, choose the newest
-sign-in email, follow its link and press **Sign in**. The welcome email is not the
-sign-in email. No private answers, email service or AI account are needed; no email
-is sent. Use `rer dev --stop` from the checkout to stop the managed app.
+password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+real local owner and reach **Setup**. No private answers, email service or AI
+account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
 See [Install](INSTALLER.md) for scripted private answers and
 [contributor setup](../README.md#contributor-setup) for pnpm commands.
@@ -191,7 +188,7 @@ Use `pnpm exec rer deploy --environment production` with the real
 [Deploy to your Cloudflare account](../OPERATIONS.md#deploy-to-your-cloudflare-account)
 covers prerequisites, secret custody and health boundaries. Local
 `pnpm exec rer deploy --dry-run` requires the same private mail inputs as real
-deployment with rer 0.2.21. It validates their shape and builds locally without
+deployment with rer 0.2.22. It validates their shape and builds locally without
 provider requests or sending mail.
 
 **Website preview** lets owners and admins see their website with the chat

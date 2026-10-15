@@ -27,8 +27,8 @@ export async function widgetJourney({browser,runtime,projectId,token,width,evide
   const name=await page.locator('.happytohelp-insight-agent-name').first().innerText();assert.equal(name,mailMode==='local'?`Local ${width}`:'Provider owner','the visitor sees the operator display name: derived from the sign-up email local-<width>@example.test for a one-screen setup, as given for an explicit ownerName');
   const message='A test message from this website '+width;
   await page.locator('textarea[name=content]').fill(message);await page.locator('button[name=submit]').click();await page.getByText(message,{exact:true}).waitFor();await page.waitForTimeout(500);
-  if(mailMode==='unavailable')assert.equal(await page.locator('.happytohelp-collect-notify-email').count(),0);
-  else{await page.locator('.happytohelp-collect-notify-email').waitFor();const copy=await page.locator('.happytohelp-collect-notify-email').innerText();assert.match(copy,mailMode==='local'?/local outbox.*No email is sent/:/Receive an email/);}
+  if(mailMode!=='remote')assert.equal(await page.locator('.happytohelp-collect-notify-email').count(),0);
+  else{await page.locator('.happytohelp-collect-notify-email').waitFor();const copy=await page.locator('.happytohelp-collect-notify-email').innerText();assert.match(copy,/Receive an email/);}
   const gap=await page.locator('.happytohelp-interact').evaluate(panel=>{const root=panel.getRootNode(),p=panel.getBoundingClientRect(),b=[...root.querySelectorAll('.happytohelp-chat-box')].at(-1).getBoundingClientRect();return {right:p.right-b.right,left:b.left-p.left}});
   assert.ok(gap.right>0,'actual message bubble retains a positive right gutter');assert.ok(gap.left>=0);
   await audit(page,evidence,`${width}-${mailMode}-widget`);

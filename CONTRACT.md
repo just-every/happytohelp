@@ -13,8 +13,8 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   operating description before installing dependencies, install locked source,
   prepare local or selected remote bindings/migrations, build, verify and deploy
   through `rer`. Local setup exits with no app running; dev
-  uses `/login/magic` on the printed app origin to request a local sign-in link,
-  then the development outbox at that origin plus `/__dev/outbox`.
+  prints a private `RER_OPEN` address that enters as the real local owner through
+  the rer dev v2 boundary, preserving native sessions, roles and passwords.
   Reset is explicitly confirmed and local;
   export/import preserve supported native data with documented exclusions.
   Deployment dry-run makes no provider requests. The delivered runtime requires no original checkout or PHP service.
@@ -50,15 +50,14 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   server secret and verification examples. Empty inboxes offer installation, a link to
   Setup and a demo. Workspace headers follow workspace switching.
   Visitor headers retain the operator's display name.
-- **LOCAL-MAIL-001 — Explicit local capture.** Only trusted, explicit local mail
-  configuration selects the maintained development outbox for native sign-in and
-  customer mail. Capture persists in local D1 with bounded visibility and pruning
-  on capture, and is described as local capture rather than remote delivery.
-  The viewer is loopback-only, escaped and non-cacheable. Production mounts
-  neither this sender nor this viewer; request URLs and headers cannot enable
-  them, and rejected viewer requests do no database work. Missing credentials or
-  failed remote delivery never fall back to local capture. Native password
-  identity, single-use sign-in confirmation and prior stored data are retained.
+- **LOCAL-MAIL-001 — Rer dev mail.** Trusted local development configuration
+  uses the rer dev v2 development transport: it validates and suppresses visitor
+  and teammate mail, reports `development`, stores no messages and exposes no mail viewer.
+  It sends no external email and never claims delivery. The local
+  owner enters automatically through the dev boundary; native password identity,
+  ordinary hosted email-link confirmation and prior stored data are retained.
+  Production has no local dev surface. Missing credentials or failed remote
+  delivery never select a local substitute.
 - **CONVERSATION-001 — Durable transcript.** Customer, operator, generation,
   import and administrative writers preserve stable message/command identity,
   revision/frontier, attachment ownership and final-reply admission atomically.
@@ -134,8 +133,8 @@ each needs is in [ACCEPTANCE.md](ACCEPTANCE.md).
   and an authenticated widget ping; whether an article is published is not one of
   them (that step stays among the eight ids but is hidden and never counted). Mail to the owner
   is confirmed by a used emailed sign-in link, or by the provider's reported outcome
-  for the welcome or test email; local capture is described as capture, never
-  delivery, and provider acceptance or queueing is pending. `GET` performs no
+  for the welcome or test email; local development mail is suppressed and never
+  confirms delivery, and provider acceptance or queueing is pending. `GET` performs no
   provider work and writes nothing. Only an explicit owner action (Create
   workspace, or Send me a test) may send mail, to that owner's mailbox, with
   durable identity; ambiguous work is never replayed. Missing provider permissions

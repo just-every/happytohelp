@@ -7,15 +7,15 @@ const scalar = (database, sql, ...values) => {
   try { return db.prepare(sql).get(...values).n; } finally { db.close(); }
 };
 const count = (database, table) => scalar(database, `SELECT count(*) n FROM "${table}"`);
-const unexpectedMail = (database, owner) => {
+const storedMailCount = database => {
   const db = new DatabaseSync(database, {readOnly: true});
-  try { return db.prepare('SELECT message FROM rer_mail_development_outbox').all().map(row => JSON.parse(row.message)).filter(message => !message.deliveryId.startsWith('magic-signin:') || JSON.stringify(message.to) !== JSON.stringify([owner])).length; }
+  try { return db.prepare('SELECT message FROM rer_mail_development_outbox').all().map(row => JSON.parse(row.message)).length; }
   finally { db.close(); }
 };
 // Rows here would mean an import started, a connection was configured or
 // delivered, or mail was sent. The native event log itself is expected to
 // record the new conversation, but with no destination nothing fans out. Under
-// rer, the development outbox holds only rer's own owner sign-in captures.
+// rer development suppresses mail without adding any rows.
 const inertTables = ['move_in_runs', 'ik_jobs', 'native_integration_destinations', 'native_integration_intents', 'integration_deliveries', 'integration_tokens', 'rer_portability_jobs'];
 const exists = (database, table) => scalar(database, "SELECT count(*) n FROM sqlite_master WHERE type='table' AND name=?", table) > 0;
 
@@ -25,7 +25,7 @@ const exists = (database, table) => scalar(database, "SELECT count(*) n FROM sql
 // outbox mail. The upgrade adds none.
 export function priorState(database, owner) {
   const counts = Object.fromEntries([...inertTables, 'native_integration_events'].map(table => [table, exists(database, table) ? count(database, table) : 0]));
-  return {counts, mail: exists(database, 'rer_mail_development_outbox') ? unexpectedMail(database, owner) : 0};
+  return {counts, mail: exists(database, 'rer_mail_development_outbox') ? storedMailCount(database) : 0};
 }
 
 // Through this source's emitted Worker on the upgraded store, with the owner's
@@ -35,7 +35,7 @@ export function priorState(database, owner) {
 export async function readBack(origin, database, data, prior = {counts: {}, mail: 0}) {
   const call = client(origin), checks = {};
   for (const table of [...inertTables, 'native_integration_events']) assert.equal(count(database, table), prior.counts[table] ?? 0, `${table} gains no rows from the upgrade`);
-  assert.equal(unexpectedMail(database, data.owner.email), prior.mail, 'no mail other than owner sign-in captures');
+  assert.equal(storedMailCount(database), prior.mail, 'development adds no stored mail');
   const login = await call('/api/identity/login', {body: {email: data.owner.email, password: data.owner.password, projectId: data.owner.projectId}});
   assert.equal(login.actor.role, 'owner');
   checks.ownerSignIn = {role: login.actor.role, projectId: login.actor.projectId};
@@ -84,8 +84,8 @@ export async function readBack(origin, database, data, prior = {counts: {}, mail
   assert.equal(sent.accepted, true);
   checks.newConversation = conversation.id;
   for (const table of inertTables) assert.equal(count(database, table), prior.counts[table] ?? 0, `${table} gains no rows from the read-back`);
-  assert.equal(unexpectedMail(database, data.owner.email), prior.mail, 'no mail other than owner sign-in captures');
+  assert.equal(storedMailCount(database), prior.mail, 'development adds no stored mail');
   checks.inertTables = inertTables;
-  checks.ownerSignInCaptures = count(database, 'rer_mail_development_outbox');
+  checks.retainedMailRows = count(database, 'rer_mail_development_outbox');
   return checks;
 }

@@ -3,7 +3,7 @@
 This HappyToHelp-maintained contract derives from Run Edit Run Base
 `export/SEED-COMMAND-CONTRACT.md` at revision
 `2de0b38c2ff5990dcfd7c177ad223a98b2aadf14`, adapted for the exact
-`@runeditrun/rer` package pin. It is locally owned documentation, not a byte-exact
+`@runeditrun/rer` 0.2.22 package pin and the 16 October local-development decision. It is locally owned documentation, not a byte-exact
 Base copy. The application runtime copies retain their existing reviewed pins.
 HappyToHelp retains its native homepage and password sign-in.
 
@@ -15,15 +15,14 @@ Run from the project root, or use `--cwd PATH`. Every new verb accepts `--help`,
 | --- | --- | --- |
 | `install` | `--no-queue` | Frozen dependency installation using the pinned pnpm and lockfile; no app setup, global tool changes or deployment. |
 | `setup` | `--owner-email EMAIL`, `--owner-name NAME`, `--port P`, `--host HOST`, `--answers FILE`, `--no-queue` | Manifest answers validated; real build, all local migrations, private settings and first owner prepared; temporary app stopped before exit. |
-| `dev` | `--foreground`, `--detach`, `--port P`, `--host HOST`, `--idle-timeout SECONDS`, `--stop`, `--as PERSONA`, `--login`, `--no-queue` | Managed development server (detached by default; `--foreground` keeps the command active) with assets/HMR, health-gated readiness and the project's declared Cron Triggers run locally on their schedule (`commandAdapter` option `scheduled: false` turns that off). The Cron Triggers are read from every file the deployed-Worker check reads: `devIdentity.deployConfig` when declared, else `wrangler.jsonc`, `wrangler.json`, `wrangler.toml` (unless `generatedOutputs` lists it) and deploy templates such as `deploy/wrangler.template.toml`. Two of those files that both declare `triggers.crons` must declare the same ones, or the command refuses with one line naming both files and their crons. A seed declaring `devIdentity` opens signed in as the owner `pnpm exec rer setup` claimed; `--as` starts as another declared persona or `signed-out`, and `--login` turns dev identity off for the outbox sign-in. Other seeds keep the ordinary outbox sign-in. |
-| `preview` | `--port P`, `--host HOST`, `--idle-timeout SECONDS`, `--stop`, `--no-queue` | Managed foreground fixed production output, actual health/outbox readiness, same owner and canonical durable state, and the same local Cron Triggers as `dev` (the seed's `preview` target receives `scheduled: true` and must start its runtime with Miniflare's trigger handler, `unsafeTriggerHandlers`, which the shared `previewTarget` does). |
+| `dev` | `--foreground`, `--detach`, `--port P`, `--host HOST`, `--idle-timeout SECONDS`, `--stop`, `--as PERSONA`, `--login`, `--no-queue` | Managed development server with assets/HMR, real health readiness and declared local Cron Triggers. `RER_OPEN` enters as the real native owner through the rer dev v2 key gate; declared personas and `signed-out` are selected with `--as`. `--login` retains the same dev v2 entry. |
+| `preview` | `--port P`, `--host HOST`, `--idle-timeout SECONDS`, `--stop`, `--no-queue` | Managed foreground production output, health readiness, canonical durable state and declared local Cron Triggers. Prints the app address; native password sign-in applies. No automatic dev entry or local email viewer. |
 | `build` | `--no-queue` | Real production Worker/assets built with private local settings excluded, then restored exactly. A `devIdentity` seed's build fails with exit 4, naming the file, when its output contains the dev layer's marker. |
 | `verify` | `--no-queue` | The seed's complete verification command runs; it never calls its own public `verify` alias recursively. Then its production build is served on loopback as `pnpm exec rer deploy` hosts it (see Hosted assets and deploy identity); verify fails, listing each path, when a built file does not answer 200 or `/health` lacks the deploy identity. |
 | `reset` | `--yes` | Explicitly confirmed local data, owner, generated settings and installer state removed; no remote effect. |
-| `deploy` | `--environment NAME`, `--dry-run`, `--no-queue` | Base deploy-kit owner-account deployment plus health (the deploy identity, then one built file must answer 200); dry run validates/builds locally and makes zero provider requests or mail sends. HappyToHelp's rer 0.2.21 preflight requires the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY` inputs for dry run and real deploy, mapped to both `MAIL_*` and native `EMAIL_*` bindings. Default environment is `production`. Both refuse with exit 4, before building, a deploy binding, secret or secret source named `RER_DEV_KEY` or any key the adapter declares in `localOnlyKeys`; deploy-kit's owner plan refuses the same. |
+| `deploy` | `--environment NAME`, `--dry-run`, `--no-queue` | Base deploy-kit owner-account deployment plus health (the deploy identity, then one built file must answer 200); dry run validates/builds locally and makes zero provider requests or mail sends. HappyToHelp's rer 0.2.22 preflight requires the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY` inputs for dry run and real deploy, mapped to both `MAIL_*` and native `EMAIL_*` bindings. Default environment is `production`. Both refuse with exit 4, before building, a deploy binding, secret or secret source named `RER_DEV_KEY` or any key the adapter declares in `localOnlyKeys`; deploy-kit's owner plan refuses the same. |
 | `export` | `--target local\|remote`, `--output FILE`, `--origin URL`, `--session-file FILE`, `--no-queue` | Complete supported installation data written to a new owner-only archive, with integrity receipt and explicit exclusions. Default target is local; output is required. A declared `prepareData` hook runs first and the path is checked against the app's served folders after it, so a checkout that never built still completes when its Vite configuration needs a file `prepareData` generates. |
 | `import` | `--target local\|remote`, `--input FILE`, `--journal FILE`, `--origin URL`, `--session-file FILE`, `--yes`, `--legacy-v1`, `--acknowledge-unverified-metadata`, `--output FILE`, `--no-queue` | Archive validated and atomically restored into an empty destination under the product's restore policy; input and confirmation are required. Normal import requires v2; `--journal` (local only) names a later archive of the same installation, whose erasure journal also fences the restore. Backup-only local Workers v1 recovery requires both legacy flags and a new v2 output; it refuses `--journal` rather than ignoring it. See modules/portability/README.md#backup-only-v1-recovery. A declared `prepareData` hook runs first, so a copy that never ran setup or build can import. |
-| `outbox` | None | Compatibility alias retained; the pinned first-party CLI has retired its dispatch. HappyToHelp uses the native `/login/magic` request and `/__dev/outbox` browser flow described below. |
 | `doctor` | none | Read-only tool/version, local configuration and state-placement diagnostics, naming missing inputs and their documented sources, plus `warnings` for leftover Node quarantine copies, mismatched Node/pnpm/workerd pins across running checkouts and a checkout on another volume (warnings never change the exit code). No provider request. |
 | `describe` | none | Describes commands, flags, aliases, effects, pins and state without installing or executing project commands. |
 | `check` | `--profile first-party` | Read-only structural contract/operations validation, including required hooks, flags, aliases and pins. No credentials needed for a fresh clone. |
@@ -47,23 +46,37 @@ private mode-0600 JSON object keyed by those names, for example
 `pnpm exec rer setup --answers PATH --non-interactive`. Keep secret
 values in declared private inputs.
 
-Local setting names come from the seed's existing declarations: `commandAdapter.hooks.secrets.originKey` selects the saved origin, and the setup manifest's `owner-claim.emailField` selects the owner mailbox. Without an owner-claim step, `commandAdapter.input.names.email` selects the mailbox. Undeclared names default to `AUTH_ORIGIN` and `OWNER_EMAIL`. Setup preflight, dev/preview/outbox prerequisites and sign-in input, and doctor all use these same keys and the adapter's declared settings file/format. Native-auth seeds retain their own setting names; do not add duplicate aliases or redeclare the manifest's owner field in the adapter.
+Local setting names come from the seed's existing declarations: `commandAdapter.hooks.secrets.originKey` selects the saved origin, and the setup manifest's `owner-claim.emailField` selects the owner mailbox. Without an owner-claim step, `commandAdapter.input.names.email` selects the mailbox. Undeclared names default to `AUTH_ORIGIN` and `OWNER_EMAIL`. Setup preflight, dev/preview prerequisites and identity input, and doctor all use these same keys and the adapter's declared settings file/format. Native-auth seeds retain their own setting names; do not add duplicate aliases or redeclare the manifest's owner field in the adapter.
 
 ## Output and exits
 
-Human dev output also prints one line `RER_SCHEDULED TIME "CRON" ok MSms` (or `failed (...)` / `skipped (...)`) per local Cron Trigger run, and `--json` a `scheduled` event, under `dev` and `preview` alike. Human dev/preview output includes exactly one line `RER_READY http://HOST:P` (IPv6 bracketed, no trailing slash) only after the real application health check succeeds. Then:
+Human dev/preview output prints `RER_READY http://HOST:P` (IPv6 bracketed,
+no trailing slash) only after the real application health check succeeds. Dev
+then prints a private `RER_OPEN` address. The command does not launch a browser:
+open that address to enter as the real native owner, or the selected `--as`
+persona. Preview prints its ready app address and uses native password sign-in.
+Declared local Cron Triggers report their bounded outcome as `RER_SCHEDULED`
+lines or JSON `scheduled` events.
 
-- **Dev identity** (a `devIdentity` seed's `dev` without `--login`): `RER_SIGNED_IN EMAIL` names the identity the browser will hold (the owner, or the `--as` persona; omitted for `--as signed-out`), then `RER_OPEN http://HOST:P/#rer-dev=KEY&as=PERSONA`. Opening it signs the browser in.
-- **Outbox sign-in** (`--login`, `preview` and `outbox`): `RER_SIGN_IN http://HOST:P/__dev/outbox` and the explanation: open the outbox, choose the newest sign-in message and follow its link; no email was sent. A `devIdentity` seed's outbox needs the key gate, so these also print `RER_OPEN` with `next=/__dev/outbox` (dev: `http://HOST:P/#rer-dev=KEY&next=…`; preview and outbox: `http://HOST:P/__dev/key#rer-dev=KEY&next=…`).
-- **HappyToHelp dev** (native identity, without `devIdentity`): wait for `RER_READY http://HOST:P`, open `/login/magic` on that app origin, enter the local owner's email shown by dev and choose **Create local sign-in link**. Then open `/__dev/outbox` on the same origin, choose the newest sign-in email, follow its link and press **Sign in**; no email was sent. Dev does not print the outbox suffix or automatically create the sign-in email. The outbox may initially contain only a welcome email.
+`RER_OPEN` uses `/__dev/key#rer-dev=KEY&as=owner`. The browser removes the
+fragment before a same-origin POST exchanges the checkout key for the dev gate
+cookie, then `/auth/dev/enter?as=owner` creates a native dev session. Keep this
+entry URL private. No sign-in email or message body is printed.
 
-**Why `RER_OPEN` may carry the key.** `RER_DEV_KEY` admits only this checkout's loopback runtime and is never a deploy binding, so the line hands the person at this terminal the same authority as reading `.rer/local/`. The key travels only in the URL fragment: browsers never send a fragment to a server, proxy or log, and the page removes it from the address bar before trading it, through a same-origin POST to `/__dev/key`, for a host-only `HttpOnly; SameSite=Strict; Path=/` cookie. It never appears in a query string, captured log (rer redacts it), JSON progress event or file outside `.rer/local/`. Treat the line as a credential: do not paste it into chats, tickets or another machine.
+Setup prints `RER_SETUP_READY URL` and exits with no server left running. Build,
+install, verify, reset, deploy, export and import print their verb, outcome and
+relevant safe path or URL. Dry-run deployment explicitly says no deployment
+occurred.
 
-Setup prints `RER_SETUP_READY URL` and exits with no server left running; with dev identity it then says that `pnpm run dev` opens the app signed in as the owner, otherwise it prints the sign-in instructions and `Next: pnpm run dev`. The retired `outbox` command supplies no sign-in URL; print neither message contents nor a token-bearing sign-in URL. Build/install/verify/reset/deploy/export/import print their verb, outcome and relevant safe path or URL. Dry-run deployment explicitly says no deployment occurred.
-
-With `--json`, stdout is UTF-8 NDJSON only: `{version:1,verb,event,...}`. Bounded commands end in exactly one `event:"result"` with `ok` and `exitCode`; failures emit `event:"error"` with a stable `code`, safe `message` and `exitCode`. Dev/preview emits one `event:"ready"` with `url`; a `devIdentity` seed's event also carries `openUrl` and, for dev, `signedInAs` (an email, or null when signed out or using the outbox). Then comes its eventual result. Progress belongs in JSON events or redacted stderr. Never include values, cookies, generated settings, archives or token-bearing URLs; `openUrl` is the one deliberate exception, for the reason above. A declared-command result can include numeric `childExitCode` and signal.
-
-`describe --json` is one object (the inspection exception to event streaming): `contractVersion:1`, `profile:"first-party"|"independent"`, `pins:{node,pnpm}`, `verbs:{VERB:{flags:[FLAG],effects:TEXT}}`, `aliases:{ALIAS:VERB}`, and, for first-party, `local:{state:".wrangler/state",settings:[RELATIVE_FILE],installerState:".seed/installer",outbox:"/__dev/outbox"}`, plus `devIdentity:true,devKey:".rer/local/dev-key.env"` for a `devIdentity` seed. It must describe what the parser/adapter actually supports. `check --json` returns a result event with `clauses:[{id,ok,message?}]`; structural failures name the missing verb/flag/alias/pin and how to fix it. Use clause IDs SC-01 through SC-13 below, with more specific subclauses allowed.
+With `--json`, stdout is UTF-8 NDJSON only: `{version:1,verb,event,...}`.
+Bounded commands finish with one `result` event containing `ok` and `exitCode`;
+failures emit an `error` event with a stable `code`, safe `message` and
+`exitCode`. Dev/preview emits `ready` with `url`; dev identity also supplies
+`openUrl` and `signedInAs` (null for signed-out). JSON and non-interactive modes
+never launch a browser or ask stdin questions. Do not share credential-bearing
+`openUrl` values. `describe --json` is one inspection object for actual parser,
+adapter, pins, aliases and local-state capabilities. `check --json` reports
+structural clauses and actionable errors; neither performs provider work.
 
 | Code | First-party/new CLI meaning |
 | --- | --- |
@@ -78,33 +91,47 @@ Release keeps 0 success, 1 BLOCKED receipt, 2 failed argument/source/artifact va
 
 ## Local sign-in and state
 
-All first-party local runs use Base mail's development provider and `/__dev/outbox`. No external mail credential, static session, sample owner or email-provider fallback. Setup builds/migrates, briefly starts the app through the shared runner and prepares its first owner, then stops the app. An already-claimed owner and data survive setup; it must not create a second owner or rotate secrets. HappyToHelp retains native identity: setup may capture a welcome email, but dev readiness does not create a sign-in email. Request one through `/login/magic` with **Create local sign-in link**, then open `/__dev/outbox` on the same app origin, select the newest sign-in email, follow its link and press **Sign in**. No email is sent. The pinned first-party CLI has retired its `outbox` dispatch. Operator-auth seeds' automatic setup/dev sign-in requests carry the CLI's `x-rer-local-cli` proof (HMAC-SHA256 of `local-cli\0sign-in` keyed by `SESSION_SECRET`, supplied by the shared adapter and honoured by operator-auth only in local mode), so their restarts never spend the owner's sign-in rate limit; a person's requests and any non-local server still count. HTML forms use POST before hydration.
+Local development uses rer dev v2. Setup builds, migrates, briefly starts the
+app and prepares the real first owner, then stops its temporary runtime.
+Repeated setup preserves the owner, data and native password credentials.
+Open dev's private `RER_OPEN` URL for automatic owner entry; no mailbox or
+printed sign-in link is involved. The explicit development mail transport
+validates and suppresses visitor and teammate email with status `development`.
+It stores no messages and serves no mail viewer; no external email is sent.
+Hosted email requires the configured real provider, and failures remain explicit.
 
 **No built-in routes or private files on the public listener.** For every seed, nothing the local runtime serves under `/cdn-cgi/*` (Wrangler's and the Cloudflare Vite plugin's Local Explorer, the scheduled and email trigger handlers, the R2 and platform proxies) answers on the port a person or proxy reaches, and neither do the checkout's private folders (`.rer`, `.seed`, `.wrangler`, `.dev.vars*`) or export archives (the `exports/` folder and any `*.rer` file). rer starts every runtime with `X_LOCAL_EXPLORER=false`, setup's temporary app runs without trigger handlers (preview's runtime has them only when the project declares Cron Triggers, on the internal port), rer's public listener answers 404 for those paths, and rer's scheduler calls the runtime's internal port. `pnpm exec rer export` refuses an `--output` the dev server would still serve: save archives at a normalized path inside the checkout's `exports/` (`exports/x.rer`, `./exports/x.rer` or an absolute path there), or at an absolute path outside the checkout. Outputs elsewhere in the checkout are refused, including public, source and build folders; so are `..` segments, unsafe symlinks and any path served by the app. Upstream connection failures, including while setup is building its app, answer the same 404 as private-path refusals. All three local runtimes (dev, preview and setup) bind a separate loopback port behind this same proxy. Every seed build must use `archiveOutputGuard()` from the shared onboarding `archive-output.mjs` in its Vite plugins: after public assets and bundles are written, it refuses `*.rer` files and portability archive manifests under any filename, including custom output directories. The shared lifecycle also checks `dist/` before setup can start its temporary app. A seed's Vite config limits `server.fs.allow` to the folders the app is built from (`src`, `public`, `node_modules`) so nothing else in the checkout is served.
 
-**The key gate** (a `devIdentity` seed). A tunnel or local reverse proxy makes remote requests look local, so the loopback origin is not a guard. For a `devIdentity` seed, `pnpm exec rer setup` writes a random `RER_DEV_KEY` (32 random bytes) per checkout to `.rer/local/dev-key.env` (directory 0700, file 0600); a repeat setup keeps its bytes, `pnpm exec rer reset --yes` removes it and the next setup makes a new one. Only local runtimes receive it: Vite's dev server, setup's temporary app and preview. Opening `RER_OPEN` trades it for the gate cookie. Dev sign-in, persona switching, `/__dev/personas`, `/__dev/outbox` and tests' `signInAs` need that cookie (or, for the CLI and test harnesses, the key in an `x-rer-dev-key` header); without it each answers 404, through any proxy. A cookie from before a reset is refused. A runtime without the key binding serves none of them.
-
-**Dev identity** (`commandAdapter.devIdentity`). The operator-auth `dev` layer, server-only in its own directory, serves `/auth/dev/enter?as=PERSONA`, which creates or reuses a real `oa_sessions` row of kind `dev` for the owner `pnpm exec rer setup` claimed, or for a persona, so version fences, revocation and deactivation behave exactly as in production. A dev session, and any credential minted while using one, is admitted only on a request that passes the key gate. Until first-run is finished the owner lands on `/setup`. A dev-only badge switches between `owner`, `signed-out` and the seed's `devPersonas()`: real operators at `<as>@dev.localhost`, created only by local dev sign-in. Export drops dev sessions and dev-minted credentials and marks personas suspended; import refuses an archive that holds either. Dev identity refuses to start when `RER_INSTALLATION_ID` is set beside a non-loopback `RER_MANAGEMENT_ORIGIN`. There is still no static session, sample owner or mail fallback: every dev session belongs to a real operator in the app's own database.
-
-The seed loads the layer only through a local-only entry (a Vite-serve or local `wrangler dev` entry), never from the deployed main, and declares `devIdentity: {entry, output, emailLinkTest}`: `pnpm exec rer build` scans `output` and refuses any file containing the layer's marker, naming it. Each seed keeps **one end-to-end email-link test** (owner claimed, ordinary link mailed to the key-gated outbox, confirmation, signed-in session), so the email path stays proven while people use dev identity. `pnpm exec rer dev --login` turns dev identity off and uses that outbox sign-in, the same experience as seeds without `devIdentity`.
-
-**Seeds without `devIdentity`** get no key: they keep the outbox guarded to the configured loopback origin and unavailable to a remote Host (a tunnel that rewrites Host to loopback passes that guard; the key gate is what closes it), and retain ordinary email-link sign-in. HappyToHelp prints `RER_READY` with the app origin. Open `/login/magic` on that origin with the local owner's email and choose **Create local sign-in link**, then open `/__dev/outbox` on the same origin to read the newest sign-in email. Dev readiness does not create that email.
-
-HappyToHelp and Slate retain their own accounts, sessions and roles: their owner and sign-in hooks use their real auth while preserving first-owner idempotence, prior data and the same Base outbox experience. Base operator-auth identity reaches them only through an accounts adapter over their own tables. The foundation template includes a real minimal owner/auth/mail/D1 path. Owners may remove it only by deliberate divergence.
+**Native dev identity and the key gate.** HappyToHelp retains its own accounts,
+sessions, passwords, roles and first-owner transaction. A local-only wrapper
+exchanges the per-checkout `RER_DEV_KEY` for a dev gate cookie before issuing a
+native dev session. Dev sessions require the gate on each request, so a rewritten
+loopback Host alone never admits them. A runtime without the private local key
+exposes none of this surface. Setup retains the key across reruns; reset removes
+it. The key stays private under `.rer/local/` and never becomes a deploy binding.
+Production output excludes the wrapper and its marker; the build rejects a leak.
+Export excludes dev sessions and credentials minted through them. Native hosted
+email links retain explicit single-use confirmation POSTs. No static session,
+sample owner or mail substitute is introduced.
 
 Canonical local durable data is `.wrangler/state/`, outside dist/build output. CLI bookkeeping is `.rer/local/`; installer drafts/logs are `.seed/installer/`; private settings default to `.dev.vars` (0600). An existing seed may explicitly inventory a retained private file such as `data/local-secrets.json`; it has the same custody/reset rules. Directories containing secrets are 0700. No symlink/traversal/overlap with source, exports, dependencies or build outputs is accepted as state. Preserve and report ambiguous legacy state; never silently adopt/move/delete it. Setup reruns keep exact existing private bytes, permissions and owner/data; builds preserve interrupted-operation recovery and credential exclusion.
 
-Reset acquires the shared local lock and refuses while dev/installer/transfer owns the state. It lists exactly the removal inventory before confirmation. `--non-interactive` requires `--yes`; neither JSON nor non-interactive implies consent. Remove local D1/R2/KV/DO state, owners/sessions/outbox, `.rer/local/` (including the dev key, so earlier gate cookies stop working), `.seed/installer/`, and declared generated private settings/backups only. Keep Git/source/lockfiles, `rer-setup.json`, edition baselines, dependencies, owner export archives and `.rer/deploy/` receipts. Do not remove a broad `.wrangler`, `.rer`, `data` or checkout directory. A second confirmed reset succeeds with an empty inventory. A fresh setup then creates a fresh owner, with no previous domain rows or messages.
+Reset acquires the shared local lock and refuses while dev/installer/transfer owns the state. It lists exactly the removal inventory before confirmation. `--non-interactive` requires `--yes`; neither JSON nor non-interactive implies consent. Remove local D1/R2/KV/DO state, owners/sessions, `.rer/local/` (including the dev key, so earlier gate cookies stop working), `.seed/installer/`, and declared generated private settings/backups only. Keep Git/source/lockfiles, `rer-setup.json`, edition baselines, dependencies, owner export archives and `.rer/deploy/` receipts. Do not remove a broad `.wrangler`, `.rer`, `data` or checkout directory. A second confirmed reset succeeds with an empty inventory. A fresh setup then creates a fresh owner, with no previous domain rows or messages.
 
 ## First-run setup at /setup
 
-Every first-party seed serves its owner's first-run setup at `/setup`: while setup is unfinished the signed-in owner completes it there (and any app route sends the owner to it); once finished, `/setup` takes the owner into the app (or to settings for later changes). Signed-out visitors are sent to sign-in and back. `pnpm exec rer setup`, dev identity and the outbox sign-in link return the owner to `/setup` until first-run is complete, and the README/AGENTS name it (owner, 10 Oct 2026).
+Every first-party seed serves its owner's first-run setup at `/setup`: while setup is unfinished the signed-in owner completes it there (and any app route sends the owner to it); once finished, `/setup` takes the owner into the app (or to settings for later changes). Signed-out visitors are sent to sign-in and back. `pnpm exec rer setup`, dev identity and native sign-in return the owner to `/setup` until first-run is complete, and the README/AGENTS name it (owner, 10 Oct 2026).
 
 First-run completion is stored durably; a setup rerun does not clear it.
 
 ## Seed theme
 
-A first-party seed may declare one theme so the shared installer, sign-in confirmation, `/setup` and development outbox pages wear its look: a CSS file at the root of its served static directory (conventionally `public/rer-theme.css`) holding only `:root` `--rer-*` tokens (page, surface, text, muted, border, focus, optional accent pair, link, font stacks, radius, logo) and `@font-face` rules for font files the app serves. The app serves it at `/rer-theme.css` (a Worker that admits only listed static paths lists it). The installer seed descriptor names it as `theme: 'public/rer-theme.css'`; the Worker passes `/rer-theme.css` to operator-auth `branding.theme`, to `firstRunResponse(..., { theme })` and to the development outbox's `createDevelopmentOutboxHandler({ ..., theme })`. The installer refuses a theme outside that grammar, naming a file the app does not serve, or whose declared colours fail contrast (4.5:1 for text pairs, 3:1 for focus and borders). Without a theme the pages are unchanged. The package exposes its installer integration through `@runeditrun/rer/operator-installer`.
+A first-party seed may declare one installer theme at `public/rer-theme.css`,
+using the supported `:root` `--rer-*` tokens and self-hosted `@font-face` rules.
+The seed descriptor names it with `theme: 'public/rer-theme.css'`; its colours
+and served font files must satisfy the installer validation. Native identity and
+Setup pages retain their existing product theme. The package exposes installer
+integration through `@runeditrun/rer/operator-installer`.
 
 ## Hosted assets and deploy identity
 
@@ -120,7 +147,7 @@ Required first-party pins: `.node-version` is `22.20.0`; `package.json.engines.n
 
 Pin the shared command implementation as an exact `@runeditrun/rer` devDependency locked in `pnpm-lock.yaml`. Install with `pnpm install --frozen-lockfile`, then invoke `pnpm exec rer VERB`. Adapters import the package exports; application Base copies retain their independently reviewed origin records.
 
-Package scripts for `setup dev preview build verify reset deploy export import release outbox doctor describe check` use the package dispatcher: each value is the OPERATIONS argv (`["rer",VERB]`) joined by single spaces. Invoke them as `pnpm run VERB -- FLAGS`; use `pnpm run deploy`, not pnpm's built-in deploy. Never define a package `install` lifecycle script to launch `pnpm exec rer install`; `pnpm install --frozen-lockfile` is the dependency action. Provide `deps` (the same dispatcher with `install`) and `rer` (the dispatcher alone). Internal adapter targets use distinct names/files to prevent alias recursion.
+Package scripts for `setup dev preview build verify reset deploy export import release doctor describe check` use the package dispatcher: each value is the OPERATIONS argv (`["rer",VERB]`) joined by single spaces. Invoke them as `pnpm run VERB -- FLAGS`; use `pnpm run deploy`, not pnpm's built-in deploy. Never define a package `install` lifecycle script to launch `pnpm exec rer install`; `pnpm install --frozen-lockfile` is the dependency action. Provide `deps` (the same dispatcher with `install`) and `rer` (the dispatcher alone). Internal adapter targets use distinct names/files to prevent alias recursion.
 
 Use OPERATIONS v2, preserving environmentSources and loops. Its `commands` declares every required verb with real argv, inputs and effects; inspector/CLI verbs still perform only their documented inspection. Opt in to the first-party profile with `seedContract:{version:1,profile:"first-party",adapter:"scripts/installer/local.mjs"}`. This is a small operations extension, not another configuration file or a second setup schema. An explicit `pnpm exec rer check --profile first-party` must enforce the profile even if its marker has been deleted; this flag is additional to check's common flags. References and generation tests must also require the marker. No package/edition presence alone makes an independent project first-party.
 
@@ -145,15 +172,15 @@ export/import must cover every supported resource. Remote transfer is optional
 and requires complete resource coverage; an unsupported remote target fails
 with exit 4 and names the missing capability.
 
-Independent projects without an adapter use `OPERATIONS.json` v2 `commands.NAME.argv`, `inputs`, effects, environmentSources and loops. Execute argv directly with shell false in the checkout, forwarding explicit arguments after `--` unchanged; never translate them into Cloudflare/pnpm/Base behavior. Common wrapper flags are consumed before the separator. No declared verb means exit 4, not an inferred command/fallback. Existing v1 inspection remains supported. Do not infer runnable commands from the platform registration descriptor's shell strings. No global pins, aliases, installer, outbox, state layout or required verb set is imposed on independent projects; runtime requirements remain project-owned. Independent check still validates the actual declaration and refuses missing/outside-checkout inputs.
+Independent projects without an adapter use `OPERATIONS.json` v2 `commands.NAME.argv`, `inputs`, effects, environmentSources and loops. Execute argv directly with shell false in the checkout, forwarding explicit arguments after `--` unchanged; never translate them into Cloudflare/pnpm/Base behavior. Common wrapper flags are consumed before the separator. No declared verb means exit 4, not an inferred command/fallback. Existing v1 inspection remains supported. Do not infer runnable commands from the platform registration descriptor's shell strings. No global pins, aliases, installer, state layout or required verb set is imposed on independent projects; runtime requirements remain project-owned. Independent check still validates the actual declaration and refuses missing/outside-checkout inputs.
 
 ## Acceptance clauses
 
 - SC-01: required verbs, real flags, thin self-contained dispatcher and truthful describe output.
 - SC-02: exact pins and public aliases, no lifecycle/built-in collision or recursion.
 - SC-03: real manifest-driven setup, private custody, idempotent owner and failure recovery. Validate the selected dependency graph before effects; claim the native owner then pull-link selected dependencies. Declared idp claim mode completes the atomic provider owner grant before readiness. Blank optional dependencies preserve standalone email-link setup; unchanged links need no new approval. Link approvals are private, exact-origin and callback-set, one-use files, deleted after successful use. Multiple interfaces use the private `RER_LINK_TOKEN_FILES` interface-to-file map; each approval is validated before effects.
-- SC-04: managed foreground development/HMR and fixed production preview, requested origin, health/outbox-gated ready output, intact public-input/output build reuse and descendant cleanup.
-- SC-05: Base outbox and ordinary one-use sign-in with pre-hydration POST; no `/cdn-cgi/*` route or private checkout folder answering on the public listener; for a `devIdentity` seed, the per-checkout key gate on every local sign-in surface, real key-gated dev sessions and personas, a local-only entry whose layer `pnpm exec rer build` refuses in output, refused local-only deploy keys, dev data kept out of archives, and one end-to-end email-link test. `pnpm exec rer check --profile first-party` enforces the entry, the build exclusion and the declared email-link test (`SC-05.dev-identity.*`); it reads the deployed main from `devIdentity.deployConfig` when declared, else from `wrangler.jsonc`, `wrangler.json` or `wrangler.toml` (skipping any the adapter lists in `generatedOutputs`), else from a deploy template such as `deploy/wrangler.template.toml`. Copies of Base's operator-auth layers that the seed records (`base-copies.json`, `composition.lock.json` or `foundation.lock.json`) stay byte-exact to their pinned Base revision and share one application, runtime and schema pin (`SC-05.auth-copy.pin`). `pnpm exec rer check` names each drifted, missing or unrecorded file (`SC-05.auth-copy.*`).
+- SC-04: managed foreground development/HMR and fixed production preview, requested origin, health-gated ready output, intact public-input/output build reuse and descendant cleanup.
+- SC-05: rer dev v2 key-gated entry over native owner/session authority; development mail suppressed without storage, a viewer or external sending; no `/cdn-cgi/*` or private checkout paths on the public listener; local-only identity excluded from production output and deployment bindings; dev sessions and dev-minted credentials excluded from archives. Copied Base sources remain byte-exact to their reviewed pin. Native password and hosted email-link flows remain supported.
 - SC-06: confirmed, contained, local-only reset and clean subsequent setup.
 - SC-07: real build/verify and production preview, owner-account deploy/dry-run and unchanged release producer/receipt/exits; bounded expensive execution joins the shared queue. After deployment readiness, link selected dependencies to the real deployed origin using its own approval. Dry-run has no link effect; no additional public verb is introduced.
 - SC-08: complete local export/import, integrity, empty-destination/confirmation and credential exclusions.
@@ -178,7 +205,7 @@ start-only flags before effects.
 
 Idle timeout precedence: explicit `--idle-timeout`, `RER_SERVER_IDLE_SECONDS`,
 then 43200 seconds (12 hours). Positive integers only. The clock starts at readiness.
-Application HTTP, assets and outbox activity reset it; active requests/streams
+Application HTTP and assets activity reset it; active requests/streams
 prevent expiry. Internal management/readiness probes and HMR control
 traffic alone do not count. Real application WebSocket data messages do count.
 
@@ -209,8 +236,8 @@ receipt. Never hash private settings. Missing/corrupt/interrupted output or an
 input change during build invalidates certification. Require ordinary prior
 setup/migrations; missing prerequisites name `pnpm exec rer setup` and exit 3. Preserve
 private bytes/modes, owner, origin overrides and canonical `.wrangler/state`
-D1/R2/KV/DO. Verify real health before ready. HappyToHelp owners request a local
-sign-in email through `/login/magic` after readiness and read it in `/__dev/outbox`.
+D1/R2/KV/DO. Verify real health before ready. Dev prints `RER_OPEN` for native
+owner entry; preview prints the app address for native password sign-in.
 
 Heavy install/build/verify targets, directly documented browser suites and
 indirect/generated scripts use the exported dependency-free Base job queue module.
@@ -220,7 +247,7 @@ cap and never outlives a released job as its descendant. Deploy queues local
 build/validation including zero-provider dry run; release queues expensive steps
 without changing its producer/parser/receipt/exits except adding `--no-queue`.
 Export/import queues local resource runtime work. Help/describe/check/doctor,
-outbox URL, stop and reset inventory/removal stay light.
+stop and reset inventory/removal stay light.
 
 Labels identify the declared project, initiating verb/phase and safe checkout
 identity without credential remotes or secrets. Status/waits are human progress,
@@ -255,12 +282,10 @@ pnpm exec rer setup --owner-email you@example.com
 pnpm exec rer dev --foreground
 ```
 
-Explain how to enter the real owner mailbox through the setup prompt or an
-approved flag, then open the app: a `devIdentity` seed's `dev` prints
-`RER_OPEN`, which opens it signed in as the owner (`--as` and `--login`
-change that); HappyToHelp owners first open `/login/magic` on the `RER_READY`
-app origin and choose **Create local sign-in link** for the local owner's email,
-then open `/__dev/outbox` on that origin and follow the newest ordinary sign-in email. State whether external mail is sent
+Explain how to provide the real owner email through setup's approved inputs.
+Dev prints `RER_OPEN`; the person opens it to enter automatically as the native
+owner. Visitor and teammate email is suppressed without storage or external
+sending. Preview uses the existing native password. Keep entry URLs private
 and preserve the actual local auth and data requirements. Stop `dev` with
 `pnpm exec rer dev --stop` or Ctrl-C, and stop `preview` with
 `pnpm exec rer preview --stop` before build or verification. The opening

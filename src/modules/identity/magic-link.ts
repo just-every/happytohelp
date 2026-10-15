@@ -33,6 +33,7 @@ async function limit(db: D1Database, identity: string, maximum: number) {
 magicLink.post('/magic-link', async c => {
  sameOrigin(c.req.raw)
  c.header('Cache-Control', 'no-store')
+ if(emailMode(c.env)==='local')throw new HTTPException(503,{message:'Local development signs in automatically through rer dev. Use your password instead.'})
  const origin = linkOrigin(c.env)
  if (!origin || !emailConfigured(c.env)) throw new HTTPException(503, { message: 'Email sign-in is not configured. Use your password or contact the workspace owner.' })
  const body = await c.req.json().catch(() => null)
@@ -58,7 +59,7 @@ magicLink.post('/magic-link', async c => {
    await c.env.DB.prepare('UPDATE magic_signins SET consumed_at=? WHERE token_hash=?').bind(Date.now(), hash).run()
   }
  })())
- return c.json({ accepted: true, message: emailMode(c.env)==='local' ? 'If this address belongs to an account, its sign-in link is in the local outbox on this computer. No email is sent. You can also use your password.' : 'If this address belongs to a HappyToHelp account, check your inbox for a sign-in link. You can also use your password.' }, 202)
+ return c.json({ accepted: true, message: 'If this address belongs to a HappyToHelp account, check your inbox for a sign-in link. You can also use your password.' }, 202)
 })
 magicLink.post('/magic-link/consume', async c => {
  sameOrigin(c.req.raw)

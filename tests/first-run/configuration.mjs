@@ -17,7 +17,7 @@ const quiet={step:async()=>{},addSecrets(){}};
 const withRoot=async action=>{const root=await mkdtemp(join(tmpdir(),'h2h-setup-answers-'));try{return await action(root);}finally{await rm(root,{recursive:true,force:true});}};
 const settings=(root,input,manifest)=>prepareSettings({root,store:quiet,input,manifest,selectedOrigin:'http://127.0.0.1:47291'},adapter.hooks);
 
-test('native local preparation selects capture and refuses to replace a saved remote provider',async()=>{
+test('native local preparation selects development suppression and refuses to replace a saved remote provider',async()=>{
  const root=await mkdtemp(join(tmpdir(),'h2h-local-mail-'));
  try{
   const path=join(root,'.dev.vars');

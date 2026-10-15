@@ -1,7 +1,7 @@
 import React from 'react';
 const labels = {
  sent: 'Email sent to provider · delivery not confirmed',
- captured: 'Email captured in local outbox',
+ suppressed: 'Email not sent · suppressed during local development',
  sending: 'Email send in progress',
  failed: 'Email failed · provider rejected the send',
  uncertain: 'Email outcome unknown · check your provider before resending',

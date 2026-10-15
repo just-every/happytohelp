@@ -38,27 +38,11 @@ export function compareArchive(before,after,added=[]){
  assert.deepEqual(after.objects,before.objects,'all R2 bytes and metadata survive');
 }
 
-// An explicit native magic-link request issues one fresh local sign-in. Validate its entire
-// receipt against native token and outbox custody, then compare every table.
-export async function compareSignInArchive(root,before,after,{email,ownerId,origin,since}){
- const previous=new Set(before.rows.email_deliveries),added=after.rows.email_deliveries.filter(row=>!previous.has(row));
- assert.equal(added.length,1,'exactly one fresh local sign-in receipt');
- const receipt=JSON.parse(added[0]),projectId=before.rows.memberships.map(JSON.parse).filter(row=>row.user_id===ownerId).map(row=>row.project_id).sort()[0]??null;
- assert.match(receipt.id,/^magic-signin:[a-f0-9]{64}$/);
- assert.equal(receipt.recipient,email);assert.equal(receipt.project_id,projectId);
- assert.equal(receipt.state,'sent');assert.equal(receipt.provider_id,null);assert.equal(receipt.error,null);
- assert.ok(receipt.created_at>=since&&receipt.updated_at>=receipt.created_at&&receipt.updated_at<=Date.now());
- await archiveStorage(root,async({DB})=>{
-  const hash=receipt.id.slice('magic-signin:'.length),token=await DB.prepare('SELECT * FROM magic_signins WHERE token_hash=?').bind(hash).first();
-  assert.ok(token);assert.equal(token.user_id,ownerId);assert.equal(token.project_id,projectId);assert.equal(token.email,email);assert.equal(token.consumed_at,null);assert.ok(token.expires_at>receipt.created_at);
-  const outbox=(await DB.prepare("SELECT message FROM rer_mail_development_outbox WHERE json_extract(message,'$.deliveryId')=?").bind(receipt.id).all()).results;
-  assert.equal(outbox.length,1);const message=JSON.parse(outbox[0].message);
-  assert.deepEqual(message.to,[email]);assert.equal(message.subject,receipt.subject);
-  const link=new URL(message.text.match(/https?:\/\/\S+/)?.[0]);assert.equal(link.origin,origin);assert.equal(link.pathname,'/login/magic');assert.equal(link.searchParams.get('returnTo'),'/setup');
-  assert.equal(createHash('sha256').update(new URLSearchParams(link.hash.slice(1)).get('token')).digest('hex'),hash);
-  const intent={to:email,subject:message.subject,text:message.text,projectId:projectId??undefined,idempotencyKey:receipt.id,from:message.from};
-  assert.equal(receipt.intent_hash,createHash('sha256').update(JSON.stringify(intent)).digest('hex'));
- });
- const expected=structuredClone(before);expected.rows.email_deliveries.push(added[0]);expected.rows.email_deliveries.sort();
+// Native session admission advances authority once; every business row remains unchanged.
+export function compareDevEntryArchive(before,after){
+ const expected=structuredClone(before);
+ const previous=before.rows.integration_authority_epoch.map(JSON.parse),next=after.rows.integration_authority_epoch.map(JSON.parse);
+ assert.deepEqual(next,previous.map(row=>({...row,revision:row.revision+1})));
+ expected.rows.integration_authority_epoch=after.rows.integration_authority_epoch;
  compareArchive(expected,after);
 }

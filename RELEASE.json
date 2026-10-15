@@ -7,7 +7,7 @@
       "change": "changed",
       "summary": "Lifecycle commands use the published rer package.",
       "was": "Commands ran through the bundled node scripts/rer.mjs entry point.",
-      "now": "Commands run through rer; local setup still stops its runtime, dev uses the development outbox, and deployment dry-run makes no provider requests."
+      "now": "Commands run through rer; local setup still stops its runtime, dev opens the local owner automatically, and deployment dry-run makes no provider requests."
     },
     "FIRST-RUN-001": {
       "change": "changed",
@@ -57,7 +57,7 @@
       "change": "changed",
       "summary": "Zero-setup development and optional private answers are documented.",
       "was": "Local development required explicit setup answers.",
-      "now": "rer dev provisions pinned tools and local setup, derives local origin and a private password, and prints the outbox; scripted private setup remains available."
+      "now": "rer dev provisions pinned tools and local setup, derives local origin and a private password, and opens the owner automatically; scripted private setup remains available."
     },
     {
       "document": "docs/INDEPENDENT-RELEASE.md",
@@ -199,7 +199,7 @@
       "date": "2026-10-15",
       "summary": "Workspace trials use provisioned Setup with optional skips.",
       "was": "The trial description led with the local checklist.",
-      "now": "Setup separates owner-only tasks from provisioned settings, permits skips and describes welcome mail as local capture.",
+      "now": "Setup separates owner-only tasks from provisioned settings, permits skips and describes development email as suppressed without sending or storage.",
       "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
     },
     {

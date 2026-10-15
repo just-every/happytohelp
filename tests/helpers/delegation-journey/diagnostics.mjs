@@ -3,7 +3,7 @@ import {join} from 'node:path';
 
 // Rer error events carry diagnostics already redacted at Base's command
 // boundary. Retain those on failure without exporting setup files, cookies,
-// the outbox or browser storage. Strip generated capabilities defensively.
+// private browser storage. Strip generated capabilities defensively.
 export function safeDiagnostic(value,secrets=[]){
  let text=String(value);
  for(const secret of secrets.filter(Boolean))text=text.replaceAll(secret,'[REDACTED]');

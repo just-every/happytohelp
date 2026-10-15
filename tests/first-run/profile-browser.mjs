@@ -24,7 +24,7 @@ try{
  browser=await chromium.launch({headless:true});
  const owner=await post(origin,'/api/identity/bootstrap',{name:'Profile workspace',ownerName:'Profile operator',email:'profile-owner@example.test',password:randomBytes(24).toString('base64url'),allowedOrigin:origin});
  const project=await api('/api/identity/projects/'+owner.projectId,owner.token);
- for(const startingMode of ['remote','local']){
+ for(const startingMode of ['remote']){
   await mailMode(startingMode);
   for(const width of [1440,390]){
    const context=await browser.newContext({viewport:{width,height:844},bypassCSP:true}),page=await context.newPage();page.setDefaultTimeout(12000);
@@ -35,7 +35,7 @@ try{
     const session=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
     await page.locator('textarea[name=content]').fill('Please retain my saved details '+width+' '+startingMode);await page.locator('button[name=submit]').click();
     await page.locator('.happytohelp-collect-notify-email').waitFor();
-    assert.match(await page.locator('.happytohelp-collect-notify-email').innerText(),startingMode==='local'?/local outbox.*No email is sent/:/Receive an email/);
+    assert.match(await page.locator('.happytohelp-collect-notify-email').innerText(),/Receive an email/);
     const email=`saved-${startingMode}-${width}@example.test`;
     await page.locator('input[name=email]').fill(email);await page.locator('textarea[name=content]').click();
     await page.locator('.happytohelp-message-show-contact-container').getByText(email,{exact:true}).waitFor();
@@ -64,7 +64,7 @@ try{
     await page.getByText('Update 24: This genuine support message remains available through keyboard scrolling and reload.',{exact:true}).waitFor();
     await inspectState(page,records,evidence,`${startingMode}-${width}-transcript`);
     await run(`${startingMode}-${width}-keyboard-transcript`,()=>keyboardScroll(page,page.locator('.happytohelp-chatlist-container'),'Conversation transcript'));
-    for(const mode of ['unavailable',startingMode]){
+    for(const mode of ['unavailable','local',startingMode]){
      await mailMode(mode);
      await run(`${startingMode}-${width}-toggle-${mode}`,async()=>{
       const beforeEffects=await profileEffects(runtime,session.contactId,email);

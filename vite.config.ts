@@ -31,5 +31,5 @@ export default defineConfig(({ command, isPreview }) => {
       next()
     })
   },
-}, cloudflare({ remoteBindings: false, configPath: process.env.H2H_WRANGLER_CONFIG, viteEnvironment: { name: 'ssr' } }), docsSite(), tanstackStart(), react(), reproducibleOutput(), archiveOutputGuard()] };
+}, cloudflare({ ...(localOrigin?{config:{main:'src/dev/server.ts',vars:{RER_DEV_KEY:process.env.RER_DEV_KEY||'',RER_DEV_IDENTITY:process.env.RER_DEV_IDENTITY||'on'}}}:{}), remoteBindings: false, configPath: process.env.H2H_WRANGLER_CONFIG, viteEnvironment: { name: 'ssr' } }), docsSite(), tanstackStart(), react(), reproducibleOutput(), archiveOutputGuard()] };
 })

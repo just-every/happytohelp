@@ -1,5 +1,6 @@
 import {hashToken} from '../../platform/auth'
-import {localMailSender} from '../../edition/local-mail/outbox'
+import {localMailOrigin} from '../../edition/local-mail/configuration'
+import {sendDevelopment} from '../../edition/local-mail/sender.mjs'
 import {emailMode} from './email-provider'
 import type {Env} from '../../platform/env'
 import {emailConfigured, providerRequest, providerReceipt, selectedEmailProvider, sendGridDelivery} from './email-provider'
@@ -21,8 +22,6 @@ async function updateDelivery(env:Env,id:string,state:'sent'|'failed'|'uncertain
  await env.DB.prepare('UPDATE email_deliveries SET state=?,provider_id=coalesce(?,provider_id),error=?,updated_at=? WHERE id=?').bind(state,providerId,error,Date.now(),id).run()
 }
 async function sendThroughSelectedProvider(env:Env,input:EmailInput,from:string):Promise<string|null>{
- const local=localMailSender(env)
- if(local){await local.send({deliveryId:input.idempotencyKey,from,to:[input.to],subject:input.subject,text:input.text,...(input.replyTo?{replyTo:input.replyTo}:{}),...(input.headers?{headers:input.headers}:{})});return null}
  if(selectedEmailProvider(env)==='sendgrid'){
   const receipt=await sendGridDelivery(env,input,from)
   return receipt.providerMessageId
@@ -40,7 +39,12 @@ function sendGridFailure(error:unknown){
 }
 export async function sendEmail(env:Env,input:EmailInput){
  if(!emailConfigured(env))throw new HTTPException(503,{message:'Email provider is not configured'})
- const from=await senderFor(env,input),intentHash=await hashToken(JSON.stringify({...input,from})),existing=await env.DB.prepare('SELECT state,provider_id,intent_hash FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<DeliveryRow>()
+ const from=await senderFor(env,input)
+ if(localMailOrigin(env)){
+  await sendDevelopment({provider:'development',mode:'development'},{deliveryId:input.idempotencyKey,from,to:[input.to],subject:input.subject,text:input.text,...(input.replyTo?{replyTo:input.replyTo}:{}),...(input.headers?{headers:{...input.headers}}:{})})
+  return {id:null,state:'suppressed',mode:'local' as const}
+ }
+ const intentHash=await hashToken(JSON.stringify({...input,from})),existing=await env.DB.prepare('SELECT state,provider_id,intent_hash FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<DeliveryRow>()
  if(existing){
   if(existing.intent_hash!==intentHash)throw new HTTPException(409,{message:'Email command identity conflict'})
   if(existing.state==='sent')return {id:existing.provider_id,state:'sent',...(emailMode(env)==='local'?{mode:'local' as const}:{})}

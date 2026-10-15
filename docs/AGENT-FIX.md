@@ -45,7 +45,7 @@ delivery; a message may already have reached the visitor.
 The maintained journey exercises these steps against the emitted application,
 the real local connector and a disposable customer-system fixture. Its model
 provider boundary is scripted. Browser checks use a fresh local installation,
-the development outbox sign-in, the dashboard and the widget at desktop and
+automatic local owner entry, the dashboard and the widget at desktop and
 phone widths. These checks do not establish a live provider result, a change to
 a real customer's system, a hosted installation or model-answer quality.
 

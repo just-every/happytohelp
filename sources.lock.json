@@ -4411,6 +4411,10 @@
       "sha256": "63ab876afd706448afdbf888a3196e104aab792109733f114f01fedcb12a9fb7",
       "executable": false
     },
+    "src/modules/management/website-address.ts": {
+      "sha256": "c811608a1ee25602d48f073a9f4606d8e429b262cdfbf1b4e934425d822ac63a",
+      "executable": false
+    },
     "src/modules/management/widget-events.ts": {
       "sha256": "7163ee1b0b629eee6d1a8ed8612530249294200490b24d3952756a1d9fd476f5",
       "executable": false
@@ -4741,6 +4745,10 @@
     },
     "src/modules/training-runs/baseline.js": {
       "sha256": "cf3b54d120db66eceabd33226de8d5badaf3bec8abcb1aefaef8bda4e840382d",
+      "executable": false
+    },
+    "src/modules/training-runs/case-details.ts": {
+      "sha256": "570c9a433522c72e56090d31f38cea469bcdd7fcea44c506952fe16fa7969ca3",
       "executable": false
     },
     "src/modules/training-runs/checks/human-voice.d.mts": {
@@ -6743,12 +6751,20 @@
       "sha256": "6d864b2c9157c065b883ae51d640c57e3634a02514ef5d8346033ce8eb1c0680",
       "executable": false
     },
+    "src/ui/native/pages/DeleteWorkspace.jsx": {
+      "sha256": "0751e155ce4c69b9cd69f566aac9649eeb83ac037bff5ce675081b945e493faf",
+      "executable": false
+    },
     "src/ui/native/pages/forms.jsx": {
       "sha256": "2ea20a9ca1e9d22a8dcbdc6b3854cc9a7acff6395804e6fdb1352ba7479b1e10",
       "executable": false
     },
     "src/ui/native/pages/GitHubSettings.jsx": {
       "sha256": "02e19f84c5184277300c16513b62f15b1ceadb8d74164bfb5045d40f7805adfb",
+      "executable": false
+    },
+    "src/ui/native/pages/HelpCenterAddress.jsx": {
+      "sha256": "a013179a0346b09f16056068563873fac98bbc1e2bdd1a1c03d928833d6d864e",
       "executable": false
     },
     "src/ui/native/pages/InsightsPage.jsx": {
@@ -6881,6 +6897,10 @@
     },
     "src/ui/native/pages/training-run-form.js": {
       "sha256": "df8156350d65162c06a7f46e89f143ea673127bade89d706e10341b30feb7dcd",
+      "executable": false
+    },
+    "src/ui/native/pages/TrainingRunDetails.jsx": {
+      "sha256": "667ff9d58ce6ffc797435fb3804c12fb4795a64a8bbf7174c8da6b0a1797d4c8",
       "executable": false
     },
     "src/ui/native/pages/TrainingRunForm.jsx": {

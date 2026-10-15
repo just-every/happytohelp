@@ -115,8 +115,10 @@ provisions declared resources, applies migrations, publishes and checks health
 through Base deploy-kit. After a healthy deploy, `rer deploy` claims the owner named
 by `OWNER_EMAIL` (the setup owner, or the value you supply privately) with a one-time
 token it then removes. Open your Worker's address and sign in by email as that owner.
-If mail is not working yet, `rer signin --environment production` prints a single-use
-sign-in link for the owner, without mail. `rer deploy --environment NAME --remove --yes`
+`rer signin` (a single-use owner link without mail) does not work with HappyToHelp yet:
+its native sign-in has no owner sign-in table, so rer stops with exit 4 and says so; if
+mail is not delivering, use the `/setup` recovery in [operations](OPERATIONS.md#claim-your-new-installation).
+`rer deploy --environment NAME --remove --yes`
 deletes what that environment's deploy created (Worker, D1, R2, queues) and reads back
 that each is gone. Hosted installation and real provider execution are not
 qualified by this release.

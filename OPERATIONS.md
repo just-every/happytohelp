@@ -158,15 +158,15 @@ owner named by `OWNER_EMAIL` on the hosted app with the one-time `H2H_SETUP_TOKE
 and then removes the token. It prints the address and a line such as
 *Claimed the hosted owner (the OWNER_EMAIL already set on the Worker)*. Open that
 address and **sign in by email** as the owner: the sign-in message goes through your
-configured mail sender. Running `rer deploy` again keeps the owner and changes nothing.
+configured mail sender, so the mail variables above must be right before you deploy.
+Running `rer deploy` again keeps the owner and changes nothing.
 
-If mail is not delivering yet, or the owner email was wrong, run
-`rer signin --environment production` (add `--env-file` if the Cloudflare credentials
-are in a file). It writes one single-use sign-in grant for the recorded owner into the
-deployment's auth database using the credentials that deployed it, prints the link once
-to your terminal, and never saves it. The link expires within 15 minutes, works once,
-only for that owner, and is recorded in the owner's audit log. Keep it out of recordings.
-Signed in that way, the owner can correct the email in settings.
+`rer signin --environment production` is rer's mail-free way back in: it writes one
+single-use sign-in grant for the recorded owner and prints the link once. **It does not
+work with HappyToHelp yet.** HappyToHelp's native sign-in has no owner sign-in table, so
+the command stops with exit 4 (`the deployment's database has no owner sign-in table`)
+and changes nothing. Until the seed adopts it, an owner who cannot receive mail, or
+whose email was wrong, recovers through `/setup` below.
 
 The native `/setup` form with the private setup token is **recovery only**: use it
 if the deploy could not claim the owner (for example the claim step was interrupted

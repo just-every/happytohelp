@@ -12,8 +12,8 @@ HappyToHelp's own tenant/permission checks.
 Use this guide for the one-screen first run, the in-app **Setup** page and the native first-owner
 boundary. A rer local installation already has an owner. An existing installation
 never creates another owner through setup. A remotely deployed installation is claimed by `rer deploy`
-for the owner named by `OWNER_EMAIL`, who then signs in by email (or with
-`rer signin`). Its private first-owner setup capability and native `/setup` page over
+for the owner named by `OWNER_EMAIL`, who then signs in by email (`rer signin` does not
+yet work with this seed's native sign-in). Its private first-owner setup capability and native `/setup` page over
 the configured HTTPS origin are recovery only. Keep the capability private and enter it
 only in the owner form. It is not a sign-in shortcut and is closed permanently after claim.
 

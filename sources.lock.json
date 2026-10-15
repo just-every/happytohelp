@@ -1564,7 +1564,7 @@
       "executable": false
     },
     "docs/SETUP-WORKFLOW.md": {
-      "sha256": "709a6d1c774c3a415f63c91549cdb852d2b9688e5caaba63b6c5557237773aa8",
+      "sha256": "8f50fe992c1fd8ecbef3393d813d805b658bdeb6a4bfa0feb3dfe51810503ff4",
       "executable": false
     },
     "docs/site.json": {
@@ -2092,7 +2092,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "ca04bd96b5f65bd5bb53cafaeabcc59ad762d76d79d9ef6039bbc64854d08588",
+      "sha256": "3928c9ae2417cfc2704366dc30ea961795ce9e3f71903d6b142de9ac452ce553",
       "executable": false
     },
     "package.json": {
@@ -2152,11 +2152,11 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "dc6fb39d634e4914d7340ad33230a10519baf7e9415b3d53aaf8841bc9e3c409",
+      "sha256": "81be16ac3a4297295fb70b809fea9f6d6c9ba8f23c84553da159b0201d841e39",
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "33061a68dbe0777a8bf00a4b16a0aec5ecc87045d10ac721185bf0f0f382d486",
+      "sha256": "d41e435ccde07f30bae02d41bab8e15d26e6c8e63201ed34a246fcf24f48b38c",
       "executable": false
     },
     "rer-project.json": {

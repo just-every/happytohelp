@@ -9,47 +9,57 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: delivery-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    # pnpm verify alone takes about 60 minutes on a 2-vCPU runner (Verify, 0.4.0).
-    timeout-minutes: 90
-    # Production authority belongs to the independent delivery service.
-    # Do not attach an environment, production secret or id-token permission.
+    timeout-minutes: 15
+    # Verify owns runtime/browser coverage, including mobile. This job owns the
+    # real distributable and the independent two-checkout reproducibility proof.
+    # Production authority belongs to the independent delivery service:
+    # no environment, production secret or id-token permission belongs here.
+    env:
+      WRANGLER_SEND_METRICS: 'false'
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.20.0
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
           run_install: false
-      - name: Prepare space for native server verification
-        # As in Verify: rer's disk guard refuses the native journey on a
-        # 2-vCPU runner otherwise. The app does not use the Android SDK.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.20.0
+          cache: pnpm
+      - name: Prepare space for reproducibility checkouts
         run: |
           df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
           sudo rm -rf -- /usr/local/lib/android
           df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm verify
-      - run: pnpm test:mobile-inbox-browser
-      - run: pnpm test:reproducible-build
+      - name: Build delivery artifact
+        run: pnpm run build
+      - name: Prove byte-reproducibility from two fresh installs
+        run: pnpm run test:reproducible-build
+      - name: Confirm build and proof preserve source
+        run: git diff --exit-code && test -z "$(git ls-files --others --exclude-standard)"
       - uses: actions/upload-artifact@v4
         with:
           name: happytohelp-worker-${{ github.sha }}
           path: delivery-artifact/
           if-no-files-found: error
           retention-days: 14
-      - name: Preserve failed native runtime diagnostics
-        if: failure()
+      - name: Preserve failed build diagnostics
+        if: ${{ failure() || cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: native-runtime-failure-${{ github.sha }}
-          path: /tmp/h2h-native-runtime-*/runtime.log
+          name: native-runtime-failure-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            /tmp/h2h-native-runtime-*/runtime.log
+            /tmp/h2h-repro-*/*-build.log
           if-no-files-found: ignore
           retention-days: 7

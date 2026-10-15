@@ -749,8 +749,11 @@ missing credentials or delivery failure never select a local fallback.
 
 Native magic links require explicit single-use confirmation POST; scanner GETs
 do not consume them. Native passwords and tenant/session checks are retained.
-`rer outbox --owner-email you@example.com` requests a new
-ordinary message while the app runs; `--open` explicitly opens the browser.
+While dev is running, open `/login/magic` on its printed app address, enter the
+local owner's email and choose **Create local sign-in link**. Open `/__dev/outbox`
+on the same address, choose the newest sign-in email, follow its link and press
+**Sign in**. No email is sent. The pinned CLI has retired its `outbox` command;
+the native browser flow remains available.
 Never print message contents, cookies or token-bearing sign-in URLs.
 
 ### Security headers

@@ -129,8 +129,7 @@ back to capture. While dev is running, open `/login/magic` on its printed app
 address, enter the local owner's email shown by dev and choose **Create local
 sign-in link**. Then open `/__dev/outbox` on that app address, choose the newest
 sign-in email, follow its link and press **Sign in**. No email is sent.
-Alternatively, `pnpm exec rer outbox --owner-email you@example.com` requests a new
-sign-in email for your actual local owner and reports the viewer address.
+The pinned CLI has retired its `outbox` command; use the native browser flow above.
 
 Stop dev before reset/export/import. Use [Operations](../OPERATIONS.md#local-data-and-backups)
 for confirmed reset and private backups. Re-running setup preserves existing

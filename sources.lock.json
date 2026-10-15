@@ -1424,7 +1424,7 @@
       "executable": false
     },
     ".github/workflows/delivery.yml": {
-      "sha256": "1da145182edaa18b40f9ee8edc263498f2f9e6018b613f8a3504db8df2464c10",
+      "sha256": "d8d9c7413ad375509643375b31dc3eb6d45c469f16c3d495acd4b57d07aea13e",
       "executable": false
     },
     ".github/workflows/deploy-stage.yml": {
@@ -1440,7 +1440,7 @@
       "executable": false
     },
     ".github/workflows/verify.yml": {
-      "sha256": "2f79562ceb4333e8bbc13816ad20bd75e23410a3bc1da4091dab1b3bb2bb57a3",
+      "sha256": "3f68c93aa6e654e5d3f367ed47c9b98f0664c282069911f636612f175723c223",
       "executable": false
     },
     ".gitignore": {
@@ -1564,7 +1564,7 @@
       "executable": false
     },
     "docs/SETUP-WORKFLOW.md": {
-      "sha256": "e01c30d12b726cfcebc41b67f17459c9003eb741273f47a962060507891c17cd",
+      "sha256": "f84c18443a0e4c75425f141080ec899d468d2fcab860d0389ae9ff2022a41813",
       "executable": false
     },
     "docs/site.json": {
@@ -2092,7 +2092,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "1a2814e4770ab36436a2051ba2b1fc90a915e6118b0315f716011f91645353bd",
+      "sha256": "58f0718e1ab0a35f307b7c142fa113ff8b0cc12cadf42cb51fbd864ab0d70131",
       "executable": false
     },
     "package.json": {
@@ -2168,7 +2168,7 @@
       "executable": false
     },
     "RUN-LOCALLY.md": {
-      "sha256": "e87ba10cb8c5c597fdbc48c4bed1b4c7f72af866934e954d2b65ab0468275750",
+      "sha256": "8f23e52297eefc71626f3ecccb3bda50d4a95a30df4f4339f281e4d6c2cd36bc",
       "executable": false
     },
     "scripts/build-local-agent.cjs": {
@@ -2500,7 +2500,7 @@
       "executable": false
     },
     "SEED-COMMAND-CONTRACT.md": {
-      "sha256": "b1efcf97e208d100408bf2ff7811fb7b71ebea557f04d1181205b828e36d9773",
+      "sha256": "d94f16141f6b6c85cc9a07a89d3100bccb019f3aec55d250e8f53cd830fe4da5",
       "executable": false
     },
     "seed.json": {
@@ -7624,7 +7624,7 @@
       "executable": false
     },
     "tests/base-refresh-browser.mjs": {
-      "sha256": "9791b848e3677de4bc7fcb484ca3d4c830232d7a362c661bb9fc71f83e0be744",
+      "sha256": "228a67ba488330d53acc66754f379e4ed0c39196cfff139d631d33c877d7a9ed",
       "executable": false
     },
     "tests/cloudflare-email.mjs": {
@@ -7956,7 +7956,7 @@
       "executable": false
     },
     "tests/first-run/cli-sign-in.mjs": {
-      "sha256": "62482e9d28b434743b37760c92a14ca49d0a409f9cae3c016f820ab1e58b23b3",
+      "sha256": "aed4f6593f07642df76db0dc8b0c1a9568f96ae243728c2133b8e31dad5ad399",
       "executable": false
     },
     "tests/first-run/configuration.mjs": {
@@ -8128,7 +8128,7 @@
       "executable": false
     },
     "tests/helpers/delegation-journey/browser.mjs": {
-      "sha256": "e7046f2f94131fbce609a6d6de95e0252d5fec1f4567e93ff1e598060fb86474",
+      "sha256": "10a73ab499ae00e5dab130bb3bceff1acf5ce420597bbab7a8369b9e3b8b748e",
       "executable": false
     },
     "tests/helpers/delegation-journey/case.mjs": {

@@ -14,10 +14,16 @@ export async function beforeHydration({browser,origin,email,password}){
   assert.equal((await context.request.get(origin+'/api/identity/session')).status(),200,'native password POST works with JavaScript disabled');
  }finally{await context.close();}
 }
-export async function signIn({browser,origin,width,evidence}){
+export async function signIn({browser,origin,email,width,evidence}){
  const context=await browser.newContext({viewport:{width,height:844},bypassCSP:true}),page=await context.newPage();
  try{
-  await page.goto(origin+'/__dev/outbox');await page.getByRole('link',{name:'Read message'}).first().click();
+  await page.goto(origin+'/login/magic');
+  await page.getByLabel('Email',{exact:true}).fill(email);
+  const requested=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/identity/magic-link'&&response.request().method()==='POST');
+  await page.getByRole('button',{name:'Create local sign-in link',exact:true}).click();
+  assert.equal((await requested).status(),202);
+  await page.getByRole('status').filter({hasText:'local outbox'}).waitFor();
+  await page.goto(origin+'/__dev/outbox');await page.locator('article').filter({has:page.getByRole('heading',{name:'Sign in to HappyToHelp',exact:true})}).first().getByRole('link',{name:'Read message'}).click();
   const link=await page.getByRole('link',{name:'Open this link'}).getAttribute('href');
   const oversized=await context.request.post(origin+'/login',{headers:{Origin:origin,'Content-Type':'application/x-www-form-urlencoded'},data:'email='+('x'.repeat(20000)),maxRedirects:0});assert.equal(oversized.status(),413);
   assert.equal((await context.request.get(origin+'/api/identity/session')).status(),401);

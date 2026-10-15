@@ -39,13 +39,9 @@ print that suffix or automatically create the sign-in email. Choose the newest
 sign-in email, follow its link and press **Sign in**. No email was sent.
 The confirmation form consumes the link once through POST.
 
-```sh
-rer outbox
-rer outbox --owner-email you@example.com --open
-```
-
-`--open` explicitly asks to open a browser. JSON and non-interactive commands
-never open a browser or ask stdin questions. Stop dev with Ctrl-C before:
+The pinned CLI has retired its `outbox` command; use the browser flow above.
+JSON and non-interactive commands never open a browser or ask stdin questions.
+Stop dev with Ctrl-C before:
 
 ```sh
 rer verify
@@ -57,8 +53,8 @@ rer check --profile first-party
 
 Every new verb supports `--help`, `--cwd PATH`, `--non-interactive` and `--json`.
 Setup also accepts `--owner-name`, `--port`, `--host` and a private JSON `--answers`
-file using the installer model's names. Dev and outbox accept `--port` and
-`--host`; outbox also accepts `--owner-email` and `--open`. Explicit ports never
+file using the installer model's names. Dev accepts `--port` and
+`--host`. Explicit ports never
 drift. Hosts are exactly 127.0.0.1, localhost or ::1. Setup rejects a conflicting
 saved owner or origin and preserves existing data and exact private settings.
 

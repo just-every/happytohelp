@@ -1,68 +1,247 @@
 {
-  "version": "0.4.1",
-  "previousVersion": "0.4.0",
-  "date": "2026-10-14",
-  "contractChanges": {},
+  "version": "0.5.0",
+  "previousVersion": "0.4.1",
+  "date": "2026-10-15",
+  "contractChanges": {
+    "NATIVE-001": {
+      "change": "changed",
+      "summary": "Lifecycle commands use the published rer package.",
+      "was": "Commands ran through the bundled node scripts/rer.mjs entry point.",
+      "now": "Commands run through rer; local setup still stops its runtime, dev uses the development outbox, and deployment dry-run makes no provider requests."
+    },
+    "FIRST-RUN-001": {
+      "change": "changed",
+      "summary": "New workspaces are provisioned with a starter assistant and installation mail settings, with a smaller first-run form.",
+      "was": "First-run led to a setup checklist and ordinary workspace creation led with the widget snippet.",
+      "now": "One-screen setup derives optional names and colours. Non-demo workspaces gain a default starter assistant, a mailbox when INBOUND_EMAIL_TOKEN exists and the installation sender until their domain is verified. Explicit creation may send one welcome email; uncertain mail is never replayed. Setup separates owner-only tasks from provisioned settings."
+    },
+    "ACTIVATION-001": {
+      "change": "changed",
+      "summary": "Setup observes applicable steps automatically and supports durable owner/admin skips.",
+      "was": "The empty inbox and Setup showed the same eight-step checklist; validation was explicit and publication counted as a step.",
+      "now": "Only Setup loads the observations. Signed-in checks perform bounded non-generative reads, never send mail; GET writes nothing. Published articles do not count. Owner-only steps can be skipped without provider work, remain unconfirmed and leave the denominator; an observation wins and rejected keys remain Needs you. Observation details can be stored without backfilling old receipts.",
+      "migrationIds": [
+        "120_activation_observations.sql"
+      ]
+    },
+    "AI-001": {
+      "change": "changed",
+      "summary": "A starter assistant without its provider key leaves new conversations with the team.",
+      "was": "Missing providers failed explicitly when model execution was requested.",
+      "now": "Requested model execution still fails explicitly without a provider; new conversations do not assign a default assistant whose provider has no key. Uncertain attempts remain uncertain and daily ceilings still apply."
+    }
+  },
   "proseChanges": [
     {
       "document": "README.md",
-      "section": "Release 0.4.1",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
       "change": "changed",
-      "date": "2026-10-13",
-      "summary": "The release section names 0.4.1, says what it fixes and that it needs no migration, and the clone command acquires v0.4.1.",
-      "was": "The section described 0.4.0 and the clone command acquired v0.4.0.",
-      "now": "The section opens with the 0.4.1 fix (lower Worker memory while applying or undoing a large import, and a delivery build with time to finish verification), states that 0.4.1 adds no migration, keeps the 0.4.0 description and limits, and the clone command acquires v0.4.1.",
-      "ownerAction": "None for a 0.4.0 installation beyond merging v0.4.1; a 0.3 installation still follows Upgrading from 0.3.x."
+      "summary": "Installation now starts with three commands and describes the provisioned workspace.",
+      "was": "The README described the 0.4.1 fix and an explicit private-answer local setup.",
+      "now": "The 0.5.0 section describes this release and its two migrations. The npm rer bootstrap, clone and rer dev path needs no private answers or external mail/AI account. AI key setup and the provisioned workspace are explained."
     },
     {
-      "document": "OPERATIONS.md",
-      "section": "Upgrading from 0.3.x",
+      "document": "AGENTS.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
       "change": "changed",
-      "date": "2026-10-13",
-      "summary": "The 0.3 upgrade merges the newest 0.4 release tag.",
-      "was": "Step 3 merged v0.4.0.",
-      "now": "Step 3 merges v0.4.1, which contains 0.4.0 and adds no migration; the steps are otherwise unchanged.",
-      "ownerAction": "Merge v0.4.1 instead of v0.4.0 when upgrading from 0.3.x."
+      "summary": "Contributor commands use the package and document automatic local dev defaults.",
+      "was": "Commands used the bundled CLI and setup answers were required for local dev.",
+      "now": "Contributors use Node 22.20.0, pnpm 10.12.4 and rer; automatic local origin/password defaults and source-lock duties are explicit."
+    },
+    {
+      "document": "docs/INSTALLER.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Zero-setup development and optional private answers are documented.",
+      "was": "Local development required explicit setup answers.",
+      "now": "rer dev provisions pinned tools and local setup, derives local origin and a private password, and prints the outbox; scripted private setup remains available."
+    },
+    {
+      "document": "docs/INDEPENDENT-RELEASE.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Public-source updates use package-mode commands.",
+      "was": "Updates described merging source and using the bundled CLI.",
+      "now": "Stop and back up, merge current public source while preserving customization, install frozen dependencies, build and dry-run; v0.4.1 predates package conversion and reset is never an upgrade."
+    },
+    {
+      "document": "docs/SETUP-WORKFLOW.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Setup distinguishes provisioned settings, observations and owner-only tasks.",
+      "was": "Setup documented eight explicit checklist observations and no automatic workspace provisioning.",
+      "now": "New workspaces gain the starter assistant and mail settings; a bounded one-time website read retains private knowledge without publishing articles. Setup performs freshness-bounded reads and permits durable skips."
     },
     {
       "document": "docs/api.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
       "change": "changed",
-      "date": "2026-10-14",
-      "summary": "Signed webhook delivery policy and deliberate resend match the runtime.",
-      "was": "The reference promised automatic retries for explicit HTTP 5xx and had no deliberate uncertain-delivery resend command.",
-      "now": "HTTP 5xx, 408, timeouts and redirects remain uncertain without automatic replay. Only 429 uses the original four-attempt automatic budget. Owners and admins can deliberately requeue an uncertain webhook with its original identity and body, current checks and an audit; each approval beyond that budget allows one attempt.",
-      "ownerAction": "Inspect the receiver before resending an uncertain webhook; deduplicate its original delivery ID."
+      "summary": "Uncertain webhook resend policy matches runtime.",
+      "was": "The reference promised retries for explicit HTTP 5xx and did not document deliberate resend.",
+      "now": "Only 429 retries automatically within four attempts. Owners/admins can approve uncertain resends with the original ID/body and current authority checks; approvals beyond budget permit one audited attempt."
     },
     {
       "document": "docs/SOURCE-PROVENANCE.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
       "change": "changed",
-      "date": "2026-10-14",
-      "summary": "The provenance reference describes the maintained Base policy and native resend boundary.",
-      "was": "The reference said HappyToHelp retried explicit server failures.",
-      "now": "The reference distinguishes bounded automatic 429 attempts from audited native approval of uncertain webhook resends, without modifying copied Base sources.",
-      "ownerAction": "No migration or configuration change."
+      "summary": "Provenance records package-mode tooling and guarded native resend.",
+      "was": "Provenance described bundled tooling and server-failure retries.",
+      "now": "The published package supplies commands; copied Base sources remain byte-exact. Native approval gates uncertain webhook resends."
+    },
+    {
+      "document": "docs/moving-in.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Help Scout response-body import and preservation limits are documented.",
+      "was": "Move in documented supported Zendesk and Intercom inputs.",
+      "now": "Supported Help Scout Inbox v2 and Docs v1 response bodies map to native history/knowledge, with explicit JSON/JSONL/ZIP packaging conventions, omitted saved replies/attachment bytes and synthetic-shape qualification only."
+    },
+    {
+      "document": "ACCEPTANCE.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Delegation acceptance includes the joined connector journey.",
+      "was": "Delegation listed component authority and recovery requirements.",
+      "now": "Required local proof includes the seven-step agent-fix case, refusal branches and fresh browser journey; hosted and live-provider acceptance remain separate."
+    },
+    {
+      "document": "OPERATIONS.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Package-mode commands and retained-state updates are documented.",
+      "was": "Operations used the bundled CLI and explicit local setup.",
+      "now": "Operations use rer while retaining backup, migration-before-runtime, owner authorization and restore limits."
+    },
+    {
+      "document": "RUN-LOCALLY.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Automatic development setup is documented.",
+      "was": "Local commands used bundled CLI entry points and private setup answers.",
+      "now": "rer dev uses its local origin and a generated private password; optional explicit private setup and managed shutdown remain documented."
+    },
+    {
+      "document": "SEED-COMMAND-CONTRACT.md",
+      "date": "2026-10-15",
+      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
+      "change": "changed",
+      "summary": "Command declarations use the published package.",
+      "was": "The command contract named the bundled CLI.",
+      "now": "The same declared lifecycle effects are reached through rer with package-mode inspection and checks."
     },
     {
       "document": "docs/AGENT-FIX.md",
       "change": "added",
-      "date": "2026-10-14",
-      "summary": "A seven-step agent-fix guide explains investigation, explicit fix approval, separate observation and human Send.",
-      "now": "The guide describes the real local connector journey, authority and uncertainty refusals, fixture proof boundaries and the operator responsibility to inspect independent evidence.",
-      "ownerAction": "Use a throwaway target when repeating the case with your own provider account; local fixture checks do not establish live-provider or hosted acceptance."
+      "date": "2026-10-15",
+      "summary": "The guide separates investigation, approved fix, observation and human Send.",
+      "now": "Seven steps describe the local connector flow and refusal branches, with a scripted model-provider boundary and disposable target fixture.",
+      "ownerAction": "Inspect independent evidence and the transcript before sending or retrying uncertain work; real providers and hosted acceptance are unqualified."
     },
     {
-      "document": "ACCEPTANCE.md",
+      "document": "SECURITY.md",
       "change": "changed",
-      "date": "2026-10-14",
-      "summary": "Delegation evidence includes the joined emitted-Worker and real-connector journey.",
-      "was": "The delegation evidence row listed component state, authority and recovery requirements without the joined case.",
-      "now": "The required check includes all seven steps, four refusal branches and the fresh local browser journey; it is a check requirement, not a hosted or live-provider acceptance claim.",
-      "ownerAction": "Retain the existing local, provider, hosted and accessibility qualification boundaries."
+      "date": "2026-10-15",
+      "summary": "Security reporting targets the public repository.",
+      "was": "Reports linked to the former happytohelp repository URL; fixes used the bundled CLI.",
+      "now": "Reports use run-happytohelp private vulnerability reporting and package-mode deployment commands.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/AUTHORING.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Authoring distinguishes package tooling from byte-exact copied source.",
+      "was": "Authoring described a self-contained CLI export.",
+      "now": "The exact rer package supplies shared commands; SEED-COMMAND-CONTRACT.md is edition-maintained documentation rather than a byte-exact Base copy.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/PUBLIC-SOURCE-PROVENANCE.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Licensing attribution reflects package mode.",
+      "was": "The attribution listed scripts/base-onboarding as a copied Base location.",
+      "now": "Attribution includes src/vendor/base, edition-authoring and the @runeditrun/rer dependency while retaining the Base MIT notice.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/NAVIGATION.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Workspace and Settings navigation are documented.",
+      "was": "The sidebar carried inbox views and additional settings links.",
+      "now": "Inbox views sit above the conversation list; More holds local computers, Reports and Insights. Twelve Settings destinations share a responsive in-page menu; global links remain project-specific.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/UI-PARITY.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Parity records the revised workspace layout.",
+      "was": "The parity record described original purple navigation and the prior settings layout.",
+      "now": "The record retains account/workspace behaviors while documenting the shorter sidebar, inbox views and shared Settings menu.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/WORKSPACE-WORKFLOWS.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Workspace trials use provisioned Setup with optional skips.",
+      "was": "The trial description led with the local checklist.",
+      "now": "Setup separates owner-only tasks from provisioned settings, permits skips and describes welcome mail as local capture.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/moving-in-shapes.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Help Scout source custody and pagination are documented.",
+      "was": "Shape custody covered the prior import vendors.",
+      "now": "Separate Inbox and Docs shapes retain strict syntax validation, list/page receipts, customer identities and source-located diagnostics before mapping.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/PUBLIC-LIMITS.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "Optional limits use package-mode deployment.",
+      "was": "Limit configuration used the bundled CLI deployment entry point.",
+      "now": "Optional settings use pnpm exec rer deploy with the real declaration; private configuration and limits retain the same authority.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "HANDOVER.md",
+      "change": "changed",
+      "date": "2026-10-15",
+      "summary": "The maintainer handover covers provisioning, site reads and package commands.",
+      "was": "The architecture described bundled CLI commands and the prior setup path.",
+      "now": "The handover identifies the exact package pin, provisioning and missing-key assignment, pure GET observations, bounded private site knowledge and migration 120.",
+      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
     }
   ],
   "extensionPointChanges": [],
-  "migrations": [],
-  "breaking": false,
-  "agentUpdateInstructions": "Update from 0.4.0 by merging v0.4.1 into the owner's checkout, preserving owner customizations, native passwords, current actor/project authority and explicit operator Send. 0.4.1 adds no migration and changes no contract clause or extension point; no data step is needed and the updated Worker can serve the existing store directly. A review prepared by 0.4.1 keeps its decisions and diagnostics as a private object under the import's storage prefix, with only the summary and that object's hash on the run row; reviews prepared by 0.4.0 keep them on the row and are read unchanged. Move in now splits a reviewed import into children of at most 10 source records (previously 20) and applies or reverses up to 20 journal rows per invocation (previously 10), which lowers Worker memory while a large import is applied or undone. Reviews, journals and imports created by 0.4.0 keep their recorded children and remain resumable and undoable unchanged; only reviews prepared after the update use the smaller children. Keep schema-2 manifests and raw payload sidecars intact and preserve private import originals with resumable journals. Preserve the accessibility checker HOLD, timed activation and portable-storage limits. An installation still on 0.3.0 or the 0.3 fix line follows the 0.4.0 instructions first (OPERATIONS.md, Upgrading from 0.3.x): back up, apply 0109_magic_signins.sql before the updated Worker if it is missing, then the ten additive migrations 0110_move_in.sql to 119_local_portability.sql in order before starting the updated Worker and before it serves traffic. Its magic_signins table and magic_signins_expiry index retain backup and restore obligations for expiry and consumption state; that migration does not rewrite existing rows, create accounts, send email or configure a provider. Email sign-in requires APP_ORIGIN, and password sign-in remains available. Never reset to upgrade.",
-  "publicReleaseNotes": "HappyToHelp 0.4.1 is a fix release for 0.4.0. Applying or undoing a large Move in import uses less Worker memory: a reviewed import is split into children of at most 10 records, each invocation reverses or applies more of a child at once, and the D1 request meter no longer copies every bound value to measure it. Imports of up to 5,000 records reach review: preparing a review no longer reads the database once per child, a review's decision list is kept in private import storage instead of on the import's database row, and a background step that runs out of its query budget records the error on the import instead of leaving it in Preparing review. The delivery build now has time to finish its full verification. 0.4.1 adds no migration and reads every 0.4.0 store unchanged; a 0.4.0 installation merges v0.4.1 and serves its existing data, and a 0.3 installation follows the 0.4.0 upgrade steps in OPERATIONS.md. Known limits are unchanged from 0.4.0: accessibility is on a confirmed owner HOLD and no WCAG conformance is claimed; backups and archives cover D1 and R2 but not Durable Object storage, and full portable-storage fidelity is not established; hosted operating costs are unmeasured, and timed activation and paid-provider execution are not qualified; imports and connections are qualified with synthetic fixtures only, without real vendor exports or live Slack; no hosted installation, compliance or FedRAMP qualification is claimed. The hosted service at app.happytohelp.com is separate legacy production and is not part of this release."
+  "migrations": [
+    {
+      "id": "120_activation_observations.sql",
+      "buyerSteps": "Back up, then apply before starting the updated Worker. Adds nullable observation_json to activation_receipts without backfilling existing receipts."
+    },
+    {
+      "id": "121_move_in_categories.sql",
+      "buyerSteps": "Apply after 120 and before starting the updated Worker. Removes category-insert revision invalidation and narrows category-delete invalidation to articles whose category ancestry changes; existing rows are not rewritten."
+    }
+  ],
+  "breaking": true,
+  "agentUpdateInstructions": "Update from 0.4.1 while preserving owner customizations, native passwords, actor/project authority and explicit operator Send. Stop dev or preview and back up state and private settings. Install the frozen package-mode dependencies (@runeditrun/rer 0.2.7); v0.4.1 predates package conversion. Apply 120_activation_observations.sql then 121_move_in_categories.sql before starting the updated Worker and before serving traffic. Neither migration rewrites prior application rows; 120 adds a nullable observation field without backfill and 121 changes only category revision triggers. Never reset to upgrade. Existing workspaces and user-edited assistants remain under their existing authority; new-workspace defaults and missing-key assignment do not authorize provider work. Preserve uncertain outcomes, reviewed source ancestry, private import originals, resumable journals, schema-2 manifests and raw payload sidecars. Deliberate uncertain webhook resend can duplicate effects and requires inspection of the receiver. Preserve the accessibility checker HOLD and portable-storage limits. An older 0.3 installation follows OPERATIONS.md first, applying 0109_magic_signins.sql before the updated Worker if missing, then 0110 through 119 in order before these two migrations. The magic_signins table and magic_signins_expiry index retain backup and restore obligations for expiry and consumption state; that migration does not rewrite existing rows, create accounts, send email or configure a provider. Email sign-in requires APP_ORIGIN and password sign-in remains available.",
+  "publicReleaseNotes": "HappyToHelp 0.5.0 adds Help Scout Inbox v2 and Docs v1 response-body Move in, guarded deliberate resend of uncertain webhooks, and a guided local-agent investigation/fix/observation/reply flow. New workspaces gain a starter assistant and installation mail settings; Setup distinguishes observed settings, owner-only tasks and durable skips. Without an AI key conversations stay with the team. A bounded initial website read retains private knowledge without publishing articles. Re-importing unchanged source preserves native edits; category changes invalidate only affected article ancestry. The workspace has a neutral light canvas and lighter controls. Local development uses the README three-command npm bootstrap/clone/rer dev path without private answers or mail/AI credentials; checkout commands pin @runeditrun/rer 0.2.7. Updating from 0.4.1 requires two migrations, 120_activation_observations.sql and 121_move_in_categories.sql, before the updated Worker starts. Imports and connection/provider journeys use synthetic fixtures; real Help Scout accounts, live Slack, hosted installation, paid-provider execution and timed activation remain unqualified. Accessibility remains on owner HOLD; no WCAG, compliance or FedRAMP conformance is claimed. Backups cover D1/R2, not Durable Object storage; full portable fidelity and hosted operating costs are unestablished. app.happytohelp.com is separate legacy production."
 }

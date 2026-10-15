@@ -1472,7 +1472,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "e8c60cc974eea52bb296e562a048a5155a48422d4d43adc80da10aefb4b1700a",
+      "sha256": "7d5cb6f79cb1b361b39596dc7dc9b5d98dc310bc3520f332d8aeb54e629869ad",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1800,7 +1800,7 @@
       "executable": false
     },
     "local-agent/package.json": {
-      "sha256": "fe01cade380a1e8205d838ad7dc176656219d34e81d15c9ab06f47e4c6f20018",
+      "sha256": "124ae541cbbdb770c8a98a50f23bc5a6b8007ca2f700751a9e905137dd52f63c",
       "executable": false
     },
     "local-agent/README.md": {
@@ -2096,11 +2096,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "8a4eafda18ff93ff9f6f8c5e8fdb9c51a4ef7b82295be1a71fb279b3869a6d7a",
+      "sha256": "11a9622e70e72dbb196d767b60948f41abeedcc59d0eeb0a537cb93d2ec74256",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "8c23054a32bb7f43fd79e848a9837d7ef22fbfe1e0de20a00b01bd3ffd2aacc8",
+      "sha256": "4f12d51ecf2c21bdf4a2096051eb467213f2cee98c06b68fb5f78c1c22a738a6",
       "executable": false
     },
     "public/fonts/inter/InterVariable.woff2": {
@@ -2152,11 +2152,11 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "82d0b61b5d85015fe3ef415a6288903cc89ef5ed429c7b4750c32e4b412e838a",
+      "sha256": "70eac4f32ac3075a47735298128843a786a9f702d6ca4df52f6306eae0349ceb",
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "8111b428baecb77f0cb1f319dc5b1e96abfd0d54add851c85907eb5c1fd7b0a9",
+      "sha256": "a486847c65ecf9e74f004707faf2949643df866fa477febc86add00d7eec9ebb",
       "executable": false
     },
     "rer-project.json": {
@@ -2504,7 +2504,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "767699c5f7ad31f2849c12dd665f4355032c12cf99556a6422939c82ba308ef9",
+      "sha256": "9c7cdbc5aa4aa6298ad072fb947d557562a699de1d5343a7fa9303ff8117a036",
       "executable": false
     },
     "src/app.ts": {
@@ -8304,11 +8304,11 @@
       "executable": false
     },
     "tests/helpers/upgrade-baselines.mjs": {
-      "sha256": "73e8d8214a663e2c043490dd27b81a4a3f45b4cb0f6581f05bcffeec8a3d6911",
+      "sha256": "53d239b1cfdbc1b18c58a8cdef0ec833bfd229ba6b118a0282f6bce98557c6a2",
       "executable": false
     },
     "tests/helpers/upgrade-exceptions.mjs": {
-      "sha256": "75397948adc8f039c4bd52c17c89748655b13bbed4d39f7765d73d491dd3baf6",
+      "sha256": "d846cda1ac746f4e9bdd96eb246ea55c32bac0f062e4108f6c370b753e7392c2",
       "executable": false
     },
     "tests/helpers/upgrade-readback.mjs": {
@@ -8880,7 +8880,7 @@
       "executable": false
     },
     "tests/publication-metadata.mjs": {
-      "sha256": "73797c2db09f7ccca829502a519987ef57b1c9f6a0f8d400600f38ba10380e62",
+      "sha256": "13851aae0d17289ba7f0e54ac7343dfeab6e59056cc9a8d1351504ae7f0ed393",
       "executable": false
     },
     "tests/recovery-artifact-build.mjs": {
@@ -9048,7 +9048,7 @@
       "executable": false
     },
     "tests/upgrade.mjs": {
-      "sha256": "0d9beaf94c20162092b5867ddbd719f24d246395542014221e40633557ec70b6",
+      "sha256": "f3dcc5754ffdb0d2cbaa8bfa881ee72f73c6da3f29b4358a65461978fe6ab34b",
       "executable": false
     },
     "tests/usage-limits.mjs": {

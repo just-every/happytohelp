@@ -12,7 +12,9 @@ export const baselines = {
   '0.3.0': {commit: '60e9a84688ea41575d56a8f692bbb8173366c7c5', tree: 'c329b580464b084d1899f7ba77fe52dad7daa091', migrations: 42, populate: populate03},
   '0.3.x': {commit: 'a6dc18da5fa8500ad3607210ecff09aedfecb825', tree: 'b9f889b14b289f7c0bf9df2e99c4bae823dabc8c', migrations: 42, populate: populate03},
   // 0.4.0 keeps the 0.3 API used to populate it.
-  '0.4.0': {commit: 'ee8d38e743fb8b0eb8c9af16b4d178133292d05e', tree: '0b9b6db9198ebde4100e183e5f2ba6bd1f70d882', migrations: 52, tables: 189, previous: true, populate: populate03},
+  '0.4.0': {commit: 'ee8d38e743fb8b0eb8c9af16b4d178133292d05e', tree: '0b9b6db9198ebde4100e183e5f2ba6bd1f70d882', migrations: 52, tables: 189, populate: populate03},
+  // Published 0.4.1 retains the same real population API and schema.
+  '0.4.1': {commit: 'dd1ea8c3d085cc4382bde018b095ff4d464a04fb', tree: '73964a643b50f74eb5c0731b58117ce279bcca8f', migrations: 52, tables: 189, previous: true, populate: populate03},
 };
 
 export function client(origin) {

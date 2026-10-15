@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
 
 const text = value => ['text', Buffer.from(value).toString('hex')];
 const integer = value => ['integer', String(value)];
@@ -19,6 +20,8 @@ export const migrationExceptions = [
 // Prior schema definitions a migration deliberately replaces. 0110 adds only the
 // native import fence to the two context message triggers' bodies.
 export const schemaExceptions = [
+  {migration: '120_activation_observations.sql', names: ['activation_receipts'], change: 'Adds nullable observation_json TEXT; every prior column definition is retained'},
+  {migration: '121_move_in_categories.sql', names: ['edition_category_insert', 'edition_category_delete'], change: 'Removes insertion invalidation and limits deletion invalidation to affected article ancestry'},
   {migration: '0110_move_in.sql', names: ['context_message_added', 'context_message_removed'], change: 'WHEN NOT EXISTS(SELECT 1 FROM move_in_native_fences ...) inserted before BEGIN'},
 ];
 
@@ -82,8 +85,35 @@ export function expectedSchema(before, after, added) {
   const changed = [];
   for (const [name, entry] of Object.entries(before)) {
     const fence = added.includes('0110_move_in.sql') && {context_message_added: 'NEW', context_message_removed: 'OLD'}[name];
-    const wanted = fence ? {...entry, sql: entry.sql.replace(' BEGIN ', ` WHEN NOT EXISTS(SELECT 1 FROM move_in_native_fences f WHERE f.project_id=${fence}.project_id AND f.conversation_id=${fence}.conversation_id) BEGIN `)} : entry;
+    let wanted = fence ? {...entry, sql: entry.sql.replace(' BEGIN ', ` WHEN NOT EXISTS(SELECT 1 FROM move_in_native_fences f WHERE f.project_id=${fence}.project_id AND f.conversation_id=${fence}.conversation_id) BEGIN `)} : entry;
+    if (added.includes('120_activation_observations.sql') && name === 'activation_receipts') {
+      // Let SQLite serialize the one deliberate ALTER; this retains every byte
+      // of the prior definition rather than ignoring the changed table schema.
+      const db = new DatabaseSync(':memory:');
+      try {
+        db.exec(entry.sql);
+        db.exec('ALTER TABLE activation_receipts ADD COLUMN observation_json TEXT');
+        wanted = {...entry, sql: db.prepare("SELECT sql FROM sqlite_master WHERE name='activation_receipts'").get().sql};
+      } finally { db.close(); }
+    }
+    if (added.includes('121_move_in_categories.sql')) {
+      if (name === 'edition_category_insert') {
+        if (after[name] !== undefined) changed.push(name);
+        continue;
+      }
+      if (name === 'edition_category_delete') wanted = {...entry, sql: categoryDelete};
+    }
     if (JSON.stringify(after[name]) !== JSON.stringify(wanted)) changed.push(name);
   }
   return changed;
 }
+
+// The deliberate replacement's full expected body: unrelated article revisions
+// must not be invalidated, including articles linked through the join table.
+const categoryDelete = `CREATE TRIGGER edition_category_delete BEFORE DELETE ON knowledge_categories BEGIN
+ UPDATE knowledge_articles SET source_revision=source_revision+1
+ WHERE project_id=OLD.project_id AND (
+  category_id IN (WITH RECURSIVE descendants(id) AS (SELECT OLD.id UNION SELECT c.id FROM knowledge_categories c JOIN descendants d ON c.parent_id=d.id WHERE c.project_id=OLD.project_id) SELECT id FROM descendants)
+  OR id IN (SELECT article_id FROM knowledge_article_categories WHERE category_id IN (WITH RECURSIVE descendants(id) AS (SELECT OLD.id UNION SELECT c.id FROM knowledge_categories c JOIN descendants d ON c.parent_id=d.id WHERE c.project_id=OLD.project_id) SELECT id FROM descendants))
+ );
+END`;

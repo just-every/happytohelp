@@ -8,6 +8,32 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
+## 0.5.0 — 2026-10-15
+
+### Added
+
+- **Help Scout Move in.** Review and import supported Inbox v2 and Docs v1 API response bodies as native history and knowledge. JSON, JSONL and ZIP groupings are packaging conventions, not Help Scout exports. Saved replies and attachment bytes are omitted; real-account compatibility remains unverified.
+- **Deliberate uncertain webhook resend.** Owners/admins can inspect the receiver and approve the original delivery ID/body again from Connections → Delivery log. Only 429 retries automatically within the existing four-attempt budget; 5xx, 408, timeouts and redirects remain uncertain. Each approval beyond the budget permits one audited attempt. A resend can duplicate an effect.
+- **Guided local-agent fixes.** Investigation, explicitly approved Resolve, separate observation and an operator-reviewed reply retain human Send. A Resolve report does not prove the customer system changed. The documented journey uses a scripted provider boundary and disposable target.
+- **Provisioned new workspaces.** Non-demo workspaces gain a default starter assistant, reply mailbox when configured and the installation sender until their own domain is verified. Explicit creation may send one welcome email; uncertain mail is never replayed. A bounded initial website read keeps private knowledge without publishing articles. Without an AI key, conversations stay with the team.
+
+### Fixed
+
+- **Re-import keeps native edits.** Unchanged source records retain edited native targets while new records can be imported; changed sources or conflicting ancestry remain review conflicts. Category insertion no longer invalidates unrelated articles; deletion updates only affected ancestry.
+- **Runtime and documentation consistency.** Preview declares generated core migrations, documentation edits reach the development watcher, and bounded hydration recovery retains explicit failure reporting.
+
+### Changed
+
+- **First run and Setup.** The one-screen form derives optional names and colours. Setup separates Needs you from What we've set, observes applicable checks automatically with freshness bounds and permits durable owner/admin skips. A skip never counts as confirmation; rejected keys remain Needs you. Empty inboxes show one next action and a link to Setup.
+- **Workspace appearance and navigation.** A neutral light canvas, lighter fields and softer menus accompany the revised inbox and settings navigation. Dark-theme tokens remain.
+- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.7**. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. Sign in through the local outbox. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
+
+### Updating from 0.4.1
+
+Back up and apply `120_activation_observations.sql` then `121_move_in_categories.sql` **before starting the updated Worker**. Migration 120 adds nullable observation data without backfill; 121 replaces category revision triggers without rewriting existing rows. Never reset to upgrade. See [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
+
+These notes claim no hosted installation, real vendor-account compatibility, paid-provider execution, import capacity or operating-cost qualification. Synthetic fixture boundaries, accessibility HOLD and D1/R2-only backup limits remain; see [Acceptance](ACCEPTANCE.md).
+
 ## 0.4.1 — 2026-10-13
 
 ### Fixed

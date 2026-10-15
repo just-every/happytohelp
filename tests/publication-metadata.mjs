@@ -39,8 +39,11 @@ test('release metadata carries the Base release contract and actionable migratio
   for (const [id, change] of Object.entries(release.contractChanges)) {
     assert.match(id, /^[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)*-[0-9]{3}$/);
     assert.ok(contract.includes('**' + id + ' —'), 'actual stable contract clause: ' + id);
-    assert.equal(change.change, 'added'); nonempty(change.summary);
-    assert.deepEqual(Object.keys(change).sort(), (change.migrationIds ? ['change', 'summary', 'migrationIds'] : ['change', 'summary']).sort());
+    assert.ok(['added', 'changed', 'removed'].includes(change.change)); nonempty(change.summary);
+    const fields = ['change', 'summary', ...(change.migrationIds ? ['migrationIds'] : [])];
+    if (change.change !== 'added') { nonempty(change.was); fields.push('was'); }
+    if (change.change === 'changed') { nonempty(change.now); fields.push('now'); }
+    assert.deepEqual(Object.keys(change).sort(), fields.sort());
     for (const migrationId of change.migrationIds || []) assert.ok(release.migrations.some(m => m.id === migrationId));
   }
   assert.deepEqual(release.extensionPointChanges, []);

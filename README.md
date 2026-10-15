@@ -37,12 +37,15 @@ work delegated to your own Codex or Claude. It works with human replies without
 an AI provider. The editable React application runs on Cloudflare Workers with
 Hono, D1, R2, Queues and Durable Objects.
 
-## Release 0.4.1
+## Release 0.5.0
 
-Version 0.4.1 is a fix release for 0.4.0. Applying or undoing a large Move in
-import uses less Worker memory, and the delivery build has time to finish its
-verification. It adds no migration: a 0.4.0 installation merges `v0.4.1` and
-serves its existing data.
+Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
+resends, a guided local-agent fix flow and provisioned new workspaces with a
+simpler Setup page. Re-imports preserve native edits. Commands use the published
+`@runeditrun/rer` package pinned to 0.2.7; local dev starts without private setup
+answers. Back up and apply `120_activation_observations.sql` then
+`121_move_in_categories.sql` before the updated Worker starts. See
+[Updates and recovery](docs/INDEPENDENT-RELEASE.md) and [the changelog](CHANGELOG.md).
 
 Version 0.4.0 adds Move in for reviewed support-history imports, resolution
 feedback with workspace-calendar Reports, Connections with scoped API tokens,

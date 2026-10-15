@@ -16,7 +16,7 @@ import {readBack, priorState} from './helpers/upgrade-readback.mjs';
 // Prior-data upgrade: build each released source, populate it through its own
 // API, apply this source's migrations in place, compare every pre-existing row,
 // then serve the upgraded store with this source's emitted Worker.
-// Usage: node tests/upgrade.mjs [0.2.1|0.3.0|0.3.x|0.4.0 ...] after `pnpm run build`.
+// Usage: node tests/upgrade.mjs [0.2.1|0.3.0|0.3.x|0.4.0|0.4.1 ...] after `pnpm run build`.
 const run = promisify(execFile);
 const root = resolve(new URL('..', import.meta.url).pathname);
 const release = JSON.parse(await readFile(join(root, 'RELEASE.json'), 'utf8'));
@@ -68,6 +68,13 @@ async function upgrade(label) {
     await command(process.execPath, [join(root, 'node_modules/wrangler/bin/wrangler.js'), 'd1', 'migrations', 'apply', 'DB', '--local', '--config', join(runtimeDirectory, 'wrangler.json'), '--persist-to', state], runtimeDirectory);
     const ledger = new DatabaseSync(database, {readOnly: true});
     const order = ledger.prepare('SELECT name FROM d1_migrations ORDER BY id').all().map(row => row.name).slice(before.d1_migrations.rowCount);
+    if (!applied.includes('120_activation_observations.sql') && headMigrations.files.includes('120_activation_observations.sql')) {
+      const column = ledger.prepare('PRAGMA table_info(activation_receipts)').all().find(row => row.name === 'observation_json');
+      assert.equal(column?.type, 'TEXT');
+      assert.equal(column.notnull, 0);
+      assert.equal(column.dflt_value, null);
+      assert.equal(ledger.prepare('SELECT count(*) AS count FROM activation_receipts WHERE observation_json IS NOT NULL').get().count, 0, '120 does not backfill prior observations');
+    }
     ledger.close();
     const after = snapshot(database, before), afterFiles = await bucketSnapshot(join(state, 'v3/r2'));
     const {expected, added, exceptions} = expectedMigrationRows(before, after, headMigrations.files);
@@ -82,7 +89,7 @@ async function upgrade(label) {
       appliedByUpgrade: added, appliedOrder: order, appliedMigrationBytesUnchanged: applied.length,
       rowsWithData: Object.fromEntries(Object.entries(before).filter(([, value]) => value.rowCount).map(([table, value]) => [table, value.rowCount])),
       comparison, failures: comparison.filter(row => !row.matchesExpected).map(row => row.table), migrationExceptions: exceptions,
-      schema: {definitions: Object.keys(beforeSchema).length, changedOutsideExceptions: changedSchema, exceptions: added.includes('0110_move_in.sql') ? schemaExceptions : []},
+      schema: {definitions: Object.keys(beforeSchema).length, changedOutsideExceptions: changedSchema, exceptions: schemaExceptions.filter(exception => added.includes(exception.migration))},
       files: {objects: beforeFiles.objects.length, blobs: beforeFiles.blobs.length, identical: JSON.stringify(beforeFiles) === JSON.stringify(afterFiles)},
     };
     assert.deepEqual(order, added, 'Upgrade applied exactly the missing migrations in order');

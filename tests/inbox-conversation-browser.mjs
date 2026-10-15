@@ -167,6 +167,7 @@ try{
  {
   const {context,page}=await open(conversationPath('draft'))
   const composer=page.getByRole('textbox',{name:'Reply to conversation'})
+  const expandedReply='Hi Maya Chen, a black replacement buckle is approved for express dispatch tomorrow. — Alex Rivers'
   const pick=async()=>{await page.getByRole('button',{name:'Reply tools',exact:true}).click();await page.getByRole('menuitem',{name:'Saved replies',exact:true}).click();await page.getByRole('link',{name:REPLY.title,exact:true}).waitFor()}
   const draft='Draft that must not be sent'
   await composer.fill(draft)
@@ -175,14 +176,18 @@ try{
   assert.equal(await composer.inputValue(),draft,'the draft stays visible and intact while the picker is open')
   await page.getByRole('link',{name:REPLY.title,exact:true}).click()
   const merged=await composer.inputValue()
-  assert.ok(merged.includes(draft)&&merged.includes(REPLY.content),`draft and reply both present: ${merged}`)
+  assert.ok(merged.includes(draft)&&merged.includes(expandedReply),`draft and reply both present: ${merged}`)
   assert.ok(merged.startsWith(draft),'a caret inside the draft does not split it: the reply follows the line')
   await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Reply to conversation')
   check('saved reply is inserted without discarding a typed draft, and the draft stays visible while picking')
   await composer.fill('')
   await pick()
   await page.getByRole('link',{name:REPLY.title,exact:true}).click()
-  assert.equal(await composer.inputValue(),REPLY.content,'an empty composer receives exactly the reply')
+  assert.equal(await composer.inputValue(),expandedReply,'an empty composer receives the entire expanded reply')
+  await page.getByRole('button',{name:'Send',exact:true}).click()
+  await eventually(async()=>(await fx.api(`/api/conversations/${fx.contacts.draft.id}/messages`)).messages,
+   messages=>messages.at(-1)?.content===expandedReply,'sending preserves the complete expanded saved reply')
+  await page.reload();await page.getByText(expandedReply,{exact:true}).waitFor()
   check('saved reply fills an empty composer exactly')
   await context.close()
  }

@@ -2,7 +2,7 @@ import {sha256,canonicalJson} from '../import-kit/src/provenance/identity'
 import type {Env} from '../../platform/env'
 import {sourceId} from './readers/common'
 import {LIMITS,type Vendor} from './types'
-import {indexUpload} from './readers/identity-index'
+import {indexUpload,type IdentityIndexIssue} from './readers/identity-index'
 import {AdmissionError} from './readers/admission-error'
 export interface IdentityLink {digest:string;source:string}
 export const identityDigest=(project:string,kind:string,value:string)=>sha256(canonicalJson(['move-in-erasure',project,kind,value]))
@@ -15,14 +15,14 @@ export function contactDigests(project:string,contact:{email?:unknown;external_i
 }
 /** Index only identity hashes, before raw custody is admitted. This includes
  * rejected and not-yet-reviewed records, and never depends on native origins. */
-export async function uploadIdentities(project:string,vendor:Vendor,name:string,bytes:Uint8Array):Promise<{links:IdentityLink[];complete:boolean;uninterpreted:string[]}>{
- const links=new Map<string,IdentityLink>(),retained:unknown[]=[];let hashes=0,aliasComplete=true
+export async function uploadIdentities(project:string,vendor:Vendor,name:string,bytes:Uint8Array):Promise<{links:IdentityLink[];complete:boolean;uninterpreted:string[];incomplete?:IdentityIndexIssue}>{
+ const links=new Map<string,IdentityLink>(),retained:unknown[]=[];let hashes=0,aliasComplete=true,incomplete:IdentityIndexIssue|undefined
  const complete=await indexUpload(vendor,name,bytes,(people,references,location,uninterpreted)=>{
   retained.push(...uninterpreted)
   const refuse=(code:string):never=>{throw new AdmissionError(code,location.artifact,location.row,location.pointer)}
   const digest=(kind:string,value:string)=>{if(++hashes>LIMITS.identityHashes)refuse('upload_identity_hash_limit');return identityDigest(project,kind,value)}
   const add=(source:string,value=source)=>{const key=`${source}/${value}`;if(!links.has(key)&&links.size>=LIMITS.identityLinks)refuse('upload_identity_link_limit');links.set(key,{source,digest:value})}
-  const ref=(id:unknown,prefix='')=>{let value:string;try{value=sourceId(id,vendor)}catch{aliasComplete=false;retained.push(id);return null}value=prefix+value;const hash=digest(`source:${vendor}`,value);add(hash);return {hash,value}}
+  const ref=(id:unknown,prefix='')=>{let value:string;try{value=sourceId(id,vendor)}catch{aliasComplete=false;incomplete??={code:'malformed_source_field',location,reason:'invalid_source_identity'};retained.push(id);return null}value=prefix+value;const hash=digest(`source:${vendor}`,value);add(hash);return {hash,value}}
   for(const reference of references)ref(reference)
   for(const person of people){
    // Help Scout user and customer IDs are separate provider identity spaces.
@@ -31,9 +31,9 @@ export async function uploadIdentities(project:string,vendor:Vendor,name:string,
    if(typeof person.external_id==='string'&&person.external_id){const external=digest('external',person.external_id);add(source?.hash??external,external)}
    if(source)add(source.hash,digest('external',`import:${vendor}:${source.value}`))
   }
- })
+ },issue=>{incomplete??=issue})
  const whole=complete&&aliasComplete
- return {links:[...links.values()],complete:whole,uninterpreted:whole?[]:uninterpretedDigests(project,vendor,retained)}
+ return {links:[...links.values()],complete:whole,uninterpreted:whole?[]:uninterpretedDigests(project,vendor,retained),...(!whole?{incomplete}:{})}
 }
 /** Retained source content the readers do not interpret (opaque, unsupported and
  * malformed fields, unknown record kinds, invalid IDs) is never mapped, yet an

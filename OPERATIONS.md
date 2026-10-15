@@ -19,8 +19,10 @@ owner password, then prints the development sign-in outbox link. No private
 answers, email service or AI account are needed. Open the link and sign in to
 your workspace. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout retains its exact **0.2.19** command package pin. The global rer
-entry point uses that local package after provisioning its tools.
+The checkout pins **`@runeditrun/rer` 0.2.19** in `package.json` and
+`pnpm-lock.yaml`. The global launcher installed by npm may have a different
+version; inside the checkout it provisions the tools and delegates to the pinned
+local package. Updating the global launcher does not change the project's pin.
 For scripted setup, prepare [private answers](docs/INSTALLER.md#private-setup-answers),
 then run `rer setup --owner-email you@example.com --answers .seed/local-answers.json`.
 Setup reruns preserve owner, data and private settings; conflicting saved email

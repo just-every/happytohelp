@@ -71,6 +71,9 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 
 ## Run it on your computer
 
+Start with the public [run guide](https://github.com/just-every/run-happytohelp/blob/main/docs/INSTALLER.md)
+for installation, local sign-in and stopping the app.
+
 You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
 if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
 or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`

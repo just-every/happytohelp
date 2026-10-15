@@ -150,6 +150,10 @@ try{
   const created=t.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname.endsWith('/runs'));
   await t.getByRole('button',{name:'Create run'}).click();const response=await created;assert.equal(response.status(),201,await response.text());
   await t.getByRole('button',{name:/evaluation/i}).first().waitFor();
+  for(const label of ['Models','Case definitions','Maximum cost','Maximum tokens'])assert.equal(await t.getByLabel(label,{exact:false}).first().inputValue(),'','committed run clears its creation draft');
+  const navigationWarnings=[];t.on('dialog',async dialog=>{navigationWarnings.push(dialog.message());await dialog.accept();});
+  await t.getByRole('navigation',{name:'Knowledge sections'}).getByRole('link',{name:'Website sources',exact:true}).click();await t.waitForURL(`${base}/datasets`);
+  assert.deepEqual(navigationWarnings,[],'successful creation leaves no unsaved-change warning');
  });
  await ctx.close();
 

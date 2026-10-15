@@ -15,5 +15,5 @@ export default function WidgetSettingsPage({ projectId }) {
     },[projectId,attempt]);
     if(error)return <div role="alert" className="widget-settings-load-error"><p>Widget settings could not load. {error}</p><button type="button" className="btn btn-outline-dark" onClick={()=>setAttempt(value=>value+1)}>Try again</button></div>;
     if(!data)return <p role="status">Loading your widget settings and preview…</p>;
-    return data && <Provider settings={data.settings||data} previewAgent={data.previewAgent} previewBrand={data.previewBrand} mailMode={data.mailMode} installation={{widgetKey:data.widgetKey,scriptUrl:new URL('/widget.js',location.origin).href,apiOrigin:location.origin}} verificationSecret={data.verificationSecret}><WidgetSettings projectId={projectId}/></Provider>;
+    return data && <Provider settings={data.settings||data} previewAgent={data.previewAgent} previewBrand={data.previewBrand} mailMode={data.mailMode} allowedOrigin={data.allowedOrigin} installation={{widgetKey:data.widgetKey,scriptUrl:new URL('/widget.js',location.origin).href,apiOrigin:location.origin}} verificationSecret={data.verificationSecret}><WidgetSettings projectId={projectId}/></Provider>;
 }

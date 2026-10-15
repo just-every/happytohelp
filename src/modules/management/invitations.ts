@@ -18,7 +18,7 @@ invitations.post('/projects/:projectId/agents',async c=>{
  if(member)throw new HTTPException(409,{message:'Already a project member'})
  const invitation=await issueInvitation(c.env.DB,c.req.url,a.projectId,email,role)
  let delivery='not_configured'
- if(emailConfigured(c.env)){await mailInvitation(c.env,a.projectId,email,invitation.hash,invitation.url);delivery='sent'}
+ if(emailConfigured(c.env)){const receipt=await mailInvitation(c.env,a.projectId,email,invitation.hash,invitation.url);delivery=receipt.mode==='local'?'captured':'sent'}
  return c.json({data:{email,role,invitationUrl:invitation.url,expiresIn:INVITATION_LIFETIME_SECONDS,delivery}},201)
 })
 
@@ -42,6 +42,6 @@ invitations.post('/projects/:projectId/invitations/:invitationId/resend',async c
  const a=await scope(c,true),invitation=await manageableInvitation(c.env.DB,a.projectId,c.req.param('invitationId'),a.role)
  if(!emailConfigured(c.env))throw new HTTPException(503,{message:'Email delivery is not configured, so the invitation cannot be emailed. Copy the link and share it instead.'})
  const link=await issueInvitation(c.env.DB,c.req.url,a.projectId,invitation.email,invitation.role)
- await mailInvitation(c.env,a.projectId,invitation.email,link.hash,link.url)
- return c.json({data:{email:invitation.email,role:invitation.role,expiresIn:INVITATION_LIFETIME_SECONDS,delivery:'sent'}},201)
+ const receipt=await mailInvitation(c.env,a.projectId,invitation.email,link.hash,link.url)
+ return c.json({data:{email:invitation.email,role:invitation.role,expiresIn:INVITATION_LIFETIME_SECONDS,delivery:receipt.mode==='local'?'captured':'sent'}},201)
 })

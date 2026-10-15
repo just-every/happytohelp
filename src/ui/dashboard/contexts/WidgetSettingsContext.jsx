@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 
 export const WidgetSettingsContext = createContext({});
 
-export const Provider = ({ settings, csrfToken, previewAgent, previewBrand, mailMode, installation, verificationSecret, children }) => {
+export const Provider = ({ settings, csrfToken, previewAgent, previewBrand, mailMode, allowedOrigin, installation, verificationSecret, children }) => {
     return (
-        <WidgetSettingsContext.Provider value={{ settings, csrfToken, previewAgent, previewBrand, mailMode, installation, verificationSecret }}>
+        <WidgetSettingsContext.Provider value={{ settings, csrfToken, previewAgent, previewBrand, mailMode, allowedOrigin, installation, verificationSecret }}>
             {children}
         </WidgetSettingsContext.Provider>
     );

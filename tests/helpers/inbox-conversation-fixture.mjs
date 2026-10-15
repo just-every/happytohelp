@@ -1,6 +1,6 @@
 // Fixture for the inbox/conversation browser regression: an owner, contacts and conversations built through the real HTTP APIs.
-export const OWNER={email:'inbox-owner@example.test',password:'inbox-conversation-test-2026',name:'Inbox Owner'}
-export const REPLY={title:'Greeting',content:'Hi there, thanks for getting in touch with Northwind Support! How can I help today?'}
+export const OWNER={email:'inbox-owner@example.test',password:'inbox-conversation-test-2026',name:'Inbox Owner',ownerName:'Alex Rivers'}
+export const REPLY={title:'Replacement buckle approved',content:'Hi {{contact.name}}, a black replacement buckle is approved for express dispatch tomorrow. — {{agent.name}}'}
 
 export async function buildInboxFixture(origin){
  const call=async(path,body,token,method=body===undefined?'GET':'POST',headers={})=>{
@@ -29,7 +29,7 @@ export async function buildInboxFixture(origin){
   alpha:await conversation({name:'Row Alpha',email:'row.alpha@rowtest.test',subject:'Row control keyboard test'}),
   beta:await conversation({name:'Row Beta',email:'row.beta@rowtest.test',subject:'Row control touch test'}),
   assign:await conversation({name:'Assign Test',email:'assign.test@assigntest.test',subject:'Assignment menu test'}),
-  draft:await conversation({name:'Draft Test',email:'draft.test@drafttest.test',subject:'Saved reply draft test'}),
+  draft:await conversation({name:'Maya Chen',email:'draft.test@drafttest.test',subject:'Saved reply draft test'}),
   reopen:await conversation({name:'Hannah Closed',email:'hannah.closed@fjordworks.test',subject:'Invoice reminder resolved last week',closed:true}),
  }
  await call(`/api/dashboard/projects/${projectId}/macros`,REPLY,token)

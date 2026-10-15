@@ -6,7 +6,7 @@ import {nativeRequest} from '../transport';
 import {Feedback} from './forms';
 import ManagementLists from './ManagementLists';
 import ManagementEditor from './ManagementEditor';
-import {InvitationNotice} from './InvitationActions';
+import {InvitationCreated,InvitationNotice} from './InvitationActions';
 import ContactDetails from './ContactDetails';
 import ContactErasure,{ContactErased} from './ContactErasure';
 import AssistantsPage from './AssistantsPage';
@@ -70,7 +70,7 @@ function ResourcePage({projectId,section,recordId}) {
    },
   });
  };
- return <><Feedback {...{error,saved}}/>{invitation&&<div className="alert alert-info" role="status">Invitation created. {invitation.delivery==='sent'?'Email sent.':'Email delivery is not configured. Share this invitation link:'} <a href={invitation.invitationUrl}>{invitation.invitationUrl}</a></div>}<InvitationNotice notice={notice}/>
+ return <><Feedback {...{error,saved}}/>{invitation&&<InvitationCreated invitation={invitation}/>}<InvitationNotice notice={notice}/>
   {!recordId&&<ManagementLists {...{section,items,base,projectId,emailConfigured}} onMove={move} onChanged={load} onNotice={setNotice} onError={setError}/>} {recordId&&!draft&&!error&&<p>Loading…</p>}
   {draft&&section==='contacts'&&draft.is_erased&&<div className="workspace-settings"><ContactErased contact={draft}/></div>}
   {draft&&!(section==='contacts'&&draft.is_erased)&&<div className="workspace-settings">{section==='contacts'&&draft.id&&<ContactDetails contact={draft}/>}

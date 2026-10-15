@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { nativeRequest } from '../transport';
 
 /** Only the current page/request may publish a result. Mutations require a loaded list. */
-export default function useTrainingRuns(path, markSaved) {
+export default function useTrainingRuns(path) {
     const current = useRef({ active: true, list: 0, detail: 0, ready: false, pending: false });
     const [runs, setRuns] = useState(null), [status, setStatus] = useState('loading');
     const [error, setError] = useState(''), [created, setCreated] = useState(false);
@@ -46,13 +46,13 @@ export default function useTrainingRuns(path, markSaved) {
         try { await work(scope); }
         finally { if (scope.active) { scope.pending = false; setPending(false); } }
     };
-    const create = value => mutate(async scope => {
+    const create = (value, onCreated) => mutate(async scope => {
         setCreated(false);
         try {
             await nativeRequest(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...value, request_id: crypto.randomUUID()})});
         } catch (failure) { if (scope.active) throw failure; return; }
         if (!scope.active) return;
-        markSaved(); setCreated(true); await load();
+        onCreated(); setCreated(true); await load();
     });
     const cancel = id => mutate(async scope => {
         try {

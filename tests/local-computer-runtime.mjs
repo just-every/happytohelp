@@ -39,10 +39,16 @@ try{
  const train=await request('/api/training/projects/p/runs',{request_id:'eval1',kind:'evaluation',cases:[{id:'case',expected:{min_responses:1}}],models:['selected'],max_cost:1,max_tokens:100});assert.equal(train.status,201);
  assert.equal((await request('/test/execute/'+train.data.id,{})).calls,1);assert.equal((await request('/test/execute/'+train.data.id,{})).calls,0);
  const run=await request('/api/training/projects/p/runs/'+train.data.id,undefined,'operator','GET');assert.equal(run.data.status,'uncertain');assert.equal(run.data.reserved_cost,1);assert.equal(run.data.spent_cost,0);
+ assert.match(run.data.cases[0].error,/cost.*not reported/i,'unknown provider cost retains a readable explanation');
+ assert.equal(run.data.cases[0].artifact_available,true,'retained output is available even with uncertain usage');
+ assert.equal((await request('/api/training/projects/p/runs/'+train.data.id+'/cases/'+run.data.cases[0].id+'/artifact',undefined,'operator','GET')).attemptId,run.data.cases[0].attempt_id);
+ const files=await mf.getR2Bucket('FILES');await files.delete(run.data.cases[0].output_key);
+ const withoutArtifact=await request('/api/training/projects/p/runs/'+train.data.id,undefined,'operator','GET');assert.equal(withoutArtifact.data.cases[0].artifact_available,false,'missing retained object is not advertised');
  const expiredRun=await request('/api/training/projects/p/runs',{request_id:'expired-eval',kind:'evaluation',cases:[{id:'expired',expected:{min_responses:1}}],models:['selected'],max_cost:2,max_tokens:100});
  await db.prepare("UPDATE training_runs SET status='running',reserved_cost=2 WHERE id=?").bind(expiredRun.data.id).run();await db.prepare("UPDATE training_cases SET status='running',attempt_id='interrupted',started_at=1,lease_expires_at=1 WHERE run_id=?").bind(expiredRun.data.id).run();
  assert.equal((await request('/test/execute/'+expiredRun.data.id,{})).calls,0);
  assert.equal((await db.prepare('SELECT status FROM training_runs WHERE id=?').bind(expiredRun.data.id).first()).status,'uncertain');assert.equal((await db.prepare('SELECT reserved_cost FROM training_runs WHERE id=?').bind(expiredRun.data.id).first()).reserved_cost,2);
+ const expiredDetails=await request('/api/training/projects/p/runs/'+expiredRun.data.id,undefined,'operator','GET');assert.equal(expiredDetails.data.cases[0].artifact_available,false);assert.match(expiredDetails.data.cases[0].error,/lease expired/i);
  const planningConfig={plan:[{id:'restored-case',definition:{id:'restored',expected:{}},model:'selected',variant:'prototype'}]};
  await db.prepare("INSERT INTO training_runs(id,project_id,operator_id,request_id,kind,status,config,case_count,max_cost,max_tokens,created_at) VALUES('restored','p','u','restored','evaluation','planning',?,1,1,100,1)").bind(JSON.stringify(planningConfig)).run();await request('/test/recover-training',{});
  assert.equal((await db.prepare("SELECT status FROM training_runs WHERE id='restored'").first()).status,'queued');assert.equal((await db.prepare("SELECT COUNT(*) n FROM training_cases WHERE run_id='restored'").first()).n,1);

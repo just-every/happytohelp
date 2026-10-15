@@ -7,7 +7,7 @@ const initial = {kind: 'evaluation', models: '', cases: '', variants: '', max_co
 const order = ['kind', 'models', 'cases', 'variants', 'max_cost', 'max_tokens'];
 /** Form to start an evaluation or simulation. Problems are shown beside the field and nothing is sent until the input is valid. */
 export default function TrainingRunForm({ onCreate, disabled = false }) {
-    const {markDirty}=useUnsavedChanges();
+    const {markDirty,markSaved}=useUnsavedChanges();
     const [draft, setDraft] = useState(initial), [errors, setErrors] = useState({}), [error, setError] = useState(''), [busy, setBusy] = useState(false);
     const change = (name, value) => { markDirty(); setDraft(current => ({...current, [name]: value})); setErrors(({[name]: _, ...rest}) => rest); };
     const submit = async event => {
@@ -22,7 +22,11 @@ export default function TrainingRunForm({ onCreate, disabled = false }) {
             return;
         }
         setBusy(true);
-        try { await onCreate(result.value); } catch (failure) { setError(failure.message); } finally { setBusy(false); }
+        try {
+            await onCreate(result.value, () => {
+                setDraft(initial); setErrors({}); markSaved();
+            });
+        } catch (failure) { setError(failure.message); } finally { setBusy(false); }
     };
     const field = (name, label, props = {}) => <Field {...{name, label}} error={errors[name]} value={draft[name]} onChange={change} {...props}/>;
     return <form onSubmit={submit} noValidate><Section title="Start a run" description="Choose the models and cases to run, and the most this run may spend.">

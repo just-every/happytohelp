@@ -31,22 +31,18 @@ export default function MacrosPicker({ onPicked, projectId }) {
         const contactName = conversation.contact.provided_name ? conversation.contact.provided_name : conversation.contact.name;
         const agentName = currentAgent.name;
 
-        const regexp = /{{(.+)}}/gmi;
+        const regexp = /{{([^{}]+)}}/g;
         const map = {
             'agent.name': agentName,
             'contact.name': contactName,
         }
-        let content = macro.content;
-        [...macro.content.matchAll(regexp)].forEach(match => {
-            const placeholder = match[0];
-            const split = match[1].split('|');
+        const content = macro.content.replace(regexp, (_, expression) => {
+            const split = expression.split('|');
             const fallback = (split[1] ? split[1] : '').trim();
             const key = split[0].trim();
-            const value = (map.hasOwnProperty(key) && map[key])
+            return (Object.hasOwn(map, key) && map[key])
                 ? map[key]
                 : fallback;
-
-            content = content.replace(placeholder, value);
         });
 
         onPicked(content);

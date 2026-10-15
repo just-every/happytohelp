@@ -7,7 +7,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.22
+npm install -g @runeditrun/rer@0.2.23
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -146,6 +146,9 @@ Use a real page to send a customer message, then reply from your workspace inbox
    `http://127.0.0.1:8840` and save. Use the actual origin if your server differs:
    scheme, hostname and optional port, without a path. `localhost` and `127.0.0.1`
    are different hosts, and different ports are different origins.
+   The widget has no email field by default. To collect an address for emailed
+   operator replies, enable **Required contact details → Require email** on this
+   same settings page and save. Visitors then enter their email before sending.
 4. Open `http://127.0.0.1:8840` in another browser profile or private window. Open
    the widget and send a message. In your signed-in app,
    open **Inbox**, choose the conversation and reply. Check the reply in the
@@ -162,7 +165,7 @@ An online website needs an online HappyToHelp installation reachable by its visi
 identity with the optional server secret. It does not prevent an operator reply
 from being emailed to the address the visitor entered. Local mail uses rer dev v2
 and is suppressed without storage or external sending. On a hosted installation
-with sending configured, **Sent to email provider** on a reply records provider acceptance,
+with sending configured, **Email sent to provider · delivery not confirmed** on a reply records provider acceptance,
 not confirmed inbox delivery. Inbound mail routing is configured separately.
 
 ## Verify, reset and move data
@@ -176,7 +179,7 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-Rer 0.2.22 requires the same private mail inputs for deployment dry runs and real
+Rer 0.2.23 requires the same private mail inputs for deployment dry runs and real
 deployment: `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`. The declaration maps
 these to both rer's `MAIL_*` preflight bindings and HappyToHelp's native `EMAIL_*`
 bindings. For Cloudflare mail, supply the additional account ID described in

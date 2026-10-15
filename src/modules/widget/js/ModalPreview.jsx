@@ -57,7 +57,7 @@ const ModalPreview = ({ previewFile, hide, containerRef }) => {
     }, [previewFile, hide, containerRef]);
 
     if(!previewFile) return null;
-    const fileName = previewFile.path || previewFile.filename || 'attachment';
+    const fileName = (previewFile.filename || previewFile.name || previewFile.path || 'attachment').replace(/^(?:\.\/)+/, '');
     const portalTarget = containerRef.current?.getRootNode();
     if(!portalTarget) return null;
     return ReactDOM.createPortal(

@@ -14,12 +14,12 @@ function Media({ upload, media, setPreview }) {
 
     // Try to normalise this data @todo correct params at source
     if(upload) {
-        media.filename = media.path;
+        media.filename = (media.name || media.path || '').replace(/^(?:\.\/)+/, '');
         media.url = media.url ?? media.preview;
     }
     else {
         media.isImage = media.aggregate_type === 'image';
-        media.filename = media.filename_original;
+        media.filename = (media.filename_original || '').replace(/^(?:\.\/)+/, '');
         media.preview = media.preview_url ?? media.url;
     }
 

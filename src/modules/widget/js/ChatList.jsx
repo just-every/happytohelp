@@ -200,6 +200,7 @@ export default function ChatList({ messages, contact, sendContact, scrollRef, ag
         <ModalPreview
             previewFile={previewFile}
             hide={() => setPreviewFile(false)}
+            containerRef={chatListEl}
         />
         <div ref={chatListEl} className="happytohelp-chat-list" style={ context.theme.window }>
 

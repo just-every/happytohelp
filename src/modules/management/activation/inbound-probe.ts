@@ -2,13 +2,15 @@ import type {Env} from '../../../platform/env'
 import {hashToken} from '../../../platform/auth'
 import type {Configuration} from './configuration'
 import type {Probe} from './types'
+import {inboundNeedsCustomDomain} from './inbound-domain'
 
 /** Verify the immutable ingress intent as well as the settings snapshot. A mailbox
  * can change between ingress lookup and insertion; the trigger alone is not proof
  * of the recipient. A plain-text receipt can be reconstructed without opening R2. */
 export async function checkInbound(env:Env,config:Configuration):Promise<Probe> {
  const email=config.email
- // The installation's gateway token comes first: without it no mailbox can receive, whatever is saved.
+ if(inboundNeedsCustomDomain(email?.inbound_address))return {state:'unavailable',detail:'Replies by email need a custom domain and an inbound email route. A workers.dev address cannot receive mail. Configure INBOUND_EMAIL_DOMAIN and route incoming mail to this installation, then save the receiving address in Email settings.'}
+ // Without the installation's gateway token no mailbox can receive, whatever is saved.
  if(!env.INBOUND_EMAIL_TOKEN)return {state:'unavailable',detail:'CONFIGURATION_REQUIRED: INBOUND_EMAIL_TOKEN. Configure the authenticated inbound gateway in the installation.'}
  if(!email?.is_enabled||!email.inbound_address)return {state:'pending',detail:'Save and enable your receiving address in Email settings.'}
  const address=email.inbound_address.toLowerCase()

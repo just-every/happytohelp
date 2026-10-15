@@ -24,6 +24,7 @@ export const behaviorFieldNames = groups.flatMap(({ fields }) => fields.map(([na
 export default function WidgetBehaviorFields({ register }) {
     return groups.map(({ title, fields }) => (
         <WidgetFieldSection key={title} title={title}>
+            {title === 'Required contact details' && <p className="settings-note" style={{gridColumn:'1 / -1'}}>The widget does not ask for an email by default. Enable Require email to show an email field before visitors send a message. On a hosted installation with email sending configured, operator replies can reach that address.</p>}
             {fields.map(([name, label]) => (
                 <div key={name}>
                     <Form.Check type="switch" id={`widget-${name.replace(/[^a-z0-9]+/gi, '-')}`}

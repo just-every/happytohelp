@@ -108,11 +108,12 @@ function rowFor(data, id) {
   }
   case 'inbound_address': {
    const mailbox = facts.inboundAddress, lead = mailbox ? `${mailbox}. ` : '';
+   if (facts.inbound?.customDomainRequired) return {...base, state: 'unavailable', value: 'Replies by email need a custom domain and an inbound email route. A workers.dev address cannot receive mail. Configure INBOUND_EMAIL_DOMAIN and route incoming mail to this installation, then save the receiving address in Email settings.'};
    if (own && own.applicable === false) return {...base, state: 'unavailable', value: `${lead}${local ? 'Replies by email need a mail provider.' : 'Replies by email are not available with this mail provider.'}`};
    if (facts.inbound && !facts.inbound.gateway) return {...base, state: 'unavailable', value: `${lead}Replies by email need INBOUND_EMAIL_TOKEN in this installation.`};
    if (!mailbox) return {...base, state: 'unavailable', value: 'Replies by email need an inbound address. Set it on the Email page.'};
    if (facts.inbound && !facts.inbound.enabled) return {...base, state: 'off', value: `${lead}The mailbox is off. Turn it on in Email settings.`};
-   return withObservation('set', `${lead}${observed ? 'Replies arrive here.' : 'Waiting for the first reply.'}`);
+   return withObservation('set', `${lead}${observed ? 'Replies arrive here.' : 'Waiting for the first reply. This address needs an inbound email route to this installation.'}`);
   }
   case 'spend_ceilings': return withObservation('set', ceilingsValue(data) || sentence(own?.detail || ''));
   case 'model_key': {

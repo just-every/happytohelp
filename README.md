@@ -42,7 +42,7 @@ Hono, D1, R2, Queues and Durable Objects.
 Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.22; local dev starts without private setup
+`@runeditrun/rer` package pinned to 0.2.23; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
@@ -81,7 +81,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.22
+npm install -g @runeditrun/rer@0.2.23
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -104,7 +104,7 @@ send a visitor message and reply from **Inbox**. Set that page's exact origin in
 entered email can receive operator replies even when their identity is labelled
 **Unverified**. Local visitor and teammate mail is suppressed without storage or
 external sending. With a hosted sender,
-**Sent to email provider** on a reply means acceptance, not confirmed inbox delivery.
+**Email sent to provider · delivery not confirmed** on a reply means acceptance, not confirmed inbox delivery.
 
 ## Choose how to run it
 
@@ -123,20 +123,24 @@ rer deploy --dry-run
 rer deploy --environment production
 ```
 
-With rer 0.2.22, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+With rer 0.2.23, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
 `EMAIL_API_KEY` inputs for dry run and real deployment. Dry run validates their
 shape and the build locally, makes no provider request and sends no mail. Deployment
 provisions declared resources, applies migrations, publishes and checks health
 through Base deploy-kit. After a healthy deploy, `rer deploy` claims the owner named
-by `OWNER_EMAIL` (the setup owner, or the value you supply privately) with a one-time
+by `OWNER_EMAIL` (a real setup owner, or the value you supply privately) with a one-time
 token it then removes. Open your Worker's address and sign in by email as that
 owner to reach **Setup**. The owner's name is derived from their email. A Workers
 hostname does not name your business: a `workers.dev` website defaults to
 **My workspace** regardless of owner email. An explicitly chosen native workspace
 name takes precedence; you can change it in Project settings.
-`rer signin` (a single-use owner link without mail) does not work with HappyToHelp yet:
-its native sign-in has no owner sign-in table, so rer stops with exit 4 and says so; if
-mail is not delivering, use the `/setup` recovery in [operations](OPERATIONS.md#claim-your-new-installation).
+Deploy refuses the local placeholder `owner@run-happytohelp.test`: it has no mailbox.
+Supply a real `OWNER_EMAIL` privately in your environment or an owned 0600
+`--env-file` for both dry run and deployment.
+`rer signin --environment production` directs you to this installation's `/login`
+page. HappyToHelp uses its native email/password sign-in; the command cannot mint
+an owner link. If mail fails, follow the working mail recovery in
+[operations](OPERATIONS.md#claim-your-new-installation).
 `rer deploy --environment NAME --remove --yes`
 removes that environment's created Worker, D1, R2 and queues in one pass,
 including uploaded attachments in its R2 bucket, and reads back that each is gone.
@@ -172,7 +176,11 @@ confirms is counted ("N of M confirmed", without what you skipped): mail to you,
 sender DNS, inbound mail, model access, spend ceilings, widget origin and an
 authenticated widget visit. Saved settings alone do not complete them. Add the widget through **Settings →
 Widget**, set its exact [website origin](docs/SETUP-WORKFLOW.md#the-widget-website-origin),
-publish useful articles and invite teammates through **Settings → Agents**.
+publish useful articles and invite teammates through **Settings → Agents**. By default the widget does not ask
+for an email. For visitors to receive replies by email, enable **Settings → Widget
+→ Settings → Required contact details → Require email**. The visitor enters their
+address before sending a message; operator replies can then use it on a hosted
+installation with email sending configured.
 
 ## Set up AI replies
 
@@ -193,7 +201,7 @@ and Setup say a key is missing.
      also set it in your terminal before you run `rer deploy --environment production` (see
      [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)).
    - **On your own computer:** add a line such as `OPENAI_API_KEY=your-key` to
-     a file named `.dev.vars` in the `happytohelp` folder, then restart the app.
+     a file named `.dev.vars` in the `run-happytohelp` folder, then restart the app.
 3. **Setup notices the key.** While the starter assistant is untouched it uses a
    model of whichever provider's key is installed, and Setup confirms the key with
    the provider. To use a different assistant, open **AI** in the sidebar, add one

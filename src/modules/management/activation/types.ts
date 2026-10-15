@@ -51,8 +51,8 @@ export type ActivationFacts = {
  /** The provisioned starter assistant (`starter_ai`), while it exists. `edited` once it differs from what it was created with. */
  starterAssistant:{id:string; name:string; model:string; provider:string|null; edited:boolean}|null
  inboundAddress:string|null
- /** `gateway` says the installation holds INBOUND_EMAIL_TOKEN (presence only). */
- inbound:{enabled:boolean; gateway:boolean}
+ /** `gateway` says the installation holds INBOUND_EMAIL_TOKEN (presence only); workers.dev cannot receive mail. */
+ inbound:{enabled:boolean; gateway:boolean; customDomainRequired:boolean}
  /** Null when AI_DAILY_CEILINGS is invalid. */
  ceilings:{repliesPerProject:number; repliesPerInstallation:number; spendUsdPerProject:number; contextRunsPerProject:number; resetUtc:'00:00'; source:'defaults'|'installation'}|null
  /** From the last sender_dns observation still valid for the current configuration (Resend domain detail). */

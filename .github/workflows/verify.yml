@@ -137,6 +137,9 @@ jobs:
           - name: first-run-browser
             commands: |
               node tests/first-run/browser.mjs
+          - name: activation-widget-browser
+            commands: |
+              pnpm run test:activation-browser
           - name: visitor-profile-browser
             commands: |
               node tests/first-run/dashboard-browser.mjs

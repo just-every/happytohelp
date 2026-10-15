@@ -9,7 +9,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.22
+npm install -g @runeditrun/rer@0.2.23
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -21,7 +21,7 @@ password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout pins **`@runeditrun/rer` 0.2.22** in `package.json` and
+The checkout pins **`@runeditrun/rer` 0.2.23** in `package.json` and
 `pnpm-lock.yaml`. The global launcher installed by npm may have a different
 version; inside the checkout it provisions the tools and delegates to the pinned
 local package. Updating the global launcher does not change the project's pin.
@@ -129,15 +129,18 @@ or real deployment, supply the mail provider (`resend`, `sendgrid` or `cloudflar
 verified sender address and sending token in private environment variables or an
 owned 0600 `--env-file`. Provider and
 sender are stored as secret bindings too, so the deployment declaration contains
-no account-specific values. Rer supplies the owner email (`OWNER_EMAIL`) from local setup, or from the environment
-when you set it, and generates missing setup/encryption secrets. It also deploys
+no account-specific values. Rer supplies the owner email (`OWNER_EMAIL`) from real local setup, or from the environment
+when you set it. Deploy refuses the local placeholder `owner@run-happytohelp.test`
+and other reserved trial domains because they cannot receive sign-in mail. Supply
+a real mailbox privately in `OWNER_EMAIL` or an owned 0600 `--env-file` for both
+dry run and deployment. Rer generates missing setup/encryption secrets. It also deploys
 the generated `INBOUND_EMAIL_TOKEN` for reply-mailbox authentication. Existing
 Worker secrets are retained; use `rer deploy --set-secret NAME` to change one
 deliberately.
 
 The declaration maps the same `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
 inputs to rer's shared `MAIL_PROVIDER`, `MAIL_FROM` and `MAIL_API_KEY` preflight
-bindings as well as HappyToHelp's native bindings. Rer 0.2.22 requires these same
+bindings as well as HappyToHelp's native bindings. Rer 0.2.23 requires these same
 mail inputs for both `rer deploy --dry-run` and real deployment. Dry run validates
 their shape and the build locally; it makes no provider requests and sends no mail.
 
@@ -145,7 +148,7 @@ Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
 declaration's `secrets` array, plus
 `{"binding":"MAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}`, and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.22 requires
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.23 requires
 every declared secret on a new Worker and has no conditional secret declaration.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
@@ -184,12 +187,30 @@ Sign-in opens **Setup**. The owner's name is derived from that actual email, and
 An explicitly chosen native workspace name takes precedence. You can set the
 business website and name in Project settings. Running `rer deploy` again preserves the existing owner and workspace.
 
-`rer signin --environment production` is rer's mail-free way back in: it writes one
-single-use sign-in grant for the recorded owner and prints the link once. **It does not
-work with HappyToHelp yet.** HappyToHelp's native sign-in has no owner sign-in table, so
-the command stops with exit 4 (`the deployment's database has no owner sign-in table`)
-and changes nothing. Until the seed adopts it, an owner who cannot receive mail, or
-whose email was wrong, recovers through `/setup` below.
+`rer signin --environment production` directs you to this deployment's `/login`
+page and exits 4 because HappyToHelp uses native accounts. It does not issue or
+print a sign-in link. On that page choose **Email me a sign-in link**, then open
+the message in the owner's mailbox. A password set in the native app also works.
+
+If sign-in mail fails after the owner was claimed, repair the sender using the
+same Cloudflare credentials and checkout that deployed it. Supply the correct
+private `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY` values in an owned
+0600 environment file, then run each needed update separately:
+
+```sh
+rer deploy --environment production --env-file private-mail.env --set-secret EMAIL_PROVIDER
+rer deploy --environment production --env-file private-mail.env --set-secret EMAIL_FROM
+rer deploy --environment production --env-file private-mail.env --set-secret EMAIL_API_KEY
+```
+
+Return to `/login` and request a new email link for the original owner. Changing
+`OWNER_EMAIL` after claiming does not rename the native account. If the claimed
+email was mistyped, an account owner with D1 edit access can first back up the
+installation, then correct that user's `users.email` in the deployment's recorded
+D1 database using Cloudflare's D1 console. Select the user by their existing email
+and verify their `memberships.role` is `owner` before changing exactly that row;
+preserve the user id, memberships and all other data. Then request a fresh link
+to the corrected mailbox. This is account-admin recovery, not a public setup bypass.
 
 The native `/setup` form with the private setup token is **recovery only**: use it
 if the deploy could not claim the owner (for example the claim step was interrupted

@@ -20,6 +20,7 @@ ownerClaim.post('/bootstrap', async c => {
  await requireSetupToken(c, body.token)
  const email = c.env.H2H_SETUP_OWNER_EMAIL || c.env.OWNER_EMAIL
  if (typeof email !== 'string' || !email.trim()) throw new HTTPException(503, {message: 'Configure the installation owner email'})
+ if (email.trim().toLowerCase() === 'owner@run-happytohelp.test') throw new HTTPException(503, {message: 'Configure a real OWNER_EMAIL that can receive hosted sign-in mail; the local trial owner has no mailbox'})
  // An absolute URL may be accepted only on this app's origin; malformed or external destinations go to Setup.
  let returnTo = '/setup'
  if (typeof body.returnTo === 'string') {

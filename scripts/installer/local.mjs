@@ -3,7 +3,7 @@ import {developmentTarget,previewTarget} from '@runeditrun/rer/operator-installe
 import {installOperator} from '@runeditrun/rer/operator-install';
 import {selectLocalState} from '@runeditrun/rer/local/state';
 import {commandAdapter as createCommandAdapter} from '@runeditrun/rer/adapter';
-import {ownerDeploy} from '@runeditrun/rer/deploy';
+import {hostedDeploy} from './hosted-deploy.mjs';
 import {localPortability} from '@runeditrun/rer/portability';
 import {localInputDefaults,localOwner,nativeOwner,prepareNativeLocal} from './native-local.mjs';
 import {archivePolicy} from './portability-policy.mjs';
@@ -38,7 +38,7 @@ const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async c
 const hostedLifecycle={...adapter,hooks:{...adapter.hooks,owner:{path:'/auth/bootstrap',tokenKey:'H2H_SETUP_TOKEN',returnTo:'/setup'}}};
 export const commandAdapter=createCommandAdapter(adapter,{
  generatedOutputs:['.generated','migrations/core','delivery-artifact','public/downloads','public/widget.js'],
- product:model.product.name,dev,preview,devIdentity:{entry:'src/dev/server.ts',output:['dist','delivery-artifact'],emailLinkTest:'tests/first-run/cli-sign-in.mjs'},verify:['pnpm',['run','verify:app']],deploy:ownerDeploy('deploy.json',hostedLifecycle),
+ product:model.product.name,dev,preview,signInPath:'/login',devIdentity:{entry:'src/dev/server.ts',output:['dist','delivery-artifact'],emailLinkTest:'tests/first-run/cli-sign-in.mjs'},verify:['pnpm',['run','verify:app']],deploy:hostedDeploy('deploy.json',hostedLifecycle),
  portability,
  setup:{manifestFile:'rer-setup.json'},browserModule:'scripts/installer/ui/seed.mjs',input:{names:{email:'OWNER_EMAIL',name:'OWNER_NAME'},defaults:localInputDefaults},
  localPrerequisites:async({vars})=>vars.H2H_LOCAL==='true'&&vars.EMAIL_PROVIDER==='development',

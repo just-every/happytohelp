@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import {mkdtemp,writeFile,rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
+import {spawnSync} from 'node:child_process'
 registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'.ts',c.parentURL);if(existsSync(u))return n(u.href,c)}return n(s,c)}})
 const {Hono}=await import('hono'),{getPlatformProxy}=await import('wrangler'),{setup}=await import('../src/modules/identity/setup.ts'),{ownerClaim}=await import('../src/modules/identity/owner-claim.ts')
 const directory=await mkdtemp(join(tmpdir(),'h2h-owner-setup-deployment-')),configPath=join(directory,'wrangler.json')
@@ -11,6 +12,11 @@ await writeFile(configPath,JSON.stringify({name:'owner-setup-deployment-test',co
 const proxy=await getPlatformProxy({configPath,persist:false,envFiles:[]})
 const tables=['owner_setup','users','projects','project_settings','memberships','credentials','sessions','ai_profiles']
 try {
+ // The public deploy command refuses the local trial owner before any build or provider work.
+ for(const flags of [[],['--dry-run']]){
+  const result=spawnSync(process.execPath,[new URL('../node_modules/@runeditrun/rer/bin/rer.mjs',import.meta.url).pathname,'deploy',...flags,'--non-interactive'],{cwd:new URL('..',import.meta.url),env:{...process.env,OWNER_EMAIL:'owner@run-happytohelp.test'},encoding:'utf8'})
+  assert.notEqual(result.status,0);assert.match(result.stdout+result.stderr,/real OWNER_EMAIL/);assert.doesNotMatch(result.stdout+result.stderr,/Building|Deploying the/)
+ }
  const env=proxy.env,db=env.DB,app=new Hono();app.route('/',setup);app.route('/auth',ownerClaim)
  for(const file of ['0001_identity.sql','0003_identity_credentials.sql'])for(const sql of readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8').split(';').filter(s=>s.trim()))await db.prepare(sql).run()
  await db.prepare(readFileSync(new URL('../migrations/0005_widget_identity.sql',import.meta.url),'utf8').split(';').find(sql=>sql.includes('ADD COLUMN metadata_json'))).run()
@@ -79,6 +85,10 @@ try {
  // The deploy claim takes its identity from this Worker's owner email, even when rer's caller sends its local default.
  await reset();env.H2H_SETUP_TOKEN='hosted-owner-token';env.OWNER_EMAIL='ada.lovelace+support@example.test'
  const hostedOrigin='https://happytohelp.owner.workers.dev';env.APP_ORIGIN=hostedOrigin
+ env.OWNER_EMAIL='owner@run-happytohelp.test'
+ const trapped=await app.request(hostedOrigin+'/auth/bootstrap',{method:'POST',headers:{'content-type':'application/json',origin:hostedOrigin},body:JSON.stringify({token:env.H2H_SETUP_TOKEN})},env)
+ assert.equal(trapped.status,503);assert.equal((await db.prepare('SELECT count(*) AS n FROM users').first()).n,0)
+ env.OWNER_EMAIL='ada.lovelace+support@example.test'
  const claim=await app.request(hostedOrigin+'/auth/bootstrap',{method:'POST',headers:{'content-type':'application/json',origin:hostedOrigin},body:JSON.stringify({token:env.H2H_SETUP_TOKEN,displayName:'Owner',returnTo:'/setup'})},env)
  assert.equal(claim.status,303);assert.equal(claim.headers.get('Location'),'/setup')
  assert.deepEqual(await db.prepare('SELECT email,name FROM users').first(),{email:env.OWNER_EMAIL,name:'Ada Lovelace'})

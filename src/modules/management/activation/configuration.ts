@@ -3,6 +3,7 @@ import {hashToken} from '../../../platform/auth'
 import {emailAddress} from '../../integrations/inbound-routing'
 import {emailMode,selectedEmailProvider} from '../../integrations/email-provider'
 import {localMailOrigin} from '../../../edition/local-mail/configuration'
+import {inboundNeedsCustomDomain} from './inbound-domain'
 // @ts-ignore The installed runtime uses this same provider registry.
 import {getProviderFromModel} from '../../ai-support/vendor/ensemble/model_providers/model_provider.js'
 import type {Environment,StepId} from './types'
@@ -38,7 +39,7 @@ export async function activationConfiguration(env:Env, projectId:string) {
  const mailIdentity=[providerName,sender,email?.from_name||'',env.EMAIL_FROM,env.EMAIL_ACCOUNT_ID,env.EMAIL_API_KEY]
  const values:Record<StepId,unknown>={
   owner_mail:[mailIdentity,owners.results],sender_dns:proposedSender&&!senderOverridden?[mailIdentity,proposedSender]:mailIdentity,
-  inbound_address:[email?.inbound_address,email?.is_enabled,email?.updated_at,env.INBOUND_EMAIL_TOKEN],
+  inbound_address:[email?.inbound_address,email?.is_enabled,email?.updated_at,env.INBOUND_EMAIL_TOKEN,inboundNeedsCustomDomain(email?.inbound_address)],
   model_key:[assistantId,model,assistant?.is_enabled,provider,key],spend_ceilings:env.AI_DAILY_CEILINGS||null,
   published_article:null,widget_origin:project?.allowed_origin,widget_seen:[project?.allowed_origin,env.PREVIEW_ORIGIN],
  }

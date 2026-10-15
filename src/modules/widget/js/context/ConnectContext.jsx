@@ -101,7 +101,9 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     const client = new WidgetTransport({apiOrigin: context.apiOrigin, widgetKey: context.widgetKey, onEvent: event => { if (active()) eventHandler.current(event); }, onError});
     transport.current = client;
     setMessages([]); setResolution(null); setContactAuth({}); setContact(context.contact || {}); setConversationId(null); setConnectionState('connecting');
-    client.connect({...localContact, ...context.contact}).catch(onError);
+    // Installation presence is independent of optional page/activity collection.
+    // Send one authenticated ping once the real visitor session is ready.
+    client.connect({...localContact, ...context.contact}).then(() => client.action('pingActive', {})).catch(onError);
     return () => { client.close(); Collector.setCollectorEnabled(false); Collector.setMessageHandler(null); };
   }, [context.apiOrigin, context.widgetKey, context.contact?.hash, context.contact?.identifier, fail]);
   const assertConnected = useCallback(() => transport.current ? transport.current.connect(localContact) : Promise.reject(new Error('Widget is initializing')), [localContact]);

@@ -37,7 +37,7 @@ try{
  await knowledgeViews({page,runtime,projectId,evidence,artifacts,checks});
  await demoAndAiViews({page,runtime,projectId,evidence,artifacts,checks});
  await spendViews({runtime,page,projectId,token,evidence,artifacts,checks});
- await widgetProbes({runtime,projectId,token,activation,checks});
+ await widgetProbes({runtime,page,projectId,token,activation,checks});
  await page.context().close();await runtime.close(true);runtime=null;
  fixture=await providerFixture({port:Number(process.env.H2H_PROVIDER_FIXTURE_PORT)||0});
  runtime=await createRuntime({providerFixtureOrigin:fixture.origin,vars:{OPENAI_API_KEY:'synthetic-activation-inert-model-key',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-activation-inert-mail-key',EMAIL_FROM:'support@activation.example.test',INBOUND_EMAIL_TOKEN:'synthetic-activation-inert-inbound-token'}});

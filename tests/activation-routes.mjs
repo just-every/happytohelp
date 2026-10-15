@@ -122,6 +122,12 @@ test('inbound completion needs a delivered receipt captured under current enable
  // Even a raced snapshot cannot reattribute an immutable old-address ingress intent.
  await DB.prepare("UPDATE activation_inbound_receipts SET address='new@example.test',settings_updated_at=101 WHERE inbound_id='inbound-1'").run()
  assert.equal((await check('inbound_address')).state,'pending')
+ // A generated workers.dev address cannot receive email, even with a gateway token installed.
+ await DB.prepare('UPDATE email_settings SET inbound_address=?,updated_at=102 WHERE project_id=?').bind(['support','in.workspace.account.workers.dev'].join('@'),primary.projectId).run()
+ const blocked=await check('inbound_address');assert.equal(blocked.state,'unavailable');assert.ok(!blocked.receiptRef)
+ assert.equal((await snapshot()).facts.inbound.customDomainRequired,true)
+ await DB.prepare('UPDATE email_settings SET inbound_address=?,updated_at=103 WHERE project_id=?').bind('support@in.example.test',primary.projectId).run()
+ assert.equal((await check('inbound_address')).state,'pending','a custom mailbox waits for a real inbound receipt')
 })
 test('widget instruction, wrong origin and owner preview do not count; only authenticated contact ping does',async()=>{
  await DB.prepare('INSERT INTO contacts(id,project_id,created_at) VALUES(?,?,?)').bind('contact',primary.projectId,Date.now()).run()
@@ -212,7 +218,7 @@ test('placement and the applicable count follow the installation, and facts carr
  assert.deepEqual(data.facts.ceilings,{...aiCeilings(base),resetUtc:'00:00',source:'defaults'})
  assert.deepEqual(data.facts.colour,{hex:DEFAULT_WORKSPACE_COLOUR,source:'default'})
  assert.deepEqual(data.facts.ai,{assistantId:null,provider:null,secretName:null,keyInstalled:true,checkable:false})
- assert.deepEqual(data.facts.inbound,{enabled:false,gateway:true});assert.equal(data.facts.starterAssistant,null)
+ assert.deepEqual(data.facts.inbound,{enabled:false,gateway:true,customDomainRequired:false});assert.equal(data.facts.starterAssistant,null)
  assert.equal((await api.get({env:{...base,OPENAI_API_KEY:undefined}})).facts.ai.keyInstalled,false)
  for(const response of [hosted,trial,other,data])assert.doesNotMatch(JSON.stringify(response),/fixture-|rotated-|fingerprint/)
 })

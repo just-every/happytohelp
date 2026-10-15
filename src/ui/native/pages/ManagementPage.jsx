@@ -24,7 +24,7 @@ function ResourcePage({projectId,section,recordId}) {
  const [items,setItems]=useState(null),[draft,setDraft]=useState(null),[error,setError]=useState(''),[saved,setSaved]=useState(false),[busy,setBusy]=useState(false),[invitation,setInvitation]=useState(null),[emailConfigured,setEmailConfigured]=useState(null),[notice,setNotice]=useState(null),[fieldErrors,setFieldErrors]=useState({});
  const load=async()=>{const response=await nativeRequest(path);setItems(response.data||response);if(section==='agents')setEmailConfigured(response.emailConfigured);};
  useEffect(()=>{
-  let active=true;setDraft(null);setInvitation(null);setNotice(null);setError('');setSaved(false);setFieldErrors({});
+  let active=true;setDraft(null);setInvitation(null);setNotice(null);setError('');setSaved(section==='macros'&&routeLocation.state?.savedReplyCreated===recordId);setFieldErrors({});
   load().catch(e=>setError(e.message));
   if(recordId==='create'){
    const query=new URLSearchParams(routeLocation.searchStr);
@@ -36,7 +36,7 @@ function ResourcePage({projectId,section,recordId}) {
   }
   return()=>{active=false};
  },[path,recordId,routeLocation.searchStr]);
- const change=(key,value)=>{markDirty();setDraft(d=>({...d,[key]:value}));setFieldErrors(({[key]:_,...rest})=>rest);};
+ const change=(key,value)=>{markDirty();setSaved(false);setDraft(d=>({...d,[key]:value}));setFieldErrors(({[key]:_,...rest})=>rest);};
  const save=async e=>{
   e.preventDefault();setError('');
   const problems=validateManagementDraft(section,draft);
@@ -46,7 +46,7 @@ function ResourcePage({projectId,section,recordId}) {
    const response=await nativeRequest(path+(draft.id?`/${draft.id}`:''),{method:draft.id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft)});
    markSaved();setSaved(true);
    if(section==='agents'&&!draft.id){setInvitation(response.data);await load();}
-   else if(response.data?.id){setDraft({...draft,...response.data});if(recordId==='create')await navigate({to:`${base}/${response.data.id}`,replace:true});}
+   else if(response.data?.id){setDraft({...draft,...response.data});if(recordId==='create')await navigate({to:`${base}/${response.data.id}`,replace:true,...(section==='macros'?{state:{savedReplyCreated:response.data.id}}:{})});}
    await load();
   }catch(e){setError(e.message)}finally{setBusy(false)}
  };

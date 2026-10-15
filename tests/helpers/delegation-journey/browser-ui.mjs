@@ -18,10 +18,15 @@ export function browserUI({page,context,origin,actor,api,width,evidence,captions
    }
   },
   async refresh(){
-   const [response]=await Promise.all([
-    page.waitForResponse(r=>new URL(r.url()).pathname===`/api/projects/${actor.projectId}/conversations/${conversationId}/delegations`&&r.request().method()==='GET'),
-    (async()=>{await page.reload();await openPanel()})(),
+   // Reload unmounts the polling Local panel and resets the selected tab to AI.
+   // Observe a request started by opening Local in the new document, so an old
+   // poll cannot supply a response whose body navigation has already discarded.
+   await page.reload();
+   const [request]=await Promise.all([
+    page.waitForRequest(r=>r.frame()===page.mainFrame()&&new URL(r.url()).pathname===`/api/projects/${actor.projectId}/conversations/${conversationId}/delegations`&&r.method()==='GET'),
+    openPanel(),
    ]);
+   const response=await request.response();assert.ok(response);
    assert.equal(response.status(),200);const jobs=(await response.json()).data;
    for(const job of jobs){
     const card=page.locator('.delegation-job').filter({has:page.locator(`[id="delegation-job-${job.id}"]`)});

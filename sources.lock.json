@@ -8084,7 +8084,7 @@
       "executable": false
     },
     "tests/helpers/delegation-journey/browser-ui.mjs": {
-      "sha256": "267060d745bd214b252b62665f2b9e9a014701414b19aa472015056a1df59f55",
+      "sha256": "df97a0ee4ebc88af1b32ddc204c554adb7020c661fc6ac11266b9d003d378a28",
       "executable": false
     },
     "tests/helpers/delegation-journey/browser.mjs": {

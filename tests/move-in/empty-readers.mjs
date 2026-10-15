@@ -57,5 +57,5 @@ test('empty-looking invalid structures and ZIP metadata retain structural errors
   ['intercom','unsupported.txt','\n ','unsupported_file_extension',''],
  ])await assert.rejects(()=>uploadIdentities('p',vendor,name,encode(body)),error=>{assert.equal(error.code,code);assert.equal(error.pointer,pointer);return true});
  for(const [options,code] of [[{prefix:'unclaimed'},'archive_unclaimed_bytes'],[{comment:'metadata'},'archive_unsupported_metadata'],[{suffix:'unclaimed'},'archive_footer']])await assert.rejects(()=>uploadIdentities('p','intercom','empty.zip',archive([],options)),error=>error.code===code);
- const opaque=encode('{"type":"list","unknown":[]}');assert.deepEqual(await uploadIdentities('p','intercom','opaque.json',opaque),{links:[],complete:false,uninterpreted:[]});assert.equal([...parseFile({name:'opaque.json',bytes:opaque},'intercom')][0].record.kind,'unsupported-field:unknown');
+ const opaque=encode('{"type":"list","unknown":[]}');assert.deepEqual(await uploadIdentities('p','intercom','opaque.json',opaque),{links:[],complete:false,uninterpreted:[],incomplete:{code:'unsupported_source_field',location:{artifact:'opaque.json',row:1,pointer:'/unknown'}}});assert.equal([...parseFile({name:'opaque.json',bytes:opaque},'intercom')][0].record.kind,'unsupported-field:unknown');
 });

@@ -8640,7 +8640,7 @@
       "executable": false
     },
     "tests/move-in/empty-readers.mjs": {
-      "sha256": "9e72983f95f58a50af676588ed39ed08ef73114de37683c1225143d8545119fb",
+      "sha256": "fb33ae9e836d3dc56d90575095dbed9f25e77b32fac3822a5e8f87afa0604f90",
       "executable": false
     },
     "tests/move-in/empty-upgrade.mjs": {

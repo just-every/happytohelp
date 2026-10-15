@@ -41,6 +41,10 @@
   "originVar": "APP_ORIGIN",
   "secrets": [
     {
+      "binding": "OWNER_EMAIL",
+      "environment": "OWNER_EMAIL"
+    },
+    {
       "binding": "H2H_SETUP_TOKEN",
       "environment": "H2H_SETUP_TOKEN"
     },

@@ -6,6 +6,7 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from './platform/env'
 import { projectCors } from './platform/cors'
+import { ownerClaim } from './modules/identity/owner-claim'
 import { routes as identity } from './modules/identity/routes'
 import { visitorProfileCredential } from './modules/identity/widget-profile'
 import { createConversationRoutes,projectSocketRoutes } from './modules/conversations/routes'
@@ -54,6 +55,7 @@ app.get('/health',async c=>{
 app.route('/api/delegation/v1',delegation)
 app.route('/api/delegation',nativeDelegation)
 app.route('/delegation',consent)
+app.route('/auth',ownerClaim)
 app.route('/api/identity',identity)
 // A default assistant answers new conversations only once its provider key is installed.
 app.route('/api/conversations',createConversationRoutes(applyMessageEffects,modelReady))

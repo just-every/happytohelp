@@ -33,9 +33,12 @@ export const adapter=localInstaller({
 export const install=(root,input,store,onApp,signal)=>installOperator(root,input,store,onApp,signal,adapter.hooks);
 const transfer=localPortability({database:'DB',buckets:{FILES:'FILES'},policy:archivePolicy,transient:['ConversationSocket connections (messages are in D1)','queue execution leases','development outbox','active sessions and one-use sign-in links','GitHub and integration credentials','local computer pairing, grants and job execution records']});
 const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async context=>{await context.store.run('Collecting local migrations',process.execPath,['scripts/migrations.mjs'],{cwd:context.root,signal:context.signal});return transfer[verb](context);} ]));
+// Local setup keeps the entered-password hook; hosted deploy has no installer input.
+// Give rer its standard claim contract so it observes 303/409 and retires the token.
+const hostedLifecycle={...adapter,hooks:{...adapter.hooks,owner:{path:'/auth/bootstrap',tokenKey:'H2H_SETUP_TOKEN',returnTo:'/setup'}}};
 export const commandAdapter=createCommandAdapter(adapter,{
  generatedOutputs:['.generated','migrations/core','delivery-artifact','public/downloads','public/widget.js'],
- product:model.product.name,dev,preview,verify:['pnpm',['run','verify:app']],deploy:ownerDeploy('deploy.json',adapter),
+ product:model.product.name,dev,preview,verify:['pnpm',['run','verify:app']],deploy:ownerDeploy('deploy.json',hostedLifecycle),
  portability,
  setup:{manifestFile:'rer-setup.json'},browserModule:'scripts/installer/ui/seed.mjs',input:{names:{email:'OWNER_EMAIL',name:'OWNER_NAME'},defaults:localInputDefaults},
  localPrerequisites:async({vars})=>vars.H2H_LOCAL==='true'&&vars.EMAIL_PROVIDER==='development',

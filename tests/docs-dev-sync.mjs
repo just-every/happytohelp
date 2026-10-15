@@ -36,11 +36,11 @@ test('the docs plugin follows edits to Markdown and docs/site.json in a running 
   };
   for (const [path, text] of Object.entries(files)) await writeFile(join(root, path), text);
   // No WebSocket server: the plugin's full-reload goes nowhere here, and no fixed HMR port is taken.
-  // Use Vite's real fs.watch transport on every host. m1's default FSEvents stream can omit events for a new
-  // fixture tree even after 'ready'; this suite checks docs synchronization once the filesystem reports the change.
+  // Poll through Vite's real watcher on every host: native filesystem streams can omit events for a new
+  // fixture tree even after 'ready'. A short interval keeps real edit/add/remove delivery inside the assertions' bound.
   const server = await createServer({
     root, configFile: false, logLevel: 'silent', appType: 'custom',
-    server: { middlewareMode: true, ws: false, watch: { useFsEvents: false, usePolling: false } },
+    server: { middlewareMode: true, ws: false, watch: { usePolling: true, interval: 100 } },
     plugins: [docsSite()],
   });
   // What each environment is sent: the browser's full reload when the docs change, an error if the plugin throws.

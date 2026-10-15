@@ -12,6 +12,8 @@ updating and backing up an installation, see
 
 ### Added
 
+- **Hosted native owner claim.** Rer can claim the configured installation owner once through `/auth/bootstrap`, then retire its private token. The claim uses the native account, password credential, workspace and session transaction; concurrent or repeated claims preserve the existing owner. Local password setup remains available.
+
 - **Help Scout Move in.** Review and import supported Inbox v2 and Docs v1 API response bodies as native history and knowledge. JSON, JSONL and ZIP groupings are packaging conventions, not Help Scout exports. Saved replies and attachment bytes are omitted; real-account compatibility remains unverified.
 - **Deliberate uncertain webhook resend.** Owners/admins can inspect the receiver and approve the original delivery ID/body again from Connections → Delivery log. Only 429 retries automatically within the existing four-attempt budget; 5xx, 408, timeouts and redirects remain uncertain. Each approval beyond the budget permits one audited attempt. A resend can duplicate an effect.
 - **Guided local-agent fixes.** Investigation, explicitly approved Resolve, separate observation and an operator-reviewed reply retain human Send. A Resolve report does not prove the customer system changed. The documented journey uses a scripted provider boundary and disposable target.
@@ -26,7 +28,7 @@ updating and backing up an installation, see
 
 - **First run and Setup.** The one-screen form derives optional names and colours. Setup separates Needs you from What we've set, observes applicable checks automatically with freshness bounds and permits durable owner/admin skips. A skip never counts as confirmation; rejected keys remain Needs you. Empty inboxes show one next action and a link to Setup.
 - **Workspace appearance and navigation.** A neutral light canvas, lighter fields and softer menus accompany the revised inbox and settings navigation. Dark-theme tokens remain.
-- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.7**. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. Sign in through the local outbox. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
+- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.13**. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. Sign in through the local outbox. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
 
 ### Updating from 0.4.1
 

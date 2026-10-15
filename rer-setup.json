@@ -62,7 +62,8 @@
       "label": "Your email",
       "kind": "email",
       "group": "owner",
-      "required": true
+      "required": true,
+      "prefill": "account-email"
     },
     {
       "name": "OWNER_PASSWORD",
@@ -354,6 +355,13 @@
     }
   ],
   "steps": [
+    {
+      "type": "owner-claim",
+      "mode": "signed",
+      "emailField": "OWNER_EMAIL",
+      "tokenField": "H2H_SETUP_TOKEN",
+      "path": "/auth/bootstrap"
+    },
     {
       "type": "extension",
       "id": "native-owner-password"

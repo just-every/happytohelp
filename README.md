@@ -42,8 +42,10 @@ Hono, D1, R2, Queues and Durable Objects.
 Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.7; local dev starts without private setup
-answers. Back up and apply `120_activation_observations.sql` then
+`@runeditrun/rer` package pinned to 0.2.13; local dev starts without private setup
+answers. Hosted deployment supports a one-time private token claim of the configured
+owner through the native account and workspace flow; existing owners are preserved.
+Back up and apply `120_activation_observations.sql` then
 `121_move_in_categories.sql` before the updated Worker starts. See
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md) and [the changelog](CHANGELOG.md).
 

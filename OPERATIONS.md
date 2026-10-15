@@ -109,11 +109,26 @@ permissions. That discovery is a convenience for choosing an account; it is
 not a prerequisite for an account-owned token or a reason to broaden its scope.
 
 The declaration names DB, FILES, CONVERSATIONS, JOBS, its dead-letter queue and
-scheduled recovery. Declared secret bindings include `H2H_SETUP_TOKEN` and
-`INTEGRATION_ENCRYPTION_KEY`, read from private environment variables. Preserve
-existing keys and owner data. Configure optional mail/model inputs through the
-supported runtime declaration and native workspace settings. Deployment never
-converts remote mail into development capture.
+scheduled recovery. Declared secret bindings include `OWNER_EMAIL`,
+`H2H_SETUP_TOKEN`, `INTEGRATION_ENCRYPTION_KEY`, `EMAIL_PROVIDER`, `EMAIL_FROM`
+and `EMAIL_API_KEY`. Before the first hosted deployment, supply the mail provider
+(`resend`, `sendgrid` or `cloudflare`), verified sender address and sending token
+in private environment variables or an owned 0600 `--env-file`. Provider and
+sender are stored as secret bindings too, so the deployment declaration contains
+no account-specific values. Rer supplies the owner email from local setup and
+generates missing setup/encryption secrets. Existing Worker secrets are retained;
+use `rer deploy --set-secret NAME` to change one deliberately.
+
+Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
+`{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
+declaration's `secrets` array and supply that account ID privately before deploying
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.13 requires
+every declared secret on a new Worker and has no conditional secret declaration.
+
+Preserve existing keys and owner data. Configure other optional mail/model inputs
+through the supported runtime declaration and native workspace settings. Local
+development keeps its outbox without a mail account, and deploy dry-run needs no
+mail credentials. Deployment never converts remote mail into development capture.
 
 ```sh
 rer deploy --dry-run

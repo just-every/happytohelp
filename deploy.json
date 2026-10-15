@@ -51,6 +51,18 @@
     {
       "binding": "INTEGRATION_ENCRYPTION_KEY",
       "environment": "INTEGRATION_ENCRYPTION_KEY"
+    },
+    {
+      "binding": "EMAIL_PROVIDER",
+      "environment": "EMAIL_PROVIDER"
+    },
+    {
+      "binding": "EMAIL_FROM",
+      "environment": "EMAIL_FROM"
+    },
+    {
+      "binding": "EMAIL_API_KEY",
+      "environment": "EMAIL_API_KEY"
     }
   ]
 }

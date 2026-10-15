@@ -1484,7 +1484,7 @@
       "executable": false
     },
     "deploy.json": {
-      "sha256": "96e6378a714e2f39be07d46af0ff1ecc85e37f9f6291985dee333230c96d280f",
+      "sha256": "5b0f4a06a6fe00cc9ad1202705f32a0832a9cd554fcb2358b3142f242852182a",
       "executable": false
     },
     "docs/ACCESSIBILITY-AUDIT-2026-09-30.md": {
@@ -2092,7 +2092,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "c9afe3508b5deb0d81089b39dc078308512cbd14adf9acfb9c11645c7b9a6840",
+      "sha256": "6447d2122f2c587c273d37da6515f9f929b587b3a3e7cd171179f5a551b95588",
       "executable": false
     },
     "package.json": {
@@ -2280,7 +2280,7 @@
       "executable": false
     },
     "scripts/deployment/environment.mjs": {
-      "sha256": "9b744d063818c25dea08963932bdee056ad20fc95625a44902ed0b47ee27608c",
+      "sha256": "c844b2c554899eb8036fba7823dd1a54ad66b9820142b0300c06eff05fd66184",
       "executable": false
     },
     "scripts/edition-authoring/base-copies.mjs": {

@@ -1,7 +1,10 @@
 # Install HappyToHelp
 
-You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
-and pnpm, installs dependencies and starts local setup:
+You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
+if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
+or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
+on macOS). The global `rer` command itself needs that Node. It then provisions the
+checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
 
 ```sh
 npm install -g @runeditrun/rer

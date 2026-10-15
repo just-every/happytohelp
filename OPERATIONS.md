@@ -2,8 +2,11 @@
 
 ## Run it on your computer
 
-You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
-and pnpm, installs dependencies and starts local setup:
+You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
+if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
+or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
+on macOS). The global `rer` command itself needs that Node. It then provisions the
+checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
 
 ```sh
 npm install -g @runeditrun/rer
@@ -16,7 +19,7 @@ owner password, then prints the development sign-in outbox link. No private
 answers, email service or AI account are needed. Open the link and sign in to
 your workspace. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout retains its exact **0.2.4** command package pin. The global rer
+The checkout retains its exact **0.2.19** command package pin. The global rer
 entry point uses that local package after provisioning its tools.
 For scripted setup, prepare [private answers](docs/INSTALLER.md#private-setup-answers),
 then run `rer setup --owner-email you@example.com --answers .seed/local-answers.json`.
@@ -115,14 +118,14 @@ and `EMAIL_API_KEY`. Before the first hosted deployment, supply the mail provide
 (`resend`, `sendgrid` or `cloudflare`), verified sender address and sending token
 in private environment variables or an owned 0600 `--env-file`. Provider and
 sender are stored as secret bindings too, so the deployment declaration contains
-no account-specific values. Rer supplies the owner email from local setup and
-generates missing setup/encryption secrets. Existing Worker secrets are retained;
+no account-specific values. Rer supplies the owner email (`OWNER_EMAIL`) from local setup, or from the environment
+when you set it, and generates missing setup/encryption secrets. Existing Worker secrets are retained;
 use `rer deploy --set-secret NAME` to change one deliberately.
 
 Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
 declaration's `secrets` array and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.13 requires
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.19 requires
 every declared secret on a new Worker and has no conditional secret declaration.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
@@ -150,9 +153,33 @@ never automatically replay ambiguous work or switch resource targets to hide it.
 
 ### Claim your new installation
 
-An empty hosted installation uses the native `/setup` form with its private
-first-owner capability. Keep it out of URLs, logs and recordings. Claim closes
-permanently and never bypasses tenant authority. See [First-run setup](docs/SETUP-WORKFLOW.md).
+There is nothing to claim by hand. After a healthy deploy, `rer deploy` claims the
+owner named by `OWNER_EMAIL` on the hosted app with the one-time `H2H_SETUP_TOKEN`
+and then removes the token. It prints the address and a line such as
+*Claimed the hosted owner (the OWNER_EMAIL already set on the Worker)*. Open that
+address and **sign in by email** as the owner: the sign-in message goes through your
+configured mail sender. Running `rer deploy` again keeps the owner and changes nothing.
+
+If mail is not delivering yet, or the owner email was wrong, run
+`rer signin --environment production` (add `--env-file` if the Cloudflare credentials
+are in a file). It writes one single-use sign-in grant for the recorded owner into the
+deployment's auth database using the credentials that deployed it, prints the link once
+to your terminal, and never saves it. The link expires within 15 minutes, works once,
+only for that owner, and is recorded in the owner's audit log. Keep it out of recordings.
+Signed in that way, the owner can correct the email in settings.
+
+The native `/setup` form with the private setup token is **recovery only**: use it
+if the deploy could not claim the owner (for example the claim step was interrupted
+before it removed the token). Keep the token out of URLs, logs and recordings. Claim
+closes permanently and never bypasses tenant authority. See
+[First-run setup](docs/SETUP-WORKFLOW.md).
+
+### Remove a deployment
+
+`rer deploy --environment NAME --remove --yes` deletes the Worker, D1 database, R2
+bucket and queues that this environment's deploy record says rer created, reads back
+that each is gone, and touches nothing else. Run it again and it finds nothing to do.
+Export what you need first: removal deletes the installation's data.
 
 ### What `/health` does and does not tell you
 
@@ -227,7 +254,7 @@ platform administrators (see [the integrations guide](src/modules/integrations/R
 
 | Feature | Variables and other configuration | Secrets |
 | --- | --- | --- |
-| Owner access and sign-up | `APP_ORIGIN` (deployment derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` for first-owner setup; optional `TURNSTILE_SECRET` |
+| Owner access and sign-up | `APP_ORIGIN` (deployment derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` (used once by `rer deploy` to claim the owner; `/setup` recovery only); optional `TURNSTILE_SECRET` |
 | AI replies, assist, profiles and monitoring (Ensemble) | The installer's `AI_PROVIDER` answer (`openai`, `anthropic`, `google`, `deepseek`, `xai`, `openrouter` or `later`, the default) chooses which key to store at setup; models are selected in workspace and AI configuration (the dashboard's **AI** page); `CONTEXT_MODEL` for widget-triggered context work. Every new workspace's starter assistant answers visitors by itself once any provider key is installed, within `AI_DAILY_CEILINGS`; with none, new conversations stay with the team | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`; the key is optional at setup and never stored with `later` |
 | Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`. Keyword search over content you supply needs none of these providers. |
 | Help center import from another provider (Intercom, Freshdesk or Zendesk) | Platform/subdomain and destination workspace chosen for each import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |

@@ -42,9 +42,9 @@ Hono, D1, R2, Queues and Durable Objects.
 Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.13; local dev starts without private setup
-answers. Hosted deployment supports a one-time private token claim of the configured
-owner through the native account and workspace flow; existing owners are preserved.
+`@runeditrun/rer` package pinned to 0.2.19; local dev starts without private setup
+answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you, who then
+sign in by email; existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
 `121_move_in_categories.sql` before the updated Worker starts. See
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md) and [the changelog](CHANGELOG.md).
@@ -71,8 +71,11 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 
 ## Run it on your computer
 
-You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
-and pnpm, installs dependencies and starts local setup:
+You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
+if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
+or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
+on macOS). The global `rer` command itself needs that Node. It then provisions the
+checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
 
 ```sh
 npm install -g @runeditrun/rer
@@ -109,7 +112,13 @@ rer deploy --environment production
 
 Dry run validates/builds locally and makes no provider request. Deployment
 provisions declared resources, applies migrations, publishes and checks health
-through Base deploy-kit. Hosted installation and real provider execution are not
+through Base deploy-kit. After a healthy deploy, `rer deploy` claims the owner named
+by `OWNER_EMAIL` (the setup owner, or the value you supply privately) with a one-time
+token it then removes. Open your Worker's address and sign in by email as that owner.
+If mail is not working yet, `rer signin --environment production` prints a single-use
+sign-in link for the owner, without mail. `rer deploy --environment NAME --remove --yes`
+deletes what that environment's deploy created (Worker, D1, R2, queues) and reads back
+that each is gone. Hosted installation and real provider execution are not
 qualified by this release.
 
 ## What you need and what it costs

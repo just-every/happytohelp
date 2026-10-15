@@ -11,10 +11,11 @@ HappyToHelp's own tenant/permission checks.
 
 Use this guide for the one-screen first run, the in-app **Setup** page and the native first-owner
 boundary. A rer local installation already has an owner. An existing installation
-never creates another owner through setup. A remotely deployed empty installation
-has a private first-owner setup capability; use its native `/setup` page over the
-configured HTTPS origin. Keep the capability private and enter it only in the
-owner form. It is not a sign-in shortcut and is closed permanently after claim.
+never creates another owner through setup. A remotely deployed installation is claimed by `rer deploy`
+for the owner named by `OWNER_EMAIL`, who then signs in by email (or with
+`rer signin`). Its private first-owner setup capability and native `/setup` page over
+the configured HTTPS origin are recovery only. Keep the capability private and enter it
+only in the owner form. It is not a sign-in shortcut and is closed permanently after claim.
 
 ## Create your owner account and workspace
 
@@ -28,9 +29,10 @@ bootstrap checks origin, validates inputs and claims the first owner atomically.
 Failed claims do not leave partial credentials or memberships. Concurrent claims
 cannot create two owners. Imported identity state also closes first-owner setup.
 
-On an empty hosted installation, enter the private setup token in the native
-form. Keep tokens and passwords out of shell arguments, URLs, recordings and
-logs. Sign in with the native password after claim.
+On a hosted installation `rer deploy` has already claimed the owner; sign in by
+email. Only to recover an unclaimed empty installation, enter the private setup token in
+the native form. Keep tokens and passwords out of shell arguments, URLs, recordings and
+logs. After a recovery claim sign in with the native password.
 
 Pressing **Create workspace** is your explicit action, and it may send you one
 welcome email at the address you gave. It goes through the same durable send path

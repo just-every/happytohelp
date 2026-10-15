@@ -1,14 +1,11 @@
 import assert from 'node:assert/strict'
-import {mkdtemp,mkdir,rm} from 'node:fs/promises'
-import {join,resolve} from 'node:path'
-import {fileURLToPath} from 'node:url'
+import {mkdtemp,rm} from 'node:fs/promises'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
 import {createRuntime} from './helpers/emitted-runtime.mjs'
 import {buildInboxFixture} from './helpers/inbox-conversation-fixture.mjs'
 
-const root=resolve(fileURLToPath(new URL('..',import.meta.url)))
-const tempParent=join(root,'.test-tmp')
-await mkdir(tempParent,{recursive:true})
-const tempRoot=await mkdtemp(join(tempParent,'inbox-default-'))
+const tempRoot=await mkdtemp(join(tmpdir(),'inbox-default-'))
 process.env.TMPDIR=tempRoot
 
 const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright')

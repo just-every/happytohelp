@@ -148,8 +148,11 @@ give consent again. Otherwise, normal sign-in sessions work as before.
 
 ### On your computer
 
-You need Node.js (with npm) and Git. Rer provisions the checkout's pinned Node
-and pnpm, installs dependencies and starts local setup:
+You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
+if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
+or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
+on macOS). The global `rer` command itself needs that Node. It then provisions the
+checkout's own pinned Node and pnpm, installs dependencies and starts local setup:
 
 ```sh
 npm install -g @runeditrun/rer
@@ -212,8 +215,9 @@ HappyToHelp to that service:
 - `management/` holds the integration profile the service adopts
   ([management/README.md](../management/README.md)).
 
-A hosted installation needs a fresh, private `H2H_SETUP_TOKEN`. The owner enters
-it at `/setup`. Creating the first owner closes setup permanently.
+A hosted installation needs a fresh, private `H2H_SETUP_TOKEN`. `rer deploy` uses it
+once to claim the owner named by `OWNER_EMAIL`, then removes it; entering it at
+`/setup` is recovery only. Creating the first owner closes setup permanently.
 
 ## Build the release package yourself
 

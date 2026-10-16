@@ -57,7 +57,7 @@ export async function pluginPrefill(page) {
   await nav.getByTestId('nav-settings').click();
   const menu=page.getByTestId('settings-menu'),more=menu.getByTestId('settings-menu-more');await menu.waitFor();
   if(await more.getAttribute('open')===null)await more.locator('summary').click();
-  await menu.getByRole('link',{name:'Integrations',exact:true}).click();
+  await menu.getByRole('link',{name:'Plugins',exact:true}).click();
   const requests=[],origin=new URL(page.url()).origin;
   const observe=request=>requests.push({method:request.method(),url:request.url()});
   page.on('request',observe);

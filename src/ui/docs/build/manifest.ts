@@ -2,7 +2,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 // docs/site.json is the one list of what the site publishes from the repository's Markdown, in display order, and of
-// what stays on GitHub. This module reads it and enforces its rules; tests/docs-site.mjs adds the coverage rule.
+// what stays on GitHub. This module reads it and enforces its rules; tests/journeys/public.mjs checks the coverage rule.
 
 export const manifestPath = 'docs/site.json';
 

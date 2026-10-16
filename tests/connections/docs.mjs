@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {spawn} from 'node:child_process';
+import {phases} from '../journeys/kit/scenarios.mjs';const test=phases(import.meta.url);import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {spawn} from 'node:child_process';
 import {harness,body} from './harness.mjs';
 test('every documented curl block executes against the local Worker with secret config on stdin and native effects',async()=>{
  const h=await harness();try{

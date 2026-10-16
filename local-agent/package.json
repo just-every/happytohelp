@@ -7,9 +7,6 @@
   "bin": {
     "h2h-local": "bin/h2h-local.mjs"
   },
-  "scripts": {
-    "test": "node --test test/*.test.mjs"
-  },
   "engines": {
     "node": ">=20"
   }

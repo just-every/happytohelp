@@ -1,0 +1,11 @@
+import {openaiStream,formatName} from '../openai-stream.mjs'
+
+/** Model provider protocol fixture for the emitted Worker: suggestion cards citing the customer's message. */
+export default async request=>{
+ if(new URL(request.url).hostname!=='api.openai.com')return new Response('Unexpected outbound request',{status:599})
+ const body=await request.json(),evidence=JSON.stringify(body).match(/message:[0-9a-f-]{36}/)?.[0]
+ const card=(button,response)=>({button,icon:'circle-question-mark',response,use_when:'',evidence_ids:evidence?[evidence]:[]})
+ if(formatName(body)==='agent_suggestion_alternatives')return openaiStream({alternatives:[card('Refund timing','Refunds arrive within five days.')],missing_information:[]})
+ if(formatName(body)==='agent_suggestion_primary')return openaiStream({user_goal:'Cancel an order',responses:[card('Cancel order','Open Orders and choose Cancel.')],missing_information:[]})
+ return openaiStream('Thanks for your message.')
+}

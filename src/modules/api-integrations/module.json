@@ -6,7 +6,9 @@
     "src/modules/api-integrations",
     "migrations/115_native_integrations.sql",
     "docs/api.md",
-    "tests/connections"
+    "tests/connections",
+    "tests/journeys/connections.mjs",
+    "tests/journeys/connections-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base",

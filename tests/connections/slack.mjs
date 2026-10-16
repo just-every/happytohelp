@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {randomBytes} from 'node:crypto';
+import {phases} from '../journeys/kit/scenarios.mjs';const test=phases(import.meta.url);import assert from 'node:assert/strict';import {randomBytes} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {harness,body} from './harness.mjs';
 const recorded=JSON.parse(readFileSync(new URL('./fixtures/slack-responses.json',import.meta.url),'utf8'));

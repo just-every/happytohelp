@@ -30,9 +30,9 @@ Human-voice checks and context fixtures remain in assist-human-voice.js; its liv
 entry uses the native executor. Blind review, image metadata observation and
 unmetered tool-summary detection retain the original independent classifications.
 
-Offline verification: `node --test tests/eval-harness/*.test.js` and
-`node --test tests/training/checks.test.mjs`. The original opt-in live human-voice
+Offline verification: the training case of
+`node --test tests/journeys/ai.mjs`. The original opt-in live human-voice
 test remains explicitly skipped without its provider opt-in. Local workerd/D1
 state transitions, recovery and seeding are tested separately by
-`node tests/local-computer-runtime.mjs`. No live-provider quality follows from
+`node tests/journeys/delegation-computers.mjs`. No live-provider quality follows from
 these fixture checks.

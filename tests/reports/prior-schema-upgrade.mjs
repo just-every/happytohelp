@@ -1,0 +1,193 @@
+import {validateStoredSearch} from '../helpers/search-index.mjs';
+import {localMailMigrations,localMailTables} from '../first-run/inventory.mjs';
+import {integrationMigrations,integrationTables} from '../connections/inventory.mjs';
+import {importEvolutionMigrations,importEvolutionTables,importRuntimeMigrations,importRuntimeTables} from '../helpers/base-import-evolution.mjs';
+import assert from 'node:assert/strict';
+import {mkdtemp, writeFile, rm, mkdir} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join, resolve} from 'node:path';
+import {readArtifact} from '../helpers/artifact-payloads.mjs';
+import {recoveryRuntime} from '../helpers/recovery/runtime.mjs';
+import {snapshot} from '../helpers/recovery/snapshot.mjs';
+import {m9Migrations} from '../helpers/recovery/m9-inventory.mjs';
+import {createHash} from 'node:crypto';
+import {seedCategoryUpgrade,assertCategoryUpgrade} from './upgrade-categories.mjs';
+
+// A packaged install populated before the outcome, integration, mail and import stages upgrades in place; every prior row and file is kept.
+export async function priorSchemaUpgrade(){
+const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
+const completeMigrations=artifact.deploymentSpec.migrations;
+assert.deepEqual(completeMigrations.filter(m=>importRuntimeMigrations.includes(m.name)).map(m=>m.name),importRuntimeMigrations);
+assert.deepEqual(completeMigrations.filter(m=>integrationMigrations.includes(m.name)).map(m=>m.name),integrationMigrations);
+// Apply the historical outcome stage before later additive migrations.
+const end=Math.max(...m9Migrations.map(name=>completeMigrations.findIndex(m=>m.name===name)));
+const migrations=completeMigrations.slice(0,end+1);
+const stagedNames=new Set([...migrations.map(m=>m.name),...integrationMigrations,...importEvolutionMigrations,...localMailMigrations,...importRuntimeMigrations]);
+const remaining=completeMigrations.filter(m=>!stagedNames.has(m.name));
+// Columns the additional stages add to existing tables; every other part of those tables' schema must stay as it was.
+const addedColumns=remaining.flatMap(m=>[...m.sql.matchAll(/ALTER TABLE (\w+) ADD COLUMN ([^;]+);/gi)].map(([,table,column])=>({table,column:column.trim()})));
+const original=migrations.filter(m=>!m9Migrations.includes(m.name));
+const directory=await mkdtemp(join(tmpdir(),'reports-upgrade-'));
+let runtime;
+try {
+  artifact.deploymentSpec.migrations=original;
+  runtime=await recoveryRuntime(artifact,{directory:join(directory,'runtime'),port:18370,inspectorPort:18371,variables:{}});
+  artifact.deploymentSpec.migrations=migrations;
+  let before,after;
+  await runtime.withStorage(async storage=>{
+    await storage.inspect({sql:"INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('upgrade-project','Upgrade','upgrade-widget','https://upgrade.example.test',1)"});
+    await storage.inspect({sql:"INSERT INTO contacts(id,project_id,created_at) VALUES('upgrade-contact','upgrade-project',1)"});
+    await storage.inspect({sql:"INSERT INTO conversations(id,project_id,contact_id,revision,created_at,updated_at,resolved_at) VALUES('upgrade-closed','upgrade-project','upgrade-contact',1,10,30,30),('upgrade-open','upgrade-project','upgrade-contact',1,10,20,NULL)"});
+    await storage.inspect({sql:"INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('upgrade-answer','upgrade-project','upgrade-closed','closed','historical-operator','operator','Preserve closed reply café',1,20),('upgrade-question','upgrade-project','upgrade-open','open','upgrade-contact','contact','Preserve open question 日本語',1,20)"});
+    before=await snapshot(storage);
+  });
+  for(const migration of migrations.filter(m=>m9Migrations.includes(m.name)))await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
+  await runtime.withStorage(async storage=>{
+    after=await snapshot(storage);
+    for(const [name,rows] of Object.entries(before.rows)) {
+      if(name==='d1_migrations')assert.deepEqual(after.rows[name].filter(row=>!m9Migrations.includes(JSON.parse(row).name)),rows);
+      else if(name==='sqlite_sequence') {
+        // SQLite's own ledger sequence grows by the four genuine applied migrations.
+        const previous=rows.map(JSON.parse),next=after.rows[name].map(JSON.parse);
+        assert.deepEqual(previous.find(row=>row.name==='d1_migrations'),{name:'d1_migrations',seq:original.length});
+        assert.deepEqual(next.find(row=>row.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length});
+        assert.deepEqual(next.filter(row=>row.name!=='d1_migrations'),previous.filter(row=>row.name!=='d1_migrations'));
+      } else assert.deepEqual(after.rows[name],rows,'every existing row retained: '+name);
+    }
+    for(const entry of before.schema) {
+      // A110 deliberately adds only the native import fence to these two
+      // pre-existing trigger bodies; every other prior definition is exact.
+      const fenceActor={context_message_added:'NEW',context_message_removed:'OLD'}[entry.name];
+      const expected=fenceActor ? {...entry,sql:entry.sql.replace(' BEGIN ',` WHEN NOT EXISTS(SELECT 1 FROM move_in_native_fences f WHERE f.project_id=${fenceActor}.project_id AND f.conversation_id=${fenceActor}.conversation_id) BEGIN `)} : entry;
+      assert.deepEqual(after.schema.find(candidate=>candidate.name===entry.name),expected,'prior schema with exact A110 fence only: '+entry.name);
+    }
+    const ledger=after.rows.d1_migrations.map(JSON.parse).sort((a,b)=>a.id-b.id);
+    assert.deepEqual(ledger.slice(original.length).map(row=>row.name),m9Migrations);
+    assert.deepEqual(ledger.map(row=>row.name),[...original.map(m=>m.name).sort((a,b)=>parseInt(a,10)-parseInt(b,10)),...m9Migrations]);
+    assert.equal((await storage.inspect({sql:"SELECT outcome FROM conversation_resolutions WHERE conversation_id='upgrade-closed'"})).results[0].outcome,'unknown');
+    assert.equal((await storage.inspect({sql:"SELECT first_resolved_at FROM conversation_tracking WHERE conversation_id='upgrade-closed'"})).results[0].first_resolved_at,null);
+  });
+  for(const migration of completeMigrations.filter(m=>integrationMigrations.includes(m.name)))await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
+  await runtime.withStorage(async storage=>{
+    const integrated=await snapshot(storage);
+    for(const [name,rows] of Object.entries(after.rows)){
+      if(name==='d1_migrations')assert.deepEqual(integrated.rows[name].filter(row=>!integrationMigrations.includes(JSON.parse(row).name)),rows);
+      else if(name==='sqlite_sequence'){
+        const previous=rows.map(JSON.parse),next=integrated.rows[name].map(JSON.parse);
+        assert.deepEqual(previous.find(row=>row.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length});
+        assert.deepEqual(next.find(row=>row.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length+integrationMigrations.length});
+        assert.deepEqual(next.filter(row=>row.name!=='d1_migrations'),previous.filter(row=>row.name!=='d1_migrations'));
+      }else assert.deepEqual(integrated.rows[name],rows,'C preserves all B rows: '+name);
+    }
+    for(const entry of after.schema)assert.deepEqual(integrated.schema.find(candidate=>candidate.name===entry.name),entry,'C preserves every B schema definition: '+entry.name);
+    for(const table of integrationTables.filter(name=>name!=='integration_authority_epoch'))assert.equal(integrated.rows[table].length,0,'upgrade emits no historical integration events: '+table);
+    assert.deepEqual(integrated.rows.integration_authority_epoch.map(JSON.parse),[{id:1,revision:0}]);
+  });
+  // Base 7e31 is a separate additive stage after the unchanged C ledger proof.
+  let priorEvolution;
+  await runtime.withStorage(async storage=>{
+    await storage.inspect({sql:"INSERT INTO ik_jobs(id,destination,namespace,mapping_version,principal_id,fingerprint,operation_key,plan_json,state,total) VALUES('prior-kit-job','upgrade-project','intercom','prior-map','prior-owner','prior-fingerprint','prior-operation','{\"retained\":\"original prior plan\"}','completed',0)"});
+    await storage.inspect({sql:"INSERT INTO ik_original_sets VALUES('prior-kit-job',1)"});
+    await storage.inspect({sql:"INSERT INTO ik_originals VALUES('prior-kit-job','artifact','prior-original','original.txt','prior-hash',3,X'0001FF')"});
+    priorEvolution=await snapshot(storage);
+  });
+  for(const migration of completeMigrations.filter(m=>importEvolutionMigrations.includes(m.name)))await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
+  await runtime.withStorage(async storage=>{
+    const latest=await snapshot(storage);assert.deepEqual(Object.keys(latest.rows).sort(),[...Object.keys(priorEvolution.rows),...importEvolutionTables].sort());
+    const defaults={reversal_policy:'strict',reversal_policy_hash:null,reversal_cursor:0,reversal_hash:createHash('sha256').update(JSON.stringify([])).digest('hex')};
+    for(const [name,rows] of Object.entries(priorEvolution.rows)){
+      if(name==='d1_migrations')assert.deepEqual(latest.rows[name].filter(row=>!importEvolutionMigrations.includes(JSON.parse(row).name)),rows);
+      else if(name==='sqlite_sequence'){const old=rows.map(JSON.parse),next=latest.rows[name].map(JSON.parse);assert.deepEqual(old.find(r=>r.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length+integrationMigrations.length});assert.deepEqual(next.find(r=>r.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length+integrationMigrations.length+importEvolutionMigrations.length});assert.deepEqual(next.filter(r=>r.name!=='d1_migrations'),old.filter(r=>r.name!=='d1_migrations'));}
+      else if(name==='ik_jobs')assert.deepEqual(latest.rows[name].map(JSON.parse),rows.map(row=>({...JSON.parse(row),...defaults})));
+      else assert.deepEqual(latest.rows[name],rows,'Base evolution preserves original custody and native rows: '+name);
+    }
+    for(const name of importEvolutionTables)assert.deepEqual(latest.rows[name],[]);
+    for(const entry of priorEvolution.schema){if(entry.name==='ik_jobs')continue;assert.deepEqual(latest.schema.find(row=>row.name===entry.name),entry,'Base evolution preserves every other schema definition: '+entry.name)}
+  });
+  let beforeLocalMail;
+  await runtime.withStorage(async storage=>{beforeLocalMail=await snapshot(storage)});
+  for(const migration of completeMigrations.filter(m=>localMailMigrations.includes(m.name)))await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
+  await runtime.withStorage(async storage=>{
+    const current=await snapshot(storage);assert.deepEqual(Object.keys(current.rows).sort(),[...Object.keys(beforeLocalMail.rows),...localMailTables].sort());
+    for(const [name,rows] of Object.entries(beforeLocalMail.rows)){
+      if(name==='d1_migrations')assert.deepEqual(current.rows[name].filter(row=>!localMailMigrations.includes(JSON.parse(row).name)),rows);
+      else if(name==='sqlite_sequence'){const old=rows.map(JSON.parse),next=current.rows[name].map(JSON.parse);assert.deepEqual(old.find(r=>r.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length+integrationMigrations.length+importEvolutionMigrations.length});assert.deepEqual(next.find(r=>r.name==='d1_migrations'),{name:'d1_migrations',seq:migrations.length+integrationMigrations.length+importEvolutionMigrations.length+localMailMigrations.length});assert.deepEqual(next.filter(r=>r.name!=='d1_migrations'),old.filter(r=>r.name!=='d1_migrations'));}
+      else assert.deepEqual(current.rows[name],rows,'local mail preserves all prior rows: '+name);
+    }
+    for(const entry of beforeLocalMail.schema)assert.deepEqual(current.schema.find(row=>row.name===entry.name),entry,'local mail preserves prior schema: '+entry.name);
+    assert.deepEqual(current.rows.rer_mail_development_outbox,[]);
+  });
+  let beforeRuntime;
+  await runtime.withStorage(async storage=>{beforeRuntime=await snapshot(storage)});
+  for(const migration of completeMigrations.filter(m=>importRuntimeMigrations.includes(m.name)))await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
+  await runtime.withStorage(async storage=>{
+    const current=await snapshot(storage);
+    assert.deepEqual(Object.keys(current.rows).sort(),[...Object.keys(beforeRuntime.rows),...importRuntimeTables].sort());
+    for(const [name,rows] of Object.entries(beforeRuntime.rows)){
+      if(name==='d1_migrations')assert.deepEqual(current.rows[name].filter(row=>!importRuntimeMigrations.includes(JSON.parse(row).name)),rows);
+      else if(name==='sqlite_sequence')assert.deepEqual(current.rows[name].map(JSON.parse).filter(row=>row.name!=='d1_migrations'),rows.map(JSON.parse).filter(row=>row.name!=='d1_migrations'));
+      else assert.deepEqual(current.rows[name],rows,'runtime closure preserves prior rows and original bytes: '+name);
+    }
+    for(const entry of beforeRuntime.schema)assert.deepEqual(current.schema.find(row=>row.name===entry.name),entry,'runtime closure preserves prior schema: '+entry.name);
+    assert.deepEqual(current.rows.d1_migrations.map(JSON.parse).slice(-importRuntimeMigrations.length).map(row=>row.name),importRuntimeMigrations);
+  });
+  // Later stages retain all prior data, including article publication state.
+  let beforeAdditional,final;
+  await runtime.withStorage(async storage=>{await seedCategoryUpgrade(storage);beforeAdditional=await snapshot(storage)});
+  for(const migration of remaining)await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
+  await runtime.withStorage(async storage=>{
+    final=await snapshot(storage);
+    for(const [name,rows]of Object.entries(beforeAdditional.rows)){
+      if(name==='d1_migrations')assert.deepEqual(final.rows[name].filter(row=>!remaining.some(m=>m.name===JSON.parse(row).name)),rows);
+      else if(name==='sqlite_sequence')assert.deepEqual(final.rows[name].map(JSON.parse).filter(row=>row.name!=='d1_migrations'),rows.map(JSON.parse).filter(row=>row.name!=='d1_migrations'));
+      else {
+        // M122 retains every original field and initializes only content_raw.
+        // Re-encode the full expected row using snapshot's canonical key order;
+        // the actual snapshot remains byte-exact and includes unknown columns.
+        const expected=name==='messages'?rows.map(serialized=>{
+          const row={...JSON.parse(serialized),content_raw:null};
+          return JSON.stringify(Object.fromEntries(Object.keys(row).sort().map(key=>[key,row[key]])));
+        }).sort():rows;
+        assert.deepEqual(final.rows[name],expected,'additional stages preserve every prior row: '+name);
+      }
+    }
+    for(const entry of beforeAdditional.schema){
+      const current=final.schema.find(candidate=>candidate.name===entry.name),added=addedColumns.filter(a=>a.table===entry.name);
+      // Category creation no longer invalidates articles. Deletion now scopes
+      // invalidation to linked ancestry; its behavior is exercised below on D1.
+      if(entry.name==='edition_category_insert'){
+        assert.equal(current,undefined,'category creation has no blanket invalidation trigger');
+        continue;
+      }
+      if(entry.name==='edition_category_delete'){
+        assert.ok(current,'category deletion retains its invalidation trigger');
+        assert.deepEqual({...current,sql:entry.sql},entry,'category deletion retains its schema identity');
+        continue;
+      }
+      for(const {column} of added)assert.ok(current.sql.includes(', '+column),'additional stage adds '+column+' to '+entry.name);
+      assert.deepEqual({...current,sql:added.reduce((sql,{column})=>sql.replace(', '+column,''),current.sql)},entry,'additional stages preserve prior schema: '+entry.name);
+    }
+    assert.deepEqual(final.rows.d1_migrations.map(JSON.parse).map(row=>row.name).sort(),completeMigrations.map(m=>m.name).sort(),'the actual final migration ledger is complete');
+    const search=await validateStoredSearch(storage.inspect),derived=new Set(search?[search.table,...search.shadows]:[]);
+    if(search){
+      const canonical=row=>JSON.stringify(Object.fromEntries(Object.entries(row).sort(([a],[b])=>a.localeCompare(b))));
+      const expected=final.rows.messages.map(value=>{const {content,conversation_id,project_id}=JSON.parse(value);return canonical({content,conversation_id,project_id})}).sort();
+      assert.deepEqual(final.rows[search.table],expected,'the new search projection contains exactly the retained messages');
+    }
+    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)&&!derived.has(name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
+  });
+  await assertCategoryUpgrade(runtime.directory);
+  artifact.deploymentSpec.migrations=completeMigrations;
+  await runtime.start();const health=await fetch(runtime.origin+'/health');assert.equal(health.status,200);await runtime.close();
+  const receipt={oldTables:Object.keys(before.rows).length,newTables:Object.keys(after.rows).length,oldMigrations:original.length,newMigrations:migrations.length,finalTables:Object.keys(final.rows).length,finalMigrations:final.rows.d1_migrations.length,added:completeMigrations.filter(m=>!original.some(old=>old.name===m.name)).map(m=>m.name),checks:['real native Wrangler prior ledger and append-only apply','every original row retained','SQLite ledger sequence growth only','prior schema exact except two specified A110 trigger fences','historical unknown outcome','unknown first resolution retained','Base strict defaults and exact prior original bytes retained','additional stages retain every row and prior schema except added columns and category insert/delete trigger evolution','upgraded category create/delete preserves unrelated article state','upgraded linked and ancestor deletion invalidates primary and additional category article revisions','actual emitted Worker health after upgrade']};
+  if(process.env.H2H_EVIDENCE_DIR){await mkdir(resolve(process.env.H2H_EVIDENCE_DIR),{recursive:true});await writeFile(join(resolve(process.env.H2H_EVIDENCE_DIR),'upgrade.json'),JSON.stringify(receipt,null,2)+'\n')}
+  console.log(JSON.stringify(receipt));
+}finally{artifact.deploymentSpec.migrations=completeMigrations;if(runtime)await runtime.close();await rm(directory,{recursive:true,force:true});}
+
+}

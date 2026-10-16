@@ -83,7 +83,7 @@ Contacts and Settings disclosures that list one link per project.
 
 Settings is a single row to the project's page; the twelve destinations it holds
 (Project, Agents, Email, Widget, Saved Replies, API tokens, Webhooks, Slack,
-Delivery log, Integrations, GitHub, Connected applications) share their own
+Delivery log, Plugins, GitHub, Connected applications) share their own
 Settings menu in the page, defined in `src/ui/native/settings-destinations.js`
 and rendered by `SettingsMenu.jsx` from `WorkspacePages.jsx`. A wide screen shows
 a short column beside the page with five destinations and a disclosure for the
@@ -167,18 +167,18 @@ pnpm run build
 pnpm run test:navigation-browser
 ```
 
-`tests/computers-delegation-browser.mjs` (`pnpm run test:computers-delegation-browser`) covers the
+`tests/journeys/delegation-browser.mjs` (`pnpm run test:computers-delegation-browser`) covers the
 Local computers dialog and authorization outcomes and the delegation pages above in the emitted
 Worker and a real browser.
 
-`tests/navigation-browser.mjs` starts an isolated local D1/R2/Durable Object
+`tests/journeys/inbox-browser.mjs` starts an isolated local D1/R2/Durable Object
 runtime from the emitted Worker (`dist/server/wrangler.json` and its emitted
 server bundle), seeds real tenants through the Worker APIs, and drives the
 actual browser UI. It exercises delayed loader reads, shell/document identity,
 header portals, search and Back/Forward, project isolation and theme changes,
 dirty conversation and settings edits, widget mount/unmount, mobile navigation,
 direct refresh/not-found recovery, sign-out and expired-session recovery.
-`tests/workspace-shell-browser.mjs` (`pnpm run test:workspace-shell-browser`)
+`tests/journeys/inbox-browser.mjs` (`pnpm run test:workspace-shell-browser`)
 covers the workspace scoping above: deep links and Projects-list navigation
 activating the URL's project, unavailable projects, `/local-agent/authorize`,
 Global Inbox settings labels, sidebar active/visible state, account-menu

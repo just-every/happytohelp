@@ -1,0 +1,57 @@
+import assert from 'node:assert/strict'
+import {startApp,sha} from '../../journeys/kit/app.mjs'
+
+// Conversation sockets on the real application: scoped REST and socket admission by token, origin and membership,
+// durable replay without operator-only data, the operator project stream, private notes live only to operators,
+// first-read receipts live to teammates, and a revoked session closing its socket.
+export async function socketJourney(){
+ const app=await startApp({origin:'https://app.example'})
+ const socketTo=async(path,headers)=>{const response=await app.request(path,{headers:{Upgrade:'websocket',...headers}});if(response.status!==101)return {status:response.status};const socket=response.webSocket;socket.accept();const frames=[],waiters=[];socket.addEventListener('message',event=>{const frame=JSON.parse(event.data);frames.push(frame);for(const waiter of waiters.splice(0))waiter()});return {status:101,socket,frames,next:(accept=()=>true,timeout=3000)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('socket timeout')),timeout);const check=()=>{const found=frames.find(accept);if(found){frames.splice(frames.indexOf(found),1);clearTimeout(timer);resolve(found)}else waiters.push(check)};check()})}}
+ try{
+  const workspace=await app.seedWorkspace('socket',{allowedOrigin:'https://widget.example'}),p=workspace.projectId,owner=workspace.tokens.owner,teammate=workspace.tokens.operator
+  const session=async()=>(await app.call('/api/identity/widget/session',{body:{widgetKey:workspace.widgetKey},headers:{Origin:'https://widget.example'},status:201})).data
+  const contact=await session(),other=await session()
+  const conversation=(await app.call('/api/conversations',{token:contact.token,body:{projectId:p},status:201})).data
+  const first=(await app.call(`/api/conversations/${conversation.id}/messages`,{token:contact.token,body:{localId:'one',content:'Persistent message',expectedRevision:0},status:200})).data
+  await app.db.prepare("UPDATE messages SET content_raw='Private original email body' WHERE id=?").bind(first.message.id).run()
+  assert.equal((await app.call(`/api/conversations/${conversation.id}/messages`,{token:other.token})).status,404,'another visitor cannot read the conversation')
+  const path=`/api/conversations/${conversation.id}/socket`
+  assert.equal((await socketTo(`${path}?token=${contact.token}`,{Origin:'https://foreign.example'})).status,403,'a foreign origin cannot open the socket')
+  const visitor=await socketTo(`${path}?token=${contact.token}`,{Origin:'https://widget.example'});assert.equal(visitor.status,101)
+  const replay=await visitor.next();assert.equal(replay.type,'message');assert.equal(replay.message.content,'Persistent message');assert.equal('content_raw' in replay.message,false,'the original email body is operator-only')
+  // The operator project stream announces conversation activity; a visitor token cannot open it.
+  const project=await socketTo(`/api/projects/${p}/socket`,{Cookie:`h2h_session=${owner}`,Origin:'https://app.example'});assert.equal(project.status,101)
+  const projectFrame=await project.next();assert.equal(projectFrame.type,'conversation');assert.equal(projectFrame.conversationId,conversation.id);project.socket.close()
+  assert.equal((await socketTo(`/api/projects/${p}/socket?token=${contact.token}`,{Origin:'https://app.example'})).status,403)
+  const cookie=await socketTo(`${path}?after=${replay.eventId}`,{Cookie:`h2h_session=${owner}`,Origin:'https://app.example'});assert.equal(cookie.status,101);cookie.socket.close()
+  // A private note reaches the teammate's socket at once, never the visitor's; its content stays behind the bucket route.
+  const observer=await socketTo(`${path}?after=${replay.eventId}`,{Authorization:`Bearer ${teammate}`,Origin:'https://app.example'});assert.equal(observer.status,101)
+  const privateContent='Customer is waiting for the ChargeDesk webhook trace; Morgan will follow up.'
+  assert.equal((await app.call(`/api/dashboard/projects/${p}/conversations/${conversation.id}/notes`,{token:owner,body:{content:privateContent}})).status,201)
+  assert.equal((await observer.next(frame=>frame.type==='activity')).kind,'note')
+  const retained=(await app.call(`/api/dashboard/projects/${p}/conversations/${conversation.id}/buckets`,{token:teammate,status:200})).data
+  assert.ok(retained.data.flatMap(bucket=>bucket.events).some(event=>event.content===privateContent))
+  const reply=(await app.call(`/api/conversations/${conversation.id}/messages`,{token:owner,body:{localId:'support-reply',content:'The webhook trace is ready for you.',expectedRevision:1},status:200})).data
+  const seen=[];const visitorNext=await visitor.next(frame=>{seen.push(frame);return frame.type==='message'});assert.equal(visitorNext.message.id,reply.message.id)
+  assert.ok(![...seen,...visitor.frames].some(frame=>frame.type==='activity'||JSON.stringify(frame).includes('ChargeDesk')),'private note activity never reaches the visitor')
+  // The visitor's first read reaches the teammate live with the server's timestamp; a second read keeps it.
+  const before=Date.now();assert.equal((await app.call(`/api/conversations/${conversation.id}/widget-events`,{token:contact.token,body:{action:'markAsRead',data:{ids:[reply.message.id]}}})).status,200)
+  const readRow=()=>app.first("SELECT created_at read_at FROM context_tracked_events WHERE type='MESSAGE_READ' AND json_extract(payload,'$.message_id')=? AND json_extract(payload,'$.reader_id')=?",reply.message.id,contact.contactId)
+  const read=await readRow();assert.ok(read.read_at>=before&&read.read_at<=Date.now())
+  assert.deepEqual((await observer.next(frame=>frame.type==='activity'&&frame.kind==='read')).reads,[{messageId:reply.message.id,readerId:contact.contactId,readerRole:'contact',readAt:new Date(read.read_at).toISOString()}])
+  observer.socket.close()
+  await app.call(`/api/conversations/${conversation.id}/widget-events`,{token:contact.token,body:{action:'markAsRead',data:{ids:[reply.message.id]}}});assert.equal((await readRow()).read_at,read.read_at)
+  const projection=(await app.call(`/api/dashboard/projects/${p}/conversations/${conversation.id}/buckets`,{token:teammate,status:200})).data
+  assert.equal(projection.data.flatMap(bucket=>bucket.messages).find(row=>row.id===reply.message.id).read_by_contacts[contact.contactId],new Date(read.read_at).toISOString())
+  // An operator's read acknowledgement carries the committed timestamp; their reply wrote attributed handoff history.
+  const ack=(await app.call(`/api/dashboard/projects/${p}/conversations/${conversation.id}/actions`,{token:owner,body:{action:'markAsRead',ids:[first.message.id]},status:200})).data
+  assert.equal(ack.receipts.length,1);assert.equal(ack.receipts[0].messageId,first.message.id);assert.equal(ack.receipts[0].readerId,workspace.users.owner);assert.equal(ack.receipts[0].readerRole,'operator');assert.ok(Number.isFinite(ack.counts.unread))
+  const acknowledged=(await app.call(`/api/dashboard/projects/${p}/conversations/${conversation.id}/buckets`,{token:owner,status:200})).data
+  assert.equal(acknowledged.data.flatMap(bucket=>bucket.messages).find(row=>row.id===first.message.id).read_by_agents[workspace.users.owner],ack.receipts[0].readAt)
+  assert.ok(projection.data.flatMap(bucket=>bucket.events).some(event=>event.type==='AGENT_ASSIGNED'&&event.payload.name==='owner socket'),'operator takeover writes attributed handoff history')
+  // A revoked visitor session closes its socket and cannot open another.
+  await app.db.prepare('UPDATE sessions SET revoked_at=? WHERE token_hash=?').bind(Date.now(),sha(contact.token)).run()
+  const closed=new Promise(resolve=>visitor.socket.addEventListener('close',resolve,{once:true}));visitor.socket.send(JSON.stringify({type:'ping'}));await closed
+  assert.equal((await socketTo(`${path}?token=${contact.token}`,{Origin:'https://widget.example'})).status,401)
+ }finally{await app.close()}
+}

@@ -14,9 +14,11 @@ export function unmarkedFailure() {
 }
 
 export async function checkUnmarkedFailures({ request, api, db, jobsPath, device, token }) {
+  const created = [];
   for (const status of ['failed', 'cancelled']) {
     const queued = await request(jobsPath, { device_id: device, mode: 'resolve_reply', instructions: 'Retain partial work; no customer effects', request_id: 'unmarked-' + status });
     assert.equal(queued.status, 200);
+    created.push(queued.data.id);
     const claim = await api.claim({ claim_id: 'unmarked-' + status });
     const endpoint = '/api/local-agents/jobs/' + queued.data.id + '/result';
     const body = { run_id: claim.run_id, event_id: 'unmarked-' + status, status, result: unmarkedFailure() };
@@ -64,11 +66,14 @@ export async function checkUnmarkedFailures({ request, api, db, jobsPath, device
   }
   // A server-side cancellation also projects a racing completed report safely.
   const queued = await request(jobsPath, { device_id: device, mode: 'resolve_reply', instructions: 'Cancellation race', request_id: 'cancel-race' });
+  created.push(queued.data.id);
   const claim = await api.claim({ claim_id: 'cancel-race' });
   await db.prepare('UPDATE local_jobs SET cancel_requested=1 WHERE id=?').bind(queued.data.id).run();
   const admitted = await request('/api/local-agents/jobs/' + queued.data.id + '/result', { run_id: claim.run_id, event_id: 'cancel-race', status: 'completed', result: unmarkedFailure() }, token);
   assert.equal(admitted.status, 200);
   assert.equal(admitted.data.status, 'cancelled');
   assert.doesNotMatch(JSON.stringify(admitted), /PRIVATE_/);
-  for (const table of ['messages', 'local_receipts', 'local_result_effects']) assert.equal((await db.prepare('SELECT COUNT(*) n FROM ' + table).first()).n, 0, table + ' stays empty after unmarked failure/replay');
+  // Customer messages may exist; no reply, receipt or effect may come from these reports.
+  assert.equal((await db.prepare("SELECT COUNT(*) n FROM messages WHERE actor_role!='contact'").first()).n, 0, 'no reply after unmarked failure/replay');
+  for (const table of ['local_receipts', 'local_result_effects']) for (const id of created) assert.equal((await db.prepare('SELECT COUNT(*) n FROM ' + table + ' WHERE job_id=?').bind(id).first()).n, 0, table + ' holds nothing for an unmarked failure/replay');
 }

@@ -1,4 +1,5 @@
-import test from 'node:test';
+import {phases} from '../journeys/kit/scenarios.mjs';
+const test=phases(import.meta.url);
 import assert from 'node:assert/strict';
 import {nativeHarness} from './harness.mjs';
 import {assertUnchangedTable} from './equality.mjs';

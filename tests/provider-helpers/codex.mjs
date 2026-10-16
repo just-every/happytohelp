@@ -12,6 +12,7 @@ if (scenario.chatgptLogin) {
   if (auth.auth_mode !== 'chatgpt' || auth.tokens?.access_token !== 'test-only-chatgpt-token') throw new Error('Expected isolated ChatGPT fixture login');
   await appendFile(process.env.H2H_PROVIDER_SCENARIO + '.auth-check', process.argv.slice(2).join(' ') + '\n');
 }
+if (process.argv[2] === 'login' && scenario.loggedOut) { console.error('Not logged in'); process.exit(1); }
 if (process.argv[2] === 'login') { console.log(scenario.chatgptLogin ? 'Logged in using ChatGPT' : 'Logged in using an API key (test fixture)'); process.exit(0); }
 const send = value => process.stdout.write(JSON.stringify(value) + '\n');
 for await (const line of createInterface({ input: process.stdin })) {
@@ -29,6 +30,7 @@ for await (const line of createInterface({ input: process.stdin })) {
   else if (request.method === 'turn/start') {
     await writeFile(process.env.H2H_PROVIDER_SCENARIO + '.request', JSON.stringify(request));
     await appendFile(process.env.H2H_PROVIDER_SCENARIO + '.calls', 'turn/start\n');
+    if (scenario.hang) { answer({ turn: { id: 'provider-turn', status: 'inProgress', items: [], error: null } }); await new Promise(() => {}); }
     const error = scenario.error || { message: 'Provider rejected structured output: Missing attachment_ids.', codexErrorInfo: { httpConnectionFailed: { httpStatusCode: 400 } }, additionalDetails: 'prompt: secret context must never be forwarded' };
     const params = { threadId: 'provider-thread', turnId: 'provider-turn' };
     if (scenario.stderr) process.stderr.write(scenario.stderr);

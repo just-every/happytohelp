@@ -8,11 +8,11 @@
     "migrations/113_outcomes_history.sql",
     "tests/reports/outcomes.mjs",
     "tests/reports/ratings.mjs",
-    "tests/reports/migration.mjs",
-    "tests/reports/upgrade.mjs",
     "tests/reports/widget-races.mjs",
     "tests/reports/import-inertness.mjs",
-    "tests/reports/operator-feedback.mjs"
+    "tests/reports/operator-feedback.mjs",
+    "tests/journeys/reports.mjs",
+    "tests/journeys/upgrade.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base",

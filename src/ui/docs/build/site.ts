@@ -13,7 +13,7 @@ import type { RenderedPage } from './render.ts';
 export type SitePage = ManifestPage & RenderedPage;
 export type Site = { repository: DocsRepository; sections: DocsSection[]; pages: SitePage[]; problems: string[]; files: string[] };
 
-/** The same absolute-path pattern tests/reproducible-build.mjs refuses in emitted code. */
+/** The same absolute-path pattern the reproducible-build case of tests/journeys/installer-nightly.mjs refuses in emitted code. */
 export const absolutePath = /(?<![\w.@~-])\/(?:Users|home|private|tmp|var\/folders|root)\/[^\s"'`\\]*/g;
 
 /** The repository's GitHub URL and the branch its links name. */

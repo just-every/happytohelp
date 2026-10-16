@@ -5,11 +5,10 @@
   "sourcePaths": [
     "src/modules/reports",
     "docs/reports.md",
-    "tests/reports/calendar.mjs",
     "tests/reports/figures.mjs",
-    "tests/reports/browser.mjs",
     "tests/reports/harness.mjs",
-    "tests/reports/worker.ts"
+    "tests/reports/worker.ts",
+    "tests/journeys/reports-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "happytohelp/outcomes"

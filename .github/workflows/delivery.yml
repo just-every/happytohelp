@@ -18,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Verify owns runtime/browser coverage, including mobile. This job owns the
-    # real distributable and the independent two-checkout reproducibility proof.
+    # real distributable; the two-checkout reproducibility proof runs nightly
+    # with the installer journeys.
     # Production authority belongs to the independent delivery service:
     # no environment, production secret or id-token permission belongs here.
     env:
@@ -35,17 +36,10 @@ jobs:
         with:
           node-version: 22.20.0
           cache: pnpm
-      - name: Prepare space for reproducibility checkouts
-        run: |
-          df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
-          sudo rm -rf -- /usr/local/lib/android
-          df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
       - run: pnpm install --frozen-lockfile
       - name: Build delivery artifact
         run: pnpm run build
-      - name: Prove byte-reproducibility from two fresh installs
-        run: pnpm run test:reproducible-build
-      - name: Confirm build and proof preserve source
+      - name: Confirm build preserves source
         run: git diff --exit-code && test -z "$(git ls-files --others --exclude-standard)"
       - uses: actions/upload-artifact@v4
         with:
@@ -60,6 +54,5 @@ jobs:
           name: native-runtime-failure-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             /tmp/h2h-native-runtime-*/runtime.log
-            /tmp/h2h-repro-*/*-build.log
           if-no-files-found: ignore
           retention-days: 7

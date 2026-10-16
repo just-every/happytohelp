@@ -57,7 +57,7 @@ export async function checkAfterSetup({ origin, kit }) {
     let page = await kit.open(origin, '/setup');
     const signIn = page.getByRole('link', { name: 'Sign in', exact: true });
     await signIn.waitFor();
-    assert.equal(await signIn.getAttribute('href'), '/login');
+    assert.equal(await signIn.getAttribute('href'), '/login?returnTo=%2Fsetup', 'sign-in resumes the setup page');
     assert.equal(await page.getByRole('button', { name: 'Create workspace' }).count(), 0);
     await kit.assertHomepageLook(page, 'setup complete');
     await kit.done(page, 'setup-complete');

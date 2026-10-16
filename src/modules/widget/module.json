@@ -5,13 +5,8 @@
   "sourcePaths": [
     "src/modules/widget",
     "scripts/build-widget.mjs",
-    "tests/widget-transport.mjs",
-    "tests/widget-native-lost-response.mjs",
-    "tests/widget-browser.mjs",
-    "tests/widget-browser-runtime.mjs",
-    "tests/widget-opening-contrast-browser.mjs",
-    "tests/widget-lifecycle-browser.mjs",
-    "tests/widget-citations.mjs"
+    "tests/journeys/widget.mjs",
+    "tests/journeys/widget-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base",

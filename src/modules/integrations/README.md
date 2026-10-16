@@ -410,10 +410,7 @@ bounds. Those records never create a charge or debit anyone's balance.
 
 ## For developers: what the automated tests cover
 
-`tests/email-provider.mjs`, `tests/cloudflare-email.mjs`, `tests/email-worker.mjs`,
-`tests/email-classification.mjs`, `tests/email-recovery.mjs`,
-`tests/sendgrid-inbound.mjs`, `tests/sendgrid-email.mjs`,
-`tests/github-integration.mjs` and `tests/lead-operations.mjs` exercise local
+`tests/journeys/email.mjs`, `tests/journeys/knowledge.mjs` and `tests/journeys/context.mjs` exercise local
 storage and test-only stand-ins for the outside services. They don't prove live
 delivery by a provider, acceptance of a GitHub OAuth sign-in, provider costs or a
 working deployment.

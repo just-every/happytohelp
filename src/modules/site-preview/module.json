@@ -4,9 +4,7 @@
   "version": "0.1.0",
   "sourcePaths": [
     "src/modules/site-preview",
-    "migrations/0096_site_preview.sql",
-    "tests/site-preview.mjs",
-    "tests/site-preview-worker.ts"
+    "migrations/0096_site_preview.sql"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

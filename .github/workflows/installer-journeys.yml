@@ -1,6 +1,7 @@
 name: Installer and README journeys
 
-# Fresh-clone installs/restores are retained on the slow qualification lane.
+# Fresh-clone installs/restores, two-location reproducibility and release upgrades are
+# retained on the slow qualification lane.
 # Branch pushes and pull requests use Verify's bounded native/build checks.
 on:
   push:
@@ -29,11 +30,20 @@ jobs:
       matrix:
         include:
           - name: native-command-and-portability
-            command: node tests/rer-journey.mjs
+            browser: false
+            command: node --test --test-name-pattern=installs.with.the.rer tests/journeys/installer-nightly.mjs
           - name: readme-clone-and-restore
-            command: pnpm run test:base-refresh
+            browser: true
+            command: node --test --test-name-pattern=README tests/journeys/installer-nightly.mjs
+          - name: reproducible-build
+            browser: false
+            command: node --test --test-name-pattern=byte-identical tests/journeys/installer-nightly.mjs
           - name: delegation-fresh-clone-browser
-            command: node tests/delegation-journey.mjs --browser
+            browser: true
+            command: node --test --test-name-pattern=agent.fix tests/journeys/installer-nightly.mjs
+          - name: release-upgrades
+            browser: false
+            command: node --test tests/journeys/upgrade-nightly.mjs
     steps:
       - name: Configure evidence directory
         run: echo "H2H_EVIDENCE_DIR=$RUNNER_TEMP/happytohelp-evidence" >> "$GITHUB_ENV"
@@ -55,7 +65,10 @@ jobs:
           sudo rm -rf -- /usr/local/lib/android
           df -h "$RUNNER_TEMP" "$GITHUB_WORKSPACE"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - if: ${{ matrix.browser }}
+        run: pnpm exec playwright install --with-deps chromium
+      - if: ${{ matrix.name == 'release-upgrades' }}
+        run: pnpm run build
       - name: Run complete fresh-clone journey
         env:
           H2H_CI_COMMANDS: ${{ matrix.command }}

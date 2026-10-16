@@ -1,4 +1,5 @@
-import test from 'node:test';
+import {phases} from '../journeys/kit/scenarios.mjs';
+const test=phases(import.meta.url);
 import assert from 'node:assert/strict';
 import {harness,json,optIntoProactiveHelp} from './harness.mjs';
 async function generation(h,id,c,kind='suggestions',state='completed'){const current=await h.db.prepare('SELECT revision FROM conversations WHERE id=?').bind(c).first();await h.db.prepare("INSERT OR IGNORE INTO ai_profiles(id,project_id,name,role,model,prompt,is_enabled,created_at) VALUES('ai','p','Stored test AI','assistant','stored-model','Test prompt',1,1)").run();await h.db.prepare("INSERT OR IGNORE INTO context_subjects(project_id,subject_id,consent,revision) VALUES('p','visitor',1,0)").run();await h.db.prepare("INSERT INTO ai_generations(id,project_id,conversation_id,state,source_revision,source_context_revision,actor_json,model,ai_id,ai_profile_json,kind,created_at,updated_at,output_json) VALUES(?,'p',?,?,?,(SELECT revision FROM context_subjects WHERE project_id='p' AND subject_id='visitor'),'{}','stored-model','ai','{\"model\":\"stored-model\",\"prompt\":\"Test prompt\"}',?,'2026-01-01','2026-01-01','{\"result\":{\"response\":\"Draft\",\"responses\":[{\"response\":\"Alternative\"}]}}')").bind(id,c,state,current.revision,kind).run();return current.revision}

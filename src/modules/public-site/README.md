@@ -68,7 +68,7 @@ shell uses the first-party stylesheet at
 pattern files are not included. See `docs/PUBLIC-SOURCE-PROVENANCE.md` for asset
 provenance and licences.
 
-`tests/public-help-center.mjs`, `tests/public-site-runtime.mjs`,
+`tests/journeys/public.mjs`,
 `pnpm run test:public-help-center-browser`, `pnpm run test:not-found-browser` and
-`tests/docs-browser.mjs` cover the current homepage, the documentation pages,
+`tests/journeys/public-browser.mjs` cover the current homepage, the documentation pages,
 help-center routes and 404 pages.

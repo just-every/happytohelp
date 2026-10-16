@@ -1,4 +1,5 @@
-import test from 'node:test';
+import {phases} from '../journeys/kit/scenarios.mjs';
+const test=phases(import.meta.url);
 import assert from 'node:assert/strict';
 import {harness} from './harness.mjs';
 const time=Date.parse;
@@ -139,3 +140,12 @@ test('invitation acceptance rechecks target and signed-in session at the native 
   }finally{await h.close()}
  }
 });
+
+test('calendar days follow the workspace zone through the report route, including non-hour offsets, and malformed ranges are refused',async()=>{const h=await harness();try{
+ await h.contact();await h.db.prepare("INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES('p','{\"timezone\":\"Asia/Kathmandu\"}',1)").run()
+ // Kathmandu is UTC+05:45, so 2026-01-01 begins at 2025-12-31T18:15:00Z.
+ for(const [id,at] of [['before','2025-12-31T18:14:59Z'],['first','2025-12-31T18:15:00Z'],['last','2026-01-01T18:14:59Z'],['after','2026-01-01T18:15:00Z']])await h.db.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind(id,'p','visitor',time(at),time(at)).run()
+ const day=await h.call('/api/dashboard/projects/p/reports?period=custom&start=2026-01-01&end=2026-01-02');assert.equal(day.volume,2,'exactly the two conversations inside the Kathmandu calendar day')
+ const csv=await(await h.raw('/api/dashboard/projects/p/reports?period=custom&start=2026-01-01&end=2026-01-02&format=conversations.csv')).text();assert.match(csv,/"first"/);assert.match(csv,/"last"/);assert.doesNotMatch(csv,/"before"|"after"/)
+ for(const query of ['period=2','period=custom&start=2026-02-30&end=2026-03-02','period=custom&start=2026-03-02&end=2026-03-01'])assert.equal((await h.raw('/api/dashboard/projects/p/reports?'+query)).status,400,query)
+}finally{await h.close()}});

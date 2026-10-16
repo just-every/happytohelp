@@ -10,6 +10,8 @@ const save = async page => {
 };
 
 export async function verifySettingsParity(page, {origin,projectId,checks}) {
+  // Open only on a weekday that is neither today nor tomorrow in UTC, so the saved schedule is closed now.
+  const weekdays=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],today=new Date().getUTCDay(),openDay=weekdays[(today+3)%7];
   const mutations=[];
   const observe=request=>{if(request.url().includes('/api/management/') && ['POST','PUT','PATCH','DELETE'].includes(request.method()))mutations.push(request.method());};
   page.on('request',observe);
@@ -19,7 +21,7 @@ export async function verifySettingsParity(page, {origin,projectId,checks}) {
     await page.getByRole('button',{name:'Dark',exact:true}).click();
     await page.getByRole('button',{name:'Availability',exact:true}).click();
     await page.getByLabel('Schedule enabled',{exact:true}).check();
-    await page.getByLabel('Monday',{exact:true}).check();
+    await page.getByLabel(openDay,{exact:true}).check();
     await page.getByLabel('Opening time').fill('09:30');
     await page.getByLabel('Closing time').fill('17:15');
     await page.getByLabel('Custom auto response message').fill('We return during our published support hours.');
@@ -41,7 +43,11 @@ export async function verifySettingsParity(page, {origin,projectId,checks}) {
   assert.equal(await page.getByLabel('Opening time').inputValue(),'09:30');
   assert.equal(await page.getByLabel('Closing time').inputValue(),'17:15');
   assert.equal(await page.getByLabel('Custom auto response message').inputValue(),'We return during our published support hours.');
-  checks.push('project tabs preserve unsaved edits without submitting; color, mode and schedule survive reload');
+  // The widget's own settings door applies the saved schedule now: closed, with the custom away message.
+  const project=await (await page.request.get(`${origin}/api/identity/projects/${projectId}`)).json();
+  const widget=await (await page.request.get(`${origin}/api/widget/settings?widgetKey=${encodeURIComponent(project.widget_key)}`)).json();
+  assert.deepEqual(widget.availability,{available:false,message:'We return during our published support hours.'},'the widget is told the workspace is away, with its message');
+  checks.push('project tabs preserve unsaved edits without submitting; color, mode and schedule survive reload; the widget settings door reports the saved schedule as away now');
 }
 
 export async function verifyManagementParity(page,{origin,projectId,checks}) {

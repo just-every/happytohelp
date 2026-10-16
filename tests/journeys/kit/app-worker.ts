@@ -12,12 +12,14 @@ const captured:unknown[]=[]
 const bindings=(env:Env):Env=>env.H2H_TEST_CAPTURE_QUEUE?{...env,JOBS:{send:async(job:unknown)=>{captured.push(job)},sendBatch:async(batch:{body:unknown}[])=>{captured.push(...batch.map(item=>item.body))}} as unknown as Env['JOBS']}:env
 // Storage faults for one request, named by test-only headers. x-test-before-batch
 // and x-test-after-batch run a real D1 write around each atomic batch, as a
-// concurrent request would; x-test-fault fails D1 or R2 before or after commit.
+// concurrent request would; x-test-fault fails D1 or R2 before or after commit,
+// or makes the queue refuse (queue-unavailable) or silently lose (queue-lost) sends.
 const faulted=(request:Request,env:Env):Env=>{
  const before=request.headers.get('x-test-before-batch'),after=request.headers.get('x-test-after-batch'),fault=request.headers.get('x-test-fault')
  if(!before&&!after&&!fault)return env
  const DB=env.DB,FILES=env.FILES;let puts=0
- return {...env,
+ const queue=fault==='queue-unavailable'?{send:async()=>{throw new Error('Injected queue delivery failure')},sendBatch:async()=>{throw new Error('Injected queue delivery failure')}}:fault==='queue-lost'?{send:async()=>{},sendBatch:async()=>{}}:undefined
+ return {...env,...(queue?{JOBS:queue as unknown as Env['JOBS']}:{}),
   DB:{prepare:DB.prepare.bind(DB),exec:DB.exec.bind(DB),async batch(statements:D1PreparedStatement[]){
    if(fault==='db-before')throw new Error('Injected D1 failure')
    if(before)await DB.exec(before)
@@ -35,16 +37,16 @@ const faulted=(request:Request,env:Env):Env=>{
 }
 export default {
  async fetch(request:Request,env:Env,context:ExecutionContext){
-  env=faulted(request,env)
+  env=faulted(request,bindings(env))
   const path=new URL(request.url).pathname
   if(path==='/_test/queue/take')return Response.json(captured.splice(0))
   if(path==='/_test/queue/run'){
    const jobs=await request.json<any[]>(),acked:number[]=[],retried:number[]=[]
-   await consumeQueue({messages:jobs.map((body,index)=>({id:String(index),body,ack(){acked.push(index)},retry(){retried.push(index)}}))} as any,bindings(env))
+   await consumeQueue({messages:jobs.map((body,index)=>({id:String(index),body,ack(){acked.push(index)},retry(){retried.push(index)}}))} as any,env)
    return Response.json({acked,retried})
   }
-  if(path==='/_test/scheduled'){await Promise.all([runScheduled(bindings(env)),dispatchOperatorNotifications(bindings(env))]);return Response.json({ran:true})}
-  return app.fetch(request,bindings(env),context)
+  if(path==='/_test/scheduled'){await Promise.all([runScheduled(env),dispatchOperatorNotifications(env)]);return Response.json({ran:true})}
+  return app.fetch(request,env,context)
  },
  async queue(batch:MessageBatch<any>,env:Env){await consumeQueue(batch,env)},
 }

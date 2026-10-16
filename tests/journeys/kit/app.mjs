@@ -50,9 +50,9 @@ export async function startApp({bindings={},outbound,origin='https://app.example
   // Restart the same stored state with changed configuration, as a redeploy would.
   async configure(changes){await mf.dispose();current={...current,...changes};await start()},
   async takeJobs(){return (await call('/_test/queue/take')).data},
-  async runJobs(jobs){return (await call('/_test/queue/run',{body:jobs,status:200})).data},
+  async runJobs(jobs,headers){return (await call('/_test/queue/run',{body:jobs,status:200,headers})).data},
   async drainJobs(limit=200){let ran=0;for(;;){const jobs=await this.takeJobs();if(!jobs.length)return ran;if((ran+=jobs.length)>limit)throw new Error('queue did not settle');for(const job of jobs){const result=await this.runJobs([job]);if(result.retried.length)throw new Error('job retried: '+JSON.stringify(job))}}},
-  async scheduled(){return (await call('/_test/scheduled',{body:{},status:200})).data},
+  async scheduled(headers){return (await call('/_test/scheduled',{body:{},status:200,headers})).data},
   async until(check,{timeout=10000,interval=25,message='condition'}={}){const deadline=Date.now()+timeout;for(;;){const value=await check();if(value)return value;if(Date.now()>deadline)throw new Error('Timed out waiting for '+message);await new Promise(done=>setTimeout(done,interval))}},
   async close(){await mf.dispose();await rm(directory,{recursive:true,force:true})},
  }

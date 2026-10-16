@@ -128,12 +128,12 @@ try {
     await nav().getByTestId('nav-settings').click();
     const menu=page.getByTestId('settings-menu');await menu.waitFor();
     const paths=new Set();
-    for(const name of ['Project','Agents','Email','Widget','Saved Replies','API tokens','Webhooks','Slack','Delivery log','Integrations','GitHub','Connected applications']){
+    for(const name of ['Project','Agents','Email','Widget','Saved Replies','API tokens','Webhooks','Slack','Delivery log','Plugins','GitHub','Connected applications']){
       const entry=menu.getByRole('link',{name,exact:true});
       if(!await entry.isVisible())await menu.getByTestId('settings-menu-more').locator('summary').click();
       await entry.click();await entry.and(menu.locator('[aria-current="page"]')).waitFor();
       // The link is current while the destination still loads; continue once its page is shown.
-      await page.getByRole('heading',{level:1,name:{Integrations:'Plugins',GitHub:'Project'}[name]||name,exact:true}).waitFor();
+      await page.getByRole('heading',{level:1,name:{GitHub:'Project'}[name]||name,exact:true}).waitFor();
       assert.equal(await menu.locator('[aria-current="page"]').count(),1,name);
       assert.equal(await nav().getByTestId('nav-settings').getAttribute('aria-current'),'page',name);
       assert.equal(await page.locator('h1').count(),1,name);paths.add(new URL(page.url()).pathname);

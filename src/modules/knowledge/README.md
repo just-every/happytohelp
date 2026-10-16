@@ -49,14 +49,14 @@ Optional configuration: `APIFY_TOKEN`, `APIFY_CRAWLER_ACTOR_ID`,
 are never stored in import jobs. Publication and provider execution require the
 edition's operating authorization.
 
-Verification: `node tests/knowledge-workerd.mjs` builds a dedicated test Worker
+Verification: `node tests/journeys/knowledge.mjs` builds a dedicated test Worker
 and exercises real local workerd, D1 and R2. Twenty-two assertions cover a 138-document
 corpus, repeated queue deliveries, failed refresh, tenant denial, public drafts,
 original authoring inputs, cycles, multi-category articles, native HTML import,
 repeat import identity, all three provider hierarchy imports, MMR and a semantic corpus above 256 chunks. External
 provider responses and queue dispatch are fixtures confined to test code; no
 live-provider, production, or paid-call proof is claimed. The fixture queue runs
-the actual production job consumer. `tests/knowledge-context.mjs` additionally
+the actual production job consumer. `tests/journeys/knowledge.mjs` additionally
 exercises native pure contracts and SQLite publication guards.
 
 Source corpus normalization currently materializes the supplied document array

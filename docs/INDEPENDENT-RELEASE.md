@@ -334,7 +334,7 @@ The artifact is byte-reproducible with the Node and pnpm versions declared in
 a published artifact.
 
 To run the artifact locally and check backup and restore, run
-`node tests/independent-runtime.mjs` (see
+`node tests/journeys/restore.mjs` (see
 [tests/helpers/INDEPENDENT-RECOVERY.md](../tests/helpers/INDEPENDENT-RECOVERY.md)).
 
 ## Share the source without Git history

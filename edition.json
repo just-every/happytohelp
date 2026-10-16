@@ -177,9 +177,8 @@
           "migrations/0002_conversations.sql",
           "migrations/0004_message_intent.sql",
           "migrations/0007_conversation_history.sql",
-          "tests/conversation-admission.mjs",
-          "tests/conversation-socket.mjs",
-          "tests/conversation-worker.ts"
+          "tests/journeys/runtime.mjs",
+          "tests/journeys/widget.mjs"
         ]
       }
     },
@@ -195,12 +194,9 @@
         "paths": [
           "src/modules/widget",
           "scripts/build-widget.mjs",
-          "tests/widget-transport.mjs",
-          "tests/widget-native-lost-response.mjs",
-          "tests/widget-browser.mjs",
-          "tests/widget-browser-runtime.mjs",
-          "tests/widget-lifecycle-browser.mjs",
-          "tests/widget-citations.mjs"
+          "tests/journeys/widget.mjs",
+          "tests/journeys/widget-browser.mjs",
+          "tests/helpers/widget"
         ]
       }
     },
@@ -218,7 +214,10 @@
         "paths": [
           "src/modules/ai-support",
           "migrations/020_ai_support.sql",
-          "tests/ai-support"
+          "tests/journeys/ai.mjs",
+          "tests/journeys/ai-browser.mjs",
+          "tests/journeys/ai-live.mjs",
+          "tests/helpers/ai"
         ]
       }
     },
@@ -235,12 +234,9 @@
           "migrations/0050_knowledge.sql",
           "migrations/0051_knowledge_authoring.sql",
           "migrations/0052_knowledge_imports.sql",
-          "tests/knowledge-context.mjs",
-          "tests/knowledge-worker.ts",
-          "tests/knowledge-workerd.mjs",
           "migrations/0053_knowledge_recovery.sql",
-          "tests/knowledge-recovery.ts",
-          "tests/knowledge-deleted-projects.ts"
+          "tests/journeys/knowledge.mjs",
+          "tests/helpers/knowledge"
         ]
       }
     },
@@ -256,8 +252,9 @@
           "src/modules/customer-context",
           "migrations/0060_customer_context.sql",
           "migrations/0060_customer_context_engine.sql",
-          "tests/customer-context",
-          "tests/customer-context-routes.mjs"
+          "tests/journeys/context.mjs",
+          "tests/journeys/context-browser.mjs",
+          "tests/helpers/context"
         ]
       }
     },
@@ -275,13 +272,10 @@
           "scripts/build-local-agent.cjs",
           "scripts/local-agent-archive.cjs",
           "migrations/030_local_computer.sql",
-          "tests/local-computer-worker.ts",
-          "tests/local-computer-runtime.mjs",
-          "tests/local-computer-revocation.mjs",
-          "tests/local-computer-sweep-worker.ts",
-          "tests/local-agent-archive.mjs",
-          "tests/provider-errors.mjs",
-          "tests/provider-helpers"
+          "tests/provider-helpers",
+          "tests/journeys/delegation-computers.mjs",
+          "tests/journeys/delegation-browser.mjs",
+          "tests/helpers/delegation"
         ]
       }
     },
@@ -313,7 +307,7 @@
         "kind": "local",
         "paths": [
           "src/modules/plugin-sdk",
-          "tests/plugin-sdk.mjs"
+          "tests/journeys/inbox-browser.mjs"
         ]
       }
     },
@@ -328,8 +322,7 @@
         "paths": [
           "src/modules/site-preview",
           "migrations/0096_site_preview.sql",
-          "tests/site-preview.mjs",
-          "tests/site-preview-worker.ts"
+          "tests/journeys/knowledge.mjs"
         ]
       }
     },
@@ -381,47 +374,19 @@
           "migrations/0095_public_site.sql",
           "migrations/090_legacy_import.sql",
           "migrations/123_inbox_message_search.sql",
-          "tests/email-provider.mjs",
-          "tests/email-worker.mjs",
-          "tests/github-integration.mjs",
-          "tests/github-discovery.mjs",
-          "tests/github-workerd-runtime.mjs",
           "tests/helpers",
-          "tests/identity.mjs",
-          "tests/lead-operations.mjs",
-          "tests/legacy-import.mjs",
-          "tests/management.mjs",
-          "tests/deleted-background.mjs",
           "tests/deleted-background-worker.ts",
           "tests/prepare-browser-fixture.mjs",
-          "tests/public-help-center.mjs",
-          "tests/public-help-center-browser.mjs",
-          "tests/public-site-runtime.mjs",
           "docs/site.json",
-          "tests/docs-site.mjs",
-          "tests/docs-dev-sync.mjs",
-          "tests/docs-browser.mjs",
-          "tests/runtime.mjs",
-          "tests/ui-transport.mjs",
           "scripts/deployment",
           "scripts/import-legacy.mjs",
           "scripts/migrations.mjs",
-          "scripts/verify-modules.mjs",
           "src/app.ts",
           "src/jobs.ts",
           "src/message-effects.ts",
           "migrations/0008_account_sessions.sql",
-          "tests/operating-environment.mjs",
-          "tests/ui-browser.mjs",
-          "tests/note-busy-focus-browser.mjs",
-          "tests/navigation-browser.mjs",
-          "tests/workspace-scope.mjs",
-          "tests/workspace-shell-browser.mjs",
-          "tests/login-return.mjs",
           "migrations/0084_billing_project_usage.sql",
           "migrations/0097_owner_setup.sql",
-          "tests/identity-setup.mjs",
-          "tests/setup-browser.mjs",
           "scripts/installer",
           "scripts/export-d1.mjs",
           "public/setup",
@@ -433,61 +398,29 @@
           "tests/demo-inbox.mjs",
           "tests/demo-inbox-browser.mjs",
           "tests/demo-transcript-events.mjs",
-          "tests/workspace-artwork.mjs",
-          "tests/cloudflare-email.mjs",
-          "tests/sendgrid-inbound.mjs",
-          "tests/ai-instructions-keyboard.mjs",
           "src/edition",
-          "tests/module-boundaries.mjs",
-          "tests/widget-events.mjs",
-          "tests/email-recovery.mjs",
-          "tests/email-classification.mjs",
           "migrations/0100_inbound_email_claims.sql",
           "migrations/0101_email_mailbox_lifecycle.sql",
           "migrations/0102_public_abuse_limits.sql",
           "migrations/0103_contact_erasure.sql",
           "migrations/0104_inbound_email_classification.sql",
-          "tests/abuse-limits.mjs",
-          "tests/abuse-limits-worker.ts",
-          "tests/abuse-limits-runtime.mjs",
-          "tests/widget-rate-limit.mjs",
           "docs/PUBLIC-LIMITS.md",
           "docs/INBOUND-EMAIL-RECOVERY.md",
-          "tests/contact-erasure.mjs",
-          "tests/contact-erasure-browser.mjs",
-          "tests/widget-settings-browser.mjs",
-          "tests/widget-settings-model.mjs",
-          "tests/project-verification-secret.mjs",
           "migrations/0106_project_verification_secret.sql",
-          "tests/management-library-browser.mjs",
-          "tests/library-validation.mjs",
           "docs/PRIVACY.md",
           "migrations/0108_public_answer_citations.sql",
-          "tests/sender-domain.mjs",
           "tests/live",
           "migrations/0107_activation_receipts.sql",
           "tests/activation",
           "tests/demo-activation-browser.mjs",
           "tests/demo-knowledge-activation.mjs",
-          "tests/knowledge-activation-browser.mjs",
-          "tests/activation-ai-controls-browser.mjs",
-          "tests/activation-browser.mjs",
-          "tests/activation-migration.mjs",
-          "tests/activation-provider-probes.mjs",
-          "tests/activation-routes.mjs",
-          "tests/activation-spend-browser.mjs",
-          "tests/activation-spend.mjs",
-          "tests/upgrade.mjs",
           "src/modules/sendgrid-email/module.json",
-          "tests/base-latest-integration.mjs",
-          "tests/base-copy-verification.mjs",
-          "tests/base-origin-verification.mjs",
-          "tests/recovery-m9.mjs",
           "scripts/build.mjs",
           "tests/first-run",
           "live-proofs/git.mjs",
           "RUN-LOCALLY.md",
-          "SEED-COMMAND-CONTRACT.md"
+          "SEED-COMMAND-CONTRACT.md",
+          "tests/journeys"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
@@ -1316,11 +1249,11 @@
           "migrations/113_outcomes_history.sql",
           "tests/reports/outcomes.mjs",
           "tests/reports/ratings.mjs",
-          "tests/reports/migration.mjs",
-          "tests/reports/upgrade.mjs",
           "tests/reports/widget-races.mjs",
           "tests/reports/import-inertness.mjs",
-          "tests/reports/operator-feedback.mjs"
+          "tests/reports/operator-feedback.mjs",
+          "tests/journeys/reports.mjs",
+          "tests/journeys/upgrade.mjs"
         ]
       }
     },
@@ -1335,11 +1268,11 @@
         "paths": [
           "src/modules/reports",
           "docs/reports.md",
-          "tests/reports/calendar.mjs",
           "tests/reports/figures.mjs",
-          "tests/reports/browser.mjs",
           "tests/reports/harness.mjs",
-          "tests/reports/worker.ts"
+          "tests/reports/worker.ts",
+          "tests/journeys/reports.mjs",
+          "tests/journeys/reports-browser.mjs"
         ]
       }
     },
@@ -1419,7 +1352,9 @@
           "src/modules/api-integrations",
           "migrations/115_native_integrations.sql",
           "docs/api.md",
-          "tests/connections"
+          "tests/connections",
+          "tests/journeys/connections.mjs",
+          "tests/journeys/connections-browser.mjs"
         ]
       }
     }

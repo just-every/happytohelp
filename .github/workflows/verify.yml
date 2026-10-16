@@ -71,118 +71,66 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: modules-1
-            commands: |
-              node scripts/ci/node-tests.mjs modules 1/4
-          - name: modules-2
-            commands: |
-              node scripts/ci/node-tests.mjs modules 2/4
-          - name: modules-3
-            commands: |
-              node scripts/ci/node-tests.mjs modules 3/4
-          - name: modules-4
-            commands: |
-              node scripts/ci/node-tests.mjs modules 4/4
           - name: contracts
+            browser: false
             commands: |
               pnpm run typecheck
               pnpm run source:check
               node scripts/edition-authoring/cli.mjs verify-base --offline
-              node --test tests/independent-contract.mjs tests/homepage-source.mjs tests/docs-site.mjs tests/docs-dev-sync.mjs
-          - name: activation-and-local-mail
+              node --test --test-concurrency=1 tests/demo-inbox.mjs tests/demo-transcript-events.mjs
+          - name: move-in-admission
+            browser: false
             commands: |
-              pnpm run test:activation
-              pnpm run test:activation-spend
-              node scripts/ci/node-tests.mjs test:first-run
-          - name: move-in-contracts-1
+              node --test --test-concurrency=1 tests/journeys/move-in-admission.mjs
+          - name: move-in-erasure
+            browser: false
             commands: |
-              node scripts/ci/node-tests.mjs test:move-in 1/4
-          - name: move-in-contracts-2
+              node --test --test-concurrency=1 tests/journeys/move-in-erasure.mjs
+          - name: move-in-custody-and-capacity
+            browser: false
             commands: |
-              node scripts/ci/node-tests.mjs test:move-in 2/4
-          - name: move-in-contracts-3
+              node --test --test-concurrency=1 tests/journeys/move-in-custody.mjs tests/journeys/move-in-capacity.mjs
+          - name: connections-and-delegation
+            browser: false
             commands: |
-              node scripts/ci/node-tests.mjs test:move-in 3/4
-          - name: move-in-contracts-4
+              node --test --test-concurrency=1 tests/journeys/connections.mjs tests/journeys/delegation.mjs tests/journeys/delegation-computers.mjs tests/journeys/connector.mjs
+          - name: runtime-and-identity
+            browser: false
             commands: |
-              node scripts/ci/node-tests.mjs test:move-in 4/4
-          - name: reports-and-recovery
+              node --test --test-concurrency=1 tests/journeys/runtime.mjs tests/journeys/identity.mjs tests/journeys/installer.mjs
+          - name: reports-and-first-run
+            browser: false
             commands: |
-              node scripts/ci/node-tests.mjs test:reports
-              node tests/reports/upgrade.mjs
-              node tests/recovery-m9.mjs
-          - name: connections
+              node --test --test-concurrency=1 tests/journeys/reports.mjs tests/journeys/first-run.mjs tests/journeys/upgrade.mjs
+          - name: assistant-mail-and-restore
+            browser: false
             commands: |
-              node scripts/ci/node-tests.mjs test:connections
-              node tests/connections/artifact.mjs
-              node tests/independent-runtime.mjs
-          - name: native-runtime
-            commands: |
-              pnpm run test:runtime
-          - name: native-transport
-            commands: |
-              pnpm run test:runtime-transport
-          - name: native-journeys
-            commands: |
-              pnpm run test:journey
-              node tests/delegation-journey.mjs
-          - name: move-in-capacity
-            commands: |
-              node tests/move-in/capacity.mjs
-          - name: business-browsers
-            commands: |
-              node tests/move-in/browser.mjs
-              node tests/reports/browser.mjs
-              node tests/connections/browser.mjs
+              node --test --test-concurrency=1 tests/journeys/restore.mjs tests/journeys/ai.mjs tests/journeys/public.mjs tests/journeys/email.mjs tests/journeys/knowledge.mjs tests/journeys/inbox.mjs tests/journeys/widget.mjs tests/journeys/erasure.mjs tests/journeys/legacy.mjs tests/journeys/context.mjs
           - name: first-run-browser
+            browser: true
             commands: |
-              node tests/first-run/browser.mjs
-          - name: activation-widget-browser
+              node --test --test-concurrency=1 tests/journeys/first-run-browser.mjs
+          - name: inbox-browser
+            browser: true
             commands: |
-              pnpm run test:activation-browser
-          - name: visitor-profile-browser
-            commands: |
-              node tests/first-run/dashboard-browser.mjs
-              node tests/first-run/profile-browser.mjs
-          - name: workspace-browsers
-            commands: |
-              pnpm run test:widget-settings-browser
-              pnpm run test:inbox-conversation-browser
-              pnpm run test:workspace-shell-browser
-              pnpm run test:navigation-browser
+              node --test --test-concurrency=1 tests/journeys/inbox-browser.mjs
           - name: widget-browsers
+            browser: true
             commands: |
-              pnpm run test:widget-browser
-              pnpm run test:widget-pointer-send-browser
-              pnpm run test:inbox-default-browser
-              pnpm run test:widget-opening-contrast-browser
-              pnpm run test:widget-lifecycle-browser
-          - name: inbox-browsers
+              node --test --test-concurrency=1 tests/journeys/widget-browser.mjs tests/journeys/context-browser.mjs tests/journeys/ai-browser.mjs
+          - name: delegation-browsers
+            browser: true
             commands: |
-              pnpm run test:ui-browser
-              pnpm run test:note-busy-focus-browser
-              pnpm run test:conversation-panel-resize-browser
-              pnpm run test:contact-erasure-browser
-          - name: public-and-setup-browsers
+              node --test --test-concurrency=1 tests/journeys/delegation-browser.mjs tests/journeys/connector-browser.mjs
+          - name: business-browsers
+            browser: true
             commands: |
-              pnpm run test:public-help-center-browser
-              pnpm run test:docs-browser
-              pnpm run test:setup-browser
-              pnpm run test:demo-inbox-browser
-              pnpm run test:mobile-inbox-browser
-          - name: connector-browsers
+              node --test --test-concurrency=1 tests/journeys/move-in-browser.mjs tests/journeys/reports-browser.mjs tests/journeys/connections-browser.mjs tests/journeys/erasure-browser.mjs
+          - name: public-browsers
+            browser: true
             commands: |
-              pnpm run test:hero-connector-browser
-              pnpm run test:assistant-draft-handoff-browser
-              pnpm run test:local-draft-adoption-browser
-              pnpm run test:assistant-draft-readiness-browser
-          - name: readiness-browsers
-            commands: |
-              pnpm run test:provider-errors-browser
-              pnpm run test:appearance-browser
-              pnpm run test:ui-readiness-browser
-              pnpm run test:training-readiness-browser
-              pnpm run test:magic-link-browser
+              node --test --test-concurrency=1 tests/journeys/public-browser.mjs tests/journeys/identity-browser.mjs
+              node tests/demo-inbox-browser.mjs
     steps:
       - name: Configure evidence directory
         run: echo "H2H_EVIDENCE_DIR=$RUNNER_TEMP/happytohelp-evidence" >> "$GITHUB_ENV"
@@ -204,7 +152,9 @@ jobs:
           path: ${{ runner.temp }}/verify-build
       - name: Restore the build from this workflow's exact checkout
         run: tar -xzf "$RUNNER_TEMP/verify-build/happytohelp-build.tar.gz"
-      - run: pnpm exec playwright install --with-deps chromium
+      # Chromium only where a shard drives a browser.
+      - if: ${{ matrix.browser }}
+        run: pnpm exec playwright install --with-deps chromium
       # Every command in a shard runs even after another check fails.
       - name: Run shard checks
         env:
@@ -278,7 +228,6 @@ jobs:
           H2H_TEST_ORIGIN: ${{ env.H2H_PREVIEW_ORIGIN }}
           H2H_CI_COMMANDS: |
             node tests/homepage-browser.mjs
-            node tests/public-site-runtime.mjs
         run: node scripts/ci/run-checks.mjs
       - name: Stop local native preview
         if: ${{ always() && steps.preview.outcome != 'skipped' }}

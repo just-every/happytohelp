@@ -41,7 +41,7 @@ Settings merge with `json_insert`, so nothing already present is
 replaced; after the batch commits the one-time site read is queued. Demo inboxes are never provisioned. A default
 assistant takes a new widget conversation only while its provider key is installed (`GET /projects/:id/ai` reports
 which secret it needs, never key material), so without a key visitors stay with the team and no reply fails; an
-explicit AI request still fails naming the missing secret. `tests/provisioning.mjs` covers this through public routes.
+explicit AI request still fails naming the missing secret. `tests/journeys/first-run.mjs` covers this through public routes.
 
 Pending invitations (`invitations.ts`, `invitation-store.ts`) are the unused invite links for one email in one
 workspace, listed on `GET /projects/:projectId/agents` with `invitation_id` (the lower-cased email), `expires_at`
@@ -50,7 +50,7 @@ role; operators: none). `POST .../invitations/:invitationId/link` issues another
 cannot be shown again), `POST .../resend` emails a fresh link and fails closed with 503 when no email provider is
 configured, and `DELETE .../invitations/:invitationId` removes every unused link. Each re-reads the caller's membership of
 the path's workspace and refuses what they may not manage. Using one link retires the others issued for the same email
-(`identity/accounts.ts`). `tests/management-invitations.mjs` covers the routes and role refusals on real local D1.
+(`identity/accounts.ts`). `tests/journeys/identity.mjs` covers the routes and role refusals on real local D1.
 
 Inbox search (`inbox-search.ts`) matches a contact's name or email address as a literal,
 ASCII case-insensitive substring: `%`, `_` and `\` are ordinary characters and the match
@@ -58,7 +58,7 @@ does not use `LIKE`, so the database's pattern-length limit cannot turn a long t
 a 500. A term longer than 200 characters is a 400 whose message the inbox shows. Message
 text is deliberately not searched: the schema has no full-text index, and an unindexed scan
 of every message per keystroke is not acceptable, so the inbox says it searches names and
-email addresses. `tests/inbox-search.mjs` runs it on local D1.
+email addresses. `tests/journeys/inbox.mjs` runs it on local D1.
 
 Owners and admins can permanently erase a contact's personal data
 (`contact-erasure.ts`, `contact-erasure/`): R2 objects are staged in
@@ -71,7 +71,7 @@ revision and frontier are kept (`messages.erased_at`); a client-supplied
 `local_id` becomes `erased:<message id>`, a prefix admission reserves, while the
 server-minted `email:<hash>` and `generation:<id>` ids later reads depend on stay
 (a caller-chosen generation id must be a UUID, `ai-support/generation-id.ts`). Repeating an erasure is safe
-and completes an interrupted one. `tests/contact-erasure.mjs` proves it on real
+and completes an interrupted one. `tests/journeys/erasure.mjs` proves it on real
 local D1/R2; docs/PRIVACY.md describes the operator-facing behaviour.
 The same batch redacts `inbound_emails.evidence_json` (migration 0104) to the
 classifier's `reasons` (`contact-erasure/inbound-evidence.ts`). Request counters
@@ -80,7 +80,7 @@ expire within a day.
 
 Migrations 0070/0071 own management records; 0103 owns contact erasure. Related core and AI migrations remain
 necessary: management is an integrated capability, not a replacement database.
-`tests/management.mjs` uses real local D1/R2, covering tenant and admin boundaries,
+`tests/journeys/inbox.mjs` uses real local D1/R2, covering tenant and admin boundaries,
 secret projection, original inbox filters/bucket history, notes/participants,
 contact collection, missing provider configuration and email ingress identity.
 Browser behavior is verified by the dashboard/widget integration lane separately.

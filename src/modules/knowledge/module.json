@@ -7,12 +7,9 @@
     "migrations/0050_knowledge.sql",
     "migrations/0051_knowledge_authoring.sql",
     "migrations/0052_knowledge_imports.sql",
-    "tests/knowledge-context.mjs",
-    "tests/knowledge-worker.ts",
-    "tests/knowledge-workerd.mjs",
     "migrations/0053_knowledge_recovery.sql",
-    "tests/knowledge-recovery.ts",
-    "tests/knowledge-deleted-projects.ts"
+    "tests/journeys/knowledge.mjs",
+    "tests/helpers/knowledge"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

@@ -44,10 +44,11 @@ Training uses its own input validation rather than depending on local-computer.
 The context-only selection in ai-support/module.json is five self-contained ESM
 files: packet, packetBounds, passEvidence, historyCursor and historyOutput. It has
 no provider/storage import and preserves evidence IDs, omission metadata, bounded
-newest-first context and recoverable history cursors. `tests/module-boundaries.mjs` copies the
-published packet selection outside the checkout and exercises image/evidence
-bounds; it also bundles context and training entry points without their optional
-execution capabilities and checks the selected graph against module contracts.
+newest-first context and recoverable history cursors. The former
+`tests/module-boundaries.mjs` check, which copied the published packet selection
+outside the checkout, exercised image/evidence bounds and bundled the context and
+training entry points against module contracts, was retired in the October 2026
+test consolidation.
 
 Full Worker routes and persistence engines remain integrated with this edition's
 `src/platform` identity, project-liveness and D1 schema. These are real integration

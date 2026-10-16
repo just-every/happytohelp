@@ -33,7 +33,7 @@ page records what was restored and which original features are still missing.
 ## Workspace scoping and shell corrections (1 October 2026)
 
 An independent UI sweep of the review build found workspace-scoping and shell
-defects; each is fixed and covered by `tests/workspace-shell-browser.mjs`.
+defects; each is fixed and covered by `tests/journeys/inbox-browser.mjs`.
 
 | Surface | Behaviour now |
 | --- | --- |
@@ -93,7 +93,7 @@ membership and role on every request. The invite form says up front when email d
 
 These rules were added after the 30 September review and are checked by
 `pnpm run test:management-library-browser` (browser, emitted Worker) and
-`tests/library-validation.mjs` (part of `pnpm run test:modules`).
+`tests/journeys/inbox.mjs` (part of `pnpm run test:modules`).
 
 | Area | Behaviour |
 | --- | --- |
@@ -106,8 +106,8 @@ These rules were added after the 30 September review and are checked by
 ## Inbox and conversation behaviour
 
 Corrections from the 1 October 2026 independent UI sweep, checked by
-`pnpm run test:inbox-conversation-browser`, `tests/inbox-search.mjs`,
-`tests/contact-timezone.mjs` and `tests/saved-reply-insertion.mjs`.
+`pnpm run test:inbox-conversation-browser`, `tests/journeys/inbox.mjs` and
+`tests/journeys/delegation-browser.mjs` (saved reply insertion).
 
 | Surface | Behaviour |
 | --- | --- |

@@ -33,7 +33,7 @@ before budgeting a production installation.
 
 `tests/fixtures/usage/local-workload.json` retains the original synthetic local
 measurement as an exact regression input for the summary algorithm. It is a test
-fixture, not evidence qualifying the current release. `tests/usage-limits.mjs`
+fixture, not evidence qualifying the current release. `tests/journeys/ai.mjs`
 continues to exercise real local request limits and project/installation daily
 AI admission ceilings with no provider execution. Configured limits are guards,
 not measured capacity. See [PUBLIC-LIMITS.md](../PUBLIC-LIMITS.md).

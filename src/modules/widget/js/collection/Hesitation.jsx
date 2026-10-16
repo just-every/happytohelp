@@ -1,5 +1,8 @@
 import { describeTarget } from "./Describe";
 
+// Elements the host site marks as private context, as the collector itself skips them.
+const excluded = element => Boolean(element?.closest?.(".context-exclude"));
+
 export class HesitationDetector {
     constructor(options) {
         // Default options
@@ -229,8 +232,9 @@ export class HesitationDetector {
         // Combine all potential CTAs and filter out duplicates
         const allPotentialCTAs = [...buttons, ...buttonLinks, ...buttonClasses, ...checkoutButtons];
 
-        // Remove duplicates and filter for visible elements
+        // Remove duplicates, the site's context-exclude regions and hidden elements
         this.ctaElements = Array.from(new Set(allPotentialCTAs)).filter(element => {
+            if (excluded(element)) return false;
             const rect = element.getBoundingClientRect();
             const style = window.getComputedStyle(element);
             return rect.width > 0 &&
@@ -867,6 +871,8 @@ export class HesitationDetector {
 
     describeField(element) {
         if (!element) return "unknown field";
+        // A field inside a context-exclude region is never described by its labels or text.
+        if (excluded(element)) return "an excluded field";
 
         // Use the imported describeTarget function
         const description = describeTarget({ target: element });

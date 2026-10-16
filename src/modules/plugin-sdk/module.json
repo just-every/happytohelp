@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "sourcePaths": [
     "src/modules/plugin-sdk",
-    "tests/plugin-sdk.mjs"
+    "tests/journeys/inbox-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

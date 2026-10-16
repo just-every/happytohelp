@@ -1,6 +1,6 @@
 # Independent artifact recovery qualification
 
-`node tests/independent-runtime.mjs` runs the emitted artifact's own entrypoint
+`node tests/journeys/restore.mjs` runs the emitted artifact's own entrypoint
 and authenticated application routes. It uploads and downloads binary media
 through those routes before backup and downloads it again with the retained
 owner session after restore.
@@ -32,7 +32,7 @@ rejected as a causal fix.
 The stronger check then reproduced the same failure on the real authenticated
 media upload immediately after the preview route rejected its input with 503.
 The application error handler returned before consuming unread request bodies.
-`tests/error-response.mjs` deterministically demonstrated that lifecycle defect
+`tests/journeys/runtime.mjs` deterministically demonstrated that lifecycle defect
 on the actual application handler: the original 401 response left its input
 unconsumed. The handler now uses the existing bounded `rejectedResponse` helper
 already used for unknown routes and CORS rejections. It preserves normal error

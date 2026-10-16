@@ -5,7 +5,8 @@
   "sourcePaths": [
     "src/vendor/base/modules/sendgrid-email",
     "src/vendor/base/modules/mail/src/sendgrid-email",
-    "tests/sendgrid-email.mjs"
+    "tests/journeys/email.mjs",
+    "tests/helpers/email"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

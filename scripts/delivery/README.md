@@ -19,7 +19,7 @@ the actual generator and compare these two representations of the same source.
 run `node scripts/delivery/build.mjs`; direct calls require a fresh empty output. Upload the whole directory: the
 schema-2 manifest references raw `payload/` files with SHA-256 and byte sizes.
 Packaging neither deploys nor authorizes provider effects. D1/R2 recovery does
-not cover Durable Object storage. `tests/delivery-base.mjs` compares the same
+not cover Durable Object storage. `tests/journeys/installer.mjs` compares the same
 emitted candidate with the test-only pre-adoption oracle; the only expected MIME
 changes are the two font LICENSE.txt files, now text/plain.
 

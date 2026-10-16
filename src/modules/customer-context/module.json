@@ -6,8 +6,9 @@
     "src/modules/customer-context",
     "migrations/0060_customer_context.sql",
     "migrations/0060_customer_context_engine.sql",
-    "tests/customer-context",
-    "tests/customer-context-routes.mjs"
+    "tests/journeys/context.mjs",
+    "tests/journeys/context-browser.mjs",
+    "tests/helpers/context"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

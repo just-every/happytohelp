@@ -1,6 +1,6 @@
 # Configured cited-answer journey
 
-Run `node --test tests/live/cited-answer.mjs` with BASE_URL, WIDGET_KEY,
+Run `node --test tests/journeys/ai-live.mjs` with BASE_URL, WIDGET_KEY,
 OPERATOR_EMAIL and OPERATOR_PASSWORD loaded privately into the environment.
 The configured project must allow BASE_URL as its widget origin, have an enabled
 customer AI as its default responder, and have a published native refund policy.
@@ -61,7 +61,7 @@ raise a used allowance or use another project to replay a failed generation.
 
    ```sh
    (
-     if nice -n 15 node --test --test-concurrency=2 tests/live/cited-answer.mjs; then
+     if nice -n 15 node --test --test-concurrency=2 tests/journeys/ai-live.mjs; then
        journey_status=0
      else
        journey_status=$?

@@ -5,8 +5,7 @@
   "sourcePaths": [
     "src/modules/site-preview",
     "migrations/0096_site_preview.sql",
-    "tests/site-preview.mjs",
-    "tests/site-preview-worker.ts"
+    "tests/journeys/knowledge.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

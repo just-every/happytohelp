@@ -10,4 +10,4 @@ Website previews require `APP_ORIGIN` and a different `PREVIEW_ORIGIN`. Serving 
 
 Public trial creation is removed. Historical public-demo grants remain stored but cannot authorize proxy access or preview widget sessions.
 
-`tests/site-preview.mjs` runs the emitted module with real local Queue/D1/R2, a provider fixture solely inside the test harness, durable ready/uncertain/idempotency transitions, private draft/public publication, scoped proxy rewriting, credential stripping, revoked grants, and authenticated preview contact sessions and rejection of historical public-demo grants. It does not establish a live image-provider or hosted-domain result.
+`tests/journeys/knowledge.mjs` runs the emitted module with real local Queue/D1/R2, a provider fixture solely inside the test harness, durable ready/uncertain/idempotency transitions, private draft/public publication, scoped proxy rewriting, credential stripping, revoked grants, and authenticated preview contact sessions and rejection of historical public-demo grants. It does not establish a live image-provider or hosted-domain result.

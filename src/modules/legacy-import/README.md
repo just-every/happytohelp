@@ -51,4 +51,4 @@ exports, alongside native operation exports. Encrypted collector actions require
 explicit `plaintext_action` to become native context actions; the encrypted
 original remains archived otherwise.
 
-`tests/legacy-import.mjs` exercises 33 table families with real local D1/R2, original transcript/bucket/knowledge IDs, exact minor-unit money, held operations, deterministic replay, conflict protection and corrupt-object denial. This fixture proof is not an import of a production dump, nor a claim that every archive-only historical system is already normalized.
+`tests/journeys/legacy.mjs` exercises 33 table families with real local D1/R2, original transcript/bucket/knowledge IDs, exact minor-unit money, held operations, deterministic replay, conflict protection and corrupt-object denial. This fixture proof is not an import of a production dump, nor a claim that every archive-only historical system is already normalized.

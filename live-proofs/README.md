@@ -115,7 +115,7 @@ there is no automatic rollback or replay of uncertain provider effects.
 ```sh
 node --test live-proofs/tests/*.test.mjs
 npm ci --prefix live-proofs/toolchain --ignore-scripts --no-audit --no-fund
-node --test live-proofs/tests/wrangler-dry-run.mjs
+node --test tests/journeys/installer.mjs
 actionlint .github/workflows/live-proof.yml .github/workflows/deploy-stage.yml
 ```
 

@@ -17,7 +17,7 @@ import {readBack, priorState} from './upgrade-readback.mjs';
 // Prior-data upgrade: build each released source, populate it through its own
 // API, apply this source's migrations in place, compare every pre-existing row,
 // then serve the upgraded store with this source's emitted Worker.
-// Usage: node tests/upgrade.mjs [0.2.1|0.3.0|0.3.x|0.4.0|0.4.1 ...] after `pnpm run build`.
+// Usage: node --test tests/journeys/upgrade-nightly.mjs after `pnpm run build`; H2H_UPGRADE_RELEASES=0.4.1 selects releases.
 const run = promisify(execFile);
 const root = resolve(new URL('../..', import.meta.url).pathname);
 const release = JSON.parse(await readFile(join(root, 'RELEASE.json'), 'utf8'));

@@ -11,6 +11,10 @@ updating and backing up an installation, see
 ## Unreleased
 
 - Mark source fixtures as synthetic so hosted changes can admit the public source without changing test coverage.
+- **Freshdesk Move in.** Tickets with every reply and private note, contacts, agents (as authors only), canned responses and attachment names come across from a script on the Move in page. Signed attachment links are never kept.
+- **Move in review you can act on.** The plan shows right after upload, in plain words: what will import, what needs fixing (file, line, reason) and what stays in your original file. Approve appears only when something can import. A rejected record no longer holds its source ID, so a corrected file imports it; imported records are linked by subject or name.
+- **Imported history lands as it was.** Solved and closed conversations from Zendesk, Intercom, Help Scout and Freshdesk land closed, and imported messages never count as unread.
+- **Pages a newcomer can finish.** API tokens, Webhooks, Slack and Local computers explain each value and where it comes from, with copyable commands and a webhook signature check. A published article no longer offers Publish again. A local trial's workspace is no longer named after its checkout folder; Setup asks for your business name instead.
 
 ## 0.5.0 — not yet tagged
 

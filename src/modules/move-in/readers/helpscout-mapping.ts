@@ -7,11 +7,12 @@ import {nativeId,sourceId,tagKey,text,time,object} from './common'
 import {auditShape,shapeReason} from './shapes'
 import {helpScoutListIssues} from './helpscout-lists'
 import {helpScoutHistory,helpScoutCustomer,helpScoutArticleStatus} from './helpscout-history'
+import {closedAt} from './closed-state'
 const markdown=async(body:string)=>/<[a-z][^>]*>/i.test(body)?htmlToMarkdown(body):body
 export function helpScoutTags(record:SourceRecord):string[]{const p=record.payload as any;return record.kind==='tag'&&typeof p.name==='string'?[p.name]:Array.isArray(p.tags)?p.tags.filter((t:any)=>object(t)&&typeof t.tag==='string').map((t:any)=>t.tag):[]}
 export async function prepareHelpScout({projectId,source,tagIds}:MappingInput):Promise<PreparedMapping>{
  const listIssues=helpScoutListIssues(source.records),conflicts=new Set(source.diagnostics.filter(d=>d.code==='conflicting_duplicate_id').map(d=>`${d.kind}/${d.sourceId}`))
- const result:PreparedMapping={effects:new Map(),rejections:new Map(),omissions:new Map()},records=new Map(source.records.map(r=>[recordKey(r),r])),id=(kind:string,sid:string)=>nativeId(projectId,'helpscout',kind,sid)
+ const result:PreparedMapping={known:new Set(),effects:new Map(),rejections:new Map(),omissions:new Map()},records=new Map(source.records.map(r=>[recordKey(r),r])),id=(kind:string,sid:string)=>nativeId(projectId,'helpscout',kind,sid)
  for(const record of source.records){const key=recordKey(record),p=record.payload as any,omissions:string[]=[],tables:Record<string,any[]>={};let kind=record.kind,target=id(kind,record.sourceId)
   for(const issue of auditShape('helpscout',record.kind,p).issues){omissions.push(shapeReason(issue));source.diagnostics.push({severity:'warning',code:issue.code,message:shapeReason(issue),kind:record.kind,sourceId:record.sourceId,location:{...record.location,pointer:`${record.location.pointer??''}${issue.path}`}})}
   try{
@@ -40,11 +41,11 @@ export async function prepareHelpScout({projectId,source,tagIds}:MappingInput):P
      if(thread.savedReplyId)omissions.push(`saved_reply_reference_not_content:${thread.savedReplyId}`)
     }
     if(!messages.length)throw new Error('published_conversation_messages_required')
-    tables.conversations=[{id:target,project_id:projectId,contact_id:id('contact',contactSource),revision:messages.length,last_message_id:messages.at(-1).id,assigned_to:null,resolved_at:null,created_at:created,updated_at:updated}]
+    tables.conversations=[{id:target,project_id:projectId,contact_id:id('contact',contactSource),revision:messages.length,last_message_id:messages.at(-1).id,assigned_to:null,resolved_at:['closed','spam'].includes(p.status)?closedAt([p.closedAt],p.userUpdatedAt,omissions):null,created_at:created,updated_at:updated}]
     tables.move_in_conversations=[{conversation_id:target,project_id:projectId,vendor:'helpscout',source_id:record.sourceId,subject:text(p.subject,'conversation_subject_required'),source_state:p.status,source_channel:p.type}]
     tables.messages=messages;tables.move_in_message_sources=sources;tables.move_in_notes=notes
     const names=helpScoutTags(record);if(names.some(name=>name.trim().length>80))throw new Error('tag_name_limit');tables.conversation_tags=[...new Set(names.map(tagKey))].map(name=>({project_id:projectId,conversation_id:target,tag_id:tagIds.get(name)??id('tag',name)}))
-    omissions.push('historical_status_and_assignment_not_activated');if(p._embedded?.threads)omissions.push('embedded_threads_ignored_full_thread_pages_used')
+    omissions.push('historical_assignment_not_activated');if(p._embedded?.threads)omissions.push('embedded_threads_ignored_full_thread_pages_used')
    }else if(kind==='collection'||kind==='category'){
     if(!['public','private'].includes(p.visibility))throw new Error('category_visibility_unknown');const collection=kind==='category'?records.get(`collection/${sourceId(p.collectionId,'helpscout')}`)?.payload as any:null;if(kind==='category'&&(!collection||!['public','private'].includes(collection.visibility)||listIssues.has(`collection/${p.collectionId}`)||conflicts.has(`collection/${p.collectionId}`)))throw new Error('category_collection_unavailable');target=id('category',`${kind}:${record.sourceId}`);kind='category';tables.knowledge_categories=[{id:target,project_id:projectId,parent_id:collection?id('category',`collection:${p.collectionId}`):null,name:text(p.name,'category_name_required'),slug:`import-helpscout-${record.kind}-${target.slice(-16)}`,summary:typeof p.description==='string'?p.description:'',is_published:p.visibility==='public'&&(!collection||collection.visibility==='public')?1:0,position:Number.isSafeInteger(p.order)&&p.order>=0?p.order:0}];omissions.push('docs_collection_as_root_category_site_and_sort_metadata_retained');
    }else if(kind==='article'){

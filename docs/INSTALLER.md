@@ -137,20 +137,23 @@ Use a real page to send a customer message, then reply from your workspace inbox
 2. Create an `index.html` in a separate test folder with a normal HTML document
    and paste the snippet before `</body>`. Serve that folder with your website's
    development server. For example, if Python 3 is installed, run this from the
-   test folder:
+   test folder. It picks a port nothing else is using and prints the page's
+   address:
 
    ```sh
-   python3 -m http.server 8840 --bind 127.0.0.1
+   PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])')
+   echo "Test page: http://127.0.0.1:$PORT"
+   python3 -m http.server "$PORT" --bind 127.0.0.1
    ```
 
-3. In **Settings → Widget → Settings**, set **Widget website origin** to
-   `http://127.0.0.1:8840` and save. Use the actual origin if your server differs:
+3. In **Settings → Widget → Settings**, set **Widget website origin** to the
+   address it printed, such as `http://127.0.0.1:52817`, and save. Use the actual origin if your server differs:
    scheme, hostname and optional port, without a path. `localhost` and `127.0.0.1`
    are different hosts, and different ports are different origins.
    The widget has no email field by default. To collect an address for emailed
    operator replies, enable **Required contact details → Require email** on this
    same settings page and save. Visitors then enter their email before sending.
-4. Open `http://127.0.0.1:8840` in another browser profile or private window. Open
+4. Open that address in another browser profile or private window. Open
    the widget and send a message. In your signed-in app,
    open **Inbox**, choose the conversation and reply. Check the reply in the
    visitor's widget. Local visitor and teammate email is suppressed without

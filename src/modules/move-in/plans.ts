@@ -9,6 +9,8 @@ import {nativeStatementCount} from './targets'
 import {publicationContact,type PublicationContact} from './publication'
 import {objectKey,updateRun} from './run-store'
 import {LIMITS,MAPPING_VERSION,recordKey,type Run,type PreparedMapping,type SourceClaim} from './types'
+/** The words a report link shows for an imported record: its subject, name or title. */
+function targetLabel(value:any){const t=value?.tables??{},label=t.move_in_conversations?.[0]?.subject||t.contacts?.[0]?.name||t.contacts?.[0]?.email||t.knowledge_articles?.[0]?.title||t.macros?.[0]?.title||t.knowledge_categories?.[0]?.name||t.workspace_tags?.[0]?.name;return typeof label==='string'&&label.trim()?label.trim().slice(0,120):undefined}
 export interface ChildPlan {ordinal:number;key:string;fingerprint:string;total:number;bytes:number}
 export interface ReviewManifest {version:1;projectId:string;actorId:string;vendor:string;mappingVersion:string;batches:ChildPlan[];contacts?:PublicationContact[];retainedSources?:SourceClaim[];categories?:PublicationCategory[];original:{key:string;sha256:string;size:number};artifacts:{key:string;sha256:string;size:number}[];diagnostics:any[];fingerprint:string}
 export function reviewFingerprint(manifest:Omit<ReviewManifest,'fingerprint'>|ReviewManifest){const {fingerprint:_,...content}=manifest as ReviewManifest;return sha256(canonicalJson(content))}
@@ -18,11 +20,17 @@ export function reviewFingerprint(manifest:Omit<ReviewManifest,'fingerprint'>|Re
  * one authority window, so planning reads do not grow with the number of children. */
 export async function retainReview(env:Env,run:Run,source:SourceBundle,prepared:PreparedMapping,duplicates:number){
  const batches:ChildPlan[]=[],contacts:PublicationContact[]=[],categories:PublicationCategory[]=[...(prepared.retainedCategories??[])],decisions:any[]=[],diagnostics=[...source.diagnostics],counts:any={input:0,unique:0,duplicates:0,mapped:0,unmapped:0,rejected:0,effects:0,byKind:{}}
- const records=source.records.filter(record=>!prepared.retained?.has(recordKey(record)))
+ // Rejected, retained and already-held records stay out of the kit's journals: a rejection claims
+ // no source ID, so a corrected copy of the record can be uploaded and imported later.
+ const held=(key:string)=>prepared.rejections.has(key)||prepared.known.has(key)||!!prepared.retained?.has(key)
+ const records=source.records.filter(record=>!held(recordKey(record)))
  for(const record of source.records){
-  const key=recordKey(record);if(!prepared.retained?.has(key))continue
-  const rejection=prepared.rejections.get(key)!;counts.input++;counts.unique++;counts.rejected++;counts.byKind[record.kind]=(counts.byKind[record.kind]??0)+1
-  decisions.push({kind:record.kind,sourceId:record.sourceId,location:record.location,rejection,omissions:[...(prepared.omissions.get(key)??[]).map(reason=>({reason})),{reason:'previously_imported_source_retained_native_edit'}],targets:[]})
+  const key=recordKey(record);if(!held(key))continue
+  const omissions=(prepared.omissions.get(key)??[]).map(reason=>({reason})),rejection=prepared.rejections.get(key)
+  counts.input++;counts.unique++;counts.byKind[record.kind]=(counts.byKind[record.kind]??0)+1
+  if(!rejection){counts.unmapped++;decisions.push({kind:record.kind,sourceId:record.sourceId,location:record.location,omissions:[...omissions,{reason:'earlier_import_already_holds_record'}],targets:[]});continue}
+  counts.rejected++;if(omissions.length)counts.unmapped++
+  decisions.push({kind:record.kind,sourceId:record.sourceId,location:record.location,rejection,omissions:[...omissions,...(prepared.retained?.has(key)?[{reason:'previously_imported_source_retained_native_edit'}]:[])],targets:[]})
   diagnostics.push({severity:'error',code:'REJECTED',message:rejection,kind:record.kind,sourceId:record.sourceId,location:record.location})
  }
  const map=(record:any)=>{const key=recordKey(record);return {effects:prepared.rejections.has(key)?[]:prepared.effects.get(key)??[],...(prepared.rejections.has(key)?{rejection:prepared.rejections.get(key)}:{}),unmapped:(prepared.omissions.get(key)??[]).map(reason=>({reason}))}}
@@ -35,7 +43,7 @@ export async function retainReview(env:Env,run:Run,source:SourceBundle,prepared:
   batches.push({ordinal:batches.length,key:objectKey(run,`plans/${plan.fingerprint}`),fingerprint:plan.fingerprint,total:plan.entries.length,bytes})
   for(const key of Object.keys(counts).filter(key=>key!=='byKind'))counts[key]+=plan.counts[key as keyof typeof plan.counts] as number
   for(const [kind,n] of Object.entries(plan.counts.byKind))counts.byKind[kind]=(counts.byKind[kind]??0)+n
-  diagnostics.push(...plan.diagnostics.filter(d=>d.code!=='ORIGINAL_UNAVAILABLE')); decisions.push(...plan.entries.map(e=>({kind:e.source.kind,sourceId:e.source.sourceId,location:e.source.location,rejection:e.rejection,omissions:e.unmapped,targets:e.effects.map(effect=>({kind:effect.targetKind,id:effect.targetId,status:(effect.value as any).tables.knowledge_articles?.[0]?.status}))})))
+  diagnostics.push(...plan.diagnostics.filter(d=>d.code!=='ORIGINAL_UNAVAILABLE')); decisions.push(...plan.entries.map(e=>({kind:e.source.kind,sourceId:e.source.sourceId,location:e.source.location,rejection:e.rejection,omissions:e.unmapped,targets:e.effects.map(effect=>({kind:effect.targetKind,id:effect.targetId,label:targetLabel(effect.value),status:(effect.value as any).tables.knowledge_articles?.[0]?.status}))})))
   for(const entry of plan.entries)for(const effect of entry.effects)if(effect.targetKind==='contact')contacts.push(publicationContact(run.project_id,effect.targetId,effect.value));else if(effect.targetKind==='category')categories.push(publicationCategory(effect.value))
  }while(cursor<records.length)
  // A malformed physical position is an input/rejection, but has no source ID,

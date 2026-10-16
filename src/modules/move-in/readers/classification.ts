@@ -1,5 +1,5 @@
 import {sha256,canonicalJson} from '../../import-kit/src/provenance/identity'
-import {object,sourceId} from './common'
+import {object,sourceId,wrappedVendor} from './common'
 import {LIMITS} from '../types'
 import type {Vendor} from '../types'
 
@@ -8,7 +8,7 @@ export class RecordStructureError extends Error {
  constructor(code:string,pointer=''){super(code);this.pointer=pointer}
 }
 export const collectionNames=new Set(['contacts','conversations','data','articles','macros'])
-const identifiedKinds={zendesk:new Set(['user','ticket','macro','article','tag']),intercom:new Set(['contact','user','lead','conversation','macro','article','tag','tag-name'])}
+const identifiedKinds={zendesk:new Set(['user','ticket','macro','article','tag']),freshdesk:new Set(['contact','agent','ticket','canned_response']),intercom:new Set(['contact','user','lead','conversation','macro','article','tag','tag-name'])}
 export function recordSourceId(kind:string,payload:Record<string,any>,vendor:Vendor):string {
  // A standalone Zendesk tag inventory can identify tags by their actual names.
  // Prefer an explicit original ID when supplied; never invent a fallback ID.
@@ -39,17 +39,26 @@ export function intercomDocument(properties:DocumentField[]):{kind:string}|{enve
  for(const field of properties)if(collectionNames.has(field.key)&&!field.array)throw new RecordStructureError('collection_must_be_array',`/${escape(field.key)}`)
  return {envelope:true}
 }
+/** Freshdesk attachment and avatar URLs carry signed access keys, which import custody must never keep.
+ * The pointer of the first such link, or null. The Move in script removes them before upload. */
+function signedLink(value:unknown,path=''):string|null{
+ if(typeof value==='string')return /^(?:https?:\/\/|\/)[^?#]*\?(?:[^#]*&)?[^=&#]*(?:token|secret|key|auth|signature|credential|password|cookie)[^=&#]*=/i.test(value)?path:null
+ if(Array.isArray(value)){for(let i=0;i<value.length;i++){const found=signedLink(value[i],`${path}/${i}`);if(found!==null)return found}return null}
+ if(object(value))for(const [key,child] of Object.entries(value)){const found=signedLink(child,`${path}/${escape(key)}`);if(found!==null)return found}
+ return null
+}
 /** Both mapping and pre-custody auditing lower a record through this function.
  * Ambiguous wrappers are refused in full, rather than admitting a partial plan. */
 export function classifyRecord(value:unknown,vendor:Vendor):{kind:string;payload:Record<string,any>;prefix:string} {
  if(!object(value))throw new RecordStructureError('record_must_be_object')
- if(vendor==='zendesk'){
+ if(wrappedVendor(vendor)){
   const keys=Object.keys(value)
   if(keys.length!==1)throw new RecordStructureError('singular_wrapper_required')
   const kind=keys[0],prefix=`/${escape(kind)}`,payload=value[kind]
   if(!/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/.test(kind)||!object(payload))throw new RecordStructureError('singular_wrapper_required',prefix)
-  if(kind==='tag'){try{recordSourceId(kind,payload,vendor)}catch{throw new RecordStructureError('invalid_source_id',prefix)}}
-  if(!identifiedKinds.zendesk.has(kind)){try{sourceId(payload.id,vendor)}catch{throw new RecordStructureError('unsupported_wrapper_requires_record_id',prefix)}}
+  if(vendor==='zendesk'&&kind==='tag'){try{recordSourceId(kind,payload,vendor)}catch{throw new RecordStructureError('invalid_source_id',prefix)}}
+  if(!identifiedKinds[vendor as 'zendesk'|'freshdesk'].has(kind)){try{sourceId(payload.id,vendor)}catch{throw new RecordStructureError('unsupported_wrapper_requires_record_id',prefix)}}
+  if(vendor==='freshdesk'){const link=signedLink(payload);if(link!==null)throw new RecordStructureError('signed_download_link_not_accepted',prefix+link)}
   // Zendesk's singular wrapper is authoritative. Payload type is ordinary
   // vendor metadata (for example a ticket's problem/incident/question/task),
   // never an alternative document discriminator.

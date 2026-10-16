@@ -2,6 +2,7 @@ import React, { useId, useState } from 'react';
 
 // The article's status bar: a drawn card with the status chip and the actions. On a phone Save and Publish ride in a bar
 // fixed to the bottom of the screen, and Delete and Unpublish wait behind a More button there (knowledge.css).
+// A published article offers Save (which keeps it published) and Unpublish, not Publish again.
 export default function ArticleEditorActions({ isPublished, savedStatus, busy, unavailable = false, onPublish, onDelete, onUnpublish }) {
     const status = savedStatus || (isPublished ? 'Published' : 'Draft');
     const [moreOpen, setMoreOpen] = useState(false);
@@ -19,12 +20,12 @@ export default function ArticleEditorActions({ isPublished, savedStatus, busy, u
                 {isPublished && <button className="btn btn-white" type="button" disabled={busy || unavailable} onClick={onUnpublish}>Unpublish</button>}
             </div>}
             {hasMore && <button className="btn btn-white btn-icon article-editor-actions__more-toggle" type="button" aria-label="More actions" aria-expanded={moreOpen} aria-controls={moreId} onClick={() => setMoreOpen(open => !open)}><i className="fe fe-more-horizontal" aria-hidden="true"/></button>}
-            <button className="btn btn-white" type="submit" disabled={busy || unavailable}>
+            <button className={isPublished ? 'btn btn-primary' : 'btn btn-white'} type="submit" disabled={busy || unavailable}>
                 {busy ? 'Saving…' : 'Save'}
             </button>
-            <button className="btn btn-primary" type="button" disabled={busy || unavailable} onClick={onPublish}>
+            {!isPublished && <button className="btn btn-primary" type="button" disabled={busy || unavailable} onClick={onPublish}>
                 {busy ? 'Publishing…' : 'Publish'}
-            </button>
+            </button>}
         </div>
     </div>;
 }

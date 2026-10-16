@@ -19,10 +19,11 @@ const domainOf = (email: string) => {
     const address = email.trim().toLowerCase();
     return address.slice(address.lastIndexOf('@') + 1);
 };
-/** The company domain of an email address, or null for a free-mail provider or a malformed address. */
+/** The company domain of an email address, or null for a free-mail provider, a reserved name such as the local trial's
+ * `owner@<checkout folder>.test`, or a malformed address. */
 export function companyDomain(email: string): string | null {
     const domain = domainOf(email);
-    return email.includes('@') && domain.includes('.') && !freeMail.has(domain) && !freeMailByCountry.test(domain) ? domain : null;
+    return email.includes('@') && domain.includes('.') && !freeMail.has(domain) && !freeMailByCountry.test(domain) && !reservedTld.has(domain.split('.').pop()!) ? domain : null;
 }
 /** The host of a website the public internet can reach: a named host, not an address, `localhost` or an internal name. */
 export function publicHost(website: string): string | null {

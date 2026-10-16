@@ -44,7 +44,7 @@ export default function LocalComputerAuthorize({ projectId, projectName, initial
         }
     };
 
-    return <Section title="Authorize a computer" description={`Enter the code shown by the computer you are connecting, then approve or deny it. Approving or denying applies to ${projectName ? `the project ${projectName}` : 'this workspace'}.`}>
+    return <Section title="Authorize a computer" description={`Only for a program that shows you an authorization code and this page’s address (it opens with the code filled in). To connect a computer yourself, use Connect computer above. Approving or denying applies to ${projectName ? `the project ${projectName}` : 'this workspace'}.`}>
         {error && <div role="alert" className="alert alert-danger">{error}</div>}
         {result && <div role="status" className={`alert ${result.decision === 'approve' ? 'alert-success' : 'alert-secondary'}`}>{result.message}</div>}
         <form onSubmit={decide}>

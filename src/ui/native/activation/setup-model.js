@@ -95,7 +95,7 @@ function rowFor(data, id) {
  const base = {id, label: rowLabels[id], change: pages[rowPage[id]], state: 'set', value: ''};
  const withObservation = (fallback, value) => ({...base, value, state: observed ? 'confirmed' : problem ? 'problem' : own?.state === 'unavailable' ? 'unavailable' : own?.state === 'pending' || own?.state === 'checking' || own?.state === 'unknown' ? 'waiting' : fallback});
  switch (id) {
-  case 'workspace': return facts.workspaceName ? {...base, value: facts.workspaceName} : null;
+  case 'workspace': return facts.workspaceName ? {...base, value: facts.workspaceNamed === false ? `${facts.workspaceName}. We chose this name; change it to your business name, which your help centre and emails show.` : facts.workspaceName} : null;
   case 'colour': return facts.colour?.hex ? {...base, value: facts.colour.source === 'site' ? `Picked from ${hostOf(facts.website)}` : 'Your workspace colour', swatch: facts.colour.hex} : null;
   case 'starter_assistant': return facts.starterAssistant ? {...base, value: `${facts.starterAssistant.name}. ${['confirmed', 'unchecked', 'checking', 'unknown', 'blocked'].includes(modelKeyState(data)) ? 'Answers visitors by itself, within your daily limits.' : 'Answers visitors by itself once AI is connected, within your daily limits.'}`} : null;
   case 'widget_origin': return withObservation('set', facts.website ? `${facts.website}. Your widget works only here.` : sentence(own?.detail || ''));

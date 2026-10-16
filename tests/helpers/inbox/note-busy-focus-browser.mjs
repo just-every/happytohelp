@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-import {chromium} from 'playwright';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {buildInboxFixture} from './helpers/inbox-conversation-fixture.mjs';
-import {startNoteFocusTrace, assertNoteFocusTrace, checkHeldNoteKeys} from './helpers/note-busy-focus-trace.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {buildInboxFixture} from '../inbox-conversation-fixture.mjs';
+import {startNoteFocusTrace, assertNoteFocusTrace, checkHeldNoteKeys} from '../note-busy-focus-trace.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+export async function noteBusyFocus(){
 
 const evidence = resolve(process.env.H2H_EVIDENCE_DIR || join(tmpdir(), 'h2h-note-busy-focus'));
 await mkdir(evidence, {recursive: true});
@@ -17,7 +19,7 @@ try {
     const conversationId = fixture.contacts.draft.id;
     const apiPath = `/api/dashboard/projects/${fixture.projectId}/conversations/${conversationId}`;
     const notes = async () => (await fixture.api(`${apiPath}/buckets/${conversationId}`)).data.events.filter(event => event.type === 'INTERNAL_NOTE');
-    browser = await chromium.launch({headless: true});
+    browser = await launchBrowser();
     for (const viewport of [{width: 1440, height: 900}, {width: 390, height: 844}]) {
         const context = await browser.newContext({viewport});
         const page = await context.newPage();
@@ -123,4 +125,6 @@ try {
     if (browser) { await browser.close(); cleanup.browserClosed = true; }
     if (runtime) { await runtime.close(success); cleanup.workerClosed = true; }
     await writeFile(join(evidence, 'note-busy-focus-summary.json'), JSON.stringify({success, records, errors, cleanup}, null, 2));
+}
+
 }

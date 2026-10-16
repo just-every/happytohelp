@@ -2,16 +2,18 @@ import assert from 'node:assert/strict';
 import {mkdir, mkdtemp, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {navigationFixture} from './helpers/navigation-fixture.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {navigationFixture} from '../navigation-fixture.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
-const {chromium} = await import(process.env.H2H_PLAYWRIGHT_MODULE || 'playwright');
+export async function panelResize(){
+
 const evidence = join(process.env.H2H_EVIDENCE_DIR ? resolve(process.env.H2H_EVIDENCE_DIR) : await mkdtemp(join(tmpdir(), 'h2h-conversation-panel-resize-')), 'conversation-panel-resize');
 await mkdir(evidence, {recursive:true});
 // Optional fixed ports for runs that must stay inside an assigned port range.
 const optionalPort = name => process.env[name] ? Number(process.env[name]) : undefined;
 const runtime = await createRuntime({port:optionalPort('H2H_RUNTIME_PORT') ?? 0, inspectorPort:optionalPort('H2H_RUNTIME_INSPECTOR_PORT')});
-const browser = await chromium.launch({headless:true});
+const browser = await launchBrowser();
 const page = await browser.newPage({viewport:{width:1440,height:1000}});
 const errors = [], checks = [];
 page.on('pageerror', error => errors.push(error.message));
@@ -63,3 +65,5 @@ try {
   await runtime.close(success);
 }
 console.log('Conversation panel resize browser checks passed:', evidence);
+
+}

@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {verifySettingsParity,verifyManagementParity,verifyMobileNavigation,verifyKnowledgeParity,verifyAssistantParity} from './helpers/ui-parity.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {verifySettingsParity,verifyManagementParity,verifyMobileNavigation,verifyKnowledgeParity,verifyAssistantParity} from '../ui-parity.mjs';
 import {mkdir,mkdtemp} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+export async function uiBrowser(){
 const evidenceRoot=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-ui-evidence-'));
 const evidenceDir=join(evidenceRoot,'ui-native');
 console.log('UI browser evidence:',evidenceDir);
@@ -20,7 +22,7 @@ const contact=await call('/api/identity/widget/session',{widgetKey:project.widge
 const conversation=await call('/api/conversations',{projectId:f.projectId},contact.token);f.conversationId=conversation.id;
 await call(`/api/conversations/${f.conversationId}/messages`,{localId:'ui-initial-message',content:'Can you help me update my account?',expectedRevision:0},contact.token);
 await mkdir(evidenceDir,{recursive:true});
-const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[],failed=[],checks=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)failed.push({status:r.status(),path:new URL(r.url()).pathname});});
+const browser=await launchBrowser();const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[],failed=[],checks=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)failed.push({status:r.status(),path:new URL(r.url()).pathname});});
 try{
  await page.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${f.projectId}/conversations`));await page.getByLabel('Email',{exact:true}).fill(f.email);await page.getByLabel('Password',{exact:true}).fill(f.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
  await page.goto(`${origin}/projects/${f.projectId}/conversations/${f.conversationId}`);await page.locator('.transcript-message-content').getByText('Can you help me update my account?',{exact:true}).waitFor();
@@ -55,3 +57,5 @@ try{
  for(const section of ['insights','contacts','ais','datasets','articles','categories','agents','email-settings','local-agent']){await page.goto(`${origin}/projects/${f.projectId}/${section}`);await page.waitForTimeout(250);checks.push(section+' route opened');}
  await page.setViewportSize({width:390,height:844});await page.goto(`${origin}/projects/${f.projectId}/conversations/${f.conversationId}`);await page.getByPlaceholder('Type your reply…').waitFor();await page.waitForTimeout(600);const composer=await page.getByPlaceholder('Type your reply…').boundingBox();assert.ok(composer.x>=0&&composer.x+composer.width<=391);await page.screenshot({path:join(evidenceDir,'mobile.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));checks.push('mobile conversation no horizontal overflow');await verifyMobileNavigation(page,{origin,projectId:f.projectId,checks});assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);success=true;
 }finally{await writeFile(join(evidenceDir,'result.json'),JSON.stringify({checks,errors,failed},null,2));console.log(JSON.stringify({checks,errors,failed}));await browser.close();await runtime.close(success);}
+
+}

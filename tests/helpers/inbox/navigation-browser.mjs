@@ -2,14 +2,16 @@ import assert from 'node:assert/strict';
 import {mkdir,mkdtemp,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {navigationFixture,watchShell,assertShell} from './helpers/navigation-fixture.mjs';
-import {rapidTenantBack,pluginPrefill} from './helpers/navigation-edges.mjs';
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
+import {createRuntime} from '../emitted-runtime.mjs';
+import {navigationFixture,watchShell,assertShell} from '../navigation-fixture.mjs';
+import {rapidTenantBack,pluginPrefill} from '../navigation-edges.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+export async function navigation(){
 const evidence=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-navigation-')),'navigation-native');
 await mkdir(evidence,{recursive:true});
 const runtime=await createRuntime();
-const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
+const browser=await launchBrowser();
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 const page=await context.newPage();
 page.setDefaultTimeout(15000);
@@ -199,4 +201,6 @@ try {
   errors.push(error.stack);await page.screenshot({path:join(evidence,'failure.png'),fullPage:true}).catch(()=>{});throw error;
 } finally {
   await writeFile(join(evidence,'result.json'),JSON.stringify({success,checks,errors,requests},null,2));console.log(JSON.stringify({success,checks,errors,evidence},null,2));await browser.close();await runtime.close(success);
+}
+
 }

@@ -29,7 +29,8 @@ export async function startApp({bindings={},outbound,origin='https://app.example
  await start()
  // One atomic batch for every migration keeps start-up to a single D1 round trip.
  try{if(migrate)await db.batch((await migrations()).flatMap(migration=>migration.statements).map(sql=>db.prepare(sql)))}catch(error){await mf.dispose();await rm(directory,{recursive:true,force:true});throw error}
- const request=(path,{body,token,method=body===undefined?'GET':'POST',headers={},raw=false,base=origin}={})=>mf.dispatchFetch(base+path,{method,redirect:'manual',headers:{...(body!==undefined&&!raw?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:raw?body:JSON.stringify(body)})
+ // A CF-IPCountry header is mirrored into request.cf, as Cloudflare's edge sets both.
+ const request=(path,{body,token,method=body===undefined?'GET':'POST',headers={},raw=false,base=origin}={})=>mf.dispatchFetch(base+path,{method,redirect:'manual',...(headers['CF-IPCountry']?{cf:{country:headers['CF-IPCountry']}}:{}),headers:{...(body!==undefined&&!raw?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:raw?body:JSON.stringify(body)})
  const call=async(path,options={})=>{const response=await request(path,options),text=await response.text();let data;try{data=text?JSON.parse(text):null}catch{data=text}if(options.status!==undefined&&response.status!==options.status)throw new Error(`${options.method||(options.body===undefined?'GET':'POST')} ${path}: expected ${options.status}, got ${response.status}: ${text.slice(0,500)}`);return {status:response.status,headers:response.headers,data}}
  const sql=async(statement,...args)=>(await db.prepare(statement).bind(...args).all()).results
  const first=async(statement,...args)=>(await db.prepare(statement).bind(...args).first())

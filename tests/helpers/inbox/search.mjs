@@ -1,17 +1,21 @@
-// Inbox search contract: literal matching, a bounded term, and no database error for any term (module level, local D1).
+import assert from 'node:assert/strict'
 import {registerHooks} from 'node:module'
 import {existsSync} from 'node:fs'
-import {readFile} from 'node:fs/promises'
-import assert from 'node:assert/strict'
+import {readFile,readdir} from 'node:fs/promises'
+import {startApp,sha} from '../../journeys/kit/app.mjs'
 registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&context.parentURL){const url=new URL(specifier+'.ts',context.parentURL);if(existsSync(url))return next(url.href,context)}return next(specifier,context)}})
-const {dashboardRoutes}=await import('../src/modules/management/index.ts')
-const {INBOX_SEARCH_MAX_LENGTH,inboxSearchTerm}=await import('../src/modules/management/inbox-search.ts')
-const {hashToken}=await import('../src/platform/auth.ts')
-const {getPlatformProxy}=await import('wrangler')
-const proxy=await getPlatformProxy({persist:false})
-try{
- const env={...proxy.env},DB=env.DB
- for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','112_conversation_outcomes.sql'])for(const [,sql] of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run()
+const {INBOX_SEARCH_MAX_LENGTH}=await import('../../../src/modules/management/inbox-search.ts')
+
+// Inbox search through the dashboard route: literal wildcards, name, email and supplied identity, all-history
+// phrases and words from an index built after the history existed and kept by every write, independent status,
+// assignment and AI views, workspace isolation, and bounded terms that answer 200 or a friendly 400.
+export async function inboxSearchJourney(){
+ const app=await startApp({migrate:false}),DB=app.db,hashToken=async value=>sha(value)
+ const directory=new URL('../../../migrations/',import.meta.url),files=(await readdir(directory)).filter(name=>name.endsWith('.sql')).sort()
+ const migrate=async select=>{for(const name of files.filter(select)){const source=(await readFile(new URL(name,directory),'utf8')).replace(/^\s*--[^\n]*$/gm,'');await DB.batch([...source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(match=>match[1]).filter(sql=>sql.trim()!==';').map(sql=>DB.prepare(sql)))}}
+ try{
+  // Every migration except the message index: the index arrives after history already exists.
+  await migrate(name=>name!=='123_inbox_message_search.sql')
  const contacts=[['plain','Alice Archer','alice@archer.example'],['pct','100% Pat','pat@percent.example'],['under','snake_case Sam','sam@under.example'],['slash','Back\\slash Bea','bea@slash.example'],['accent','Zoë Ünal','zoe@accent.example'],['upper','CHARLIE UPPER','Charlie.Mixed@Case.example']]
  await DB.batch([
   DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)"),
@@ -25,14 +29,14 @@ try{
   DB.prepare("UPDATE conversations SET resolved_at=500,assigned_to='u' WHERE id='c-plain'"),
   DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('history','p','c-plain','history','plain','contact','The cobalt buckle replacement arrived safely; the refund for my last invoice is pending',1,100)"),
  ])
- for(const [,sql] of (await readFile(new URL('../migrations/123_inbox_message_search.sql',import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run()
+ await migrate(name=>name==='123_inbox_message_search.sql')
  // Derived full-text/shadow storage is not business archive state.
  const {catalogue,policy}=await import('@runeditrun/rer/internal/modules/portability/catalogue.mjs')
- const {archivePolicy}=await import('../scripts/installer/portability-policy.mjs')
+ const {archivePolicy}=await import('../../../scripts/installer/portability-policy.mjs')
  const catalog=await catalogue(DB,policy({product:archivePolicy.product,derivedTables:archivePolicy.derivedTables}))
  assert.ok(catalog.tables.some(table=>table.name==='messages'),'transcripts remain archived')
  assert.ok(!catalog.tables.some(table=>table.name.startsWith('inbox_message_search')),'the message index is rebuilt, not archived')
- const list=async(params)=>dashboardRoutes.request('https://app.example/projects/p/conversations?'+new URLSearchParams({view:'open',...params}),{headers:{Authorization:'Bearer token'}},env)
+ const list=async(params)=>app.request('/api/dashboard/projects/p/conversations?'+new URLSearchParams({view:'open',...params}),{token:'token'})
  const names=async(params)=>{const response=await list(params);assert.equal(response.status,200,`${JSON.stringify(params).slice(0,80)} -> ${response.status}`);return (await response.json()).data.map(row=>row.contact.name).sort()}
 
  // Wildcards are literal.
@@ -102,6 +106,5 @@ try{
   else{assert.equal(response.status,400,`${length} characters`);const message=await response.text();assert.match(message,/too long/i);assert.match(message,new RegExp(String(INBOX_SEARCH_MAX_LENGTH)));assert.doesNotMatch(message,/diagnostics/i)}
  }
  for(const term of ["'",'"','\u0000','日本語のテスト'.repeat(20),'a b c '.repeat(30),'%25','?*[]()','x'.repeat(INBOX_SEARCH_MAX_LENGTH-1)+'%'])assert.deepEqual(await names({q:term}),[],`term ${JSON.stringify(term.slice(0,12))}`)
- assert.throws(()=>inboxSearchTerm({req:{query:name=>name==='search'?'z'.repeat(INBOX_SEARCH_MAX_LENGTH+1):undefined}}),error=>error.status===400)
- console.log('Inbox search: literal % _ and backslash, name/email matching, bounded terms with a friendly 400 and no database errors passed')
-}finally{await proxy.dispose()}
+ }finally{await app.close()}
+}

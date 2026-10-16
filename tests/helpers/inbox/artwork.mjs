@@ -1,40 +1,24 @@
-import { registerHooks } from 'node:module';
-import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { Hono } from 'hono';
+import { startApp, sha } from '../../journeys/kit/app.mjs';
 
-registerHooks({ resolve(specifier, context, next) {
-  if (specifier.startsWith('.') && context.parentURL) {
-    const url = new URL(specifier + '.ts', context.parentURL);
-    if (existsSync(url)) return next(url.href, context);
-  }
-  return next(specifier, context);
-} });
-const { routes } = await import('../src/modules/management/index.ts');
-const { hashToken } = await import('../src/platform/auth.ts');
-const { getPlatformProxy } = await import('wrangler');
-const proxy = await getPlatformProxy({ persist: false });
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1cAAAAASUVORK5CYII=', 'base64');
-try {
-  const env = proxy.env, db = env.DB;
-  const migrations = ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0003_identity_credentials.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0007_conversation_history.sql', '0008_account_sessions.sql', '0070_management.sql', '0071_management_preferences.sql', '0080_integrations.sql', '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql'];
-  for (const file of migrations) {
-    const source = await readFile(new URL('../migrations/' + file, import.meta.url), 'utf8');
-    for (const [, sql] of source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)) await db.prepare(sql).run();
-  }
+
+// Workspace artwork through the management routes on real D1 and R2: shared member reads, role permissions,
+// tenant isolation, bootstrap, atomic context guards, concurrent cleanup and validation.
+export async function artworkJourney() {
+  const app = await startApp({ origin: 'https://app.test' }), db = app.db, hashToken = async value => sha(value);
+  try {
   for (const project of ['p', 'q']) await db.prepare('INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES(?,?,?,?,1)').bind(project, project, project, 'https://widget.test').run();
   for (const [token, project, role] of [['owner','p','owner'], ['admin','p','admin'], ['operator','p','operator'], ['outsider','q','owner']]) {
     await db.prepare('INSERT INTO users VALUES(?,?,?,1)').bind(token, token + '@example.test', token).run();
     await db.prepare('INSERT INTO memberships VALUES(?,?,?)').bind(project, token, role).run();
     await db.prepare('INSERT INTO sessions VALUES(?,?,?,?,NULL,?,NULL)').bind(await hashToken(token), token, project, role, Date.now() + 999999).run();
   }
-  const app = new Hono().route('/api/management', routes);
   const base = '/api/management/projects/p';
-  const request = (path, { token = 'owner', method = 'GET', body, type = 'application/json', headers = {} } = {}) => app.request('https://app.test' + path, {
+  const request = (path, { token = 'owner', method = 'GET', body, type = 'application/json', headers = {} } = {}) => app.request(path, { raw: true,
     method, headers: { ...(token ? { Authorization: 'Bearer ' + token } : {}), 'Content-Type': type, ...headers },
     body: body === undefined ? undefined : type === 'application/json' ? JSON.stringify(body) : body,
-  }, env);
+  });
   const appearance = async () => {
     const response = await request(base + '/appearance');
     assert.equal(response.status, 200, await response.clone().text());
@@ -49,7 +33,7 @@ try {
   assert.equal((await update({ artwork_enabled: true }, 'operator')).status, 403);
   assert.equal((await upload({ token: 'outsider' })).status, 403);
   const guards = { 'x-h2h-expected-workspace': encodeURIComponent(JSON.stringify(context)), 'x-h2h-expected-artwork': 'none' };
-  const keys = async () => (await env.FILES.list({ prefix: 'workspace-artwork/p/' })).objects.map(object => object.key).sort();
+  const keys = async () => (await (await app.files).list({ prefix: 'workspace-artwork/p/' })).objects.map(object => object.key).sort();
   for (const headers of [
     { 'x-h2h-expected-workspace': guards['x-h2h-expected-workspace'] },
     { 'x-h2h-expected-artwork': 'none' },
@@ -107,7 +91,5 @@ try {
   const settings = JSON.parse((await db.prepare("SELECT settings_json FROM project_settings WHERE project_id='p'").first()).settings_json);
   assert.equal(settings.sidebar_artwork_id, replaced.artwork_url.split('/').at(-1));
   assert.equal(settings.sidebar_artwork_enabled, true);
-  console.log('Workspace artwork D1/R2: shared member reads, role permissions, tenant isolation, bootstrap, atomic context guards, concurrent cleanup and validation passed');
-} finally {
-  await proxy.dispose();
+  } finally { await app.close(); }
 }

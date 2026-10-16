@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import {mkdir, mkdtemp, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {navigationFixture, watchShell, assertShell} from './helpers/navigation-fixture.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {navigationFixture, watchShell, assertShell} from '../navigation-fixture.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
-const {chromium} = await import(process.env.H2H_PLAYWRIGHT_MODULE || 'playwright');
+export async function mobileInbox(){
+
 const evidence = join(process.env.H2H_EVIDENCE_DIR ? resolve(process.env.H2H_EVIDENCE_DIR) : await mkdtemp(join(tmpdir(), 'h2h-mobile-inbox-navigation-')), 'mobile-inbox-navigation');
 await mkdir(evidence, {recursive:true});
 // This helper deliberately supplies no management/provider configuration.
@@ -17,7 +19,7 @@ try {
   const endpoint = runtime.origin + '/api/identity/editor-config';
   assert.equal((await fetch(endpoint)).status, 401, 'editor config requires authentication');
   const fixture = await navigationFixture(runtime.origin);
-  browser = await chromium.launch({headless:true});
+  browser = await launchBrowser();
   const context = await browser.newContext({viewport:{width:1440,height:1000}});
   page = await context.newPage();
   page.setDefaultTimeout(15000);
@@ -120,3 +122,5 @@ try {
   await runtime.close(success);
 }
 console.log('Mobile inbox browser checks passed:', evidence);
+
+}

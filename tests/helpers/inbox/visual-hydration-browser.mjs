@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import {readFile, writeFile} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
-const root = fileURLToPath(new URL('../', import.meta.url));
-const {chromium} = await import(process.env.H2H_PLAYWRIGHT_MODULE || 'playwright');
-const path = new URL('../src/editor/visual-edits.json', import.meta.url);
+export async function visualHydration(){
+
+const root = fileURLToPath(new URL('../../../', import.meta.url));
+const path = new URL('../../../src/editor/visual-edits.json', import.meta.url);
 const original = await readFile(path, 'utf8');
 let browser, runtime, changed = false, success = false;
 const build = () => {
@@ -15,7 +17,7 @@ const build = () => {
   assert.equal(result.status, 0, 'Hydration regression build failed');
 };
 try {
-  browser = await chromium.launch({headless:true});
+  browser = await launchBrowser();
   runtime = await createRuntime();
   // Read the real server-rendered heading without executing existing compiled edits.
   const baselineContext = await browser.newContext({javaScriptEnabled:false});
@@ -65,4 +67,6 @@ try {
   } finally {
     if (changed) { await writeFile(path, original); build(); }
   }
+}
+
 }

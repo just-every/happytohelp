@@ -2,15 +2,17 @@ import assert from 'node:assert/strict';
 import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-import {notificationPreferencesJourney} from './helpers/notification-preferences-browser.mjs';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
+import {notificationPreferencesJourney} from '../notification-preferences-browser.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+export async function managementLibrary(){
 
 // Management and library pages on the emitted Worker with real local D1/R2: one shared delete confirmation,
 // mobile tables that keep every column and action reachable, validated training-run and create forms.
 const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-management-library-')),'management-library');
 await mkdir(evidenceDir,{recursive:true});console.log('Management library browser evidence:',evidenceDir);
-const runtime=await createRuntime({vars:{EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-management-mail',EMAIL_FROM:'support@example.test'},outboundFixture:new URL('./helpers/notification-mail-fixture.mjs',import.meta.url).href,port:Number(process.env.H2H_TEST_PORT)||0,inspectorPort:process.env.H2H_RUNTIME_INSPECTOR_PORT?Number(process.env.H2H_RUNTIME_INSPECTOR_PORT):undefined}),origin=runtime.origin;
+const runtime=await createRuntime({vars:{EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-management-mail',EMAIL_FROM:'support@example.test'},outboundFixture:new URL('../notification-mail-fixture.mjs',import.meta.url).href,port:Number(process.env.H2H_TEST_PORT)||0,inspectorPort:process.env.H2H_RUNTIME_INSPECTOR_PORT?Number(process.env.H2H_RUNTIME_INSPECTOR_PORT):undefined}),origin=runtime.origin;
 let browser,success=false;
 const request=async(path,{token,body,method=body===undefined?'GET':'POST',raw=false}={})=>{const response=await fetch(origin+path,{method,headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});if(raw)return response;assert.ok(response.ok,`${method} ${path}: ${response.status} ${await response.clone().text()}`);return response.json();};
 const results=[],failures=[];
@@ -36,7 +38,7 @@ try{
  const category=(await request(`${knowledge}/categories`,{token,body:{name:'Getting started'}}));
  const dataset=(await request(`${knowledge}/datasets`,{token,body:{name:'Docs',url:'https://example.test/docs',max_crawl_depth:3,max_crawl_pages:50}}));
 
- browser=await chromium.launch({headless:true,args:["--use-mock-keychain","--password-store=basic"]});
+ browser=await launchBrowser();
  const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
  const pageErrors=[],nativeDialogs=[],deletes=[],posts=[];
  page.on('pageerror',error=>pageErrors.push(error.message));
@@ -86,7 +88,7 @@ try{
  });
  // The dialog itself is accessible at desktop and phone width (axe-core, as the accessibility suite uses).
  await check('confirmation dialog: no axe violations at desktop and phone width, typed confirmation is labelled',async()=>{
-  const axe=await readFile(join(resolve(new URL('..',import.meta.url).pathname),'node_modules/axe-core/axe.min.js'),'utf8');
+  const axe=await readFile(join(resolve(new URL('../../..',import.meta.url).pathname),'node_modules/axe-core/axe.min.js'),'utf8');
   const fresh=await request(`${knowledge}/articles`,{token,body:{title:'Axe dialog article',slug:'axe-dialog-article',content:'Steps.',status:'draft'}});
   for(const viewport of [{width:1440,height:1000},{width:320,height:568}]){
    await page.setViewportSize(viewport);await page.goto(`${base}/articles/${fresh.id}`);await page.getByRole('button',{name:'Save',exact:true}).waitFor();const more=page.getByRole('button',{name:'More actions',exact:true});if(await more.isVisible())await more.click();await page.getByRole('button',{name:'Delete',exact:true}).click();
@@ -236,7 +238,9 @@ try{
  await context.close();
  assert.deepEqual(pageErrors,[],'no page errors');
  await writeFile(join(evidenceDir,'result.json'),JSON.stringify({passed:results,failed:failures},null,2));
- if(failures.length){console.error(`Management library browser FAILED: ${failures.length} of ${results.length+failures.length}\n- ${failures.map(f=>`${f.name}: ${f.message}`).join('\n- ')}`);process.exitCode=1;}
+ if(failures.length){console.error(`Management library browser FAILED: ${failures.length} of ${results.length+failures.length}\n- ${failures.map(f=>`${f.name}: ${f.message}`).join('\n- ')}`);throw new Error(`Management library browser failed: ${failures.map(f=>f.name).join('; ')}`)}
  else{console.log(`Management library browser passed: ${results.length} checks.`);success=true;}
 }finally{await browser?.close();await runtime.close(success);}
 async function shot2(page,name){await page.screenshot({path:join(evidenceDir,name),fullPage:true});}
+
+}

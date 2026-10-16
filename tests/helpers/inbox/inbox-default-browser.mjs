@@ -2,18 +2,20 @@ import assert from 'node:assert/strict'
 import {mkdtemp,rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
-import {createRuntime} from './helpers/emitted-runtime.mjs'
-import {buildInboxFixture} from './helpers/inbox-conversation-fixture.mjs'
+import {createRuntime} from '../emitted-runtime.mjs'
+import {buildInboxFixture} from '../inbox-conversation-fixture.mjs'
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
-const tempRoot=await mkdtemp(join(tmpdir(),'inbox-default-'))
+export async function inboxDefault(){
+
+const tempRoot=await mkdtemp(join(tmpdir(),'inbox-default-')),previousTmp=process.env.TMPDIR
 process.env.TMPDIR=tempRoot
 
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright')
 let runtime,browser,context,page,success=false
 const errors=[]
 try{
  runtime=await createRuntime()
- browser=await chromium.launch({headless:true,...(process.env.H2H_BROWSER_CHANNEL?{channel:process.env.H2H_BROWSER_CHANNEL}:{})})
+ browser=await launchBrowser()
  context=await browser.newContext({viewport:{width:1440,height:900}})
  page=await context.newPage()
  page.setDefaultTimeout(15000)
@@ -80,9 +82,12 @@ try{
  assert.deepEqual(errors,[],'the inbox has no browser exceptions')
  success=true
 }finally{
+if(previousTmp===undefined)delete process.env.TMPDIR;else process.env.TMPDIR=previousTmp
  await context?.close()
  await browser?.close()
  await runtime?.close(success)
  if(success)await rm(tempRoot,{recursive:true,force:true})
 }
 console.log('Inbox default browser checks passed at 1440px and 390px.')
+
+}

@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validCompiledLiveEditSnapshot} from '../src/editor/live-edit-contracts.ts';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {navigationFixture, watchShell, assertShell} from './helpers/navigation-fixture.mjs';
+import {validCompiledLiveEditSnapshot} from '../../../src/editor/live-edit-contracts.ts';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {navigationFixture, watchShell, assertShell} from '../navigation-fixture.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
-const snapshot = JSON.parse(await readFile(new URL('../src/editor/visual-edits.json', import.meta.url), 'utf8'));
+export async function visualEdit(){
+
+const snapshot = JSON.parse(await readFile(new URL('../../../src/editor/visual-edits.json', import.meta.url), 'utf8'));
 assert.ok(validCompiledLiveEditSnapshot(snapshot), 'Invalid compiled visual edits');
 // Runtime uses the last edit for each target; earlier revisions are not additive.
 const effective = new Map();
@@ -12,12 +15,11 @@ for (const edit of snapshot.edits) {
   effective.set(JSON.stringify([edit.target.navigation ? 'navigation' : edit.path, edit.target.tag, edit.target.role, edit.target.navigation?.href || edit.target.selector]), edit);
 }
 const edits = [...effective.values()];
-const {chromium} = await import(process.env.H2H_PLAYWRIGHT_MODULE || 'playwright');
 let runtime, browser, success = false;
 const errors = [], checked = new Set();
 try {
   runtime = await createRuntime();
-  browser = await chromium.launch({headless:true});
+  browser = await launchBrowser();
   const page = await browser.newPage({viewport:{width:1440,height:1000}});
   page.setDefaultTimeout(15000);
   page.on('pageerror', error => errors.push(error.message));
@@ -68,7 +70,10 @@ try {
   const stamp = await watchShell(page);
   // Address links by destination because their visible labels are owner editable.
   for (const route of ['contacts', 'insights', 'conversations']) {
-    await nav.locator(`a[href="${base}/${route}"]`).click();
+    // Insights lives in the navigation's More menu, which opens first.
+    const link = nav.locator(`a.nav-link[href="${base}/${route}"]`);
+    if (!await link.isVisible()) await nav.locator('summary', {hasText: 'More'}).click();
+    await link.click();
     await page.waitForURL(url => url.pathname === `${base}/${route}`);
     await assertEdits();
     await assertShell(page, stamp, `${route} preserves the native shell`);
@@ -90,4 +95,6 @@ try {
   console.log(JSON.stringify({success, savedEdits:edits.length, checked:[...checked], checks:['real isolated Worker login', 'native route clicks preserve shell', 'document reload restores inbox', ...(edits.length ? ['saved text/styles checked on applicable routes and reload'] : [])], note:edits.length ? undefined : 'No saved edits in current snapshot; navigation and reload verified.'}, null, 2));
 } finally {
   try { await browser?.close(); } finally { await runtime?.close(success); }
+}
+
 }

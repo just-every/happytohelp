@@ -1,16 +1,18 @@
-// Workspace scoping and shell regressions, driven through the real emitted Worker and Chromium.
-// Each check runs independently so one failure does not hide the others; the process fails if any did.
 import assert from 'node:assert/strict';
 import {mkdir,mkdtemp} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {navigationFixture} from './helpers/navigation-fixture.mjs';
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
+import {createRuntime} from '../emitted-runtime.mjs';
+import {navigationFixture} from '../navigation-fixture.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+export async function workspaceShell(){
+// Workspace scoping and shell regressions, driven through the real emitted Worker and Chromium.
+// Each check runs independently so one failure does not hide the others; the process fails if any did.
 const evidence=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-workspace-shell-')),'workspace-shell');
 await mkdir(evidence,{recursive:true});
 const runtime=await createRuntime({port:Number(process.env.H2H_TEST_PORT||0)});
-const browser=await chromium.launch({headless:true,channel:process.env.H2H_PLAYWRIGHT_CHANNEL||undefined});
+const browser=await launchBrowser();
 const results=[];
 const requests=[];
 const unknownId='00000000-0000-4000-8000-000000000000';
@@ -296,5 +298,7 @@ try {
   const failed=results.filter(r=>!r.ok);
   await runtime.close(failed.length===0);
   console.log(`workspace shell browser checks: ${results.length-failed.length}/${results.length} passed; evidence ${evidence}`);
-  if(failed.length)process.exitCode=1;
+  if(failed.length)throw new Error(`workspace shell checks failed: ${failed.map(r=>r.name+': '+r.error).join('; ')}`);
+}
+
 }

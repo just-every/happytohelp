@@ -17,11 +17,19 @@ const bindings=(env:Env):Env=>env.H2H_TEST_CAPTURE_QUEUE?{...env,JOBS:{send:asyn
 // or makes the queue refuse (queue-unavailable) or silently lose (queue-lost) sends.
 const faulted=(request:Request,env:Env):Env=>{
  const before=request.headers.get('x-test-before-batch'),after=request.headers.get('x-test-after-batch'),fault=request.headers.get('x-test-fault')
- if(!before&&!after&&!fault)return env
- const DB=env.DB,FILES=env.FILES;let puts=0
+ // x-test-before-statement runs a real D1 write just before the first single statement matching x-test-statement.
+ const beforeStatement=request.headers.get('x-test-before-statement'),statementPattern=request.headers.get('x-test-statement')
+ if(!before&&!after&&!fault&&!beforeStatement)return env
+ const DB=env.DB,FILES=env.FILES;let puts=0,fired=false
+ const intercept=(statement:D1PreparedStatement):D1PreparedStatement=>new Proxy(statement,{get(target,key){
+  if(key==='bind')return (...values:unknown[])=>intercept(target.bind(...values))
+  if(key==='run'||key==='all'||key==='first'||key==='raw')return async(...args:unknown[])=>{if(!fired){fired=true;await DB.exec(beforeStatement!)}return (target as any)[key](...args)}
+  const value=(target as any)[key];return typeof value==='function'?value.bind(target):value
+ }})
+ const prepare=(sql:string)=>beforeStatement&&statementPattern&&new RegExp(statementPattern,'i').test(sql)?intercept(DB.prepare(sql)):DB.prepare(sql)
  const queue=fault==='queue-unavailable'?{send:async()=>{throw new Error('Injected queue delivery failure')},sendBatch:async()=>{throw new Error('Injected queue delivery failure')}}:fault==='queue-lost'?{send:async()=>{},sendBatch:async()=>{}}:undefined
  return {...env,...(queue?{JOBS:queue as unknown as Env['JOBS']}:{}),
-  DB:{prepare:DB.prepare.bind(DB),exec:DB.exec.bind(DB),async batch(statements:D1PreparedStatement[]){
+  DB:{prepare,exec:DB.exec.bind(DB),async batch(statements:D1PreparedStatement[]){
    if(fault==='db-before')throw new Error('Injected D1 failure')
    if(before)await DB.exec(before)
    const result=await DB.batch(statements)

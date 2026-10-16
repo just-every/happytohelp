@@ -1,20 +1,22 @@
-// Inbox and conversation regressions against the emitted Worker and a real browser:
-// contact clocks, header fit, literal bounded search, Escape on the assignment menu, saved replies over a draft,
-// the row Close/Reopen control by keyboard and touch, and Reopen on a closed conversation.
 import assert from 'node:assert/strict'
 import {mkdir,mkdtemp,writeFile} from 'node:fs/promises'
 import {join,resolve} from 'node:path'
 import {tmpdir} from 'node:os'
-import {createRuntime} from './helpers/emitted-runtime.mjs'
-import {buildInboxFixture,REPLY} from './helpers/inbox-conversation-fixture.mjs'
-import {emailConversationJourney} from './helpers/email-conversation-browser.mjs'
+import {createRuntime} from '../emitted-runtime.mjs'
+import {buildInboxFixture,REPLY} from '../inbox-conversation-fixture.mjs'
+import {emailConversationJourney} from '../email-conversation-browser.mjs'
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright')
+export async function inboxConversation(){
+// Inbox and conversation regressions against the emitted Worker and a real browser:
+// contact clocks, header fit, literal bounded search, Escape on the assignment menu, saved replies over a draft,
+// the row Close/Reopen control by keyboard and touch, and Reopen on a closed conversation.
+
 const optionalPort=name=>process.env[name]?Number(process.env[name]):undefined
 const evidence=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-inbox-conversation-')),'inbox-conversation')
 await mkdir(evidence,{recursive:true})
 const runtime=await createRuntime({port:optionalPort('H2H_RUNTIME_PORT')??0,inspectorPort:optionalPort('H2H_RUNTIME_INSPECTOR_PORT'),vars:{H2H_LOCAL:'true',APP_ORIGIN:'http://127.0.0.1',EMAIL_PROVIDER:'development',EMAIL_FROM:'support@localhost.test'}})
-const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
+const browser=await launchBrowser()
 const checks=[],problems=[]
 let success=false
 const check=(label)=>checks.push(label)
@@ -298,4 +300,6 @@ try{
  console.log(JSON.stringify({checks,problems}))
  await browser.close()
  await runtime.close(success)
+}
+
 }

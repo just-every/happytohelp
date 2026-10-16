@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
-import {chromium} from 'playwright';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {assertHelpSearchFits,assertHelpSearchReachable} from './helpers/appearance-geometry.mjs';
-import {assertHelpLinksReadable} from './helpers/help-center-link-contrast.mjs';
-import {exerciseLongAppearance} from './helpers/appearance-long-content.mjs';
-import {appearanceAudit} from './helpers/appearance-audit.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {assertHelpSearchFits,assertHelpSearchReachable} from '../appearance-geometry.mjs';
+import {assertHelpLinksReadable} from '../help-center-link-contrast.mjs';
+import {exerciseLongAppearance} from '../appearance-long-content.mjs';
+import {appearanceAudit} from '../appearance-audit.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+export async function appearanceBrowser(){
 const directory=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/appearance');await mkdir(directory,{recursive:true});
 const runtime=await createRuntime(),origin=runtime.origin,records=[];let browser,success=false;
 const api=async(path,{token,body,method=body?'POST':'GET'}={})=>{const response=await fetch(origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{})});return response};
@@ -15,7 +17,7 @@ const brand={brand_name:'Orchid Support',logo_url:origin+'/site-assets/images/ha
 brand.logo_url=brand.avatar_url=origin+'/homepage/media/brands/happytohelp-favicon.png';
 const audit=appearanceAudit(directory,records);
 try{
- browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
+ browser=await launchBrowser();
  const tenant=await runtime.seedTenant({name:'Orchid',email:'orchid@example.test',allowedOrigin:origin}),other=await runtime.seedTenant({name:'Other tenant',email:'other@example.test',allowedOrigin:origin});
  const settingsPath=`/api/management/projects/${tenant.projectId}/settings`,widgetPath=`/api/management/projects/${tenant.projectId}/widget-settings`;
  const project=await(await api(`/api/identity/projects/${tenant.projectId}`,{token:tenant.token})).json();
@@ -111,3 +113,5 @@ try{
  for(const viewport of [{width:1440,height:900},{width:390,height:844}]){await page.setViewportSize(viewport);assert.equal((await page.goto(origin+`/help/${tenant.projectId}`)).status(),404);await audit(page,viewport.width+'-help-deleted');}
  success=true;console.log('Appearance PASS: native save/reload/removal/defaults, preview parity, isolation, empty/loading/error/offline/recovery, publication/canonical/draft/deletion, '+records.length+' rendered axe scans.');
 }finally{await browser?.close();await runtime.close(success)}
+
+}

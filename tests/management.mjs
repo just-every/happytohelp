@@ -6,13 +6,15 @@ registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&con
 const {routes,dashboardRoutes,publicWidget,widgetEvents}=await import('../src/modules/management/index.ts')
 const {inboundEmail}=await import('../src/modules/integrations/index.ts')
 const {updateEmailSettings}=await import('../src/modules/integrations/mailbox-settings.ts')
+const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
+const {resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts')
 const {widget:widgetIdentity}=await import('../src/modules/identity/widget.ts')
 const {hashToken}=await import('../src/platform/auth.ts')
 const require=createRequire(import.meta.url),{build}=require('esbuild'),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
 const compiled=await build({entryPoints:['tests/conversation-worker.ts'],bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})
 const runtime=new Miniflare(convertV4MiniflareOptions({name:'management',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}))
 const proxy={env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
-try{const env={...proxy.env,EMAIL_API_KEY:undefined,EMAIL_FROM:undefined,OPENAI_API_KEY:undefined,GITHUB_TOKEN:undefined,GITHUB_TOKENS:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0101_email_mailbox_lifecycle.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','112_conversation_outcomes.sql'])for(const [,sql] of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run();
+try{const env={...proxy.env,EMAIL_API_KEY:undefined,EMAIL_FROM:undefined,OPENAI_API_KEY:undefined,GITHUB_TOKEN:undefined,GITHUB_TOKENS:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0101_email_mailbox_lifecycle.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','122_email_content.sql','123_email_reply_grants.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','112_conversation_outcomes.sql'])for(const [,sql] of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run();
 await DB.batch([DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)"),DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('q','Other','other','https://other.example',1)"),DB.prepare("INSERT INTO users VALUES('u','owner@example.com','Owner',1)"),DB.prepare("INSERT INTO memberships VALUES('p','u','owner')"),DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'),Date.now()+999999),DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('contact','p','Visitor','visitor@example.com',1)"),DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('c','p','contact',1,1)")]);
 async function call(app,path,method='GET',body){const result=await app.request('https://app.example'+path,{method,headers:{Authorization:'Bearer token','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env);return result}
 assert.equal((await call(routes,'/projects/q/settings')).status,403)
@@ -84,6 +86,25 @@ assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/notes','PO
 assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:'other@example.com'})).status,201)
 assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/actions','POST',{action:'markAsRead'})).status,200)
 const detail=await(await call(dashboardRoutes,'/projects/p/conversations/c')).json();assert.equal(detail.data.contact.display_name,'Visitor');assert.equal(detail.data.participants.length,1)
+// The add result and the detail loaded again use one contact + pivot shape.
+const addedParticipant=detail.data.participants[0]
+assert.ok(addedParticipant.pivot.id);assert.equal(addedParticipant.id,addedParticipant.contact_id)
+assert.equal((await call(dashboardRoutes,`/projects/p/conversations/c/participants/${addedParticipant.pivot.id}`,'DELETE')).status,200)
+assert.deepEqual((await(await call(dashboardRoutes,'/projects/p/conversations/c')).json()).data.participants,[])
+await DB.batch([
+ DB.prepare("INSERT INTO contacts(id,project_id,name,email,metadata_json,created_at) VALUES('supplied','p','Colleague','canonical@example.com','{\"provided_email\":\"supplied@example.com\"}',1)"),
+ DB.prepare("INSERT INTO contacts(id,project_id,email,created_at) VALUES('foreign','q','supplied@example.com',1)"),
+])
+const supplied=await(await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:' SUPPLIED@example.com '})).json()
+assert.equal(supplied.data.id,'supplied');assert.equal(supplied.data.provided_email,'supplied@example.com')
+assert.deepEqual((await(await call(dashboardRoutes,'/projects/p/conversations/c')).json()).data.participants[0].pivot,supplied.data.pivot)
+assert.equal((await call(dashboardRoutes,'/projects/q/conversations/c/participants','POST',{email:'supplied@example.com'})).status,404)
+await DB.prepare("INSERT INTO contacts(id,project_id,email,created_at) VALUES('ambiguous','p','supplied@example.com',1)").run()
+assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:'supplied@example.com'})).status,409)
+assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:'bad@example.com, other@example.com'})).status,400)
+assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:'visitor@example.com'})).status,409)
+await DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_erased',1) WHERE id='ambiguous'").run()
+assert.equal((await call(dashboardRoutes,'/projects/p/conversations/c/participants','POST',{email:'supplied@example.com'})).status,409,'erased identities do not remove ambiguity')
 assert.equal((await call(routes,'/projects/p/email-settings/test','POST',{idempotencyKey:'test'})).status,503)
 assert.equal((await publicWidget.request('https://app.example/settings?widgetKey=widget',{headers:{Origin:'https://other.example'}},env)).status,403)
 const widget=await(await publicWidget.request('https://app.example/settings?widgetKey=widget',{headers:{Origin:'https://widget.example'}},env)).json();assert.equal(widget.currentAgent.name,'Owner');assert.equal(widget.collectorEnabled,true)
@@ -95,6 +116,53 @@ const none=await(await call(dashboardRoutes,'/conversations?status=unresolved&as
 await DB.prepare("INSERT INTO conversation_buckets VALUES('old-bucket','c',1,'{}')").run()
 await DB.prepare("UPDATE messages SET bucket_id='old-bucket' WHERE id='m'").run()
 const historical=await(await call(dashboardRoutes,'/projects/p/conversations/c/buckets/old-bucket')).json();assert.equal(historical.data.messages[0].id,'m');assert.equal(historical.data.id,'old-bucket')
+// Send through the authenticated dashboard with only the paid network edge faked.
+await DB.batch([
+ DB.prepare("INSERT INTO conversation_buckets VALUES('latest-customer','c',20,'{}')"),
+ DB.prepare("INSERT INTO conversation_buckets VALUES('only-operator','c',30,'{}')"),
+ DB.prepare("INSERT INTO conversation_buckets VALUES('automatic-only','c',40,'{}')"),
+ DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('transcript-question','p','c','question','contact','contact','Customer **question**',2,20,'latest-customer')"),
+ DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('transcript-answer','p','c','answer','u','owner','Helpful [answer](https://example.com/help)',3,21,'latest-customer')"),
+ DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('transcript-ai','p','c','ai','import:helpscout:assistant','ai','Authored assistant answer',4,22,'latest-customer')"),
+ DB.prepare(`INSERT INTO move_in_message_sources(message_id,project_id,author_json,source_id,time_provenance) VALUES('transcript-ai','p','{"name":"Imported assistant","role":"ai"}','original-assistant-reply','source')`),
+ DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('transcript-system','p','c','system','system','system','System-only content',5,23,'latest-customer')"),
+ DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('later-operator','p','c','later-op','u','owner','Later operator-only segment',6,30,'only-operator')"),
+ DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('automatic-email','p','c','email:automatic','contact','contact','Automatic receipt',7,40,'automatic-only')"),
+ DB.prepare("INSERT INTO inbound_emails(id,project_id,conversation_id,intent_hash,state,created_at,local_id,message_id,automatic) VALUES('automatic','p','c','fixture','delivered',40,'email:automatic','automatic-email',1)"),
+ DB.prepare("UPDATE conversations SET revision=7 WHERE id='c'"),
+ DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)"),
+])
+await env.FILES.put('transcript-image',new Uint8Array([1,2,3]));await env.FILES.put('transcript-file',new TextEncoder().encode('Retained file'))
+await DB.batch([
+ DB.prepare("INSERT INTO media VALUES('transcript-image','p','c','contact','transcript-image','screenshot.png','image/png',3,'transcript-question',20)"),
+ DB.prepare("INSERT INTO media VALUES('transcript-file','p','c','contact','transcript-file','details.txt','text/plain',13,'transcript-question',20)"),
+])
+const transcriptEnv={...env,EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-key',EMAIL_FROM:'support@example.com',INBOUND_EMAIL_TOKEN:'fixture-inbound'},networkFetch=globalThis.fetch,requests=[]
+let rejectTranscript=false
+const transcriptBody={send_transcript_to:'chosen@example.com',idempotencyKey:'transcript-command',transcript_revision:7}
+async function transcript(body=transcriptBody){return dashboardRoutes.request('https://app.example/projects/p/conversations/c',{method:'PUT',headers:{Authorization:'Bearer token','Content-Type':'application/json'},body:JSON.stringify(body)},transcriptEnv)}
+try{
+ globalThis.fetch=async(url,options)=>{if(String(url)==='https://api.resend.com/emails'){requests.push(JSON.parse(options.body));return rejectTranscript?new Response('unavailable',{status:503}):Response.json({id:'provider-transcript'})}return networkFetch(url,options)}
+ const sent=await transcript();assert.equal(sent.status,200);assert.equal((await sent.json()).transcript_delivery.state,'sent')
+ const delivered=requests[0];assert.equal(delivered.to[0],'chosen@example.com');assert.equal((await resolveReplyRecipient(transcriptEnv,'p',inboundTarget(delivered.reply_to).replyToken,'chosen@example.com')).conversation_id,'c')
+ assert.ok(delivered.text.includes('Authored assistant answer'));assert.match(delivered.text,/Imported assistant/);assert.match(delivered.text,/Visitor/);assert.match(delivered.text,/Owner/);assert.match(delivered.html,/<strong>question<\/strong>/);assert.match(delivered.html,/href="https:\/\/example.com\/help"/)
+ for(const excluded of ['Hello','System-only content','Later operator-only segment','Automatic receipt','Private note'])assert.ok(!delivered.text.includes(excluded))
+ assert.ok(delivered.attachments.some(file=>file.filename==='screenshot.png'&&file.content_id));assert.ok(delivered.attachments.some(file=>file.filename==='details.txt'&&Buffer.from(file.content,'base64').toString()==='Retained file'))
+ assert.match(delivered.html,/src="cid:/)
+ await DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,bucket_id) VALUES('after-send','p','c','after-send','contact','contact','A later question',8,41,'latest-customer')").run()
+ await DB.prepare("UPDATE conversations SET revision=8 WHERE id='c'").run()
+ assert.equal((await(await transcript()).json()).transcript_delivery.state,'sent');assert.equal(requests.length,1,'lost-response retry keeps the original frontier and never sends twice')
+ assert.equal((await transcript({...transcriptBody,send_transcript_to:'different@example.com'})).status,409)
+ assert.equal((await DB.prepare("SELECT count(*) total FROM contacts WHERE email='chosen@example.com'").first()).total,0,'transcript recipient gains no inbound identity')
+ rejectTranscript=true
+ const uncertain={...transcriptBody,idempotencyKey:'unknown-transcript'}
+ assert.equal((await(await transcript(uncertain)).json()).transcript_delivery.state,'uncertain')
+ assert.equal((await(await transcript(uncertain)).json()).transcript_delivery.state,'uncertain');assert.equal(requests.length,2,'uncertain sends are never replayed')
+ assert.equal((await transcript({...transcriptBody,send_transcript_to:'bad,address'})).status,400)
+ await DB.prepare("DELETE FROM memberships WHERE project_id='p' AND user_id='u'").run()
+ assert.equal((await transcript()).status,401,'revoked operators cannot send or recover transcripts')
+ await DB.prepare("INSERT INTO memberships VALUES('p','u','owner')").run()
+}finally{globalThis.fetch=networkFetch}
 assert.equal((await call(routes,'/projects/p/agents','POST',{email:'invite@example.com',role:'operator'})).status,201)
 await DB.prepare("INSERT INTO sessions VALUES(?,'contact','p','contact','contact',?,NULL)").bind(await hashToken('contact-token'),Date.now()+999999).run()
 const widgetContact=await widgetEvents.request('https://app.example/c/widget-events',{method:'POST',headers:{Authorization:'Bearer contact-token','Content-Type':'application/json'},body:JSON.stringify({action:'contact',data:{provided_name:'Updated',provided_email:'updated@example.com'}})},env);assert.equal(widgetContact.status,200)

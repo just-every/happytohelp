@@ -1,5 +1,5 @@
-// @ts-ignore Maintained pure-JavaScript HTML text parser.
-import {convert} from 'html-to-text'
+import {plainEmail} from './email-reply'
+import {HTTPException} from 'hono/http-exception'
 import PostalMime from 'postal-mime'
 import type {Env} from '../../platform/env'
 import {receiveEmail} from './inbound-service'
@@ -13,11 +13,13 @@ export async function handleEmail(message:ForwardableEmailMessage,env:Env,execut
  const envelopeFrom=String(message.from||'').trim()
  if(!envelopeFrom||envelopeFrom==='<>'){message.setReject('Envelope sender required');return}
  const raw=await new Response(message.raw).arrayBuffer(),parsed=await PostalMime.parse(raw,{attachmentEncoding:'arraybuffer'})
- const body=(parsed.text|| (parsed.html?convert(parsed.html,{wordwrap:false,selectors:[{selector:'script',format:'skip'},{selector:'style',format:'skip'}]}):'')).trim();if(!body){message.setReject('A message body is required');return}
+ const body=plainEmail(parsed.text||'',parsed.html||'');if(!body.trim()&&!parsed.attachments.length){message.setReject('A message body is required');return}
  const rawId=parsed.messageId||await hashToken(new TextDecoder().decode(raw)),messageId=rawId.length>200?await hashToken(rawId):rawId
  // The SMTP envelope and configured recipient determine routing; message headers never select a tenant.
  // The header From, subject and automatic-mail headers are classification evidence only.
  const evidence=emailEvidence({envelopeFrom,headerFrom:parsed.from?.address,subject:parsed.subject,headers:parsed.headers})
- const result=await receiveEmail(env,{messageId,from:envelopeFrom,to:message.to,text:body,evidence,attachments:parsed.attachments.map(file=>({filename:file.filename||'attachment',contentType:file.mimeType,content:file.content as ArrayBuffer}))})
+ try{
+ const result=await receiveEmail(env,{messageId,from:envelopeFrom,to:message.to,text:body,senderAuthenticated:false,cc:(parsed.cc||[]).flatMap((entry:any)=>entry.group?entry.group.map((member:any)=>member.address):[entry.address]).filter(Boolean),evidence,attachments:parsed.attachments.map(file=>({filename:file.filename||'attachment',contentType:file.mimeType,content:file.content as ArrayBuffer}))})
  scheduleInboundEffects(env,execution,result)
+ }catch(error){if(error instanceof HTTPException&&error.status>=400&&error.status<500){message.setReject(error.message);return}throw error}
 }

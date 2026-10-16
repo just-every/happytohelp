@@ -1,8 +1,9 @@
 import type {Env} from '../../platform/env'
 import {isProjectActive} from '../../platform/project-status'
 import {contactAvailableSql} from '../conversations/contact-privacy'
-import {emailConfigured} from './email'
-import {replyAddress} from './inbound-routing'
+import {emailConfigured,type EmailInput} from './email'
+import {recipientReplyAddress} from './email-reply-address'
+import {renderConversationEmail} from './email-content'
 import {batchOperatorActivity} from './operator-activity'
 import {deliverNotification,loopSuppressionHeaders,recordedNotification} from './notification-delivery'
 
@@ -17,6 +18,7 @@ export function assignmentNotificationStatement(env:Env,event:AssignmentNotifica
  WHERE c.id=? AND c.project_id=? AND c.assigned_to=? AND ? IS NOT NULL AND ? IS NOT ? AND ?<>? AND (${acceptedSql})`)
  .bind(`assignment:${event.id}`,event.assignee,Date.now(),event.conversationId,event.projectId,event.assignee,event.assignee,event.assignee,event.previousAssignee,event.assignee,event.actorId,...acceptedArgs)
 }
+const escapeHtml=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!))
 type Notification={id:string;project_id:string;conversation_id:string;user_id:string;kind:'assignment'|'unread';batch_id:string|null;through_revision:number}
 type Recipient={email:string;assigned_to:string|null;assignment_preference:number;unassigned_preference:number;read_revision:number;inbound_address:string|null;is_enabled:number|null}
 async function recipient(env:Env,row:Notification){
@@ -37,18 +39,26 @@ async function sendNotification(env:Env,row:Notification){
  if(!user||user.is_enabled===0||!user.email)return
  if(row.kind==='assignment'&&user.assignment_preference===0)return
  let text='A teammate assigned this support conversation to you.'
+ let rich:Pick<EmailInput,'html'|'attachments'>={}
  if(row.kind==='unread'){
-  const unread=await env.DB.prepare(`SELECT m.content,m.revision FROM operator_notification_activity a JOIN messages m ON m.id=a.message_id AND m.project_id=a.project_id
+  const unread=await env.DB.prepare(`SELECT m.id,m.actor_id,m.actor_role,m.content,m.revision FROM operator_notification_activity a JOIN messages m ON m.id=a.message_id AND m.project_id=a.project_id AND m.conversation_id=a.conversation_id
    WHERE a.batch_id=? AND a.conversation_id=? AND a.project_id=? AND m.revision>? ORDER BY m.revision LIMIT 100`)
-   .bind(row.batch_id,row.conversation_id,row.project_id,user.read_revision).all<{content:string;revision:number}>()
+   .bind(row.batch_id,row.conversation_id,row.project_id,user.read_revision).all<{id:string;actor_id:string;actor_role:string;content:string;revision:number}>()
   if(!unread.results.length)return
   const context=await env.DB.prepare('SELECT actor_role,content FROM messages WHERE conversation_id=? AND project_id=? AND revision<? ORDER BY revision DESC LIMIT 3')
    .bind(row.conversation_id,row.project_id,unread.results[0].revision).all<{actor_role:string;content:string}>()
-  text=[...(context.results.length?['Previous context:',...context.results.reverse().map(m=>`${m.actor_role}: ${m.content}`),'']:[]),'Unread customer messages:',...unread.results.map(m=>m.content)].join('\n\n')
+  const previous=context.results.reverse()
+  const rendered=await renderConversationEmail(env,{projectId:row.project_id,conversationId:row.conversation_id,messages:unread.results})
+  text=[...(previous.length?['Previous context:',...previous.map(m=>`${m.actor_role}: ${m.content}`),'']:[]),'Unread customer messages:',...unread.results.map(m=>m.content),...(rendered.attachments.length?['Attachments:',...rendered.attachments.map(file=>file.filename)]:[])].join('\n\n')
+  rich={html:[...(previous.length?['<h2>Previous context:</h2>',...previous.map(m=>`<p>${escapeHtml(m.actor_role)}: ${escapeHtml(m.content).replace(/\n/g,'<br />')}</p>`)]:[]),'<h2>Unread customer messages:</h2>',rendered.html].join(''),attachments:rendered.attachments}
  }
- if(typeof env.APP_ORIGIN==='string')text+=`\n\nOpen conversation: ${new URL(`/projects/${encodeURIComponent(row.project_id)}/conversations/${encodeURIComponent(row.conversation_id)}`,env.APP_ORIGIN).href}`
- const replyTo=env.INBOUND_EMAIL_TOKEN&&user.inbound_address?replyAddress(user.inbound_address,row.conversation_id)||undefined:undefined
- await deliverNotification(env,{projectId:row.project_id,to:user.email,subject:row.kind==='assignment'?'A support conversation was assigned to you':'Unread HappyToHelp conversation messages',text,replyTo,headers:loopSuppressionHeaders({}),idempotencyKey:row.id})
+ if(typeof env.APP_ORIGIN==='string'){
+  const url=new URL(`/projects/${encodeURIComponent(row.project_id)}/conversations/${encodeURIComponent(row.conversation_id)}`,env.APP_ORIGIN).href
+  text+=`\n\nOpen conversation: ${url}`
+  if(rich.html)rich.html+=`<p>Open conversation: <a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>`
+ }
+ const replyTo=await recipientReplyAddress(env,user.inbound_address,row.project_id,row.conversation_id,user.email)
+ await deliverNotification(env,{projectId:row.project_id,to:user.email,subject:row.kind==='assignment'?'A support conversation was assigned to you':'Unread HappyToHelp conversation messages',text,...rich,replyTo,headers:loopSuppressionHeaders({}),idempotencyKey:row.id})
 }
 /** Bounded scheduled recovery. No attempted provider delivery is replayed.
  * `now` allows the scheduler's clock to be supplied by a caller. */

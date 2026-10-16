@@ -7,12 +7,13 @@ import {join,resolve} from 'node:path'
 import {tmpdir} from 'node:os'
 import {createRuntime} from './helpers/emitted-runtime.mjs'
 import {buildInboxFixture,REPLY} from './helpers/inbox-conversation-fixture.mjs'
+import {emailConversationJourney} from './helpers/email-conversation-browser.mjs'
 
 const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright')
 const optionalPort=name=>process.env[name]?Number(process.env[name]):undefined
 const evidence=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-inbox-conversation-')),'inbox-conversation')
 await mkdir(evidence,{recursive:true})
-const runtime=await createRuntime({port:optionalPort('H2H_RUNTIME_PORT')??0,inspectorPort:optionalPort('H2H_RUNTIME_INSPECTOR_PORT')})
+const runtime=await createRuntime({port:optionalPort('H2H_RUNTIME_PORT')??0,inspectorPort:optionalPort('H2H_RUNTIME_INSPECTOR_PORT'),vars:{H2H_LOCAL:'true',APP_ORIGIN:'http://127.0.0.1',EMAIL_PROVIDER:'development',EMAIL_FROM:'support@localhost.test'}})
 const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
 const checks=[],problems=[]
 let success=false
@@ -284,6 +285,10 @@ try{
   await mobile.context.close()
  }
 
+ for(const width of [1440,390]){
+  const {context,page}=await open(conversationPath('draft'),{viewport:{width,height:900}})
+  try{await emailConversationJourney({page,api:fx.api,projectId:fx.projectId,conversationId:fx.contacts.draft.id,width,evidence});check(`email recipients and transcript send survive reload at ${width}`)}finally{await context.close()}
+ }
  assert.deepEqual(problems,[])
  success=true
 }finally{

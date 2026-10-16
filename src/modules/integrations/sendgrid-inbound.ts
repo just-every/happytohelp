@@ -1,3 +1,5 @@
+import PostalMime from 'postal-mime'
+import {plainEmail} from './email-reply'
 import {Hono} from 'hono'
 import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
@@ -48,7 +50,7 @@ async function authorized(c:any){
 sendgridInbound.post('/email/sendgrid/inbound',async c=>{
  if(!await authorized(c))throw new HTTPException(403)
  const size=Number(c.req.header('content-length')||0);if(size>maxBody)throw new HTTPException(413,{message:'Inbound email exceeds 30 MB'})
- const raw=await c.req.parseBody(),body=raw as Record<string,unknown>,envelope=json(field(body,'envelope'))||{},envelopeRecipients=Array.isArray(envelope.to)?envelope.to:[],to=address(envelopeRecipients[0]||'')||address(field(body,'to')),sender=typeof envelope.from==='string'?envelope.from.trim():'',from=sender==='<>'?'':sender,text=field(body,'text').trim(),html=field(body,'html'),content=text||html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()
+ const raw=await c.req.parseBody(),body=raw as Record<string,unknown>,envelope=json(field(body,'envelope'))||{},envelopeRecipients=Array.isArray(envelope.to)?envelope.to:[],to=envelopeRecipients.length===1?address(envelopeRecipients[0]||''):'',sender=typeof envelope.from==='string'?envelope.from.trim():'',from=sender==='<>'?'':sender,html=field(body,'html'),content=plainEmail(field(body,'text'),html)
  const info=json(field(body,'attachment-info'))||{},attachments=[]
  for(const [key,metadata] of Object.entries(info)){
   const file=body[key];if(!(file instanceof File))continue
@@ -59,8 +61,9 @@ sendgridInbound.post('/email/sendgrid/inbound',async c=>{
  // auto-replies) is refused rather than admitted as whoever the header From claims.
  if(!from)throw new HTTPException(400,{message:'SendGrid inbound payload has no envelope sender'})
  if(!to||(!content&&!attachments.length))throw new HTTPException(400,{message:'SendGrid inbound payload is missing recipient or body'})
+ const parsedHeaders=await PostalMime.parse(`${field(body,'headers')}\r\nCc: ${field(body,'cc').replace(/[\r\n]/g,' ')}\r\n\r\n`),cc=(parsedHeaders.cc||[]).flatMap((entry:any)=>entry.group?entry.group.map((member:any)=>member.address):[entry.address]).filter(Boolean)
  const evidence=emailEvidence({envelopeFrom:from,headerFrom:field(body,'from'),subject:field(body,'subject'),headers:headerBlockEntries(field(body,'headers'))})
- const fallback=await hashToken(JSON.stringify({to,from,subject:field(body,'subject'),content,attachments:await Promise.all(attachments.map(async file=>({filename:file.filename,type:file.contentType,size:file.content.byteLength,hash:await contentHash(file.content)})))})),result=await receiveEmail(c.env,{messageId:messageId(field(body,'headers'),fallback),to,from,text:content,evidence,attachments})
+ const fallback=await hashToken(JSON.stringify({to,from,subject:field(body,'subject'),content,cc,attachments:await Promise.all(attachments.map(async file=>({filename:file.filename,type:file.contentType,size:file.content.byteLength,hash:await contentHash(file.content)})))})),result=await receiveEmail(c.env,{messageId:messageId(field(body,'headers'),fallback),to,from,text:content,cc,senderAuthenticated:field(body,'SPF').trim().toLowerCase()==='pass',evidence,attachments})
  scheduleInboundEffects(c.env,c.executionCtx,result)
  return c.json(result,result.duplicate?200:201)
 })

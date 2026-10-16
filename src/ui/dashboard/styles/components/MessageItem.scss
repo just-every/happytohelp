@@ -183,3 +183,9 @@
         margin-top: 0.6rem;
     }
 }
+.transcript-original-email pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 20rem;
+    overflow: auto;
+}

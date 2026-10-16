@@ -29,6 +29,10 @@ function MessageItem({ message, conversation, showActor = true, grouped = false,
         <div className={"message-content transcript-message-content"+( message.content ? " has-content" : "")+( !message.content && message.media && message.media.length ? " image-only" : "")}>
             { message.erased_at && <p className="mb-1 transcript-message-erased"><em>Message erased</em></p> }
             { message.content && <ReactMarkdown remarkPlugins={[gfm, externalLinks]} className="mb-1">{ visibleMessageContent(message.content) }</ReactMarkdown> }
+            { message.content_raw && message.content_raw.trim() !== (message.content || '').trim() && <details className="transcript-original-email mt-2">
+                <summary>Original email</summary>
+                <pre className="mt-2 mb-1">{message.content_raw}</pre>
+            </details> }
             <MessageCitations message={message} />
             <MessageMailStatus status={message.email_status} />
             { message.media && message.media.map(media => (

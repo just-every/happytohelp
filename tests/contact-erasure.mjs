@@ -46,6 +46,8 @@ async function seed(){
   `INSERT INTO contacts(id,project_id,name,email,external_id,created_at,is_verified,metadata_json) VALUES('ct','p','Alice Example','alice@example.com','crm-alice',5,1,'{"provided_email":"Alice.Personal@example.com","phone":"+61 400 000 000","ip_address":"203.0.113.9","user_agent":"Private Browser"}'),('other','p','Bob Other','bob@example.com','crm-bob',6,1,'{"phone":"+61 411 111 111"}'),('qct','q','Quinn','quinn@example.com',NULL,7,0,'{}')`,
   "INSERT INTO conversations(id,project_id,contact_id,revision,last_message_id,created_at,updated_at) VALUES('conv1','p','ct',3,'m1c',10,13),('conv2','p','ct',1,'m2a',20,21),('convOther','p','other',1,'mo1',30,31),('convQ','q','qct',1,'mq1',40,41)",
   `INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,intent_hash) VALUES('m1a','p','conv1','c-1','ct','contact','${secret}',1,11,'hash-c1'),('m1b','p','conv1','op-1','operator','operator','Thanks Alice, checking order 4471',2,12,'hash-op1'),('m1c','p','conv1','c-2','ct','contact','My card ends 4242',3,13,'hash-c2'),('m2a','p','conv2','c-3','ct','contact','Second conversation secret',1,21,'hash-c3'),('mo1','p','convOther','o-1','other','contact','Bob private question',1,31,'hash-o1'),('mq1','q','convQ','q-1','qct','contact','Quinn private question',1,41,'hash-q1')`,
+  `UPDATE messages SET content_raw='Alice original email with quoted order history' WHERE id='m1a'`,
+  "INSERT INTO email_reply_grants VALUES('reply-alice','p','conv1','alice@example.com',1),('reply-alias','p','convOther','alice.personal@example.com',1),('reply-bob','p','convOther','bob@example.com',1),('reply-q','q','convQ','alice@example.com',1)",
   "INSERT INTO conversation_outbox(project_id,conversation_id,message_id,created_at) VALUES('p','conv1','m1a',11),('p','conv1','m1b',12),('p','conv1','m1c',13),('p','conv2','m2a',21),('p','convOther','mo1',31),('q','convQ','mq1',41)",
   "INSERT INTO media(id,project_id,conversation_id,uploaded_by,object_key,filename,content_type,size,message_id,created_at) VALUES('md1','p','conv1','ct','p/conv1/contact-upload','passport.png','image/png',13,'m1a',11),('md2','p','conv2','operator','p/conv2/operator-upload','invoice.pdf','application/pdf',30,NULL,21),('mdo','p','convOther','other','p/convOther/other-upload','bob.txt','text/plain',19,'mo1',31),('mdq','q','convQ','qct','q/convQ/q-upload','q.txt','text/plain',18,'mq1',41),('mdq2','q','convQ','ct','q/convQ/q-by-ct','q2.txt','text/plain',40,NULL,42)",
   `INSERT INTO conversation_buckets(id,conversation_id,created_at,metadata_json) VALUES('bucket1','conv1',9,'{"id":"bucket1","summary":"Alice asked about a refund for order 4471"}'),('bucketOther','convOther',29,'{"id":"bucketOther","summary":"Bob asked about shipping"}')`,
@@ -109,6 +111,7 @@ async function outsideScope(){
   usage:await all('SELECT * FROM ai_round_usage ORDER BY attempt_id,request_id'),
   localJobs:await all("SELECT * FROM local_jobs WHERE id<>'job1' ORDER BY id"),
   localEvents:await all("SELECT * FROM local_events WHERE job_id<>'job1'"),
+  replyGrants:await all("SELECT * FROM email_reply_grants WHERE token_hash IN ('reply-bob','reply-q') ORDER BY token_hash"),
   email:await all("SELECT * FROM email_deliveries WHERE id='message:mo1:x'"),
   legacy:await all("SELECT * FROM legacy_import_rows WHERE source_id IN ('other','bucketOther') ORDER BY source_id"),
   buckets:await all("SELECT * FROM conversation_buckets WHERE conversation_id NOT IN ('conv1','conv2') ORDER BY id"),
@@ -175,6 +178,8 @@ test('admin erasure removes the contact personal data from D1 and R2',async()=>{
  assert.equal(first.erased_by,'admin');assert.equal(first.runs,1);assert.equal(first.erased_at,first.last_erased_at)
  assert.deepEqual({conversations:first.conversations,messages:first.messages,attachments:first.attachments,tracked_events:first.tracked_events,context_records:first.context_records,sessions:first.sessions},{conversations:2,messages:4,attachments:3,tracked_events:2,context_records:7,sessions:2})
  const erased=await erasedScope()
+ assert.deepEqual(await all("SELECT * FROM email_reply_grants WHERE token_hash IN ('reply-alice','reply-alias')"),[])
+ assert.ok((await all("SELECT content_raw FROM messages WHERE conversation_id IN ('conv1','conv2')")).every(message=>message.content_raw===null))
  assert.deepEqual({name:erased.contact.name,email:erased.contact.email,external_id:erased.contact.external_id,is_verified:erased.contact.is_verified},{name:null,email:null,external_id:null,is_verified:0})
  assert.deepEqual(JSON.parse(erased.contact.metadata_json),{is_deleted:1,is_blocked:1,is_erased:1,erased_at:first.erased_at})
  assert.deepEqual(erased.sessions,[])

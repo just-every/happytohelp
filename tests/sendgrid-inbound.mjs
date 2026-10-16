@@ -17,15 +17,13 @@ const { getPlatformProxy } = await import('wrangler')
 const proxy = await getPlatformProxy({ persist: false })
 
 try {
-  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql', '0100_inbound_email_claims.sql', '0104_inbound_email_classification.sql','112_conversation_outcomes.sql']) {
+  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql', '0100_inbound_email_claims.sql', '0104_inbound_email_classification.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql']) {
     for (const sql of migrationStatements(await readFile(new URL(`../migrations/${file}`, import.meta.url), 'utf8'))) await proxy.env.DB.prepare(sql).run()
   }
-  const files = new Map()
   const env = {
     ...proxy.env,
     INBOUND_EMAIL_TOKEN: 'synthetic-fixture-inbound-token',
     OPENAI_API_KEY: undefined,
-    FILES: { async put(key, content) { files.set(key, content) }, async get(key) { const content = files.get(key); return content === undefined ? null : { arrayBuffer: async () => content } } },
     CONVERSATIONS: { idFromName: id => id, get: () => ({ fetch: async () => new Response('ok') }) },
   }
   await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)").run()
@@ -41,6 +39,7 @@ try {
     form.set('envelope', JSON.stringify({ to: [envelopeTo], from: 'customer@example.com' }))
     form.set('to', visibleTo)
     form.set('from', 'Customer <customer@example.com>')
+    form.set('SPF','pass')
     form.set('subject', 'Attachment from customer')
     if (text !== undefined) form.set('text', text)
     form.set('headers', `Message-ID: <${messageId}>\r\n`)
@@ -81,12 +80,13 @@ try {
 
   // Only the SMTP envelope names the sender: a null return path is refused, and the
   // header From (chosen by whoever wrote the message) never selects a contact.
-  const rawForm = ({ messageId, envelope, from = 'Customer <customer@example.com>', subject = 'Question', headers = '', text = 'Hello' }) => {
+  const rawForm = ({ messageId, envelope, from = 'Customer <customer@example.com>', subject = 'Question', headers = '', text = 'Hello', spf='pass' }) => {
     const form = new FormData()
     if (envelope !== undefined) form.set('envelope', JSON.stringify(envelope))
     form.set('to', 'support@reply.support.example.com')
     form.set('from', from)
     form.set('subject', subject)
+    form.set('SPF',spf)
     form.set('text', text)
     form.set('headers', `Message-ID: <${messageId}>\r\n${headers}`)
     return form
@@ -115,6 +115,18 @@ try {
   const customer = await post(rawForm({ messageId: 'sendgrid-customer@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'customer@example.com' }, subject: 'Re: Out of office auto-replies are not working' }))
   assert.equal((await customer.json()).automatic, false)
   assert.equal(pending.length - scheduled, 3, 'customer mail schedules the broadcast and the AI reply request')
+  const ccMail=rawForm({messageId:'sendgrid-cc@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Finance can help.\n\nOn Fri, 16 Oct 2026 Support wrote:\n> Please attach the export',headers:'Cc: Finance <finance@example.com>\r\n'})
+  const ccResult=await post(ccMail);assert.equal(ccResult.status,201)
+  const participant=await env.DB.prepare('SELECT ct.id FROM contacts ct JOIN conversation_participants cp ON cp.contact_id=ct.id WHERE cp.conversation_id=? AND ct.email=? AND ct.project_id=?').bind(firstBody.conversationId,'finance@example.com','p').first()
+  assert.ok(participant)
+  const finance=await post(rawForm({messageId:'sendgrid-participant@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'finance@example.com'},from:'Finance <finance@example.com>',text:'I have the invoice.'}))
+  assert.equal(finance.status,201)
+  const body=await env.DB.prepare('SELECT content,content_raw FROM messages WHERE id=(SELECT message_id FROM inbound_emails WHERE id=?)').bind('<sendgrid-cc@example.com>').first()
+  assert.equal(body.content,'Finance can help.');assert.ok(body.content_raw.includes('Please attach the export'))
+  const ambiguous=await post(rawForm({messageId:'sendgrid-many-recipients@example.com',envelope:{to:['support@reply.support.example.com','second@reply.support.example.com'],from:'customer@example.com'}}))
+  assert.equal(ambiguous.status,400)
+  const unauthenticatedSender=await post(rawForm({messageId:'sendgrid-spoof@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'finance@example.com'},text:'Forged participant envelope',spf:'fail'}))
+  assert.equal(unauthenticatedSender.status,403)
   await Promise.all(pending)
   console.log('SendGrid inbound: Basic shared-token auth, multipart attachment bytes, stable Message-ID, D1/R2 admission, and duplicate delivery passed')
 } finally {

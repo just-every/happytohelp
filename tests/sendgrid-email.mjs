@@ -17,7 +17,7 @@ const proxy = await getPlatformProxy({ persist: false })
 const originalFetch = globalThis.fetch
 
 try {
-  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql']) {
+  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql','123_email_reply_grants.sql']) {
     for (const sql of (await readFile(new URL(`../migrations/${file}`, import.meta.url), 'utf8')).split(';').filter(value => value.trim())) await proxy.env.DB.prepare(sql).run()
   }
   const env = { ...proxy.env, EMAIL_PROVIDER: 'sendgrid', EMAIL_API_KEY: 'fixture-key', EMAIL_FROM: 'help@support.example.com', INBOUND_EMAIL_TOKEN: 'test-only-inbound-email-token' }
@@ -87,7 +87,8 @@ try {
   assert.equal(notified.state, 'sent')
   const notification = bodies.at(-1).body
   assert.deepEqual(notification.headers, loopHeaders)
-  assert.deepEqual(notification.reply_to, { email: 'inbound+c@example.com' })
+  const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts'),{resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts')
+  assert.equal((await resolveReplyRecipient(env,'p',inboundTarget(notification.reply_to.email).replyToken,'customer@example.com')).conversation_id,'c')
   assert.deepEqual(notification.personalizations[0].to, [{ email: 'customer@example.com' }])
   console.log('SendGrid transport: explicit selection, real envelope/reply address, accepted receipt, uncertain no-replay, rejection, and Resend selection passed')
 } finally {

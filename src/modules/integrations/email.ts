@@ -3,16 +3,18 @@ import {localMailOrigin} from '../../edition/local-mail/configuration'
 import {sendDevelopment} from '../../edition/local-mail/sender.mjs'
 import {emailMode} from './email-provider'
 import type {Env} from '../../platform/env'
-import {emailConfigured, providerRequest, providerReceipt, selectedEmailProvider, sendGridDelivery} from './email-provider'
+import {emailConfigured, providerRequest, providerReceipt, selectedEmailProvider, sendGridDelivery, providerMessage, validateEmailInput} from './email-provider'
 import {SendGridSendError} from '../../vendor/base/modules/sendgrid-email/src/sender'
 export {emailConfigured} from './email-provider'
 import {HTTPException} from 'hono/http-exception'
 
 /** `headers` are extra message headers (loop suppression on notifications); like every
  * other field they are part of the delivery identity. */
-export interface EmailInput {to:string;subject:string;text:string;projectId?:string;idempotencyKey:string;replyTo?:string;headers?:Readonly<Record<string,string>>}
+export interface EmailAttachment {filename:string;content:string;contentType:string;contentId?:string}
+export interface EmailInput {to:string;subject:string;text:string;html?:string;attachments?:readonly EmailAttachment[];projectId?:string;idempotencyKey:string;replyTo?:string;headers?:Readonly<Record<string,string>>}
 type DeliveryRow={state:string;provider_id:string|null;intent_hash:string}
 
+export type EmailOutcome={id:string|null;state:string;recipient?:string;mode?:'local'}
 async function senderFor(env:Env,input:EmailInput){
  const sender=input.projectId?await env.DB.prepare('SELECT from_name,from_address FROM email_settings WHERE project_id=?').bind(input.projectId).first<{from_name:string;from_address:string}>():null
  const senderAddress=sender?.from_address||String(env.EMAIL_FROM||'')
@@ -37,13 +39,30 @@ function sendGridFailure(error:unknown){
  const failed=error.outcome==='rejected'||error.outcome==='rate_limited'
  return {state:failed?'failed' as const:'uncertain' as const,message:error.outcome==='rate_limited'?'Email provider rate limited delivery':failed?'Email provider rejected delivery':'Email delivery outcome unknown; reconcile before retrying'}
 }
-export async function sendEmail(env:Env,input:EmailInput){
+async function submitClaimed(env:Env,input:EmailInput,from:string):Promise<EmailOutcome>{
+ try{
+  const providerId=await sendThroughSelectedProvider(env,input,from)
+  await updateDelivery(env,input.idempotencyKey,'sent',null,providerId)
+  return {id:providerId,state:'sent',...(emailMode(env)==='local'?{mode:'local' as const}:{})}
+ }catch(error){
+  const classified=sendGridFailure(error)
+  if(classified){
+   await updateDelivery(env,input.idempotencyKey,classified.state,classified.message)
+   throw new HTTPException(classified.state==='failed'?502:503,{message:classified.message})
+  }
+  await env.DB.prepare("UPDATE email_deliveries SET state='uncertain',error='Delivery outcome unknown',updated_at=? WHERE id=? AND state='sending'").bind(Date.now(),input.idempotencyKey).run()
+  throw error
+ }
+}
+async function suppressDevelopment(env:Env,input:EmailInput,from:string):Promise<EmailOutcome>{
+ await sendDevelopment({provider:'development',mode:'development'},providerMessage(input,from))
+ return {id:null,state:'suppressed',mode:'local'}
+}
+export async function sendEmail(env:Env,input:EmailInput):Promise<EmailOutcome>{
  if(!emailConfigured(env))throw new HTTPException(503,{message:'Email provider is not configured'})
  const from=await senderFor(env,input)
- if(localMailOrigin(env)){
-  await sendDevelopment({provider:'development',mode:'development'},{deliveryId:input.idempotencyKey,from,to:[input.to],subject:input.subject,text:input.text,...(input.replyTo?{replyTo:input.replyTo}:{}),...(input.headers?{headers:{...input.headers}}:{})})
-  return {id:null,state:'suppressed',mode:'local' as const}
- }
+ validateEmailInput(input,from)
+ if(localMailOrigin(env))return suppressDevelopment(env,input,from)
  const intentHash=await hashToken(JSON.stringify({...input,from})),existing=await env.DB.prepare('SELECT state,provider_id,intent_hash FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<DeliveryRow>()
  if(existing){
   if(existing.intent_hash!==intentHash)throw new HTTPException(409,{message:'Email command identity conflict'})
@@ -52,17 +71,26 @@ export async function sendEmail(env:Env,input:EmailInput){
  }
  const now=Date.now(),claimed=await env.DB.prepare("INSERT OR IGNORE INTO email_deliveries VALUES(?,?,?,?,?,'sending',NULL,NULL,?,?)").bind(input.idempotencyKey,input.projectId||null,input.to,input.subject,intentHash,now,now).run()
  if(!claimed.meta.changes)throw new HTTPException(409)
- try{
-  const providerId=await sendThroughSelectedProvider(env,input,String(from))
-  await updateDelivery(env,input.idempotencyKey,'sent',null,providerId)
-  return {id:providerId,state:'sent',...(emailMode(env)==='local'?{mode:'local' as const}:{})}
- }catch(error){
- const classified=sendGridFailure(error)
- if(classified){
-   await updateDelivery(env,input.idempotencyKey,classified.state,classified.message)
-   throw new HTTPException(classified.state==='failed'?502:503,{message:classified.message})
+ return submitClaimed(env,input,from)
+}
+/** Freeze the complete notification recipient set before any network effect. A
+ * process lost after this transaction leaves sending outcomes for reconciliation,
+ * never a partially reconstructed recipient list on automatic outbox replay. */
+export async function sendEmails(env:Env,inputs:readonly EmailInput[]):Promise<EmailOutcome[]>{
+ if(!inputs.length)return []
+ if(!emailConfigured(env))throw new HTTPException(503,{message:'Email provider is not configured'})
+ const prepared=await Promise.all(inputs.map(async input=>{const from=await senderFor(env,input);validateEmailInput(input,from);return {input,from,intentHash:await hashToken(JSON.stringify({...input,from}))}}))
+ if(localMailOrigin(env))return Promise.all(prepared.map(({input,from})=>suppressDevelopment(env,input,from)))
+ const now=Date.now()
+ // D1 batch is one transaction. A duplicate primary claim rolls back every
+ // participant claim; only the process that owns the whole set may submit it.
+ await env.DB.batch(prepared.map(({input,intentHash})=>env.DB.prepare("INSERT INTO email_deliveries VALUES(?,?,?,?,?,'sending',NULL,NULL,?,?)").bind(input.idempotencyKey,input.projectId||null,input.to,input.subject,intentHash,now,now)))
+ return Promise.all(prepared.map(async({input,from})=>{
+  try{return {...await submitClaimed(env,input,from),recipient:input.to}}
+  catch(error){
+   const row=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<{state:string;provider_id:string|null;recipient:string}>()
+   if(!row)throw error
+   return {state:row.state,id:row.provider_id,recipient:row.recipient}
   }
-  await env.DB.prepare("UPDATE email_deliveries SET state='uncertain',error='Delivery outcome unknown',updated_at=? WHERE id=? AND state='sending'").bind(Date.now(),input.idempotencyKey).run()
-  throw error
- }
+ }))
 }

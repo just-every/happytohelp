@@ -11,7 +11,7 @@ const {releaseInterruptedInbound}=await import('../src/modules/integrations/inbo
 const {getPlatformProxy}=await import('wrangler'),proxy=await getPlatformProxy({persist:false})
 try{
  const env=proxy.env,DB=env.DB
- for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
+ for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
  await DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)").run()
  await DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)").run()
  const input={messageId:'recover',to:'inbound@example.com',from:'customer@example.com',text:'Durable email',attachments:[{filename:'note.txt',contentType:'text/plain',content:new TextEncoder().encode('attachment').buffer}]}
@@ -116,7 +116,7 @@ try{
   const outbound=[],env={...proxy.env,EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-resend',EMAIL_FROM:'support@example.com'},DB=env.DB
   const flushAlerts=()=>dispatchOperatorNotifications(env,{now:Date.now()+61000})
   globalThis.fetch=async(url,init)=>{outbound.push(JSON.parse(String(init.body)));return Response.json({id:`resend-${outbound.length}`})}
-  for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
+  for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
   await DB.batch([
    DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)"),
    DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)"),

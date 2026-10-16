@@ -47,6 +47,35 @@ come from write-time records, without a classification model request. A new visi
 message reopens the cycle; resolving again records a separate outcome and rating
 eligibility. Reopened conversations leave current closed-cycle rate denominators.
 
+## Continue a conversation by email
+
+With the inbound gateway configured, reply to a conversation's reply address from
+its customer's canonical email, a current recipient's canonical email, or a current
+workspace member's email. Notifications carry a recipient-bound reply address; keep
+that full address when replying. SendGrid additionally accepts a verified SPF result
+from its authenticated gateway. The JSON gateway must authenticate the sender before
+posting. A header From or Reply-To alone never proves the sender. Removing a recipient or teammate removes that reply
+authority. Unrelated or ambiguous senders are refused. A supplied reply address is
+used for notifications separately from the website's signed customer identity; it
+does not authenticate inbound replies as that verified customer.
+
+Through a sender-authenticated gateway, mail to the bare support mailbox continues
+the sender's single open conversation. The Email Worker requires the recipient reply
+address to continue an existing thread or add CC recipients.
+If none is open it starts a new one; if several are open, reply to the specific
+conversation address instead. CC addresses on accepted human mail become scoped
+recipients. Replies notify the other recipients, excluding the sender.
+
+Visible replies omit conventional quoted history and signatures. **Original email**
+retains the original text in the inbox. Replies and emailed transcripts carry rich
+text, inline images and files, up to 8 MiB per file and 24 MiB encoded content.
+Unavailable or oversized media is refused explicitly. **Details → Contact actions →
+Email conversation** sends the latest customer conversation segment, excluding
+automated messages, with its conversation reply address. Reopening or retrying a
+transcript keeps the same request and revision. Provider acceptance is distinct
+from delivery; an uncertain send is never automatically replayed. Local development
+suppresses mail without storing or sending it.
+
 ## Read Reports
 
 Reports uses the workspace's IANA timezone (UTC by default). Select 7, 30 or 90

@@ -11,12 +11,13 @@ export function mailbox(value:unknown):string|null{
  const address=emailAddress(value),match=address?.match(mailboxPattern)
  return match?`${match[1]}@${match[2]}`:null
 }
-export function inboundTarget(value:unknown):{mailbox:string;conversationId:string|null}|null{
+export function inboundTarget(value:unknown):{mailbox:string;conversationId:string|null;replyToken?:string}|null{
  const address=emailAddress(value),match=address?.match(/^([^@\s]+)@([^@\s]+)$/)
  if(!match)return null
  const plus=match[1].lastIndexOf('+')
  if(plus<1){const base=mailbox(address);return base?{mailbox:base,conversationId:null}:null}
  const local=match[1].slice(0,plus),conversationId=match[1].slice(plus+1)
+ if(/^r\.[a-f0-9]{32}$/.test(conversationId)&&mailbox(`${local}@${match[2]}`))return {mailbox:`${local}@${match[2]}`,conversationId:null,replyToken:conversationId.slice(2)}
  if(!conversationPattern.test(conversationId)||!mailbox(`${local}@${match[2]}`))return null
  return {mailbox:`${local}@${match[2]}`,conversationId}
 }

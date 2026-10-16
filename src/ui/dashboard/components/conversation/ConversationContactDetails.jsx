@@ -38,7 +38,7 @@ export default function ConversationContactDetails({ conversation, onEdit, onEma
         </ConversationDetailField> }
         { email && <ConversationDetailField className="conversation-detail-field--primary" icon="mail" label="Email">
             <a href={ `mailto:${ email }` }>{ email }</a>
-            <small className="d-block text-muted">Replies are emailed to this address. Delivery status appears below each reply.</small>
+            <small className="d-block text-muted">Replies go to {contact.provided_email || email}. Delivery status appears below each reply.{hasDifferentProvidedEmail && ' This supplied reply address does not change the signed identity.'}</small>
             { hasDifferentProvidedEmail && <a href={ `mailto:${ contact.provided_email }` } className="conversation-detail-field__secondary-value">{ contact.provided_email }</a> }
         </ConversationDetailField> }
         <ConversationDetailField

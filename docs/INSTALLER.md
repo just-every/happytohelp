@@ -192,3 +192,22 @@ in Operations. Local development still needs no email account.
 `rer describe` lists the remaining commands and real flags.
 All new verbs accept `--help`, `--cwd PATH`, `--non-interactive` and `--json`;
 release has its own preserved parser. No command implies provider acceptance.
+
+### Custom application origin
+
+Attach your hostname to the deployed Worker in your Cloudflare account, then add
+`H2H_PUBLIC_ORIGIN=https://support.example.com` to the same private 0600 env file
+you use for `rer deploy --environment production --env-file <file>`. Supply an
+exact HTTPS origin with no trailing slash, credentials, path, query or fragment.
+Keep this input on every redeploy; omitting it selects the default workers.dev
+address again. Invalid input is refused before build or provider writes.
+
+The seed writes a private generated deploy declaration in `.rer`, using rer's
+supported `vars` declaration to set `APP_ORIGIN`. The tracked declaration and
+resource names stay the same. This origin governs sign-in, invitation and
+notification links, widget URLs, file links, help citations and OAuth callbacks.
+Register `https://support.example.com/api/management/github/callback` with your
+GitHub OAuth app if you enable that integration. Browser entry on workers.dev
+redirects to the public address; health and API endpoints remain available for
+rer. Cookies are host-only, so sign in again on the custom hostname. Customer
+website origins remain a separate setting under **Settings → Widget**.

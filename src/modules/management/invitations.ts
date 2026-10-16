@@ -16,7 +16,7 @@ invitations.post('/projects/:projectId/agents',async c=>{
  if(!['operator','admin','owner'].includes(role)||a.role!=='owner'&&role!=='operator')throw new HTTPException(403)
  const member=await c.env.DB.prepare('SELECT u.id FROM users u JOIN memberships m ON m.user_id=u.id WHERE m.project_id=? AND lower(u.email)=?').bind(a.projectId,email).first()
  if(member)throw new HTTPException(409,{message:'Already a project member'})
- const invitation=await issueInvitation(c.env.DB,c.req.url,a.projectId,email,role)
+ const invitation=await issueInvitation(c.env.DB,String(c.env.APP_ORIGIN||new URL(c.req.url).origin),a.projectId,email,role)
  let delivery='not_configured'
  if(emailConfigured(c.env)){const receipt=await mailInvitation(c.env,a.projectId,email,invitation.hash,invitation.url);delivery=receipt.state==='suppressed'?'suppressed':'sent'}
  return c.json({data:{email,role,invitationUrl:invitation.url,expiresIn:INVITATION_LIFETIME_SECONDS,delivery}},201)
@@ -34,14 +34,14 @@ invitations.delete('/projects/:projectId/invitations/:invitationId',async c=>{
 // for the same invitation; links already sent keep working until they expire or the invitation is revoked.
 invitations.post('/projects/:projectId/invitations/:invitationId/link',async c=>{
  const a=await scope(c,true),invitation=await manageableInvitation(c.env.DB,a.projectId,c.req.param('invitationId'),a.role)
- const link=await issueInvitation(c.env.DB,c.req.url,a.projectId,invitation.email,invitation.role)
+ const link=await issueInvitation(c.env.DB,String(c.env.APP_ORIGIN||new URL(c.req.url).origin),a.projectId,invitation.email,invitation.role)
  return c.json({data:{email:invitation.email,role:invitation.role,invitationUrl:link.url,expiresIn:INVITATION_LIFETIME_SECONDS}},201)
 })
 
 invitations.post('/projects/:projectId/invitations/:invitationId/resend',async c=>{
  const a=await scope(c,true),invitation=await manageableInvitation(c.env.DB,a.projectId,c.req.param('invitationId'),a.role)
  if(!emailConfigured(c.env))throw new HTTPException(503,{message:'Email delivery is not configured, so the invitation cannot be emailed. Copy the link and share it instead.'})
- const link=await issueInvitation(c.env.DB,c.req.url,a.projectId,invitation.email,invitation.role)
+ const link=await issueInvitation(c.env.DB,String(c.env.APP_ORIGIN||new URL(c.req.url).origin),a.projectId,invitation.email,invitation.role)
  const receipt=await mailInvitation(c.env,a.projectId,invitation.email,link.hash,link.url)
  return c.json({data:{email:invitation.email,role:invitation.role,expiresIn:INVITATION_LIFETIME_SECONDS,delivery:receipt.state==='suppressed'?'suppressed':'sent'}},201)
 })

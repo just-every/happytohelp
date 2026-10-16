@@ -221,7 +221,7 @@ assert.equal((await email()).status,201);assert.equal((await email()).status,200
 assert.equal((await DB.prepare("SELECT count(*) n FROM messages WHERE content='Help by email'").first()).n,1)
 await DB.batch([DB.prepare("UPDATE projects SET verification_secret='private-proof' WHERE id='p'"),DB.prepare("INSERT INTO users VALUES('op','op@example.com','Operator',1)"),DB.prepare("INSERT INTO memberships VALUES('p','op','operator')"),DB.prepare("INSERT INTO sessions VALUES(?,'op','p','operator',NULL,?,NULL)").bind(await hashToken('operator-token'),Date.now()+999999)])
 for(const path of ['/bootstrap','/projects','/projects/p/settings','/projects/p/widget-settings']){const response=await routes.request('https://app.example'+path,{headers:{Authorization:'Bearer operator-token'}},env);assert.equal(response.status,200);assert.ok(!(await response.text()).includes('private-proof'),path+' must not expose verification secret')}
-const ownerSettings=await(await call(routes,'/projects/p/widget-settings')).json();assert.equal(ownerSettings.verificationSecret,'private-proof')
+const ownerSettings=await(await call(routes,'/projects/p/widget-settings')).json();assert.equal(ownerSettings.verificationSecret,'private-proof');assert.equal(ownerSettings.appOrigin,env.APP_ORIGIN||'https://app.example')
 // Widget settings are stored exactly as sent: the body is the settings object, so the widget's own `settings` section is not mistaken for a wrapper.
 const widgetBody={theme:{avatar:{background:'#ff0000'}},settings:{show_glow:{on_insight:false}},text:{message:{button_send:'Go'}}}
 assert.equal((await call(routes,'/projects/p/widget-settings','PUT',widgetBody)).status,200)

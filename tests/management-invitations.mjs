@@ -8,7 +8,7 @@ const { routes: identity } = await import('../src/modules/identity/routes.ts')
 const db = await openIdentityDb()
 const { DB } = db
 const origin = 'https://app.example'
-const emailEnv = { ...db.env, EMAIL_PROVIDER: 'resend', EMAIL_API_KEY: 'fixture-key', EMAIL_FROM: 'HappyToHelp <support@example.test>' }
+const emailEnv = { ...db.env, APP_ORIGIN: 'https://support.example.test', EMAIL_PROVIDER: 'resend', EMAIL_API_KEY: 'fixture-key', EMAIL_FROM: 'HappyToHelp <support@example.test>' }
 const plainEnv = { ...db.env, EMAIL_API_KEY: undefined, EMAIL_FROM: undefined }
 const mail = []
 const realFetch = globalThis.fetch
@@ -64,6 +64,8 @@ test('the pending list gives each invitation a stable id, its expiry and who may
   assert.equal((await pendingRows(acme, acme.tokens.owner, plainEnv)).emailConfigured, false)
   assert.equal((await pendingRows(beta, beta.tokens.owner)).rows.length, 0, 'another workspace sees none of them')
   assert.match(created.invitationUrl, /\/accept-invitation\?token=/)
+  assert.equal(new URL(created.invitationUrl).origin,emailEnv.APP_ORIGIN)
+  assert.ok(mail[0].text.includes(emailEnv.APP_ORIGIN+'/accept-invitation'))
 })
 
 test('copy link issues a working link for the same workspace and email and leaves earlier links valid', async () => {

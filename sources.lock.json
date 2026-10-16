@@ -1495,7 +1495,7 @@
       "executable": false
     },
     "docs/INSTALLER.md": {
-      "sha256": "d7a69a246803aa452bd743aa176f2971b2a4501fce946e08659102cee1da987f",
+      "sha256": "429eefbd66544de711464b134f8be3cbd0305b9d3912aeb66312d2b5fcb681ce",
       "executable": false
     },
     "docs/legacy-entry-points.md": {
@@ -2475,7 +2475,11 @@
       "executable": false
     },
     "scripts/installer/hosted-deploy.mjs": {
-      "sha256": "db0f77163ada1e52ecb6a19e096ad388354e77b30e92880c76188faf5f3d5c00",
+      "sha256": "107057fba1ce2ea31d764a8d27b291beff3f2734f19ec12a1aca7b26355e37a9",
+      "executable": false
+    },
+    "scripts/installer/hosted-origin.mjs": {
+      "sha256": "cbc949c501c08708a753f6305ca37e316d8b126b2d30ee6137356c3e8435d94b",
       "executable": false
     },
     "scripts/installer/local.mjs": {
@@ -3955,7 +3959,7 @@
       "executable": false
     },
     "src/modules/integrations/github-oauth.ts": {
-      "sha256": "ac05d1afae5e0649d21e4c7e819e49ed8627ec60cb1ac692bd15c8e800bcd1d9",
+      "sha256": "cf0d39a8fbe4f17d46dce3ff3b29b3531cd4347ce2dc5236162ef878d25aaece",
       "executable": false
     },
     "src/modules/integrations/github.ts": {
@@ -4215,7 +4219,7 @@
       "executable": false
     },
     "src/modules/management/activation.ts": {
-      "sha256": "2aa6369882a1b4734d23f1203a3c6ddbacb38e7f74caea4cb59384822aa5bbaa",
+      "sha256": "eab7699a6bdb4cd01986ef5bef06e3bee48649c4cda937f7084c293463b1b968",
       "executable": false
     },
     "src/modules/management/activation/checks.ts": {
@@ -4443,7 +4447,7 @@
       "executable": false
     },
     "src/modules/management/invitations.ts": {
-      "sha256": "2e54b2624483741c5756f7c9c7f6128132ad1e9dce3a51267d443626a9b7cf77",
+      "sha256": "b6eba962352d6f8e93201c92d0407fce61375db0f2fab017ebb0b85622e5a59e",
       "executable": false
     },
     "src/modules/management/member-updates.ts": {
@@ -4559,7 +4563,7 @@
       "executable": false
     },
     "src/modules/management/widget-settings.ts": {
-      "sha256": "099722f78ba18a44d054125065b9c88fdb7ad81cf9b2d289817c2eb44935a8f0",
+      "sha256": "fad3ffeec73f8c43ac2263e34225feacc47e8e41865cf2957317784312777c9e",
       "executable": false
     },
     "src/modules/management/workspace-artwork.ts": {
@@ -5374,6 +5378,10 @@
       "sha256": "86fde1552adb6282523cdca2e8ce897cb2cff973c26924f5c81f41d0cbb387d2",
       "executable": false
     },
+    "src/platform/canonical-navigation.ts": {
+      "sha256": "39b2179a96384a17186dfd32a45301c13f0778b620d235a7b285630133ab9b56",
+      "executable": false
+    },
     "src/platform/contact-state.ts": {
       "sha256": "714f5928178a9dcd88c5baad8c5b94942d011a92fe94f57a84feec41a4542d22",
       "executable": false
@@ -5511,7 +5519,7 @@
       "executable": false
     },
     "src/server.ts": {
-      "sha256": "80eddee66ba1584effa9a6f9a6cdef864ccfa649c46174a8de5a1b2ab09ca4fe",
+      "sha256": "bbf4d3b14bf3b84bac03f556210db7a5e4a85213463137e364e29f584c7d3b62",
       "executable": false
     },
     "src/ui/dashboard/api.jsx": {
@@ -7095,7 +7103,7 @@
       "executable": false
     },
     "src/ui/native/pages/WidgetSettingsPage.jsx": {
-      "sha256": "25f92bb95d0a9dabb62848f2ded328fd51447ce7076bf5d9705ea16d6053e87a",
+      "sha256": "26895a8a5c70dfda5aed54845adb97a7747f0464ac89934d8c849e181ddf70d7",
       "executable": false
     },
     "src/ui/native/pages/WorkspaceNotices.jsx": {
@@ -7991,7 +7999,7 @@
       "executable": false
     },
     "tests/github-integration.mjs": {
-      "sha256": "7ff37b7ab5f6db396d68fd95cb42ec7477e58a1b03fa378ccfd57a1800976132",
+      "sha256": "6ed4676e3d66064910bfd26c152f08b80c4402870132cfdec8d8478a77edb968",
       "executable": false
     },
     "tests/github-workerd-runtime.mjs": {
@@ -8563,7 +8571,7 @@
       "executable": false
     },
     "tests/management-invitations.mjs": {
-      "sha256": "96da3ba22aa7c46e90036ab0220b86738bb04e7e2d19d056089e4a88d628a060",
+      "sha256": "051cec88330613c963771183dd242d0b2262da0440938f655fa8b0ecf5e07bac",
       "executable": false
     },
     "tests/management-library-browser.mjs": {
@@ -8571,7 +8579,7 @@
       "executable": false
     },
     "tests/management.mjs": {
-      "sha256": "502c51c1fe97a53376247efb3a8697603e88c2ba585ed5de7df6abd92ba82f18",
+      "sha256": "11b5a30bcfe74aa1bc23d50b1565ac00fdc799120c0bf899919184d10655f385",
       "executable": false
     },
     "tests/mobile-inbox-browser.mjs": {

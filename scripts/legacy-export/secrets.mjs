@@ -1,4 +1,4 @@
-import {credentialColumns} from './scope.mjs';
+import {credentialColumns,skippedTables} from './scope.mjs';
 
 const secretName = /key|secret|token|password|hash|salt|credential|encrypt/i;
 // Exact reviewed noncredential fields, never an entire JSON/text exception.
@@ -9,7 +9,7 @@ const exportedNames = new Set([
 const checksum = /^[a-f0-9]{32}$/i;
 const usageCounters = new Set([
   'prompt_tokens','completion_tokens','total_tokens','input_tokens','output_tokens',
-  'cached_tokens','reasoning_tokens','audio_tokens','accepted_prediction_tokens','rejected_prediction_tokens',
+  'cached_tokens','cache_write_tokens','cache_write_1h_tokens','cache_read_input_tokens','cache_creation_input_tokens','reasoning_tokens','audio_tokens','accepted_prediction_tokens','rejected_prediction_tokens',
 ]);
 const usageContainers = new Set(['prompt_tokens_details','completion_tokens_details','input_tokens_details','output_tokens_details']);
 const refuse = location => { throw new Error(`Unclassified secret-like legacy field: ${location}; explicitly classify export/omit before exporting`); };
@@ -26,7 +26,7 @@ export function classifyColumns(table, columns) {
 function usageField(table, column, path, key, value) {
   // Provider accounting counts, never authentication material.
   const root = table === 'ai_usages' && column === 'usage' ? []
-    : table === 'ai_logs' && column === 'response' ? ['usage'] : null;
+    : null;
   if (!root || !root.every((part,index) => path[index] === part)) return false;
   const rest = path.slice(root.length);
   if (rest.length > 1 || (rest.length === 1 && !usageContainers.has(rest[0]))) return false;
@@ -69,6 +69,17 @@ export function classifyValue(table, column, value, path = []) {
       if (parsed !== undefined) { classifyValue(table,column,parsed,path); return; }
     }
     if (table === 'projects' && column === 'widget_settings_hash' && !path.length && checksum.test(value)) return;
+    // AI profile evidence fingerprints are cache checksums, not credentials.
+    if (['projects','users','contacts','project_optimizations'].includes(table) && column==='ai_profile' && path.join('.')==='_profile_meta.evidence_fingerprint' && /^[a-f0-9]{64}$/i.test(value)) return;
+    if(table==='contacts'&&column==='metadata'&&path.join('.')==='optimized_content_fingerprint'&&/^[a-f0-9]{64}$/i.test(value))return;
+    // Public, unsigned object paths contain content-hash filenames. Restrict the
+    // exact columns and bucket hostname; signed/authenticated URLs still fail.
+    if (['projects.avatar_url','users.avatar_url','ais.avatar_url','contacts.avatar_url','media.url'].includes(location) && !path.length) {
+      try {const url=new URL(value);if(url.protocol==='https:'&&url.hostname==='storage.happytohelp.com'&&!url.username&&!url.password&&!url.search&&!url.hash&&/^\/[A-Za-z0-9_./%~-]+$/.test(url.pathname)&&!secretString(url.pathname.replace(/\b[a-f0-9]{32,64}\b/gi,'content')))return;}catch{}
+    }
+    if (column==='avatar_url' && ['projects','users','ais','contacts'].includes(table) && !path.length) {
+      try {const url=new URL(value);if(url.protocol==='https:'&&['secure.gravatar.com','www.gravatar.com','gravatar.com'].includes(url.hostname)&&!url.username&&!url.password&&!url.hash&&/^\/avatar\/(?:[a-f0-9]{32}|[a-f0-9]{64})(?:\.jpg)?$/i.test(url.pathname)&&[...url.searchParams].every(([key,v])=>key==='s'?/^\d{1,4}$/.test(v):key==='r'?/^(g|pg|r|x)$/.test(v):key==='d'&&/^(404|mp|mm|identicon|monsterid|wavatar|retro|robohash|blank)$/.test(v)))return;}catch{}
+    }
     if (secretString(value)) refuse(location);
   }
 }
@@ -76,6 +87,7 @@ export function classifyValue(table, column, value, path = []) {
 /** Refuse old or edited snapshots that still contain omitted payloads. */
 export function classifySnapshot(bundle) {
   for (const [table,rows] of Object.entries(bundle.tables || {})) {
+    if(skippedTables.includes(table)&&rows.length)refuse(table);
     for (const row of rows) {
       const columns = Object.keys(row).map(col => ({col}));
       if (columns.some(({col}) => credentialColumns[table]?.includes(col))) refuse(table);

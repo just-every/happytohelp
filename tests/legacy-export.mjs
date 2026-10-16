@@ -45,6 +45,8 @@ test('project snapshot → attachment bytes → native import → safe replay', 
       const raw=await assertArtifact(snapshot,fixture.secrets);
       sources.push(raw);
       if(index===0)await assertCredentialRefusals({admin,run,env,output,projectId,snapshotArgs,snapshot,objectDirectory});
+      assert.equal(raw.tables.ai_logs,undefined,'operational AI request logs are excluded');
+      assert.ok(raw.tables.events.every(row=>row.type!=='PAGE_VIEW'),'visitor tracking is excluded');
       assert.equal(raw.tables.projects.length,1);assert.equal(raw.tables.projects[0].id,projectId);
       for(const rows of Object.values(raw.tables))for(const row of rows)if(row.project_id)assert.equal(row.project_id,projectId);
       assert.equal(raw.tables.users.length,2,'owner and this project’s AI only');
@@ -52,15 +54,24 @@ test('project snapshot → attachment bytes → native import → safe replay', 
       assert.equal(raw.tables.projects[0].ai_balance,'12.500000','decimal remains exact text');
       await run('scripts/export-legacy.mjs',['attachments','--input',snapshot,'--objects-dir',objectDirectory,'--output',file]);
       await assertArtifact(file,fixture.secrets);
+      // Exercise the scalable format through the same public doors, then replay
+      // into empty state, then use JSON to prove both formats preserve identical state.
+      const chunkSnapshot=join(output,`project-${index+1}.snapshot`),chunkImport=join(output,`project-${index+1}.import`);
+      await run('scripts/export-legacy.mjs',[...snapshotArgs,'--chunk-bytes','4096','--output',chunkSnapshot],env);
+      await run('scripts/export-legacy.mjs',['attachments','--input',chunkSnapshot,'--objects-dir',objectDirectory,'--output',chunkImport]);
+      const chunked=JSON.parse(await run('scripts/import-legacy.mjs',['--file',chunkImport,'--apply','--persist-to',persist]));
       const first=JSON.parse(await run('scripts/import-legacy.mjs',['--file',file,'--apply','--persist-to',persist]));
       const replay=JSON.parse(await run('scripts/import-legacy.mjs',['--file',file,'--apply','--persist-to',persist]));
+      assert.equal(chunked.sourceRows,first.sourceRows);assert.equal(chunked.mappedRows,first.mappedRows);assert.equal(chunked.objects,1);
       assert.equal(first.applied,first.sourceRows);assert.equal(replay.applied,0);assert.equal(replay.replayed,first.sourceRows);
-      results.push({projectId,source:raw.source.rowCounts,first,replay});files.push(file);
+      const chunkReplay=JSON.parse(await run('scripts/import-legacy.mjs',['--file',chunkImport,'--apply','--persist-to',persist]));
+      assert.equal(chunkReplay.applied,0);assert.equal(chunkReplay.replayed,first.sourceRows);
+      results.push({projectId,source:raw.source.rowCounts,first,replay,chunked,chunkReplay});files.push(file);
     }
     const {getPlatformProxy}=await import('wrangler');const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(persist,'v3')}});
     const native={};
     try{
-      const expected={projects:2,users:1,memberships:2,contacts:4,conversations:4,messages:8,conversation_notes:2,media:2,knowledge_categories:6,knowledge_articles:4,knowledge_article_categories:6,macros:2,project_settings:2,knowledge_datasets:4,knowledge_documents:2,context_insights:4,email_settings:2,public_project_aliases:2};
+      const expected={projects:2,users:1,memberships:2,contacts:4,conversations:4,messages:8,conversation_notes:2,media:2,knowledge_categories:6,knowledge_articles:4,knowledge_article_categories:6,macros:2,project_settings:2,knowledge_datasets:4,knowledge_documents:2,context_insights:4,context_tracked_events:2,local_devices:2,local_grants:2,local_device_settings:2,local_jobs:2,local_events:2,email_settings:2,public_project_aliases:2};
       for(const [table,count] of Object.entries(expected)){const row=await proxy.env.DB.prepare(`SELECT COUNT(*) n FROM ${table}`).first();native[table]=row.n;assert.equal(row.n,count,table);}
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM knowledge_categories WHERE is_published=0').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM knowledge_articles WHERE status=\'draft\'').first()).n,2);
@@ -68,6 +79,8 @@ test('project snapshot → attachment bytes → native import → safe replay', 
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM conversation_notes WHERE content LIKE \'%Internal only.%\'').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM contacts WHERE email LIKE \'preferred@%\'').first()).n,2);
       await assertMappedBusinessState(proxy.env,sources,files);
+      assert.equal((await proxy.env.DB.prepare("SELECT COUNT(*) n FROM local_devices WHERE worker_ready_at IS NULL AND revoked_at IS NOT NULL").first()).n,2,'imported devices carry no authority');
+      assert.equal((await proxy.env.DB.prepare("SELECT COUNT(*) n FROM local_events WHERE json_extract(payload,'$.message')='Reading invoice details'").first()).n,2,'delegation progress text is live');
       await assertAllNativeStores(proxy.env,fixture.secrets,persist);
     }finally{await proxy.dispose();}
     await writeFile(join(output,'results.json'),JSON.stringify({fixture:fixture.counts,native,imports:results,files,persist},null,2));

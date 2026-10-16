@@ -14,6 +14,9 @@ const json = JSON.stringify;
 /** Seed a fresh, local MySQL database and an on-disk S3 object directory. */
 export async function seedLegacy(connection, { objectDirectory }) {
   if (!objectDirectory) throw new Error('objectDirectory is required for legacy attachment objects');
+  // Aurora MySQL 8.0 permits foreign keys to indexed nonunique legacy IDs.
+  const [fkMode]=await connection.query("SHOW VARIABLES LIKE 'restrict_fk_on_non_standard_key'");
+  if(fkMode.length)await connection.query('SET SESSION restrict_fk_on_non_standard_key=OFF');
   const schema = await readFile(new URL('./schema.sql', import.meta.url), 'utf8');
   for (const statement of schema.replace(/^--.*$/gm, '').split(';').map(value => value.trim()).filter(Boolean)) {
     await connection.execute(statement);
@@ -92,7 +95,7 @@ export async function seedLegacy(connection, { objectDirectory }) {
       agent_id: aiId, ai_id: aiId, resolved_at: timestamp, metadata: json({ subject: `${name}: resolved setup` }), ...times });
     await insert('conversation_participants', { id: uuid('42', n), conversation_id: conversationId, contact_id: participantId, ...times });
     await insert('buckets', { id: bucketId, project_id: projectId, conversation_id: conversationId,
-      counts: json({ contact_messages: 1, agent_messages: 2, agent_events_internal_note: 1, contact_events_page_view: 1 }), ...times });
+      is_vectorized:0, counts: json({ contact_messages: 1, agent_messages: 2, agent_events_internal_note: 1, contact_events_page_view: 1 }), ...times });
 
     const bodies = [`Can you explain this ${name} invoice?`, 'The invoice covers your current billing period.',
       'I can help you find the billing guide.', 'Our team will reply during business hours.', 'Removed duplicate message.'];
@@ -134,7 +137,7 @@ export async function seedLegacy(connection, { objectDirectory }) {
     await insert('article_categories', { id: uuid('74', n), article_id: articleId, category_id: categoryId, ...times });
     await insert('article_categories', { id: uuid('75', n), article_id: articleId, category_id: draftCategoryId, ...times });
     await insert('article_categories', { id: uuid('76', n), article_id: uuid('73', n), category_id: draftCategoryId, ...times });
-    await seedExtendedLegacy(insert,{projectId,n,slug,name,ownerId,aiId,contactId,conversationId,messageId:messageIds[2]});
+    await seedExtendedLegacy(insert,{projectId,n,slug,name,ownerId,aiId,contactId,conversationId,bucketId,messageId:messageIds[2]});
     await insert('macros', { id: uuid('90', n), project_id: projectId, created_by_id: ownerId,
       title: `${name} billing reply`, content: `Thanks for contacting ${name}. Please open your billing page to download invoices.`, ...times });
   }

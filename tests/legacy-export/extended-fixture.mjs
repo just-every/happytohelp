@@ -16,11 +16,20 @@ export const PLANTED_SECRETS = Object.freeze([
   'fixture-connection-shared-key', 'fixture-contact-shared-key', 'fixture-github-access-token',
   'fixture-asymmetric-private-key', 'fixture-asymmetric-public-key',
   'fixture-contact-shared-hash', 'fixture-contact-shared-salt',
+  'fixture-crawl-exception-credential','fixture-crawl-webhook-token','fixture-refresh-claim-token','fixture-device-token-hash','fixture-grant-token-hash','fixture-personal-access-token',
   'fixture-password-reset-token', 'fixture-message-thinking-signature', actionPlaintext, encryptedAction,
 ]);
 
-export async function seedExtendedLegacy(insert, {projectId, n, slug, name, ownerId, aiId, contactId, conversationId, messageId}) {
+export async function seedExtendedLegacy(insert, {projectId, n, slug, name, ownerId, aiId, contactId, conversationId, bucketId, messageId}) {
   const sharedKeyId = uuid('93', n);
+  const grantId=uuid('b1',n),deviceId=uuid('b2',n),delegationId=uuid('b3',n);
+  await insert('local_agent_grants',{id:grantId,project_id:projectId,operator_id:ownerId,token_hash:'fixture-grant-token-hash-'+n,...times});
+  await insert('local_agent_devices',{id:deviceId,project_id:projectId,operator_id:ownerId,local_agent_grant_id:grantId,name:'Support laptop',provider:'codex',capabilities:json(['investigate']),token_hash:'fixture-device-token-hash-'+n,...times});
+  await insert('local_agent_device_project_settings',{id:uuid('b4',n),project_id:projectId,local_agent_device_id:deviceId,working_directories:json(['/workspace/support']),...times});
+  await insert('support_delegations',{id:delegationId,project_id:projectId,conversation_id:conversationId,local_agent_device_id:deviceId,created_by_user_id:ownerId,request_id:uuid('b5',n),mode:'investigate',instructions:'Inspect this invoice',status:'running',...times});
+  await insert('support_delegation_events',{id:uuid('b6',n),support_delegation_id:delegationId,created_by_user_id:ownerId,event_type:'progress',message:'Reading invoice details',payload:json({step:1}),created_at:timestamp});
+  await insert('events',{id:uuid('b7',n),conversation_id:conversationId,bucket_id:bucketId,agent_id:ownerId,type:'AGENT_ASSIGNED',payload:json({name:'Export Owner',is_ai:false}),created_at:timestamp});
+
   await insert('asymmetric_keys', {id:uuid('92', n),project_id:projectId,contact_id:contactId,
     public_key:'fixture-asymmetric-public-key',private_key:'fixture-asymmetric-private-key',...times});
   await insert('contact_shared_keys', {id:sharedKeyId,project_id:projectId,contact_id:contactId,
@@ -44,6 +53,7 @@ export async function seedExtendedLegacy(insert, {projectId, n, slug, name, owne
     [1,{excluded_urls:'',max_crawl_depth:0,max_crawl_pages:0}]]) {
     const datasetId=uuid(offset?'a1':'a0',n);
     await insert('datasets', {id:datasetId,project_id:projectId,url:`https://${slug}.example.test/${offset?'empty':'help'}`,
+      crawl_webhook_token:'fixture-crawl-exception-credential','fixture-crawl-webhook-token',refresh_claim_token:'fixture-refresh-claim-token',refresh_mode:'manual',refresh_unchanged_count:2,
       status:offset?'created':'ready',pages_count:offset?0:1,metadata:json({purpose:'support'}),...settings,...times});
     if (!offset) await insert('dataset_files', {id:uuid('a2',n),project_id:projectId,dataset_id:datasetId,
       url:`https://${slug}.example.test/help/billing`,original_url:`https://${slug}.example.test/help/billing`,

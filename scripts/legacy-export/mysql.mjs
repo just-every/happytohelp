@@ -10,7 +10,7 @@ export async function connectLegacy(env = process.env) {
     if (env[name] === undefined || env[name] === '') throw Error(`Set ${name} explicitly`);
   const port = Number(env.LEGACY_MYSQL_PORT || 3306);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw Error('Invalid LEGACY_MYSQL_PORT');
-  return mysql.createConnection({
+  const connection=await mysql.createConnection({
     host: env.LEGACY_MYSQL_HOST, port, database: env.LEGACY_MYSQL_DATABASE,
     user: env.LEGACY_MYSQL_USER, password: env.LEGACY_MYSQL_PASSWORD,
     ...(env.LEGACY_MYSQL_SSL_CA ? {ssl: {ca: await readFile(env.LEGACY_MYSQL_SSL_CA), rejectUnauthorized: true}} : {}),
@@ -18,6 +18,11 @@ export async function connectLegacy(env = process.env) {
     supportBigNumbers: true, bigNumberStrings: true, decimalNumbers: false, jsonStrings: true,
     multipleStatements: false, connectTimeout: 15000,
   });
+  if(env.LEGACY_MYSQL_EXPECTED_SERVER_PREFIX){
+    const [[server]]=await connection.query('SELECT @@aurora_server_id AS id');
+    if(!String(server.id).startsWith(env.LEGACY_MYSQL_EXPECTED_SERVER_PREFIX)){await connection.end();throw Error('Refusing unexpected source server');}
+  }
+  return connection;
 }
 // SELECTs and transaction/session control only. No locks or source mutations.
 export async function snapshot(connection, read) {
@@ -25,5 +30,5 @@ export async function snapshot(connection, read) {
   await connection.query('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
   await connection.query('START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY');
   try { const result = await read(); await connection.query('COMMIT'); return result; }
-  catch (error) { await connection.query('ROLLBACK'); throw error; }
+  catch (error) { connection.destroy(); throw error; }
 }

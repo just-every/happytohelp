@@ -16,7 +16,7 @@ function identifier(value, label) {
   return String(value);
 }
 
-function relativeKey(key) {
+export function relativeKey(key) {
   if (typeof key !== 'string' || !key || /[\\\x00-\x1f\x7f]/.test(key) || path.posix.isAbsolute(key)
     || /^[A-Za-z]:/.test(key) || key.split('/').some(part => !part || part === '.' || part === '..')) {
     throw new Error('Invalid attachment source key');
@@ -67,7 +67,7 @@ function positiveLimit(value, fallback, label) {
   return result;
 }
 
-function mediaSize(row) {
+export function mediaSize(row) {
   if (typeof row.size !== 'number' && (typeof row.size !== 'string' || !/^\d+$/.test(row.size))) throw new Error('Missing or invalid media byte size');
   const size = Number(row.size);
   if (!Number.isSafeInteger(size) || size < 0) throw new Error('Invalid media byte size');
@@ -139,7 +139,7 @@ async function localBytes(root, sourceKey, expectedSize) {
   } finally { await file.close(); }
 }
 
-function s3Environment(bucket, region) {
+export function s3Environment(bucket, region) {
   if (typeof bucket !== 'string' || !/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(bucket) || bucket.includes('..')) throw new Error('An explicit S3 bucket name is required');
   if (typeof region !== 'string' || !/^[a-z]{2}(?:-[a-z]+)+-\d+$/.test(region)) throw new Error('An explicit AWS region is required');
   const access = process.env.LEGACY_AWS_ACCESS_KEY_ID;

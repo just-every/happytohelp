@@ -25,7 +25,8 @@ export async function handleContextWidgetAction(env:Env,actor:Actor,conversation
   // Check the cheap schedule before constructing a packet or reserving AI work.
   const collector=await env.DB.prepare('SELECT c.*,s.consent,s.bot_enabled FROM context_collectors c JOIN context_subjects s ON s.project_id=c.project_id AND s.subject_id=c.subject_id WHERE c.project_id=? AND c.subject_id=?').bind(actor.projectId,subject).first<any>()
   if(!collector?.consent||!collector.bot_enabled)return {job:{reason:'consent_or_bot_disabled'}}
-  if(collector.job_id||collector.actions_count-collector.analysis_actions<analysisInterval(collector.analysis_since_insight)||collector.last_run_at>Date.now()-4000)return {job:{reason:'schedule_gate'}}
+  if(collector.actions_count-collector.analysis_actions<analysisInterval(collector.analysis_since_insight))return {job:{reason:'awaiting_activity'}}
+  if(collector.job_id||collector.last_run_at>Date.now()-4000)return {job:{reason:'schedule_gate'}}
   return {job:await enqueueContextJob(env,actor.projectId,subject,'monitoring',policy.model!,true)}
  }
  if(action==='collector'){

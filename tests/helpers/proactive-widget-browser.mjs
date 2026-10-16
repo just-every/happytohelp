@@ -77,6 +77,36 @@ export async function proactiveWidgetBrowser({operatorJourney=true}={}) {
             } catch(error) { await page.screenshot({path:`${evidence}/proactive-failure-${width}.png`,fullPage:true}); throw error; } finally { await context.close(); }
           }
         }
+        // One visitor with several open tabs: idle tabs stay quiet, so real activity, the
+        // offer and a consent change in another tab all fit the per-visitor allowance.
+        {
+            const context = await browser.newContext({viewport: {width: 1440, height: 960}}), events = [], refused = [];
+            context.on('request', request => { if (request.url().endsWith('/widget-events')) events.push({at: Date.now(), action: request.postDataJSON()?.action}); });
+            context.on('response', response => { if (response.status() === 429) refused.push(response.url()); });
+            try {
+                const tabs = [await context.newPage()];
+                await tabs[0].goto(hostOrigin);
+                await tabs[0].getByRole('button', {name: 'Allow proactive help', exact: true}).click();
+                await tabs[0].getByRole('button', {name: 'Stop sharing activity'}).waitFor();
+                for (let index = 1; index < 4; index++) { tabs.push(await context.newPage()); await tabs[index].goto(hostOrigin); await tabs[index].getByRole('button', {name: 'Stop sharing activity'}).waitFor(); }
+                for (const tab of tabs) await tab.getByRole('button', {name: 'Close chat', exact: true}).click();
+                await tabs[0].waitForTimeout(2500);
+                const idleFrom = Date.now();
+                await tabs[0].waitForTimeout(20000);
+                const idle = events.filter(event => event.at >= idleFrom);
+                assert.deepEqual(idle.filter(event => event.action === 'pingAction'), [], 'idle consented tabs send no activity pings');
+                assert.ok(idle.filter(event => event.action === 'insights').length < tabs.length, `idle tabs back off offer checks: ${JSON.stringify(idle)}`);
+                await tabs[0].bringToFront();
+                for (const step of steps) await tabs[0].getByRole('button', {name: step, exact: true}).click();
+                await tabs[0].locator('.happytohelp-insight').waitFor({state: 'visible', timeout: 30000});
+                await tabs[0].screenshot({path: `${evidence}/multi-tab-insight-1440.png`, fullPage: true});
+                await tabs[1].bringToFront();
+                await tabs[1].getByRole('button', {name: 'Open chat'}).first().click();
+                await tabs[1].getByRole('button', {name: 'Stop sharing activity'}).click();
+                await tabs[1].getByRole('button', {name: 'Allow proactive help', exact: true}).waitFor();
+                assert.deepEqual(refused, [], 'no widget request from this visitor is refused');
+            } finally { await context.close(); }
+        }
         success = true;
         console.log('Proactive widget: explicit consent, real collected clicks, native model queue, delivered insight, guarded button reply, reload and revocation passed at 1440/390.');
     } finally { await browser?.close(); if (host) await new Promise(done => host.close(done)); await runtime.close(success); }

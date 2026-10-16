@@ -2787,7 +2787,7 @@
       "executable": false
     },
     "src/modules/ai-support/customer-message.ts": {
-      "sha256": "24b37b48538065f696bc7c0504e553476dfa1f9da1dad58a637ef8d1907e9619",
+      "sha256": "4a5aa2599ddeac5b191f9b0121af4b9d7130511265a16db52ea896bb3ed0801e",
       "executable": false
     },
     "src/modules/ai-support/generation-currentness.ts": {
@@ -3275,7 +3275,7 @@
       "executable": false
     },
     "src/modules/customer-context/jobs.ts": {
-      "sha256": "e6cbe83c1eb574dbc15b26a133a15d506467ac5c71ee48bb982b1966636e116a",
+      "sha256": "0a4653314eb53f38cf0dd3d69c72e278849a416fc9bee860e0194d563713cf59",
       "executable": false
     },
     "src/modules/customer-context/module.json": {
@@ -3355,7 +3355,7 @@
       "executable": false
     },
     "src/modules/customer-context/widget.ts": {
-      "sha256": "8fadfc3725f3ef073c84b7a9d4d68c0fddbf7de1c3d858464cf918f7d4b76121",
+      "sha256": "104ec6f3c2d2b7f0f20c44f39c49f7efbf6b01ca0d0d889d7b60d8fffe66223f",
       "executable": false
     },
     "src/modules/identity/accounts.ts": {
@@ -4747,7 +4747,7 @@
       "executable": false
     },
     "src/modules/outcomes/resolve.ts": {
-      "sha256": "d1a26542d4b8820203248c738a9d41667e5bb02513fc70c7aa0ef5b7bf239b37",
+      "sha256": "4ba81c937be1286f4597f9b24d21151de21853af38c031c1b99c0667f5aea527",
       "executable": false
     },
     "src/modules/outcomes/state.ts": {
@@ -5203,11 +5203,11 @@
       "executable": false
     },
     "src/modules/widget/js/collection/Action.jsx": {
-      "sha256": "54793a7299839780ccb24eec922d7b76d16245b3dc69df99deb2e523d9fd49a5",
+      "sha256": "aaf8d4f264c75aa278c65a6c88e5146cf3668b6a97a24424ce79d6ec1ae5b4e9",
       "executable": false
     },
     "src/modules/widget/js/collection/Collector.jsx": {
-      "sha256": "e811ce0cc2d8181f00febf0b3a0b69909c15e276c73eb6a85322d4c0caa6bfeb",
+      "sha256": "3558fd7adbc60443d1cb4fec3b796289a3b78e65d6b4c2fea886f78fb6b1c387",
       "executable": false
     },
     "src/modules/widget/js/collection/Describe.jsx": {
@@ -5235,7 +5235,7 @@
       "executable": false
     },
     "src/modules/widget/js/context/ConnectContext.jsx": {
-      "sha256": "be5f841b576120ce7f14046503516907e6e2564d4161273eb14842e3e26453ae",
+      "sha256": "7fa437ad5bbc77c7b72719d5f8bcafb2d3e3288f939eae2875b1281d40d5b81e",
       "executable": false
     },
     "src/modules/widget/js/context/defaults.js": {
@@ -5611,7 +5611,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/conversation/ConversationAssignmentControl.jsx": {
-      "sha256": "b0022c6579827db2a40f1c8d2a091f96819de33bc619d6966ffb055b67728740",
+      "sha256": "e19bdbbbe504fafcb92fb56475d6d9c509ce876a7b01311a49e46e74da180672",
       "executable": false
     },
     "src/ui/dashboard/components/conversation/ConversationContactDetails.jsx": {
@@ -7495,7 +7495,7 @@
       "executable": false
     },
     "tests/ai-support/lifecycle.test.mjs": {
-      "sha256": "d537e1bc589f1b84a4a9169448ba1a7f2d97df1e85ea9afe70fce1475491501e",
+      "sha256": "7f8d91a10edc3dab8f6189c7c7200491ca148800adf830ad21b1a139ba1943e8",
       "executable": false
     },
     "tests/ai-support/openaiSchema.test.js": {
@@ -8071,7 +8071,7 @@
       "executable": false
     },
     "tests/helpers/configured-support-browser.mjs": {
-      "sha256": "b457f37951e32bf2b6a1377575b570eddb507b5da812a2364b492592107f65d1",
+      "sha256": "e391119a634d3b85e998e15438af364c2c8d8b978a02fedd2dd6eeeb15623aa2",
       "executable": false
     },
     "tests/helpers/delegation-journey/browser-ui.mjs": {
@@ -8251,7 +8251,7 @@
       "executable": false
     },
     "tests/helpers/proactive-widget-browser.mjs": {
-      "sha256": "a26c4ab830fdc91008bc41a1906736f6ea89b3ec145218dc73c3e179c6437abd",
+      "sha256": "2c453edbc5f2fceab5852eee094aa25b819290b454b15a9befdd4a8f7e6ad855",
       "executable": false
     },
     "tests/helpers/recovery/journey.mjs": {

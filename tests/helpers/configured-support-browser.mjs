@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 
 /** Continue the existing knowledge/AI journeys through the operator's ordinary controls. */
 export async function configuredSupportBrowser({browser, runtime, owner, project, call, evidence}) {
+    // An assistant on a provider this installation has no key for cannot take a conversation.
+    const keyless = (await call(`/api/management/projects/${owner.projectId}/ais`, {name: 'Claude specialist', role: 'Support assistant', prompt: 'Answer support questions.', model: 'claude-sonnet-5'}, owner.token)).data;
     for (const width of [1440, 390]) {
         const context = await browser.newContext({viewport: {width, height: 960}}), page = await context.newPage();
         try {
@@ -38,8 +40,14 @@ export async function configuredSupportBrowser({browser, runtime, owner, project
             if(await panel.getAttribute('aria-expanded')==='false')await panel.click();
             await page.getByRole('tab',{name:'Details',exact:true}).click();
             const assignment = page.getByRole('button', {name: /Assign conversation\. Current assignment:/});
+            const human = await assignment.getAttribute('aria-label');
             await assignment.click();
-            const assistant = (await call('/api/management/bootstrap', undefined, owner.token)).ais.find(item => item.is_enabled);
+            await page.getByRole('menuitem', {name: keyless.name, exact: false}).click();
+            await page.getByRole('alert').filter({hasText: 'ANTHROPIC_API_KEY'}).waitFor();
+            assert.equal(await assignment.getAttribute('aria-label'), human, 'a refused handoff stays visibly with the human');
+            await page.screenshot({path: `${evidence}/handoff-nokey-${width}.png`, fullPage: true});
+            await assignment.click();
+            const assistant = (await call('/api/management/bootstrap', undefined, owner.token)).ais.find(item => item.is_enabled && item.id !== keyless.id);
             await page.getByRole('menuitem', {name: assistant.name, exact: false}).click();
             if(await panel.getAttribute('aria-expanded')==='true')await page.locator('#conversation-assistant').getByRole('button',{name:'Hide',exact:true}).click();
             await page.waitForTimeout(500);

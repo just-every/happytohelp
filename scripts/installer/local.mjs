@@ -37,7 +37,7 @@ const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async c
 // Give rer its standard claim contract so it observes 303/409 and retires the token.
 const hostedLifecycle={...adapter,hooks:{...adapter.hooks,owner:{path:'/auth/bootstrap',tokenKey:'H2H_SETUP_TOKEN',returnTo:'/setup'}}};
 export const commandAdapter=createCommandAdapter(adapter,{
- generatedOutputs:['.generated','migrations/core','delivery-artifact','public/downloads','public/widget.js'],
+ generatedOutputs:['.generated','migrations/core','delivery-artifact','management/integration/deployment-spec.json','public/downloads','public/widget.js'],
  product:model.product.name,dev,preview,signInPath:'/login',devIdentity:{entry:'src/dev/server.ts',output:['dist','delivery-artifact'],emailLinkTest:'tests/first-run/cli-sign-in.mjs'},verify:['pnpm',['run','verify:app']],deploy:hostedDeploy('deploy.json',hostedLifecycle),
  portability,
  setup:{manifestFile:'rer-setup.json'},browserModule:'scripts/installer/ui/seed.mjs',input:{names:{email:'OWNER_EMAIL',name:'OWNER_NAME'},defaults:localInputDefaults},

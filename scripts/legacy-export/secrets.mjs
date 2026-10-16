@@ -76,7 +76,8 @@ export function classifyValue(table, column, value, path = []) {
       if (parsed !== undefined) { classifyValue(table,column,parsed,path); return; }
     }
     if (table === 'projects' && column === 'widget_settings_hash' && !path.length && checksum.test(value)) return;
-    if(table==='media'&&['filename','directory'].includes(column)&&!path.length&&!/[\\\x00-\x1f\x7f]/.test(value)&&!secretString(value,true))return;
+    // Storage and customer-supplied download names: no opaque-shape guess, strong signatures still fail.
+    if(table==='media'&&['filename','directory','filename_original'].includes(column)&&!path.length&&!/[\\\x00-\x1f\x7f]/.test(value)&&!secretString(value,true))return;
     // AI profile evidence fingerprints are cache checksums, not credentials.
     if (['projects','users','contacts','project_optimizations'].includes(table) && column==='ai_profile' && path.join('.')==='_profile_meta.evidence_fingerprint' && /^[a-f0-9]{64}$/i.test(value)) return;
     if(table==='contacts'&&column==='metadata'&&path.join('.')==='optimized_content_fingerprint'&&/^[a-f0-9]{64}$/i.test(value))return;

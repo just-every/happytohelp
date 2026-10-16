@@ -20,8 +20,13 @@ paths cannot be claimed. `docs` is reserved, so no alias can shadow the
 documentation at `/docs`; an alias named `docs` from before the reservation stays
 reachable at `/help/docs`. Published project-scoped articles are rendered with the
 maintained Markdown renderer (raw HTML disabled), and draft/deleted projects stay
-private. The importer maps retained legacy project slugs into
-`public_project_aliases` when preserving old help links.
+private. Legacy slug import is assigned to migration round 5 and is not available
+today. Until it lands, an authenticated project owner/admin must set each retained
+slug by sending `PUT /api/public-site/projects/:projectId/alias` with
+`Content-Type: application/json` and body `{"slug":"retained-help-slug"}` using
+their native session. This writes `public_project_aliases`; there is currently no
+dashboard control for aliases. Legacy `/{slug}/` links resolve only after that
+alias exists.
 
 `help-host.ts` also serves the legacy host-root forms `/`, `/search?keyword=...`
 and `/{article_slug}` when deployment explicitly supplies `PUBLIC_HELP_HOSTS` as

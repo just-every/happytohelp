@@ -24,7 +24,7 @@ async function ownerScope(c:Parameters<typeof scope>[0]) {
 /** The snapshot as stored now. Reads only: no provider request and no write. */
 async function snapshotResponse(c:Context<AppEnv>,projectId:string) {
  const [config,receipts]=await Promise.all([activationConfiguration(c.env,projectId),readReceipts(c.env,projectId)])
- const facts=await activationFacts(c.env,config,receipts,new URL(c.req.url).origin)
+ const facts=await activationFacts(c.env,config,receipts,String(c.env.APP_ORIGIN||new URL(c.req.url).origin))
  c.header('Cache-Control','no-store')
  return c.json({data:activationSnapshot(config,receipts,facts)})
 }

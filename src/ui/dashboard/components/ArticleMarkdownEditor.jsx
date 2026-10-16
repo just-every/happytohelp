@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import '../article-editor.css';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 import Api from '../api';

@@ -6,7 +6,7 @@ import ContactAvatar from './ContactAvatar';
 import TimeAgo from 'react-timeago';
 import { ChatContext } from '../contexts/ChatContext';
 import CountryName from './includes/CountryName';
-import Moment from '../../native/Moment';
+import Moment from '../../native/ZonedMoment';
 import { contactTimezone } from '../utils/contactTimezone';
 
 import '../styles/components/ConversationHeader.scss';

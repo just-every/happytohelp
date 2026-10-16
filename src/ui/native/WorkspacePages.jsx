@@ -1,35 +1,19 @@
 import SettingsMenu from './SettingsMenu';
 import { onSettingsDestination } from './settings-destinations';
-import Connections from './pages/Connections';
-import Reports from './pages/Reports';
-import MoveIn from './pages/MoveIn';
 import React from 'react';
-import {ActivationPage,SetupTitle} from './activation';
 import { Link } from '@tanstack/react-router';
 import { useDashboardLocation } from './dashboard-state';
-import GitHubSettings from './pages/GitHubSettings';
-import ArticleImport from './pages/ArticleImport';
-import ProjectsPage from './pages/ProjectsPage';
-import AdminPage from './pages/AdminPage';
 import { adminTitles } from './pages/AdminRecords';
-import KnowledgePage from './pages/KnowledgePage';
-import ManagementPage from './pages/ManagementPage';
-import ProjectSettings from './pages/ProjectSettings';
-import WidgetSettingsPage from './pages/WidgetSettingsPage';
-import ComputersPage from './pages/ComputersPage';
-import DelegationSettings from './pages/DelegationSettings';
-import DelegationAuthorize from './pages/DelegationAuthorize';
-import TrainingRuns from './pages/TrainingRuns';
-import AccountPage from './pages/AccountPage';
-import InsightsPage from './pages/InsightsPage';
+import { workspacePageComponents, workspacePageRoute } from './workspace-page-code';
 import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
 const titles={'api-settings':'API tokens','webhook-settings':'Webhooks','slack-settings':'Slack','delivery-log':'Delivery log',reports:'Reports','move-in':'Move in',edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
-export default function WorkspacePages({ settings }) {
+export default function WorkspacePages({ settings, pages = {} }) {
+    const { Connections, Reports, MoveIn, ActivationPage, SetupTitle, GitHubSettings, ArticleImport,
+        ProjectsPage, AdminPage, KnowledgePage, ManagementPage, ProjectSettings, WidgetSettingsPage,
+        ComputersPage, DelegationSettings, DelegationAuthorize, TrainingRuns, AccountPage, InsightsPage } = { ...workspacePageComponents, ...pages };
     const pathname = useDashboardLocation().pathname;
-    const segments=pathname.split('/').filter(Boolean);
+    const {segments,section,recordId}=workspacePageRoute(pathname,settings);
     const projectId=segments[0]==='projects'?segments[1]:settings.project?.id||Object.keys(settings.projects||{})[0];
-    const section=settings.accountOnly?'projects':segments[0]==='projects'&&(!segments[1]||segments[1]==='create')?'projects':segments[0]==='projects'?segments[2]||'edit':segments[0];
-    const recordId=segments[0]==='projects'?segments[3]:segments[1];
     // /users/<id> is only the signed-in user's own profile; any other id is not a page.
     const foreignUser=section==='users'&&recordId!=='profile'&&recordId!==settings.currentAgent?.id;
     let page;

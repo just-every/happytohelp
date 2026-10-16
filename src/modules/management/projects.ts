@@ -1,3 +1,4 @@
+import {inboxCounts} from './inbox-counts'
 import {validTimezone} from '../reports/calendar'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
@@ -14,14 +15,49 @@ import {workspaceDefaults} from './provisioning/index'
 import {notificationPreference} from './member-updates'
 import {websiteAddress} from './website-address'
 export const projects=new Hono<AppEnv>()
-projects.get('/bootstrap',async c=>{const actor=await requireActor(c);if(!actor.projectId){if(actor.role==='contact')throw new HTTPException(403);return c.json({currentAgent:person(await c.env.DB.prepare('SELECT id,name,email FROM users WHERE id=?').bind(actor.id).first()),projects:{},project:null,agents:[],ais:[],plugins:[],accountOnly:true,sessionProjectId:null,isPlatformAdmin:await isPlatformAdmin(c.env.DB,actor.id)})}const a=await scope(c),rows=(await c.env.DB.prepare('SELECT p.id,p.name,p.widget_key,p.allowed_origin,p.created_at,ps.settings_json,m.role,coalesce(pref.is_primary,0) is_primary FROM projects p LEFT JOIN project_settings ps ON ps.project_id=p.id JOIN memberships m ON m.project_id=p.id LEFT JOIN user_project_preferences pref ON pref.project_id=p.id AND pref.user_id=m.user_id WHERE m.user_id=?').bind(a.id).all()).results;const map:Record<string,any>={};for(const p of rows){const agents=(await c.env.DB.prepare('SELECT u.id,u.name,u.email,m.role,s.avatar_url FROM users u JOIN memberships m ON m.user_id=u.id LEFT JOIN user_settings s ON s.user_id=u.id WHERE m.project_id=?').bind(p.id).all()).results;const ais=(await c.env.DB.prepare('SELECT * FROM ai_profiles WHERE project_id=?').bind(p.id).all()).results;const plugins=(await c.env.DB.prepare('SELECT * FROM plugins WHERE project_id=? ORDER BY sort_order,id').bind(p.id).all()).results;const {settings_json,...summary}=p;const appearance=JSON.parse(String(settings_json||'{}'));map[String(p.id)]={...summary,is_demo:appearance.is_demo===true,sidebar_artwork_url:artworkUrl(String(p.id),appearance.sidebar_artwork_id),sidebar_artwork_enabled:appearance.sidebar_artwork_enabled===true,primary_color:appearance.primary_color||null,display_mode:appearance.display_mode||null,brand_image_url:appearance.brand_image_url||null,avatar_url:appearance.avatar_url||null,agents,ais,plugins}}const project=map[a.projectId];return c.json({currentAgent:person(await c.env.DB.prepare('SELECT u.id,u.name,u.email,s.avatar_url FROM users u LEFT JOIN user_settings s ON s.user_id=u.id WHERE u.id=?').bind(a.id).first()),projects:map,project,sessionProjectId:actor.projectId,isPlatformAdmin:await isPlatformAdmin(c.env.DB,a.id),agents:project.agents.map(person),ais:project.ais,plugins:project.plugins})})
+projects.get('/bootstrap',async c=>{
+ const actor=await requireActor(c)
+ if(actor.role==='contact')throw new HTTPException(403)
+ if(!actor.projectId){
+  const [currentAgent,platformAdmin]=await Promise.all([
+   c.env.DB.prepare('SELECT id,name,email FROM users WHERE id=?').bind(actor.id).first(),
+   isPlatformAdmin(c.env.DB,actor.id)
+  ])
+  return c.json({currentAgent:person(currentAgent),projects:{},project:null,agents:[],ais:[],plugins:[],accountOnly:true,sessionProjectId:null,isPlatformAdmin:platformAdmin})
+ }
+ // The actor is already authenticated. Select every workspace's related rows in
+ // one round trip instead of authenticating again and reading three times per workspace.
+ const [data,platformAdmin]=await Promise.all([c.env.DB.batch<any>([
+  c.env.DB.prepare('SELECT p.id,p.name,p.widget_key,p.allowed_origin,p.created_at,ps.settings_json,m.role,coalesce(pref.is_primary,0) is_primary FROM projects p LEFT JOIN project_settings ps ON ps.project_id=p.id JOIN memberships m ON m.project_id=p.id LEFT JOIN user_project_preferences pref ON pref.project_id=p.id AND pref.user_id=m.user_id WHERE m.user_id=?').bind(actor.id),
+  c.env.DB.prepare('SELECT m.project_id hydration_project_id,u.id,u.name,u.email,m.role,s.avatar_url FROM users u JOIN memberships m ON m.user_id=u.id LEFT JOIN user_settings s ON s.user_id=u.id WHERE EXISTS(SELECT 1 FROM memberships mine WHERE mine.project_id=m.project_id AND mine.user_id=?)').bind(actor.id),
+  c.env.DB.prepare('SELECT a.* FROM ai_profiles a WHERE EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=a.project_id AND m.user_id=?)').bind(actor.id),
+  c.env.DB.prepare('SELECT p.* FROM plugins p WHERE EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=p.project_id AND m.user_id=?) ORDER BY p.sort_order,p.id').bind(actor.id),
+  c.env.DB.prepare('SELECT u.id,u.name,u.email,s.avatar_url FROM users u LEFT JOIN user_settings s ON s.user_id=u.id WHERE u.id=?').bind(actor.id)
+ ]),isPlatformAdmin(c.env.DB,actor.id)])
+ const map:Record<string,any>={}
+ const projectId=c.req.param('projectId')||c.req.query('projectId')||actor.projectId
+ for(const p of data[0].results){
+  const {settings_json,...summary}=p,appearance=JSON.parse(String(settings_json||'{}'))
+  // Preserve scope()'s current-workspace denial, including a deleted workspace.
+  if(p.id===projectId&&appearance.deleted_at!=null)throw new HTTPException(403,{message:'Project not found, or you do not have access to it'})
+  map[String(p.id)]={...summary,is_demo:appearance.is_demo===true,sidebar_artwork_url:artworkUrl(String(p.id),appearance.sidebar_artwork_id),sidebar_artwork_enabled:appearance.sidebar_artwork_enabled===true,primary_color:appearance.primary_color||null,display_mode:appearance.display_mode||null,brand_image_url:appearance.brand_image_url||null,avatar_url:appearance.avatar_url||null,agents:[],ais:[],plugins:[]}
+ }
+ const project=map[projectId]
+ if(!project)throw new HTTPException(403,{message:'Project not found, or you do not have access to it'})
+ for(const {hydration_project_id,...agent} of data[1].results)map[String(hydration_project_id)].agents.push(agent)
+ for(const ai of data[2].results)map[String(ai.project_id)].ais.push(ai)
+ for(const plugin of data[3].results)map[String(plugin.project_id)].plugins.push(plugin)
+ const inbox=c.req.query('inbox')
+ const inboxViewCounts=inbox==='global'||inbox==='project'?await inboxCounts(c.env,actor.id,inbox==='global'?undefined:projectId):undefined
+ return c.json({inboxViewCounts,currentAgent:person(data[4].results[0]),projects:map,project,sessionProjectId:actor.projectId,isPlatformAdmin:platformAdmin,agents:project.agents.map(person),ais:project.ais,plugins:project.plugins})
+})
 projects.get('/projects',async c=>{const a=await scope(c);return c.json({data:(await c.env.DB.prepare('SELECT p.id,p.name,p.widget_key,p.allowed_origin,p.created_at,m.role,coalesce(pref.is_primary,0) is_primary FROM projects p JOIN memberships m ON m.project_id=p.id LEFT JOIN user_project_preferences pref ON pref.project_id=p.id AND pref.user_id=m.user_id WHERE m.user_id=?').bind(a.id).all()).results})})
 projects.post('/projects',async c=>{
  const a=await requireActor(c);if(a.role==='contact')throw new HTTPException(403);await enforceRateLimits(c.env,[['projectsPerAccountDay',a.id],['projectsPerIpDay',clientAddress(c.req)]])
  const b=await c.req.json(),projectId=id(),name=requiredString(b.name,'name',200),origin=new URL(url(b.allowed_origin||b.allowedOrigin)).origin
  const owner=await c.env.DB.prepare('SELECT email FROM users WHERE id=?').bind(a.id).first<{email:string}>()
  const defaults=workspaceDefaults(c.env,{projectId,name,website:origin,ownerEmail:owner?.email||''})
- await c.env.DB.batch([c.env.DB.prepare('INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) VALUES(?,?,?,?,?,?)').bind(projectId,name,id(),origin,Date.now(),serverSecret()),c.env.DB.prepare("INSERT INTO memberships VALUES(?,?,'owner')").bind(projectId,a.id),...defaults.statements])
+ await c.env.DB.batch<any>([c.env.DB.prepare('INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) VALUES(?,?,?,?,?,?)').bind(projectId,name,id(),origin,Date.now(),serverSecret()),c.env.DB.prepare("INSERT INTO memberships VALUES(?,?,'owner')").bind(projectId,a.id),...defaults.statements])
  await defaults.after()
  return c.json({id:projectId,name,allowed_origin:origin},201)
 })
@@ -66,7 +102,7 @@ projects.delete('/projects/:projectId',async c=>{
      settings_json=excluded.settings_json,
      updated_at=excluded.updated_at
  `).bind(a.projectId,a.projectId,a.projectId,a.projectId,now,now,now)
- await c.env.DB.batch([
+ await c.env.DB.batch<any>([
   archiveSettings,
   c.env.DB.prepare('UPDATE email_settings SET inbound_address=NULL,is_enabled=0,updated_at=? WHERE project_id=?').bind(now,a.projectId),
   c.env.DB.prepare('UPDATE sessions SET revoked_at=? WHERE project_id=?').bind(now,a.projectId),

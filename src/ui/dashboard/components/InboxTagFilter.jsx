@@ -7,16 +7,17 @@ export default function InboxTagFilter({ projectId, value, onChange }) {
 
     useEffect(() => {
         let active = true;
+        const controller = new AbortController();
 
         setTags([]);
 
         if (projectId) {
-            nativeRequest(`/api/dashboard/projects/${ projectId }/tags`)
+            nativeRequest(`/api/dashboard/projects/${ projectId }/tags`, {signal: controller.signal})
                 .then(result => { if (active) setTags(result.data); })
                 .catch(() => { if (active) setTags([]); });
         }
 
-        return () => { active = false; };
+        return () => { active = false; controller.abort(); };
     }, [ projectId ]);
 
     if (!projectId || tags.length === 0) return null;

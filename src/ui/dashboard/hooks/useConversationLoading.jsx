@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChatContext } from '../contexts/ChatContext';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
     fetchInitialConversationBuckets,
     hasNextPage as hasNextResponsePage,
@@ -17,6 +18,7 @@ function useConversationLoading({
     setIsMainVisible,
     lastConnected,
 }) {
+    const {initialInboxReadsId, initialInboxConversationId, completeInitialInboxMount} = useContext(ChatContext);
     const [ isLoading, setIsLoading ] = useState(false);
     const [ isRefreshing, setIsRefreshing ] = useState(false);
     const [ isLoadingMore, setIsLoadingMore ] = useState(false);
@@ -101,8 +103,11 @@ function useConversationLoading({
             });
     }, [ conversationId, conversationProjectId, hasNextPage ]);
 
-    const loadConversation = (quietly = false) => {
+    const loadConversation = (quietly = false, initialNavigation = false) => {
         if (activeRequest.current) {
+            if (!initialNavigation && activeRequest.current.initialInboxReadsId) {
+                completeInitialInboxMount?.(activeRequest.current.initialInboxReadsId, true);
+            }
             if (quietly) {
                 queuedQuietRefresh.current = true;
                 return;
@@ -118,6 +123,7 @@ function useConversationLoading({
             conversationId,
             generation: ++requestGeneration.current,
         };
+        request.initialInboxReadsId = initialNavigation ? initialInboxReadsId : null;
         const initialLoad = !quietly || readyConversationId !== conversationId;
         activeRequest.current = request;
         setLoadError(null);
@@ -136,11 +142,13 @@ function useConversationLoading({
 
         setIsMainVisible(true);
 
+        let initialFailed = false;
+        const initialId = initialNavigation ? initialInboxReadsId : null;
         fetchInitialConversationBuckets({
             conversationId,
             projectId,
-            fetchConversation: fetchConversationRef.current,
-            fetchBucketList: fetchBucketListRef.current,
+            fetchConversation: (id, scope, options) => fetchConversationRef.current(id, scope, {...options, initialInboxRead: initialNavigation}),
+            fetchBucketList: (id, params, scope, options) => fetchBucketListRef.current(id, params, scope, {...options, initialInboxRead: initialNavigation}),
             signal: controller.signal,
             isCurrent: () => requestIsCurrent(request),
             onConversation: nextConversation => {
@@ -157,6 +165,7 @@ function useConversationLoading({
                 }
             })
             .catch(error => {
+                initialFailed = true;
                 if (!requestIsCurrent(request) || isAbortedRequest(error)) {
                     return;
                 }
@@ -169,6 +178,7 @@ function useConversationLoading({
                     return;
                 }
 
+                if (initialId) completeInitialInboxMount?.(initialId, initialFailed);
                 setIsLoading(false);
                 setIsRefreshing(false);
                 finishRequest(request);
@@ -178,15 +188,25 @@ function useConversationLoading({
     loadConversationRef.current = loadConversation;
 
     useEffect(() => {
-        loadConversationRef.current(false);
+        // The retained provider can render the outgoing conversation once while
+        // Chat's route effect activates the new explicit conversation.
+        if (initialInboxReadsId && initialInboxConversationId !== conversationId) return;
+        loadConversationRef.current(false, true);
 
         return () => {
             requestGeneration.current += 1;
             activeRequest.current?.controller.abort();
             activeRequest.current = null;
             queuedQuietRefresh.current = false;
+            // StrictMode immediately installs a replacement request for this same
+            // envelope. A real unmount/navigation has no such committed setup.
+            queueMicrotask(() => {
+                if (initialInboxReadsId && activeRequest.current?.initialInboxReadsId !== initialInboxReadsId) {
+                    completeInitialInboxMount?.(initialInboxReadsId, true);
+                }
+            });
         };
-    }, [ conversationId ]);
+    }, [ conversationId, initialInboxReadsId, initialInboxConversationId ]);
 
     useEffect(() => {
         if (lastConnected) {

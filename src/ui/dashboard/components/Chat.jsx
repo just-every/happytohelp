@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ConversationsList from "./ConversationsList";
-import Conversation from "./Conversation";
+import { Conversation as LazyConversation } from '../../native/inbox-page-code';
 import InboxStart from './InboxStart';
 import { useDashboardSettings, useDashboardLocation } from '../../native/dashboard-state';
 import { TwoBubbles } from '../../native/drawings';
@@ -8,7 +8,7 @@ import { updateNavigationUnreadBadge } from './navigationInboxBadge';
 import { ChatContext } from "../contexts/ChatContext";
 import useInboxRoute from "../hooks/useInboxRoute";
 
-export default function Chat() {
+export default function Chat({ Conversation = LazyConversation }) {
     const [ isCompactViewport, setIsCompactViewport ] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1199.98px)').matches);
     const { urlConversationId } = useInboxRoute();
     const settings = useDashboardSettings();

@@ -11,7 +11,7 @@ export function widgetDevAsset(origin:string|undefined):Plugin {
    if(req.url?.split('?')[0]!=='/widget.js'||!['GET','HEAD'].includes(req.method||''))return next()
    try {
     const bytes=await readFile(join(server.config.root,'public/widget.js'))
-    const response=widgetAssetOrigin(new Request(origin+'/widget.js'),new Response(bytes,{headers:{'Content-Type':'text/javascript; charset=utf-8'}}),origin)
+    const response=await widgetAssetOrigin(new Request(origin+'/widget.js',{method:req.method,headers:req.headers as HeadersInit}),new Response(bytes,{headers:{'Content-Type':'text/javascript; charset=utf-8'}}),origin)
     res.statusCode=response.status
     response.headers.forEach((value,name)=>res.setHeader(name,value))
     if(req.method==='HEAD'){await response.body?.cancel();res.end()}else res.end(await response.text())

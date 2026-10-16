@@ -7,10 +7,22 @@ import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {createConfiguredMailRuntime} from './helpers/configured-mail-runtime.mjs';
-const runtime=await createConfiguredMailRuntime();let success=false;
+const apiSocket=createServer();await new Promise(resolve=>apiSocket.listen(0,'127.0.0.1',resolve));const apiPort=apiSocket.address().port;await new Promise(resolve=>apiSocket.close(resolve));
+const runtime=await createConfiguredMailRuntime({port:apiPort,workerFirst:true,vars:{APP_ORIGIN:`http://127.0.0.1:${apiPort}`}});let success=false;
 const evidenceRoot=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-widget-evidence-'));const proofDir=pathToFileURL(join(evidenceRoot,'widget-native')+'/');await mkdir(proofDir,{recursive:true});console.log('Widget evidence:',proofDir.pathname);
 const call=async(path,body,token,extra={})=>{const response=await fetch(runtime.origin+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} :{}),...extra},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,`${path}: ${response.status} ${await response.clone().text()}`);return response.json()};
 try{
+ // Exercise the deployed Worker-first path, including the canonical-origin prefix.
+ const asset=await fetch(runtime.origin+'/widget.js'),bytes=Buffer.from(await asset.arrayBuffer());
+ const etag='"'+createHash('sha256').update(bytes).digest('hex')+'"';
+ const repeated=await fetch(runtime.origin+'/widget.js',{headers:{'If-None-Match':etag}});
+ const otherOriginTag='"'+createHash('sha256').update(bytes.toString().replace(runtime.origin,'https://other-installation.example')).digest('hex')+'"';
+ const otherOrigin=await fetch(runtime.origin+'/widget.js',{headers:{'If-None-Match':otherOriginTag}});
+ assert.equal(asset.status,200);assert.ok(bytes.toString().startsWith('if(document.currentScript'));assert.ok(bytes.toString().slice(0,250).includes(JSON.stringify(runtime.origin)));
+ assert.equal(asset.headers.get('ETag'),etag);assert.match(asset.headers.get('Cache-Control'),/public.*max-age=[1-9][0-9]*.*stale-while-revalidate=/);
+ assert.equal(repeated.status,304);assert.equal((await repeated.arrayBuffer()).byteLength,0);assert.equal(repeated.headers.get('ETag'),etag);assert.equal(repeated.headers.get('Cache-Control'),asset.headers.get('Cache-Control'));
+ assert.equal(otherOrigin.status,200);assert.deepEqual(Buffer.from(await otherOrigin.arrayBuffer()),bytes);
+ console.log('Worker-first widget cache: 200',bytes.length,'bytes; If-None-Match: 304, 0 bytes;',asset.headers.get('Cache-Control'));
  const socket=createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));const origin=`http://127.0.0.1:${port}`;
  const owner=await call('/api/identity/bootstrap',{password:'synthetic-test-setup-password-123',name:'Widget runtime proof',email:'widget-runtime@example.test',allowedOrigin:origin});
  const project=await call(`/api/identity/projects/${owner.projectId}`,undefined,owner.token);

@@ -12,6 +12,8 @@ import {HTTPException} from 'hono/http-exception'
  * other field they are part of the delivery identity. */
 export interface EmailAttachment {filename:string;content:string;contentType:string;contentId?:string}
 export interface EmailInput {to:string;subject:string;text:string;html?:string;attachments?:readonly EmailAttachment[];projectId?:string;idempotencyKey:string;replyTo?:string;headers?:Readonly<Record<string,string>>}
+/** The host retains provider execution only after every sending claim is durable. */
+export type DeferEmailDelivery=(delivery:Promise<unknown>)=>void
 type DeliveryRow={state:string;provider_id:string|null;intent_hash:string}
 
 export type EmailOutcome={id:string|null;state:string;recipient?:string;mode?:'local'}
@@ -58,7 +60,7 @@ async function suppressDevelopment(env:Env,input:EmailInput,from:string):Promise
  await sendDevelopment({provider:'development',mode:'development'},providerMessage(input,from))
  return {id:null,state:'suppressed',mode:'local'}
 }
-export async function sendEmail(env:Env,input:EmailInput):Promise<EmailOutcome>{
+export async function sendEmail(env:Env,input:EmailInput,defer?:DeferEmailDelivery):Promise<EmailOutcome>{
  if(!emailConfigured(env))throw new HTTPException(503,{message:'Email provider is not configured'})
  const from=await senderFor(env,input)
  validateEmailInput(input,from)
@@ -71,12 +73,14 @@ export async function sendEmail(env:Env,input:EmailInput):Promise<EmailOutcome>{
  }
  const now=Date.now(),claimed=await env.DB.prepare("INSERT OR IGNORE INTO email_deliveries VALUES(?,?,?,?,?,'sending',NULL,NULL,?,?)").bind(input.idempotencyKey,input.projectId||null,input.to,input.subject,intentHash,now,now).run()
  if(!claimed.meta.changes)throw new HTTPException(409)
- return submitClaimed(env,input,from)
+ const delivery=submitClaimed(env,input,from)
+ if(defer){defer(delivery);return {id:null,state:'sending'}}
+ return delivery
 }
 /** Freeze the complete notification recipient set before any network effect. A
  * process lost after this transaction leaves sending outcomes for reconciliation,
  * never a partially reconstructed recipient list on automatic outbox replay. */
-export async function sendEmails(env:Env,inputs:readonly EmailInput[]):Promise<EmailOutcome[]>{
+export async function sendEmails(env:Env,inputs:readonly EmailInput[],defer?:DeferEmailDelivery):Promise<EmailOutcome[]>{
  if(!inputs.length)return []
  if(!emailConfigured(env))throw new HTTPException(503,{message:'Email provider is not configured'})
  const prepared=await Promise.all(inputs.map(async input=>{const from=await senderFor(env,input);validateEmailInput(input,from);return {input,from,intentHash:await hashToken(JSON.stringify({...input,from}))}}))
@@ -85,7 +89,7 @@ export async function sendEmails(env:Env,inputs:readonly EmailInput[]):Promise<E
  // D1 batch is one transaction. A duplicate primary claim rolls back every
  // participant claim; only the process that owns the whole set may submit it.
  await env.DB.batch(prepared.map(({input,intentHash})=>env.DB.prepare("INSERT INTO email_deliveries VALUES(?,?,?,?,?,'sending',NULL,NULL,?,?)").bind(input.idempotencyKey,input.projectId||null,input.to,input.subject,intentHash,now,now)))
- return Promise.all(prepared.map(async({input,from})=>{
+ const delivery=Promise.all(prepared.map(async({input,from})=>{
   try{return {...await submitClaimed(env,input,from),recipient:input.to}}
   catch(error){
    const row=await env.DB.prepare('SELECT state,provider_id,recipient FROM email_deliveries WHERE id=?').bind(input.idempotencyKey).first<{state:string;provider_id:string|null;recipient:string}>()
@@ -93,4 +97,8 @@ export async function sendEmails(env:Env,inputs:readonly EmailInput[]):Promise<E
    return {state:row.state,id:row.provider_id,recipient:row.recipient}
   }
  }))
+ // A deferred acknowledgement represents the entire immutable recipient set.
+ // No provider request starts until the all-or-nothing claim above commits.
+ if(defer){defer(delivery);return prepared.map(({input})=>({id:null,state:'sending',recipient:input.to}))}
+ return delivery
 }

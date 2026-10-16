@@ -6026,7 +6026,7 @@
       "executable": false
     },
     "src/ui/dashboard/styles/layouts/_conversation-composer.scss": {
-      "sha256": "6f53c91b437b88f3170890792d24c946bae7fd16f80c59c63fc238a6e128aee7",
+      "sha256": "b2991ade1be3902756e1b4688c4bd4a45ad016c46e50fc2321f0eb1d85839f25",
       "executable": false
     },
     "src/ui/dashboard/styles/layouts/_conversation-delegation-results.scss": {

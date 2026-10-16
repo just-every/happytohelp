@@ -182,6 +182,10 @@
     {
       "source": "SEED-COMMAND-CONTRACT.md",
       "reason": "Copied Base command contract for maintainers; the README and local command reference explain product usage"
+    },
+    {
+      "source": "docs/LEGACY-EXPORT.md",
+      "reason": "Read-only legacy database export tooling and access instructions for migration operators"
     }
   ]
 }

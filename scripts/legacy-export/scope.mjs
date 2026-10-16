@@ -6,7 +6,10 @@ export const directTables = ['projects','project_users','contacts','conversation
 export const credentialColumns = {
   projects: ['verification_secret'], users: ['password','remember_token'],
   project_users: ['invitation_token'], contacts: ['key_hashes'],
-  connections: ['shared_key','user_shared_key'], project_github_connections: ['access_token'],
+  connections: ['shared_key','contact_shared_key','contact_shared_key_id'],
+  // Drop encrypted telemetry and its crypto-only reference; never decrypt it.
+  collector_actions: ['action','contact_shared_key_id'], project_github_connections: ['access_token'],
+  message_thinkings: ['signature'], // opaque provider continuation payload, never needed to read history
 };
 export const skippedTables = ['migrations','password_resets','personal_access_tokens','asymmetric_keys',
   'contact_shared_keys','failed_jobs','jobs','job_batches','telescope_entries','telescope_entries_tags',

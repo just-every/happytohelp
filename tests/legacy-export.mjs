@@ -2,14 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import mysql from 'mysql2/promise';
 import {spawn} from 'node:child_process';
-import {mkdtemp,mkdir,readFile,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-import {randomBytes,createHash} from 'node:crypto';
+import {randomBytes} from 'node:crypto';
 import {seedLegacy} from './legacy-export/fixture.mjs';
+import {assertArtifact,assertAllNativeStores,assertMappedBusinessState} from './legacy-export/assertions.mjs';
+import {assertCredentialRefusals} from './legacy-export/refusals.mjs';
 
 // One public-command integration flow, using real MySQL and local D1/R2.
-test('project snapshot → attachment bytes → native import → safe replay', {timeout:180000}, async () => {
+test('project snapshot → attachment bytes → native import → safe replay', {timeout:240000}, async () => {
   const output=process.env.LEGACY_TEST_OUTPUT?resolve(process.env.LEGACY_TEST_OUTPUT):await mkdtemp(join(tmpdir(),'h2h-legacy-export-'));
   await mkdir(output,{recursive:true,mode:0o700});
   const database='h2h_export_'+randomBytes(5).toString('hex'),reader='export_'+randomBytes(5).toString('hex');
@@ -35,17 +37,21 @@ test('project snapshot → attachment bytes → native import → safe replay', 
     try{await assert.rejects(readonly.execute('DELETE FROM projects'),/denied/i);}finally{await readonly.end();}
     await run('scripts/migrations.mjs');
     await run('node_modules/wrangler/bin/wrangler.js',['d1','migrations','apply','DB','--local','--persist-to',persist]);
-    const results=[],files=[];
+    const results=[],files=[],sources=[];
     for(const [index,projectId] of fixture.projectIds.entries()){
       const snapshot=join(output,`project-${index+1}.snapshot.json`),file=join(output,`project-${index+1}.import.json`);
-      await run('scripts/export-legacy.mjs',['snapshot','--project',projectId,'--revision','fixture-legacy-schema','--ai-model','gpt-5.6-luna','--output',snapshot],env);
-      const raw=JSON.parse(await readFile(snapshot,'utf8'));
+      const snapshotArgs=['snapshot','--project',projectId,'--revision','fixture-legacy-schema','--ai-model','gpt-5.6-luna','--mail-from-domain','example.test'];
+      await run('scripts/export-legacy.mjs',[...snapshotArgs,'--output',snapshot],env);
+      const raw=await assertArtifact(snapshot,fixture.secrets);
+      sources.push(raw);
+      if(index===0)await assertCredentialRefusals({admin,run,env,output,projectId,snapshotArgs,snapshot,objectDirectory});
       assert.equal(raw.tables.projects.length,1);assert.equal(raw.tables.projects[0].id,projectId);
       for(const rows of Object.values(raw.tables))for(const row of rows)if(row.project_id)assert.equal(row.project_id,projectId);
       assert.equal(raw.tables.users.length,2,'owner and this project’s AI only');
       assert.equal(raw.tables.users[0].password,undefined);assert.equal(raw.tables.projects[0].verification_secret,undefined);
       assert.equal(raw.tables.projects[0].ai_balance,'12.500000','decimal remains exact text');
       await run('scripts/export-legacy.mjs',['attachments','--input',snapshot,'--objects-dir',objectDirectory,'--output',file]);
+      await assertArtifact(file,fixture.secrets);
       const first=JSON.parse(await run('scripts/import-legacy.mjs',['--file',file,'--apply','--persist-to',persist]));
       const replay=JSON.parse(await run('scripts/import-legacy.mjs',['--file',file,'--apply','--persist-to',persist]));
       assert.equal(first.applied,first.sourceRows);assert.equal(replay.applied,0);assert.equal(replay.replayed,first.sourceRows);
@@ -54,14 +60,15 @@ test('project snapshot → attachment bytes → native import → safe replay', 
     const {getPlatformProxy}=await import('wrangler');const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(persist,'v3')}});
     const native={};
     try{
-      const expected={projects:2,users:1,memberships:2,contacts:4,conversations:4,messages:8,conversation_notes:2,media:2,knowledge_categories:4,knowledge_articles:4,knowledge_article_categories:6,macros:2,project_settings:2};
+      const expected={projects:2,users:1,memberships:2,contacts:4,conversations:4,messages:8,conversation_notes:2,media:2,knowledge_categories:6,knowledge_articles:4,knowledge_article_categories:6,macros:2,project_settings:2,knowledge_datasets:4,knowledge_documents:2,context_insights:4,email_settings:2,public_project_aliases:2};
       for(const [table,count] of Object.entries(expected)){const row=await proxy.env.DB.prepare(`SELECT COUNT(*) n FROM ${table}`).first();native[table]=row.n;assert.equal(row.n,count,table);}
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM knowledge_categories WHERE is_published=0').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM knowledge_articles WHERE status=\'draft\'').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM messages WHERE content LIKE \'%Internal only%\' OR content LIKE \'Removed duplicate%\'').first()).n,0);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM conversation_notes WHERE content LIKE \'%Internal only.%\'').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM contacts WHERE email LIKE \'preferred@%\'').first()).n,2);
-      for(const file of files){const bundle=JSON.parse(await readFile(file,'utf8'));for(const object of bundle.objects){const actual=await proxy.env.FILES.get(object.key);assert.ok(actual);assert.equal(createHash('sha256').update(Buffer.from(await actual.arrayBuffer())).digest('hex'),object.sha256);}}
+      await assertMappedBusinessState(proxy.env,sources,files);
+      await assertAllNativeStores(proxy.env,fixture.secrets,persist);
     }finally{await proxy.dispose();}
     await writeFile(join(output,'results.json'),JSON.stringify({fixture:fixture.counts,native,imports:results,files,persist},null,2));
     console.log(JSON.stringify({output,fixture:fixture.counts,native,replayApplied:results.map(r=>r.replay.applied)}));success=true;

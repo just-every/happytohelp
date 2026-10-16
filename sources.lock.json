@@ -2596,7 +2596,7 @@
       "executable": false
     },
     "scripts/legacy-export/text-policy.mjs": {
-      "sha256": "f9538fbf7b53125a57f2acdc849385d28801f7f3f8b34749b52606c76b65504f",
+      "sha256": "2f9d1d35e713f45a6f90c663f21bba0dbe691c36359fec23721840bb2782ba96",
       "executable": false
     },
     "scripts/legacy-export/transport-secrets.mjs": {

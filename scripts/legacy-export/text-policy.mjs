@@ -103,6 +103,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
 // rendered or derived text repeats it ("enter the manual key `…`"). The exporter
 // collects these values first; length matches the secret scan's searched values.
 export const repeatedCredentialMinimum=12;
+const tokenCharacter=/[A-Za-z0-9+/_=-]/;
 export function knownCredentials(secrets){
  // Index both stored forms by a fixed-length prefix: one linear pass per string.
  const forms=new Map();
@@ -121,7 +122,11 @@ export function omitKnownCredentials(value,known,onOmit){
    for(let i=0;i+repeatedCredentialMinimum<=v.length;){
     const form=known.get(v.substr(i,repeatedCredentialMinimum))?.find(f=>v.startsWith(f,i));
     if(!form){i++;continue;}
-    result+=v.slice(last,i)+'<redacted>';i+=form.length;last=i;omitted++;onOmit?.(form);
+    // Inside a longer token the whole token goes: a remnant would still be part of the credential.
+    let start=i,end=i+form.length;
+    while(start>last&&tokenCharacter.test(v[start-1]))start--;
+    while(end<v.length&&tokenCharacter.test(v[end]))end++;
+    result+=v.slice(last,start)+'<redacted>';i=end;last=end;omitted++;onOmit?.(form);
    }
    return last?result+v.slice(last):v;
   }

@@ -109,15 +109,27 @@ jobs:
           - name: first-run-browser
             browser: true
             commands: |
-              node --test --test-concurrency=1 tests/journeys/first-run-browser.mjs
+              node --test --test-concurrency=1 --test-skip-pattern=dashboard.is.ready tests/journeys/first-run-browser.mjs
+          - name: first-run-dashboard-browser
+            browser: true
+            commands: |
+              node --test --test-concurrency=1 --test-name-pattern=dashboard.is.ready tests/journeys/first-run-browser.mjs
           - name: inbox-browser
             browser: true
             commands: |
-              node --test --test-concurrency=1 tests/journeys/inbox-browser.mjs
+              node --test --test-concurrency=1 --test-skip-pattern=management.libraries --test-skip-pattern=appearance.settings tests/journeys/inbox-browser.mjs
+          - name: inbox-library-browser
+            browser: true
+            commands: |
+              node --test --test-concurrency=1 --test-name-pattern=management.libraries --test-name-pattern=appearance.settings tests/journeys/inbox-browser.mjs
           - name: widget-browsers
             browser: true
             commands: |
-              node --test --test-concurrency=1 tests/journeys/widget-browser.mjs tests/journeys/context-browser.mjs tests/journeys/ai-browser.mjs
+              node --test --test-concurrency=1 tests/journeys/widget-browser.mjs tests/journeys/ai-browser.mjs
+          - name: context-browser
+            browser: true
+            commands: |
+              node --test --test-concurrency=1 tests/journeys/context-browser.mjs
           - name: delegation-browsers
             browser: true
             commands: |

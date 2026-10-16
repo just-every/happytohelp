@@ -1,5 +1,4 @@
 import { fileURLToPath as __rerTestEntryPath } from 'node:url';
-const __rerTestEntry = __rerTestEntryPath(import.meta.resolve('@runeditrun/rer/internal/global/rer.mjs'));
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -9,13 +8,17 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {createServer} from 'node:net';
-import {command,run} from './helpers/rer-command.mjs';
-import {waitForServingCapacity} from './helpers/serving-capacity.mjs';
-import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive} from './helpers/rer-archive.mjs';
-import {seedPortableData,verifyPortableData} from './helpers/rer-data.mjs';
+import {command,run} from '../rer-command.mjs';
+import {waitForServingCapacity} from '../serving-capacity.mjs';
+import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive} from '../rer-archive.mjs';
+import {seedPortableData,verifyPortableData} from '../rer-data.mjs';
+
+// The fresh-clone rer command journey: install, setup, dev, export/import, reset and fresh owner.
+export async function freshInstallJourney(){
+const __rerTestEntry = __rerTestEntryPath(import.meta.resolve('@runeditrun/rer/internal/global/rer.mjs'));
 
 // One maintained public command journey replaces the standalone installer flow.
-const source=fileURLToPath(new URL('..',import.meta.url));
+const source=fileURLToPath(new URL('../../..',import.meta.url));
 const scratch=await mkdtemp(join(tmpdir(),'h2h-rer-journey-')),root=join(scratch,'checkout');
 const execute=promisify(execFile);
 let server;
@@ -147,4 +150,6 @@ try{
 }finally{
  if(server)await server.stop();
  await rm(scratch,{recursive:true,force:true});
+}
+
 }

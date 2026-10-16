@@ -1,4 +1,4 @@
-import { digest } from '../artifact.mjs';
+import { digest } from '../../../live-proofs/artifact.mjs';
 export const sha = '1'.repeat(40);
 export function candidate() {
   const sql = 'CREATE TABLE sample(id TEXT PRIMARY KEY);';

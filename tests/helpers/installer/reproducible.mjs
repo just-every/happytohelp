@@ -1,5 +1,4 @@
-import {readArtifact,payloadBytes} from './helpers/artifact-payloads.mjs';
-import test from 'node:test';
+import {readArtifact,payloadBytes} from '../artifact-payloads.mjs';
 import assert from 'node:assert/strict';
 import {spawn, execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -15,7 +14,7 @@ import {fileURLToPath} from 'node:url';
 // checkout, the source repository, the temporary directory nor the home directory.
 // The second checkout's files carry an old modification time and its build starts
 // a few seconds later, so copied timestamps and build clocks cannot line up.
-const root = fileURLToPath(new URL('..', import.meta.url));
+const root = fileURLToPath(new URL('../../..', import.meta.url));
 const pnpm = process.env.npm_execpath;
 const artifactFile = 'delivery-artifact/happytohelp-worker-artifact.json';
 // Absolute filesystem locations a builder could leak (macOS, Linux and CI).
@@ -54,8 +53,8 @@ async function entries({artifact}) {
  return new Map([...values,['deploymentSpec',JSON.stringify(artifact.deploymentSpec)]]);
 }
 
-test('delivery artifact is byte-reproducible across checkout paths and names no builder path', {timeout: 15 * 60_000}, async () => {
-  assert.ok(pnpm, 'Run through `pnpm run test:reproducible-build` so the same pnpm installs each checkout.');
+export async function reproducibleBuild() {
+  assert.ok(pnpm, 'Run through `pnpm run test:installer-nightly` so the same pnpm installs each checkout.');
   const files = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {cwd: root, encoding: 'utf8'})
     .split('\0').filter(file => file && existsSync(join(root, file)));
   const base = await realpath(await mkdtemp(join(tmpdir(), 'h2h-repro-')));
@@ -86,4 +85,4 @@ test('delivery artifact is byte-reproducible across checkout paths and names no 
     if (passed) await rm(base, {recursive: true, force: true});
     else console.error(`Reproducibility checkouts and build logs retained in ${base}`);
   }
-});
+}

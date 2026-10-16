@@ -3,11 +3,14 @@ import {mkdtemp,mkdir,writeFile,readFile,rm,copyFile,stat} from 'node:fs/promise
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {randomBytes,randomUUID} from 'node:crypto';
-import {chromium} from 'playwright';
-import {processRun,command,serve} from './first-run/cli-kit.mjs';
-import {signIn,beforeHydration} from './first-run/cli-sign-in.mjs';
-import {freePort,post} from './first-run/browser-kit.mjs';
-const source=resolve(import.meta.dirname,'..'),directory=await mkdtemp(join(tmpdir(),'h2h-cli-journey-'));
+import {processRun,command,serve} from '../../first-run/cli-kit.mjs';
+import {signIn,beforeHydration} from '../../first-run/cli-sign-in.mjs';
+import {freePort,post} from '../../first-run/browser-kit.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs';
+
+// The README clone-and-restore journey: setup twice, owner entry at 1440/390, D1/R2 round trip into a fresh clone, reset.
+export async function readmeRestoreJourney(){
+const source=resolve(import.meta.dirname,'../../..'),directory=await mkdtemp(join(tmpdir(),'h2h-cli-journey-'));
 const evidence=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/base-command');await mkdir(evidence,{recursive:true});
 const env={...process.env,CI:'true',H2H_EVIDENCE_DIR:evidence,WRANGLER_SEND_METRICS:'false',CLOUDFLARE_INCLUDE_PROCESS_ENV:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false',RER_SERVERS_DIR:join(directory,'servers'),RER_SERVER_JOURNEY:'1'};
 let browser,runtime;
@@ -30,7 +33,7 @@ try{
  await command(root,['setup','--answers','.seed/local-answers.json','--port',String(port),'--non-interactive'],env);receipt.commands.push('setup');
  const saved=await readFile(join(root,'.dev.vars'));assert.equal((await stat(join(root,'.dev.vars'))).mode&0o777,0o600);
  await command(root,['setup','--non-interactive'],env);assert.ok(saved.equals(await readFile(join(root,'.dev.vars'))),'second setup preserves exact private bytes');receipt.commands.push('setup again');
- runtime=await serve(root,env);assert.equal(runtime.origin,origin);browser=await chromium.launch({headless:true});
+ runtime=await serve(root,env);assert.equal(runtime.origin,origin);browser=await launchBrowser();
  await beforeHydration({browser,origin,email:answer.OWNER_EMAIL,password});receipt.preHydration=true;
  for(const width of [1440,390]){await signIn({browser,origin,openUrl:await readFile(join(root,'.rer/local/open-url'),'utf8'),width,evidence});receipt.widths.push(width);}
  const logged=await post(origin,'/api/identity/login',{email:answer.OWNER_EMAIL,password});
@@ -64,3 +67,5 @@ try{
  receipt.roundTrip=true;receipt.reset=true;receipt.commands.push('dev','export','import into fresh clone','export comparison','confirmed reset','fresh setup');
  await writeFile(join(evidence,'cli-proof.json'),JSON.stringify(receipt,null,2)+'\n');console.log('CLI README journey passed: setup twice, automatic owner entry at 1440/390, private settings, D1/R2 round trip, active-state refusal and confirmed reset.');
 }finally{await runtime?.close();await browser?.close();await rm(directory,{recursive:true,force:true});}
+
+}

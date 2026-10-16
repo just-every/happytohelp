@@ -8238,7 +8238,7 @@
       "executable": false
     },
     "tests/inbox-conversation-browser.mjs": {
-      "sha256": "4a2971e9c37d887f140f56ce2c5447f15bbc080e008dd716e25e7064ee7f0c2a",
+      "sha256": "b6428351de7c0b54720def756c0b691e7b25ca988c5b192b9b2294080f3cbb32",
       "executable": false
     },
     "tests/inbox-default-browser.mjs": {

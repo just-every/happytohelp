@@ -57,18 +57,13 @@ try{
   check('contact without a timezone: no header clock, Details says Unknown, no Moment console errors')
   await context.close()
   const tokyo=await open(conversationPath('tokyo'))
-  await tokyo.page.route(`**/api/dashboard/projects/${fx.projectId}/conversations/${fx.contacts.tokyo.id}`,async route=>{
-   const response=await route.fetch(),body=await response.json()
-   body.data.contact.timezone='Asia%2FTokyo'
-   await route.fulfill({response,json:body})
-  })
+  await runtime.execute(`UPDATE contacts SET metadata_json=json_set(metadata_json,'$.timezone','Asia%2FTokyo') WHERE id=(SELECT contact_id FROM conversations WHERE id='${fx.contacts.tokyo.id}')`)
   await tokyo.page.reload()
   await tokyo.page.locator('.conversation-header-meta').getByText(/\d{1,2}:\d{2}/).waitFor()
   await tokyo.page.getByRole('tab',{name:'Details'}).click()
   await tokyo.page.getByText('UTC+09:00',{exact:true}).waitFor()
   assert.deepEqual(problems,[])
   check('contact with a URL-encoded timezone: header clock and Details UTC offset shown')
-  await tokyo.page.unrouteAll({behavior:'ignoreErrors'})
   await tokyo.context.close()
  }
 

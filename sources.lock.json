@@ -3926,6 +3926,10 @@
       "sha256": "eb9c19e1b3ae600ebe5384015019b005bd919dcfe449e9afeeee29a79cdd8a19",
       "executable": false
     },
+    "src/modules/integrations/email-file-links.ts": {
+      "sha256": "cbb128b2479c5f148e7a8de557322223c70193642a14b8c3a2ad045ff7085a3a",
+      "executable": false
+    },
     "src/modules/integrations/email-provider.ts": {
       "sha256": "30291f16e37350e10d78fef3c0b28cf60c334bb928eaa6418375375c4525131a",
       "executable": false
@@ -3984,6 +3988,10 @@
     },
     "src/modules/integrations/inbound-routing.ts": {
       "sha256": "ab34427d73deea1e13747202478f271428919670110a50f1353f454e8bc597ba",
+      "executable": false
+    },
+    "src/modules/integrations/inbound-sender.ts": {
+      "sha256": "0549e7e20b55295c3357cbb57df18d74d7e28051aeed6c5668a809d6fd19139e",
       "executable": false
     },
     "src/modules/integrations/inbound-service.ts": {

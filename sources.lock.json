@@ -2090,11 +2090,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "9180284974d943ac11e200f9d1f1f9938553f999b4de606eaea11c3af78a22fa",
+      "sha256": "939b5a7e8d96dc45064ee3d1296aa4807a6f4e16f4142de571c0642607bbb0d4",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "3ec491a0f8ded99c9ecf674cb1f78ea095338df5df3704f1409b2623393e8a38",
+      "sha256": "ea0e57a0dcf6e92b08d960796b8796369404580eeff1c616899120ed862b178a",
       "executable": false
     },
     "public/fonts/inter/InterVariable.woff2": {

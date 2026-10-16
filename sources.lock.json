@@ -1486,6 +1486,14 @@
       "sha256": "852228281914dfa8c6d33f3734659304d51b37cb126d20442a02a40392237d20",
       "executable": false
     },
+    "docs/connected-applications.md": {
+      "sha256": "26c331a82ca6f4b96e701a168b87bfd5e1350018bc72137b202f561a183b7570",
+      "executable": false
+    },
+    "docs/help-before-they-ask.md": {
+      "sha256": "67fe53b426df56d2f7e47ab97b89be8dd246a7edab4877efabe50e231654b312",
+      "executable": false
+    },
     "docs/INBOUND-EMAIL-RECOVERY.md": {
       "sha256": "7eabb5658df5bede58b69f87782d61705254ce365645a3e0a7d1bed31e188feb",
       "executable": false
@@ -1534,6 +1542,10 @@
       "sha256": "b674c7a62076c41b383d37d0d2c46b2c92452ca7dd1a2f86305a8a04fcc9da02",
       "executable": false
     },
+    "docs/plugins.md": {
+      "sha256": "8fd354c73006a7c451d6328408c3bc63b48cff900c3a3684b6a71d2950477ba6",
+      "executable": false
+    },
     "docs/PRIVACY.md": {
       "sha256": "ebbb05c0ff3b7e57151238c96d4d34035aa6198a139a0298d593cf67ff07b3bf",
       "executable": false
@@ -1568,6 +1580,10 @@
     },
     "docs/usage/README.md": {
       "sha256": "0d6e81901fd1ff0101e73a5a7f28816c99d08300311f2ff6b399689ca5db0e82",
+      "executable": false
+    },
+    "docs/website-knowledge.md": {
+      "sha256": "e5d1461a3c8da82aae57c897aa8f20d6730eaf9beb9d93c40f009901357e9cb6",
       "executable": false
     },
     "docs/WORKSPACE-WORKFLOWS.md": {
@@ -4172,6 +4188,10 @@
     },
     "src/modules/knowledge/service.ts": {
       "sha256": "88dca0a31e2501594d681cbc97a2a6c05a6a373780025b37e00570f0a2fdb13f",
+      "executable": false
+    },
+    "src/modules/knowledge/website-reader.ts": {
+      "sha256": "8f38dbdfb2f9e6e7f9cc97c71ce95545e6ef2f1aac89724ff5bc5d17f0baed5a",
       "executable": false
     },
     "src/modules/legacy-import/importer.ts": {
@@ -7190,6 +7210,10 @@
       "sha256": "6009be6fd52539f1ff8cef82105f75ccb192be14566960e84fe5cba26c0f1bd0",
       "executable": false
     },
+    "src/ui/native/pages/knowledge/WebsiteReader.jsx": {
+      "sha256": "1baed112ab18958d519c0508cbfba3882bcfca0aa8d2fb6b0922e86383904669",
+      "executable": false
+    },
     "src/ui/native/pages/KnowledgePage.jsx": {
       "sha256": "47d1ad4ce975a51e106a426c332fa04b4c353771c0ef425d84ef90b425d5324e",
       "executable": false
@@ -7250,6 +7274,14 @@
       "sha256": "c60aaa034304f14ee3c9e02c4d8e76c4c355f6cc29b0dd6d9f03ebd591178ad7",
       "executable": false
     },
+    "src/ui/native/pages/PluginHelp.jsx": {
+      "sha256": "343a207f3bb67d598a07675c8b3ad6a1d5da59549cb3116b271999434f43773a",
+      "executable": false
+    },
+    "src/ui/native/pages/ProactiveHelp.jsx": {
+      "sha256": "d674d47c8e04f6458374f42297f279d57c9354a76dad897a6f5b3cb3b3f98df4",
+      "executable": false
+    },
     "src/ui/native/pages/project-parity.css": {
       "sha256": "2669d7d9018c7e4fad6f1d5c565cbba74eb98b29f050f3c62a6fce0de31d637a",
       "executable": false
@@ -7284,6 +7316,10 @@
     },
     "src/ui/native/pages/stack-table.css": {
       "sha256": "8321f773e9e63b61f64cfd41f19c75fe8a841f8af15d3e42d310455444fbd619",
+      "executable": false
+    },
+    "src/ui/native/pages/terminal-prompts.js": {
+      "sha256": "0af4ef2a44efbc3cbcd72e314b68d45def348ea7dbf9650c27de0b2737670656",
       "executable": false
     },
     "src/ui/native/pages/training-run-form.js": {

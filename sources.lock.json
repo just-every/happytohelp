@@ -1487,7 +1487,7 @@
       "executable": false
     },
     "docs/INBOUND-EMAIL-RECOVERY.md": {
-      "sha256": "2e99d141c0986d9491c0c8535650c47e0229bc18f11b18ce5b4cd3318b71d9c8",
+      "sha256": "7eabb5658df5bede58b69f87782d61705254ce365645a3e0a7d1bed31e188feb",
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
@@ -1571,7 +1571,7 @@
       "executable": false
     },
     "docs/WORKSPACE-WORKFLOWS.md": {
-      "sha256": "b0c71567bf9ddbc5cb30861d6f5758bc8c6a4b6a84ca0e3fcbdcd5682f41da2f",
+      "sha256": "21bc317e9beee745a11706c2cdd4c80d18dc707353638c67d20574cd891e8618",
       "executable": false
     },
     "edition.json": {
@@ -2103,7 +2103,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "d2ab96b802a40c565fb45834bb1c4d67a7ea31bff9a1813dc5e495edd2168c71",
+      "sha256": "f73f4035b9470bb0a06e7238ffaeabd312e874ea6a6a68986a69c1b1c15fd42f",
       "executable": false
     },
     "package.json": {
@@ -3938,6 +3938,10 @@
       "sha256": "ece4ba2269831421ec40e2b36cca39ba729977bc8c21a62a50cd6e1dee6dddfd",
       "executable": false
     },
+    "src/modules/integrations/authentication-results.ts": {
+      "sha256": "4b087a49d9b04624fbb478d846dff2fe684c5ba1689ab42f7e82c52ea2afb3ee",
+      "executable": false
+    },
     "src/modules/integrations/email-classification.ts": {
       "sha256": "c158580ac1c9d1f328eaf08d6a783212dcecd97cb390399a976cf77401735957",
       "executable": false
@@ -3963,7 +3967,7 @@
       "executable": false
     },
     "src/modules/integrations/email-worker.ts": {
-      "sha256": "f877f4f452b24b706a8ff5ebde86fc858eebaa070fbcd24ffcc21b35b3fe413e",
+      "sha256": "def884ff8cd95de8fe579b764815fa285cf8ad6dbc3ff938d42bbf68863fd7ee",
       "executable": false
     },
     "src/modules/integrations/email.ts": {
@@ -3983,7 +3987,7 @@
       "executable": false
     },
     "src/modules/integrations/inbound-authority.ts": {
-      "sha256": "4a8db4dfd555f3cacb8b857c998270b24d8d55b21be8b40648c5131dff432f6e",
+      "sha256": "0b1e4a7378fefb6aa6ae4dcf8ef8783a548c8819cafc38ba87c53278ac0af09e",
       "executable": false
     },
     "src/modules/integrations/inbound-effects.ts": {
@@ -3998,12 +4002,16 @@
       "sha256": "200c74f4b59b4f43f08171a44e5ac4a243c9d8f9f4cb5b4accd1c6431c427073",
       "executable": false
     },
+    "src/modules/integrations/inbound-receiving.ts": {
+      "sha256": "1cb4579db43cff12d34c66a05318c4e91198eac6fa7a8b8d8f224983f1a163dc",
+      "executable": false
+    },
     "src/modules/integrations/inbound-recovery-routes.ts": {
       "sha256": "1dc2fa041cbf0d45a30c712d72862e5e9d249c9255eacec1adb6e67fa934bd54",
       "executable": false
     },
     "src/modules/integrations/inbound-recovery.ts": {
-      "sha256": "9dc27ee435ddc8a8bd7454f7a0f14c1779e3d6c9f8191dbcebb83417b600bd4c",
+      "sha256": "759576bd07b554d05724d6fd31b75eb6ffb9689b1a302b5786e01fcea5ea5577",
       "executable": false
     },
     "src/modules/integrations/inbound-routing.ts": {
@@ -4011,11 +4019,11 @@
       "executable": false
     },
     "src/modules/integrations/inbound-sender.ts": {
-      "sha256": "0549e7e20b55295c3357cbb57df18d74d7e28051aeed6c5668a809d6fd19139e",
+      "sha256": "f89462ebe5b57c956768d8b22acd5cdc1a54aa506262b3fd1e3f315b8646d9d3",
       "executable": false
     },
     "src/modules/integrations/inbound-service.ts": {
-      "sha256": "f3870146db8a8c9a324acc53376edb30de583250c08daa87b7113d3a5e62215d",
+      "sha256": "52fe5ed74a3fa6c9ece509e7430fe9c0d20a0fcde984bcbda377f6bf7660a93f",
       "executable": false
     },
     "src/modules/integrations/inbound.ts": {
@@ -4055,7 +4063,7 @@
       "executable": false
     },
     "src/modules/integrations/README.md": {
-      "sha256": "36681c9fe7977248d386f1a8f662ead9bf2c778a5049f575d792b8fb83c4bf8f",
+      "sha256": "c751dc73646149281bd63cdfc449631965287bb0a16ce7254a2d59e7d1977a25",
       "executable": false
     },
     "src/modules/integrations/repository.ts": {
@@ -4079,7 +4087,7 @@
       "executable": false
     },
     "src/modules/integrations/sendgrid-inbound.ts": {
-      "sha256": "68d0077b9c62d95cbb395bc5f8c7a676f46ebc8ccfa8fa7da37cac99e7db2e8e",
+      "sha256": "1bf362e15ccb237da53a8c2e79f725113c9d2b70496f917394ed051ed92f6de1",
       "executable": false
     },
     "src/modules/knowledge/article-presentation.ts": {
@@ -4399,7 +4407,7 @@
       "executable": false
     },
     "src/modules/management/dashboard-actions.ts": {
-      "sha256": "5fda154e0a1f122aefac7b92eb0d77bf8b12f1307c84589211ea8f3aacd033e8",
+      "sha256": "9c116ccd90c62864394aba7062b5c864ea46627f8d8cfc16decad66a2566672b",
       "executable": false
     },
     "src/modules/management/dashboard-data.ts": {
@@ -5751,7 +5759,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/ConversationHeader.jsx": {
-      "sha256": "34f974d91c2c404ae4e5c0617c595045cebbc5477eacde57eb7100c3903e962d",
+      "sha256": "a4b33d75f734eb04b56818a7914f016abeaf93bf4d7167487b1c8f5ab79cdcfe",
       "executable": false
     },
     "src/ui/dashboard/components/ConversationItem.jsx": {
@@ -6187,7 +6195,7 @@
       "executable": false
     },
     "src/ui/dashboard/styles/foundation/_controls.scss": {
-      "sha256": "f49e0e4517534786ca08b3127e32640a9495cff009bebe1f22a25e1ba3850d66",
+      "sha256": "a4b71e22a068bb0069c51e0cde5c4733a1817b9121b377f05a8207a569208dae",
       "executable": false
     },
     "src/ui/dashboard/styles/foundation/_feather-icon-names.scss": {
@@ -7987,7 +7995,7 @@
       "executable": false
     },
     "tests/email-worker.mjs": {
-      "sha256": "fce7f46a464826f2cb5541e9b04dacc0fc951ad15e99e43f8b5f0ced3a8d8e95",
+      "sha256": "0c0e894d83af02fc2a9048eef345784a1d290ec604c2a0ab616d6d7b3a26e2cf",
       "executable": false
     },
     "tests/emitted-runtime-proxy-cause.mjs": {
@@ -9167,7 +9175,7 @@
       "executable": false
     },
     "tests/sendgrid-inbound.mjs": {
-      "sha256": "b0cfd302c54ad763dd797443737b298c76f1af36a930fd7c83c5d5aa3ec00155",
+      "sha256": "14a15caddf9940bb787065596c4d4bf1b70e1f14da6afa41362f610251947892",
       "executable": false
     },
     "tests/setup-browser.mjs": {

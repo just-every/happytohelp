@@ -8,14 +8,32 @@ export const inboundAuthority=Symbol('authenticated inbound email')
 export interface InboundAuthority {sender:string;receiptId:string;claimToken:string;raw:string;cc:string[]}
 const availableAs=(alias:string)=>`${contactWritable.replaceAll('metadata_json',`${alias}.metadata_json`)} AND coalesce(json_extract(${alias}.metadata_json,'$.is_blocked'),0)!=1 AND coalesce(json_extract(${alias}.metadata_json,'$.is_deleted'),0)!=1`,available=availableAs('contacts')
 
+// A contact kept apart for mail whose From could not be authenticated (below).
+const UNVERIFIED_SENDER="coalesce(json_extract(metadata_json,'$.unverified_sender'),0)=1"
+const ownContact=`NOT ${UNVERIFIED_SENDER}`
+
 /** The project's contact for a sender address, created on first mail. Retained
  * history may hold two contacts with one address; the earliest keeps the mail, as
  * legacy did. A blocked, deleted or erased contact receives nothing (null). */
 export async function emailContact(env:Env,projectId:string,email:string){
- const read=()=>env.DB.prepare('SELECT * FROM contacts WHERE project_id=? AND lower(email)=? ORDER BY created_at,id LIMIT 1').bind(projectId,email).first<any>()
+ return senderContact(env,projectId,email,ownContact,'{}')
+}
+
+/** Mail whose From was not authenticated, when that address belongs to a widget-
+ * verified customer or the provider reported an explicit fail, is written by a
+ * separate contact flagged `unverified_sender`. Its conversations never continue
+ * the customer's, and replies reach only the From address it used. */
+export async function unverifiedSenderContact(env:Env,projectId:string,email:string){
+ return senderContact(env,projectId,email,UNVERIFIED_SENDER,'{"unverified_sender":1}')
+}
+export async function isVerifiedCustomerAddress(env:Env,projectId:string,email:string){
+ return Boolean(await env.DB.prepare(`SELECT 1 FROM contacts WHERE project_id=? AND lower(email)=? AND is_verified=1 AND ${ownContact}`).bind(projectId,email).first())
+}
+async function senderContact(env:Env,projectId:string,email:string,kind:string,metadata:string){
+ const read=()=>env.DB.prepare(`SELECT * FROM contacts WHERE project_id=? AND lower(email)=? AND ${kind} ORDER BY created_at,id LIMIT 1`).bind(projectId,email).first<any>()
  let contact=await read()
  if(!contact){
-  await env.DB.prepare('INSERT INTO contacts(id,project_id,email,created_at) SELECT ?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM contacts WHERE project_id=? AND lower(email)=?)').bind(id(),projectId,email,Date.now(),projectId,email).run()
+  await env.DB.prepare(`INSERT INTO contacts(id,project_id,email,metadata_json,created_at) SELECT ?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM contacts WHERE project_id=? AND lower(email)=? AND ${kind})`).bind(id(),projectId,email,metadata,Date.now(),projectId,email).run()
   contact=await read()
  }
  if(!contact||!await env.DB.prepare(`SELECT id FROM contacts WHERE id=? AND project_id=? AND ${available}`).bind(contact.id,projectId).first())return null

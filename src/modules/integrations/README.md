@@ -123,10 +123,22 @@ Every ordinary email is accepted; none is bounced for who sent it:
   it, or SPF passing for an aligned envelope domain: Cloudflare's own (topmost)
   `Authentication-Results`, or SendGrid's `dkim` and `SPF` fields. The envelope
   sender is delivery metadata only, so SendGrid VERP and forwarding SRS rewrites
-  never become contacts. `Reply-To` is only where replies go: for a verified sender
-  it becomes their preferred notification address, never their identity. A From
-  no provider verified is admitted and labelled **unverified sender** in the
-  dashboard.
+  never become contacts. Cloudflare's verdict is read with RFC 8601 quoting and
+  comment rules; anything sender text could have shaped (a quote, a `;` in a
+  comment, an unbalanced bracket, a repeated result or one after the HELO's SPF
+  result) is treated as a fail, and SPF counts only for the envelope sender the
+  Worker received. `Reply-To` is only where replies go: for a verified sender it
+  becomes their preferred notification address, never their identity, and it
+  never replaces the preference of a widget-verified customer. A From no provider
+  verified is admitted and labelled **unverified sender** in the dashboard.
+- **Possible forgeries are kept apart.** When the From is unverified and either
+  belongs to a widget-verified customer or the provider reported an explicit fail
+  (DKIM, SPF or DMARC fail, or an ambiguous verdict, on Cloudflare; SPF fail on
+  SendGrid), the mail is written by a separate contact flagged
+  `unverified_sender` and starts (or continues) that contact's own conversation,
+  shown with an **Unverified sender** chip. It never joins the customer's
+  conversations, and replies to it go only to the From address it used. The
+  sender's own reply address still proves possession and joins its thread.
 - **Which conversation.** Mail to a conversation's reply address joins it when the
   sender is a current participant (members need a verified From or their own reply
   address). Everything else, including a fresh email from a customer with an open
@@ -135,7 +147,9 @@ Every ordinary email is accepted; none is bounced for who sent it:
 - **CC recipients** become participants only for a verified sender or a sender using
   their own reply address. Otherwise they are skipped, never a reason to refuse the
   message. Workspace addresses the mail was routed through are always skipped.
-- **Which workspace.** The envelope recipient selects the workspace. When it names no
+- **Which workspace.** Routing candidates are deduplicated and bounded to 50
+  (receiving addresses first), so a long reply-all is routed, never refused. The
+  envelope recipient selects the workspace. When it names no
   configured mailbox, `Delivered-To`, `X-Original-To`, `X-Forwarded-To`,
   `X-Gm-Original-To`, then `To` and `Cc` are tried, so mail forwarded from a company
   address (for example Google Workspace address-map routing of

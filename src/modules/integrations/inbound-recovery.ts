@@ -2,9 +2,10 @@ import {HTTPException} from 'hono/http-exception'
 import type {Env} from '../../platform/env'
 import {inboundLocalId,legacyInboundLocalId,scopedInboundId} from './inbound-identity'
 
-/** Operator reconciliation only: the prior Worker invocation must be confirmed ended.
- * This is deliberately not called by email delivery or a timer. An observed receipt
- * is required so an operator cannot release a different claim by Message-ID alone.
+/** Operator reconciliation for a receipt whose sender never retries (a sender's
+ * retry reclaims a stale claim itself): the prior Worker invocation must be confirmed
+ * ended. An observed receipt is required so an operator cannot release a different
+ * claim by Message-ID alone.
  */
 export async function releaseInterruptedInbound(env:Env,input:{projectId:string;messageId:string;intentHash:string;createdAt:number;conversationId:string|null;claimToken:string|null;priorExecutionEnded:boolean}){
  if(input.priorExecutionEnded!==true)throw new HTTPException(409,{message:'Confirm the prior inbound execution has ended before reconciliation'})

@@ -278,11 +278,53 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   assert.deepEqual(await people('signed-cc'),{contact:'ben@customer.example',verified:true,participants:['colleague@customer.example']})
   assert.equal(await forwarded('forged-verdict','Cy <cy@customer.example>',verdict('customer.example','fail')+verdict('customer.example')+forwardedCc),undefined)
   assert.deepEqual(await people('forged-verdict'),{contact:'cy@customer.example',verified:false,participants:[]})
-  // A widget-verified customer without a conversation, then a fresh email while it is open.
-  await DB.prepare("INSERT INTO contacts(id,project_id,email,is_verified,created_at) VALUES('signed-in','p','dana@customer.example',1,1)").run()
-  for(const id of ['verified-first','verified-again'])assert.equal(await deliver({id,to:'inbound@example.com',from:'dana@customer.example',headerFrom:'Dana <dana@customer.example>'}),undefined)
-  assert.equal((await admitted('verified-again')).conversation_id,(await admitted('verified-first')).conversation_id)
+  // A widget-verified customer: signed mail continues their thread, and its Reply-To
+  // never replaces the preference they chose.
+  await DB.prepare("INSERT INTO contacts(id,project_id,email,is_verified,metadata_json,created_at) VALUES('signed-in','p','dana@customer.example',1,'{\"provided_email\":\"dana-home@customer.example\"}',1)").run()
+  const dana=(id,headers)=>deliver({id,to:'inbound@example.com',from:'dana@customer.example',headerFrom:'Dana <dana@customer.example>',headers:headers+'Reply-To: attacker@attacker.example\r\n'})
+  assert.equal(await dana('verified-first',verdict('customer.example')),undefined)
+  const danaThread=(await admitted('verified-first')).conversation_id
   assert.equal((await admitted('verified-first')).actor_id,'signed-in')
+  // Mail that may forge her From never writes as her: the gate's injections into
+  // Cloudflare's own verdict, an honest fail and no verdict at all each land in one
+  // separate conversation flagged as an unverified sender.
+  const cloudflare=results=>`Authentication-Results: mx.cloudflare.net; ${results}\r\n`
+  const forgeries={
+   'quoted-mail-from':cloudflare('dkim=none; spf=pass smtp.mailfrom="x;dkim=pass header.d=customer.example z"@attacker.example; dmarc=fail header.from=customer.example'),
+   'spf-comment':cloudflare('dkim=none (no signatures found); spf=pass (mx.cloudflare.net: domain of "a);dkim=pass header.d=customer.example (b"@attacker.example designates 192.0.2.1 as permitted sender) smtp.mailfrom=attacker.example; dmarc=fail header.from=customer.example'),
+   'helo-semicolon':cloudflare('dkim=none; spf=none smtp.helo=evil;dmarc=pass header.from=customer.example; spf=pass smtp.mailfrom=attacker.example'),
+   'honest-fail':cloudflare('dkim=fail header.d=customer.example; spf=fail smtp.mailfrom=attacker.example; dmarc=fail header.from=customer.example'),
+   'unsigned':'',
+  }
+  for(const [id,header] of Object.entries(forgeries))assert.equal(await dana(id,header),undefined,id)
+  const isolated=await Promise.all(Object.keys(forgeries).map(async id=>({...await people(id),conversation:(await admitted(id)).conversation_id})))
+  assert.deepEqual(new Set(isolated.map(row=>JSON.stringify([row.verified,row.participants,row.conversation===danaThread]))),new Set([JSON.stringify([false,[],false])]))
+  assert.equal(new Set(isolated.map(row=>row.conversation)).size,1)
+  const impostor=await DB.prepare('SELECT ct.email,ct.metadata_json FROM conversations c JOIN contacts ct ON ct.id=c.contact_id WHERE c.id=?').bind(isolated[0].conversation).first()
+  assert.deepEqual([impostor.email,JSON.parse(impostor.metadata_json)],['dana@customer.example',{unverified_sender:1}])
+  assert.equal((await DB.prepare("SELECT json_extract(metadata_json,'$.provided_email') p FROM contacts WHERE id='signed-in'").first()).p,'dana-home@customer.example')
+  // An operator's reply there goes only to the unverified From address.
+  const isolatedHead=await DB.prepare('SELECT revision FROM conversations WHERE id=?').bind(isolated[0].conversation).first()
+  assert.equal((await conversationRoutes.request(`/${isolated[0].conversation}/messages`,{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'isolated-reply',content:'Your refund code is 4417',expectedRevision:isolatedHead.revision})},env,execution)).status,200)
+  await applyMessageEffects(env,await DB.prepare("SELECT * FROM messages WHERE local_id='isolated-reply'").first(),{id:'op',projectId:'p',role:'operator'})
+  assert.deepEqual(outbound.filter(mail=>mail.body.text?.includes('4417')).map(mail=>mail.body.to),[['dana@customer.example']])
+  // A reply-all to more than 50 addresses is routed, never refused.
+  const crowd=[...Array.from({length:60},(_,index)=>`person${index}@crowd.example`),`${'x'.repeat(330)}@crowd.example`,'inbound@example.com'].join(', ')
+  assert.equal(await deliver({id:'reply-all@example.com',to:crowd,envelopeTo:'inbound@example.com',from:'ana@customer.example',headerFrom:'ana@customer.example'}),undefined)
+  assert.equal((await claim('reply-all@example.com')).state,'delivered')
+  // A retry after an attempt that crashed mid-admission is never dropped: while the
+  // claim may be live the sender is told to retry (thrown, not bounced); a stale
+  // claim is reclaimed and the mail admitted exactly once.
+  await DB.prepare("CREATE TRIGGER crash_admission BEFORE INSERT ON messages BEGIN SELECT RAISE(ABORT,'worker crashed'); END").run()
+  const crashed=()=>deliver({id:'crashed@example.com',to:'inbound@example.com',from:'ana@customer.example',headerFrom:'ana@customer.example'})
+  await assert.rejects(crashed(),/worker crashed/)
+  await DB.prepare('DROP TRIGGER crash_admission').run()
+  await DB.prepare("UPDATE inbound_emails SET state='processing' WHERE id='<crashed@example.com>'").run()
+  await assert.rejects(crashed(),/already processing/)
+  await DB.prepare("UPDATE inbound_emails SET created_at=created_at-180000 WHERE id='<crashed@example.com>'").run()
+  assert.equal(await crashed(),undefined)
+  assert.equal(await crashed(),undefined)
+  assert.equal((await DB.prepare('SELECT count(*) n FROM messages WHERE local_id=?').bind((await claim('crashed@example.com')).local_id).first()).n,1)
   // Original body follows the same erasure custody as visible content.
   await DB.prepare("UPDATE messages SET content='' WHERE id=?").bind(ccMessage.id).run()
   assert.equal((await DB.prepare('SELECT content_raw FROM messages WHERE id=?').bind(ccMessage.id).first()).content_raw,null)

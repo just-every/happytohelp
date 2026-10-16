@@ -8,7 +8,7 @@ import {receiveEmail} from './inbound-service'
 import {scheduleInboundEffects} from './inbound-effects'
 import {emailEvidence,headerBlockEntries} from './email-classification'
 import {emailAddress} from './inbound-routing'
-import {routingCandidates,verifiedBySendGrid} from './inbound-sender'
+import {routingCandidates,sendGridVerdict} from './inbound-sender'
 
 export const sendgridInbound=new Hono<AppEnv>()
 const maxBody=30*1024*1024
@@ -68,14 +68,14 @@ sendgridInbound.post('/email/sendgrid/inbound',async c=>{
  // A subject-only email is its subject; only a message with nothing at all is refused.
  const content=text.trim()||(attachments.length?'':field(body,'subject').trim())
  if(!content&&!attachments.length)throw new HTTPException(400,{message:'SendGrid inbound payload is missing a body'})
- const cc=list(parsedHeaders.cc),senderAuthenticated=Boolean(headerFrom)&&verifiedBySendGrid({dkim:field(body,'dkim'),spf:field(body,'SPF'),envelopeFrom,from:headerFrom!})
+ const cc=list(parsedHeaders.cc),verdict=headerFrom?sendGridVerdict({dkim:field(body,'dkim'),spf:field(body,'SPF'),envelopeFrom,from:headerFrom}):{verified:false,failed:false}
  const evidence=emailEvidence({envelopeFrom,headerFrom:field(body,'from'),subject:field(body,'subject'),headers})
  const fallback=await hashToken(JSON.stringify({to:envelopeRecipients,from,subject:field(body,'subject'),content,cc,attachments:await Promise.all(attachments.map(async file=>({filename:file.filename,type:file.contentType,size:file.content.byteLength,hash:await contentHash(file.content)})))}))
  // One message may name several configured mailboxes; each project receives its copy.
- const forwarded=routingCandidates({envelope:[],headers,to:list(parsedHeaders.to)}),targets=envelopeRecipients.filter(Boolean).length?envelopeRecipients.filter(Boolean):['']
+ const targets=envelopeRecipients.filter(Boolean).length?envelopeRecipients.filter(Boolean):['']
  const results=[]
  for(const recipient of targets){
-  try{results.push(await receiveEmail(c.env,{messageId:messageId(headerBlock,fallback),to:[...(recipient?[recipient]:[]),...forwarded],from,text:content,cc,replyTo:list(parsedHeaders.replyTo)[0],senderAuthenticated,evidence,attachments}))}
+  try{results.push(await receiveEmail(c.env,{messageId:messageId(headerBlock,fallback),to:routingCandidates({envelope:recipient?[recipient]:[],headers,to:list(parsedHeaders.to)}),from,text:content,cc,replyTo:list(parsedHeaders.replyTo)[0],senderAuthenticated:verdict.verified,senderFailed:verdict.failed,evidence,attachments}))}
   catch(error){if(!(error instanceof HTTPException&&error.status===404&&targets.length>1))throw error}
  }
  if(!results.length)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})

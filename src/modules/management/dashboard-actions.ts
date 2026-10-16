@@ -19,7 +19,7 @@ dashboardActions.post(`${prefix}/notes`,async c=>{const {actor,conversation}=awa
 dashboardActions.delete(`${prefix}/notes/:noteId`,async c=>{const {actor,conversation}=await dashboardAccess(c);const r=await c.env.DB.prepare("DELETE FROM conversation_notes WHERE id=? AND conversation_id=? AND (user_id=? OR ? IN ('owner','admin'))").bind(c.req.param('noteId'),conversation.id,actor.id,actor.role).run();if(!r.meta.changes)throw new HTTPException(404);await publishActivity(c.env,actor.projectId,conversation.id,'note');return c.json({deleted:true})})
 dashboardActions.post(`${prefix}/participants`,async c=>{
  const {actor,conversation}=await dashboardAccess(c),b=await c.req.json(),email=recipientAddress(b.email)
- const matches=(await c.env.DB.prepare("SELECT * FROM contacts WHERE project_id=? AND (lower(trim(email))=? OR lower(trim(json_extract(metadata_json,'$.provided_email')))=?) LIMIT 2").bind(actor.projectId,email,email).all()).results
+ const matches=(await c.env.DB.prepare("SELECT * FROM contacts WHERE project_id=? AND (lower(trim(email))=? OR lower(trim(json_extract(metadata_json,'$.provided_email')))=?) AND coalesce(json_extract(metadata_json,'$.unverified_sender'),0)!=1 LIMIT 2").bind(actor.projectId,email,email).all()).results
  if(matches.length>1)throw new HTTPException(409,{message:'This address matches more than one customer. Resolve the customer identities before adding a recipient.'})
  let contact=matches[0]
  if(contact){const metadata=JSON.parse(String(contact.metadata_json||'{}'));if(metadata.is_erasing||metadata.is_erased||metadata.is_blocked)throw new HTTPException(409,{message:'This customer cannot be added as a recipient'})}

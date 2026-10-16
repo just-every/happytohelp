@@ -532,7 +532,9 @@ evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId
 
 - **Mail with no envelope sender is added as automatic**, under its `From`
   header. Customer identity always comes from the `From` header (verified by
-  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**), never
+  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**; a
+  possible forgery of a widget-verified customer, or mail the provider reported
+  as failing, gets its own **Unverified sender** conversation), never
   from the envelope, so forwarding and bounce-address rewrites do not create
   contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional

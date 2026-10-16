@@ -1,4 +1,4 @@
-import {readArtifact} from './helpers/artifact-payloads.mjs';
+import {readArtifact} from '../artifact-payloads.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -6,10 +6,13 @@ import {join,resolve} from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createHash,randomBytes} from 'node:crypto';
-import {artifactRuntime} from './helpers/independent-artifact.mjs';
-import {verifyStreamedRejection} from './helpers/streamed-rejection.mjs';
-import {validateStoredSearch,markSearchShadows,assertSearchShadowEquality} from './helpers/search-index.mjs';
-import {exportD1Sql} from '../scripts/installer/search-index-sql.mjs';
+import {artifactRuntime} from '../independent-artifact.mjs';
+import {verifyStreamedRejection} from '../streamed-rejection.mjs';
+import {validateStoredSearch,markSearchShadows,assertSearchShadowEquality} from '../search-index.mjs';
+import {exportD1Sql} from '../../../scripts/installer/search-index-sql.mjs';
+
+// The packaged artifact as an independent install: token-gated setup, media through the app, a failed export that restores search, native export and exact restore.
+export async function independentRestoreJourney(){
 const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-independent-proof-'));
 const setupToken=randomBytes(32).toString('hex');
@@ -83,3 +86,5 @@ try{
  const receipt={artifactSha256:createHash('sha256').update(await readFile('delivery-artifact/happytohelp-worker-artifact.json')).digest('hex'),migrations:artifact.deploymentSpec.migrations.length,tables:Object.keys(before).length,objects:objects.map(o=>({key:o.key,sha256:createHash('sha256').update(Buffer.from(o.bytes)).digest('hex')})),sourceRuntime:runtime.directory,restoredRuntime:restored.directory,evidence,providerCalls:0,completeRerExport:false,checks:['token missing/wrong denial','atomic owner setup closed','widget origin denial','durable duplicate-safe conversation','published knowledge','separate-preview-origin required','early preview rejection finishes streamed request before authenticated media upload','native D1 export/fresh import','all table equality before intentional login','R2 byte and metadata equality','real application authenticated media upload and retained-session download before and after restore','retained session and fresh password login','restored setup refusal']};
  await writeFile(join(evidence,'receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt,null,2));
 }finally{await runtime.close();if(restored)await restored.close()}
+
+}

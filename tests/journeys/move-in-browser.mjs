@@ -1,26 +1,29 @@
-import assert from 'node:assert/strict';
-import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
-import {resolve,join} from 'node:path';
-import {tmpdir} from 'node:os';
-import {randomBytes} from 'node:crypto';
-import {chromium} from 'playwright';
-import {createRuntime} from '../helpers/emitted-runtime.mjs';
-import {helpScoutBrowserFlow} from './helpscout-browser-flow.mjs';
-import {generate,generateDiagnostics} from './generator.mjs';
-const evidence=process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-move-in-browser-'));await mkdir(evidence,{recursive:true});
-const runtime=await createRuntime();let browser,success=false;const results=[],errors=[];
-try{
- const owner={email:'move-in-browser@example.test',password:randomBytes(24).toString('base64url')};
- const request=async(path,{body,method=body===undefined?'GET':'POST',token}={})=>{const response=await fetch(runtime.origin+path,{method,headers:{...(token?{Authorization:`Bearer ${token}`} :{}),...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,`${method} ${path} ${response.status}`);return response.json()};
- const setup=await request('/api/identity/bootstrap',{body:{...owner,name:'Import Owner',allowedOrigin:runtime.origin}}),project=setup.projectId,{token}=await request('/api/identity/login',{body:owner}),base=`/projects/${project}`;
- browser=await chromium.launch({headless:true,args:['--disable-gpu']});const context=await browser.newContext({viewport:{width:1440,height:1000},bypassCSP:true}),page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',error=>errors.push(error.message));page.on('dialog',async dialog=>{errors.push('Unexpected script dialog');await dialog.dismiss()});
- await page.goto(runtime.origin+'/login?returnTo='+encodeURIComponent(base+'/conversations'));await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
- const axe=await readFile(new URL('../../node_modules/axe-core/axe.min.js',import.meta.url),'utf8');
- async function inspect(name){await page.addScriptTag({content:axe});const result=await page.evaluate(async()=>{const scan=await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return {violations:scan.violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),overflow:document.documentElement.scrollWidth>innerWidth+1}});assert.deepEqual(result.violations,[],name);assert.equal(result.overflow,false,name);await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:join(evidence,`${name}.png`),fullPage:true});results.push({name,...result});}
- await page.goto(runtime.origin+base+'/settings');await page.getByRole('link',{name:'Move in existing support history',exact:true}).click();await page.getByRole('heading',{name:'Move in',exact:true}).waitFor();
- await page.goto(runtime.origin+base+'/activation');await page.getByRole('link',{name:'Move in your existing support history',exact:true}).click();
- await page.getByLabel('Export file',{exact:true}).setInputFiles({name:'too-large.jsonl',mimeType:'application/octet-stream',buffer:Buffer.alloc(2*1024*1024+1)});assert.equal(await page.getByRole('button',{name:'Upload and review',exact:true}).isDisabled(),true);await page.getByText('This file exceeds the 2 MiB upload limit.',{exact:false}).waitFor();await page.getByLabel('Export format',{exact:true}).selectOption('intercom');assert.equal(await page.getByLabel('Export file',{exact:true}).evaluate(input=>input.files.length),0);assert.equal(await page.getByRole('button',{name:'Upload and review',exact:true}).isDisabled(),true);
- for(const width of [1440,390])for(const vendor of (process.env.MOVE_IN_BROWSER_VENDOR==='helpscout'?[]:['zendesk','intercom'])){
+import test,{before,after} from 'node:test'
+import assert from 'node:assert/strict'
+import {readFile,writeFile} from 'node:fs/promises'
+import {randomBytes} from 'node:crypto'
+import {createRuntime} from '../helpers/emitted-runtime.mjs'
+import {helpScoutBrowserFlow} from '../move-in/helpscout-browser-flow.mjs'
+import {generate,generateDiagnostics} from '../move-in/generator.mjs'
+import {launchBrowser,evidence} from './kit/browser.mjs'
+
+// Move in in a real browser against the emitted Worker: one owner workspace, every
+// screen axe-checked for serious findings and horizontal overflow at its width.
+let runtime,browser,context,page,request,project,token,base,shot,success=true
+const errors=[],results=[],owner={email:'move-in-browser@example.test',password:randomBytes(24).toString('base64url')}
+const axe=await readFile(new URL('../../node_modules/axe-core/axe.min.js',import.meta.url),'utf8')
+async function inspect(name){await page.addScriptTag({content:axe});const result=await page.evaluate(async()=>{const scan=await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return {violations:scan.violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),overflow:document.documentElement.scrollWidth>innerWidth+1}});assert.deepEqual(result.violations,[],name);assert.equal(result.overflow,false,name);await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:shot(`${name}.png`),fullPage:true});results.push({name,...result})}
+before(async()=>{
+ runtime=await createRuntime();shot=await evidence('move-in')
+ request=async(path,{body,method=body===undefined?'GET':'POST',token}={})=>{const response=await fetch(runtime.origin+path,{method,headers:{...(token?{Authorization:`Bearer ${token}`}:{}),...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,`${method} ${path} ${response.status}`);return response.json()}
+ const setup=await request('/api/identity/bootstrap',{body:{...owner,name:'Import Owner',allowedOrigin:runtime.origin}});project=setup.projectId;token=(await request('/api/identity/login',{body:owner})).token;base=`/projects/${project}`
+ browser=await launchBrowser();context=await browser.newContext({viewport:{width:1440,height:1000},bypassCSP:true});page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',error=>errors.push(error.message));page.on('dialog',async dialog=>{errors.push('Unexpected script dialog');await dialog.dismiss()})
+ await page.goto(runtime.origin+'/login?returnTo='+encodeURIComponent(base+'/conversations'));await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations')
+})
+after(async()=>{await writeFile(shot('checks.json'),JSON.stringify({checks:results,errors},null,2)).catch(()=>{});await browser?.close();await runtime?.close(success)})
+const guarded=body=>async()=>{try{await body();assert.deepEqual(errors,[])}catch(error){success=false;throw error}}
+
+async function vendorJourney(width,vendor){
   const label=`${vendor}-${width}`,content=generate(vendor,6,width),filename=`${label}.jsonl`;await page.setViewportSize({width,height:1000});await page.goto(runtime.origin+base+'/move-in');
   await page.getByLabel('Export format',{exact:true}).selectOption(vendor);await page.getByLabel('Export file',{exact:true}).setInputFiles({name:filename,mimeType:'application/octet-stream',buffer:Buffer.from(content)});await page.getByRole('button',{name:'Upload and review',exact:true}).click();
   await page.getByRole('heading',{name:`Ready for review: ${filename}`,exact:true}).waitFor({timeout:120000});assert.match(await page.locator('.move-in-page').innerText(),/Articles: 1 will be published, 1 will stay a draft/);await inspect(`${label}-plan`);
@@ -44,8 +47,15 @@ try{
   const listed=await request(`/api/dashboard/projects/${project}/conversations?view=all`,{token});assert.equal(listed.meta.pagination.total,0);
   const negativeName=`${label}-diagnostics.jsonl`,negative=generateDiagnostics(vendor,2,width+1).body.replace(vendor==='zendesk'?'\"draft\":false,\"user_segment_id\":null':'\"state\":\"published\"',vendor==='zendesk'?'\"draft\":false,\"user_segment_id\":7':'\"state\":\"published\",\"audience\":{\"type\":\"restricted\"}');await page.getByLabel('Export format',{exact:true}).selectOption(vendor);await page.getByLabel('Export file',{exact:true}).setInputFiles({name:negativeName,mimeType:'application/octet-stream',buffer:Buffer.from(negative)});await page.getByRole('button',{name:'Upload and review',exact:true}).click();await page.getByText('Upload refused:',{exact:false}).waitFor();assert.match(await page.locator('.move-in-page').innerText(),/No source files or import were saved/);await inspect(`${label}-upload-refused`);
   await page.getByLabel('Export file',{exact:true}).setInputFiles({name:negativeName,mimeType:'application/octet-stream',buffer:Buffer.from(negative.slice(0,negative.lastIndexOf('{malformed')))});await page.getByRole('button',{name:'Upload and review',exact:true}).click();await page.getByRole('heading',{name:`Ready for review: ${negativeName}`,exact:true}).waitFor({timeout:120000});await page.getByText('The export contains conflicting records for this ID.',{exact:false}).first().waitFor();await page.getByText('This article has a restricted audience that cannot be preserved.',{exact:false}).first().waitFor();assert.match(await page.locator('.move-in-page').innerText(),new RegExp(`${negativeName}, line (?:9|10|11)`));await inspect(`${label}-diagnostics`);
- }
- await helpScoutBrowserFlow({page,origin:runtime.origin,base,inspect,request,project,token});
+}
+for(const width of [1440,390])test(`at ${width}px Zendesk and Intercom exports are reviewed, imported, reported, opened, tagged, filtered, repeated, undone, refused and diagnosed`,guarded(async()=>{for(const vendor of ['zendesk','intercom'])await vendorJourney(width,vendor)}))
+
+test('a Help Scout export at 1440 and 390: its own guide, review, import, repeat, opened history and undo',guarded(()=>helpScoutBrowserFlow({page,origin:runtime.origin,base,inspect,request,project,token})))
+
+test('entry points and limits: Settings and Setup lead to Move in, an oversized file never uploads, a late native conflict stops and undoes cleanly, and an operator cannot move in history',guarded(async()=>{
+ await page.goto(runtime.origin+base+'/settings');await page.getByRole('link',{name:'Move in existing support history',exact:true}).click();await page.getByRole('heading',{name:'Move in',exact:true}).waitFor();
+ await page.goto(runtime.origin+base+'/activation');await page.getByRole('link',{name:'Move in your existing support history',exact:true}).click();
+ await page.getByLabel('Export file',{exact:true}).setInputFiles({name:'too-large.jsonl',mimeType:'application/octet-stream',buffer:Buffer.alloc(2*1024*1024+1)});assert.equal(await page.getByRole('button',{name:'Upload and review',exact:true}).isDisabled(),true);await page.getByText('This file exceeds the 2 MiB upload limit.',{exact:false}).waitFor();await page.getByLabel('Export format',{exact:true}).selectOption('intercom');assert.equal(await page.getByLabel('Export file',{exact:true}).evaluate(input=>input.files.length),0);assert.equal(await page.getByRole('button',{name:'Upload and review',exact:true}).isDisabled(),true);
  // Hand-written late-native conflict: the stopped review exposes exact progress
  // and undo while preserving the contact created after review.
  await page.goto(runtime.origin+base+'/move-in');await page.getByLabel('Export format',{exact:true}).selectOption('intercom');
@@ -55,5 +65,4 @@ try{
  await page.getByRole('button',{name:'Approve and import',exact:true}).click();await page.getByText('Native contact identities changed after review.',{exact:false}).waitFor({timeout:120000});assert.match(await page.locator('.move-in-page').innerText(),/0 of 1 source records processed/);await page.getByRole('button',{name:'Undo whole import',exact:true}).waitFor();await inspect('late-native-conflict-stopped-390');
  await page.getByRole('button',{name:'Undo whole import',exact:true}).click();await page.getByRole('heading',{name:`Undone: ${stoppedName}`,exact:true}).waitFor({timeout:120000});const nativeContacts=(await request(`/api/management/projects/${project}/contacts`,{token})).data;assert.deepEqual(nativeContacts.filter(contact=>contact.email?.toLowerCase()==='fence-browser@example.test').map(contact=>contact.id),[keeper.id]);await inspect('late-native-conflict-undone-390');
  const member={email:'move-in-operator@example.test',name:'Operator',password:randomBytes(24).toString('base64url')},invite=await request('/api/identity/invitations',{token,body:{email:member.email,role:'operator'}});await request('/api/identity/accept-token',{body:{token:invite.token,name:member.name,password:member.password}});const memberSession=await request('/api/identity/login',{body:member});await context.clearCookies();await context.addCookies([{name:'h2h_session',value:memberSession.token,url:runtime.origin}]);await page.goto(runtime.origin+base+'/move-in');await page.getByText('Only a workspace owner or admin can move in support history.',{exact:false}).waitFor();assert.equal(await page.getByLabel('Export file',{exact:true}).count(),0);await inspect('operator-denied-390');await page.goto(runtime.origin+base+'/settings');await page.getByRole('heading',{name:'Project details',exact:true}).waitFor();assert.equal(await page.getByRole('link',{name:'Move in existing support history',exact:true}).count(),0);
- assert.deepEqual(errors,[]);success=true;await writeFile(join(evidence,'checks.json'),JSON.stringify({checks:results,errors},null,2));console.log(`Move in browser: ${results.length} states; no serious/critical axe findings or horizontal overflow`);
-}finally{await browser?.close();await runtime.close(success)}
+}))

@@ -1,4 +1,5 @@
-import test from 'node:test';
+import {phases} from './phases.mjs';
+const test=phases(import.meta.url);
 import assert from 'node:assert/strict';
 import {nativeHarness} from './harness.mjs';
 import {person,upload,state,apply,json,root} from './correction-fixtures.mjs';

@@ -1,38 +1,28 @@
+import test,{before as setup,after as teardown} from 'node:test'
+import assert from 'node:assert/strict'
 import {registerHooks} from 'node:module'
 import {existsSync} from 'node:fs'
-import {cp,mkdir,mkdtemp,readdir,rm,writeFile} from 'node:fs/promises'
-import {tmpdir} from 'node:os'
-import {join} from 'node:path'
-import {execFile} from 'node:child_process'
-import {promisify} from 'node:util'
-import test from 'node:test'
-import assert from 'node:assert/strict'
+import {startApp} from './kit/app.mjs'
 registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&context.parentURL){const url=new URL(specifier+'.ts',context.parentURL);if(existsSync(url))return next(url.href,context)}return next(specifier,context)}})
-const {routes,dashboardRoutes}=await import('../src/modules/management/index.ts')
-const {createConversationRoutes}=await import('../src/modules/conversations/routes.ts')
-const {admitMessage}=await import('../src/modules/conversations/admission.ts')
-const {admitInsightPair}=await import('../src/modules/conversations/insight-admission.ts')
-const {reconcileTerminalAttempt}=await import('../src/modules/ai-support/recovery.ts')
-const {fenceAndStage,deleteStagedObjects}=await import('../src/modules/management/contact-erasure/objects.ts')
-const {erasureInboundEvidenceStatements}=await import('../src/modules/management/contact-erasure/inbound-evidence.ts')
-const {suggestionState}=await import('../src/modules/ai-support/presentation.ts')
-const {hashToken}=await import('../src/platform/auth.ts')
-const {getPlatformProxy}=await import('wrangler')
+// Fault windows and races are driven through the application's own modules on the same real D1/R2 the routes use.
+const {admitMessage}=await import('../../src/modules/conversations/admission.ts')
+const {admitInsightPair}=await import('../../src/modules/conversations/insight-admission.ts')
+const {reconcileTerminalAttempt}=await import('../../src/modules/ai-support/recovery.ts')
+const {fenceAndStage,deleteStagedObjects}=await import('../../src/modules/management/contact-erasure/objects.ts')
+const {erasureInboundEvidenceStatements}=await import('../../src/modules/management/contact-erasure/inbound-evidence.ts')
+const {suggestionState}=await import('../../src/modules/ai-support/presentation.ts')
+const {hashToken}=await import('../../src/platform/auth.ts')
 
-// Real local D1/R2 with every canonical migration applied by Wrangler itself.
-const root=new URL('..',import.meta.url).pathname,directory=await mkdtemp(join(tmpdir(),'h2h-contact-erasure-')),migrations=join(directory,'migrations'),config=join(directory,'wrangler.json'),persist=join(directory,'state')
-await mkdir(migrations)
-for(const source of [join(root,'migrations'),...(await readdir(join(root,'src/modules'),{withFileTypes:true})).filter(d=>d.isDirectory()).map(d=>join(root,'src/modules',d.name,'migrations'))]){if(!existsSync(source))continue;for(const name of (await readdir(source)).filter(n=>n.endsWith('.sql')))await cp(join(source,name),join(migrations,name))}
-await writeFile(config,JSON.stringify({name:'h2h-contact-erasure-test',compatibility_date:'2026-09-08',compatibility_flags:['nodejs_compat'],d1_databases:[{binding:'DB',database_name:'erasure',database_id:'erasure-local',migrations_dir:'migrations'}],r2_buckets:[{binding:'FILES',bucket_name:'erasure-files'}]}))
-await promisify(execFile)(process.execPath,[join(root,'node_modules/wrangler/bin/wrangler.js'),'d1','migrations','apply','DB','--local','--config',config,'--persist-to',persist],{cwd:directory,env:{PATH:process.env.PATH,TMPDIR:process.env.TMPDIR,WRANGLER_LOG_PATH:process.env.WRANGLER_LOG_PATH,CI:'1',WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false'}})
-const proxy=await getPlatformProxy({configPath:config,persist:{path:join(persist,'v3')}})
-const env={...proxy.env,EMAIL_API_KEY:undefined,OPENAI_API_KEY:undefined},DB=env.DB,FILES=env.FILES
-const conversationRoutes=createConversationRoutes()
-test.after(async()=>{await proxy.dispose();await rm(directory,{recursive:true,force:true})})
-
+// Contact erasure through the real application router on real D1 and R2 with every migration applied.
+let app,DB,FILES,env
+setup(async()=>{app=await startApp();DB=app.db;FILES=await app.files;env={DB,FILES}})
+teardown(async()=>{await app?.close()})
+const routes='/api/management',dashboardRoutes='/api/dashboard',conversationRoutes='/api/conversations'
+const steps=[]
+const step=(name,fn)=>steps.push(fn)
 const all=async(sql,...args)=>(await DB.prepare(sql).bind(...args).all()).results
 const one=(sql,...args)=>DB.prepare(sql).bind(...args).first()
-const call=(app,path,token,method='GET',body)=>app.request('https://app.example'+path,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env)
+const call=(prefix,path,token,method='GET',body)=>app.request(prefix+path,{method,token,body,headers:{'Content-Type':'application/json'}})
 const erase=(token,project='p',contact='ct')=>call(routes,`/projects/${project}/contacts/${contact}/erase`,token,'POST')
 const objectText=async key=>{const object=await FILES.get(key);return object?object.text():null}
 
@@ -153,13 +143,13 @@ async function erasedScope(){
 }
 
 let tokens,before
-test('seeded contact data is present in real local D1 and R2',async()=>{
+step('seeded contact data is present in real local D1 and R2',async()=>{
  tokens=await seed();before=await outsideScope()
  assert.equal((await erasedScope()).objects.every(Boolean),true)
  assert.equal((await call(conversationRoutes,'/conv1/messages',tokens.contact)).status,200)
 })
 
-test('only owners and admins of the contact project can erase it',async()=>{
+step('only owners and admins of the contact project can erase it',async()=>{
  assert.equal((await erase(tokens.operator)).status,403,'operator refused')
  assert.equal((await erase(tokens.contact)).status,403,'contact session refused')
  assert.equal((await erase(tokens.qOwner)).status,403,'owner of another project refused')
@@ -172,7 +162,7 @@ test('only owners and admins of the contact project can erase it',async()=>{
 })
 
 let first,opAfter
-test('admin erasure removes the contact personal data from D1 and R2',async()=>{
+step('admin erasure removes the contact personal data from D1 and R2',async()=>{
  const response=await erase(tokens.admin);assert.equal(response.status,200)
  first=(await response.json()).data
  assert.equal(first.erased_by,'admin');assert.equal(first.runs,1);assert.equal(first.erased_at,first.last_erased_at)
@@ -210,11 +200,11 @@ test('admin erasure removes the contact personal data from D1 and R2',async()=>{
  for(const fragment of ['Alice','alice','4471','Sydney','Private Client'])assert.equal(inbound.includes(fragment),false,`${fragment} remains in inbound email evidence`)
 })
 
-test('other contacts and projects are untouched',async()=>{
+step('other contacts and projects are untouched',async()=>{
  assert.deepEqual(await outsideScope(),before)
 })
 
-test('erased conversations keep a coherent transcript for operators',async()=>{
+step('erased conversations keep a coherent transcript for operators',async()=>{
  assert.equal((await call(conversationRoutes,'/conv1/messages',tokens.contact)).status,401,'erased widget session is gone')
  const transcript=await(await call(conversationRoutes,'/conv1/messages',tokens.operator)).json()
  assert.equal(transcript.revision,3);assert.equal(transcript.lastMessageId,'m1c');assert.deepEqual(transcript.messages.map(m=>[m.revision,m.content,m.media.length]),[[1,'',0],[2,'',0],[3,'',0]])
@@ -232,7 +222,7 @@ test('erased conversations keep a coherent transcript for operators',async()=>{
  assert.equal((await call(routes,'/projects/p/contacts/ct',tokens.owner,'PUT',{name:'Alice again'})).status,409)
 })
 
-test('repeated erasure is idempotent and records the new run',async()=>{
+step('repeated erasure is idempotent and records the new run',async()=>{
  const state=await erasedScope(),outside=await outsideScope()
  const followupHistory=await all("SELECT type,payload FROM context_tracked_events WHERE project_id='p' AND subject_id='ct'")
  const sender=await one('SELECT actor_id FROM messages WHERE id=?',opAfter)
@@ -252,7 +242,7 @@ test('repeated erasure is idempotent and records the new run',async()=>{
  assert.deepEqual(await erasedScope(),again)
 })
 
-test('an erasure interrupted after R2 deletion is completed by repeating it',async()=>{
+step('an erasure interrupted after R2 deletion is completed by repeating it',async()=>{
  await DB.batch([
   DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('late','p','Late Visitor','late@example.com',8)"),
   DB.prepare("INSERT INTO conversations(id,project_id,contact_id,revision,last_message_id,created_at,updated_at) VALUES('convLate','p','late',1,'ml1',50,51)"),
@@ -276,7 +266,7 @@ test('an erasure interrupted after R2 deletion is completed by repeating it',asy
 })
 
 // Local ids are client-supplied free text; only the server-minted ids later reads depend on survive erasure.
-test('erasure replaces client-supplied message local ids and keeps the server ids later reads use',async()=>{
+step('erasure replaces client-supplied message local ids and keeps the server ids later reads use',async()=>{
  const inbound=`email:${await hashToken('p:lid-inbound')}`
  await DB.batch([
   DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('lid','p','Lid Visitor','lid@example.com',9)"),
@@ -317,7 +307,7 @@ test('erasure replaces client-supplied message local ids and keeps the server id
 })
 
 // The redaction statement directly, across every way a claim can belong to the contact.
-test('inbound email evidence for the erased contact is redacted to classifier reasons',async()=>{
+step('inbound email evidence for the erased contact is redacted to classifier reasons',async()=>{
  const columns=(await all('PRAGMA table_info(inbound_emails)')).map(c=>c.name)
  for(const column of ['automatic','evidence_json','local_id','message_id'])assert.ok(columns.includes(column),`0104 adds inbound_emails.${column}`)
  const evidence=(from,header,subject,reasons=[])=>JSON.stringify({envelope_from:from,header_from:header,subject,headers:{'x-mailer':'Private Client'},reasons})
@@ -351,3 +341,8 @@ test('inbound email evidence for the erased contact is redacted to classifier re
  await DB.batch(erasureInboundEvidenceStatements(DB,request))
  assert.deepEqual(await all('SELECT * FROM inbound_emails ORDER BY id'),again,'repeating the redaction changes nothing')
 })
+
+
+test('only owners and admins of the contact\'s own workspace can erase; erasure removes every personal row and object in D1 and R2 while other contacts, workspaces and the operator transcript stay coherent',async()=>{for(const run of steps.slice(0,5))await run()})
+test('repeating an erasure is idempotent and records the run, an erasure interrupted after R2 deletion completes on retry, and erased command ids can never be replayed or collided',async()=>{for(const run of steps.slice(5,8))await run()})
+test('inbound email evidence of the erased contact is reduced to classifier reasons in every claim form, and other senders keep theirs',async()=>{for(const run of steps.slice(8))await run()})

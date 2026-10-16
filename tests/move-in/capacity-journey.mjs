@@ -10,6 +10,9 @@ import {snapshotDatabase} from './snapshot.mjs';
 import {assertBusinessEquality,businessSnapshot,journalAccounting} from './business-equality.mjs';
 import {children as processChildren,identifyWorkerd,assertWorkerdStopped} from './owned-workerd.mjs';
 import {heapSampler} from './inspector.mjs';
+
+// One vendor's seeded export through upload, review, apply, inbox counts, exact repeat and undo business equality, within D1/heap bounds.
+export async function capacityJourney(vendor,count){
 const require=createRequire(import.meta.url),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}));
 const directory=await mkdtemp(join(tmpdir(),'move-in-native-'));let mf,sampler,heap,workerdPid;const queued=[];let maxStatements=0,outbound=0,lastWrites=0,lastStatements=0,lastRequestMs=0,maxRequestMs=0;const limits={maxSqlBytes:0,maxBindings:0,maxValueBytes:0,maxParameterBytes:0,maxDurationMs:0};function recordLimits(result){for(const key of Object.keys(limits))limits[key]=Math.max(limits[key],result[key]||0)}
 try{
@@ -25,7 +28,7 @@ try{
  const before=await snapshot();
  async function call(path,method='GET',body,headers={}){const started=performance.now();const response=await mf.dispatchFetch('https://app.example'+path,{method,headers:{Authorization:`Bearer ${token}`,...headers},body}),data=await response.json();lastRequestMs=performance.now()-started;maxRequestMs=Math.max(maxRequestMs,lastRequestMs);maxStatements=Math.max(maxStatements,Number(response.headers.get('X-Test-Statements')||0));lastWrites=Number(response.headers.get('X-Test-Writes')||0);lastStatements=Number(response.headers.get('X-Test-Statements')||0);recordLimits(JSON.parse(response.headers.get('X-Test-Limits')||'{}'));if(path.startsWith('/api/move-in/'))assert.equal(response.headers.get('X-Test-Widget-Effects'),'0','history imports never publish widget activity');queued.push(...JSON.parse(response.headers.get('X-Test-Queued')||'[]'));assert.ok(response.ok,JSON.stringify({status:response.status,data}));return data}
  assert.deepEqual(await call('/_test/configured'),{mail:true,model:true});
- const vendor=process.env.MOVE_IN_VENDOR||'zendesk',count=Number(process.env.MOVE_IN_COUNT||2),base='/api/move-in/projects/p/imports';
+ const base='/api/move-in/projects/p/imports';
  let run=(await call(`${base}?vendor=${vendor}`,'POST',generate(vendor,count),{'X-Import-Filename':`${vendor}.jsonl`,'X-Import-Schema':'2.16','Content-Type':'application/octet-stream'})).data;
  const uploadRequestMs=lastRequestMs;console.log(JSON.stringify({vendor,count,phase:'uploaded',uploadRequestMs,heap:sampler.snapshot()}));
  async function drain(){let iterations=0;while(queued.length){assert.ok(iterations++<2000);const job=queued.shift(),result=await call('/_test/queue','POST',JSON.stringify([job]),{'Content-Type':'application/json'});maxStatements=Math.max(maxStatements,result.statements);recordLimits(result);assert.deepEqual(result.effects,{widget:0});assert.deepEqual(result.retried,[]);queued.push(...result.queue)}run=(await call(`${base}/${run.id}`)).data;assert.equal(run.error,null)}
@@ -45,3 +48,5 @@ try{
  const receipt={vendor,count,maxStatements,maxRequestMs,limits,heap,businessRepeatEquality:'FULFILLED',businessUndoEquality:'FULFILLED',businessTables:Object.keys(businessSnapshot(after)),beforeRepeatHash:digest(after),afterRepeatHash:digest(repeatedSnapshot),beforeImportHash:digest(before),afterUndoHash:digest(undone),retainedJournals,repeatReadStatements,uploadRequestMs,childJobs:children.length,maxPlanBytes,importAndUndo:'passed',outbound};
  await writeFile(join(evidence,`${vendor}-${count}-business-equality.json`),JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));
 }finally{try{await sampler?.close()}finally{await mf?.dispose();if(workerdPid)await assertWorkerdStopped(workerdPid);await rm(directory,{recursive:true,force:true})}}
+
+}

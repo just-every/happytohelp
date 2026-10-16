@@ -1,15 +1,16 @@
-import {readArtifact} from './helpers/artifact-payloads.mjs';
-import {exportD1Sql} from '../scripts/installer/search-index-sql.mjs';
+import {readArtifact} from '../artifact-payloads.mjs';
+import {exportD1Sql} from '../../../scripts/installer/search-index-sql.mjs';
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import {readFile, writeFile, mkdir, rm, copyFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
-import {recoveryRuntime} from './helpers/recovery/runtime.mjs';
-import {snapshot, compareSnapshots, summarize, sha256} from './helpers/recovery/snapshot.mjs';
-import {seedJourney, verifyAccess, verifyFreshLogin, setupToken} from './helpers/recovery/journey.mjs';
+import {recoveryRuntime} from './runtime.mjs';
+import {snapshot, compareSnapshots, summarize, sha256} from './snapshot.mjs';
+import {seedJourney, verifyAccess, verifyFreshLogin, setupToken} from './journey.mjs';
 
-const [profile, buildDirectory, outputDirectory] = process.argv.slice(2);
-assert.equal(profile, 'first-run', 'Usage: node tests/recovery-comparison.mjs first-run BUILD_DIRECTORY NEW_OUTPUT_DIRECTORY');
-assert.ok(buildDirectory && outputDirectory, 'Build and output directories are required');
+// Native export of a populated packaged install, restored into a fresh destination and compared row by row and object by object.
+export async function recoveryComparison(buildDirectory, outputDirectory, profile='first-run'){
+
 const buildRoot = resolve(buildDirectory), output = resolve(outputDirectory);
 const build = JSON.parse(await readFile(join(buildRoot, 'build.json')));
 const bytes = await readFile(join(buildRoot, 'delivery-artifact/artifact.json'));
@@ -36,6 +37,9 @@ try {
     for (const [suffix, bytes] of [['metadata', [0, 3, 255]], ['empty', []]]) {
       await storage.inspect({key: `${journey.owner.projectId}/recovery/${suffix}`, bytes, options: {httpMetadata: {contentType: 'application/octet-stream', cacheControl: 'private, max-age=73', contentDisposition: `attachment; filename="${suffix}.bin"`}, customMetadata: {purpose: 'recovery-comparison', unicode: 'café'}}});
     }
+    // A delegated application grant and code exist in the source; the documented backup must not carry them.
+    await storage.inspect({sql: "INSERT INTO edition_grants(id,installation_id,client_id,project_id,principal_id,scopes,targets,expires_at,token_hash,created_at) VALUES('recovery-grant','installation','client',?,'owner','[]','[]',9999999999999,'private-grant-hash',1)", values: [journey.owner.projectId]});
+    await storage.inspect({sql: "INSERT INTO edition_codes(code_hash,grant_id,challenge,redirect_uri,expires_at) VALUES('private-code-hash','recovery-grant','challenge','https://client.example/callback',9999999999999)"});
     before = await snapshot(storage);
     const migrations = before.rows.d1_migrations.map(row => JSON.parse(row).name).sort();
     assert.deepEqual(migrations, artifact.deploymentSpec.migrations.map(m => m.name).sort(), 'Applied migration rows must match the emitted artifact');
@@ -46,7 +50,14 @@ try {
   });
   const exportFile = join(output, 'native-export.sql');
   await exportD1Sql({inspect:input=>original.withStorage(storage=>storage.inspect(input)),runExport:()=>original.run(['d1','export','DB','--local','--output',exportFile]),output:exportFile});
-  restored = await recoveryRuntime(artifact, {directory: join(output, 'restored-runtime'), port: port + 2, inspectorPort: port + 3, variables, restoreFile: exportFile});
+  // The documented restore path: a credential-free backup made by the shipped sanitizer, never the raw export.
+  const backupFile = join(output, 'restore.sql');
+  const sanitized = spawnSync('python3', [resolve('scripts/independent/delegation-backup.py'), exportFile, backupFile], {encoding: 'utf8'});
+  assert.equal(sanitized.status, 0, sanitized.stderr);
+  const backup = await readFile(backupFile, 'utf8');
+  assert.doesNotMatch(backup, /private-grant-hash|private-code-hash/, 'the backup carries no delegated credential');
+  for (const table of ['edition_grants', 'edition_codes']) before.rows[table] = [];
+  restored = await recoveryRuntime(artifact, {directory: join(output, 'restored-runtime'), port: port + 2, inspectorPort: port + 3, variables, restoreFile: backupFile});
   let after;
   await restored.withStorage(async storage => {
     assert.deepEqual((await snapshot(storage)).objects, [], 'Fresh target R2 must be empty');
@@ -56,7 +67,9 @@ try {
   });
   const repeatExport = join(output, 'restored-export.sql');
   await exportD1Sql({inspect:input=>restored.withStorage(storage=>storage.inspect(input)),runExport:()=>restored.run(['d1','export','DB','--local','--output',repeatExport]),output:repeatExport});
-  assert.deepEqual(await readFile(repeatExport), await readFile(exportFile), 'Native SQL re-export differs');
+  const repeatBackup = join(output, 'restored-backup.sql');
+  assert.equal(spawnSync('python3', [resolve('scripts/independent/delegation-backup.py'), repeatExport, repeatBackup]).status, 0);
+  assert.equal(await readFile(repeatBackup, 'utf8'), backup, 'a backup of the restored install is identical to the backup it came from');
   await restored.start();
   await verifyAccess(restored, journey, journey.owner.token);
   await verifyFreshLogin(restored, journey);
@@ -77,4 +90,6 @@ try {
     await copyFile(join(runtime.directory, 'runtime.log'), join(output, runtime === original ? 'source-runtime.log' : 'restored-runtime.log'));
     await rm(runtime.directory, {recursive: true, force: true});
   }
+}
+
 }

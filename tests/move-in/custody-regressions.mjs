@@ -1,4 +1,5 @@
-import test from 'node:test';
+import {phases} from './phases.mjs';
+const test=phases(import.meta.url);
 import assert from 'node:assert/strict';
 import {nativeHarness} from './harness.mjs';
 const root='/api/move-in/projects/p/imports';

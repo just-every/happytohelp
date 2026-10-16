@@ -77,6 +77,8 @@ export async function verifyMobileNavigation(page,{origin,projectId,checks}) {
   assert.equal(await nav.getByRole('button',{name:'Toggle navigation'}).getAttribute('aria-expanded'),'true');
   await nav.getByRole('link',{name:'Contacts',exact:true}).click();
   await page.waitForURL(`**/projects/${projectId}/contacts`);
+  // The URL commits while Contacts still loads; the account menu closes when the page arrives.
+  await page.getByRole('heading',{level:1,name:'Contacts',exact:true}).waitFor();
   const account=page.locator('.navbar-user.d-xl-none').getByRole('button',{name:'Account menu'});
   await account.click();
   await page.getByRole('link',{name:'Profile',exact:true}).waitFor();

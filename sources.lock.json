@@ -8531,7 +8531,7 @@
       "executable": false
     },
     "tests/helpers/ui-parity.mjs": {
-      "sha256": "b0d8361e7322e0851f3d04722e8c6e0cad82373c3657154c8c45e5ecb74d6f31",
+      "sha256": "2f9e36ff03bcd59c340978f87ff7598a6309a8d7d15632c2fa41fdb3228f1722",
       "executable": false
     },
     "tests/helpers/ui-readiness-editor.mjs": {

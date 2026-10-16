@@ -36,6 +36,14 @@ IDs must be positive safe integers or canonical positive decimal strings. String
 
 ## Intercom
 
+The simplest route needs only an Intercom access token: **Settings → Project →
+Move in → Intercom** shows a Terminal script that reads every conversation and
+its contacts from the [Conversations API](https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/conversation)
+(`Intercom-Version: 2.16`) and writes `intercom-move-in-1.jsonl`, `-2` and so
+on, 25 conversations each, with each conversation's contacts on lines before
+it. A conversation with more than 500 parts is longer than the API returns at
+once; its count no longer matches its parts and the review lists it as rejected.
+
 Use the [conversation cloud export](https://www.intercom.com/help/en/articles/7029721-export-conversations-data-to-amazon-s3) configured for Data API **2.16**, in JSON or JSONL. The reader also accepts a top-level JSON array and convenience `contacts`/`conversations` arrays. ZIP may package these files and separate API supplements. Reporting CSV, macro-content CSV, PDF, text and NDJSON are unsupported.
 
 Include [Contacts API](https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts) records for the single contact referenced by each conversation. A contact needs its original ID, valid email and Unix creation time. Conversation channel must be explicit in `channel.initial` (`email` or `messenger`), state must be `open`, `closed` or `snoozed`, and the conversation parts must be complete. When supplied, `conversation_parts.total_count` must be a nonnegative safe integer exactly equal to the supplied parts array length; malformed counts and mismatches are rejected. Comments become visible messages; notes remain private. Source authors retain their exported type and identity. Contact tags remain contact metadata; conversation tags become workspace tags. Duplicate contact or conversation IDs are reported as conflicts.

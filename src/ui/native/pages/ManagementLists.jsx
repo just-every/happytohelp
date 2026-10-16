@@ -5,6 +5,7 @@ import InvitationActions from './InvitationActions';
 import RowMenu from './RowMenu';
 import './stack-table.css';
 import { Notepad } from '../drawings';
+import PluginHelp from './PluginHelp';
 export function PersonAvatar({person}) {return person.avatar_url?<img className="management-avatar" src={person.avatar_url} alt=""/>:<span className="management-avatar">{(person.name||person.email||'?').slice(0,1).toUpperCase()}</span>}
 const date=value=>value?new Date(value).toLocaleDateString():'';
 const labels={macros:'Save a Reply',agents:'Invite Agent',plugins:'Add Custom Plugin'};
@@ -44,6 +45,7 @@ export default function ManagementLists({section,items,base,onMove,projectId,ema
  const shown=columns[section];
  return <><PageHeaderActions><div className="management-toolbar">{section!=='plugins'&&<div className="input-group"><input aria-label="Search" placeholder="Search" className="form-control" value={query?query.search:search} onChange={e=>query?onQuery({...query,search:e.target.value,page:1}):setSearch(e.target.value)}/><span className="input-group-text"><i className="fe fe-search"/></span></div>}{labels[section]&&<Link className="btn btn-primary" to={`${base}/create`}>{labels[section]}</Link>}</div></PageHeaderActions>
  {query&&<div className="d-flex flex-wrap gap-2 align-items-center mb-3"><label htmlFor="management-sort">Sort by</label><select id="management-sort" className="form-select w-auto" value={query.sort} onChange={e=>onQuery({...query,sort:e.target.value,page:1})}>{sorts.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select><label className="visually-hidden" htmlFor="management-direction">Sort direction</label><select id="management-direction" className="form-select w-auto" value={query.direction} onChange={e=>onQuery({...query,direction:e.target.value,page:1})}><option value="asc">Ascending</option><option value="desc">Descending</option></select></div>}
+ {section==='plugins'&&<PluginHelp/>}
  {!items&&<p role="status">Loading…</p>}
  {(section!=='plugins'||rows.length>0)&&<div className="table-responsive"><table className="table table-sm table-hover management-table stack-table"><thead><tr>{shown.map((column,index)=><th key={index}>{column.label||hidden(column.actions)}</th>)}</tr></thead><tbody>{rows.map((item,index)=>{
   const context={item,index,rows,onMove,href:`${base}/${item.id}`,metadata:section==='contacts'?contactMetadata(item):{},invitationProps:{projectId,emailConfigured,onChanged,onNotice,onError}};

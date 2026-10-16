@@ -35,8 +35,8 @@ export default function AcceptInvitation() {
 
     if (joined === 'account') return <IdentityFrame>
         <h1>Welcome to {info?.workspace}</h1>
-        <p className="id-lede">Your account for <strong>{info?.email}</strong> is ready and you have joined the workspace. Sign in to get started.</p>
-        <div className="id-actions"><a className="pill pill--ink" href="/login">Sign in</a></div>
+        <p className="id-lede">Your account for <strong>{info?.email}</strong> is ready and you have joined the workspace. Sign in once with the password you just chose to open it.</p>
+        <div className="id-actions"><a className="pill pill--ink" href={`/login?login_hint=${encodeURIComponent(info?.email ?? '')}&returnTo=${encodeURIComponent(`/projects/${info?.projectId ?? ''}/conversations`)}`}>Sign in</a></div>
     </IdentityFrame>;
     if (joined === 'member') return <IdentityFrame>
         <h1>You have joined {info?.workspace}</h1>

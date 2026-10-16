@@ -21,9 +21,10 @@ const groups = [
 
 export const behaviorFieldNames = groups.flatMap(({ fields }) => fields.map(([name]) => name));
 
-export default function WidgetBehaviorFields({ register }) {
+export default function WidgetBehaviorFields({ register, projectId }) {
     return groups.map(({ title, fields }) => (
         <WidgetFieldSection key={title} title={title}>
+            {title === 'Glow effects' && <p className="settings-note" style={{gridColumn:'1 / -1'}}>On insight makes the chat button glow when Help before they ask offers a visitor help. Turn that on in <a href={`/projects/${projectId}/settings#help-before-they-ask`}>Project settings, Help before they ask</a>.</p>}
             {title === 'Required contact details' && <p className="settings-note" style={{gridColumn:'1 / -1'}}>The widget does not ask for an email by default. Enable Require email to show an email field before visitors send a message. On a hosted installation with email sending configured, operator replies can reach that address.</p>}
             {fields.map(([name, label]) => (
                 <div key={name}>

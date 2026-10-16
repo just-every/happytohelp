@@ -10,6 +10,6 @@ export default function ProviderSetupNotice({projectId,secretName,error}) {
  const matched=names.find(name=>name===secretName||String(error?.message||error||'').includes(name));
  return <aside className="provider-setup-notice" aria-label="AI provider setup">
   <strong>{matched?`Add ${matched}`:'Connect your AI provider'}</strong>
-  <p>{matched?'Add it as an installation secret. ':'Choose an enabled default visitor assistant, then add the installation secret for its model. '}{WHERE} {projectId&&<Link to={`/projects/${projectId}/ais`}>AI settings</Link>}</p>
+  <p>{matched?'Add it as an installation secret, or, to use another AI provider, choose one of its models for the assistant in AI settings and add that provider’s key instead. ':'Choose an enabled default visitor assistant, then add the key for its model’s provider: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, DEEPSEEK_API_KEY, XAI_API_KEY or OPENROUTER_API_KEY. '}{WHERE} {projectId&&<Link to={`/projects/${projectId}/ais`}>AI settings</Link>}</p>
  </aside>;
 }

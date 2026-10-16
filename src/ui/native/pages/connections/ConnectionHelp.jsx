@@ -1,15 +1,20 @@
 import React from 'react';
 import {Link} from '@tanstack/react-router';
 import CopyCommand from '../../setup-help/CopyCommand';
+import {required,secret} from '../terminal-prompts';
 import '../../setup-help/setup-help.css';
 
 const apiGuide='https://github.com/just-every/run-happytohelp/blob/main/docs/api.md';
-const terminal=<>It asks for the token without showing or saving it.</>;
+const terminal=<>Paste it into Terminal (the Mac’s standard zsh or bash) and press Return. It asks for the token without showing or saving it.</>;
 
-const apiExample=origin=>`read -rsp 'HappyToHelp API token: ' H2H_TOKEN; echo
+const apiExample=origin=>`(
+${secret('H2H_TOKEN','HappyToHelp API token')}
+${required('H2H_TOKEN')}
 curl --silent --show-error --config - "${origin}/api/v1/conversations?status=open&limit=5" <<EOF_CURL
 header = "Authorization: Bearer $H2H_TOKEN"
-EOF_CURL`;
+EOF_CURL
+echo
+)`;
 
 /** How to call the workspace API with a token from this page. */
 export function ApiHelp({origin}){

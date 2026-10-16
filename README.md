@@ -176,8 +176,9 @@ email and optional AI providers bill your own accounts. Enable R2 and the accoun
 capabilities required by the declaration before deployment. An email sender must
 be verified. Local development needs no external mail or AI credential.
 
-Configure optional model keys, Apify crawl, Qdrant search, GitHub and email only
-when you need them. See [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)
+Configure optional model keys, the Apify crawler (for website sources larger than
+the built-in reader's 40 pages; see [Website knowledge](docs/website-knowledge.md)),
+Qdrant search, GitHub and email only when you need them. See [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)
 and [Measure local usage and costs](OPERATIONS.md#measure-local-usage-and-costs).
 The optional [local agent](local-agent/README.md) runs on the computer doing the
 support work and has its own runtime prerequisites.

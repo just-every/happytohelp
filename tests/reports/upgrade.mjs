@@ -143,7 +143,16 @@ try {
     for(const [name,rows]of Object.entries(beforeAdditional.rows)){
       if(name==='d1_migrations')assert.deepEqual(final.rows[name].filter(row=>!remaining.some(m=>m.name===JSON.parse(row).name)),rows);
       else if(name==='sqlite_sequence')assert.deepEqual(final.rows[name].map(JSON.parse).filter(row=>row.name!=='d1_migrations'),rows.map(JSON.parse).filter(row=>row.name!=='d1_migrations'));
-      else assert.deepEqual(final.rows[name],rows,'additional stages preserve every prior row: '+name);
+      else {
+        // M122 retains every original field and initializes only content_raw.
+        // Re-encode the full expected row using snapshot's canonical key order;
+        // the actual snapshot remains byte-exact and includes unknown columns.
+        const expected=name==='messages'?rows.map(serialized=>{
+          const row={...JSON.parse(serialized),content_raw:null};
+          return JSON.stringify(Object.fromEntries(Object.keys(row).sort().map(key=>[key,row[key]])));
+        }).sort():rows;
+        assert.deepEqual(final.rows[name],expected,'additional stages preserve every prior row: '+name);
+      }
     }
     for(const entry of beforeAdditional.schema){
       const current=final.schema.find(candidate=>candidate.name===entry.name),added=addedColumns.filter(a=>a.table===entry.name);

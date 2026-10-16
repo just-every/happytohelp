@@ -1,29 +1,12 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { createRequire } from 'node:module'
-import { readFile } from 'node:fs/promises'
+import { startApp } from '../../journeys/kit/app.mjs'
 
-const require = createRequire(import.meta.url)
-const { build } = require('esbuild')
-const { Miniflare, convertV4MiniflareOptions } = require(require.resolve('miniflare', { paths: [require.resolve('wrangler')] }))
-const built = await build({
-  stdin: {
-    contents: `import { widgetEvents } from './src/modules/management/widget-events';
-      export { ConversationSocket } from './src/modules/conversations/socket';
-      import {consumeContextJob} from './src/modules/customer-context/engine';
-      import {requestContextModel} from './src/edition/ai/customer-context-provider';
-      export default {fetch:widgetEvents.fetch,async queue(batch,env){for(const message of batch.messages){await consumeContextJob(message.body,env,requestContextModel);message.ack()}}};`,
-    resolveDir: process.cwd(), loader: 'ts',
-  },
-  bundle: true, write: false, format: 'esm', platform: 'node',
-  external: ['cloudflare:workers', 'node:*', 'crypto', 'path', 'buffer'], logLevel: 'silent',
-})
-const mf = new Miniflare(convertV4MiniflareOptions({
-  name: 'widget-events', cf:{country:'US'}, modules: true, script: built.outputFiles[0].text,
-  compatibilityDate: '2026-09-14', compatibilityFlags: ['nodejs_compat'],
-  bindings:{OPENAI_API_KEY:'synthetic-inert-test-key'},r2Buckets:['FILES'],
-  queueProducers:{JOBS:'context-jobs'},queueConsumers:{'context-jobs':{maxBatchSize:1,maxRetries:0}},
-  outboundService:async request=>{
+// Widget commands through the conversation's widget-events route: contact and tenant scope, exact replay of an
+// insight pair, read state, observed presence, live authority on every request, consent-gated monitoring with a
+// native model run, and the visitor's responder selector resuming one waiting turn. Only the model is a fixture.
+export async function widgetEventsJourney(){
+ const app=await startApp({captureQueue:true,origin:'https://app.example',cf:{country:'US'},bindings:{OPENAI_API_KEY:'synthetic-inert-test-key'},outbound:async request=>{
     assert.equal(new URL(request.url).hostname,'api.openai.com');
     const body=await request.json(),name=body.text?.format?.name;
     const evidence=JSON.stringify(body).match(/action:[a-z0-9-]+/)?.[0];
@@ -31,17 +14,9 @@ const mf = new Miniflare(convertV4MiniflareOptions({
     assert.ok(value,'only the expected monitoring model requests reach the network');
     const text=JSON.stringify(value),events=[{type:'response.output_text.delta',item_id:'msg',delta:text},{type:'response.output_text.done',item_id:'msg',text},{type:'response.completed',response:{usage:{input_tokens:12,output_tokens:4,total_tokens:16,input_tokens_details:{cached_tokens:0,cache_write_tokens:0},output_tokens_details:{reasoning_tokens:0}}}}];
     return new Response(events.map(event=>`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`).join(''),{headers:{'content-type':'text/event-stream'}});
-  },
-  d1Databases: ['DB'], durableObjects: { CONVERSATIONS: { className: 'ConversationSocket', useSQLite: true } },
-}))
-try {
-  const db = await mf.getD1Database('DB')
-  for (const name of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0004_message_intent.sql',
-    '0005_widget_identity.sql', '0007_conversation_history.sql', '0070_management.sql',
-    '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql', '0102_public_abuse_limits.sql','112_conversation_outcomes.sql']) {
-    const migration = await readFile(new URL('../migrations/' + name, import.meta.url), 'utf8')
-    for (const [, sql] of migration.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)) await db.prepare(sql).run()
-  }
+ }})
+ const db=app.db
+ try{
   await db.exec(`INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','key','https://widget.example',1),('q','Other','other','https://other.example',1);
     INSERT INTO contacts(id,project_id,name,created_at) VALUES('visitor','p','Visitor',1),('other','p','Other',1),('foreign','q','Foreign',1);
     INSERT INTO users VALUES('owner','owner@example.com','Owner',1);
@@ -56,10 +31,13 @@ try {
     await db.prepare('INSERT INTO context_insights VALUES(?,?,?,?,?,?,?,?,NULL)')
       .bind(id, 'p', subject, 'help', 'How can we help?', buttons, '[]', 1).run()
   }
+  // Proactive help is on with a ready assistant, and these visitors consented earlier: insights exist only then.
+  await db.prepare("INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,is_enabled,created_at) VALUES('helper','p','Support assistant','Support','Help the visitor','gpt-5.6-luna',1,1)").run()
+  await db.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind('p',JSON.stringify({is_contact_tracking_enabled:true,proactive_help_enabled:true,default_visitor_ai_id:'helper'}),1).run()
+  await db.prepare("UPDATE context_subjects SET consent=1,bot_enabled=1 WHERE subject_id IN ('visitor','other')").run()
   async function call(action, data = {}, conversation = 'own', token = 'contact-token', headers = {}) {
-    return mf.dispatchFetch(`https://app.example/${conversation}/widget-events`, {
-      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...headers },
-      body: JSON.stringify({ action, data }),
+    return app.request(`/api/conversations/${conversation}/widget-events`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, ...headers }, body: { action, data },
     })
   }
   const insightCommand = { insight_id: 'insight', button_id: 'policy', ai_message: { local_id: 'insight-ai' }, local_id: 'insight-contact' }
@@ -112,21 +90,17 @@ try {
   assert.equal((await call('useInsight', { ...insightCommand, close: true })).status, 200)
   assert.equal((await call('useInsight', insightCommand)).status, 404)
   // A fresh subject opts in through the real visitor command; no operator SQL consent seed.
-  await db.prepare("INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,is_enabled,created_at) VALUES('helper','p','Support assistant','Support','Help the visitor','gpt-5.6-luna',1,1)").run()
-  await db.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind('p',JSON.stringify({is_contact_tracking_enabled:true,proactive_help_enabled:true,default_visitor_ai_id:'helper'}),1).run()
   const actions=Array.from({length:7},(_,i)=>({localId:`settings-action-${i}`,action:`Tried to find the API credential in workspace settings step ${i}`}))
+  await db.prepare("UPDATE context_subjects SET consent=0,bot_enabled=0 WHERE subject_id='visitor'").run()
   assert.equal((await (await call('collector',actions)).json()).accepted,0,'collection is refused before visitor consent')
-  assert.equal((await (await call('contextConsent')).json()).monitoring.consent,null)
+  assert.notEqual((await (await call('contextConsent')).json()).monitoring.consent,true)
   assert.equal((await (await call('contextConsent',{consent:true})).json()).monitoring.enabled,true)
   const collection=await (await call('collector',actions)).json()
   assert.ok(collection.accepted>0)
   assert.ok(collection.job.id,'accepted activity queues the selected native model')
-  let generated
-  for(let attempt=0;attempt<100;attempt++){
-    generated=await db.prepare('SELECT state,error FROM context_jobs WHERE id=?').bind(collection.job.id).first()
-    if(!['queued','running'].includes(generated.state))break
-    await new Promise(resolve=>setTimeout(resolve,100))
-  }
+  // The queued monitoring run executes as the queue would.
+  for(const job of await app.takeJobs())if(job.type==='context.run')await app.runJobs([job])
+  const generated=await db.prepare('SELECT state,error FROM context_jobs WHERE id=?').bind(collection.job.id).first()
   assert.equal(generated.state,'completed',generated.error)
   const offer=(await (await call('insights')).json()).insights[0]
   assert.ok(offer.metadata.buttons.some(button=>button.action==='send'))
@@ -154,7 +128,5 @@ try {
   assert.equal((await call('markAsRead')).status, 401)
   assert.equal((await db.prepare('SELECT count(*) n FROM messages').first()).n, 2)
   assert.equal((await db.prepare('SELECT state FROM ai_generations WHERE id=?').bind(handoff.id).first()).state,'queued','authority refusals do not alter the admitted handoff')
-  console.log('Widget command Worker/D1: admission, tenant/contact scope, replay, outbox and live authority transitions passed')
-} finally {
-  await mf.dispose()
+ }finally{await app.close()}
 }

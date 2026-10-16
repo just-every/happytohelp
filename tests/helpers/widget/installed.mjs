@@ -1,18 +1,22 @@
 import {createServer} from 'node:http';
 import {writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import {widgetFailedSendBrowser} from './helpers/widget-failed-send-browser.mjs';
-import {widgetRecoveryBrowser} from './helpers/widget-recovery-browser.mjs';
-const {chromium}=await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const api=process.env.WIDGET_TEST_API, origin=process.env.WIDGET_TEST_ORIGIN, widgetKey=process.env.WIDGET_TEST_KEY, ownerToken=process.env.WIDGET_TEST_OWNER_TOKEN;
+import {widgetFailedSendBrowser} from '../widget-failed-send-browser.mjs';
+import {widgetRecoveryBrowser} from '../widget-recovery-browser.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+
+// The installed widget on a separate site origin against the emitted Worker: current and legacy installs and
+// open modes, a failed send and its recovery, and a foreign conversation refused.
+export async function installedWidget({api,origin,widgetKey,ownerToken,projectId,foreignConversation,evidence}){
+
 if(!api||!origin||!widgetKey||!ownerToken)throw new Error('WIDGET_TEST_API, WIDGET_TEST_ORIGIN, WIDGET_TEST_KEY, WIDGET_TEST_OWNER_TOKEN required');
 if(!['localhost','127.0.0.1'].includes(new URL(origin).hostname))throw new Error('Browser fixture host must be local');
-const evidence=process.env.WIDGET_TEST_EVIDENCE_DIR||'/tmp';
+
 const storageKey=`rer-widget:${api}:${widgetKey}`;
 const server=createServer((req,res)=>{
  res.setHeader('Content-Type','text/html; charset=utf-8');
  const mode=new URL(req.url,origin).searchParams.get('legacy');
- const options={projectId:process.env.WIDGET_TEST_PROJECT,selector:'.launch-chat',settings:{collector:{enabled:false}}};
+ const options={projectId:projectId,selector:'.launch-chat',settings:{collector:{enabled:false}}};
  const legacy=mode==='queue'?`<script>window.h2hQueue=[];function h2h(){h2hQueue.push(arguments)}h2h('init',${JSON.stringify(options)});h2h('close');h2h('open');h2h('update',{name:'Maya Chen',email:'maya@example.test',identifier:'legacy-maya',hash:'legacy-proof-requires-native-verification',metadata:{plan:'annual'},metadataHash:'legacy-metadata-proof'});</script><script src="${api}/widget.js"></script>`:
  mode==='consent'?`<script>window.h2hQueue=[];function h2h(){h2hQueue.push(arguments)}h2h('init',${JSON.stringify({...options,await_consent:true})});</script><script src="${api}/widget.js"></script>`:
  mode==='hascontext'?`<script>window.hasContextQueue=[];function hasContext(){hasContextQueue.push(arguments)}hasContext('init',${JSON.stringify(options)});</script><script src="${api}/widget.js"></script>`:
@@ -20,7 +24,7 @@ const server=createServer((req,res)=>{
  res.end(`<html><head><meta charset="utf-8"></head><body style="background:#eee"><h1>Independent host page</h1><a class="launch-chat" href="#launch-chat">Contact support</a>${legacy||`<script src="${api}/widget.js"></script><script>h2h("init",${JSON.stringify({widgetKey,apiOrigin:api,open:true,settings:{collector:{enabled:false}}})})</script>`}</body></html>`);
 });
 await new Promise(resolve=>server.listen(Number(new URL(origin).port),new URL(origin).hostname,resolve));
-const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']}),context=await browser.newContext({viewport:{width:1000,height:800}}),page=await context.newPage();const errors=[],failed=[];
+const browser=await launchBrowser(),context=await browser.newContext({viewport:{width:1000,height:800}}),page=await context.newPage();const errors=[],failed=[];
 page.on('pageerror',error=>{errors.push(error.message);console.error('BROWSER ERROR',error.stack)});page.on('response',response=>{if(response.status()>=400)failed.push({url:response.url(),status:response.status()});});
 try{
  await page.goto(origin);await page.locator('textarea[name=content]').waitFor({state:'visible'});await page.waitForTimeout(600);
@@ -44,7 +48,7 @@ try{
  const after=await(await fetch(`${api}/api/conversations/${session.conversationId}/messages`,{headers})).json();assert.equal(after.messages.length,before.messages.length);
  assert.equal(await page.locator('h1').textContent(),'Independent host page');
  const denied=await fetch(`${api}/api/widget/settings?widgetKey=${encodeURIComponent(widgetKey)}`,{headers:{Origin:'https://untrusted.example'}});assert.equal(denied.status,403);
- const foreign=await fetch(`${api}/api/conversations/${process.env.WIDGET_TEST_FOREIGN_CONVERSATION || 'widget-foreign-conversation'}/messages`,{headers:{Authorization:`Bearer ${session.token}`,Origin:origin}});assert.equal(foreign.status,404);
+ const foreign=await fetch(`${api}/api/conversations/${foreignConversation}/messages`,{headers:{Authorization:`Bearer ${session.token}`,Origin:origin}});assert.equal(foreign.status,404);
  await page.locator('input[name=email]').fill('visitor-updated@example.test');await page.locator('input[name=email]').press('Enter');await page.waitForTimeout(300);
  const updatedContact=await(await fetch(`${api}/api/management/projects/${session.projectId}/contacts/${session.contactId}`,{headers})).json();assert.equal(updatedContact.data.email,'visitor-updated@example.test');
  const browserContext=await page.evaluate(()=>({timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,language:navigator.language,user_agent:navigator.userAgent}));
@@ -57,7 +61,7 @@ try{
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
  const recoveryChecks=await widgetRecoveryBrowser({browser,origin,api,widgetKey,ownerToken});
  const failedSendChecks=await widgetFailedSendBrowser({browser,origin,api,widgetKey,ownerToken,evidence});
- if(process.env.WIDGET_TEST_PROJECT){
+ if(projectId){
   const legacyContext=await browser.newContext({viewport:{width:1440,height:900}}),legacyPage=await legacyContext.newPage();
   legacyPage.on('pageerror',error=>errors.push(error.message));
   for(const mode of ['queue','data-project','data-projectId','data-project-id','config','hascontext']){
@@ -66,7 +70,7 @@ try{
    await legacyPage.locator('textarea[name=content]').waitFor({state:'visible'});
    await legacyPage.waitForFunction(key=>JSON.parse(localStorage.getItem(key)||'null')?.conversationId,storageKey);
    const legacySession=await legacyPage.evaluate(key=>JSON.parse(localStorage.getItem(key)),storageKey);
-   assert.equal(legacySession.projectId,process.env.WIDGET_TEST_PROJECT);
+   assert.equal(legacySession.projectId,projectId);
    assert.equal(legacySession.verified,false);
    await legacyPage.evaluate(name=>window[name]('close'),apiName);
    await legacyPage.locator('#happytohelp-root.happytohelp-closed').waitFor({state:'attached'});
@@ -78,7 +82,6 @@ try{
    if(mode==='queue'){
     const configurationError=await legacyPage.evaluate(async()=>{try{await h2h('ask',{message:'Can the assistant answer?'});return null}catch(error){return {message:error.message,status:error.status,code:error.code}}});
     assert.equal(configurationError?.status,503);assert.equal(configurationError?.code,'CONFIGURATION_REQUIRED');assert.match(configurationError.message,/^CONFIGURATION_REQUIRED:/);
-    console.log('Legacy h2h ask:',JSON.stringify(configurationError));
     await legacyPage.locator('textarea[name=content]').fill('Can I keep my existing ChargeDesk support link?');
     await legacyPage.locator('button[name=submit]').click();
     await legacyPage.getByText('Can I keep my existing ChargeDesk support link?',{exact:true}).waitFor();
@@ -102,6 +105,8 @@ try{
   await legacyPage.getByText('Can I keep my existing ChargeDesk support link?',{exact:true}).waitFor();
   await legacyContext.close();assert.deepEqual(errors,[]);
  }
- const proof={checks:[...recoveryChecks,...failedSendChecks,...(process.env.WIDGET_TEST_PROJECT?['legacy project resolver and queued init/open/close/settings/update','three legacy script attribute spellings and data-config','launch-chat initial fragment and repeated link opening','consent makes no requests before grant; revoke/remount resumes native conversation','legacy signatures never become verified native authority']:[]),'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','browser timezone/language and observed device context survive reload with collector disabled','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
- await writeFile(`${evidence}/browser.json`,JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));
-}catch(error){console.error(JSON.stringify({error:error.message,errors,failed}));await page.screenshot({path:`${evidence}/failed-attempt.png`});throw error;}finally{await browser.close();server.close();}
+ const proof={checks:[...recoveryChecks,...failedSendChecks,...(projectId?['legacy project resolver and queued init/open/close/settings/update','three legacy script attribute spellings and data-config','launch-chat initial fragment and repeated link opening','consent makes no requests before grant; revoke/remount resumes native conversation','legacy signatures never become verified native authority']:[]),'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','browser timezone/language and observed device context survive reload with collector disabled','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
+ await writeFile(`${evidence}/browser.json`,JSON.stringify(proof,null,2));
+}catch(error){await page.screenshot({path:`${evidence}/failed-attempt.png`});throw error;}finally{await browser.close();server.close();}
+
+}

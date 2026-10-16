@@ -3,9 +3,11 @@ import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
 import {build} from 'vite';
 import react from '@vitejs/plugin-react';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+// The widget bundle's collector, remount, live handles, consent revocation and preview lifecycle.
+export async function lifecycleJourney(){
 
-const {chromium} = await import(process.env.H2H_PLAYWRIGHT_MODULE || process.env.PLAYWRIGHT_MODULE || 'playwright');
-const root = fileURLToPath(new URL('../', import.meta.url));
+const root = fileURLToPath(new URL('../../../', import.meta.url));
 const entry = root + '__widget-lifecycle-entry.js';
 const output = await build({
   root, configFile:false, publicDir:false, logLevel:'error',
@@ -29,7 +31,7 @@ const server = createServer((req, res) => {
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 let browser;
 try {
-  browser = await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
+  browser = await launchBrowser();
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -142,8 +144,9 @@ try {
   await page.locator('#preview .happytohelp-interact').waitFor({state:'visible'});
   await page.evaluate(() => previewHandle.destroy());
   assert.deepEqual(errors, []);
-  console.log('Widget lifecycle browser passed: collector resource cleanup, remount actions, stale live handles, consent revocation, preview destroy/remount');
 } finally {
   await browser?.close();
   await new Promise(resolve => server.close(resolve));
+}
+
 }

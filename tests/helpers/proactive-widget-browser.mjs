@@ -3,10 +3,10 @@ import {createServer} from 'node:http';
 import {readFile, mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {createRuntime} from './emitted-runtime.mjs';
+import {launchBrowser} from '../journeys/kit/browser.mjs';
 import {configuredSupportBrowser} from './configured-support-browser.mjs';
 
 export async function proactiveWidgetBrowser({operatorJourney=true}={}) {
-    const {chromium} = await import(process.env.H2H_PLAYWRIGHT_MODULE || 'playwright');
     const evidence = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/proactive');
     await mkdir(evidence, {recursive: true});
     const runtime = await createRuntime({inspectorPort: 0, vars: {OPENAI_API_KEY: 'synthetic-inert-test-key', APIFY_TOKEN: 'synthetic-inert-test-key', APIFY_CRAWLER_ACTOR_ID: 'fixture-crawler'}, outboundFixture: new URL('./proactive-provider-network.mjs', import.meta.url).href});
@@ -29,7 +29,7 @@ export async function proactiveWidgetBrowser({operatorJourney=true}={}) {
         await new Promise(done => host.listen(0, '127.0.0.1', done));
         const hostOrigin = `http://127.0.0.1:${host.address().port}`;
         await call(`/api/management/projects/${owner.projectId}/settings`, {allowed_origin: hostOrigin}, owner.token, 'PUT');
-        browser = await chromium.launch({headless: true, args: ['--use-mock-keychain', '--password-store=basic']});
+        browser = await launchBrowser();
         if(operatorJourney)await configuredSupportBrowser({browser,runtime,owner,project,call,evidence});
         for (const width of [1440, 390]) {
           for (const mode of ['act', 'dismiss']) {
@@ -108,6 +108,5 @@ export async function proactiveWidgetBrowser({operatorJourney=true}={}) {
             } finally { await context.close(); }
         }
         success = true;
-        console.log('Proactive widget: explicit consent, real collected clicks, native model queue, delivered insight, guarded button reply, reload and revocation passed at 1440/390.');
     } finally { await browser?.close(); if (host) await new Promise(done => host.close(done)); await runtime.close(success); }
 }

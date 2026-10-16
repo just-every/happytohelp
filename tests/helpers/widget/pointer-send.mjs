@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {resolve, join} from 'node:path';
-import {chromium} from 'playwright';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+// Pointer and keyboard sending in the widget at desktop and phone widths.
+export async function pointerSendJourney(){
 
 const evidence = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/widget-pointer-send');
 await mkdir(evidence, {recursive: true});
@@ -10,7 +12,7 @@ const runtime = await createRuntime();
 const records = [];
 let browser, success = false;
 try {
-    browser = await chromium.launch({headless: true});
+    browser = await launchBrowser();
     const tenant = await runtime.seedTenant({name: 'Pointer send', email: 'pointer@example.test', allowedOrigin: runtime.origin});
     const avatarUrl = `${runtime.origin}/homepage/media/brands/happytohelp-favicon.png`;
     await runtime.execute(`INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES('${tenant.projectId}','${JSON.stringify({brand_name: 'Pointer send', avatar_url: avatarUrl})}',${Date.now()})`);
@@ -95,8 +97,9 @@ try {
         await page.close();
     }
     success = true;
-    console.log(JSON.stringify({checks: records.length, viewports: [1440, 390], flow: 'closed → pointer open → repeated pointer send → close/reopen → reload'}));
 } finally {
     if (browser) await browser.close();
     await runtime.close(success);
+}
+
 }

@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
-import {chromium} from 'playwright';
-import {createConfiguredMailRuntime} from './helpers/configured-mail-runtime.mjs';
-import {decodePng, measureContrastInRegions} from './helpers/accessibility-contrast.mjs';
+import {createConfiguredMailRuntime} from '../configured-mail-runtime.mjs';
+import {decodePng, measureContrastInRegions} from '../accessibility-contrast.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+// Opening the widget at desktop and phone widths: readable contrast in every opened state.
+export async function openingJourney(){
 
 const evidence = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/widget-opening-contrast');
 await mkdir(evidence, {recursive: true});
@@ -63,7 +65,7 @@ async function measure(page, label, selector) {
 }
 
 try {
-    browser = await chromium.launch({headless: true});
+    browser = await launchBrowser();
     const tenant = await runtime.seedTenant({name: 'Opening contrast', email: 'opening@example.test', allowedOrigin: runtime.origin});
     const project = await call(`/api/identity/projects/${tenant.projectId}`, undefined, tenant.token);
     for (const viewport of [{width: 1440, height: 960}, {width: 390, height: 844}]) {
@@ -150,10 +152,11 @@ try {
         await measure(page, `${viewport.width}-scrolled-notification`, '.happytohelp-collect-notify-email');
         await page.close();
     }
-    console.log(JSON.stringify({measurements: records.length, minimumContrastRatio: Math.min(...records.map(record => record.minimumContrastRatio))}));
     success = true;
 } finally {
     if (browser) await browser.close();
     await runtime.close(success);
     await writeFile(join(evidence, 'cleanup.json'), JSON.stringify({success, browserClosed: true, workerClosed: true}));
+}
+
 }

@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import {mkdir,mkdtemp} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
-const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
-import {assertLauncherAvatarFits} from './helpers/widget-launcher-geometry.mjs';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
+import {assertLauncherAvatarFits} from '../widget-launcher-geometry.mjs';
+import {createRuntime} from '../emitted-runtime.mjs';
+import {launchBrowser} from '../../journeys/kit/browser.mjs'
+// The widget settings editor, its live preview and the installed widget agree.
+export async function settingsJourney(){
 
 // Widget settings must show what the widget renders, edit one value at a time, save only edits,
 // and every project must have a server secret that its owner can reveal and copy.
@@ -15,8 +17,8 @@ const themeDefaults=Object.fromEntries(Object.entries(defaults.theme).map(([name
 const textDefaults={'text[message][placeholder_message]':'Send a message...','text[message][button_send]':'Send','text[chat][return_title]':'Continue Conversation','text[chat][return_last_message]':'Last message','text[chat][sending_images]':'Sending images...','text[errors][connection]':'Sorry we could not connect to the server. Please check your connection and try again.','text[prompt][email_prompt]':'Receive an email when {agent_name} replies!','text[ai][human_response]':'Responds within 24 hours'};
 const switchDefaults={'settings[show_glow][on_insight]':true,'settings[show_glow][on_insight_reply]':true,'settings[show_glow][on_ai_typing]':false,'settings[show_glow][on_human_typing]':false,'settings[message][collect_screenshot]':true,'settings[message][collect_attachments]':true,'settings[collect][require_name]':false,'settings[collect][require_email]':false};
 
-const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(resolve('../widget-settings-evidence-')),'widget-settings');
-await mkdir(evidenceDir,{recursive:true});console.log('Widget settings evidence:',evidenceDir);
+const evidenceDir=resolve(process.env.H2H_EVIDENCE_DIR||'test-results','widget-settings');
+await mkdir(evidenceDir,{recursive:true});
 const runtime=await createRuntime({port:Number(process.env.H2H_TEST_PORT||0)});const origin=runtime.origin;let success=false;
 const call=async(path,body,token,method=body===undefined?'GET':'POST')=>{const r=await fetch(origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(r.ok,`${path}: ${r.status}`);return r.json()};
 const f={email:'widget-settings@example.test',password:'synthetic-widget-settings-test-password-2026'};
@@ -25,7 +27,7 @@ const owner=await call('/api/identity/login',{email:f.email,password:f.password}
 // Setup gives every new workspace a colour; clear it so the first checks read the widget's own defaults.
 await call(`/api/management/projects/${setup.projectId}/settings`,{primary_color:''},owner.token,'PUT');
 const settingsApi=(projectId=setup.projectId)=>call(`/api/management/projects/${projectId}/widget-settings`,undefined,owner.token);
-const browser=await chromium.launch({headless:true,channel:'chrome'});
+const browser=await launchBrowser();
 const context=await browser.newContext({viewport:{width:1440,height:900},permissions:['clipboard-read','clipboard-write']});const page=await context.newPage();
 const errors=[],puts=[];page.on('pageerror',e=>errors.push(e.message));
 await page.route('**/api/management/projects/*/widget-settings',async route=>{const request=route.request();if(request.method()==='PUT')puts.push(JSON.parse(request.postData()));await route.continue()});
@@ -162,4 +164,6 @@ try{
  }
  checks.push('real responder initials and image fill all four launcher edges within half a pixel with a round clip at 1440 and 390, with image coverage on default and themed backgrounds');
  assert.deepEqual(errors,[]);success=true;
-}finally{await browser.close();await runtime.close(success);console.log(JSON.stringify({checks,errors}))}
+}finally{await browser.close();await runtime.close(success)}
+
+}

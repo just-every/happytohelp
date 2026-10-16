@@ -19,7 +19,7 @@ export function projectQueries(schema,projectId,authorIds) {
     const d=ids('local_agent_devices');scopes.set('local_agent_grants',{where:`project_id=? OR id IN (SELECT local_agent_grant_id FROM local_agent_devices WHERE id IN (${d.sql}))`,args:[projectId,...d.args]});
   }
   if(schema.has('articles')&&schema.has('categories')){const a=ids('articles'),c=ids('categories');scopes.set('article_categories',{where:`article_id IN (${a.sql}) AND category_id IN (${c.sql})`,args:[...a.args,...c.args]});}
-  const fields=new Set(['user_id','agent_id','operator_id','invited_by_id','created_by_id','modified_by_id']);
+  const fields=new Set(['user_id','agent_id','operator_id','invited_by_id','created_by_id','created_by_user_id','modified_by_id']);
   const refs=[],args=[];
   for(const [table,scope]of scopes)for(const {col}of schema.get(table)?.columns||[])if(fields.has(col)){refs.push(`SELECT DISTINCT ${identifier(col)} FROM ${identifier(table)} WHERE ${scope.where}`);args.push(...scope.args);}
   if(schema.has('ais')){const ai=ids('ais');refs.push(ai.sql);args.push(...ai.args);}

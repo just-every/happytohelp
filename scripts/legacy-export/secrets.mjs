@@ -1,4 +1,4 @@
-import {hasTransportCredentials,transportObject} from './transport-secrets.mjs';
+import {hasTransportCredentials,transportObject,hasBasicAuthorization} from './transport-secrets.mjs';
 import {opaqueCredentialShape,publicConfigurationValue,publicConfigurationName} from './references.mjs';
 import {hasCredentialAssignment,isRedactedCredentialField} from './text-policy.mjs';
 import {credentialColumns,skippedTables,structuredOmissions} from './scope.mjs';
@@ -37,14 +37,6 @@ function usageField(table, column, path, key, value) {
   return usageCounters.has(key) && typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
-function basicAuthorization(value){
-  if(/\bAuthorization[ \t]*:[ \t]*Basic[ \t]+(?!<redacted>)([^\s]+)/i.test(value))return true;
-  for(const match of value.matchAll(/\bBasic\s+([A-Za-z0-9+/]+={0,2})/gi)){
-    const bytes=Buffer.from(match[1],'base64');
-    if(bytes.toString('base64').replace(/=+$/,'')===match[1].replace(/=+$/,'')&&bytes.includes(0x3a))return true;
-  }
-  return false;
-}
 function secretString(value, storageIdentifier = false) {
   return hasTransportCredentials(value)
     || /-----BEGIN [A-Z ]*(?:PRIVATE KEY|ENCRYPTED)/.test(value)
@@ -57,7 +49,7 @@ function secretString(value, storageIdentifier = false) {
     || /\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/i.test(value)
     || /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/.test(value)
     || hasCredentialAssignment(value)
-    || /\bBearer\s+[A-Za-z0-9+/_.=-]{12,}/i.test(value) || basicAuthorization(value)
+    || /\bBearer\s+[A-Za-z0-9+/_.=-]{12,}/i.test(value) || hasBasicAuthorization(value)
     || /\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$/.test(value)
     || !storageIdentifier && opaqueCredentialShape(value);
 }

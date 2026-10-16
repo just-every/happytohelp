@@ -1,4 +1,4 @@
-import {omitTransportCredentials,omitTransportObject} from './transport-secrets.mjs';
+import {omitTransportCredentials,omitTransportObject,omitBasicAuthorization} from './transport-secrets.mjs';
 import {opaqueCredentialShape,opaqueReferences} from './references.mjs';
 // Explicit omission policy for rendered support text. Unknown credential-like
 // assignments, JSON fields and opaque payloads still fail in secrets.mjs.
@@ -68,10 +68,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
  value=value.replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,removed);
  value=value.replace(/\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$[^\s"'<>]+/g,removed);
  value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+removed(secret));
- value=value.replace(/(\bAuthorization[ \t]*:[ \t]*Basic[ \t]+)(?!<redacted>)([^\s<>]+)/gi,(_match,head,secret)=>head+removed(secret));
- value=value.replace(/\b(Basic)[ \t]+([A-Za-z0-9+/]+={0,2})/gi,(match,scheme,secret)=>{
-  const bytes=Buffer.from(secret,'base64');return bytes.toString('base64').replace(/=+$/,'')===secret.replace(/=+$/,'')&&bytes.includes(0x3a)?scheme+' '+removed(secret):match;
- });
+ value=omitBasicAuthorization(value,removed);
  value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|auth)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+removed(secret));
  value=value.replace(/\b([a-z][a-z0-9+.-]*:\/\/)([^\s/@:"'<>()[\]]+):([^\s/@"'<>()[\]]+)@/gi,(_match,scheme,user,secret)=>scheme+removed(user+':'+secret)+'@');
  value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?removed(url):url);
@@ -80,7 +77,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
  // still stop export. Never turn an encrypted JSON envelope into readable data.
  const opaque=new Set([...opaqueReferences(value).matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].map(m=>m[0]).filter(opaqueCredentialShape));
  value=value.replace(/[A-Za-z0-9+/_-]{32,}={0,2}/g,token=>{
-  if(!opaque.has(token))return token;
+  if(![...opaqueReferences(token).matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].some(m=>opaque.has(m[0])))return token;
   try{const decoded=JSON.parse(Buffer.from(token,'base64').toString('utf8'));if(decoded&&'iv'in decoded&&'value'in decoded&&('mac'in decoded||'tag'in decoded))return token;}catch{}
   return removed(token);
  });

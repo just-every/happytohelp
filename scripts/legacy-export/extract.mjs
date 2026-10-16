@@ -13,7 +13,7 @@ export async function extractProject(connection,{projectId,revision,aiModel,mail
     const schema=new Map(inventory.map(t=>[t.name,{engine:t.engine,columns:columns.filter(c=>c.name===t.name)}]));
     for(const [table,info]of schema)if(!skippedTables.includes(table))classifyColumns(table,info.columns);
     if(schema.has('mediables')){const [parents]=await connection.execute('SELECT DISTINCT mediable_type FROM mediables');const known=new Set(Object.keys(morphTables).map(t=>'App\\Models\\'+t));if(parents.some(r=>!known.has(r.mediable_type)))throw Error('Unclassified legacy media parent; add an explicit export/archive/omit scope before exporting');}
-    const scopes=projectQueries(schema,projectId),tables={},omittedColumns={},rowCounts={},cloneCounts={},omittedJsonValueCounts={},omittedTextValueCounts={};let bytes=0;const authors=new Set(),authorFields=new Set(['user_id','agent_id','operator_id','invited_by_id','created_by_id','modified_by_id']);
+    const scopes=projectQueries(schema,projectId),tables={},omittedColumns={},rowCounts={},cloneCounts={},omittedJsonValueCounts={},omittedTextValueCounts={};let bytes=0;const authors=new Set(),authorFields=new Set(['user_id','agent_id','operator_id','invited_by_id','created_by_id','created_by_user_id','modified_by_id']);
     for(const [table]of scopes){
       if(table==='users'){const updated=projectQueries(schema,projectId,[...authors]);for(const t of ['users','mediables','media'])if(updated.has(t))scopes.set(t,updated.get(t));}
       const {where,args}=scopes.get(table);

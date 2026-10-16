@@ -22,12 +22,13 @@ export async function startApp({bindings={},outbound,origin='https://app.example
  let current={...bindings},mf,db,url,port=0
  const outboundService=async request=>{const body=request.method==='GET'||request.method==='HEAD'?'':await request.clone().text();const entry={url:request.url,method:request.method,headers:Object.fromEntries(request.headers),body};requests.push(entry);if(!outbound)throw new Error('External calls prohibited: '+request.url);return outbound(request,entry)}
  const start=async()=>{
-  mf=new Miniflare(convertV4MiniflareOptions({name:'h2h-app',...(listen?{host:'127.0.0.1',port}:{}),modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{...(captureQueue?{H2H_TEST_CAPTURE_QUEUE:'1'}:{}),...Object.fromEntries(Object.entries(current).filter(([,value])=>value!==undefined))},d1Databases:{DB:'h2h-app'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},queueProducers:{JOBS:'h2h-app-jobs'},queueConsumers:{'h2h-app-jobs':{maxBatchSize:1,maxRetries:0}},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService}))
+  mf=new Miniflare(convertV4MiniflareOptions({name:'h2h-app',...(listen?{host:'127.0.0.1',port}:{}),modules:true,script,unsafeTriggerHandlers:true,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{...(captureQueue?{H2H_TEST_CAPTURE_QUEUE:'1'}:{}),...Object.fromEntries(Object.entries(current).filter(([,value])=>value!==undefined))},d1Databases:{DB:'h2h-app'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},queueProducers:{JOBS:'h2h-app-jobs'},queueConsumers:{'h2h-app-jobs':{maxBatchSize:1,maxRetries:0}},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService}))
   db=await mf.getD1Database('DB')
   if(listen){url=String(await mf.ready).replace(/\/$/,'');port=Number(new URL(url).port)}
  }
  await start()
- try{if(migrate)for(const migration of await migrations())await db.batch(migration.statements.map(sql=>db.prepare(sql)))}catch(error){await mf.dispose();await rm(directory,{recursive:true,force:true});throw error}
+ // One atomic batch for every migration keeps start-up to a single D1 round trip.
+ try{if(migrate)await db.batch((await migrations()).flatMap(migration=>migration.statements).map(sql=>db.prepare(sql)))}catch(error){await mf.dispose();await rm(directory,{recursive:true,force:true});throw error}
  const request=(path,{body,token,method=body===undefined?'GET':'POST',headers={},raw=false,base=origin}={})=>mf.dispatchFetch(base+path,{method,redirect:'manual',headers:{...(body!==undefined&&!raw?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:raw?body:JSON.stringify(body)})
  const call=async(path,options={})=>{const response=await request(path,options),text=await response.text();let data;try{data=text?JSON.parse(text):null}catch{data=text}if(options.status!==undefined&&response.status!==options.status)throw new Error(`${options.method||(options.body===undefined?'GET':'POST')} ${path}: expected ${options.status}, got ${response.status}: ${text.slice(0,500)}`);return {status:response.status,headers:response.headers,data}}
  const sql=async(statement,...args)=>(await db.prepare(statement).bind(...args).all()).results
@@ -52,7 +53,9 @@ export async function startApp({bindings={},outbound,origin='https://app.example
   async takeJobs(){return (await call('/_test/queue/take')).data},
   async runJobs(jobs,headers){return (await call('/_test/queue/run',{body:jobs,status:200,headers})).data},
   async drainJobs(limit=200){let ran=0;for(;;){const jobs=await this.takeJobs();if(!jobs.length)return ran;if((ran+=jobs.length)>limit)throw new Error('queue did not settle');for(const job of jobs){const result=await this.runJobs([job]);if(result.retried.length)throw new Error('job retried: '+JSON.stringify(job))}}},
-  async scheduled(headers){return (await call('/_test/scheduled',{body:{},status:200,headers})).data},
+  // Inbound mail through the Worker's email entry, as Email Routing delivers it.
+  async email(raw,{from,to,direct=false}){if(direct){const response=await mf.dispatchFetch(`http://localhost/_test/email?${new URLSearchParams({from,to})}`,{method:'POST',body:raw});const text=await response.text();return {status:response.status,text,...(response.ok?JSON.parse(text):{})}}const response=await mf.dispatchFetch(`http://localhost/cdn-cgi/local/email?${new URLSearchParams({from,to})}`,{method:'POST',body:raw});const text=await response.text();try{return {status:response.status,...JSON.parse(text)}}catch{return {status:response.status,text}}},
+  async scheduled(headers,{after=0}={}){return (await call('/_test/scheduled',{body:{after},status:200,headers})).data},
   async until(check,{timeout=10000,interval=25,message='condition'}={}){const deadline=Date.now()+timeout;for(;;){const value=await check();if(value)return value;if(Date.now()>deadline)throw new Error('Timed out waiting for '+message);await new Promise(done=>setTimeout(done,interval))}},
   async close(){await mf.dispose();await rm(directory,{recursive:true,force:true})},
  }

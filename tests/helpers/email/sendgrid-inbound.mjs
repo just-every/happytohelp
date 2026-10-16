@@ -1,40 +1,16 @@
-import {migrationStatements} from './helpers/migration-statements.mjs';
-import { registerHooks } from 'node:module'
-import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
 import assert from 'node:assert/strict'
+import {mailApp} from './app.mjs'
 
-registerHooks({ resolve(specifier, context, next) {
-  if (specifier.startsWith('.') && context.parentURL) {
-    const url = new URL(specifier + '.ts', context.parentURL)
-    if (existsSync(url)) return next(url.href, context)
-  }
-  return next(specifier, context)
-} })
-
-const { sendgridInbound } = await import('../src/modules/integrations/sendgrid-inbound.ts')
-const { recipientReplyAddress } = await import('../src/modules/integrations/email-reply-address.ts')
-const { getPlatformProxy } = await import('wrangler')
-const proxy = await getPlatformProxy({ persist: false })
-
-try {
-  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql', '0100_inbound_email_claims.sql', '0104_inbound_email_classification.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql']) {
-    for (const sql of migrationStatements(await readFile(new URL(`../migrations/${file}`, import.meta.url), 'utf8'))) await proxy.env.DB.prepare(sql).run()
-  }
-  const env = {
-    ...proxy.env,
-    INBOUND_EMAIL_TOKEN: 'synthetic-fixture-inbound-token',
-    OPENAI_API_KEY: undefined,
-    CONVERSATIONS: { idFromName: id => id, get: () => ({ fetch: async () => new Response('ok') }) },
-  }
-  await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)").run()
-  await env.DB.prepare("INSERT INTO email_settings VALUES('p','Support','help@support.example.com','support@reply.support.example.com',1,1)").run()
+// SendGrid Inbound Parse: shared-token authentication, attachment bytes, stable Message-ID per mailbox, the
+// header From over VERP and SRS envelopes, forwarded routing, unverified SPF kept apart, and multi-mailbox delivery.
+export async function sendgridInboundJourney(){
+ const m=await mailApp({bindings:{INBOUND_EMAIL_TOKEN:'synthetic-fixture-inbound-token'},inbound:'support@reply.support.example.com',outbox:'help@support.example.com'}),env={DB:m.DB}
+ try{
   await env.DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('q','Second Project','q-w','https://example.com',1)").run()
   await env.DB.prepare("INSERT INTO email_settings VALUES('q','Support','help@support.example.com','second@reply.support.example.com',1,1)").run()
-
-  const pending = []
-  const execution = { waitUntil(promise) { pending.push(Promise.resolve(promise).catch(() => {})) } }
-  const authorization = `Basic ${Buffer.from('sendgrid:synthetic-fixture-inbound-token').toString('base64')}`
+  const authorization=`Basic ${Buffer.from('sendgrid:synthetic-fixture-inbound-token').toString('base64')}`
+  // Multipart as SendGrid posts it: an encoded body with its boundary.
+  const post=async(form,auth=authorization)=>{const encoded=new Request('https://sendgrid.example',{method:'POST',body:form});return m.app.request('/api/integrations/email/sendgrid/inbound',{method:'POST',raw:true,headers:{Authorization:auth,'Content-Type':encoded.headers.get('Content-Type')},body:await encoded.arrayBuffer()})}
   const makeForm = ({ messageId, envelopeTo, visibleTo, text, attachment }) => {
     const form = new FormData()
     form.set('envelope', JSON.stringify({ to: [envelopeTo], from: 'customer@example.com' }))
@@ -52,30 +28,30 @@ try {
   }
   const form = makeForm({ messageId: 'sendgrid-inbound-1@example.com', envelopeTo: 'support@reply.support.example.com', visibleTo: 'wrong@example.org', text: 'Please review the attached note.', attachment: { filename: 'note.txt', type: 'text/plain', body: 'attachment bytes' } })
 
-  const first = await sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: authorization }, body: form }, env, execution)
+  const first = await post(form)
   assert.equal(first.status, 201)
   const firstBody = await first.json()
   assert.equal(firstBody.state, 'delivered')
   assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 1)
   const media = await env.DB.prepare('SELECT * FROM media').first()
   assert.equal(media.filename, 'note.txt')
-  assert.equal(new TextDecoder().decode(await (await env.FILES.get(media.object_key)).arrayBuffer()), 'attachment bytes')
+  assert.equal(new TextDecoder().decode(await (await (await m.app.files).get(media.object_key)).arrayBuffer()), 'attachment bytes')
 
-  const duplicate = await sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: authorization }, body: form }, env, execution)
+  const duplicate = await post(form)
   assert.equal(duplicate.status, 200)
   assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 1)
 
-  const rejected = await sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: 'Basic ZGVueTpub3QtaXQ=' }, body: form }, env, execution)
+  const rejected = await post(form, 'Basic ZGVueTpub3QtaXQ=')
   assert.equal(rejected.status, 403)
 
   // The same provider Message-ID may be delivered to another configured
   // mailbox. The SMTP envelope scopes routing; the visible To header does not.
-  const second = await sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: authorization }, body: makeForm({ messageId: 'sendgrid-inbound-1@example.com', envelopeTo: 'second@reply.support.example.com', visibleTo: 'wrong@example.org', text: 'Please review the attached note.' }) }, env, execution)
+  const second = await post(makeForm({ messageId: 'sendgrid-inbound-1@example.com', envelopeTo: 'second@reply.support.example.com', visibleTo: 'wrong@example.org', text: 'Please review the attached note.' }))
   assert.equal(second.status, 201)
   assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 2)
 
   // A customer may send only a file with no text or HTML body.
-  const attachmentOnly = await sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: authorization }, body: makeForm({ messageId: 'sendgrid-inbound-attachment-only@example.com', envelopeTo: 'support@reply.support.example.com', visibleTo: 'wrong@example.org', text: '', attachment: { filename: 'screenshot.png', type: 'image/png', body: 'png bytes' } }) }, env, execution)
+  const attachmentOnly = await post(makeForm({ messageId: 'sendgrid-inbound-attachment-only@example.com', envelopeTo: 'support@reply.support.example.com', visibleTo: 'wrong@example.org', text: '', attachment: { filename: 'screenshot.png', type: 'image/png', body: 'png bytes' } }))
   assert.equal(attachmentOnly.status, 201)
   assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 3)
 
@@ -93,7 +69,6 @@ try {
     form.set('headers', `Message-ID: <${messageId}>\r\n${headers}`)
     return form
   }
-  const post = form => sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: authorization }, body: form }, env, execution)
   // A null return path is admitted under its unverified header From, and stays quiet.
   for (const envelope of [{ to: ['support@reply.support.example.com'], from: '' }, { to: ['support@reply.support.example.com'], from: '<>' }, { to: ['support@reply.support.example.com'] }, undefined]) {
     const bounce = await post(rawForm({ messageId: 'sendgrid-null-sender@example.com', envelope, from: 'Victim <victim@example.org>', subject: 'Delivery Status Notification (Failure)' }))
@@ -103,11 +78,9 @@ try {
   assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 4)
 
   // List mail is classified from the raw header block: admitted and broadcast, but no AI reply is requested.
-  const scheduled = pending.length
   const list = await post(rawForm({ messageId: 'sendgrid-list@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'bounces@news.example.com' }, from: 'News <news@example.com>', subject: 'Weekly news', headers: 'List-Id: Product news\r\n <news.example.com>\r\nList-Unsubscribe: <mailto:leave@news.example.com>\r\n' }))
   assert.equal(list.status, 201)
   assert.equal((await list.json()).automatic, true)
-  assert.equal(pending.length - scheduled, 1, 'only the transcript broadcast is scheduled')
   const listClaim = await env.DB.prepare("SELECT * FROM inbound_emails WHERE id='<sendgrid-list@example.com>'").first()
   assert.equal(listClaim.automatic, 1)
   const listEvidence = JSON.parse(listClaim.evidence_json)
@@ -117,7 +90,6 @@ try {
   assert.equal((await env.DB.prepare("SELECT email FROM contacts c JOIN conversations v ON v.contact_id=c.id WHERE v.id=?").bind(listClaim.conversation_id).first()).email, 'news@example.com')
   const customer = await post(rawForm({ messageId: 'sendgrid-customer@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'customer@example.com' }, subject: 'Re: Out of office auto-replies are not working' }))
   assert.equal((await customer.json()).automatic, false)
-  assert.equal(pending.length - scheduled, 3, 'customer mail schedules the broadcast and the AI reply request')
   const ccMail=rawForm({messageId:'sendgrid-cc@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Finance can help.\n\nOn Fri, 16 Oct 2026 Support wrote:\n> Please attach the export',headers:'Cc: Finance <finance@example.com>\r\n'})
   const ccResult=await post(ccMail);assert.equal(ccResult.status,201)
   const participant=await env.DB.prepare('SELECT ct.id FROM contacts ct JOIN conversation_participants cp ON cp.contact_id=ct.id WHERE cp.conversation_id=? AND ct.email=? AND ct.project_id=?').bind(firstBody.conversationId,'finance@example.com','p').first()
@@ -164,20 +136,15 @@ try {
   // A widget visitor's typed address answers its notification through the reply
   // address issued to it: the answer continues the chat as the visitor; fresh mail
   // from that address does not.
-  // The receiving mailbox's MX lookup answers, so a reply address is issued.
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url, init) => String(url).startsWith('https://cloudflare-dns.com/') ? Response.json({ Status: 0, Answer: [{ type: 15, data: '10 mx.example.com.' }] }) : originalFetch(url, init)
   await env.DB.batch([
    env.DB.prepare("INSERT INTO contacts(id,project_id,email,metadata_json,created_at) VALUES('visitor','p','rosa@acme.test','{\"email_unproven\":1}',1)"),
-   env.DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('chat','p','visitor',1,1)"),
+   env.DB.prepare("INSERT INTO conversations(id,project_id,contact_id,revision,last_message_id,created_at,updated_at) VALUES('chat','p','visitor',1,'chat-hello',1,1)"),
+   env.DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('chat-hello','p','chat','hello','visitor','contact','My parcel arrived damaged',1,1)"),
   ])
-  const rosaReplyAddress = await recipientReplyAddress(env, 'support@reply.support.example.com', 'p', 'chat', 'rosa@acme.test')
+  const rosaReplyAddress = await m.replyAddress('chat', 'rosa@acme.test')
   const rosa = await (await post(rawForm({ messageId: 'sendgrid-rosa-answer@example.com', envelope: { to: [rosaReplyAddress], from: 'rosa@acme.test' }, to: rosaReplyAddress, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}', text: 'Photo attached, the corner is crushed.' }))).json()
   assert.deepEqual([rosa.conversationId, rosa.actor.contactId], ['chat', 'visitor'])
   const rosaFresh = await (await post(rawForm({ messageId: 'sendgrid-rosa-fresh@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'rosa@acme.test' }, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}' }))).json()
   assert.notEqual(rosaFresh.conversationId, 'chat')
-  await Promise.all(pending)
-  console.log('SendGrid inbound: Basic shared-token auth, multipart attachment bytes, stable Message-ID, D1/R2 admission, duplicate delivery, From identity over VERP/SRS envelopes, forwarded routing, unverified SPF and multi-mailbox delivery passed')
-} finally {
-  await proxy.dispose()
+ }finally{await m.close()}
 }

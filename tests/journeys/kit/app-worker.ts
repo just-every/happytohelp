@@ -2,6 +2,7 @@ import {app} from '../../../src/app'
 import {consumeQueue} from '../../../src/queue'
 import {runScheduled} from '../../../src/jobs'
 import {dispatchOperatorNotifications} from '../../../src/modules/integrations/notifications'
+import {handleEmail} from '../../../src/modules/integrations/email-worker'
 import type {Env} from '../../../src/platform/env'
 export {ConversationSocket} from '../../../src/modules/conversations/socket'
 
@@ -45,8 +46,18 @@ export default {
    await consumeQueue({messages:jobs.map((body,index)=>({id:String(index),body,ack(){acked.push(index)},retry(){retried.push(index)}}))} as any,env)
    return Response.json({acked,retried})
   }
-  if(path==='/_test/scheduled'){await Promise.all([runScheduled(env),dispatchOperatorNotifications(env)]);return Response.json({ran:true})}
+  // The Email Worker entry for mail Miniflare's local trigger cannot parse (no usable From): the same
+  // message shape Email Routing hands the Worker, with its rejection reported back.
+  if(path==='/_test/email'){
+   const url=new URL(request.url),raw=await request.arrayBuffer();let rejected:string|undefined
+   await handleEmail({from:url.searchParams.get('from')||'',to:url.searchParams.get('to')||'',headers:new Headers(),raw:new Response(raw).body,rawSize:raw.byteLength,setReject:(reason:string)=>{rejected=reason},forward:async()=>{throw new Error('forward is not used')},reply:async()=>{throw new Error('reply is not used')}} as any,env,context)
+   return Response.json({rejected})
+  }
+  // The cron tick; `after` runs the operator-mail dispatch that many milliseconds later, as a later tick would.
+  if(path==='/_test/scheduled'){const {after=0}=await request.json<{after?:number}>().catch(()=>({after:0}));await Promise.all([runScheduled(env),dispatchOperatorNotifications(env,{now:Date.now()+after})]);return Response.json({ran:true})}
   return app.fetch(request,env,context)
  },
  async queue(batch:MessageBatch<any>,env:Env){await consumeQueue(batch,env)},
+ // The deployed Email Worker entry (src/server.ts), reached through Miniflare's local email trigger.
+ async email(message:ForwardableEmailMessage,env:Env,context:ExecutionContext){return handleEmail(message as any,bindings(env),context)},
 }

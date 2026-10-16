@@ -2219,7 +2219,7 @@
       "executable": false
     },
     "scripts/ci/run-checks.mjs": {
-      "sha256": "230957a92bcd7ac4ef9ecf822e04adcee9c7269bab8905f899eb011ab92782f7",
+      "sha256": "0b060966dedf9ecedcb02be565a289059925b0726342c140bdfaeaabe8f605f8",
       "executable": false
     },
     "scripts/delivery/base/artifact.mjs": {

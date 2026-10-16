@@ -12,7 +12,8 @@ for (const [index, command] of commands.entries()) {
   if (interrupted) break;
   if (!/^(?:node|pnpm) [\w./:=\s-]+$/.test(command)) throw new Error(`Unsupported check argv: ${command}`);
   const [executable, ...args] = command.split(/\s+/);
-  const name = `${index + 1}-${args.join('-').replace(/[^\w-]+/g, '-')}`;
+  // The index keeps names unique; the rest is only a readable hint, bounded to a valid file name.
+  const name = `${index + 1}-${args.join('-').replace(/[^\w-]+/g, '-')}`.slice(0, 120);
   const env = {...process.env};
   if (env.H2H_EVIDENCE_DIR) {
     env.H2H_EVIDENCE_DIR = join(env.H2H_EVIDENCE_DIR, name);

@@ -11,19 +11,20 @@ import {build} from 'esbuild'
 const require=createRequire(import.meta.url)
 const {Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
 const root=resolve(new URL('../../..',import.meta.url).pathname)
-let bundled
-const bundle=()=>bundled??=build({entryPoints:[join(root,'tests/journeys/kit/app-worker.ts')],bundle:true,write:false,format:'esm',platform:'node',target:'es2022',external:['node:*','cloudflare:*'],loader:{'.sql':'text'},logLevel:'silent'}).then(result=>result.outputFiles[0].text)
+const bundles=new Map()
+const bundle=(entry='tests/journeys/kit/app-worker.ts')=>bundles.get(entry)??bundles.set(entry,build({entryPoints:[join(root,entry)],bundle:true,write:false,format:'esm',platform:'node',target:'es2022',external:['node:*','cloudflare:*'],loader:{'.sql':'text'},logLevel:'silent'}).then(result=>result.outputFiles[0].text)).get(entry)
 let migrationSql
 const migrations=()=>migrationSql??=(async()=>{const files=(await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')).sort();return Promise.all(files.map(async name=>{const source=(await readFile(join(root,'migrations',name),'utf8')).replace(/^\s*--[^\n]*$/gm,'');return {name,statements:[...source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(match=>match[1]).filter(sql=>sql.trim()!==';')}}))})()
 export const sha=value=>createHash('sha256').update(value).digest('hex')
 
-export async function startApp({bindings={},outbound,origin='https://app.example',captureQueue=false,migrate=true}={}){
- const directory=await mkdtemp(join(tmpdir(),'h2h-app-')),script=await bundle(),requests=[]
- let current={...bindings},mf,db
+export async function startApp({bindings={},outbound,origin='https://app.example',captureQueue=false,migrate=true,listen=false,entry}={}){
+ const directory=await mkdtemp(join(tmpdir(),'h2h-app-')),script=await bundle(entry),requests=[]
+ let current={...bindings},mf,db,url,port=0
  const outboundService=async request=>{const body=request.method==='GET'||request.method==='HEAD'?'':await request.clone().text();const entry={url:request.url,method:request.method,headers:Object.fromEntries(request.headers),body};requests.push(entry);if(!outbound)throw new Error('External calls prohibited: '+request.url);return outbound(request,entry)}
  const start=async()=>{
-  mf=new Miniflare(convertV4MiniflareOptions({name:'h2h-app',modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{...(captureQueue?{H2H_TEST_CAPTURE_QUEUE:'1'}:{}),...Object.fromEntries(Object.entries(current).filter(([,value])=>value!==undefined))},d1Databases:{DB:'h2h-app'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},queueProducers:{JOBS:'h2h-app-jobs'},queueConsumers:{'h2h-app-jobs':{maxBatchSize:1,maxRetries:0}},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService}))
+  mf=new Miniflare(convertV4MiniflareOptions({name:'h2h-app',...(listen?{host:'127.0.0.1',port}:{}),modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{...(captureQueue?{H2H_TEST_CAPTURE_QUEUE:'1'}:{}),...Object.fromEntries(Object.entries(current).filter(([,value])=>value!==undefined))},d1Databases:{DB:'h2h-app'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},queueProducers:{JOBS:'h2h-app-jobs'},queueConsumers:{'h2h-app-jobs':{maxBatchSize:1,maxRetries:0}},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService}))
   db=await mf.getD1Database('DB')
+  if(listen){url=String(await mf.ready).replace(/\/$/,'');port=Number(new URL(url).port)}
  }
  await start()
  try{if(migrate)for(const migration of await migrations())for(const sql of migration.statements)await db.prepare(sql).run()}catch(error){await mf.dispose();await rm(directory,{recursive:true,force:true});throw error}
@@ -40,6 +41,8 @@ export async function startApp({bindings={},outbound,origin='https://app.example
  }
  return {
   origin,request,call,sql,first,seedWorkspace,requests,directory,
+  // The loopback HTTP origin when started with `listen`, for clients such as the local connector CLI.
+  get url(){return url},
   async ok(path,options={}){const {status,data}=await call(path,options);if(status<200||status>299)throw new Error(`${path}: ${status} ${JSON.stringify(data).slice(0,500)}`);return data},
   get db(){return db},
   get files(){return mf.getR2Bucket('FILES')},

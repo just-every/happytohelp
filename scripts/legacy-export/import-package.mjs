@@ -11,7 +11,6 @@ async function bodyHash(body){const h=createHash('sha256');for await(const chunk
 /** Validate the entire package before the first write; then bounded row imports. */
 export async function importPackage(root,env,{planImport,importLegacy,tableOrder}){
   const manifest=await readManifest(root);
-  if(manifest.source?.mailboxPending)throw Error('Original MAIL_FROM_DOMAIN is required before native import; no native state was written');
   const context=await packageContext(root,manifest),counts={},keys=new Set(),media=new Map((context.tables.media||[]).map(r=>[String(r.id),r]));
   if(!manifest.attachmentsComplete)throw Error('Package requires exported attachment bytes');
   for(const object of manifest.objects){if(keys.has(object.key)||!media.has(String(object.mediaId)))throw Error('Invalid package object identity');keys.add(object.key);const file=safeFile(root,object.file),size=(await stat(file)).size;if(size!==object.size||size!==Number(media.get(String(object.mediaId)).size)||await fileHash(file)!==object.sha256)throw Error('Package object size or digest mismatch');}

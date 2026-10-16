@@ -16,9 +16,11 @@ function symbolic(value){
 }
 function* assignments(text){
  const pattern=/\b([A-Za-z][\w-]*)(["']?[ \t]*([:=])[ \t]*)(?:"((?:\\.|[^"\\\r\n])*)"|'((?:\\.|[^'\\\r\n])*)'|([^\s"',;}]+))/g;
- for(const m of text.matchAll(pattern)){
+ for(let m;(m=pattern.exec(text));){
   const quote=m[4]!==undefined?'"':m[5]!==undefined?"'":'',value=m[4]??m[5]??m[6];
   yield {raw:m[0],index:m.index,name:m[1],operator:m[3],quote,value,head:m[0].slice(0,m[0].length-value.length-(quote?1:0)),prefix:text.slice(0,m.index),tail:text.slice(m.index+m[0].length)};
+  // An unquoted value can hold its own assignment ("Diagnostic: API_KEY=..."); rescan it.
+  if(m[6]!==undefined)pattern.lastIndex=m.index+m[0].length-m[6].length;
  }
 }
 function noncredential(a){
@@ -54,7 +56,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
  value=omitTransportCredentials(value,removed);
  let result='',offset=0;
  for(const a of assignments(value)){
-  if(!reviewedName(a.name)||noncredential(a))continue;
+  if(a.index<offset||!reviewedName(a.name)||noncredential(a))continue;
   result+=value.slice(offset,a.index)+a.head+removed(a.value)+a.quote;offset=a.index+a.raw.length;
  }
  value=result+value.slice(offset);

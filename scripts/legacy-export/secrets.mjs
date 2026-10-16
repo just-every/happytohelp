@@ -14,7 +14,8 @@ const usageCounters = new Set([
   'prompt_tokens','completion_tokens','total_tokens','input_tokens','output_tokens',
   'cached_tokens','cache_write_tokens','cache_write_1h_tokens','cache_read_input_tokens','cache_creation_input_tokens','reasoning_tokens','audio_tokens','accepted_prediction_tokens','rejected_prediction_tokens',
 ]);
-const usageContainers = new Set(['prompt_tokens_details','completion_tokens_details','input_tokens_details','output_tokens_details']);
+// prompt_token_details: one provider's singular spelling of prompt_tokens_details (live ai_usages).
+const usageContainers = new Set(['prompt_tokens_details','prompt_token_details','completion_tokens_details','input_tokens_details','output_tokens_details']);
 const refuse = location => { throw new Error(`Unclassified secret-like legacy field: ${location}; explicitly classify export/omit before exporting`); };
 
 /** Classify inventory before selecting payloads. Whole-table omissions live in scope. */

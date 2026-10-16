@@ -67,6 +67,21 @@ test('project snapshot → attachment bytes → native import → safe replay', 
       const chunkReplay=JSON.parse(await run('scripts/import-legacy.mjs',['--file',chunkImport,'--apply','--persist-to',persist]));
       assert.equal(chunkReplay.applied,0);assert.equal(chunkReplay.replayed,first.sourceRows);
       results.push({projectId,source:raw.source.rowCounts,first,replay,chunked,chunkReplay});files.push(file);
+      if(index===0){
+        // Without the legacy MAIL_FROM_DOMAIN the package still imports: sender kept, mailbox held and disabled.
+        const deferred=join(output,'deferred.snapshot'),deferredImport=join(output,'deferred.import'),deferredState=join(output,'deferred-state');
+        await run('scripts/export-legacy.mjs',['snapshot','--project',projectId,'--revision','fixture-legacy-schema','--ai-model','gpt-5.6-luna','--defer-mail-domain','--chunk-bytes','4096','--output',deferred],env);
+        await run('scripts/export-legacy.mjs',['attachments','--input',deferred,'--objects-dir',objectDirectory,'--output',deferredImport]);
+        await run('node_modules/wrangler/bin/wrangler.js',['d1','migrations','apply','DB','--local','--persist-to',deferredState]);
+        await run('scripts/import-legacy.mjs',['--file',deferredImport,'--apply','--persist-to',deferredState]);
+        const {getPlatformProxy}=await import('wrangler');const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(deferredState,'v3')}});
+        try{
+          const email=await proxy.env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(projectId).first();
+          assert.equal(email.from_address,raw.tables.projects[0].email_from_address,'unverified legacy sender is kept');
+          assert.equal(email.inbound_address,null,'no inbound address is invented');assert.equal(email.is_enabled,0,'unverified mail stays disabled');
+          assert.match((await proxy.env.DB.prepare("SELECT reason FROM legacy_import_holds WHERE source_table='projects'").first()).reason,/not verified/);
+        }finally{await proxy.dispose();}
+      }
     }
     const {getPlatformProxy}=await import('wrangler');const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(persist,'v3')}});
     const native={};

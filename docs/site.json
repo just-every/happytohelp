@@ -81,6 +81,31 @@
       ]
     },
     {
+      "title": "Features",
+      "pages": [
+        {
+          "slug": "website-knowledge",
+          "source": "docs/website-knowledge.md",
+          "label": "Website knowledge"
+        },
+        {
+          "slug": "help-before-they-ask",
+          "source": "docs/help-before-they-ask.md",
+          "label": "Help before they ask"
+        },
+        {
+          "slug": "plugins",
+          "source": "docs/plugins.md",
+          "label": "Plugins"
+        },
+        {
+          "slug": "connected-applications",
+          "source": "docs/connected-applications.md",
+          "label": "Connected applications"
+        }
+      ]
+    },
+    {
       "title": "Project",
       "pages": [
         {

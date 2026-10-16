@@ -180,7 +180,7 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   const initialContact = useRef(localContact);
   useEffect(() => {
     if (localContact === initialContact.current) return;
-    transport.current?.action('contact', localContact).then(result => setContact({...localContact, ...result.contact, loading_email: false, loading_name: false})).catch(fail);
+    transport.current?.action('contact', localContact).then(result => setContact({...localContact, ...result.contact, loading_email: false, loading_name: false})).catch(error => { setContact(current => ({...current, loading_email: false, loading_name: false})); fail(error); });
   }, [localContact, fail]);
   const readIds = useRef(new Set());
   useEffect(() => {

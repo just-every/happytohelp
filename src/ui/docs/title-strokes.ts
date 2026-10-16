@@ -29,6 +29,10 @@ export const titleStrokes: readonly TitleStroke[] = [
   { name: 'comma', width: 236, reach: 0.7, d: 'M7 10C11 18 19 23.5 36 24.5 90 26.5 156 22.5 232 20' },
   { name: 'double', width: 218, reach: 0.64, d: 'M4 17C70 14 142 15 214 17.5M26 28C78 26 128 25.5 176 27' },
   { name: 'ripple', width: 258, reach: 0.76, d: 'M4 22C14 16 24 16 34 22 44 28 54 28 64 22 72 18.5 80 18.5 88 22 120 24 186 21 254 18' },
+  { name: 'arch', width: 226, reach: 0.66, d: 'M4 29C48 13 132 9 222 24' },
+  { name: 'step', width: 238, reach: 0.7, d: 'M4 26C40 25 76 25 104 24 112 23.5 116 17 124 17 150 17 190 18 234 16' },
+  { name: 'trail', width: 262, reach: 0.74, d: 'M4 21C70 18 140 18 200 21M214 22C224 22.5 236 23 244 23.5M252 24C254 24 256 24 258 24' },
+  { name: 'drift', width: 204, reach: 0.6, d: 'M4 18C44 24 88 28 132 26 160 24.5 182 21 200 16' },
 ];
 
 /** FNV-1a over the slug: a page's starting stroke, the same on every build. */

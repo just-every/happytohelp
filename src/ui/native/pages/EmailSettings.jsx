@@ -1,3 +1,4 @@
+import {Link} from '@tanstack/react-router';
 import React from 'react';
 import OwnerTestMail from '../activation/OwnerTestMail';
 import CopyCommand from '../setup-help/CopyCommand';
@@ -49,7 +50,7 @@ function RoutingSteps({receiving, installation}) {
    <ol>
     <li>At your DNS provider, add an MX record: name <code>{domain}</code>, value <code>mx.sendgrid.net</code>, priority <code>10</code>.</li>
     <li>In SendGrid, open <b>Settings</b>, <b>Inbound Parse</b>, <b>Add Host &amp; URL</b>. Choose <code>{domain}</code>, leave “POST the raw, full MIME message” unticked, and use this URL with your inbound token in place of <code>TOKEN</code>:<CopyCommand text={`https://hh:TOKEN@${host}/api/integrations/email/sendgrid/inbound`}/></li>
-    <li>Your inbound token is in <code>.dev.vars</code> in the checkout you {installation?.environment === 'local' ? 'run' : 'deployed'} from:<CopyCommand text="grep INBOUND_EMAIL_TOKEN .dev.vars"/></li>
+    <li>Your inbound token is the <code>INBOUND_EMAIL_TOKEN</code> line in <code>.dev.vars</code>, in the checkout you {installation?.environment === 'local' ? 'run' : 'deployed'} from{installation?.environment === 'local' ? '' : <>: <code>rer deploy</code> installed that same value here</>}. Run this in that folder to show it:<CopyCommand text="grep INBOUND_EMAIL_TOKEN .dev.vars"/>{installation?.environment !== 'local' && <>No checkout, or not sure it is the one you deployed from? Choose a new token in place of <code>NEW-TOKEN</code> (a long random value, for example from <code>openssl rand -hex 32</code>) and install it, then use it in the URL above:<CopyCommand text={`umask 077 && printf 'INBOUND_EMAIL_TOKEN=%s\n' NEW-TOKEN > private.env\nrer deploy --environment YOUR-ENVIRONMENT --env-file private.env --set-secret INBOUND_EMAIL_TOKEN`}/></>}</li>
    </ol>
    <p className="sh-note">More detail, including your own gateway: <a href="/docs/integrations#receive-email">Receive email</a>.</p>
   </div>
@@ -66,6 +67,7 @@ export default function EmailSettings({data, status, field, role, projectId}) {
    <div className="settings-grid">{field('email_from_address', 'Support Email From Address', 'email')}{field('email_from_name', 'Support Email From Name')}</div>
    <div className="mt-3">{field('is_enabled', 'Email customers and your team about conversations', 'checkbox')}</div>
    <p className="settings-note">On: customers who leave an email get your replies by email, and teammates get alerts. Off also stops receiving.</p>
+   <p className="settings-note">Who gets alerts: the person a conversation is assigned to, when the customer writes and they have not read it. Unassigned conversations alert only people who turned on <b>Notify on unassigned conversation activity</b>, each set under <Link to={`/projects/${projectId}/agents`}>Agents</Link> (open a person, including yourself). It starts off for everyone, so turn it on for whoever should hear about new conversations.</p>
   </Section>
   <Section title="Receive Email">
    {field('inbound_address', 'Receiving address', 'email')}

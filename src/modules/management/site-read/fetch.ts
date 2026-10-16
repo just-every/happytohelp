@@ -39,11 +39,15 @@ export function publicOrigin(value: string): string {
 export class SiteFetcher {
  readonly origin: string
  private readonly deadline: number
+ private readonly maxRequests: number
+ private readonly userAgent: string
  private requests = 0
  private verified = false
- constructor(origin: string, deadline: number) {
+ constructor(origin: string, deadline: number, options: {maxRequests?: number; userAgent?: string} = {}) {
   this.origin = origin
   this.deadline = deadline
+  this.maxRequests = options.maxRequests ?? MAX_REQUESTS
+  this.userAgent = options.userAgent ?? USER_AGENT
  }
 
  async get(path: string, options: {max: number; allow?: Robots; accept?: string}): Promise<Fetched> {
@@ -51,7 +55,7 @@ export class SiteFetcher {
   for (let hop = 0; hop <= MAX_HOPS; hop++) {
    if (target.origin !== this.origin) throw new SiteReadStop('failed', 'off_origin_redirect')
    if (options.allow && !options.allow(target.pathname + target.search)) throw new SiteReadStop('skipped', 'robots_disallowed')
-   if (this.requests >= MAX_REQUESTS || Date.now() > this.deadline) throw new SiteReadStop('failed', 'budget_exhausted')
+   if (this.requests >= this.maxRequests || Date.now() > this.deadline) throw new SiteReadStop('failed', 'budget_exhausted')
    if (!this.verified) {
     try { await verifyPublicDns(target.hostname) } catch (error) {
      if (error instanceof HTTPException && error.status === 400) throw new SiteReadStop('skipped', 'dns_not_public')
@@ -62,7 +66,7 @@ export class SiteFetcher {
    this.requests++
    let response: Response
    try {
-    response = await fetch(target.href, {method: 'GET', redirect: 'manual', headers: {'User-Agent': USER_AGENT, Accept: options.accept ?? 'text/html,application/xhtml+xml,*/*;q=0.5'}, signal: AbortSignal.timeout(PER_REQUEST_MS)})
+    response = await fetch(target.href, {method: 'GET', redirect: 'manual', headers: {'User-Agent': this.userAgent, Accept: options.accept ?? 'text/html,application/xhtml+xml,*/*;q=0.5'}, signal: AbortSignal.timeout(PER_REQUEST_MS)})
    } catch { throw new SiteReadStop('failed', 'fetch_failed') }
    if (REDIRECTS.includes(response.status)) {
     const location = response.headers.get('Location')

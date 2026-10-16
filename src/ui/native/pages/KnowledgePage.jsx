@@ -12,6 +12,7 @@ import { KnowledgeFields } from './knowledge/KnowledgeForms';
 import KnowledgeTabs from './knowledge/KnowledgeTabs';
 import DatasetProgress, { datasetIsActive } from './knowledge/DatasetProgress';
 import { SourceOrigin, canCrawl } from './knowledge/source-origin';
+import WebsiteReader, { WebsiteReadFailure, useWebsiteReader } from './knowledge/WebsiteReader';
 import './knowledge/knowledge.css';
 import './stack-table.css';
 
@@ -47,6 +48,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
     const [busy, setBusy] = useState(false);
     const [tab, setTab] = useState('overview');
     const [fieldErrors, setFieldErrors] = useState({});
+    const reader = useWebsiteReader(projectId);
     const datasetActive = section === 'datasets' && Boolean(items?.some(datasetIsActive));
     const articleReady = Boolean(draft && (recordId === 'create' ? !draft.id : draft.id === recordId));
 
@@ -76,8 +78,8 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                 is_published: false,
                 refreshMode: 'adaptive',
                 url: project?.website || '',
-                max_crawl_depth: 100,
-                max_crawl_pages: 1000,
+                max_crawl_depth: 3,
+                max_crawl_pages: 40,
                 categories: [],
             });
         }
@@ -249,8 +251,8 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                     <dt>Last refreshed</dt><dd>{draft.last_refreshed_at ? new Date(draft.last_refreshed_at).toLocaleString() : 'Not recorded'}</dd>
                     <dt>Indexed pages</dt><dd>{draft.page_count ?? pages.length}</dd>
                 </dl>
-                {draft.error && <p role="alert" className="alert alert-danger">{draft.error}</p>}
-                {canCrawl(draft) ? <button className="btn btn-primary" disabled={busy || datasetIsActive(draft)} onClick={refresh}>Refresh now</button> : <SourceOrigin source={draft}/>}
+                <WebsiteReadFailure error={draft.status === 'failed' ? draft.error : ''}/>
+                {canCrawl(draft) ? <><button className="btn btn-primary" disabled={busy || datasetIsActive(draft)} onClick={refresh}>Refresh now</button><WebsiteReader reader={reader}/></> : <SourceOrigin source={draft}/>}
             </div> : existingDataset && tab === 'pages' ? <div className="table-responsive">
                 <table className="table knowledge-table stack-table">
                     <thead><tr><th>Page</th><th>Content</th></tr></thead>
@@ -279,6 +281,8 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                     onUnpublish={event => save(event, false)}
                     onDelete={articleReady && draft.id ? () => remove(draft) : undefined}
                 />}
+                {section === 'datasets' && <WebsiteReader reader={reader}/>}
+                {isArticle && articleReady && draft.is_published && draft.slug && <p className="settings-note knowledge-public-address">Published on your Help Center: <a href={`/help/${projectId}/${draft.slug}`} target="_blank" rel="noreferrer">{`${window.location.origin}/help/${projectId}/${draft.slug}`}</a></p>}
                 {draft && (!isArticle || articleReady) && <KnowledgeFields {...{ section, draft, change, categories, fieldErrors }}/>}
                 {!isArticle && <div className="knowledge-form-actions">
                     <button className="btn btn-primary" disabled={busy}>

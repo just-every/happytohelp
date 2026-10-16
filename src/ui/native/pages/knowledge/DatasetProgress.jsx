@@ -7,7 +7,7 @@ export default function DatasetProgress({ source }) {
         empty: 'Waiting for content',
         crawling: 'Crawling website…',
         ingesting: source.ingest_cursor < 0 ? 'Queued to read website…' : 'Indexing website content…',
-        processing: source.ingest_cursor < 0 ? 'Preparing website content…' : 'Indexing website content…',
+        processing: source.ingest_cursor < 0 ? 'Reading website…' : 'Indexing website content…',
         ready: 'Ready for AI answers',
         failed: 'Refresh failed',
     };

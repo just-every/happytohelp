@@ -46,3 +46,9 @@
   .project-account .project-avatar .d-flex { flex-wrap: wrap; }
   .project-list-table th:first-child { width: auto; }
 }
+
+/* Help before they ask (ProactiveHelp.jsx): its numbered explanation reads as prose above the two switches. */
+.proactive-help-settings ol { max-width: 720px; margin: 0 0 20px; padding-left: 20px; line-height: 1.55; }
+.proactive-help-settings ol li + li { margin-top: 8px; }
+.proactive-help-settings { scroll-margin-top: 24px; }
+.proactive-help-settings .form-switch { margin: 12px 0; }

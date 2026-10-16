@@ -26,7 +26,7 @@ export function siteColour(home: string): string | null {
 }
 
 const HELP_WORDS = new Set(['help', 'faq', 'faqs', 'support', 'docs', 'documentation', 'guide', 'guides', 'howto', 'shipping', 'delivery', 'returns', 'return', 'refund', 'refunds', 'pricing', 'billing', 'account', 'contact', 'about', 'warranty', 'terms', 'privacy', 'policy', 'policies', 'knowledge', 'troubleshooting', 'questions', 'start', 'started'])
-const NOT_PAGES = /\.(?:pdf|png|jpe?g|gif|webp|svg|ico|css|js|json|xml|zip|gz|mp4|mp3|woff2?|txt|csv|docx?|xlsx?)$/i
+export const NOT_PAGES = /\.(?:pdf|png|jpe?g|gif|webp|svg|ico|css|js|json|xml|zip|gz|mp4|mp3|woff2?|txt|csv|docx?|xlsx?)$/i
 
 function score(url: URL, label: string): number {
  let path = url.pathname

@@ -10,7 +10,7 @@ async function json(response:Response){if(!response.ok)throw new Error(`Provider
 export async function apifyDocuments(env:Env,datasetId:string):Promise<DocumentInput[]>{
  const data=await json(await fetch(`https://api.apify.com/v2/datasets/${encodeURIComponent(datasetId)}/items?clean=true`,{headers:{Authorization:`Bearer ${config(env,'APIFY_TOKEN')}`}}));
  if(!Array.isArray(data))throw new Error('Invalid Apify dataset');
- return data.map(x=>({url:x.url,title:x.title||x.url,content:x.text||x.markdown}));
+ return data.map(x=>({url:x.url,title:x.title||x.metadata?.title||x.url,content:x.text||x.markdown}));
 }
 export async function embeddings(env:Env,input:string[]):Promise<number[][]>{
  const data=await json(await fetch('https://api.openai.com/v1/embeddings',{method:'POST',headers:{Authorization:`Bearer ${config(env,'OPENAI_API_KEY')}`,'Content-Type':'application/json'},body:JSON.stringify({model:config(env,'KNOWLEDGE_EMBEDDING_MODEL'),input})}));

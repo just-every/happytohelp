@@ -193,6 +193,9 @@ bindings. For Cloudflare mail, supply the additional account ID described in
 provider requests, sends no mail and makes no deployment. `rer deploy --environment
 production` requires owner authorization and the private credentials/declaration
 in Operations. Local development still needs no email account.
+Stop `rer dev` first (`rer dev --stop`): while it runs it owns the checkout's local
+state, and `rer deploy`, including `--dry-run`, refuses with "An active local
+operation owns the state".
 `rer describe` lists the remaining commands and real flags.
 All new verbs accept `--help`, `--cwd PATH`, `--non-interactive` and `--json`;
 release has its own preserved parser. No command implies provider acceptance.

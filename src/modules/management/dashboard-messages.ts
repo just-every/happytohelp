@@ -9,7 +9,7 @@ export async function messagesData(env:Env,rows:any[]){
  if(!rows.length)return []
  const ids=JSON.stringify(rows.map(row=>row.id))
  const selected='SELECT value FROM json_each(?)'
- const mailRows=rows.filter(row=>row.actor_role!=='contact'&&!row.erased_at),mailIds=JSON.stringify(mailRows.map(row=>row.id))
+ const mailRows=rows.filter(row=>!['contact','system'].includes(row.actor_role)&&!row.erased_at),mailIds=JSON.stringify(mailRows.map(row=>row.id))
  const data=await env.DB.batch<any>([
   env.DB.prepare(`SELECT s.* FROM move_in_message_sources s JOIN messages m ON m.id=s.message_id AND m.project_id=s.project_id WHERE m.id IN (${selected})`).bind(ids),
   env.DB.prepare(`SELECT u.id,u.name,s.avatar_url FROM users u LEFT JOIN user_settings s ON s.user_id=u.id WHERE u.id IN (SELECT actor_id FROM messages WHERE id IN (${selected}) AND actor_role<>'contact')`).bind(ids),
@@ -41,11 +41,12 @@ export async function messagesData(env:Env,rows:any[]){
  const suppressed=!!localMailOrigin(env),configured=emailConfigured(env)
  return rows.map(row=>{
   const origin:any=origins.get(String(row.id)),sourceAuthor=origin?JSON.parse(origin.author_json):null
-  const agent=row.actor_role==='contact'?null:person(agents.get(String(row.actor_id)))
+  // The workspace's away reply (away-reply.ts) has no teammate author and is never emailed.
+  const agent=row.actor_role==='contact'?null:row.actor_role==='system'?person({id:row.actor_id,name:'Away reply'}):person(agents.get(String(row.actor_id)))
   const attempt:any=mail.get(String(row.id))
   // Keep the durable mail-status precedence, including suppressed development
   // mail and unknown delivery. Reads never ask the provider to do work.
-  const emailStatus=origin||row.actor_role==='contact'||row.erased_at?null:suppressed?{state:'suppressed'}:attempt?.state?{state:attempt.state,updatedAt:attempt.updated_at}:!configured?{state:'not_configured'}:attempt?.is_enabled===0?{state:'disabled'}:{state:attempt?.email?'not_recorded':'no_recipient'}
+  const emailStatus=origin||row.actor_role==='contact'||row.actor_role==='system'||row.erased_at?null:suppressed?{state:'suppressed'}:attempt?.state?{state:attempt.state,updatedAt:attempt.updated_at}:!configured?{state:'not_configured'}:attempt?.is_enabled===0?{state:'disabled'}:{state:attempt?.email?'not_recorded':'no_recipient'}
   return {...row,...(reads.get(String(row.id))||{read_by_contacts:{},read_by_agents:{}}),email_status:emailStatus,created_at:iso(row.created_at),source_time_provenance:origin?.time_provenance,source_author:sourceAuthor,bucket_id:row.bucket_id||row.conversation_id,agent:sourceAuthor&&sourceAuthor.role!=='contact'?person({id:row.actor_id,name:sourceAuthor.name||'Imported author'}):agent,agent_id:sourceAuthor&&sourceAuthor.role!=='contact'?row.actor_id:agent?.id,contact_id:row.actor_role==='contact'?row.actor_id:null,contact:row.actor_role==='contact'?person(contacts.get(String(row.actor_id))):null,media:(media.get(String(row.id))||[]).map(m=>({...m,filename_original:m.filename,url:`/api/conversations/${row.conversation_id}/media/${m.id}`,preview_url:`/api/conversations/${row.conversation_id}/media/${m.id}`,aggregate_type:m.content_type.startsWith('image/')?'image':'file'}))}
  })
 }

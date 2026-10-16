@@ -108,6 +108,16 @@ export const defaultText = {
         placeholder_name: "Your Name",
         placeholder_email: "you@example.com",
     },
+    away: {
+        title: "We're away right now",
+        back: "We're back {when}.",
+        later: "We'll reply as soon as we're back.",
+        email_ask: "Leave your email below and we'll send our reply there too.",
+        email_known: "We'll reply here and email you at {email}.",
+        header: "Away",
+        header_back: "Away until {when}",
+        email_prompt: "We'll email our reply to this address.",
+    },
     prompt: {
         email_prompt: "Receive an email when {agent_name} replies!",
         edit_contact: "Edit your contact details below",

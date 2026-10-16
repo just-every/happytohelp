@@ -57,7 +57,7 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
         const value = event.configuration;
         setCollectorReady(value.proactiveHelpEnabled === true && !(context.settings.collector.disable_bots && isBot));
         const brand = value.brand?.name || value.project?.name;
-        setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), mailMode: value.mailMode, workspace_brand: {name: brand, avatar_url: value.brand?.avatar_url || value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
+        setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), mailMode: value.mailMode, availability: value.availability || null, workspace_brand: {name: brand, avatar_url: value.brand?.avatar_url || value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
         onSettingsUpdated?.({...widgetAppearance(value.brand, value.settings), settings: {...value.settings?.settings, collector: {...value.settings?.settings?.collector, enabled: value.collectorEnabled === true}}});
         break;
       }
@@ -98,6 +98,13 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     }
   }, [setFilteredMessages, setInsightOpen, fail, onSettingsUpdated]);
   const eventHandler = useRef(processEvent); eventHandler.current = processEvent;
+  // Ask for settings again when the team's availability next changes (it opens or closes) while the widget is open.
+  const availabilityChangesAt = conversationSettings.availability?.changesAt;
+  useEffect(() => {
+    if (!availabilityChangesAt) return;
+    const timer = setTimeout(() => { transport.current?.refreshConfiguration().catch(() => {}); }, Math.min(Math.max(availabilityChangesAt - Date.now(), 0) + 1000, 2147483647));
+    return () => clearTimeout(timer);
+  }, [availabilityChangesAt]);
   useEffect(() => {
     const active = () => transport.current === client && !client.closed;
     const onError = error => { if (active()) fail(error); };

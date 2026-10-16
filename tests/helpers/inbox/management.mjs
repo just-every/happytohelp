@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict'
-import {startApp,sha} from '../../journeys/kit/app.mjs'
+import {startApp,sha,applyMigrations} from '../../journeys/kit/app.mjs'
 
 // Workspace management on the real application: scoped settings, resources and bootstrap, last-owner and
 // global-admin boundaries, dashboard notes and contact participants, transcript mail, widget settings and
 // origins, observed presence, mailbox ownership. Only the mail provider and DNS are fixtures.
 export async function managementJourney(){
  const network={requests:[],reject:false}
- const app=await startApp({origin:'https://app.example',outbound:async request=>{
+ // Migration 129 runs on the seeded workspaces below, as an upgrade would run it on existing ones.
+ const ownerAlerts=name=>name.startsWith('129_')
+ const app=await startApp({origin:'https://app.example',migrate:name=>!ownerAlerts(name),outbound:async request=>{
   if(request.url.startsWith('https://cloudflare-dns.com/'))return Response.json({Status:0,Answer:[{type:15,data:'10 mx.example.com.'}]})
   assert.equal(request.url,'https://api.resend.com/emails','only the mail provider is called');network.requests.push(await request.json())
   return network.reject?new Response('unavailable',{status:503}):Response.json({id:'provider-transcript'})
@@ -16,6 +18,11 @@ export async function managementJourney(){
  const call=(prefix,path,method='GET',body,token='token')=>app.request(prefix+path,{raw:true,method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)})
  try{
 await DB.batch([DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)"),DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('q','Other','other','https://other.example',1)"),DB.prepare("INSERT INTO users VALUES('u','owner@example.com','Owner',1)"),DB.prepare("INSERT INTO memberships VALUES('p','u','owner')"),DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'),Date.now()+999999),DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('contact','p','Visitor','visitor@example.com',1)"),DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('c','p','contact',1,1)")]);
+// An existing workspace where no member gets new-conversation alerts alerts its owner after the upgrade; one where a
+// member already gets them is unchanged.
+await DB.batch([DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('team','Team','team','https://team.example',1)"),DB.prepare("INSERT INTO users VALUES('team-owner','team-owner@example.com','Team owner',1),('team-admin','team-admin@example.com','Team admin',1)"),DB.prepare("INSERT INTO memberships VALUES('team','team-owner','owner'),('team','team-admin','admin')"),DB.prepare("INSERT INTO user_project_preferences(project_id,user_id,is_notified_on_unassigned_activity) VALUES('team','team-admin',1)")])
+await applyMigrations(app.db,ownerAlerts)
+assert.deepEqual((await DB.prepare('SELECT project_id,user_id,is_notified_on_unassigned_activity alerted FROM user_project_preferences ORDER BY project_id,user_id').all()).results,[{project_id:'p',user_id:'u',alerted:1},{project_id:'team',user_id:'team-admin',alerted:1}])
 assert.equal((await call('/api/management','/projects/q/settings')).status,403)
 assert.equal((await call('/api/management','/projects/p/settings','PUT',{name:'Renamed',timezone:'UTC',is_contact_tracking_enabled:true})).status,200)
 const macro=await(await call('/api/management','/projects/p/macros','POST',{title:'Welcome',content:'Hello'})).json();assert.ok(macro.data.id)
@@ -230,6 +237,11 @@ assert.deepEqual((await(await call('/api/management','/projects/p/widget-setting
 const fresh=await(await call('/api/management','/projects','POST',{name:'Fresh',allowed_origin:'https://fresh.example'})).json(),freshSettings=await(await call('/api/management',`/projects/${fresh.id}/widget-settings`)).json()
 assert.match(freshSettings.verificationSecret,/^[0-9a-f]{64}$/);assert.notEqual(freshSettings.verificationSecret,ownerSettings.verificationSecret)
 assert.equal((await app.request(`/api/management/projects/${fresh.id}/widget-settings`,{raw:true,headers:{Authorization:'Bearer operator-token'}})).status,403)
+// The owner who creates a workspace is alerted to its new conversations, and can switch that off.
+const freshProfile=async()=>(await(await call('/api/management',`/profile?projectId=${fresh.id}`)).json()).data.is_notified_on_unassigned_activity
+assert.equal(await freshProfile(),1)
+assert.equal((await call('/api/management',`/profile?projectId=${fresh.id}`,'PUT',{name:'Owner',is_notified_on_unassigned_activity:false})).status,200)
+assert.equal(await freshProfile(),0)
 await DB.prepare("INSERT INTO memberships VALUES('q','u','owner')").run()
 await DB.prepare("INSERT INTO sessions VALUES(?,'u','q','owner',NULL,?,NULL)").bind(await hashToken('q-token'),Date.now()+999999).run()
 async function callQ(path,method='GET',body){return app.request('/api/management'+path,{raw:true,method,headers:{Authorization:'Bearer q-token','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)})}

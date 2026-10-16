@@ -7,6 +7,7 @@ import AgentAvatar from "./AgentAvatar";
 import {ConnectContext} from "./context/ConnectContext";
 import AppContext from "./context/AppContext";
 import {faTimes as falTimes} from "@fortawesome/free-solid-svg-icons";
+import {backAt} from "../availability-text.js";
 export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded, onHeightChange}) {
     const context = useContext(AppContext);
     const {
@@ -22,6 +23,9 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded,
     const [lastHeight, setLastHeight] = useState(0);
 
     const currentAgent = getCurrentAgent();
+    // A person replies within the usual time only while the team is available.
+    const availability = conversationSettings?.availability;
+    const humanResponse = availability?.available === false ? (availability.opensAt ? context.text.away.header_back.replace('{when}', backAt(availability.opensAt)) : context.text.away.header) : context.text.ai.human_response;
     const canExpand = conversationSettings && (conversationSettings.ais.length + (conversationSettings.is_human_response_enabled ? 1 : 0)) > 1;
     if(!canExpand && headerExpanded) {
         headerExpanded = false;
@@ -84,7 +88,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded,
                         <span className="happytohelp-insight-agent-seperator">•</span>
                         <span className="happytohelp-insight-agent-role">{agent.role ?? (agent.is_ai ? context.text.ai.ai : context.text.ai.human)}</span>
                     </div>
-                    <div className="happytohelp-insight-agent-info">{agent.is_ai ? context.text.ai.ai_response : context.text.ai.human_response}</div>
+                    <div className="happytohelp-insight-agent-info">{agent.is_ai ? context.text.ai.ai_response : humanResponse}</div>
                 </div>
             </div>);
         });
@@ -123,7 +127,7 @@ export default function ChatHeader({ setOpen, headerExpanded, setHeaderExpanded,
                         {canExpand && <span className="happytohelp-chat-header-edit-inline">
                             <FontAwesomeIcon icon={faAngleDown}/>
                         </span>}
-                        {!currentAgent.is_ai && <div className="happytohelp-insight-agent-info"><span className="happytohelp-insight-agent-seperator-tiny">•</span>{context.text.ai.human_response}
+                        {!currentAgent.is_ai && <div className="happytohelp-insight-agent-info"><span className="happytohelp-insight-agent-seperator-tiny">•</span>{humanResponse}
                         </div>}
                     </span>
                 </div>

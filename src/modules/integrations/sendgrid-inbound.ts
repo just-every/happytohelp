@@ -75,12 +75,22 @@ sendgridInbound.post('/email/sendgrid/inbound',async c=>{
  // One message may name several configured mailboxes; each project receives its copy.
  const targets=envelopeRecipients.filter(Boolean).length?envelopeRecipients.filter(Boolean):['']
  const results=[]
+ let alreadyReceived=false
  for(const recipient of targets){
   try{results.push(await receiveEmail(c.env,{messageId:messageId(headerBlock,fallback),to:routingCandidates({envelope:recipient?[recipient]:[],headers,to:list(parsedHeaders.to)}),from,text:content,cc,replyTo:list(parsedHeaders.replyTo)[0],senderAuthenticated:verdict.verified,senderFailed:verdict.failed,fromUnusable:!headerFrom,evidence,attachments}))}
-  catch(error){if(!(error instanceof HTTPException&&error.status===404&&targets.length>1))throw error}
+  catch(error){
+   // 409: this Message-ID already holds this mailbox's copy, as when a reply-all names a reply address and the
+   // bare mailbox. It is mail already received, as on the Worker path (email-worker.ts): no second write, and a
+   // success so SendGrid stops retrying while the admitted copy keeps its live update and AI reply.
+   if(error instanceof HTTPException&&error.status===409){console.error('Inbound email already received',error.message);alreadyReceived=true;continue}
+   if(!(error instanceof HTTPException&&error.status===404&&targets.length>1))throw error
+  }
  }
- if(!results.length)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})
  for(const result of results)scheduleInboundEffects(c.env,c.executionCtx,result)
+ if(!results.length){
+  if(alreadyReceived)return c.json({duplicate:true},200)
+  throw new HTTPException(404,{message:'Inbound mailbox is not configured'})
+ }
  const result=results[0]
  return c.json(result,results.every(entry=>entry.duplicate)?200:201)
 })

@@ -20,7 +20,9 @@ export default function SendMessage({ mainView, setView, messages, localContact,
     const isPreview = context.preview?.enabled === true;
     const { open, getCurrentAgent, conversationSettings } = useContext(ConnectContext);
     const currentAgent = getCurrentAgent();
-    const needsNotifyEmail = ( !currentAgent?.is_ai && messages.length && !contact.email && conversationSettings.mailMode === 'remote');
+    // An away team asks for the address before the first message, so its reply can reach the visitor.
+    const away = conversationSettings.availability?.available === false && Boolean(conversationSettings.mailMode) && conversationSettings.mailMode !== 'unavailable';
+    const needsNotifyEmail = !currentAgent?.is_ai && !contact.email && (away || (messages.length && conversationSettings.mailMode === 'remote'));
 
     const [message, setMessage] = useState("");
     const [files, setFiles] = useState([]);
@@ -164,7 +166,7 @@ export default function SendMessage({ mainView, setView, messages, localContact,
     else {
         content = (
             <FileHandler className={"happytohelp-message-input"} setFiles={setFiles} files={files}>
-                { showCollector && <CollectCustomer needsNotifyEmail={ needsNotifyEmail } setShowCollector={ setShowCollector } localContact={ localContact } contact={ contact } sendContact={ sendContact } /> }
+                { showCollector && <CollectCustomer needsNotifyEmail={ needsNotifyEmail } away={ away } setShowCollector={ setShowCollector } localContact={ localContact } contact={ contact } sendContact={ sendContact } /> }
                 <FileHandlerList files={files} setFiles={setFiles} />
                 <div className="happytohelp-send-message-row">
                 <TextareaAutosize forwardRef={textareaRef} name="content" value={message} onChange={e => setMessage(e.target.value)} onEnter={handleSend} aria-label={(mainView === 'conversation' ? context.text.message.placeholder_message_chat : context.text.message.placeholder_message)} placeholder={(mainView === 'conversation' ? context.text.message.placeholder_message_chat : context.text.message.placeholder_message)} style={ context.theme.input.message } />

@@ -6,10 +6,10 @@ import {authoringSource,authorshipStatement,type Authoring} from '../outcomes/pr
 import {trackingStatement} from '../outcomes/state.ts'
 import {resolvePublicCitations,citationAdmissionGuard,activeSourceProjectSql,type PublicReference} from '../knowledge/public-sources.ts'
 import type { Actor,Env } from '../../platform/env'
-/** Local ids the server mints: `email:` identifies an inbound email claim and `erased:`
- * replaces a client-supplied id when its contact is erased (contact-erasure/statements.ts).
- * Clients may use neither. */
-export const reservedLocalId=(localId:unknown)=>typeof localId==='string'&&/^(?:email|erased):/.test(localId)
+/** Local ids the server mints: `email:` identifies an inbound email claim, `erased:`
+ * replaces a client-supplied id when its contact is erased (contact-erasure/statements.ts)
+ * and `away:` is the workspace's away reply (management/away-reply.ts). Clients may use none. */
+export const reservedLocalId=(localId:unknown)=>typeof localId==='string'&&/^(?:email|erased|away):/.test(localId)
 export interface MessageInput {[inboundAuthority]?:InboundAuthority;projectId:string;conversationId:string;actor:Actor;localId:string;content:string;expectedRevision:number;expectedLastMessageId?:string|null;mediaIds?:string[];resolve?:boolean;generationId?:string;citations?:PublicReference[];authoring?:Authoring;sessionHash?:string;tokenAuthority?:TokenAuthority}
 export async function admitMessage(env:Env,input:MessageInput){
  const {projectId,conversationId,actor,localId,content,expectedRevision}=input,email=input[inboundAuthority]

@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises'
 import {randomBytes} from 'node:crypto'
 import {startApp,sha} from './kit/app.mjs'
 
-const ownerSetupTables=['owner_setup','users','projects','project_settings','user_settings','memberships','credentials','sessions']
+const ownerSetupTables=['owner_setup','users','projects','project_settings','user_settings','user_project_preferences','memberships','credentials','sessions']
 const migrationStatements=async name=>{const source=(await readFile('migrations/'+name,'utf8')).replace(/^\s*--[^\n]*$/gm,'');return [...source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(match=>match[1]).filter(sql=>sql.trim()!==';')}
 const mailOutbound=(mail,{reject=()=>false}={})=>async(request,entry)=>{const url=new URL(request.url);if(url.host==='api.resend.com'){if(reject(entry))return new Response('rejected',{status:400});const body=JSON.parse(entry.body);mail.push({to:body.to[0],text:body.text,subject:body.subject});return Response.json({id:'email-'+mail.length})}if(url.host==='api.sendgrid.com'){if(reject(entry))return new Response('rejected',{status:400});const body=JSON.parse(entry.body);mail.push({to:body.personalizations[0].to[0].email,text:body.content.find(part=>part.type==='text/plain').value,subject:body.subject});return new Response(null,{status:202,headers:{'x-message-id':'fixture-'+mail.length}})}throw new Error('Unexpected outbound request: '+request.url)}
 const tokenOf=url=>new URL(url).searchParams.get('token')
@@ -51,7 +51,7 @@ test('first-owner setup validates, refuses cross-site claims, rolls back a faile
   const secure=await app.request('/api/identity/login',{base:'https://example.invalid',body:{email:winner,password:entry.password}});assert.equal(secure.status,200);assert.match(secure.headers.get('set-cookie'),/Secure/)
   assert.deepEqual(await state(),{available:false});assert.equal((await submit()).status,409)
   // Deleting every owner row never reopens setup, nor does a legacy partial installation or an import.
-  for(const table of ['sessions','credentials','memberships','user_settings','project_settings','ai_profiles','users','projects'])await app.db.prepare(`DELETE FROM ${table}`).run()
+  for(const table of ['sessions','credentials','memberships','user_settings','user_project_preferences','project_settings','ai_profiles','users','projects'])await app.db.prepare(`DELETE FROM ${table}`).run()
   assert.deepEqual(await state(),{available:false});assert.equal((await submit()).status,409)
   await app.db.prepare('DROP TRIGGER owner_setup_on_user').run();await app.db.prepare('DROP TRIGGER owner_setup_on_project').run();await app.db.prepare('DROP TABLE owner_setup').run()
   await app.db.prepare("INSERT INTO users VALUES('legacy','legacy@example.invalid','Legacy',1)").run()
@@ -86,7 +86,7 @@ test('a managed install claims only with its credential; a dropped welcome mail 
   await app.db.prepare('INSERT INTO user_settings(user_id,visual_inspiration) VALUES(?,?)').bind(owner.userId,'Preserved historical preference').run()
   assert.equal((await profile('PUT',{name:'Renamed Owner',visual_inspiration:'Do not reactivate this field'})).status,200)
   assert.equal((await app.first('SELECT visual_inspiration FROM user_settings WHERE user_id=?',owner.userId)).visual_inspiration,'Preserved historical preference')
-  for(const table of ['project_settings','sessions','credentials','memberships','user_settings','ai_profiles','users','projects'])await app.db.prepare(`DELETE FROM ${table}`).run()
+  for(const table of ['project_settings','sessions','credentials','memberships','user_settings','user_project_preferences','ai_profiles','users','projects'])await app.db.prepare(`DELETE FROM ${table}`).run()
   assert.equal((await submit(managedEntry)).status,409,'the managed credential shares the permanent claim, even after owner deletion')
  }finally{await app.close()}
 })
@@ -103,7 +103,7 @@ test('a deployed install claims only with its private setup token or its owner-e
   const submit=(base,body=entry)=>app.request('/api/identity/bootstrap',{base,body,headers:{origin:base}})
   const state=async base=>(await app.call('/api/identity/setup',{base})).data
   const users=async()=>(await app.first('SELECT count(*) AS n FROM users')).n
-  const reset=async(changes={})=>{for(const table of ['sessions','credentials','memberships','project_settings','ai_profiles','users','projects','owner_setup'])await app.db.prepare(`DELETE FROM ${table}`).run();await app.configure({H2H_SETUP_TOKEN:undefined,RER_INSTALLATION_ID:undefined,APP_ORIGIN:undefined,OWNER_EMAIL:undefined,...changes});assert.equal(await users(),0)}
+  const reset=async(changes={})=>{for(const table of ['sessions','credentials','memberships','user_project_preferences','project_settings','ai_profiles','users','projects','owner_setup'])await app.db.prepare(`DELETE FROM ${table}`).run();await app.configure({H2H_SETUP_TOKEN:undefined,RER_INSTALLATION_ID:undefined,APP_ORIGIN:undefined,OWNER_EMAIL:undefined,...changes});assert.equal(await users(),0)}
   await reset()
   assert.deepEqual(await state(deployed),{available:true,tokenRequired:true})
   for(const body of [entry,{...entry,setupToken:''},{...entry,setupToken:'guessed-token'}]){const refused=await submit(deployed,body);assert.equal(refused.status,503);assert.match(await refused.text(),/requires a private H2H_SETUP_TOKEN/)}

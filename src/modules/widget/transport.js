@@ -59,8 +59,9 @@ export class WidgetTransport {
   }
   async initialize(contact) {
     let configuration;
+    this.settingsPath = `/api/widget/settings?widgetKey=${encodeURIComponent(this.widgetKey)}${contact?.preview_token ? `&previewToken=${encodeURIComponent(contact.preview_token)}` : ""}`;
     try {
-      configuration = await this.request(`/api/widget/settings?widgetKey=${encodeURIComponent(this.widgetKey)}${contact?.preview_token ? `&previewToken=${encodeURIComponent(contact.preview_token)}` : ""}`);
+      configuration = await this.request(this.settingsPath);
     } catch (error) {
       if (error.status === 403 || error instanceof TypeError) {
         throw new Error(`Support could not connect on ${location.origin}. Site owner: open HappyToHelp > Settings > Widget and allow this exact Website origin. Also check that the HappyToHelp address is reachable.`);
@@ -93,6 +94,12 @@ export class WidgetTransport {
     }
     return this.session;
   }
+  // Settings again, when the team's availability changes while the widget is open.
+  async refreshConfiguration() {
+    if (!this.settingsPath || this.closed) return;
+    this.configuration = await this.request(this.settingsPath);
+    this.onEvent({type: 'configuration', configuration: this.configuration});
+  }
   async refresh() {
     const result = await this.request(`/api/conversations/${this.conversationId}/messages`);
     if (result.revision >= this.revision) {this.revision = result.revision; this.lastMessageId = result.lastMessageId;}
@@ -109,8 +116,13 @@ export class WidgetTransport {
       }
       return {...item, url, preview_url: url, filename_original: item.filename || item.name, aggregate_type: (item.content_type || item.mime_type || '').startsWith('image/') ? 'image' : 'file'};
     }));
-    const agent = message.actor_role !== 'contact' ? this.configuration?.agents?.find(person => person.id === message.actor_id) : undefined;
+    const agent = message.actor_role === 'system' ? this.workspaceAuthor(message.actor_id) : message.actor_role !== 'contact' ? this.configuration?.agents?.find(person => person.id === message.actor_id) : undefined;
     return {...message, ...(agent ? {agent} : {}), created_at: typeof message.created_at === 'number' ? new Date(message.created_at).toISOString() : message.created_at, local_id: message.local_id || message.localId, contact_id: message.actor_role === 'contact' ? this.session.contactId : message.contact_id, agent_id: message.actor_role && message.actor_role !== 'contact' ? message.actor_id : message.agent_id, media};
+  }
+  // The workspace itself, as the author of its away reply.
+  workspaceAuthor(id) {
+    const brand = this.configuration?.brand || {}, name = brand.name || this.configuration?.project?.name || 'Support';
+    return {id, name, initials: name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase(), ...(brand.avatar_url || brand.logo_url ? {avatar_url: brand.avatar_url || brand.logo_url} : {})};
   }
   openSocket() {
     if (this.closed || this.revoked) return;

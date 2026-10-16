@@ -20,11 +20,11 @@ export async function verifySettingsParity(page, {origin,projectId,checks}) {
     await page.getByLabel('Workspace color hex').fill('#327654');
     await page.getByRole('button',{name:'Dark',exact:true}).click();
     await page.getByRole('button',{name:'Availability',exact:true}).click();
-    await page.getByLabel('Schedule enabled',{exact:true}).check();
+    await page.getByLabel('Use opening hours',{exact:true}).check();
     await page.getByLabel(openDay,{exact:true}).check();
     await page.getByLabel('Opening time').fill('09:30');
     await page.getByLabel('Closing time').fill('17:15');
-    await page.getByLabel('Custom auto response message').fill('We return during our published support hours.');
+    await page.getByLabel('Away message outside hours',{exact:true}).fill('We return during our published support hours.');
     await page.getByRole('button',{name:'General',exact:true}).click();
     assert.equal(await page.getByLabel('Website',{exact:true}).inputValue(),'https://example.test');
     assert.deepEqual(mutations,[],'tabs and display buttons must not submit settings');
@@ -39,15 +39,19 @@ export async function verifySettingsParity(page, {origin,projectId,checks}) {
   assert.equal(await page.getByLabel('Workspace color hex').inputValue(),'#327654');
   assert.equal(await page.getByRole('button',{name:'Dark',exact:true}).getAttribute('aria-pressed'),'true');
   await page.getByRole('button',{name:'Availability',exact:true}).click();
-  assert.equal(await page.getByLabel('Schedule enabled',{exact:true}).isChecked(),true);
+  assert.equal(await page.getByLabel('Use opening hours',{exact:true}).isChecked(),true);
   assert.equal(await page.getByLabel('Opening time').inputValue(),'09:30');
   assert.equal(await page.getByLabel('Closing time').inputValue(),'17:15');
-  assert.equal(await page.getByLabel('Custom auto response message').inputValue(),'We return during our published support hours.');
+  assert.equal(await page.getByLabel('Away message outside hours',{exact:true}).inputValue(),'We return during our published support hours.');
   // The widget's own settings door applies the saved schedule now: closed, with the custom away message.
   const project=await (await page.request.get(`${origin}/api/identity/projects/${projectId}`)).json();
   const widget=await (await page.request.get(`${origin}/api/widget/settings?widgetKey=${encodeURIComponent(project.widget_key)}`)).json();
-  assert.deepEqual(widget.availability,{available:false,message:'We return during our published support hours.'},'the widget is told the workspace is away, with its message');
-  checks.push('project tabs preserve unsaved edits without submitting; color, mode and schedule survive reload; the widget settings door reports the saved schedule as away now');
+  const {available,message,scheduled,opensAt}=widget.availability;
+  assert.deepEqual({available,message,scheduled},{available:false,message:'We return during our published support hours.',scheduled:true},'the widget is told the workspace is away, with its message');
+  assert.equal(new Date(opensAt).toLocaleDateString('en-US',{weekday:'long',timeZone:'UTC'}),openDay,'and when the team is back');
+  // The tab says the same thing in words before anything is saved.
+  await page.getByRole('status').filter({hasText:'Right now:'}).filter({hasText:`Away. Back ${openDay} at 9:30 AM`}).waitFor();
+  checks.push('project tabs preserve unsaved edits without submitting; color, mode and schedule survive reload; the widget settings door and the tab report the saved schedule as away now, with when the team is back');
 }
 
 export async function verifyManagementParity(page,{origin,projectId,checks}) {

@@ -47,6 +47,8 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
   }
   const published=page.waitForResponse(r=>new URL(r.url()).pathname===`/api/knowledge/${projectId}/articles`&&r.request().method()==='POST');await page.getByRole('button',{name:'Publish',exact:true}).click();assert.equal((await published).status(),201);
   await page.getByRole('heading',{name:'Edit article',exact:true}).waitFor();await page.reload();await page.getByRole('heading',{name:'Edit article',exact:true}).waitFor();
+  // The editor renders before the saved record arrives; the status naming it Published is that record.
+  await page.getByRole('group',{name:'Article save and publish',exact:true}).getByRole('status').filter({hasText:'Published'}).waitFor();
   await page.evaluate(()=>{const element=document.querySelector('#workspace-main');element?.scrollTo(0,element.scrollHeight);window.scrollTo(0,document.body.scrollHeight)});
   await visibleControl(page.getByRole('button',{name:'Save',exact:true}),`${width} edit Save`);
   assert.equal(await page.getByRole('button',{name:'Publish',exact:true}).count(),0,`${width} a published article offers no second Publish`);

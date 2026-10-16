@@ -7623,7 +7623,7 @@
       "executable": false
     },
     "tests/activation/browser-kit.mjs": {
-      "sha256": "e7965e04676a2187b8adc639967c4c22d63952a3e00766ed467fe8a5271c47c5",
+      "sha256": "7feb4d9c148bc9804a1be5cd17a58ab2b218e9959ff11697b89d23329338e4db",
       "executable": false
     },
     "tests/activation/browser-local-probes.mjs": {

@@ -346,6 +346,21 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   const visitorView=JSON.stringify(await (await conversationRoutes.request(`/${visitorThread.id}/messages`,{headers:visitorAuth},env,execution)).json())
   assert.ok(visitorView.includes('Hi, I am the CEO'));assert.ok(!visitorView.includes('2.4M')&&!visitorView.includes('renewal draft'))
   assert.equal((await conversationRoutes.request(`/${ceoMail.conversation_id}/messages`,{headers:visitorAuth},env,execution)).status>=400,true)
+  // A visitor who typed her own address answers the operator's emailed reply through
+  // the reply address it carries: the answer continues her chat, as her.
+  const rosa=await (await widget.request('/widget/session',{method:'POST',headers:{Origin:'https://example.com','Content-Type':'application/json'},body:JSON.stringify({widgetKey:'w',name:'Rosa',email:'rosa@acme.test'})},env)).json()
+  const rosaAuth={Authorization:`Bearer ${rosa.token}`,'Content-Type':'application/json'}
+  const rosaThread=await (await conversationRoutes.request('/',{method:'POST',headers:rosaAuth,body:JSON.stringify({projectId:'p'})},env,execution)).json()
+  assert.equal((await conversationRoutes.request(`/${rosaThread.id}/messages`,{method:'POST',headers:rosaAuth,body:JSON.stringify({localId:'rosa-hello',content:'My parcel arrived damaged',expectedRevision:0})},env,execution)).status,200)
+  assert.equal((await conversationRoutes.request(`/${rosaThread.id}/messages`,{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'rosa-reply',content:'Could you send a photo of the box?',expectedRevision:1})},env,execution)).status,200)
+  await applyMessageEffects(env,await DB.prepare("SELECT * FROM messages WHERE local_id='rosa-reply'").first(),{id:'op',projectId:'p',role:'operator'})
+  const rosaNotice=outbound.find(mail=>mail.body.text?.includes('photo of the box'));assert.deepEqual(rosaNotice.body.to,['rosa@acme.test']);assert.match(rosaNotice.body.reply_to,/^inbound\+r\./)
+  assert.equal(await deliver({id:'rosa-answer@example.com',to:rosaNotice.body.reply_to,from:'rosa@acme.test',headerFrom:'Rosa <rosa@acme.test>',headers:verdict('acme.test'),text:'Photo attached, the corner is crushed.'}),undefined)
+  assert.deepEqual([(await admitted('rosa-answer@example.com')).conversation_id,(await admitted('rosa-answer@example.com')).actor_id],[rosaThread.id,rosa.contactId])
+  assert.ok(JSON.stringify(await (await conversationRoutes.request(`/${rosaThread.id}/messages`,{headers:rosaAuth},env,execution)).json()).includes('the corner is crushed'))
+  // Fresh mail from her typed address still starts that address's own conversation.
+  assert.equal(await deliver({id:'rosa-fresh@example.com',to:'inbound@example.com',from:'rosa@acme.test',headerFrom:'Rosa <rosa@acme.test>',headers:verdict('acme.test'),text:'A separate question'}),undefined)
+  assert.notEqual((await admitted('rosa-fresh@example.com')).conversation_id,rosaThread.id);assert.notEqual((await admitted('rosa-fresh@example.com')).actor_id,rosa.contactId)
   // A reply-all to more than 50 addresses is routed, never refused.
   const crowd=[...Array.from({length:60},(_,index)=>`person${index}@crowd.example`),`${'x'.repeat(330)}@crowd.example`,'inbound@example.com'].join(', ')
   assert.equal(await deliver({id:'reply-all@example.com',to:crowd,envelopeTo:'inbound@example.com',from:'ana@customer.example',headerFrom:'ana@customer.example'}),undefined)

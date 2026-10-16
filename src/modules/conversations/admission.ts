@@ -1,5 +1,5 @@
 import {assignmentHistoryStatement} from '../outcomes/assignment-history.ts'
-import {inboundAuthority,provenAddressSql,mailOnlyContactSql,type InboundAuthority} from '../integrations/inbound-authority.ts'
+import {inboundAuthority,provenAddressSql,type InboundAuthority} from '../integrations/inbound-authority.ts'
 import {contactAvailableSql} from './contact-privacy.ts'
 import {tokenGuard,type TokenAuthority} from '../../platform/integration-authority.ts'
 import {authoringSource,authorshipStatement,type Authoring} from '../outcomes/provenance.ts'
@@ -47,8 +47,8 @@ export async function admitMessage(env:Env,input:MessageInput){
   predicates.push(`EXISTS(SELECT 1 FROM inbound_emails receipt JOIN email_settings mailbox ON mailbox.project_id=receipt.project_id WHERE receipt.id=? AND receipt.project_id=c.project_id AND receipt.conversation_id=c.id AND receipt.claim_token=? AND receipt.state='processing' AND mailbox.is_enabled=1)`,activeSourceProjectSql('c.project_id'),contactAvailableSql())
   args.push(email.receiptId,email.claimToken)
   if(actor.role==='contact'){
-   predicates.push(`EXISTS(SELECT 1 FROM contacts sender WHERE sender.id=? AND sender.project_id=c.project_id AND (lower(sender.email)=? AND ${provenAddressSql('sender')} OR c.contact_id=sender.id AND lower(json_extract(sender.metadata_json,'$.provided_email'))=? AND ${mailOnlyContactSql('sender')}) AND coalesce(json_extract(sender.metadata_json,'$.is_blocked'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_deleted'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erased'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erasing'),0)!=1 AND (c.contact_id=sender.id OR EXISTS(SELECT 1 FROM conversation_participants cp WHERE cp.conversation_id=c.id AND cp.contact_id=sender.id)))`)
-   args.push(actor.id,email.sender,email.sender)
+   predicates.push(`EXISTS(SELECT 1 FROM contacts sender WHERE sender.id=? AND sender.project_id=c.project_id AND (lower(sender.email)=? AND ${provenAddressSql('sender')} OR EXISTS(SELECT 1 FROM email_reply_grants issued WHERE issued.token_hash=? AND issued.project_id=c.project_id AND issued.conversation_id=c.id AND lower(issued.recipient)=? AND (lower(sender.email)=lower(issued.recipient) OR lower(json_extract(sender.metadata_json,'$.provided_email'))=lower(issued.recipient)))) AND coalesce(json_extract(sender.metadata_json,'$.is_blocked'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_deleted'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erased'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erasing'),0)!=1 AND (c.contact_id=sender.id OR EXISTS(SELECT 1 FROM conversation_participants cp WHERE cp.conversation_id=c.id AND cp.contact_id=sender.id)))`)
+   args.push(actor.id,email.sender,email.grant??null,email.sender)
   }else{
    predicates.push('EXISTS(SELECT 1 FROM memberships live JOIN users sender ON sender.id=live.user_id WHERE live.project_id=c.project_id AND live.user_id=? AND live.role=? AND lower(sender.email)=?)')
    args.push(actor.id,actor.role,email.sender)

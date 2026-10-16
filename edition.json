@@ -545,7 +545,6 @@
           "scripts/delivery/base/bindings.mjs",
           "scripts/delivery/base/capabilities.mjs",
           "scripts/delivery/base/cli.mjs",
-          "scripts/delivery/base/declarations.mjs",
           "scripts/delivery/base/export.mjs",
           "scripts/delivery/base/generators/integration.mjs",
           "scripts/delivery/base/generators/managed.mjs",
@@ -606,10 +605,6 @@
             "originPath": "modules/delivery-producer/cli.mjs"
           },
           {
-            "path": "scripts/delivery/base/declarations.mjs",
-            "originPath": "modules/delivery-producer/declarations.mjs"
-          },
-          {
             "path": "scripts/delivery/base/export.mjs",
             "originPath": "modules/delivery-producer/export.mjs"
           },
@@ -668,6 +663,32 @@
           {
             "path": "scripts/delivery/base/spec.mjs",
             "originPath": "modules/delivery-producer/spec.mjs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "runeditrun/delivery-declarations",
+      "role": "module",
+      "requires": [
+        "runeditrun/delivery-producer"
+      ],
+      "source": {
+        "kind": "local",
+        "paths": [
+          "scripts/delivery/base/declarations.mjs"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "6b3e0f931ce69465496e2c4b05cd4bcaf530fff2",
+          "paths": [
+            "modules/delivery-producer/declarations.mjs"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "scripts/delivery/base/declarations.mjs",
+            "originPath": "modules/delivery-producer/declarations.mjs"
           }
         ]
       }

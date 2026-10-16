@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "parent": null,
   "edition": "just-every/happytohelp",
-  "manifest": "ef1b52200b99b060bf66eaa88f76372afd48f72a109808b0731e163858974b43",
+  "manifest": "c67219d9e6a78461c5c6e9202d95a64bd087dc7e922150f4944e598f9c0abbd9",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -504,7 +504,6 @@
           "scripts/delivery/base/bindings.mjs",
           "scripts/delivery/base/capabilities.mjs",
           "scripts/delivery/base/cli.mjs",
-          "scripts/delivery/base/declarations.mjs",
           "scripts/delivery/base/export.mjs",
           "scripts/delivery/base/generators/integration.mjs",
           "scripts/delivery/base/generators/managed.mjs",
@@ -563,10 +562,6 @@
           {
             "path": "scripts/delivery/base/cli.mjs",
             "originPath": "modules/delivery-producer/cli.mjs"
-          },
-          {
-            "path": "scripts/delivery/base/declarations.mjs",
-            "originPath": "modules/delivery-producer/declarations.mjs"
           },
           {
             "path": "scripts/delivery/base/export.mjs",
@@ -634,6 +629,33 @@
         "key": "d2e4531b9ab8abd2c5e2b21591e27ad5bc61d9e19c7660ca4640c476a0f7a474",
         "digest": "abcc154fdc547bc734322e48fbc6f4dc483a2608058fb6ab52efb71159022df8",
         "sha256": "6db8b8e0ade643a53c3a61d297876aa02572a2fd37b13be3d192f22792d9d363"
+      }
+    },
+    {
+      "id": "runeditrun/delivery-declarations",
+      "source": {
+        "kind": "local",
+        "paths": [
+          "scripts/delivery/base/declarations.mjs"
+        ],
+        "origin": {
+          "repository": "https://github.com/runeditrun/base.git",
+          "revision": "6b3e0f931ce69465496e2c4b05cd4bcaf530fff2",
+          "paths": [
+            "modules/delivery-producer/declarations.mjs"
+          ]
+        },
+        "mappings": [
+          {
+            "path": "scripts/delivery/base/declarations.mjs",
+            "originPath": "modules/delivery-producer/declarations.mjs"
+          }
+        ]
+      },
+      "baseline": {
+        "key": "e696a5c85cbd71c1fbbc54feb80e95649cd7796d164de6fd3e1d23de546004c8",
+        "digest": "ef4baa209fe1b928b40d8433782b314f205604d709d4d66e071021f8b415a434",
+        "sha256": "a43b02b184162a0fa3c0dd98aee2865ef082d924753055b735e36d1882d416cb"
       }
     },
     {
@@ -1547,7 +1569,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "ef1b52200b99b060bf66eaa88f76372afd48f72a109808b0731e163858974b43",
+      "sha256": "c67219d9e6a78461c5c6e9202d95a64bd087dc7e922150f4944e598f9c0abbd9",
       "executable": false
     },
     "HANDOVER.md": {

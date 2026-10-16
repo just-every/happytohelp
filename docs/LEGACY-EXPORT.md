@@ -4,7 +4,7 @@ This operator tool reads one explicitly chosen legacy MySQL project and its medi
 
 ## Access and extraction
 
-Supply `LEGACY_MYSQL_HOST`, `LEGACY_MYSQL_PORT` (default 3306), `LEGACY_MYSQL_DATABASE`, `LEGACY_MYSQL_USER`, `LEGACY_MYSQL_PASSWORD` in the process environment. Use a local SSH tunnel to a private database or `LEGACY_MYSQL_SSL_CA` for verified MySQL TLS. Use a SELECT-only database account. The tool sets UTC and repeatable-read, opens a consistent read-only transaction, streams SELECTs on that connection, then commits. It requires InnoDB for every table it reads. No lock, write, schema change, dump privilege, superuser, SSH key or AWS discovery permission is needed.
+Supply `LEGACY_MYSQL_HOST`, `LEGACY_MYSQL_PORT` (default 3306), `LEGACY_MYSQL_DATABASE`, `LEGACY_MYSQL_USER`, `LEGACY_MYSQL_PASSWORD` in the process environment. Use a local SSH tunnel to a private database or `LEGACY_MYSQL_SSL_CA` for verified MySQL TLS. Use a SELECT-only database account. The tool sets UTC and repeatable-read, opens a consistent read-only transaction, reads every SELECT on that connection, then commits. Tables keyed by `id` are read in id-ordered pages of 10,000 rows inside that transaction, so a slow tunnel never has to buffer a whole table; other tables stream in one result. It requires InnoDB for every table it reads. No lock, write, schema change, dump privilege, superuser, SSH key or AWS discovery permission is needed.
 
 ```sh
 node scripts/export-legacy.mjs snapshot \

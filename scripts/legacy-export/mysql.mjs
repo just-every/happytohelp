@@ -24,6 +24,20 @@ export async function connectLegacy(env = process.env) {
   }
   return connection;
 }
+// A table whose primary key is exactly `id` is read in id-ordered pages inside the open
+// snapshot, so only one page is ever in flight. Streaming a whole large table at once lets the
+// server outrun a slow link; an SSM port-forward then buffers it and wedges (ChargeDesk's dry run).
+export const pageRows=10000;
+export async function* selectRows(connection,{table,columns,where,args,orderBy,keyed}){
+  const from=`SELECT ${columns.map(identifier).join(',')} FROM ${identifier(table)} WHERE `;
+  if(!keyed){yield* connection.connection.query({sql:from+where+(orderBy?` ORDER BY ${orderBy}`:''),values:args}).stream({highWaterMark:16});return;}
+  if(!columns.includes('id'))throw Error(`Paged read needs its key column: ${table}`);
+  const key=`${identifier(table)}.${identifier('id')}`;
+  for(let after=null;;){
+    const [rows]=await connection.query({sql:`${from}(${where})${after===null?'':` AND ${key}>?`} ORDER BY ${key} LIMIT ${pageRows}`,values:after===null?args:[...args,after]});
+    yield* rows;if(rows.length<pageRows)return;after=rows.at(-1).id;
+  }
+}
 // SELECTs and transaction/session control only. No locks or source mutations.
 export async function snapshot(connection, read) {
   await connection.query("SET SESSION time_zone = '+00:00'");

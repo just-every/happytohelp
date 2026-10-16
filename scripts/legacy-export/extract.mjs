@@ -1,5 +1,5 @@
 import {omitSupportCredentials,omitKnownCredentials,knownCredentials,sanitizable} from './text-policy.mjs';
-import {identifier,snapshot} from './mysql.mjs';
+import {identifier,snapshot,selectRows} from './mysql.mjs';
 import {credentialColumns,skippedTables,supportEventTypes,structuredOmissions,morphTables} from './scope.mjs';
 import {projectQueries} from './queries.mjs';
 import {enrichMedia} from './attachments.mjs';
@@ -10,7 +10,8 @@ export async function extractProject(connection,{projectId,revision,aiModel,mail
   return snapshot(connection,async()=>{
     const [inventory]=await connection.execute("SELECT TABLE_NAME name,ENGINE engine FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'");
     const [columns]=await connection.execute('SELECT TABLE_NAME name,COLUMN_NAME col,DATA_TYPE type FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() ORDER BY ORDINAL_POSITION');
-    const schema=new Map(inventory.map(t=>[t.name,{engine:t.engine,columns:columns.filter(c=>c.name===t.name)}]));
+    const [primary]=await connection.execute("SELECT TABLE_NAME name,COLUMN_NAME col FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND INDEX_NAME='PRIMARY'");
+    const schema=new Map(inventory.map(t=>{const key=primary.filter(p=>p.name===t.name).map(p=>p.col);return [t.name,{engine:t.engine,columns:columns.filter(c=>c.name===t.name),keyed:key.length===1&&key[0]==='id'}];}));
     for(const [table,info]of schema)if(!skippedTables.includes(table))classifyColumns(table,info.columns);
     if(schema.has('mediables')){const [parents]=await connection.execute('SELECT DISTINCT mediable_type FROM mediables');const known=new Set(Object.keys(morphTables).map(t=>'App\\Models\\'+t));if(parents.some(r=>!known.has(r.mediable_type)))throw Error('Unclassified legacy media parent; add an explicit export/archive/omit scope before exporting');}
     const scopes=projectQueries(schema,projectId),tables={},omittedColumns={},rowCounts={},cloneCounts={},omittedJsonValueCounts={},omittedTextValueCounts={},repeatedCredentialValueCounts={};let bytes=0;
@@ -22,9 +23,9 @@ export async function extractProject(connection,{projectId,revision,aiModel,mail
       const selected=classifyColumns(table,info.columns),omit=credentialColumns[table]||[];
       omittedColumns[table]=info.columns.filter(c=>omit.includes(c.col)).map(c=>c.col);
       const [[count]]=await connection.execute(`SELECT COUNT(*) n FROM ${identifier(table)} WHERE ${where}`,args);cloneCounts[table]=Number(count.n);
-      const query=connection.connection.query({sql:`SELECT ${selected.map(c=>identifier(c.col)).join(',')} FROM ${identifier(table)} WHERE ${where} ORDER BY ${table==='categories'?'_lft,id':info.columns.some(c=>c.col==='id')?'id':selected.map(c=>identifier(c.col)).join(',')}`,values:args});
+      const orderBy=table==='categories'?'_lft,id':info.columns.some(c=>c.col==='id')?'id':selected.map(c=>identifier(c.col)).join(',');
       const rows=[];let n=0;
-      for await(const input of query.stream({highWaterMark:16})){
+      for await(const input of selectRows(connection,{table,columns:selected.map(c=>c.col),where,args,orderBy,keyed:info.keyed&&table!=='categories'})){
         const row={...input};for(const c of selected){const v=row[c.col];
           if(v!==null&&c.type==='json'&&typeof v==='string')row[c.col]=JSON.parse(v);
           else if(v!==null&&/^(timestamp|datetime|date)$/.test(c.type))row[c.col]=String(v).replace(' ','T')+(c.type==='date'?'T00:00:00.000Z':'Z');
@@ -57,8 +58,8 @@ async function removedCredentials(connection,schema,scopes){
   for(const [table,{where,args}]of scopes){
     const columns=classifyColumns(table,schema.get(table).columns).filter(c=>sanitizable(table,c.col));
     if(!columns.length)continue;
-    const query=connection.connection.query({sql:`SELECT ${columns.map(c=>identifier(c.col)).join(',')} FROM ${identifier(table)} WHERE ${where}`,values:args});
-    for await(const row of query.stream({highWaterMark:16}))for(const c of columns){
+    const {keyed}=schema.get(table),names=columns.map(c=>c.col);
+    for await(const row of selectRows(connection,{table,columns:keyed&&!names.includes('id')?['id',...names]:names,where,args,keyed}))for(const c of columns){
       let value=row[c.col];if(value===null)continue;
       if(c.type==='json'&&typeof value==='string')value=JSON.parse(value);
       omitSupportCredentials(table,c.col,omitStructured(table,c.col,value).value,secret=>secrets.add(String(secret)));

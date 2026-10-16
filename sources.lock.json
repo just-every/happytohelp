@@ -1466,7 +1466,7 @@
       "executable": false
     },
     "docs/LEGACY-EXPORT.md": {
-      "sha256": "008cfdeac67ee58b53f63c16e87a3c148615e8b7eef9a588350eebf75bb6c9fa",
+      "sha256": "bb3a9c8d540baf0d2ce2d87bbe6b7c885157a7537c0484c9b4c0f21e55d18d24",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2422,7 +2422,7 @@
       "executable": false
     },
     "scripts/legacy-export/extract.mjs": {
-      "sha256": "c07fdb3548bd9259f516f9a145c69c0a26c10ff0fab60fb9cb35cd13d6bf3318",
+      "sha256": "3c44875a26b7768466fd681130b7ed3cfefb62719e3bbc67a5a468159a1dab20",
       "executable": false
     },
     "scripts/legacy-export/files.mjs": {
@@ -2438,7 +2438,7 @@
       "executable": false
     },
     "scripts/legacy-export/mysql.mjs": {
-      "sha256": "2aa059dc9fd151350c993fcae56139bdadbe7caf8a4523ae8fd0483862cb6f30",
+      "sha256": "945cc8d4ed8acdfbe6722f0e1a91041640abf031c5759f2a49a30c9378bc1c35",
       "executable": false
     },
     "scripts/legacy-export/package-media.mjs": {

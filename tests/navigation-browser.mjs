@@ -9,7 +9,7 @@ const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
 const evidence=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-navigation-')),'navigation-native');
 await mkdir(evidence,{recursive:true});
 const runtime=await createRuntime();
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 const page=await context.newPage();
 page.setDefaultTimeout(15000);
@@ -68,7 +68,7 @@ try {
   await link('Inbox').click();await view('open').click();
   await page.waitForURL(url=>url.searchParams.get('view')==='open');
   const allOpenURL=page.url();
-  await page.getByRole('searchbox',{name:'Search all open by customer name or email',exact:true}).fill('Alpha');
+  await page.locator('.conversation-inbox input[type=search]').fill('Alpha');
   await page.getByRole('button',{name:'Search conversations',exact:true}).click();
   await page.waitForURL(url=>url.searchParams.get('q')==='Alpha');
   const searchedURL=page.url();

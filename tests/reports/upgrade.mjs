@@ -1,3 +1,4 @@
+import {validateStoredSearch} from '../helpers/search-index.mjs';
 import {localMailMigrations,localMailTables} from '../first-run/inventory.mjs';
 import {integrationMigrations,integrationTables} from '../connections/inventory.mjs';
 import {importEvolutionMigrations,importEvolutionTables,importRuntimeMigrations,importRuntimeTables} from '../helpers/base-import-evolution.mjs';
@@ -161,7 +162,13 @@ try {
       assert.deepEqual({...current,sql:added.reduce((sql,{column})=>sql.replace(', '+column,''),current.sql)},entry,'additional stages preserve prior schema: '+entry.name);
     }
     assert.deepEqual(final.rows.d1_migrations.map(JSON.parse).map(row=>row.name).sort(),completeMigrations.map(m=>m.name).sort(),'the actual final migration ledger is complete');
-    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
+    const search=await validateStoredSearch(storage.inspect),derived=new Set(search?[search.table,...search.shadows]:[]);
+    if(search){
+      const canonical=row=>JSON.stringify(Object.fromEntries(Object.entries(row).sort(([a],[b])=>a.localeCompare(b))));
+      const expected=final.rows.messages.map(value=>{const {content,conversation_id,project_id}=JSON.parse(value);return canonical({content,conversation_id,project_id})}).sort();
+      assert.deepEqual(final.rows[search.table],expected,'the new search projection contains exactly the retained messages');
+    }
+    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)&&!derived.has(name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
   });
   await assertCategoryUpgrade(runtime.directory);
   artifact.deploymentSpec.migrations=completeMigrations;

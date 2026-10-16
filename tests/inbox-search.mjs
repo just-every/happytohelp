@@ -67,6 +67,13 @@ try{
  assert.ok(!(await names({})).includes('100% Pat'),'human Open excludes AI')
  assert.deepEqual(await names({view:'ai',assigned_to:'myself'}),['Alice Archer'],'AI includes closed history and composes with assignment')
  assert.deepEqual(await names({view:'closed'}),[],'human Closed excludes AI')
+ // A missing index entry is a failure even when all message rows survive.
+ const integrity="INSERT INTO inbox_message_search(inbox_message_search,rank) VALUES('integrity-check',1)"
+ await DB.prepare("DELETE FROM inbox_message_search WHERE rowid=(SELECT rowid FROM messages WHERE id='history')").run()
+ await assert.rejects(()=>DB.prepare(integrity).run(),'content integrity refuses a missing indexed message')
+ await DB.prepare("INSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild')").run()
+ await DB.prepare(integrity).run()
+ assert.deepEqual(await names({q:'cobalt buckle replacement'}),['Alice Archer'],'reconstructed content is searchable')
  // The same triggers cover normal commits, import, erasure and undo.
  await DB.prepare("UPDATE messages SET content='A different retained answer' WHERE id='history'").run()
  assert.deepEqual(await names({q:'cobalt buckle replacement'}),[],'replaced/erased words leave the index')

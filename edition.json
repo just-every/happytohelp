@@ -423,6 +423,7 @@
           "tests/identity-setup.mjs",
           "tests/setup-browser.mjs",
           "scripts/installer",
+          "scripts/export-d1.mjs",
           "public/setup",
           "docs/INSTALLER.md",
           "src/editor",

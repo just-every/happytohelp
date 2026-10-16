@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "parent": null,
   "edition": "just-every/happytohelp",
-  "manifest": "a2a0144e00e53d9732edb47e50f30f90c99ad32a823b081c21a58c8b45ff3f9e",
+  "manifest": "2fd2961cbf921ededf9a2a89585df3f2a77b62b053e72f9a3b084539221c1ff4",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -381,6 +381,7 @@
           "tests/identity-setup.mjs",
           "tests/setup-browser.mjs",
           "scripts/installer",
+          "scripts/export-d1.mjs",
           "public/setup",
           "docs/INSTALLER.md",
           "src/editor",
@@ -1490,7 +1491,7 @@
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
-      "sha256": "2e661a67a62fde2d5ae5b5a1748c499b95fe2172fd1acfe2b567bacd849f42c5",
+      "sha256": "ad360c458aa0e8372ae95ac1e20845a9e33eb9cb2f350894301e5af3aaa9b564",
       "executable": false
     },
     "docs/INSTALLER.md": {
@@ -1570,7 +1571,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "a2a0144e00e53d9732edb47e50f30f90c99ad32a823b081c21a58c8b45ff3f9e",
+      "sha256": "2fd2961cbf921ededf9a2a89585df3f2a77b62b053e72f9a3b084539221c1ff4",
       "executable": false
     },
     "HANDOVER.md": {
@@ -2162,7 +2163,7 @@
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "5a0b34675ff92adaceeded4b6c66de39680fab414c6f43f87338a0fcaef50c1a",
+      "sha256": "a74ae62f1b1fd2e03b2d40c09786234a5b9a985011a833e140b5fa31597cba41",
       "executable": false
     },
     "rer-project.json": {
@@ -2445,6 +2446,10 @@
       "sha256": "9276c7bead07fe5e63df58184d0031ed99aef1a4fe3133c594dde9b5ee892886",
       "executable": false
     },
+    "scripts/export-d1.mjs": {
+      "sha256": "672804f37691a130044a01d35853d2161f18e2acf38dd18218a2897c1a6851ff",
+      "executable": false
+    },
     "scripts/generate-routes.mjs": {
       "sha256": "6812dc54c879ebed038ec7d5f585dd00127ec7c24e192a01e8e46744bbf75146",
       "executable": false
@@ -2479,6 +2484,10 @@
     },
     "scripts/installer/portability-policy.mjs": {
       "sha256": "3fd7ac5e7c57918072f6dd8e31da1eaf1403985b35d2268c45664cec8739e7d2",
+      "executable": false
+    },
+    "scripts/installer/search-index-sql.mjs": {
+      "sha256": "dbe66e666793ad19f22f4a3fb50f27d7bd8720bb678a6b04590fecbf5d142ad2",
       "executable": false
     },
     "scripts/installer/ui/seed.mjs": {
@@ -8206,7 +8215,7 @@
       "executable": false
     },
     "tests/helpers/recovery/snapshot.mjs": {
-      "sha256": "bcbaf6e1af50543eae4e47eb404971948321019814c1cff13fb0fe2576f1638c",
+      "sha256": "c61e81f211a88348cc340afd9d184570e1b071807890647920c64edc8a44eaac",
       "executable": false
     },
     "tests/helpers/rer-archive.mjs": {
@@ -8227,6 +8236,10 @@
     },
     "tests/helpers/scene-background.mjs": {
       "sha256": "9e5b45a5b728bcc21ed1e1cf5f08dd9f228434b453de0dafa15c857e52d9ad76",
+      "executable": false
+    },
+    "tests/helpers/search-index.mjs": {
+      "sha256": "1fddd991c6f00c52606944da14284a240a7dbfd2d1406221616e0caf7448d921",
       "executable": false
     },
     "tests/helpers/serving-capacity.mjs": {
@@ -8342,7 +8355,7 @@
       "executable": false
     },
     "tests/inbox-search.mjs": {
-      "sha256": "285e149887265e75b04fa7553d493d29ab996d87daa5d11b8e787e1f29a5a478",
+      "sha256": "13775a1e5e2c3be655a7b73e8ef9a6337dcf0eefcbedc6d24f61cef4ab1d0e59",
       "executable": false
     },
     "tests/independent-browser.mjs": {
@@ -8354,7 +8367,7 @@
       "executable": false
     },
     "tests/independent-runtime.mjs": {
-      "sha256": "c6dfcfc3a4b232d25d61f708f9f8aec6657c982b9b87e3f11a30abb3b8a7cc44",
+      "sha256": "39012518619cf0ebbd9b419b7733e56b36a250a84ef862670a84736585caf4ee",
       "executable": false
     },
     "tests/knowledge-activation-browser.mjs": {
@@ -8550,7 +8563,7 @@
       "executable": false
     },
     "tests/move-in/business-equality.mjs": {
-      "sha256": "b5f3c92fd22ba1ed3c3535066ea4ca74812b7d65cfe706584b80529417674e15",
+      "sha256": "a42848eb5ca9de42e0db4d390b52dd0a80debc897d7c04330f06a02f5ac754eb",
       "executable": false
     },
     "tests/move-in/capacity.mjs": {
@@ -8602,7 +8615,7 @@
       "executable": false
     },
     "tests/move-in/equality.mjs": {
-      "sha256": "ef275265f5d704c6e148cbe6f764f09f96119cb2ac489c9b5500243ab7f7d015",
+      "sha256": "d38ea57569f9ee1c21d75a6a8746089f963e439877a240c2bb6a16615a986ff8",
       "executable": false
     },
     "tests/move-in/erasure-interleaving.ts": {
@@ -8742,7 +8755,7 @@
       "executable": false
     },
     "tests/move-in/snapshot.mjs": {
-      "sha256": "452b51d45648304166d223c049b85ac2719f78a2716da29241e19fae35bfa457",
+      "sha256": "33c52652c15233cece9d9dfe921bc4fab478e74404ad86268d2ff6bed9921882",
       "executable": false
     },
     "tests/move-in/sql-audit.ts": {
@@ -8758,7 +8771,7 @@
       "executable": false
     },
     "tests/navigation-browser.mjs": {
-      "sha256": "0bfb0858b6e26ad633514d1ddbfe9af2282be87a662cce4b675b8a0ab084f233",
+      "sha256": "97392c06bd4df33872d5bf3d13e19130f1a69bd7cb00401e5d93a01b5affc76b",
       "executable": false
     },
     "tests/not-found-browser.mjs": {
@@ -8850,7 +8863,7 @@
       "executable": false
     },
     "tests/recovery-comparison.mjs": {
-      "sha256": "a82197c55bd6358bd298c1470641b4a1b73d3e0ddcc2c2a8224735ddeb0f8820",
+      "sha256": "62ce577e796482b8ec6c1bb47dd9d8bf654d1c46698c132da23ea795b007ff63",
       "executable": false
     },
     "tests/recovery-m9.mjs": {
@@ -8902,7 +8915,7 @@
       "executable": false
     },
     "tests/reports/upgrade.mjs": {
-      "sha256": "b5174efd27fbcd9f40ee6e7107bdec67882926cc3c980020fe018c5dd6466676",
+      "sha256": "9ecdeaf23a98aea36ffd9412d4d26cc0f0c6059a4fd627caeb72300f9282432e",
       "executable": false
     },
     "tests/reports/widget-races.mjs": {

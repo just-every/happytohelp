@@ -6,6 +6,8 @@ import {tokenGuard,type TokenAuthority} from '../../platform/integration-authori
 import {HTTPException} from 'hono/http-exception'
 import type {Actor,Env} from '../../platform/env'
 import {publishResolution} from './state'
+import {onAssistantAssignment} from '../ai-support/customer-message'
+import {assertModelConfigured} from '../ai-support/configuration'
 export interface ConversationTransition {resolved?:boolean;agent_id?:string|null;ai_id?:string|null}
 /** All effects are conditional on one transaction-local receipt, minted only while
  * the session, membership, workspace, message frontier and cycle still match. */
@@ -15,6 +17,11 @@ export async function transitionConversation(env:Env,actor:Actor,conversationId:
  if(change.resolved!==undefined&&typeof change.resolved!=='boolean')throw new HTTPException(400)
  for(const field of ['agent_id','ai_id'] as const)if(field in change&&change[field]!==null&&typeof change[field]!=='string')throw new HTTPException(400)
  const current=await env.DB.prepare(`SELECT c.*,(SELECT ai_id FROM conversation_ai WHERE conversation_id=c.id) current_ai_id,t.transition_id,(SELECT MAX(ordinal) FROM conversation_resolutions WHERE conversation_id=c.id) ordinal FROM conversations c LEFT JOIN conversation_tracking t ON t.conversation_id=c.id WHERE c.id=? AND c.project_id=?`).bind(conversationId,actor.projectId).first<any>();if(!current)throw new HTTPException(404)
+ if(change.ai_id&&!change.agent_id&&current.last_message_id){
+  const waiting=await env.DB.prepare("SELECT id FROM messages WHERE id=? AND conversation_id=? AND actor_role='contact'").bind(current.last_message_id,conversationId).first()
+  const selected=waiting?await env.DB.prepare('SELECT model FROM ai_profiles WHERE id=? AND project_id=? AND is_enabled=1').bind(change.ai_id,actor.projectId).first<{model:string}>():null
+  if(selected)assertModelConfigured(env,selected.model)
+ }
  const token=tokenAuthority?tokenGuard(tokenAuthority,actor.projectId,'conversations:write'):null
  const authoritySql=token?`AND EXISTS(${token.sql}) AND ${contactAvailableSql()}`:`AND EXISTS(SELECT 1 FROM memberships WHERE project_id=c.project_id AND user_id=? AND role=?)
  AND EXISTS(SELECT 1 FROM sessions WHERE token_hash=? AND actor_id=? AND role<>'contact' AND revoked_at IS NULL AND expires_at>? AND (project_id IS NULL AND role='operator' AND EXISTS(SELECT 1 FROM users WHERE id=sessions.actor_id) OR EXISTS(SELECT 1 FROM memberships live WHERE live.project_id=sessions.project_id AND live.user_id=sessions.actor_id AND live.role=sessions.role)))
@@ -35,10 +42,10 @@ export async function transitionConversation(env:Env,actor:Actor,conversationId:
   env.DB.prepare(`UPDATE conversations SET resolved_at=?,assigned_to=?,updated_at=? WHERE id=? AND ${accepted}`).bind(change.resolved===undefined?current.resolved_at:change.resolved?(current.resolved_at??now):null,'agent_id' in change?change.agent_id||null:current.assigned_to,now,conversationId,conversationId,receipt)
  ]
  if('ai_id' in change||change.agent_id)statements.push(env.DB.prepare(`INSERT INTO conversation_ai(conversation_id,ai_id) SELECT ?,? WHERE ${accepted} ON CONFLICT(conversation_id) DO UPDATE SET ai_id=excluded.ai_id`).bind(conversationId,change.agent_id?null:change.ai_id||null,conversationId,receipt))
- if(change.resolved||'agent_id' in change||'ai_id' in change)statements.push(env.DB.prepare(`UPDATE ai_generations SET state='cancelled',updated_at=? WHERE conversation_id=? AND project_id=? AND state IN ('queued','running') AND ${accepted}`).bind(new Date(now).toISOString(),conversationId,actor.projectId,conversationId,receipt))
  const assignee='agent_id' in change?change.agent_id||null:current.assigned_to
  const aiId=change.agent_id?null:'ai_id' in change?change.ai_id||null:current.current_ai_id
  const assignmentChanged=assignee!==current.assigned_to||aiId!==(current.current_ai_id||null)
+ if(change.resolved||assignmentChanged)statements.push(env.DB.prepare(`UPDATE ai_generations SET state='cancelled',updated_at=? WHERE conversation_id=? AND project_id=? AND state IN ('queued','running') AND ${accepted}`).bind(new Date(now).toISOString(),conversationId,actor.projectId,conversationId,receipt))
  if(assignmentChanged){
   statements.push(assignmentHistoryStatement(env,{id:receipt,conversationId,actorId:actor.id,agentId:assignee,aiId,createdAt:now},accepted,[conversationId,receipt]))
   statements.push(assignmentNotificationStatement(env,{id:receipt,projectId:actor.projectId,conversationId,actorId:actor.id,previousAssignee:current.assigned_to,assignee},accepted,[conversationId,receipt]))
@@ -49,6 +56,10 @@ export async function transitionConversation(env:Env,actor:Actor,conversationId:
   await publishActivity(env,actor.projectId,conversationId,'assignment')
   await dispatchOperatorNotifications(env,{projectId:actor.projectId,conversationId})
  }
+ if(change.ai_id&&!change.agent_id)await onAssistantAssignment(env,actor.projectId,conversationId,{
+  sql:`EXISTS(SELECT 1 FROM conversation_tracking WHERE conversation_id=c.id AND transition_id=?) AND c.assigned_to IS NULL AND c.last_message_id IS ? AND EXISTS(SELECT 1 FROM conversation_ai WHERE conversation_id=c.id AND ai_id=?) AND ${contactAvailableSql()} ${authoritySql} AND NOT EXISTS(SELECT 1 FROM project_settings WHERE project_id=c.project_id AND json_extract(settings_json,'$.deleted_at') IS NOT NULL)`,
+  params:[receipt,current.last_message_id,change.ai_id,...authorityArgs]
+ })
  return publishResolution(env,actor.projectId,conversationId)
 }
 export function setConversationResolved(env:Env,actor:Actor,conversationId:string,resolved:boolean,sessionHash?:string){return transitionConversation(env,actor,conversationId,{resolved},sessionHash)}

@@ -10,7 +10,9 @@ const built = await build({
   stdin: {
     contents: `import { widgetEvents } from './src/modules/management/widget-events';
       export { ConversationSocket } from './src/modules/conversations/socket';
-      export default widgetEvents;`,
+      import {consumeContextJob} from './src/modules/customer-context/engine';
+      import {requestContextModel} from './src/edition/ai/customer-context-provider';
+      export default {fetch:widgetEvents.fetch,async queue(batch,env){for(const message of batch.messages){await consumeContextJob(message.body,env,requestContextModel);message.ack()}}};`,
     resolveDir: process.cwd(), loader: 'ts',
   },
   bundle: true, write: false, format: 'esm', platform: 'node',
@@ -19,6 +21,17 @@ const built = await build({
 const mf = new Miniflare(convertV4MiniflareOptions({
   name: 'widget-events', cf:{country:'US'}, modules: true, script: built.outputFiles[0].text,
   compatibilityDate: '2026-09-14', compatibilityFlags: ['nodejs_compat'],
+  bindings:{OPENAI_API_KEY:'synthetic-inert-test-key'},r2Buckets:['FILES'],
+  queueProducers:{JOBS:'context-jobs'},queueConsumers:{'context-jobs':{maxBatchSize:1,maxRetries:0}},
+  outboundService:async request=>{
+    assert.equal(new URL(request.url).hostname,'api.openai.com');
+    const body=await request.json(),name=body.text?.format?.name;
+    const evidence=JSON.stringify(body).match(/action:[a-z0-9-]+/)?.[0];
+    const value=name==='context_analysis'?{decision:'insight',help_type:'support',evidence_ids:[evidence],help:'Help finding the API credential'}:name==='context_insight'?{content:'Would you like help finding your API credential?',buttons:[{text:'Show me where',action:'send'},{text:'No thanks',action:'close'}],loading:null,evidence_ids:[evidence]}:name==='context_summary'?{summary:'The visitor could not find an API credential in workspace settings.'}:null;
+    assert.ok(value,'only the expected monitoring model requests reach the network');
+    const text=JSON.stringify(value),events=[{type:'response.output_text.delta',item_id:'msg',delta:text},{type:'response.output_text.done',item_id:'msg',text},{type:'response.completed',response:{usage:{input_tokens:12,output_tokens:4,total_tokens:16,input_tokens_details:{cached_tokens:0,cache_write_tokens:0},output_tokens_details:{reasoning_tokens:0}}}}];
+    return new Response(events.map(event=>`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`).join(''),{headers:{'content-type':'text/event-stream'}});
+  },
   d1Databases: ['DB'], durableObjects: { CONVERSATIONS: { className: 'ConversationSocket', useSQLite: true } },
 }))
 try {
@@ -98,13 +111,49 @@ try {
   assert.equal((await call('assignAi', { ai_id: 'missing' })).status, 400)
   assert.equal((await call('useInsight', { ...insightCommand, close: true })).status, 200)
   assert.equal((await call('useInsight', insightCommand)).status, 404)
+  // A fresh subject opts in through the real visitor command; no operator SQL consent seed.
+  await db.prepare("INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,is_enabled,created_at) VALUES('helper','p','Support assistant','Support','Help the visitor','gpt-5.6-luna',1,1)").run()
+  await db.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind('p',JSON.stringify({is_contact_tracking_enabled:true,proactive_help_enabled:true,default_visitor_ai_id:'helper'}),1).run()
+  const actions=Array.from({length:7},(_,i)=>({localId:`settings-action-${i}`,action:`Tried to find the API credential in workspace settings step ${i}`}))
+  assert.equal((await (await call('collector',actions)).json()).accepted,0,'collection is refused before visitor consent')
+  assert.equal((await (await call('contextConsent')).json()).monitoring.consent,null)
+  assert.equal((await (await call('contextConsent',{consent:true})).json()).monitoring.enabled,true)
+  const collection=await (await call('collector',actions)).json()
+  assert.ok(collection.accepted>0)
+  assert.ok(collection.job.id,'accepted activity queues the selected native model')
+  let generated
+  for(let attempt=0;attempt<100;attempt++){
+    generated=await db.prepare('SELECT state,error FROM context_jobs WHERE id=?').bind(collection.job.id).first()
+    if(!['queued','running'].includes(generated.state))break
+    await new Promise(resolve=>setTimeout(resolve,100))
+  }
+  assert.equal(generated.state,'completed',generated.error)
+  const offer=(await (await call('insights')).json()).insights[0]
+  assert.ok(offer.metadata.buttons.some(button=>button.action==='send'))
+  assert.equal(offer.ai.id,'helper')
+  await db.prepare("UPDATE ai_profiles SET model='claude-haiku-4-5-20251001' WHERE id='helper'").run()
+  assert.deepEqual((await (await call('insights')).json()).insights,[],'no proactive offer when the reply assistant lacks its provider key')
+  await db.prepare("UPDATE ai_profiles SET model='gpt-5.6-luna' WHERE id='helper'").run()
+  assert.equal((await call('useInsight',{insight_id:offer.id,close:true})).status,200)
+  assert.ok(!(await (await call('insights')).json()).insights.some(item=>item.id===offer.id),'dismissal survives subsequent retrieval')
+  await call('contextConsent',{consent:false})
+  assert.equal((await (await call('collector',actions.map(row=>({...row,localId:'revoked-'+row.localId})))).json()).accepted,0,'withdrawal stops collection')
+  assert.deepEqual((await (await call('insights')).json()).insights,[])
+  // The visitor's ordinary responder selector resumes the same waiting turn once.
+  assert.equal((await call('assignAi',{ai_id:'helper'})).status,200)
+  const handoff=await db.prepare("SELECT id,state FROM ai_generations WHERE conversation_id='own' AND kind='reply'").first()
+  assert.ok(handoff?.id)
+  assert.equal(handoff.state,'queued')
+  assert.equal((await call('assignAi',{ai_id:'helper'})).status,200)
+  assert.deepEqual(await db.prepare("SELECT id,state FROM ai_generations WHERE conversation_id='own' AND kind='reply'").all().then(result=>result.results),[handoff],'repeating a visitor handoff preserves one queued reply')
+  await db.prepare("DELETE FROM project_settings WHERE project_id='p'").run()
   await db.prepare('INSERT INTO project_settings VALUES(?,?,?)').bind('p', '{"deleted_at":1}', 1).run()
   assert.equal((await call('markAsRead')).status, 401)
   await db.exec("UPDATE project_settings SET settings_json='{}' WHERE project_id='p';")
   await db.exec("UPDATE sessions SET revoked_at=1 WHERE actor_id='visitor';")
   assert.equal((await call('markAsRead')).status, 401)
   assert.equal((await db.prepare('SELECT count(*) n FROM messages').first()).n, 2)
-  assert.equal((await db.prepare('SELECT count(*) n FROM ai_generations').first()).n, 0)
+  assert.equal((await db.prepare('SELECT state FROM ai_generations WHERE id=?').bind(handoff.id).first()).state,'queued','authority refusals do not alter the admitted handoff')
   console.log('Widget command Worker/D1: admission, tenant/contact scope, replay, outbox and live authority transitions passed')
 } finally {
   await mf.dispose()

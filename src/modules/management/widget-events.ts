@@ -30,8 +30,10 @@ widgetEvents.post('/:id/widget-events', async c => {
     case 'rateResolution': return rateResolution(command)
     case 'contact': return updateContact(command)
     case 'pingActive':
-    case 'pingAction':
     case 'instruction': return recordPresence(command)
+    case 'pingAction':
+      await recordPresence(command)
+      return dispatchContextAction(command, data)
     case 'markAsRead': return markAsRead(command)
     case 'assignAi': return assignAi(command)
     case 'useInsight': return useInsight(command)

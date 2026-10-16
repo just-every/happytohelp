@@ -90,13 +90,16 @@ try {
     token = login.token;
 
     const dataset = await request('/api/knowledge/' + projectId + '/datasets', {
-        body: { name: 'First-run docs', url: 'https://knowledge-fixture.example.test', max_crawl_depth: 3, max_crawl_pages: 50 },
+        body: { name: 'First-run docs' },
     });
     await request('/api/knowledge/' + projectId + '/datasets/' + dataset.id + '/refresh', {
         body: { documents: [datasetDocument()] },
     });
     const firstPublished = await waitForDataset(dataset.id, row => row.status === 'ready' && row.published_version, 'the local corpus publication');
     assert.ok((await searchFor(DATASET_RETRIEVAL_TOKEN)).some(citation => citation.content.includes(DATASET_RETRIEVAL_TOKEN)), 'the emitted Worker retrieves the newly published corpus');
+    await request('/api/knowledge/' + projectId + '/datasets/' + dataset.id, {
+        method: 'PUT', body: { name: 'First-run docs', url: 'https://knowledge-fixture.example.test', max_crawl_depth: 3, max_crawl_pages: 50 },
+    });
 
     await request('/api/knowledge/' + projectId + '/datasets/' + dataset.id + '/refresh', { body: { documents: [] } });
     const failedRefresh = await waitForDataset(dataset.id, row => row.status === 'failed', 'the failed local refresh');
@@ -107,7 +110,7 @@ try {
 
     browser = await chromium.launch({
         headless: true,
-        ...(process.env.H2H_BROWSER_CHANNEL ? { channel: process.env.H2H_BROWSER_CHANNEL } : {}),
+        args: ['--use-mock-keychain', '--password-store=basic'],
     });
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const page = await context.newPage();
@@ -128,6 +131,27 @@ try {
     await page.getByRole('button', { name: 'Login', exact: true }).click();
     await page.waitForURL('**/conversations');
     const base = origin + '/projects/' + projectId;
+
+    await record('Add URL starts the initial website run and opens its progress without Refresh now', async () => {
+        await page.goto(base + '/datasets/create');
+        await page.getByLabel('Starting URL', { exact: true }).fill('https://initial-crawl.example.test');
+        await page.getByLabel('Excluded URLs', { exact: true }).fill('https://initial-crawl.example.test/private/**');
+        await page.getByLabel('Max Crawl Depth', { exact: true }).fill('2');
+        await page.getByLabel('Max Crawl Pages', { exact: true }).fill('7');
+        const creation = page.waitForResponse(response => new URL(response.url()).pathname === '/api/knowledge/' + projectId + '/datasets' && response.request().method() === 'POST');
+        await page.getByRole('button', { name: 'Add URL', exact: true }).click();
+        const created = await (await creation).json();
+        assert.equal(created.refresh.status, 'queued');
+        await page.waitForURL('**/datasets/' + created.id);
+        await page.locator('.knowledge-form [role="status"]').waitFor();
+        const source = await request('/api/knowledge/' + projectId + '/datasets/' + created.id);
+        assert.notEqual(source.status, 'empty');
+        assert.equal(source.max_crawl_depth, 2);
+        assert.equal(source.max_crawl_pages, 7);
+        assert.deepEqual(JSON.parse(source.excluded_urls), ['https://initial-crawl.example.test/private/**']);
+        // No provider account is selected in this isolated emitted-runtime journey.
+        // The Worker fixture journey qualifies successful crawl and publication.
+    });
 
     await record('Knowledge tabs expose articles, categories, website sources, and evaluation runs', async () => {
         await page.goto(base + '/articles');

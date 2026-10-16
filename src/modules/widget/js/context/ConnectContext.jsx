@@ -16,6 +16,8 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   const chunks = useRef({});
   const cancelled = useRef(new Set());
   const [collectorReady, setCollectorReady] = useState(false);
+  const [monitoring, setMonitoring] = useState(null);
+  const shownInsights = useRef(new Set());
   const [contactAuth, setContactAuth] = useState({});
   const [conversationId, setConversationId] = useState(null);
   const [contact, setContact] = useState(context.contact || {});
@@ -52,7 +54,7 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     switch (event.type || event.event) {
       case 'configuration': {
         const value = event.configuration;
-        setCollectorReady(value.collectorEnabled === true && context.settings.collector.enabled && !(context.settings.collector.disable_bots && isBot));
+        setCollectorReady(value.proactiveHelpEnabled === true && !(context.settings.collector.disable_bots && isBot));
         const brand = value.brand?.name || value.project?.name;
         setConversationSettings(current => ({...current, ais: value.ais || [], human: value.currentAgent || (brand ? {id: null, name: `${brand} Team`, initials: brand.split(/\s+/).map(part => part[0]).join('').slice(0,2)} : null), mailMode: value.mailMode, workspace_brand: {name: brand, avatar_url: value.brand?.avatar_url || value.brand?.logo_url}, is_human_response_enabled: value.is_human_response_enabled, is_contact_tracking_enabled: value.collectorEnabled}));
         onSettingsUpdated?.({...widgetAppearance(value.brand, value.settings), settings: {...value.settings?.settings, collector: {...value.settings?.settings?.collector, enabled: value.collectorEnabled === true}}});
@@ -103,7 +105,11 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     setMessages([]); setResolution(null); setContactAuth({}); setContact(context.contact || {}); setConversationId(null); setConnectionState('connecting');
     // Installation presence is independent of optional page/activity collection.
     // Send one authenticated ping once the real visitor session is ready.
-    client.connect({...localContact, ...context.contact}).then(() => client.action('pingActive', {})).catch(onError);
+    client.connect({...localContact, ...context.contact}).then(async () => {
+      await client.action('pingActive', {});
+      const result = await client.action('contextConsent', {});
+      if (active()) setMonitoring(result.monitoring);
+    }).catch(onError);
     return () => { client.close(); Collector.setCollectorEnabled(false); Collector.setMessageHandler(null); };
   }, [context.apiOrigin, context.widgetKey, context.contact?.hash, context.contact?.identifier, fail]);
   const assertConnected = useCallback(() => transport.current ? transport.current.connect(localContact) : Promise.reject(new Error('Widget is initializing')), [localContact]);
@@ -138,10 +144,32 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     });
   }, [context.settings.collector.enabled, fail, setFilteredMessages]);
   useEffect(() => {
-    Collector.setCollectorEnabled(collectorReady && context.settings.collector.enabled);
-    if (collectorReady && context.settings.collector.enabled) Collector.init();
+    Collector.setCollectorEnabled(collectorReady && monitoring?.enabled === true && !open);
+    if (collectorReady && monitoring?.enabled === true && !open) Collector.init();
     Collector.setMessageHandler((action, data) => { sendMessage(action, data).catch(() => {}); });
-  }, [sendMessage, context.settings.collector.enabled, collectorReady]);
+  }, [sendMessage, collectorReady, monitoring?.enabled, open]);
+  const setMonitoringConsent = useCallback(async consent => {
+    const result = await transport.current.action('contextConsent', {consent});
+    setMonitoring(result.monitoring);
+    if (!consent) { setInsight(null); setInsightOpen(false); }
+  }, [setInsightOpen]);
+  useEffect(() => {
+    if (!monitoring?.enabled) return;
+    let active = true;
+    const poll = async () => {
+      try {
+        const result = await transport.current.action('insights', {});
+        if (!active) return;
+        setMonitoring(result.monitoring);
+        if (open) return;
+        const next = result.insights?.find(item => !shownInsights.current.has(item.id));
+        if (next) { shownInsights.current.add(next.id); setInsight(next); setInsightOpen(true); }
+      } catch {}
+    };
+    poll();
+    const timer = setInterval(poll, 5000);
+    return () => { active = false; clearInterval(timer); };
+  }, [monitoring?.enabled, open, setInsightOpen]);
   useEffect(() => {
     setLocalContact(current => JSON.stringify(current) === JSON.stringify(context.contact || {}) ? current : {...current, ...context.contact});
   }, [context.contact]);
@@ -164,16 +192,13 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   };
   const sendInsight = (value, button) => {
     if (button.action === 'close') return sendMessage('useInsight', {insight_id: value.id, close: true}).catch(() => {});
-    const agent = {...value.ai, ai: value.ai, is_ai: true};
-    const ai_message = {content: value.content, agent, local_id: uuidv4(), agent_id: agent.id};
-    const contact_message = {content: button.text, contact, local_id: uuidv4(), contact_id: contactAuth.id};
-    setFilteredMessages([{insight: true, ...ai_message}, {sending: true, insight: true, ...contact_message}]);
-    setConversationSettings(current => ({...current, ai_id: value.ai.id}));
-    setAgentTyping({...insightTypingState(value, agent), local_id: ai_message.local_id});
-    if (context.settings.show_glow.on_insight_reply) setThinking(true);
-    return sendMessage('useInsight', {insight_id: value.id, ai_message, contact_message}).catch(() => {
-      setFilteredMessages([{...contact_message, sending: true, failed_send: true}]); setAgentTyping(emptyTypingState()); setThinking(false);
-    });
+    // Stop page collection before opening chat: the opening telemetry must not
+    // invalidate the guarded answer requested by this accepted insight.
+    Collector.setCollectorEnabled(false);
+    const aiLocalId = uuidv4(), contactLocalId = uuidv4();
+    return sendMessage('useInsight', {insight_id: value.id, ai_message: {local_id: aiLocalId}, contact_message: {local_id: contactLocalId, content: button.text}}).then(async result => {
+      if (result.accepted) { setConversationSettings(current=>({...current,ai_id:result.ai_id})); setInsight(null); await transport.current.refresh(); }
+    }).catch(() => {});
   };
-  return <ConnectContext.Provider value={{open, resolution, setResolution, connectionState, retryConnection, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;
+  return <ConnectContext.Provider value={{monitoring, setMonitoringConsent, open, resolution, setResolution, connectionState, retryConnection, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;
 }

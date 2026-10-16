@@ -12,6 +12,7 @@ import {queueImport} from '../src/modules/knowledge/import-jobs'
 import importsSchema from '../migrations/0052_knowledge_imports.sql'
 import recoverySchema from '../migrations/0053_knowledge_recovery.sql'
 import managementSchema from '../migrations/0070_management.sql'
+import {testKnowledgeStart} from './knowledge-start'
 import {testKnowledgeRecovery} from './knowledge-recovery'
 import {refreshDataset,consumeJob,searchKnowledge,maximalMarginalRelevance} from '../src/modules/knowledge/service'
 import {routes} from '../src/modules/knowledge/routes'
@@ -40,6 +41,7 @@ export default {async fetch(request:Request,env:Env){
  await env.DB.prepare("INSERT INTO knowledge_articles(id,project_id,slug,title,content,status,updated_at) VALUES('draft','p','draft','Private','Draft body','draft',0),('pub','p','published','Public','Published body','published',0)").run();
  await env.DB.prepare("INSERT INTO users(id,email,name,created_at) VALUES('owner','owner@example.com','Owner',0)").run();await env.DB.prepare("INSERT INTO memberships(project_id,user_id,role) VALUES('p','owner','owner')").run();await env.DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,'owner','p','owner',?)").bind(await hashToken('owner-test'),Date.now()+60000).run();
  const send=async(path:string,method:string,body:unknown)=>routes.request(path,{method,headers:{Authorization:'Bearer owner-test','Content-Type':'application/json'},body:JSON.stringify(body)},env);
+ await testKnowledgeStart(env,check);
  const categoryResponse=await send('/p/categories','POST',{title:'Category',summary:'Summary'});check(categoryResponse.status===201,'original category fields and automatic slug');const category=await categoryResponse.json<any>();
  const articleResponse=await send('/p/articles','POST',{title:'Authored',summary:'Cobalt zephyr',content:'Copper horizon',categories:[category.id],is_published:true});check(articleResponse.status===201,'article multicategory authoring');const authored=await articleResponse.json<any>();
  const readArticles=async(query:string)=>routes.request(`/p/articles?q=${encodeURIComponent(query)}`,{headers:{Authorization:'Bearer owner-test'}},env);

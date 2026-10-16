@@ -13,3 +13,14 @@ export const crawlDepthError=(value:unknown,required=false)=>check(value,'Max cr
 export const crawlPagesError=(value:unknown,required=false)=>check(value,'Max crawl pages',CRAWL_PAGES,required)
 /** First problem with the crawl limits of a dataset body; absent values mean the stored or default limits apply. */
 export const crawlLimitError=(input:{max_crawl_depth?:unknown;max_crawl_pages?:unknown})=>crawlDepthError(input.max_crawl_depth)??crawlPagesError(input.max_crawl_pages)
+
+/** Reject invalid website settings before persisting a source or contacting its crawler. */
+export function crawlInputError(input:{url?:unknown;excluded_urls?:unknown;max_crawl_depth?:unknown;max_crawl_pages?:unknown}){
+ const bounds=crawlLimitError(input);if(bounds)return bounds;
+ if(input.url!==undefined&&input.url!==null){
+  if(typeof input.url!=='string')return 'Invalid crawl URL';
+  try{if(!['https:','http:'].includes(new URL(input.url).protocol))return 'Invalid crawl URL'}catch{return 'Invalid crawl URL'}
+ }
+ if(input.excluded_urls!==undefined&&(!Array.isArray(input.excluded_urls)||input.excluded_urls.some(value=>typeof value!=='string')))return 'Excluded URLs must be a list of URL patterns';
+ return null
+}

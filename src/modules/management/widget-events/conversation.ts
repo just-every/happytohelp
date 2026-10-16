@@ -5,6 +5,8 @@ import { HTTPException } from 'hono/http-exception'
 import { requestGeneration } from '../../ai-support/repository'
 import { clientGenerationId } from '../../ai-support/generation-id'
 import { AiReplyCeilingReached } from '../../ai-support/reply-ceiling'
+import {onAssistantAssignment} from '../../ai-support/customer-message'
+import {assertModelConfigured} from '../../ai-support/configuration'
 import type { WidgetCommand } from './types'
 
 export async function markAsRead({ c, actor, conversation, data }: WidgetCommand) {
@@ -14,8 +16,10 @@ export async function markAsRead({ c, actor, conversation, data }: WidgetCommand
 
 export async function assignAi({ c, actor, conversation, data }: WidgetCommand) {
   const key = data.ai_id || data.aiId || data.id
-  if (key && !await c.env.DB.prepare('SELECT id FROM ai_profiles WHERE id=? AND project_id=? AND is_enabled=1')
-    .bind(key, actor.projectId).first()) throw new HTTPException(400)
+  const assistant=key?await c.env.DB.prepare('SELECT model FROM ai_profiles WHERE id=? AND project_id=? AND is_enabled=1').bind(key,actor.projectId).first<{model:string}>():null
+  if(key&&!assistant)throw new HTTPException(400)
+  if(assistant)assertModelConfigured(c.env,assistant.model)
+  const previous=await c.env.DB.prepare('SELECT ai_id FROM conversation_ai WHERE conversation_id=?').bind(conversation.id).first<{ai_id:string|null}>()
   if (conversation.assigned_to) throw new HTTPException(409, { message: 'A human is handling this conversation' })
   const sessionHash=c.get('sessionHash');if(!sessionHash)throw new HTTPException(401)
   const now=Date.now(),receipt=crypto.randomUUID()
@@ -30,10 +34,14 @@ export async function assignAi({ c, actor, conversation, data }: WidgetCommand) 
     c.env.DB.prepare(`UPDATE conversation_tracking SET transition_id=? WHERE conversation_id IN (SELECT c.id FROM conversations c WHERE ${guard})`).bind(receipt,...values),
     assignmentHistoryStatement(c.env,{id:receipt,conversationId:conversation.id,actorId:actor.id,agentId:null,aiId:key||null,createdAt:now},`${accepted} AND (SELECT ai_id FROM conversation_ai WHERE conversation_id=c.id) IS NOT ?`,[conversation.id,receipt,key||null]),
     c.env.DB.prepare(`INSERT INTO conversation_ai(conversation_id,ai_id) SELECT ?,? WHERE ${accepted} ON CONFLICT(conversation_id) DO UPDATE SET ai_id=excluded.ai_id`).bind(conversation.id,key||null,conversation.id,receipt),
-    c.env.DB.prepare(`UPDATE ai_generations SET state='cancelled',updated_at=? WHERE conversation_id=? AND project_id=? AND state IN ('queued','running') AND ${accepted}`).bind(new Date(now).toISOString(),conversation.id,actor.projectId,conversation.id,receipt),
+    ...((previous?.ai_id||null)!==(key||null)?[c.env.DB.prepare(`UPDATE ai_generations SET state='cancelled',updated_at=? WHERE conversation_id=? AND project_id=? AND state IN ('queued','running') AND ${accepted}`).bind(new Date(now).toISOString(),conversation.id,actor.projectId,conversation.id,receipt)]:[]),
   ])
   if(!result[1].meta.changes)throw new HTTPException(409,{message:'Conversation or visitor authority changed'})
   await publishActivity(c.env,actor.projectId,conversation.id,'assignment')
+  if(key)await onAssistantAssignment(c.env,actor.projectId,conversation.id,{
+    sql:`${guard} AND EXISTS(SELECT 1 FROM conversation_tracking WHERE conversation_id=c.id AND transition_id=?) AND EXISTS(SELECT 1 FROM conversation_ai WHERE conversation_id=c.id AND ai_id=?)`,
+    params:[...values,receipt,key],
+  })
   return c.json({ assigned: true })
 }
 

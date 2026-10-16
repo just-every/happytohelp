@@ -24,3 +24,7 @@ try{
  const hash=async path=>createHash('sha256').update(await readFile(new URL(path,import.meta.url))).digest('hex');
  await writeFile(new URL('runtime.json',proofDir),JSON.stringify({runtime:'isolated emitted Worker, real D1/R2/DO; no provider credentials',migrationCount:runtime.migrationCount,widgetSha256:await hash('../public/widget.js'),workerSha256:await hash('../dist/server/index.js'),results},null,2));success=true;
 }finally{await runtime.close(success)}
+
+// The proactive path uses the same emitted widget and native queues, with only provider HTTP replaced.
+const {proactiveWidgetBrowser}=await import('./helpers/proactive-widget-browser.mjs');
+await proactiveWidgetBrowser();

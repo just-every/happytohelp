@@ -29,7 +29,7 @@ const server = createServer((req, res) => {
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 let browser;
 try {
-  browser = await chromium.launch({headless:true});
+  browser = await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));

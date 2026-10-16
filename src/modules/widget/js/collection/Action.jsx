@@ -8,8 +8,6 @@ let messageHandler = null;
 let pendingTimer = false;
 let pingTimer = false;
 let pingTimerAction = false;
-let sentActionPing = false;
-let sentActions = 0;
 let widgetState = 'closed';
 let collectorEnabled = true
 let actionCallback = [];
@@ -21,7 +19,6 @@ const ACTION_PING_INTERVAL = 4100;
 
 function sendPending() {
     if(messageHandler && pendingActions.length) {
-        sentActions += pendingActions.length;
         messageHandler('collector', pendingActions);
         pendingActions = [];
 
@@ -39,10 +36,8 @@ function sendPending() {
 function sendPing(type) {
     if(messageHandler) {
         let sentPing = false;
-        if(type === 'action' && sentActions > 0 && widgetState !== 'opened' && collectorEnabled) {
+        if(type === 'action' && widgetState !== 'opened' && collectorEnabled) {
             messageHandler('pingAction');
-            sentActions = 0;
-            sentActionPing = true;
             sentPing = true;
         }
         if(type === 'active') {
@@ -100,7 +95,7 @@ function setMessageHandler(handler) {
     messageHandler = handler;
     if (!handler) { clearTimeout(pendingTimer); clearTimeout(pingTimer); clearTimeout(pingTimerAction); pendingActions = []; return; }
     sendPending();
-    if(!sentActionPing && collectorEnabled) {
+    if(collectorEnabled) {
         runPing();
     }
     else {
@@ -137,8 +132,6 @@ function resetCollectorState() {
     lastAction = null;
     lastActionWriteTime = null;
     pendingTimer = pingTimer = pingTimerAction = false;
-    sentActionPing = false;
-    sentActions = 0;
     widgetState = 'closed';
     collectorEnabled = false;
     actionCallback = [];

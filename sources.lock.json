@@ -7959,7 +7959,11 @@
       "executable": false
     },
     "tests/helpers/hero/flow.mjs": {
-      "sha256": "fe62d60609b2832181950a00c448b5b116ae0d6305f9d8f97e1402e4fad3b91a",
+      "sha256": "c9abc4faf01d714a2838f635d7eb749088c337d361ae78aad75cc334c0d624cc",
+      "executable": false
+    },
+    "tests/helpers/hero/transcript.mjs": {
+      "sha256": "ed5b0c0e80f80d344e103da9573f4db40d049dca7fb8de4269a458965ee79576",
       "executable": false
     },
     "tests/helpers/identity-browser-default.mjs": {

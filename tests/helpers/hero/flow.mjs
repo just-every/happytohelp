@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {articleCapability} from './article-capability.mjs';
 import {connector as prepareConnector} from './connector.mjs';
+import {readTranscript} from './transcript.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const until=async(read,accept,label,limit=360)=>{for(let i=0;i<limit;i++){const v=await read();if(accept(v))return v;await new Promise(r=>setTimeout(r,1000));}throw Error(label+' timed out; no retry');};
 export async function hero({browser,operator,origin,bootstrap,directory,viewport}){
@@ -21,10 +22,7 @@ export async function hero({browser,operator,origin,bootstrap,directory,viewport
   const storageKey=`rer-widget:${origin}:${widgetKey}`;
   const session=await until(()=>visitor.evaluate(key=>JSON.parse(localStorage.getItem(key)||'null'),storageKey),v=>v?.conversationId,'Real widget conversation');
   assert.equal(session.projectId,projectId);
-  // Playwright pools API connections across the connector's idle periods.
-  // Close each transcript connection so workerd's idle close cannot race its
-  // reuse. Each read still makes one request; failures are never replayed.
-  const transcript=async()=>{const r=await visitor.request.get(origin+`/api/conversations/${session.conversationId}/messages`,{headers:{Authorization:`Bearer ${session.token}`,Connection:'close'}});assert.equal(r.status(),200);return(await r.json()).messages;};
+  const transcript=()=>readTranscript(origin,session);
   const before=await transcript();assert.equal(before.filter(m=>m.actor_role!=='contact').length,0);
   const connector=await prepareConnector({origin,context,projectId,directory});
   capability=await articleCapability({origin,cookie,projectId,article});

@@ -56,7 +56,7 @@ export async function seedLegacy(connection, { objectDirectory }) {
     const draftCategoryId = uuid('72', n);
     const mediaId = uuid('80', n);
     const directory = `${projectId}/${conversationId}`;
-    const fileContent = Buffer.from(`${name} fixture invoice\nAmount: AUD ${n * 25}.00\n`, 'utf8');
+    const fileContent = Buffer.from(`${name} fixture invoice\nAmount: AUD ${n * 25}.00\n`.repeat(index?1:220000), 'utf8');
     const messageIds = Array.from({ length: 5 }, (_, i) => uuid('60', n * 10 + i));
 
     await insert('projects', {
@@ -87,7 +87,7 @@ export async function seedLegacy(connection, { objectDirectory }) {
         provided_email: id === contactId ? `preferred@${slug}.example.test` : null,
         nickname: 'Blue Finch', identifier: `${slug}-${id === contactId ? 'customer' : 'accounts'}`,
         timezone: 'Australia/Brisbane', country_code: 'AU', language: 'en',
-        is_verified: 1, key_hashes: json(['fixture-contact-key-hash']), metadata: json({ plan: 'business', company: name }), ...times });
+        is_verified: 1, key_hashes: json(['fixture-contact-key-hash']), metadata: json({ plan: 'business', company: name,admin:'fixture-contact-admin-capability' }), ...times });
     }
     await insert('conversations', { id: conversationId, project_id: projectId, contact_id: contactId,
       agent_id: ownerId, metadata: json({ subject: `${name}: invoice question` }), unread_contact_messages_count: 1, ...times });
@@ -97,7 +97,7 @@ export async function seedLegacy(connection, { objectDirectory }) {
     await insert('buckets', { id: bucketId, project_id: projectId, conversation_id: conversationId,
       is_vectorized:0, counts: json({ contact_messages: 1, agent_messages: 2, agent_events_internal_note: 1, contact_events_page_view: 1 }), ...times });
 
-    const bodies = [`Can you explain this ${name} invoice?`, 'The invoice covers your current billing period.',
+    const bodies = [`Diagnostic: GPTCODEX_API_KEY=fixture-transcript-environment-value\nCan you explain this ${name} invoice?`, 'The invoice covers your current billing period.',
       'I can help you find the billing guide.', 'Our team will reply during business hours.', 'Removed duplicate message.'];
     for (let i = 0; i < bodies.length; i++) {
       await insert('messages', { id: messageIds[i], project_id: projectId, conversation_id: conversationId, bucket_id: bucketId,

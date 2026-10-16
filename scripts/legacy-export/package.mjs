@@ -1,4 +1,4 @@
-import {mkdir,writeFile,readFile,rename,rm,lstat,copyFile,open} from 'node:fs/promises';
+import {mkdir,writeFile,readFile,rename,rm,lstat,copyFile,open,rmdir,chmod} from 'node:fs/promises';
 import {constants} from 'node:fs';
 import {createHash,randomUUID} from 'node:crypto';
 import path from 'node:path';
@@ -12,7 +12,8 @@ export const chunkLimit=4*1024*1024;
 export async function publishDirectory(output,build){
   try{await lstat(output);throw Error('Output already exists');}catch(e){if(e.code!=='ENOENT')throw e;}
   const staging=output+'.partial-'+randomUUID();await mkdir(staging,{mode:0o700});
-  try{const result=await build(staging);await rename(staging,output);return result;}catch(e){await rm(staging,{recursive:true,force:true});throw e;}
+  let reserved=false;
+  try{const result=await build(staging);await mkdir(output,{mode:0o700});reserved=true;await rename(staging,output);reserved=false;return result;}catch(e){await rm(staging,{recursive:true,force:true});if(reserved)await rmdir(output).catch(()=>{});throw e;}
 }
 export function safeFile(root,file){if(typeof file!=='string'||!/^\w[\w.-]*$/.test(file))throw Error('Invalid package filename');return path.join(root,file);}
 export async function readPart(root,part){
@@ -49,4 +50,4 @@ export async function snapshotPackage(connection,options){return publishDirector
 });}
 export async function packageContext(root,manifest){const tables={};for(const part of manifest.context){const rows=await readPart(root,part);(tables[part.table]??=[]).push(...rows);}classifySnapshot({tables});
   const entries=enrichMedia(tables);if(JSON.stringify(entries)!==JSON.stringify(manifest.source.attachments||[]))throw Error('Attachment manifest differs from scoped media');return {format:'happytohelp-legacy-v1',source:manifest.source,tables};}
-export async function copyPackageRows(input,root,manifest){for(const part of [...manifest.chunks,...manifest.context]){await readPart(input,part);await copyFile(safeFile(input,part.file),safeFile(root,part.file));}}
+export async function copyPackageRows(input,root,manifest){for(const part of [...manifest.chunks,...manifest.context]){const rows=await readPart(input,part);classifySnapshot({tables:{[part.table]:rows}});await copyFile(safeFile(input,part.file),safeFile(root,part.file));await chmod(safeFile(root,part.file),0o600);}}

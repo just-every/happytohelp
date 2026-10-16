@@ -9,13 +9,13 @@ export const credentialColumns = {
   dataset_files: ['html'], messages: ['content_raw'], collectors: ['data'],
   local_agent_devices: ['token_hash'], local_agent_grants: ['token_hash'],
   projects: ['verification_secret'], users: ['password','remember_token'],
-  project_users: ['invitation_token'], contacts: ['key_hashes'],
+  project_users: ['invitation_token'], contacts: ['key_hashes','user_agent'],
   connections: ['shared_key','contact_shared_key','contact_shared_key_id','page_content'],
   // Drop encrypted telemetry and its crypto-only reference; never decrypt it.
   collector_actions: ['action','contact_shared_key_id'],
   // Generated browsing summaries can repeat tokens captured in visitor URLs.
   collector_summaries: ['summary'], project_github_connections: ['access_token'],
-  message_thinkings: ['signature'], // opaque provider continuation payload, never needed to read history
+  message_thinkings: ['signature','thinking_id'], // opaque provider continuation payload, never needed to read history
 };
 export const skippedTables = ['migrations','password_resets','personal_access_tokens','asymmetric_keys',
   'contact_shared_keys','failed_jobs','jobs','job_batches','telescope_entries','telescope_entries_tags',
@@ -28,3 +28,7 @@ export const childScopes = {
 
 // EventItem.js renders these support events; PAGE_VIEW is visitor tracking.
 export const supportEventTypes = ['AGENT_ASSIGNED','USED_INSIGHT','INTERNAL_NOTE'];
+// ChargeDesk's generated administrative links carry an opaque login capability.
+// Customer-reply trigger caches are runtime control state, not history.
+// Remove only these exact paths; unknown nested credential fields still fail.
+export const structuredOmissions = {contacts:{metadata:[['admin']]},conversations:{metadata:[['customer_reply']]}};

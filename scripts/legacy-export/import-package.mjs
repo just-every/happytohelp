@@ -1,6 +1,6 @@
 import {createReadStream} from 'node:fs';
+import {putObject} from './import-objects.mjs';
 import {stat} from 'node:fs/promises';
-import {Readable} from 'node:stream';
 import {createHash} from 'node:crypto';
 import {readManifest,readPart,packageContext,safeFile,sha} from './package.mjs';
 import {skippedTables} from './scope.mjs';
@@ -10,7 +10,9 @@ async function fileHash(file){const h=createHash('sha256');for await(const chunk
 async function bodyHash(body){const h=createHash('sha256');for await(const chunk of body)h.update(chunk);return h.digest('hex');}
 /** Validate the entire package before the first write; then bounded row imports. */
 export async function importPackage(root,env,{planImport,importLegacy,tableOrder}){
-  const manifest=await readManifest(root),context=await packageContext(root,manifest),counts={},keys=new Set(),media=new Map((context.tables.media||[]).map(r=>[String(r.id),r]));
+  const manifest=await readManifest(root);
+  if(manifest.source?.mailboxPending)throw Error('Original MAIL_FROM_DOMAIN is required before native import; no native state was written');
+  const context=await packageContext(root,manifest),counts={},keys=new Set(),media=new Map((context.tables.media||[]).map(r=>[String(r.id),r]));
   if(!manifest.attachmentsComplete)throw Error('Package requires exported attachment bytes');
   for(const object of manifest.objects){if(keys.has(object.key)||!media.has(String(object.mediaId)))throw Error('Invalid package object identity');keys.add(object.key);const file=safeFile(root,object.file),size=(await stat(file)).size;if(size!==object.size||size!==Number(media.get(String(object.mediaId)).size)||await fileHash(file)!==object.sha256)throw Error('Package object size or digest mismatch');}
   const entries=manifest.source.attachments||[];if(entries.length!==manifest.objects.length||entries.some(e=>!manifest.objects.some(o=>o.key===e.key&&String(o.mediaId)===String(e.mediaId))))throw Error('Package attachment manifest mismatch');
@@ -23,7 +25,7 @@ export async function importPackage(root,env,{planImport,importLegacy,tableOrder
   // controls the row chunk's heap size or a JSON request limit.
   const runId=`legacy-package:${packageId}`;
   if(env)await env.DB.prepare("INSERT OR IGNORE INTO legacy_import_runs VALUES(?,?,?,'running',?,NULL)").bind(runId,JSON.stringify(manifest.source),packageId,Date.now()).run();
-  if(env)for(const object of manifest.objects){const current=await env.FILES.get(object.key);if(current){if(current.size!==object.size||await bodyHash(current.body)!==object.sha256)throw Error('Existing R2 object differs');}else{const stored=await env.FILES.put(object.key,Readable.toWeb(createReadStream(safeFile(root,object.file))),{onlyIf:{etagDoesNotMatch:'*'},customMetadata:{sha256:object.sha256,legacyImport:`legacy-package:${packageId}`}});if(!stored)throw Error('Concurrent R2 object write');const verified=await env.FILES.get(object.key);if(!verified||verified.size!==object.size||await bodyHash(verified.body)!==object.sha256)throw Error('Imported R2 object digest mismatch');}await env.DB.prepare('INSERT OR IGNORE INTO legacy_import_objects VALUES(?,?,?,?)').bind(runId,object.key,object.sha256,object.size).run();}
+  if(env)for(const object of manifest.objects){const current=await env.FILES.get(object.key);if(current){if(current.size!==object.size||await bodyHash(current.body)!==object.sha256)throw Error('Existing R2 object differs');}else{await putObject(env.FILES,safeFile(root,object.file),object,runId);const verified=await env.FILES.get(object.key);if(!verified||verified.size!==object.size||await bodyHash(verified.body)!==object.sha256)throw Error('Imported R2 object digest mismatch');}await env.DB.prepare('INSERT OR IGNORE INTO legacy_import_objects VALUES(?,?,?,?)').bind(runId,object.key,object.sha256,object.size).run();}
   for(const [index,part]of chunks.entries()){
     const rows=await readPart(root,part);const bundle={format:'happytohelp-legacy-v1',source:{...manifest.source,packageId,chunk:index,chunkDigest:part.sha256},tables:{[part.table]:rows}};
     const result=env?await importLegacy(env,bundle,options):(await planImport(bundle,options)).summary;

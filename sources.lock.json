@@ -1504,7 +1504,7 @@
       "executable": false
     },
     "docs/LEGACY-EXPORT.md": {
-      "sha256": "c3d777328da91a0b5dd4825b5e454f500a316c5776568517b3a72268bc3577f4",
+      "sha256": "d9350e28dd84c4bbf1cbdc3e810ea57cddaa58da58abb2faba1f2e77471d5390",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2468,7 +2468,7 @@
       "executable": false
     },
     "scripts/import-legacy.mjs": {
-      "sha256": "80ab82dc80bd8c9fd1ed49f1c5b701d3415698638410dec077b13ffb0d7f3d9b",
+      "sha256": "8a6ee916eca8bd576a0877fc332dfc2dfcb71ab351d1ea0f157be03c0f28edd3",
       "executable": false
     },
     "scripts/independent/delegation-backup.py": {
@@ -2516,7 +2516,7 @@
       "executable": false
     },
     "scripts/legacy-export/extract.mjs": {
-      "sha256": "b10b09058108d26c73dd5fdf74e9f51ef42a6f6b4971d5897c69cbdda2797404",
+      "sha256": "3f750d599de118a656ff7c2a59dff0e55dea641d63c129dc3474abfa6702ea2b",
       "executable": false
     },
     "scripts/legacy-export/files.mjs": {
@@ -2524,7 +2524,7 @@
       "executable": false
     },
     "scripts/legacy-export/import-package.mjs": {
-      "sha256": "d0147f6eeb3f341499c2caf1fba6101266f1e32c49bda8728be6e18cb490bd7b",
+      "sha256": "7f206658795ccea08dd6a77112488b26413bf6564ef4bc4491316684180f6312",
       "executable": false
     },
     "scripts/legacy-export/mysql.mjs": {
@@ -2536,19 +2536,19 @@
       "executable": false
     },
     "scripts/legacy-export/package.mjs": {
-      "sha256": "66d98a3822a2f0e45c2df8408fcf14a7b97b488165d1820d9ca7b175119d17d4",
+      "sha256": "e720f104cc1bbbdf3a0de72fc185bef0e1e22113a017f3c50cc5021676619b50",
       "executable": false
     },
     "scripts/legacy-export/queries.mjs": {
-      "sha256": "b0c1b8ce441ece7ca8fe33c1de479f1709aad6fb51c0c41eca6c3090e18a77c0",
+      "sha256": "db54c794909adf283549d4ab403c4b8e7a5369d52cc629fc119964e58489e3fc",
       "executable": false
     },
     "scripts/legacy-export/scope.mjs": {
-      "sha256": "43985c19348a84ccb5c9d3213ae2479df198ee8e52f2a28f85f2c42825605b6b",
+      "sha256": "a3eff164a25cb51770930e40d03a5b81ae13c7ecf1bdffa5f327c83a2fbca9c2",
       "executable": false
     },
     "scripts/legacy-export/secrets.mjs": {
-      "sha256": "6eaa5e12041e6db352294b9f609e19527589abad54dc216251cfd3c527c366f7",
+      "sha256": "e9c19424274dc23894f9dda501c397a04b551a84c3729dbefdf1eeb4d3a851c1",
       "executable": false
     },
     "scripts/local-agent-archive.cjs": {
@@ -8480,11 +8480,11 @@
       "executable": false
     },
     "tests/legacy-export/extended-fixture.mjs": {
-      "sha256": "fa6b2062f520cff5e2ec80ca92cab70a9ae84a232a69c97e52393933862d9679",
+      "sha256": "918d7f6baf0bafa13392f61f59d4002c401ea7de18ae317f8a938d0f45013bfd",
       "executable": false
     },
     "tests/legacy-export/fixture.mjs": {
-      "sha256": "622d9185f563246faae4732b41c64c3985c3e49d180ebde6ae59e95dddda4694",
+      "sha256": "6939b859516845bb089d5fa8cd01a5e1d3affe3e954062ecab750eab0e0a0b7c",
       "executable": false
     },
     "tests/legacy-export/live-schema.sql": {
@@ -8496,7 +8496,7 @@
       "executable": false
     },
     "tests/legacy-export/refusals.mjs": {
-      "sha256": "30fc5b8f3622789dda7ff3acf52cf937c81f63e2c7c2c8cede1be93f803e0154",
+      "sha256": "0902e5bf7de8b4776c6bb5be4d5e6af74c9fea45dad6d37ca14cd74132d9dac9",
       "executable": false
     },
     "tests/legacy-export/schema.sql": {

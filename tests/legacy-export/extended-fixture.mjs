@@ -11,7 +11,7 @@ const encryptedAction = Buffer.concat([cipher.update(actionPlaintext), cipher.fi
 // Every value here is synthetic. Scan all artifacts and native stores, not only
 // the archive table that exposed the original connection-key regression.
 export const PLANTED_SECRETS = Object.freeze([
-  'fixture-password-hash', 'fixture-remember-token', 'fixture-contact-key-hash',
+  'fixture-transcript-environment-value','fixture-contact-admin-capability','fixture-password-hash', 'fixture-remember-token', 'fixture-contact-key-hash',
   ...['chargedesk', '12ui'].flatMap(slug => [`fixture-verification-${slug}`, `fixture-invitation-${slug}`]),
   'fixture-connection-shared-key', 'fixture-contact-shared-key', 'fixture-github-access-token',
   'fixture-asymmetric-private-key', 'fixture-asymmetric-public-key',
@@ -53,7 +53,7 @@ export async function seedExtendedLegacy(insert, {projectId, n, slug, name, owne
     [1,{excluded_urls:'',max_crawl_depth:0,max_crawl_pages:0}]]) {
     const datasetId=uuid(offset?'a1':'a0',n);
     await insert('datasets', {id:datasetId,project_id:projectId,url:`https://${slug}.example.test/${offset?'empty':'help'}`,
-      crawl_webhook_token:'fixture-crawl-exception-credential','fixture-crawl-webhook-token',refresh_claim_token:'fixture-refresh-claim-token',refresh_mode:'manual',refresh_unchanged_count:2,
+      status_message:'fixture-crawl-exception-credential',crawl_webhook_token:'fixture-crawl-webhook-token',refresh_claim_token:'fixture-refresh-claim-token',refresh_mode:'manual',refresh_unchanged_count:2,
       status:offset?'created':'ready',pages_count:offset?0:1,metadata:json({purpose:'support'}),...settings,...times});
     if (!offset) await insert('dataset_files', {id:uuid('a2',n),project_id:projectId,dataset_id:datasetId,
       url:`https://${slug}.example.test/help/billing`,original_url:`https://${slug}.example.test/help/billing`,

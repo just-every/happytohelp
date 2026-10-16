@@ -9,9 +9,9 @@ async function noPublication(output,file,before) {
 
 export async function assertCredentialRefusals({admin,run,env,output,projectId,snapshotArgs,snapshot,objectDirectory}) {
   let index=0;
-  const refuse=async()=>{
+  const refuse=async(expected=/Unclassified secret-like legacy field/)=>{
     const file=join(output,`refused-${++index}.json`),before=(await readdir(output)).sort();
-    await assert.rejects(run('scripts/export-legacy.mjs',[...snapshotArgs,'--output',file],env),/Unclassified secret-like legacy field/);
+    await assert.rejects(run('scripts/export-legacy.mjs',[...snapshotArgs,'--output',file],env),expected);
     await noPublication(output,file,before);
   };
   await admin.query('ALTER TABLE contacts ADD unexpected_secret TEXT NULL');
@@ -19,6 +19,10 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
     await admin.execute('UPDATE contacts SET unexpected_secret=? WHERE project_id=?',['fixture-unexpected-secret',projectId]);
     await refuse();
   } finally {await admin.query('ALTER TABLE contacts DROP COLUMN unexpected_secret');}
+
+  await admin.execute('UPDATE mediables SET mediable_type=? WHERE mediable_type=?',['App\\Models\\Unclassified','App\\Models\\Message']);
+  try {await refuse(/Unclassified legacy media parent/);}
+  finally {await admin.execute('UPDATE mediables SET mediable_type=? WHERE mediable_type=?',['App\\Models\\Message','App\\Models\\Unclassified']);}
 
   const [[contact]]=await admin.execute('SELECT id,metadata FROM contacts WHERE project_id=? ORDER BY id LIMIT 1',[projectId]);
   const original=typeof contact.metadata==='string'?contact.metadata:JSON.stringify(contact.metadata);

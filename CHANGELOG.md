@@ -12,7 +12,9 @@ updating and backing up an installation, see
 
 - Mark source fixtures as synthetic so hosted changes can admit the public source without changing test coverage.
 
-## 0.5.0 — 2026-10-15
+## 0.5.0 — not yet tagged
+
+On `main` until the `v0.5.0` tag is cut; the latest tagged release is 0.4.1.
 
 ### Added
 
@@ -32,7 +34,7 @@ updating and backing up an installation, see
 
 - **First run and Setup.** The one-screen form derives optional names and colours. Setup separates Needs you from What we've set, observes applicable checks automatically with freshness bounds and permits durable owner/admin skips. A skip never counts as confirmation; rejected keys remain Needs you. Empty inboxes show one next action and a link to Setup.
 - **Workspace appearance and navigation.** A neutral light canvas, lighter fields and softer menus accompany the revised inbox and settings navigation. Dark-theme tokens remain.
-- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.22**. Rer dev v2 enters as the real native owner through `RER_OPEN`; local visitor and teammate email is suppressed without storage or external sending. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
+- **Package commands and automatic local setup.** Checkout commands pin published `@runeditrun/rer` **0.2.25**. Rer dev v2 enters as the real native owner through `RER_OPEN`; local visitor and teammate email is suppressed without storage or external sending. The README path is `npm install -g @runeditrun/rer`, clone, then `rer dev`: the command provisions pinned tools, installs dependencies and sets up a local origin and private owner password without private answers or external mail/AI credentials. The `v0.4.1` tag predates package conversion, so updating requires current source and frozen dependency installation.
 
 ### Updating from 0.4.1
 

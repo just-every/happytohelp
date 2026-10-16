@@ -17,7 +17,7 @@ try{
   DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)"),
   DB.prepare("INSERT INTO users VALUES('u','owner@example.com','Owner',1)"),DB.prepare("INSERT INTO memberships VALUES('p','u','owner')"),
   DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'),Date.now()+999999),
-  ...contacts.flatMap(([id,name,email],index)=>[DB.prepare('INSERT INTO contacts(id,project_id,name,email,created_at) VALUES(?,?,?,?,?)').bind(id,'p',name,email,1),DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind('c-'+id,'p',id,1,10+index)]),
+  ...contacts.flatMap(([id,name,email],index)=>[DB.prepare('INSERT INTO contacts(id,project_id,name,email,created_at) VALUES(?,?,?,?,?)').bind(id,'p',name,email,1),DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind('c-'+id,'p',id,1,10+index),...(id==='plain'?[]:[DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES(?,'p',?,'first',?,'contact','Opening question',1,1)").bind('m-'+id,'c-'+id,id)])]),
  ])
  // A closed, assigned retained thread predates the index migration.
  await DB.batch([
@@ -56,6 +56,9 @@ try{
 
  // Indexed history, supplied identity and independent status/assignment filters.
  assert.deepEqual(await names({q:'cobalt buckle replacement'}),['Alice Archer'],'all-history search finds a retained closed thread from Open')
+ await DB.batch([DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('later','p','c-plain','later','u','owner','Thanks, closing this now',2,200)"),DB.prepare("UPDATE conversations SET last_message_id='later' WHERE id='c-plain'")])
+ const [found]=(await(await list({q:'cobalt buckle replacement'})).json()).data
+ assert.deepEqual([found.last_message.content,found.matched_message.content.slice(0,10)],['Thanks, closing this now','The cobalt'],'a result previews the message that matched')
  // All unquoted words are required in any order; explicit phrases stay adjacent.
  for(const q of ['refund invoice','invoice refund','refund "last invoice"','"last invoice" refund'])assert.deepEqual(await names({q}),['Alice Archer'],q)
  for(const q of ['"refund invoice"','refund "invoice last"','refund missing'])assert.deepEqual(await names({q}),[],q)

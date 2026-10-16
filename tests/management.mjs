@@ -157,7 +157,7 @@ let rejectTranscript=false
 const transcriptBody={send_transcript_to:'chosen@example.com',idempotencyKey:'transcript-command',transcript_revision:7}
 async function transcript(body=transcriptBody){return dashboardRoutes.request('https://app.example/projects/p/conversations/c',{method:'PUT',headers:{Authorization:'Bearer token','Content-Type':'application/json'},body:JSON.stringify(body)},transcriptEnv)}
 try{
- globalThis.fetch=async(url,options)=>{if(String(url)==='https://api.resend.com/emails'){requests.push(JSON.parse(options.body));return rejectTranscript?new Response('unavailable',{status:503}):Response.json({id:'provider-transcript'})}return networkFetch(url,options)}
+ globalThis.fetch=async(url,options)=>{if(String(url).startsWith('https://cloudflare-dns.com/'))return Response.json({Status:0,Answer:[{type:15,data:'10 mx.example.com.'}]});if(String(url)==='https://api.resend.com/emails'){requests.push(JSON.parse(options.body));return rejectTranscript?new Response('unavailable',{status:503}):Response.json({id:'provider-transcript'})}return networkFetch(url,options)}
  const sent=await transcript();assert.equal(sent.status,200);assert.equal((await sent.json()).transcript_delivery.state,'sent')
  const delivered=requests[0];assert.equal(delivered.to[0],'chosen@example.com');assert.deepEqual({...await replyGrant(transcriptEnv,'p',inboundTarget(delivered.reply_to).replyToken)},{conversation_id:'c',recipient:'chosen@example.com'})
  assert.ok(delivered.text.includes('Authored assistant answer'));assert.match(delivered.text,/Imported assistant/);assert.match(delivered.text,/Visitor/);assert.match(delivered.text,/Owner/);assert.match(delivered.html,/<strong>question<\/strong>/);assert.match(delivered.html,/href="https:\/\/example.com\/help"/)

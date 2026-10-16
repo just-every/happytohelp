@@ -26,7 +26,9 @@ export default function Login() {
     useEffect(()=>{const destination=requestedDestination();if(destination)setMagicPath('/login/magic?returnTo='+encodeURIComponent(loginDestination(destination,location.origin)));},[]);
     const { options } = useAuthOptions();
     const {options:mail}=useSignInMail();
-    const [error, setError] = useState(''), [busy, setBusy] = useState(false);
+    const [error, setError] = useState(''), [busy, setBusy] = useState(false), [typed, setTyped] = useState('');
+    // An email typed here carries into the sign-in-link page, so it is never typed twice.
+    const magicHref = typed ? `${magicPath}${magicPath.includes('?') ? '&' : '?'}login_hint=${encodeURIComponent(typed)}` : magicPath;
     const submit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setBusy(true); setError('');
@@ -43,13 +45,13 @@ export default function Login() {
         {mail?.mailMode === 'local' && <p className="id-note" role="status"><code>rer dev</code> signs you in automatically as the local owner. Open the app address it prints. Email is suppressed during local development. No email is sent.</p>}
         <Alert>{error}</Alert>
         <form method="post" onSubmit={submit}>
-            <Field id="email" label="Email" type="email" autoComplete="username" placeholder="you@example.com" defaultValue={hint} />
+            <Field id="email" label="Email" type="email" autoComplete="username" placeholder="you@example.com" defaultValue={hint} onInput={event => setTyped(event.currentTarget.value.trim())} />
             <Field id="password" label="Password" type="password" autoComplete="current-password" placeholder="Your password" />
             <SubmitButton busy={busy} ready={true} busyLabel="Signing in…">Login</SubmitButton>
         </form>
         <div className="id-links">
             {mail?.mailMode !== 'local' && <a href="/forgot-password">Forgot your password?</a>}
-            {mail?.mailMode === 'remote' && <a href={magicPath}>Email me a sign-in link</a>}
+            {mail?.mailMode === 'remote' && <a href={magicHref}>Email me a sign-in link</a>}
             {options?.registrationAvailable && <a href="/register">Create an account</a>}
         </div>
     </IdentityFrame>;

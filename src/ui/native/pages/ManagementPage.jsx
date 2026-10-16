@@ -29,7 +29,7 @@ function ResourcePage({projectId,section,recordId}) {
  const load=useCallback(async()=>{const id=++requestId.current;const response=await nativeRequest(listPath);if(id!==requestId.current)return;setItems(response.data||response);setPagination(response.pagination||null);if(section==='agents')setEmailConfigured(response.emailConfigured);},[listPath,section]);
  useEffect(()=>{let active=true;setItems(null);setError('');const timer=setTimeout(()=>load().catch(e=>{if(active)setError(e.message)}),paged&&listQuery.search?200:0);return()=>{active=false;clearTimeout(timer);requestId.current++};},[load]);
  useEffect(()=>{
-  let active=true;setDraft(null);setInvitation(null);setNotice(null);setError('');setSaved(section==='macros'&&routeLocation.state?.savedReplyCreated===recordId);setFieldErrors({});
+  let active=true;setDraft(null);setInvitation(null);setNotice(null);setError('');setSaved(section==='macros'&&Boolean(recordId)&&routeLocation.state?.savedReplyCreated===recordId);setFieldErrors({});
   if(recordId==='create'){
    const query=new URLSearchParams(routeLocation.searchStr);
    setDraft(section==='agents'?{role:'operator',is_notified_on_unassigned_activity:true}:section==='plugins'?{name:query.get('name')||'',url:query.get('url')||''}:{});

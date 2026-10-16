@@ -10,6 +10,9 @@ async function notificationRuntime(){
  const runtime=new Miniflare(convertV4MiniflareOptions({name:'email-worker',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}))
  return {env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
 }
+// The workspace mailboxes here receive mail: their MX lookup answers before any provider stub.
+const withMx=handler=>async(url,init)=>String(url).startsWith('https://cloudflare-dns.com/')?Response.json({Status:0,Answer:[{type:15,data:'10 mx.example.com.'}]}):handler(url,init)
+globalThis.fetch=withMx(globalThis.fetch)
 const {recipientReplyAddress}=await import('../src/modules/integrations/email-reply-address.ts'),{inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
 const protectedAddress=async(env,to,from)=>{const target=inboundTarget(to);return target?.conversationId?await recipientReplyAddress(env,target.mailbox,'p',target.conversationId,from):to}
 const {handleEmail}=await import('../src/modules/integrations/email-worker.ts'),proxy=await notificationRuntime()
@@ -32,7 +35,7 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   const jobs=[],outbound=[],pending=[],execution={waitUntil:promise=>pending.push(promise),passThroughOnException(){}}
   const env={...proxy.env,APP_ORIGIN:'https://app.example',OPENAI_API_KEY:'fixture-openai',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-resend',EMAIL_FROM:'support@example.com',INBOUND_EMAIL_TOKEN:'fixture-gateway',JOBS:{send:async job=>{jobs.push(job)}}},DB=env.DB
   const flushAlerts=()=>dispatchOperatorNotifications(env,{now:Date.now()+61000})
-  globalThis.fetch=async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})}
+  globalThis.fetch=withMx(async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})})
   for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
   await DB.batch([
    DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)"),
@@ -187,7 +190,7 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   await DB.prepare("UPDATE user_project_preferences SET is_notified_on_unassigned_activity=0 WHERE user_id='op'").run()
   await unreadMail('uncertain-alert','A lost response')
   let attempts=0
-  globalThis.fetch=async()=>{attempts++;throw new Error('response lost')}
+  globalThis.fetch=withMx(async()=>{attempts++;throw new Error('response lost')})
   await flushAlerts()
   const uncertain=await DB.prepare("SELECT * FROM email_deliveries WHERE state='uncertain'").first()
   assert.equal(attempts,1);assert.equal(uncertain.recipient,'watcher@example.com')
@@ -195,7 +198,7 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   assert.equal(attempts,1)
   // The real operator mutation creates assignment-mail intent in the same
   // transaction as ownership. Same-owner writes and self assignment stay quiet.
-  globalThis.fetch=async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})}
+  globalThis.fetch=withMx(async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})})
   const assign=async(agent_id,requestEnv=env)=>{
    const response=await dashboardActions.request('/projects/p/conversations/assigned',{method:'PUT',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({agent_id})},requestEnv,execution)
    assert.equal(response.status,200,await response.text())

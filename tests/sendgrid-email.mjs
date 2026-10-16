@@ -61,6 +61,8 @@ try {
   const loopHeaders = { 'Auto-Submitted': 'auto-replied', 'X-Auto-Response-Suppress': 'All' }
   const bodies = []
   globalThis.fetch = async (url, init) => {
+    // The reply mailbox's MX lookup: example.com receives mail, other domains do not.
+    if (String(url).startsWith('https://cloudflare-dns.com/')) return Response.json({ Status: 0, Answer: new URL(url).searchParams.get('name') === 'example.com' ? [{ type: 15, data: '10 mx.example.com.' }] : [] })
     calls++
     bodies.push({ url: String(url), body: JSON.parse(String(init.body)) })
     if (String(url).includes('sendgrid')) return new Response(null, { status: 202, headers: { 'X-Message-Id': `sg-${calls}` } })
@@ -90,6 +92,16 @@ try {
   const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts'),{replyGrant}=await import('../src/modules/integrations/email-reply-address.ts')
   assert.deepEqual({...await replyGrant(env,'p',inboundTarget(notification.reply_to.email).replyToken)},{conversation_id:'c',recipient:'customer@example.com'})
   assert.deepEqual(notification.personalizations[0].to, [{ email: 'customer@example.com' }])
+  // A mailbox that cannot receive mail gets no Reply-To; the email points to the chat instead.
+  // The operator reply is emailed even though the visitor was active in the widget a moment ago.
+  await env.DB.batch([
+    env.DB.prepare("UPDATE email_settings SET inbound_address='inbound@unrouted.example' WHERE project_id='p'"),
+    env.DB.prepare("UPDATE contacts SET metadata_json=json_object('last_seen_at',?) WHERE id='contact'").bind(Date.now()),
+  ])
+  assert.equal((await notifyMessage(env, { id: 'operator-while-active', conversation_id: 'c', actor_role: 'operator', actor_id: 'operator', content: 'Here is your answer.' }, { id: 'operator', projectId: 'p', role: 'operator' })).state, 'sent')
+  assert.equal(bodies.at(-1).body.reply_to, undefined)
+  assert.match(bodies.at(-1).body.content[0].value, /Replies to this email are not received\. To answer, continue in the chat: https:\/\/example\.com\/#launch-chat$/)
+  await env.DB.prepare("UPDATE email_settings SET inbound_address='inbound@example.com' WHERE project_id='p'").run()
   // A reply can acknowledge its durable send claim while the paid transport is
   // still pending. Provider outcomes still settle once, and unknown is not replayed.
   for (const outcome of ['sent', 'uncertain']) {

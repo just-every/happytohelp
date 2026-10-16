@@ -61,7 +61,10 @@ addresses are separate capabilities from this.
 Once a provider is configured, all of these go through it:
 
 - email sign-in links, password recovery, email verification and invitations;
-- customer reply notifications, including while the widget is online;
+- your team's replies to customers. Each reply is emailed straight away to a
+  customer who left an email, even while they are still active in the chat
+  widget, so the answer reaches them if they close the page. There is no quiet
+  period: replying in a live chat also sends that email;
 - unread operator alerts, grouped after 60 seconds without conversation activity.
   Each recipient's read frontier excludes messages they have already read. Assigned
   teammates receive these alerts independently of their assignment preference.
@@ -69,8 +72,8 @@ Once a provider is configured, all of these go through it:
   activity notifications, and AI-owned conversations stay with the assistant;
 - assignment alerts when another teammate changes the assignee to you, if enabled
   in your account preferences. Self-assignment and unchanged assignments stay quiet.
-  Conversation mail requires enabled workspace email settings (**Enable receiving
-  email** on the **Email** page). Durable intents recover before a provider attempt;
+  Conversation mail requires **Email customers and your team about conversations**
+  on the **Email** page. Durable intents recover before a provider attempt;
   failed or uncertain attempts are never automatically replayed;
 - conversation transcripts that an operator chooses to email;
 - reviewed lead emails (see [Lead outreach](#lead-outreach)).
@@ -102,9 +105,10 @@ land back in the same conversation.
 
 ### Set up an inbound address
 
-1. On the workspace's **Email** settings page, enter a **Receive Email Address** and
-   tick **Enable receiving email**. Any email sent to that address creates a
-   support conversation. Use a plain address without a `+`; each address can belong
+1. On the workspace's **Email** settings page, enter a **Receiving address** and keep
+   **Email customers and your team about conversations** on. Once mail can reach it,
+   any email sent to that address creates a support conversation; the page shows
+   whether it can yet. Use a plain address without a `+`; each address can belong
    to only one active workspace.
 2. Route mail for that address to HappyToHelp in one of the three ways below. Your
    email routing must deliver that mailbox, or a catch-all, to the Worker.
@@ -112,7 +116,13 @@ land back in the same conversation.
    records stay unchanged.
 
 Notification emails carry a reply address issued to their recipient, of the form
-`mailbox+r.<token>@domain`. A reply from that recipient joins that conversation as
+`mailbox+r.<token>@domain`, only when the receiving address can actually receive
+mail: the installation holds `INBOUND_EMAIL_TOKEN`, the address is not on
+`workers.dev`, and its domain has an MX record (Cloudflare Email Routing and
+SendGrid Inbound Parse both add one). Otherwise the email has no `Reply-To` and
+ends with a line telling the customer that replies to it are not received, with a
+link that opens the chat on the workspace's website (`<website>/#launch-chat`).
+**Settings → Email** shows which case applies and the routing steps. A reply from that recipient joins that conversation as
 them: possessing the address is the proof. A customer's preferred notification
 address replies as the customer only through the reply address issued to it.
 

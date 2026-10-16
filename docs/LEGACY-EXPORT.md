@@ -1,0 +1,74 @@
+# Export legacy HappyToHelp
+
+This operator tool reads one explicitly chosen legacy MySQL project and its media. It makes no source writes, discovers no credentials and never loads dotenv files. It belongs beside the native importer; it does not use a web endpoint or change an installation. Run Node 22.20.0, `pnpm install --frozen-lockfile`, and AWS CLI v2 for direct S3 reads.
+
+## Access and extraction
+
+Supply `LEGACY_MYSQL_HOST`, `LEGACY_MYSQL_PORT` (default 3306), `LEGACY_MYSQL_DATABASE`, `LEGACY_MYSQL_USER`, `LEGACY_MYSQL_PASSWORD` in the process environment. Use a local SSH tunnel to a private database or `LEGACY_MYSQL_SSL_CA` for verified MySQL TLS. Use a SELECT-only database account. The tool sets UTC and repeatable-read, opens a consistent read-only transaction, streams SELECTs on that connection, then commits. It requires InnoDB for every table it reads. No lock, write, schema change, dump privilege, superuser, SSH key or AWS discovery permission is needed.
+
+```sh
+node scripts/export-legacy.mjs snapshot \
+  --project PROJECT_UUID --revision LEGACY_GIT_SHA --ai-model gpt-5.6-luna \
+  --output exports/company.snapshot.json
+```
+
+Choose the native AI model explicitly. The legacy `ais` table has no model field; the example is the native edition's configured OpenAI default, not a recovered historical model. No provider work runs during import.
+
+The snapshot retains UUIDs, all selected noncredential columns, SQL decimals/BIGINTs as strings, JSON as JSON, and UTC timestamps. It includes direct project tables, conversation children, article/category pivots, dataset files, referenced human/AI authors, matching global AI defaults, scoped polymorphic media and image variants. It fails for unclassified tables instead of silently claiming to export them. The current scope and credential omissions are in `scripts/legacy-export/scope.mjs`. Production migration state must be confirmed by the owner; only source-defined schemas were available during development.
+
+Passwords, remember/invitation/contact-key tokens, verification/shared keys and GitHub access tokens are omitted. Asymmetric/contact shared-key tables, auth resets, queues, Telescope and the unrelated waitlist are excluded. The snapshot records names of excluded tables and omitted columns. Other original business fields remain in the importer's archive, including unsupported fields and soft-deleted records.
+
+## Attachments
+
+```sh
+# Directory must contain the original bucket's key tree (not renamed files).
+node scripts/export-legacy.mjs attachments \
+  --input exports/company.snapshot.json --objects-dir /private/copied-bucket \
+  --output exports/company.import.json
+
+# Or read only the exact S3 keys from the snapshot.
+node scripts/export-legacy.mjs attachments \
+  --input exports/company.snapshot.json --bucket CONFIRMED_BUCKET --region us-east-1 \
+  --output exports/company.import.json
+```
+
+S3 uses only `s3:GetObject` through AWS CLI `s3api get-object`, with explicit `LEGACY_AWS_ACCESS_KEY_ID`, `LEGACY_AWS_SECRET_ACCESS_KEY` and optional `LEGACY_AWS_SESSION_TOKEN`. It ignores existing AWS profiles/config and never lists or writes the bucket. Add `kms:Decrypt` for the specific KMS key only if these objects use SSE-KMS. Local `public` media must be supplied from its filesystem root; other disks fail explicitly. Missing objects and wrong sizes fail. Bytes are base64 encoded with SHA-256 and copied into native local R2 by the importer. Original S3 keys, filenames and media joins stay in the artifact. Non-message media is retained in R2/archive; inline article images and logos still need the separate URL-rewrite work described below.
+
+Default bounds are 256 MiB of row JSON, 256 MiB of raw attachments and 512 MiB of final JSON. Increase only with an explicit `--max-row-bytes`, `--max-object-bytes`, or `--max-json-bytes` byte count and adequate local memory. These are memory bounds, not automatic chunking. The importer reads/plans the whole bundle; very large projects require a deliberate importer streaming/chunking extension before access is granted. There is no silent truncation.
+
+Outputs are private (0600), exclusively created and published after success. Existing files are never replaced. Snapshot extraction must restart after interruption; the consistent transaction cannot resume on a later connection. The completed snapshot is immutable. Retry only the attachments step from it with a new output path. Attachment copying is read-only and may safely repeat; it has no durable byte cache. Import resumes per row from the exact final artifact.
+
+For an owner-run export in a checkout already on `hh/legacy-export`, with the environment above plus `LEGACY_S3_BUCKET` and `LEGACY_AWS_REGION`:
+
+```sh
+bash scripts/legacy-export/export-project.sh PROJECT_UUID LEGACY_GIT_SHA gpt-5.6-luna exports/company
+```
+
+Run once per project into a distinct directory. The resulting `import.json` and `snapshot.json` contain private support data: transfer them through the owner's private channel, never Git or a public PR.
+
+## Native import
+
+Use an isolated native checkout. Start local state/migrations through `rer dev`, then stop it before importing; alternatively prepare/apply local migrations directly. Keep the completed artifact for resume.
+
+```sh
+pnpm run migrations:prepare
+pnpm exec wrangler d1 migrations apply DB --local --persist-to .wrangler/state
+node scripts/import-legacy.mjs --file exports/company.import.json
+node scripts/import-legacy.mjs --file exports/company.import.json --apply --persist-to .wrangler/state
+```
+
+The plan is read-only. Apply writes only local D1/R2. Bundle digest is the run identity; source rows and canonical writes commit together. Exact replay skips every completed row. A new artifact must match existing canonical bytes or stops without overwriting them. Earlier committed rows remain after a later conflict; resume the exact artifact. This is a migration/replay tool, not an incremental synchronizer or a cutover procedure.
+
+Native mappings preserve conversation/message/note/contact/article/category/macro IDs. Internal notes come from `events.type=INTERNAL_NOTE` and remain private. Draft categories use nullable `published_at`; deleted records are archive-only, including dependent transcripts. Preferred contact name/email and original file names survive. Invitees with no user stay archive-only. Old credentials are not native logins; recover/pair/reconnect through native flows separately.
+
+Project `website` supplies the allowed origin. Raw widget/availability settings, responder IDs, timezone, help-center domain and logo URL are retained in project settings; unsupported legacy widget defaults, proxy controls and billing fields remain archived. This does not configure DNS, sending domains, mail credentials, providers or legacy-widget compatibility.
+
+## Deliberate boundaries
+
+Archive-only: page views, read/notification maps, raw email source, connection/proxy state, leads, AI logs/thinking/optimizations, legacy billing/account fields, encrypted collector actions, provider-only dataset references, non-message media associations, pending invites and deleted rows. Retain these in the private original bundle and `legacy_import_rows` for later decisions. No jobs or provider requests replay. Retained dataset markdown maps only when publication provenance permits it. AI profiles use an explicit chosen native model and original/default prompts. Plugins retain their configuration but must be reviewed before use.
+
+Build before cutover: rewriting article inline media/avatar/background URLs to authorized native object URLs; translating unsupported legacy widget overrides/defaults and availability behavior; recreating live mail/provider/integration configuration with native credentials. Legacy access tokens, passwords and encryption keys are deliberately dropped, not migrated. Redis sessions/cache, open sockets and SQS execution state are dropped; durable conversations and support content come from MySQL/media, not Redis.
+
+## Local integration
+
+`pnpm run test:legacy-export` requires an isolated local/CI MySQL admin supplied by `LEGACY_TEST_MYSQL_HOST`, `LEGACY_TEST_MYSQL_PORT`, `LEGACY_TEST_MYSQL_USER`, `LEGACY_TEST_MYSQL_PASSWORD`, optional `LEGACY_TEST_MYSQL_SOCKET`. It creates and deletes only its randomly named test database/user. It loads the migration-derived final core schema and realistic ChargeDesk/12ui fixtures, grants a SELECT-only reader, runs both exporter commands, invokes the importer's public command twice per project and checks actual local D1/R2 content, privacy, publication, tenant separation and replay. `LEGACY_TEST_OUTPUT` keeps synthetic artifacts outside the checkout for local UI inspection. CI runs this single integration test against MySQL 8.4.

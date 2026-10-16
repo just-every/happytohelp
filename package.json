@@ -99,7 +99,8 @@
     "deps": "rer install",
     "rer": "rer",
     "test:delegation-journey": "node tests/delegation-journey.mjs && node tests/delegation-journey.mjs --browser",
-    "verify:release": "pnpm run build && node tests/upgrade.mjs 0.4.1"
+    "verify:release": "pnpm run build && node tests/upgrade.mjs 0.4.1",
+    "test:legacy-export": "node --test tests/legacy-export.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",
@@ -166,6 +167,7 @@
     "@vitejs/plugin-react": "6.1.1",
     "axe-core": "4.13.0",
     "esbuild": "0.28.1",
+    "mysql2": "3.24.6",
     "playwright": "1.63.0-alpha-2026-08-31",
     "sass": "^1.93.0",
     "typescript": "5.9.3",

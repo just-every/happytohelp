@@ -485,7 +485,12 @@
           "tests/first-run",
           "live-proofs/git.mjs",
           "RUN-LOCALLY.md",
-          "SEED-COMMAND-CONTRACT.md"
+          "SEED-COMMAND-CONTRACT.md",
+          "scripts/export-legacy.mjs",
+          "scripts/legacy-export",
+          "tests/legacy-export.mjs",
+          "tests/legacy-export",
+          "docs/LEGACY-EXPORT.md"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",

@@ -1508,7 +1508,7 @@
       "executable": false
     },
     "docs/LEGACY-EXPORT.md": {
-      "sha256": "0e72c89739c44035b16d66e19476786de5fc495f567f3aff348a373817df8838",
+      "sha256": "008cfdeac67ee58b53f63c16e87a3c148615e8b7eef9a588350eebf75bb6c9fa",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2536,7 +2536,7 @@
       "executable": false
     },
     "scripts/legacy-export/extract.mjs": {
-      "sha256": "3f750d599de118a656ff7c2a59dff0e55dea641d63c129dc3474abfa6702ea2b",
+      "sha256": "91c5be7b10976c7719b58003452869fd2864fdf4a0694b59e12c679998e54d78",
       "executable": false
     },
     "scripts/legacy-export/files.mjs": {
@@ -2548,7 +2548,7 @@
       "executable": false
     },
     "scripts/legacy-export/import-package.mjs": {
-      "sha256": "7f206658795ccea08dd6a77112488b26413bf6564ef4bc4491316684180f6312",
+      "sha256": "2f6c5241401848b09c738cf381ab0d9f5d06725a5a019e8c36aa0103b26e7505",
       "executable": false
     },
     "scripts/legacy-export/mysql.mjs": {
@@ -2560,11 +2560,11 @@
       "executable": false
     },
     "scripts/legacy-export/package.mjs": {
-      "sha256": "e720f104cc1bbbdf3a0de72fc185bef0e1e22113a017f3c50cc5021676619b50",
+      "sha256": "3a9735ea0b9c77e6b3f33fda16e95799e0dc41a4cb2b97d6f95d877464a7a013",
       "executable": false
     },
     "scripts/legacy-export/queries.mjs": {
-      "sha256": "db54c794909adf283549d4ab403c4b8e7a5369d52cc629fc119964e58489e3fc",
+      "sha256": "f3994c58127d30b4cebe02508a251758ec8bfe288fdaf02353139d7c81e8aa82",
       "executable": false
     },
     "scripts/legacy-export/references.mjs": {
@@ -2572,19 +2572,19 @@
       "executable": false
     },
     "scripts/legacy-export/scope.mjs": {
-      "sha256": "dbb161f12f29e75d583991dd9bf1fcc3a34c2863f633172bbefd04ca079db5b0",
+      "sha256": "f6ccf152d3c3682ec0fe39b5b65c894cbfbb90e832170216eea5c3ea4e98fa0e",
       "executable": false
     },
     "scripts/legacy-export/secrets.mjs": {
-      "sha256": "70beea59ffbc8e5f179912de09bb577c26be0712b84210e84f1dbdb81466746e",
+      "sha256": "80924d5e06c25f52acac97c253ff11f587bcde9d76a7b4153d2953af75c09d77",
       "executable": false
     },
     "scripts/legacy-export/text-policy.mjs": {
-      "sha256": "8f6f1ed0f8de33e5028bb2b93e1cc7eb7083771f8845f1269f6f9a87799ca9a9",
+      "sha256": "4d40e9a98a56d8b9fea0b60f7ee93960b97e1c42b09129a3e70591899238aa40",
       "executable": false
     },
     "scripts/legacy-export/transport-secrets.mjs": {
-      "sha256": "93dfb631ef303e8d95a32f3ea9288f5c8651b73faff7d84b6e81c7ef4e841ff6",
+      "sha256": "757526fb1ef29e4eff2f5e34093100513928bcf97da0257e1c07c9172472e7fc",
       "executable": false
     },
     "scripts/local-agent-archive.cjs": {
@@ -4252,11 +4252,11 @@
       "executable": false
     },
     "src/modules/legacy-import/importer.ts": {
-      "sha256": "0a224fe7d3389f8a0d2bf35f3ee07b68b0992088faf8055e40a1a07685b4d659",
+      "sha256": "63dcbe968dcafb0d9e6e255856187435e6ce96c21c4344c640f296d85fbf33f8",
       "executable": false
     },
     "src/modules/legacy-import/map-core.ts": {
-      "sha256": "5381d71e5e7e84501cab73c72f5d6a4bfb7246d17647cc75f0909166e61c62af",
+      "sha256": "433415f6cbda9b94e741b376493eb210532b6118b94f680d14fcf9836e55c2db",
       "executable": false
     },
     "src/modules/legacy-import/map-knowledge.ts": {
@@ -4268,7 +4268,7 @@
       "executable": false
     },
     "src/modules/legacy-import/map-project.ts": {
-      "sha256": "db9dafe8b3c77671558d85f9e28bb93857155a5fe416bcc472db8ff13ac5532b",
+      "sha256": "3138ed8e0f11c5178214ce25b3fefb0e026fb109a1e5e0478d2e181ccad6f822",
       "executable": false
     },
     "src/modules/legacy-import/mapping-shared.ts": {
@@ -4284,7 +4284,7 @@
       "executable": false
     },
     "src/modules/legacy-import/relationships.ts": {
-      "sha256": "c0e1449fc1588661e5b644e06d825ce1769603aa7816860ee7d906ec0eaea8a1",
+      "sha256": "dea284fdbb0f607bd0bd01813537a24e83ea99e121650b836e19b7c24c1d4d07",
       "executable": false
     },
     "src/modules/legacy-import/types.ts": {
@@ -8756,7 +8756,7 @@
       "executable": false
     },
     "tests/legacy-export.mjs": {
-      "sha256": "8570e55d5aa21087019fb68babb9fe6540f14d2a7a9b43ee3f4a94c7c8d7aeb8",
+      "sha256": "f503a630caa3cf63f1cd5de4372b0c00b0ef258a8d3bebf5452f7d51bab2fe17",
       "executable": false
     },
     "tests/legacy-export/assertions.mjs": {

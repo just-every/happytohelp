@@ -15,6 +15,7 @@ function sentryEndpoint(url){
  return /^(?:sentry\.io|o\d+\.ingest(?:\.[a-z]{2})?\.sentry\.io)$/.test(url.hostname)&&/^\/api\/\d+\/(?:security|store|envelope|minidump)\/?$/.test(url.pathname)
   &&url.searchParams.has('sentry_key')&&[...url.searchParams].every(([key,value])=>key==='sentry_key'?/^[a-f0-9]{32}$/.test(value):/^sentry_(?:version|client|environment|release)$/.test(key));
 }
+export function publicSentryEndpoint(raw){try{return sentryEndpoint(new URL(raw.replaceAll('&amp;','&')));}catch{return false;}}
 function gravatar(url){
  if(!['gravatar.com','www.gravatar.com','secure.gravatar.com'].includes(url.hostname)||!/^\/avatar\/(?:[a-f0-9]{32}|[a-f0-9]{64})(?:\.jpg)?$/i.test(url.pathname))return false;
  return [...url.searchParams].every(([key,value])=>{

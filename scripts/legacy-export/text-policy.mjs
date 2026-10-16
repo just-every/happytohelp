@@ -1,5 +1,5 @@
 import {omitTransportCredentials,omitTransportObject,omitBasicAuthorization} from './transport-secrets.mjs';
-import {opaqueCredentialShape,opaqueReferences} from './references.mjs';
+import {opaqueCredentialShape,opaqueReferences,publicSentryEndpoint} from './references.mjs';
 // Explicit omission policy for rendered support text. Unknown credential-like
 // assignments, JSON fields and opaque payloads still fail in secrets.mjs.
 const credentialName=/(?:key|secret|token|password|salt|credential|encrypt(?:ion)?)$/i;
@@ -38,6 +38,8 @@ function noncredential(a){
  // A public link ("reset password: https://…/password/reset") is not the credential itself.
  // Capability-shaped URLs still go through the URL omission below.
  if(!quote&&publicLink(value))return true;
+ // The public DSN key inside an exact Sentry ingest URL (see references.mjs).
+ if(name==='sentry_key'&&operator==='='&&!quote){const start=prefix.search(/https?:\/\/[^\s<>"'()[\]]*$/);if(start>=0&&publicSentryEndpoint(prefix.slice(start)+a.raw+(tail.match(/^[^\s<>"'()[\]]*/)?.[0]??'')))return true;}
  if(/^Idempotency-Key$/i.test(name)||name.toLowerCase()==='key'&&/\bidempotency\s+$/i.test(prefix))return true;
  if(operator===':'&&/^YOUR_[A-Z_]+$/.test(name)&&['\\','-d','-X','-H'].includes(value))return true;
  if(operator===':'&&!quote&&/^(?:true|false|null|undefined|None)$/.test(value))return true;

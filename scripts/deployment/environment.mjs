@@ -13,7 +13,7 @@ export const variableNames = [
  'APIFY_CRAWLER_ACTOR_ID','GITHUB_CLIENT_ID','GITHUB_PROJECT_ID','PREVIEW_ORIGIN',
  'BRAND_IMAGE_MODEL','BRAND_IMAGE_SIZE',
  'BRAND_IMAGE_QUALITY','TRAINING_PRICE_CEILINGS','ENABLE_SYNTHETIC_EVALUATION',
- 'RATE_LIMITS','AI_DAILY_CEILINGS',
+ 'RATE_LIMITS','AI_DAILY_CEILINGS','PUBLIC_HELP_HOSTS',
 ]
 /** Native bindings other than the standard database, storage and queue bindings. */
 export const serviceBindingNames = []
@@ -46,6 +46,14 @@ export function validateLocalSetupEnvironment(env){
 export function validateRuntimeEnvironment(env){
  if(env.H2H_LOCAL==='true')throw new Error('Local development mail configuration cannot be deployed')
  validateRemoteMailSelection(env)
+ if(configured(env,'PUBLIC_HELP_HOSTS')){
+  const hosts=JSON.parse(env.PUBLIC_HELP_HOSTS)
+  if(!hosts||Array.isArray(hosts)||typeof hosts!=='object')throw new Error('PUBLIC_HELP_HOSTS must be an exact hostname/project map')
+  for(const [host,project]of Object.entries(hosts)){
+   if(host!==host.toLowerCase()||! /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(host)||typeof project!=='string'||!project||project.trim()!==project||project.length>200)throw new Error('PUBLIC_HELP_HOSTS requires exact lower-case DNS hosts and project ids or slugs')
+   if(configured(env,'APP_ORIGIN')&&new URL(env.APP_ORIGIN).hostname===host)throw new Error('The application hostname cannot be a help host')
+  }
+ }
  if(configured(env,'INBOUND_EMAIL_DOMAIN')&&!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(env.INBOUND_EMAIL_DOMAIN))throw new Error('INBOUND_EMAIL_DOMAIN must be a domain name such as in.example.com')
  for(const name of ['REGISTRATION_ENABLED','ENABLE_SYNTHETIC_EVALUATION'])if(configured(env,name)&&!['true','false'].includes(env[name]))throw new Error(`${name} must be true or false`)
  for(const name of ['APP_ORIGIN','PREVIEW_ORIGIN','RER_MANAGEMENT_ORIGIN','QDRANT_URL'])if(configured(env,name)){const url=runtimeUrl(env[name],name);if(url.protocol!=='https:'||url.username||url.password||url.hash)throw new Error(`${name} must be HTTPS without embedded credentials`);if(name!=='QDRANT_URL'&&(url.pathname!=='/'||url.search||url.port))throw new Error(`${name} must be an origin`)}

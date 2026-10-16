@@ -24,6 +24,7 @@ import { routes as sitePreview,brandMediaRoutes } from './modules/site-preview/r
 import {moveInRoutes} from './modules/move-in/routes'
 import {tags} from './modules/management/tags'
 import { previewRoutes } from './modules/site-preview/proxy'
+import {legacyWidget} from './modules/widget/legacy-project'
 
 import {delegation} from './edition/delegation/routes'
 import {consent} from './edition/delegation/consent'
@@ -75,6 +76,7 @@ app.route('/api/dashboard',dashboardRoutes)
 app.route('/api/dashboard',tags)
 app.route('/api/move-in',moveInRoutes)
 app.route('/api/widget',publicWidget)
+app.route('/api/widget',legacyWidget)
 registerLocalComputerRoutes(app,localComputerIntegration)
 
 // Drain small rejected uploads so the Worker proxy preserves the HTTP response.

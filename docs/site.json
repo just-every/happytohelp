@@ -67,6 +67,11 @@
           "slug": "inbound-email-recovery",
           "source": "docs/INBOUND-EMAIL-RECOVERY.md",
           "label": "Inbound email recovery"
+        },
+        {
+          "slug": "legacy-entry-points",
+          "source": "docs/legacy-entry-points.md",
+          "label": "Legacy entry points"
         }
       ]
     },

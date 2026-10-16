@@ -18,7 +18,7 @@ const Insight = React.lazy(() => import(/* webpackChunkName: "Insight" */ './Ins
 const Interact = React.lazy(() => import(/* webpackChunkName: "Interact" */ './Interact'));
 const Style = React.lazy(() => import(/* webpackChunkName: "Style" */ './Style'));
 
-const App = forwardRef(({ config, Collector }, ref) => {
+const App = forwardRef(({ config, Collector, onReady }, ref) => {
     const isPreview = isPreviewMode(config);
     const connectionRef = useRef(null);
     const shadowHostRef = useRef(null);
@@ -108,6 +108,8 @@ const App = forwardRef(({ config, Collector }, ref) => {
         update: updateContext,
         request: isPreview ? () => Promise.resolve({ preview: true }) : (...args) => connectionRef.current?.request?.(...args),
     }));
+
+    useEffect(() => { onReady?.(); }, [onReady]);
 
     const fetchSettings = useCallback((configuration) => {
         if (configuration) { setContextValues(current => mergeAdvanced(current, configuration, {hardMergeEverything: true})); return; }

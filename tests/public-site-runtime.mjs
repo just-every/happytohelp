@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict'
+import { createRuntime } from './helpers/emitted-runtime.mjs'
+
+if (!process.argv.includes('--help-entry')) {
 const origin = process.env.H2H_TEST_ORIGIN
 if (!origin) throw Error('Set H2H_TEST_ORIGIN to the real local native Worker with migrations applied')
 const response = await fetch(origin + '/')
@@ -54,8 +57,14 @@ assert.doesNotMatch(html, /waitlist|pricing|widget\.js|stripe|<\?php|@extends\(/
 for (const asset of html.matchAll(/(?:src|href)="(\/(?:site-assets|homepage)\/[^"?]+)/g)) {
  assert.equal((await fetch(origin + asset[1])).status, 200, asset[1])
 }
-for (const path of ['/marketing', '/pricing', '/waitlist', '/features/sales', '/resources/install', '/company/terms', '/demo?website=https://example.com']) {
+for (const path of ['/marketing', '/pricing', '/waitlist', '/features/sales', '/company/terms', '/demo?website=https://example.com']) {
  assert.equal((await fetch(origin + path)).status, 404, path)
+}
+for (const [page, section] of [['install', 'widget'], ['widget-hash', 'identity'], ['javascript-api', 'javascript-api'], ['javascript-options', 'widget'], ['values', 'caller-decisions'], ['safety', 'identity']]) {
+ const response = await fetch(`${origin}/resources/${page}`, { redirect: 'manual' })
+ assert.equal(response.status, 308, page)
+ assert.equal(response.headers.get('location'), `/docs/legacy-entry-points#${section}`, page)
+ assert.equal((await fetch(new URL(response.headers.get('location'), origin))).status, 200, 'documentation destination ' + page)
 }
 assert.equal((await fetch(origin + '/waitlist', {method: 'POST', body: new URLSearchParams({email: 'removed@example.invalid'})})).status, 404)
 // Unknown application paths: a branded HTML 404 with a descriptive title, a message and links home and to the workspace.
@@ -91,3 +100,78 @@ if (process.env.H2H_TEST_PROJECT_ID) {
  }
 }
 console.log('Native homepage: workspace entry, /docs pages and their 404s, retired-route denial, local assets and no public widget passed. Published Help Center checks: ' + (process.env.H2H_TEST_PROJECT_ID ? 'passed' : 'not requested'))
+
+}
+
+// A retained customer URL must pass the emitted Worker's real dispatch, not just the Help Center router.
+async function helpEntryJourney() {
+ const slug = 'retained-help-slug'
+ const runtime = await createRuntime({ vars: {
+  APP_ORIGIN: 'http://127.0.0.1',
+  PUBLIC_HELP_HOSTS: JSON.stringify({ localhost: slug, '127.0.0.1': slug }),
+ } })
+ const helpOrigin = new URL(runtime.origin)
+ helpOrigin.hostname = 'localhost'
+ let success = false
+ try {
+  assert.equal((await fetch(new URL('/', helpOrigin))).status, 404, 'a configured host with an unknown project cannot expose a center')
+  const tenant = await runtime.seedTenant({ name: 'Retained support', email: 'retained-help@example.test', allowedOrigin: runtime.origin })
+  // The legacy importer retains aliases in this table. Fixture custody is separate from native identity.
+  await runtime.execute(`INSERT INTO public_project_aliases(slug,project_id) VALUES('${slug}','${tenant.projectId}')`)
+  const headers = { Authorization: `Bearer ${tenant.token}`, 'Content-Type': 'application/json' }
+  const publish = async (owner, articleSlug, status) => {
+   const response = await fetch(`${runtime.origin}/api/knowledge/${owner.projectId}/articles`, {
+    method: 'POST', headers: { ...headers, Authorization: `Bearer ${owner.token}` },
+    body: JSON.stringify({ slug: articleSlug, title: articleSlug, summary: 'retained support guide', content: 'Retained instructions.', status }),
+   })
+   assert.equal(response.status, 201, await response.text())
+  }
+  await publish(tenant, 'retained-guide', 'published')
+  await publish(tenant, 'private-guide', 'draft')
+  const other = await runtime.seedTenant({ name: 'Other support', email: 'other-help@example.test', allowedOrigin: runtime.origin })
+  await publish(other, 'foreign-guide', 'published')
+  for (const base of [`/${tenant.projectId}`, `/${slug}`, `/help/${slug}`]) {
+   for (const tail of ['', '/', '/search?keyword=retained', '/retained-guide']) {
+    const response = await fetch(runtime.origin + base + tail)
+    assert.equal(response.status, 200, base + tail)
+    const html = await response.text()
+    assert.ok(html.includes(`action="${base}/search"`), 'search stays on the retained path')
+    if (!tail || tail.startsWith('/search')) assert.ok(html.includes(`href="${base}/retained-guide"`), 'article links retain their entry path')
+   }
+  }
+  for (const path of ['/', '/search?keyword=retained', '/retained-guide']) {
+   const response = await fetch(new URL(path, helpOrigin))
+   assert.equal(response.status, 200, 'configured host ' + path)
+   const html = await response.text()
+   assert.ok(html.includes('action="/search"'), 'host search stays at its root')
+   assert.ok(html.includes('class="help-center-brand" href="/"'), 'host brand returns to its root')
+   if (path !== '/retained-guide') assert.ok(html.includes('href="/retained-guide"'), 'host article links stay at its root')
+  }
+  assert.equal((await fetch(new URL('/retained-guide', helpOrigin), { method: 'HEAD' })).status, 200)
+  for (const path of ['/private-guide', '/foreign-guide', '/missing-guide']) {
+   assert.equal((await fetch(new URL(path, helpOrigin))).status, 404, path)
+  }
+  for (const path of ['/', '/run']) {
+   const response = await fetch(runtime.origin + path, { headers: { Forwarded: 'host=localhost', 'X-Forwarded-Host': 'localhost', 'X-Original-Host': 'localhost' } })
+   if (path === '/') assert.equal(response.status, 200, 'canonical application root')
+   assert.ok(response.status < 500, 'canonical application route remains available')
+   assert.doesNotMatch(await response.text(), /data-help-center-nav/, 'configuration and forwarded headers cannot replace the application origin')
+  }
+  const privateResponse = await fetch(new URL('/api/management/projects', helpOrigin))
+  assert.equal(privateResponse.status, 401, 'a configured help host does not turn a private API into public knowledge')
+  assert.doesNotMatch(await privateResponse.text(), /data-help-center-nav/)
+  const retired = await fetch(`${runtime.origin}/api/management/projects/${tenant.projectId}`, { method: 'DELETE', headers })
+  assert.equal(retired.status, 200, await retired.text())
+  for (const address of [new URL('/', helpOrigin), new URL('/search?keyword=retained', helpOrigin), new URL('/retained-guide', helpOrigin), new URL(`/${slug}`, runtime.origin), new URL(`/help/${slug}/retained-guide`, runtime.origin)]) {
+   const response = await fetch(address)
+   assert.equal(response.status, 404, 'retired project ' + address.pathname)
+   assert.doesNotMatch(await response.text(), /retained-guide|Retained instructions/)
+  }
+  // The same explicit configuration can name a native id directly, without requiring a slug alias.
+  await runtime.execute(`DELETE FROM public_project_aliases WHERE slug='${slug}'; INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('${slug}','Direct native help','direct-native-help','https://example.test',1); INSERT INTO knowledge_articles(id,project_id,slug,title,content,status,updated_at) VALUES('direct-guide','${slug}','direct-guide','Direct native guide','Native instructions.','published',1)`)
+  for (const path of ['/', '/search?keyword=Native', '/direct-guide']) assert.equal((await fetch(new URL(path, helpOrigin))).status, 200, 'configured native id ' + path)
+  success = true
+ } finally { await runtime.close(success) }
+ console.log('Emitted public help entry: native/imported slug paths, exact configured host root/search/article, app-origin preservation, draft/tenant/API/deleted fences passed')
+}
+await helpEntryJourney()

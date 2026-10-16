@@ -4,6 +4,7 @@ import type { AppEnv, Env } from '../../platform/env'
 import { notFoundResponse, rejectedResponse } from '../../base/rejected-response'
 import { helpCenterRoutes, reserved, resolvePublicProject } from './help-center'
 import { missingHelpCenterPage } from './not-found'
+export { publicHelpHostResponse } from './help-host'
 
 export async function isPublicSitePath(path: string, env: Env) {
  if (path.startsWith('/help/') || path.startsWith('/api/public-site/')) return true

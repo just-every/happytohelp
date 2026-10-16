@@ -24,6 +24,7 @@ import { routes as sitePreview,brandMediaRoutes } from './modules/site-preview/r
 import {moveInRoutes} from './modules/move-in/routes'
 import {tags} from './modules/management/tags'
 import { previewRoutes } from './modules/site-preview/proxy'
+import {AiConfigurationError} from './modules/ai-support/configuration'
 import {legacyWidget} from './modules/widget/legacy-project'
 
 import {delegation} from './edition/delegation/routes'
@@ -42,6 +43,7 @@ app.route('/api/v1',scopedApi)
 app.use('/api/identity/widget/profile',visitorProfileCredential)
 app.use('/api/*',async(c,next)=>{if(c.req.path==='/api/v1'||c.req.path.startsWith('/api/v1/'))return next();return projectCors(c,next)})
 app.onError((error,c) => {
+ if(error instanceof AiConfigurationError)return rejectedResponse(c.req.raw,c.json({error:error.message,code:error.code},error.status))
  // An exception carrying its own response (e.g. 429 with Retry-After) keeps its headers and JSON body.
  if(error instanceof HTTPException) return rejectedResponse(c.req.raw,error.res?error.getResponse():c.json({error:error.message},error.status))
  const status=(error as Error & {status?:number}).status

@@ -1,5 +1,5 @@
 import {createServer} from 'node:http';
-import {readFile,writeFile} from 'node:fs/promises';
+import {writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {widgetFailedSendBrowser} from './helpers/widget-failed-send-browser.mjs';
 import {widgetRecoveryBrowser} from './helpers/widget-recovery-browser.mjs';
@@ -9,17 +9,16 @@ if(!api||!origin||!widgetKey||!ownerToken)throw new Error('WIDGET_TEST_API, WIDG
 if(!['localhost','127.0.0.1'].includes(new URL(origin).hostname))throw new Error('Browser fixture host must be local');
 const evidence=process.env.WIDGET_TEST_EVIDENCE_DIR||'/tmp';
 const storageKey=`rer-widget:${api}:${widgetKey}`;
-const bundle=await readFile(new URL('../public/widget.js',import.meta.url));
-const server=createServer((req,res)=>{if(req.url==='/widget.js'){res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(bundle);}else {
+const server=createServer((req,res)=>{
  res.setHeader('Content-Type','text/html; charset=utf-8');
  const mode=new URL(req.url,origin).searchParams.get('legacy');
- const options={projectId:process.env.WIDGET_TEST_PROJECT,apiOrigin:api,selector:'.launch-chat',settings:{collector:{enabled:false}}};
- const legacy=mode==='queue'?`<script>window.h2hQueue=[];function h2h(){h2hQueue.push(arguments)}h2h('init',${JSON.stringify(options)});h2h('close');h2h('open');h2h('update',{name:'Maya Chen',email:'maya@example.test',identifier:'legacy-maya',hash:'legacy-proof-requires-native-verification',metadata:{plan:'annual'},metadataHash:'legacy-metadata-proof'});</script><script src="/widget.js"></script>`:
- mode==='consent'?`<script>window.h2hQueue=[];function h2h(){h2hQueue.push(arguments)}h2h('init',${JSON.stringify({...options,await_consent:true})});</script><script src="/widget.js"></script>`:
- mode==='hascontext'?`<script>window.hasContextQueue=[];function hasContext(){hasContextQueue.push(arguments)}hasContext('init',${JSON.stringify(options)});</script><script src="/widget.js"></script>`:
- mode?`<script src="/widget.js" ${mode==='config'?`data-config="{'project_id':'${options.projectId}'}"`:`${mode}="${options.projectId}"`} data-api-origin="${api}"></script>`:null;
- res.end(`<html><head><meta charset="utf-8"></head><body style="background:#eee"><h1>Independent host page</h1><a class="launch-chat" href="#launch-chat">Contact support</a>${legacy||`<script src="/widget.js"></script><script>h2h("init",${JSON.stringify({widgetKey,apiOrigin:api,open:true,settings:{collector:{enabled:false}}})})</script>`}</body></html>`);
-}});
+ const options={projectId:process.env.WIDGET_TEST_PROJECT,selector:'.launch-chat',settings:{collector:{enabled:false}}};
+ const legacy=mode==='queue'?`<script>window.h2hQueue=[];function h2h(){h2hQueue.push(arguments)}h2h('init',${JSON.stringify(options)});h2h('close');h2h('open');h2h('update',{name:'Maya Chen',email:'maya@example.test',identifier:'legacy-maya',hash:'legacy-proof-requires-native-verification',metadata:{plan:'annual'},metadataHash:'legacy-metadata-proof'});</script><script src="${api}/widget.js"></script>`:
+ mode==='consent'?`<script>window.h2hQueue=[];function h2h(){h2hQueue.push(arguments)}h2h('init',${JSON.stringify({...options,await_consent:true})});</script><script src="${api}/widget.js"></script>`:
+ mode==='hascontext'?`<script>window.hasContextQueue=[];function hasContext(){hasContextQueue.push(arguments)}hasContext('init',${JSON.stringify(options)});</script><script src="${api}/widget.js"></script>`:
+ mode?`<script src="${api}/widget.js" ${mode==='config'?`data-config="{'project_id':'${options.projectId}'}"`:`${mode}="${options.projectId}"`} data-api-origin="${api}"></script>`:null;
+ res.end(`<html><head><meta charset="utf-8"></head><body style="background:#eee"><h1>Independent host page</h1><a class="launch-chat" href="#launch-chat">Contact support</a>${legacy||`<script src="${api}/widget.js"></script><script>h2h("init",${JSON.stringify({widgetKey,apiOrigin:api,open:true,settings:{collector:{enabled:false}}})})</script>`}</body></html>`);
+});
 await new Promise(resolve=>server.listen(Number(new URL(origin).port),new URL(origin).hostname,resolve));
 const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']}),context=await browser.newContext({viewport:{width:1000,height:800}}),page=await context.newPage();const errors=[],failed=[];
 page.on('pageerror',error=>{errors.push(error.message);console.error('BROWSER ERROR',error.stack)});page.on('response',response=>{if(response.status()>=400)failed.push({url:response.url(),status:response.status()});});
@@ -52,7 +51,7 @@ try{
  const observedContext=JSON.parse(updatedContact.data.metadata_json);
  assert.equal(observedContext.timezone,browserContext.timezone);assert.equal(observedContext.language,Intl.getCanonicalLocales(browserContext.language)[0]);assert.equal(observedContext.user_agent,browserContext.user_agent);assert.ok(Number.isFinite(new Date(observedContext.last_seen_at).getTime()));
 
- await page.screenshot({path:`${evidence}/desktop.png`});
+ await page.setViewportSize({width:1440,height:900});await page.screenshot({path:`${evidence}/desktop.png`});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
  const panel=await page.locator('.happytohelp-interact').boundingBox();assert.ok(panel.width<=390);await page.screenshot({path:`${evidence}/mobile.png`});
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
@@ -77,6 +76,9 @@ try{
    await legacyPage.locator('textarea[name=content]').waitFor({state:'visible'});
    await legacyPage.evaluate(name=>window[name]('settings',{text:{message:{placeholder_message_chat:'Ask the team'}}}),apiName);
    if(mode==='queue'){
+    const configurationError=await legacyPage.evaluate(async()=>{try{await h2h('ask',{message:'Can the assistant answer?'});return null}catch(error){return {message:error.message,status:error.status,code:error.code}}});
+    assert.equal(configurationError?.status,503);assert.equal(configurationError?.code,'CONFIGURATION_REQUIRED');assert.match(configurationError.message,/^CONFIGURATION_REQUIRED:/);
+    console.log('Legacy h2h ask:',JSON.stringify(configurationError));
     await legacyPage.locator('textarea[name=content]').fill('Can I keep my existing ChargeDesk support link?');
     await legacyPage.locator('button[name=submit]').click();
     await legacyPage.getByText('Can I keep my existing ChargeDesk support link?',{exact:true}).waitFor();
@@ -86,7 +88,7 @@ try{
     await legacyPage.setViewportSize({width:1440,height:900});
    }
   }
-  const requests=[];legacyPage.on('request',request=>{if(request.url().startsWith(api))requests.push(request.url())});
+  const requests=[];legacyPage.on('request',request=>{if(request.url().startsWith(api+'/api/'))requests.push(request.url())});
   await legacyPage.goto(`${origin}/?legacy=consent#launch-chat`);await legacyPage.waitForTimeout(150);
   assert.deepEqual(requests,[],'consent gate starts no native network activity');
   await legacyPage.evaluate(()=>h2h('consent',{provided:true}));

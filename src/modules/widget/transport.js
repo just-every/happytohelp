@@ -29,7 +29,7 @@ export class WidgetTransport {
       const retryAfter = Number(result.retryAfter ?? response.headers.get('Retry-After')) || null;
       throw Object.assign(new Error(result.error || 'Please wait a moment and try again.'), {status: 429, rateLimited: true, retryAfter, detail: result});
     }
-    if (!response.ok) throw Object.assign(new Error(result.message || result.error || `Request failed (${response.status})`), {status: response.status, detail: result});
+    if (!response.ok) throw Object.assign(new Error(result.message || result.error || `Request failed (${response.status})`), {status: response.status, code: result.code, detail: result});
     return result;
   }
   async connect(contact = {}) {

@@ -1,5 +1,5 @@
 import {assistanceProfileSql,replyProfileSql} from './selection'
-import {assertModelConfigured} from './configuration'
+import {assertModelConfigured,AiConfigurationError} from './configuration'
 import {publishSuggestions} from './presentation'
 import type { Actor,Env } from '../../platform/env'
 import {admitAutomaticReply,ceilingSkipToday,recordAutomaticReplySpend,recordSkippedReply,type ReplyAdmission} from './reply-ceiling'
@@ -18,7 +18,7 @@ function storedActorJson(actorJson:string){try{return canonicalActorJson(JSON.pa
 export async function requestGeneration(env:Env,input:{projectId:string;conversationId:string;actor:Actor;expectedRevision:number;id?:string;kind?:'reply'|'suggestions';instruction?:string;options?:{tool?:string;message?:string;client_request_id?:string;display_request_version?:number;loading_message?:string}},configurationFailure:'reject'|'record'='reject',assignmentGuard?:AssignmentReplyGuard){
  const profileSql=input.kind==='suggestions'?assistanceProfileSql:replyProfileSql
  const selected=await env.DB.prepare(`SELECT a.model FROM conversations c JOIN ai_profiles a ON a.id=${profileSql} AND a.project_id=c.project_id AND a.is_enabled=1 WHERE c.project_id=? AND c.id=?`).bind(input.projectId,input.conversationId).first<{model:string}>()
- if(!selected)throw new Error('CONFIGURATION_REQUIRED: enabled selected conversation AI')
+ if(!selected)throw new AiConfigurationError('enabled selected conversation AI')
  let configurationError:string|null=null
  try{assertModelConfigured(env,selected.model)}catch(error){if(configurationFailure==='reject')throw error;configurationError=String(error)}
  if(input.actor.projectId!==input.projectId)throw new Error('Project access denied')

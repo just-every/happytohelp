@@ -31,9 +31,16 @@ export async function monitoringJourney(){
   const retries=await Promise.all([v.widget('pingAction',{},200),v.widget('pingAction',{},200)]);assert.equal(retries.filter(retry=>retry.data.job?.id).length,1,'one run for concurrent retries')
   assert.equal(await count('context_jobs',"state='queued'"),1)
   // The burst is analysed with the historical summary, and an attributable insight is offered to the visitor.
-  ai.answer=(name,body)=>{const evidence=evidenceIds(body)[0];return name==='context_analysis'?{decision:'insight',help_type:'support',evidence_ids:[evidence],help:'Help with payment'}:name==='context_insight'?{content:'Would you like help with your payment?',buttons:[{text:'Dismiss',action:'close'}],loading:null,evidence_ids:[evidence]}:{summary:'Payment errors were observed.'}}
+  ai.answer=(name,body)=>{const evidence=evidenceIds(body)[0];return name==='context_analysis'?{decision:'insight',help_type:'support',evidence_ids:[evidence],help:'Help with payment'}:name==='context_insight'?{content:'Would you like help with your payment?',buttons:[{text:'Yes, help me',action:'send'},{text:'Dismiss',action:'close'}],loading:null,evidence_ids:[evidence]}:{summary:'Payment errors were observed.'}}
   await runAll();assert.match(JSON.stringify(ai.calls[0].body),/Seven password reset failures were observed/,'the historical summary informs the next analysis')
   const offered=(await v.widget('insights',{},200)).data.insights;assert.equal(offered.length,1);assert.equal(offered[0].content,'Would you like help with your payment?')
+  // Choosing an offered response admits the insight and the visitor's reply as one pair, once; a forged response is refused.
+  const use=(text,localId)=>app.call(`/api/conversations/${v.conversationId}/widget-events`,{token:v.token,body:{action:'useInsight',data:{insight_id:offered[0].id,text,local_id:localId,ai_message:{local_id:localId+'-ai'}}}})
+  assert.equal((await use('Forged button','forged')).status,400)
+  const pair=await use('Yes, help me','use-1');assert.equal(pair.status,200,JSON.stringify(pair.data));assert.equal(pair.data.messages.length,2)
+  assert.equal((await use('Yes, help me','use-1')).data.duplicate,true);await app.takeJobs()
+  const transcript=(await app.call(`/api/conversations/${v.conversationId}/messages`,{token:v.token,status:200})).data.messages.map(message=>message.content)
+  assert.deepEqual(transcript.slice(-2),['Would you like help with your payment?','Yes, help me'])
   // A dismissed insight stays dismissed, and stops further model requests for that visitor.
   assert.equal((await v.widget('dismissInsight',offered[0].id,200)).data.dismissed,true);assert.deepEqual((await v.widget('insights',{},200)).data.insights,[])
   await app.db.prepare('UPDATE context_collectors SET last_run_at=0 WHERE subject_id=?').bind(subject).run();const calls=ai.calls.length

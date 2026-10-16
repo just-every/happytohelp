@@ -1,17 +1,11 @@
-import assert from 'node:assert/strict';
-import {mkdir, writeFile} from 'node:fs/promises';
-import {join, resolve} from 'node:path';
-import {chromium} from 'playwright';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {holdNativeResponse, fillTrainingRun, settleFrames, assertUnavailable, switchTrainingProject} from './helpers/training-readiness.mjs';
+import assert from 'node:assert/strict'
+import {holdNativeResponse,fillTrainingRun,settleFrames,assertUnavailable,switchTrainingProject} from '../training-readiness.mjs'
 
-const directory = join(resolve(process.env.H2H_EVIDENCE_DIR || 'test-results'), 'training-readiness');
-await mkdir(directory, {recursive: true});
-const runtime = await createRuntime();
-let browser, success = false;
-const checks = [], holds = [];
-const pass = name => { checks.push(name); console.log('PASS', name); };
-try {
+// The evaluation runs page shows only real native state: loading and failures are never a fabricated list,
+// recovery is explicit, stale responses never repaint, and a pending creation is never replayed.
+export async function trainingBrowserJourney({runtime,browser,shot}){
+ const checks=[],holds=[],pass=name=>checks.push(name)
+ try{
     const api = async (path, body, token) => {
         const response = await fetch(runtime.origin + path, {method: body ? 'POST' : 'GET', headers: {'Content-Type': 'application/json', ...(token ? {Authorization: 'Bearer ' + token} : {})}, ...(body ? {body: JSON.stringify(body)} : {})});
         assert.ok(response.ok, path + ': ' + response.status + ' ' + await response.clone().text());
@@ -23,7 +17,6 @@ try {
     const beta = await api('/api/management/projects', {name: 'Training Beta', allowed_origin: runtime.origin}, token);
     const path = `/api/training/projects/${setup.projectId}/runs`, betaPath = `/api/training/projects/${beta.id}/runs`;
     const url = `${runtime.origin}/projects/${setup.projectId}/training-runs`;
-    browser = await chromium.launch({headless: true});
     const context = await browser.newContext({viewport: {width: 1440, height: 1000}});
     await context.addCookies([{name: 'h2h_session', value: token, url: runtime.origin}]);
     const page = await context.newPage(), posts = [], gets = [], errors = [];
@@ -45,7 +38,7 @@ try {
         await page.goto(url); await delayed.responseReady;
         await page.getByText('Loading evaluation runs…', {exact: true}).waitFor();
         await assertUnavailable(page, posts);
-        await page.screenshot({path: join(directory, `${width}-loading.png`), fullPage: true});
+        await page.screenshot({path: shot(`training-${width}-loading.png`), fullPage: true});
         delayed.release(); await delayed.deliveryDone; await createButton.waitFor();
         assert.ok(await createButton.isEnabled());
         assert.match(await page.locator('.workspace-page-content').innerText(), /No evaluation runs yet/);
@@ -58,7 +51,7 @@ try {
         await page.reload(); await page.getByRole('alert').waitFor();
         await assertUnavailable(page, posts);
         await settleFrames(page); assert.equal(failedReads, 1, 'failed GET is not retried automatically');
-        await page.screenshot({path: join(directory, `${width}-load-error.png`), fullPage: true});
+        await page.screenshot({path: shot(`training-${width}-load-error.png`), fullPage: true});
         await page.unroute('**' + path, fail);
         const recovery = await hold(path);
         await page.getByRole('button', {name: 'Load runs', exact: true}).click();
@@ -157,14 +150,5 @@ try {
 
     assert.deepEqual(errors, [], 'no browser exceptions');
     await context.close();
-    await writeFile(join(directory, 'result.json'), JSON.stringify({passed: checks, failed: []}, null, 2));
-    console.log(JSON.stringify({passed: checks, failed: []}, null, 2));
-    success = true;
-} catch (error) {
-    await writeFile(join(directory, 'result.json'), JSON.stringify({passed: checks, failed: [String(error?.message || error)]}, null, 2));
-    throw error;
-} finally {
-    for (const held of holds) held.release();
-    await browser?.close();
-    await runtime.close(success);
+ }finally{for(const held of holds)held.release()}
 }

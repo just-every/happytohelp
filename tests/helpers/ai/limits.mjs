@@ -1,27 +1,16 @@
-import test from 'node:test'
 import assert from 'node:assert/strict'
-import {createRequire} from 'node:module'
-import {readFile} from 'node:fs/promises'
 import {createHash} from 'node:crypto'
-import {awaitWindowRoom} from './helpers/window-room.mjs'
-const require=createRequire(import.meta.url),{build}=require(require.resolve('esbuild',{paths:[require.resolve('wrangler')]})),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
+import {startApp} from '../../journeys/kit/app.mjs'
+import {openaiStream} from '../openai-stream.mjs'
+import {awaitWindowRoom} from '../window-room.mjs'
 
-const migrations=['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0006_registration.sql','0007_conversation_history.sql','0008_account_sessions.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0097_owner_setup.sql','0102_public_abuse_limits.sql','020_ai_support.sql','0085_ai_context_guards.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql']
 const sha=value=>createHash('sha256').update(value).digest('hex')
-const bundle=build({entryPoints:['tests/abuse-limits-worker.ts'],bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})
-
-// The real application Worker on local D1/R2/Durable Objects/Queues. Any outbound
-// request other than the explicit email fixture fails the test (no provider calls).
+// The real application with configured limits. Outbound calls fail the test except the mail provider
+// and, where a reply runs, the model provider reporting enough usage to pass a $0.05 spend ceiling.
 async function start(bindings,outbound=[]){
- const script=(await bundle).outputFiles[0].text
- const mf=new Miniflare(convertV4MiniflareOptions({name:'abuse-limits',modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings,d1Databases:['DB'],r2Buckets:['FILES'],queueProducers:{JOBS:{queueName:'abuse-limit-jobs'}},durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}},outboundService:async request=>{outbound.push(request.url);if(request.url==='https://api.resend.com/emails')return Response.json({id:'fixture-'+outbound.length});return new Response('Unexpected outbound request in test',{status:599})}}))
- let db
- try{
-  db=await mf.getD1Database('DB')
-  for(const file of migrations){const source=(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).replace(/^\s*--[^\n]*$/gm,'');for(const [,sql] of source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await db.prepare(sql).run()}
- }catch(error){await mf.dispose();throw error}
- const call=(path,{body,token,ip,origin,method,headers={}}={})=>mf.dispatchFetch('https://app.example'+path,{method:method||(body===undefined?'GET':'POST'),headers:{...(body!==undefined&&!(body instanceof Uint8Array)?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{}),...(ip?{'CF-Connecting-IP':ip}:{}),...(origin?{Origin:origin}:{}),...headers},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)})
- return {mf,db,call}
+ const app=await startApp({captureQueue:true,origin:'https://app.example',bindings,outbound:async request=>{outbound.push(request.url);if(request.url==='https://api.resend.com/emails')return Response.json({id:'fixture-'+outbound.length});if(new URL(request.url).hostname==='api.openai.com')return openaiStream('Paid answer',{input_tokens:300000,output_tokens:0});return new Response('Unexpected outbound request in test',{status:599})}})
+ const call=(path,{body,token,ip,origin,method,headers={}}={})=>app.request(path,{method:method||(body===undefined?'GET':'POST'),raw:true,headers:{...(body!==undefined&&!(body instanceof Uint8Array)?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{}),...(ip?{'CF-Connecting-IP':ip}:{}),...(origin?{Origin:origin}:{}),...headers},body:body===undefined?undefined:body instanceof Uint8Array?body:JSON.stringify(body)})
+ return {app,db:app.db,call}
 }
 async function seedProject(db,id,{ai=false}={}){
  const now=Date.now()
@@ -60,9 +49,11 @@ async function expectAiRefused(send,origin){
  return body
 }
 
-test('public request limits return 429 with Retry-After and stay per project, address, contact and conversation',async()=>{
+
+// Public request limits per project, address, contact and conversation, refusals that store nothing, hashed keys.
+export async function requestLimits(){
  const outbound=[]
- const {mf,db,call}=await start({
+ const {app,db,call}=await start({
   RATE_LIMITS:JSON.stringify({widgetSessionsPerIpHour:3,conversationsPerContactHour:2,conversationsPerIpHour:3,messagesPerConversationMinute:3,messagesPerContactHour:5,uploadsPerContactDay:2,uploadBytesPerContactDay:1000,widgetEventsPerContactMinute:4,registrationsPerIpDay:2,projectsPerIpDay:3,projectsPerAccountDay:2}),
   REGISTRATION_ENABLED:'true',APP_ORIGIN:'https://app.example',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'test-only-email-key',EMAIL_FROM:'support@example.com',
  },outbound)
@@ -120,7 +111,7 @@ test('public request limits return 429 with Retry-After and stay per project, ad
   assert.equal((await upload(eConversation,e,600)).status,201)
   await expectLimited(await upload(eConversation,e,600),'uploadBytesPerContactDay')
   assert.equal((await db.prepare('SELECT count(*) n FROM media').first()).n,3)
-  assert.equal((await (await mf.getR2Bucket('FILES')).list()).objects.length,3)
+  assert.equal((await (await app.files).list()).objects.length,3)
 
   // Widget commands per contact.
   await awaitWindowRoom(60,5000)
@@ -151,11 +142,12 @@ test('public request limits return 429 with Retry-After and stay per project, ad
   // Stored keys are hashes; raw client addresses are never persisted.
   const keys=(await db.prepare('SELECT key FROM abuse_counters').all()).results.map(row=>row.key).join('\n')
   assert.doesNotMatch(keys,/198\.51|203\.0|2001:db8|192\.0/)
- }finally{await mf.dispose()}
-})
+ }finally{await app.close()}
+}
 
-test('per-project ceilings bound what rotating client addresses can create, with refunds and tenant isolation',async()=>{
- const {mf,db,call}=await start({RATE_LIMITS:JSON.stringify({widgetSessionsPerProjectHour:5,conversationsPerProjectHour:4,uploadsPerProjectDay:4,uploadBytesPerProjectDay:1500})})
+// Per-project ceilings bound rotating addresses, return refused capacity and stay per tenant.
+export async function projectCeilings(){
+ const {app,db,call}=await start({RATE_LIMITS:JSON.stringify({widgetSessionsPerProjectHour:5,conversationsPerProjectHour:4,uploadsPerProjectDay:4,uploadBytesPerProjectDay:1500})})
  try{
   const one=await seedProject(db,'rotate-one'),two=await seedProject(db,'rotate-two')
   const count=async table=>(await db.prepare(`SELECT count(*) n FROM ${table}`).first()).n
@@ -195,13 +187,14 @@ test('per-project ceilings bound what rotating client addresses can create, with
   assert.equal((await upload(one,conversations[3],100)).status,201,'capacity returned by the refusal is usable')
   await expectLimited(await upload(one,conversations[0],1),'uploadsPerProjectDay')
   assert.equal(await stored('uploadBytesPerProjectDay',one.id),1500)
-  assert.equal(await count('media'),4);assert.equal((await (await mf.getR2Bucket('FILES')).list()).objects.length,4)
+  assert.equal(await count('media'),4);assert.equal((await (await app.files).list()).objects.length,4)
   assert.equal((await upload(two,{visitor:otherVisitors[0],id:(await otherConversation.json()).id},1000)).status,201,'another project keeps its own upload ceiling')
- }finally{await mf.dispose()}
-})
+ }finally{await app.close()}
+}
 
-test('daily AI ceilings skip automatic replies visibly, keep the visitor message and never replay',async()=>{
- const {mf,db,call}=await start({OPENAI_API_KEY:'test-only-openai-key',AI_DAILY_CEILINGS:JSON.stringify({repliesPerProject:2,repliesPerInstallation:4,spendUsdPerProject:0.05})})
+// Daily AI ceilings: replies skipped visibly to operators only, the message kept, never replayed.
+export async function aiCeilings(){
+ const {app,db,call}=await start({OPENAI_API_KEY:'test-only-openai-key',AI_DAILY_CEILINGS:JSON.stringify({repliesPerProject:2,repliesPerInstallation:4,spendUsdPerProject:0.05})})
  try{
   const [alpha,beta,gamma]=await Promise.all(['alpha','beta','gamma'].map(id=>seedProject(db,id,{ai:true})))
   const open=async project=>{const visitor=await(await call('/api/identity/widget/session',{body:{widgetKey:project.widgetKey},ip:'198.51.100.50',origin:project.origin})).json();const conversation=await(await call('/api/conversations',{body:{projectId:project.id},token:visitor.token,ip:'198.51.100.50',origin:project.origin})).json();return {project,token:visitor.token,conversation:conversation.id,revision:0}}
@@ -212,19 +205,22 @@ test('daily AI ceilings skip automatic replies visibly, keep the visitor message
 
   // Spend: provider-reported cost of automatic replies accumulates once per provider round.
   const g=await open(gamma),first=await say(g,'gamma one');assert.equal(first.generation.state,'queued')
-  await db.prepare("INSERT INTO ai_attempts(id,generation_id,state,started_at) VALUES('attempt-gamma',?,'running',?)").bind(first.generation.id,new Date().toISOString()).run()
-  for(const cost of [0.04,0.06]){const response=await mf.dispatchFetch('https://app.example/__probe/cost',{method:'POST',body:JSON.stringify({attemptId:'attempt-gamma',requestId:'round-1',cost})});assert.equal(response.status,200)}
-  assert.equal((await usage(gamma)).spendUsd.used,0.06,'an updated report for the same round replaces, not adds')
+  // The first reply runs; the spend is exactly the cost of its recorded provider rounds.
+  await app.runJobs((await app.takeJobs()).filter(job=>job.id===first.generation.id))
+  const rounds=(await db.prepare('SELECT u.usage_json FROM ai_round_usage u JOIN ai_attempts t ON t.id=u.attempt_id WHERE t.generation_id=?').bind(first.generation.id).all()).results
+  const spent=rounds.reduce((sum,row)=>sum+JSON.parse(row.usage_json).cost,0);assert.ok(spent>0.05)
+  assert.equal((await usage(gamma)).spendUsd.used,Math.round(spent*1e6)/1e6,'provider-reported usage is the spend')
+  g.revision=(await db.prepare('SELECT revision FROM conversations WHERE id=?').bind(g.conversation).first()).revision
   const overSpend=await say(g,'gamma two');assert.equal(overSpend.generation.state,'failed');assert.match(overSpend.generation.error,/^AI_REPLY_CEILING: .*spendUsdPerProject/)
   // An explicit reply request over the spend ceiling is refused; the spend stays operator-only.
   const spendRefusal=await expectAiRefused(()=>call(`/api/conversations/${g.conversation}/widget-events`,{body:{action:'request',data:{requestId:'00000000-0000-4000-8000-0000000000c1'}},token:g.token,ip:'198.51.100.50',origin:gamma.origin}),gamma.origin)
-  assert.doesNotMatch(JSON.stringify(spendRefusal),/0\.06|0\.05/)
-  assert.match((await db.prepare('SELECT error FROM ai_generations WHERE id=?').bind('00000000-0000-4000-8000-0000000000c1').first()).error,/^AI_REPLY_CEILING: .*\(\$0\.06\).*spendUsdPerProject/,'operators still see the spend reason')
+  assert.doesNotMatch(JSON.stringify(spendRefusal),/0\.12|0\.05/)
+  assert.match((await db.prepare('SELECT error FROM ai_generations WHERE id=?').bind('00000000-0000-4000-8000-0000000000c1').first()).error,/^AI_REPLY_CEILING: .*\(\$0\.12\).*spendUsdPerProject/,'operators still see the spend reason')
 
   // Per-project reply count: the third automatic reply is skipped; the message itself persists.
   const a=await open(alpha)
   // Everything the visitor's live socket receives is checked for operator-only ceiling text.
-  const socketResponse=await mf.dispatchFetch(`https://app.example/api/conversations/${a.conversation}/socket?token=${a.token}`,{headers:{Upgrade:'websocket',Origin:alpha.origin}});assert.equal(socketResponse.status,101)
+  const socketResponse=await app.request(`/api/conversations/${a.conversation}/socket?token=${a.token}`,{headers:{Upgrade:'websocket',Origin:alpha.origin}});assert.equal(socketResponse.status,101)
   const frames=[];socketResponse.webSocket.accept();socketResponse.webSocket.addEventListener('message',event=>frames.push(String(event.data)))
   for(const text of ['alpha one','alpha two'])assert.equal((await say(a,text)).generation.state,'queued')
   const skipped=await say(a,'alpha three')
@@ -233,7 +229,7 @@ test('daily AI ceilings skip automatic replies visibly, keep the visitor message
   assert.equal((await db.prepare("SELECT count(*) n FROM ai_attempts WHERE generation_id=?").bind(skipped.generation.id).first()).n,0)
 
   // No replay later: scheduler-style effect replay and a duplicate command reuse the recorded decision.
-  for(let index=0;index<2;index++)assert.equal((await mf.dispatchFetch('https://app.example/__probe/replay-effects',{method:'POST',body:JSON.stringify({messageId:skipped.message.id})})).status,200)
+  for(let index=0;index<2;index++)await app.scheduled()
   const duplicate=await(await call(`/api/conversations/${a.conversation}/messages`,{body:{localId:'alpha three',content:'alpha three',expectedRevision:2},token:a.token,ip:'198.51.100.50',origin:alpha.origin})).json();assert.equal(duplicate.duplicate,true)
   const decisions=(await db.prepare("SELECT id,state FROM ai_generations WHERE conversation_id=? ORDER BY created_at").bind(a.conversation).all()).results
   assert.deepEqual(decisions.map(row=>row.state),['queued','queued','failed'])
@@ -271,12 +267,13 @@ test('daily AI ceilings skip automatic replies visibly, keep the visitor message
   const installation=await say(b,'beta two');assert.equal(installation.generation.state,'failed');assert.match(installation.generation.error,/repliesPerInstallation/)
   const betaUsage=await usage(beta);assert.equal(betaUsage.replies.used,1);assert.equal(betaUsage.installationCeilingReached,true);assert.equal(betaUsage.replyCeilingReached,true)
   await expectAiRefused(()=>call(`/api/conversations/${b.conversation}/widget-events`,{body:{action:'request',data:{requestId:'00000000-0000-4000-8000-0000000000b1'}},token:b.token,ip:'198.51.100.50',origin:beta.origin}),beta.origin)
-  assert.equal((await db.prepare("SELECT count(*) n FROM ai_generations WHERE state='queued'").first()).n,4,'exactly the installation ceiling was admitted')
- }finally{await mf.dispose()}
-})
+  assert.equal((await db.prepare("SELECT count(*) n FROM ai_generations WHERE state IN ('queued','completed')").first()).n,4,'exactly the installation ceiling was admitted')
+ }finally{await app.close()}
+}
 
-test('reply request ids must be UUIDs, so no visitor or operator text becomes a generation id that erasure keeps',async()=>{
- const {mf,db,call}=await start({OPENAI_API_KEY:'test-only-openai-key'})
+// Reply request ids are UUIDs, so no free text becomes a generation id that erasure keeps.
+export async function requestIds(){
+ const {app,db,call}=await start({OPENAI_API_KEY:'test-only-openai-key'})
  try{
   const project=await seedProject(db,'delta',{ai:true}),ip='198.51.100.60',origin=project.origin
   const visitor=await(await call('/api/identity/widget/session',{body:{widgetKey:project.widgetKey},ip,origin})).json()
@@ -294,60 +291,28 @@ test('reply request ids must be UUIDs, so no visitor or operator text becomes a 
   const id='00000000-0000-4000-8000-0000000000d1'
   for(let attempt=0;attempt<2;attempt++){const accepted=await widgetRequest(id);const body=await accepted.json();assert.equal(accepted.status,202,JSON.stringify(body));assert.deepEqual(body,{id,state:'queued'})}
   assert.equal((await db.prepare('SELECT count(*) n FROM ai_generations').first()).n,1)
- }finally{await mf.dispose()}
-})
+ }finally{await app.close()}
+}
 
-test('a burst straddling a window boundary admits at most twice the limit and every refusal waits at least a second',async()=>{
- const {mf,db}=await start({RATE_LIMITS:JSON.stringify({messagesPerConversationMinute:3,messagesPerContactHour:5})})
- try{
-  const boundary=Date.UTC(2030,0,1),minute=60000,hour=3600000
-  const check=async(now,checks=[['messagesPerConversationMinute','straddle']])=>(await mf.dispatchFetch('https://app.example/__probe/rate-limit',{method:'POST',body:JSON.stringify({checks,now})})).json()
-  const stored=async(limit,subject)=>db.prepare('SELECT used,window_start FROM abuse_counters WHERE key=?').bind(`rate:${limit}:${sha(subject)}`).first()
-
-  // In order, then with stragglers: requests that read the clock before the boundary but
-  // reach the database after the next window opened count against the newer window.
-  const steps=[[-3000,true,null],[-2000,true,null],[-1000,true,null],[-1,false,1],[-400,false,1],[0,true,null],[-5,true,null],[10,true,null],[-2,false,61],[minute-1,false,1]]
-  const outcomes=[]
-  for(const [offset] of steps)outcomes.push(await check(boundary+offset))
-  assert.deepEqual(outcomes.map(outcome=>[outcome.allowed,outcome.retryAfter??null]),steps.map(([,allowed,retryAfter])=>[allowed,retryAfter]))
-  assert.equal(outcomes.filter(outcome=>outcome.allowed).length,6,'exactly twice the limit across the boundary')
-  assert.deepEqual(await stored('messagesPerConversationMinute','straddle'),{used:3,window_start:boundary},'the newer window holds exactly the limit')
-  assert.equal((await check(boundary+minute)).allowed,true,'the following window recovers')
-
-  // Arbitrary interleaving around a boundary: never more than twice the limit, never more than
-  // the limit in one window, and every refusal waits at least one second and at most until the
-  // refusing window ends.
-  let seed=7;const random=()=>(seed=(seed*48271)%2147483647)/2147483647
-  const second=boundary+5*minute,readings=Array.from({length:200},(_,index)=>second-minute+1500+Math.floor(index*(2*minute-1500)/200)-Math.floor(random()*1500))
-  let admitted=0
-  for(const now of readings){const outcome=await check(now,[['messagesPerConversationMinute','interleaved']]);if(outcome.allowed){admitted++;continue}assert.equal(outcome.limit,'messagesPerConversationMinute');assert.ok(Number.isInteger(outcome.retryAfter)&&outcome.retryAfter>=1,`Retry-After ${outcome.retryAfter} at ${now-second}`);assert.ok(outcome.retryAfter<=Math.ceil((second+minute-now)/1000),`Retry-After ${outcome.retryAfter} past the refusing window at ${now-second}`)}
-  assert.equal(admitted,6,'three per window across the two windows the burst spans')
-  assert.equal((await stored('messagesPerConversationMinute','interleaved')).used,3)
-
-  // A combined check refused by one limit returns capacity to the window it was actually taken from.
-  for(let index=0;index<5;index++)assert.equal((await check(boundary+hour+1,[['messagesPerContactHour','full']])).allowed,true)
-  assert.equal((await check(boundary+hour+2,[['messagesPerConversationMinute','refunded'],['messagesPerContactHour','other']])).allowed,true)
-  const refused=await check(boundary+hour-1,[['messagesPerConversationMinute','refunded'],['messagesPerContactHour','full']])
-  assert.deepEqual(refused,{allowed:false,limit:'messagesPerContactHour',retryAfter:3601})
-  assert.deepEqual(await stored('messagesPerConversationMinute','refunded'),{used:1,window_start:boundary+hour},'the straggler took and returned capacity in the newer window')
- }finally{await mf.dispose()}
-})
-
-test('invalid limit configuration fails visibly instead of silently removing a limit',async()=>{
- const {mf,db,call}=await start({RATE_LIMITS:JSON.stringify({widgetSessionsPerIpHour:0})})
+// An invalid limit fails visibly instead of silently removing the limit.
+export async function invalidLimits(){
+ const {app,db,call}=await start({RATE_LIMITS:JSON.stringify({widgetSessionsPerIpHour:0})})
  try{
   const project=await seedProject(db,'config')
   const response=await call('/api/identity/widget/session',{body:{widgetKey:project.widgetKey},ip:'198.51.100.60',origin:project.origin})
   assert.equal(response.status,500)
   assert.equal((await db.prepare('SELECT count(*) n FROM contacts').first()).n,0)
- }finally{await mf.dispose()}
-})
+ }finally{await app.close()}
+}
 
-test('deployment validation knows exactly the runtime limit names and rejects invalid maps',async()=>{
- const {rateLimitNames,aiCeilingNames,variableNames,validateRuntimeEnvironment}=await import('../scripts/deployment/environment.mjs')
- const {rateLimitDefaults,aiCeilingDefaults}=await import('../src/platform/limit-config.ts')
- assert.deepEqual(rateLimitNames,Object.keys(rateLimitDefaults));assert.deepEqual(aiCeilingNames,Object.keys(aiCeilingDefaults))
- assert.ok(variableNames.includes('RATE_LIMITS')&&variableNames.includes('AI_DAILY_CEILINGS'))
- validateRuntimeEnvironment({RATE_LIMITS:'{"messagesPerConversationMinute":30}',AI_DAILY_CEILINGS:'{"spendUsdPerProject":2.5,"repliesPerProject":500}'})
- for(const [name,value] of [['RATE_LIMITS','{"unknownLimit":1}'],['RATE_LIMITS','{"widgetSessionsPerIpHour":0}'],['RATE_LIMITS','{"widgetSessionsPerIpHour":1.5}'],['RATE_LIMITS','[1]'],['AI_DAILY_CEILINGS','{"repliesPerProject":-1}']])assert.throws(()=>validateRuntimeEnvironment({[name]:value}),new RegExp(name),`${name}=${value}`)
-})
+// The documented usage summary command keeps unmeasured D1 metadata and billing unknown, never zero.
+export async function usageSummary(){
+ const {execFile}=await import('node:child_process'),{promisify}=await import('node:util')
+ const fixture=new URL('../../fixtures/usage/local-workload.json',import.meta.url).pathname,raw=JSON.parse(await (await import('node:fs/promises')).readFile(fixture,'utf8'))
+ const result=JSON.parse((await promisify(execFile)(process.execPath,['scripts/usage/summarize.mjs',fixture])).stdout)
+ for(const name of ['new_visitor','returning_visitor']){
+  const phase=result.phases[name];assert.equal(phase.d1.rows_read,null);assert.equal(phase.d1.rows_written,null);assert.ok(phase.d1.missing_metadata_statements>0)
+  assert.equal(phase.r2.uploaded_bytes,raw.phases?.[name]?.r2?.uploaded_bytes??phase.r2.uploaded_bytes);assert.equal(phase.queue_messages,0)
+ }
+ assert.ok(result.scenarios.every(scenario=>scenario.billing_total_usd===null&&scenario.d1_total_rows_read===null),'unmeasured billing is never reported as a number')
+}

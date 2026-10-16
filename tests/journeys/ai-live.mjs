@@ -1,18 +1,22 @@
-import test from 'node:test'
+import test,{after} from 'node:test'
 import assert from 'node:assert/strict'
 import {chromium} from 'playwright'
-import {authenticatedReplyReceipt} from './mail-receipt.mjs'
+import {authenticatedReplyReceipt} from '../helpers/ai/mail-receipt.mjs'
 const required=['BASE_URL','WIDGET_KEY','OPERATOR_EMAIL','OPERATOR_PASSWORD']
 const absent=required.filter(name=>!process.env[name])
 const base=process.env.BASE_URL?.replace(/\/$/,'')
 const widgetKey=process.env.WIDGET_KEY
+// Optional configured-provider journeys: they run only with a disposable configured installation in the
+// environment, and otherwise skip without any model or mail call.
+let browser,live
+after(async()=>{await browser?.close()})
 const until=async(read,accept,label)=>{for(let i=0;i<180;i++){const value=await read();if(accept(value))return value;await new Promise(r=>setTimeout(r,500))}assert.fail(`${label} did not complete`)}
 
 test('live cited native answer reaches widget and the same inbox; handoff and operator reply',{
  skip:absent.length?`Missing environment: ${absent.join(', ')}; no model or mail calls made`:false,
  timeout:240000,
-},async t=>{
- const browser=await chromium.launch({headless:true})
+},async()=>{
+ browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
  const widgetContext=await browser.newContext(),operatorContext=await browser.newContext()
  const widget=await widgetContext.newPage(),operator=await operatorContext.newPage()
  widget.setDefaultTimeout(90000);operator.setDefaultTimeout(30000)
@@ -67,12 +71,20 @@ test('live cited native answer reaches widget and the same inbox; handoff and op
   const reloadedReplies=(await transcript()).messages.filter(m=>m.id===persistedReply.id)
   assert.equal(reloadedReplies.length,1);assert.deepEqual(reloadedReplies[0],persistedReply)
   assert.equal((await transcript()).messages.filter(m=>m.content===reply).length,1)
-  await t.test('delivered transcript mail',{skip:!process.env.TEST_MAIL_TO||!process.env.MAILBOX_RECEIPT_URL?'TEST_MAIL_TO and MAILBOX_RECEIPT_URL required; no mail sent':false},async()=>{
+  live={operator,session,reply,persistedReply}
+  console.log('Live proof passed: native anchor, durable REST/socket identity, widget/inbox reload, human handoff and operator reply.')
+ }finally{await widgetContext.close()}
+})
+
+test('the operator\'s transcript mail of that conversation is delivered with the reply and passes DMARC',{
+ skip:absent.length||!process.env.TEST_MAIL_TO||!process.env.MAILBOX_RECEIPT_URL?'BASE_URL, WIDGET_KEY, OPERATOR_EMAIL, OPERATOR_PASSWORD, TEST_MAIL_TO and MAILBOX_RECEIPT_URL required; no mail sent':false,
+ timeout:240000,
+},async()=>{
+ assert.ok(live,'the cited-answer journey ran first in this file')
+ const {operator,session,reply,persistedReply}=live
+
    const r=await operator.request.put(`${base}/api/dashboard/projects/${session.projectId}/conversations/${session.conversationId}`,{data:{send_transcript_to:process.env.TEST_MAIL_TO,idempotencyKey:`t021-mail:${session.conversationId}`}})
    assert.equal(r.status(),200)
    const receipt=await until(async()=>{const r=await fetch(process.env.MAILBOX_RECEIPT_URL);assert.ok(r.ok);return authenticatedReplyReceipt(await r.json(),reply)},Boolean,'authenticated delivered mail receipt')
    assert.equal(receipt.auth.dmarc,'pass');assert.ok(receipt.excerpt.includes(persistedReply.content))
-  })
-  console.log('Live proof passed: native anchor, durable REST/socket identity, widget/inbox reload, human handoff and operator reply.')
- }finally{await browser.close()}
 })

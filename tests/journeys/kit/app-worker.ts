@@ -10,8 +10,32 @@ export {ConversationSocket} from '../../../src/modules/conversations/socket'
 // controls when background work happens; otherwise the Miniflare queue runs them.
 const captured:unknown[]=[]
 const bindings=(env:Env):Env=>env.H2H_TEST_CAPTURE_QUEUE?{...env,JOBS:{send:async(job:unknown)=>{captured.push(job)},sendBatch:async(batch:{body:unknown}[])=>{captured.push(...batch.map(item=>item.body))}} as unknown as Env['JOBS']}:env
+// Storage faults for one request, named by test-only headers. x-test-before-batch
+// and x-test-after-batch run a real D1 write around each atomic batch, as a
+// concurrent request would; x-test-fault fails D1 or R2 before or after commit.
+const faulted=(request:Request,env:Env):Env=>{
+ const before=request.headers.get('x-test-before-batch'),after=request.headers.get('x-test-after-batch'),fault=request.headers.get('x-test-fault')
+ if(!before&&!after&&!fault)return env
+ const DB=env.DB,FILES=env.FILES;let puts=0
+ return {...env,
+  DB:{prepare:DB.prepare.bind(DB),exec:DB.exec.bind(DB),async batch(statements:D1PreparedStatement[]){
+   if(fault==='db-before')throw new Error('Injected D1 failure')
+   if(before)await DB.exec(before)
+   const result=await DB.batch(statements)
+   if(after)await DB.exec(after)
+   if(fault==='db-after')throw new Error('Injected lost D1 response')
+   return result
+  }} as unknown as D1Database,
+  FILES:{get:FILES.get.bind(FILES),head:FILES.head.bind(FILES),delete:FILES.delete.bind(FILES),list:FILES.list.bind(FILES),async put(...args:Parameters<R2Bucket['put']>){
+   if(fault==='second-copy'&&++puts===2)throw new Error('Injected R2 copy failure')
+   if(fault==='unknown-copy'){await FILES.put(...args);throw new Error('Injected lost R2 response')}
+   return FILES.put(...args)
+  }} as unknown as R2Bucket,
+ }
+}
 export default {
  async fetch(request:Request,env:Env,context:ExecutionContext){
+  env=faulted(request,env)
   const path=new URL(request.url).pathname
   if(path==='/_test/queue/take')return Response.json(captured.splice(0))
   if(path==='/_test/queue/run'){

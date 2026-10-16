@@ -1,11 +1,8 @@
-import assert from 'node:assert/strict';
-import {registry,runPhases} from './phases.mjs';
+import {any,either,journeys} from '../journeys/kit/scenarios.mjs';
 
 // Every Move in scenario module, imported once so each journey sees the whole registry.
 for(const module of ['door-readers','door-mapping','admission','empty-native','envelope-native','nested-native','record-native','parse-accounting','shape-syntax','limits','formats','security','partitions','publication-correction','publication-resume','native-corrections','custody-regressions','identity-correction','shape-custody','helpscout-security','empty-upgrade','envelope-upgrade','nested-upgrade','record-upgrade','shape-upgrade','migration'])await import(`./${module}.mjs`);
 
-const any=(file,...patterns)=>phase=>phase.file===file&&(!patterns.length||patterns.some(pattern=>pattern.test(phase.name)));
-const either=(...selectors)=>phase=>selectors.some(select=>select(phase));
 
 // The nine Move in journeys and the scenarios each one owns. Selection is by
 // claim; a scenario owned by no journey, or by two, fails every journey file.
@@ -38,5 +35,4 @@ export const claims={
   any('helpscout-security'),any('door-mapping',/^Help Scout/),any('formats',/^Help Scout/))],
 };
 
-for(const phase of registry){const owners=Object.entries(claims).filter(([,[,select]])=>select(phase)).map(([key])=>key);assert.equal(owners.length,1,`${phase.file}: ${phase.name} is owned by ${owners.join(', ')||'no journey'}`)}
-export const journey=key=>{const [title,select]=claims[key];return [title,()=>runPhases(registry.filter(select))]};
+export const journey=journeys(claims);

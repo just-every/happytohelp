@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';
+import {phases} from '../journeys/kit/scenarios.mjs';const test=phases(import.meta.url);import assert from 'node:assert/strict';
 import {harness,body,sha,allScopes} from './harness.mjs';
 const settings='/api/management/projects/p/connections';
 test('current native admins manage workspace credentials while operators cannot create or inspect them',async()=>{

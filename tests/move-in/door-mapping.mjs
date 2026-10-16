@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {phases} from './phases.mjs';
+import {phases} from '../journeys/kit/scenarios.mjs';
 import {nativeHarness} from './harness.mjs';
 import {zip} from './zip.mjs';
 const test=phases(import.meta.url);

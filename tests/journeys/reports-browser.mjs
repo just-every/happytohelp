@@ -1,20 +1,23 @@
-import assert from 'node:assert/strict';
-import {createServer} from 'node:http';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
-import {resolve,join} from 'node:path';
-import {chromium} from 'playwright';
-import {createRuntime} from '../helpers/emitted-runtime.mjs';
-const directory=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/reports');await mkdir(directory,{recursive:true});
-const runtime=await createRuntime();
- // C adds two named migrations and the latest Base evolution adds 116; upgrade.mjs retains the exact 46 and 48 stages.
-let browser,server,success=false;const records=[];
+import test,{before,after} from 'node:test'
+import assert from 'node:assert/strict'
+import {createServer} from 'node:http'
+import {readFile,writeFile} from 'node:fs/promises'
+import {resolve,join} from 'node:path'
+import {createRuntime} from '../helpers/emitted-runtime.mjs'
+import {launchBrowser,evidence} from './kit/browser.mjs'
+
+// A visitor rates through the real widget on a customer page; the operator sees it live, reports it, downloads both CSVs, and reopening removes the prompt.
+let runtime,browser,server,directory,success=true,origin,owner,widgetKey;const records=[]
 const api=async(path,{token,body,method=body?'POST':'GET'}={})=>{const response=await fetch(runtime.origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{})});assert.ok(response.ok,path+': '+response.status);return response.json()};
 async function audit(page,name){await page.addScriptTag({path:resolve('node_modules/axe-core/axe.min.js')});const violations=await page.evaluate(async()=>{const result=await axe.run();return result.violations.filter(x=>['serious','critical'].includes(x.impact)).map(x=>({id:x.id,impact:x.impact,nodes:x.nodes.map(n=>n.target)}))});assert.deepEqual(violations,[],name);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' no horizontal overflow');await page.screenshot({path:join(directory,name+'.png'),fullPage:true});records.push({name,violations})}
-try{
- browser=await chromium.launch({headless:true});const bundle=await readFile('public/widget.js');let widgetKey;
- server=createServer((req,res)=>{if(req.url==='/widget.js'){res.setHeader('Content-Type','text/javascript');res.end(bundle)}else{res.setHeader('Content-Type','text/html');res.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Support rating journey</title></head><body><main><h1>Support rating journey</h1></main><script src="/widget.js"></script><script>h2h('init',${JSON.stringify({widgetKey,apiOrigin:runtime.origin,open:true,settings:{collector:{enabled:false}}})})</script></body></html>`)}});await new Promise(done=>server.listen(0,'127.0.0.1',done));const origin='http://127.0.0.1:'+server.address().port;
- const owner=await runtime.seedTenant({name:'Report workspace',email:'reports@example.test',allowedOrigin:origin});widgetKey=(await api('/api/identity/projects/'+owner.projectId,{token:owner.token})).widget_key;
- for(const width of [1440,390]){
+before(async()=>{
+ runtime=await createRuntime();directory=(await evidence('reports'))('')
+ browser=await launchBrowser();const bundle=await readFile('public/widget.js');
+ server=createServer((req,res)=>{if(req.url==='/widget.js'){res.setHeader('Content-Type','text/javascript');res.end(bundle)}else{res.setHeader('Content-Type','text/html');res.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Support rating journey</title></head><body><main><h1>Support rating journey</h1></main><script src="/widget.js"></script><script>h2h('init',${JSON.stringify({widgetKey,apiOrigin:runtime.origin,open:true,settings:{collector:{enabled:false}}})})</script></body></html>`)}});await new Promise(done=>server.listen(0,'127.0.0.1',done));origin='http://127.0.0.1:'+server.address().port;
+ owner=await runtime.seedTenant({name:'Report workspace',email:'reports@example.test',allowedOrigin:origin});widgetKey=(await api('/api/identity/projects/'+owner.projectId,{token:owner.token})).widget_key;
+})
+after(async()=>{await writeFile(join(directory,'browser.json'),JSON.stringify({records},null,2)).catch(()=>{});if(browser)await browser.close();if(server)await new Promise(done=>server.close(done));await runtime?.close(success)})
+for(const width of [1440,390])test(`at ${width}px a widget rating reaches the operator live and on reload, Reports range and both CSVs include it, and reopening clears the prompt while keeping prior feedback`,async()=>{try{
  const visitor=await browser.newContext({viewport:{width,height:900}}),widget=await visitor.newPage();widget.setDefaultTimeout(20000);await widget.goto(origin);await widget.locator('textarea[name=content]').fill('Please help with this report');await widget.locator('button[name=submit]').click();const key=`rer-widget:${runtime.origin}:${widgetKey}`;await widget.waitForFunction(key=>JSON.parse(localStorage.getItem(key)||'null')?.conversationId,key);const conversationId=await widget.evaluate(key=>JSON.parse(localStorage.getItem(key)).conversationId,key);
  const operator=await browser.newContext({viewport:{width,height:900},acceptDownloads:true});await operator.addCookies([{name:'h2h_session',value:owner.token,url:runtime.origin}]);const dashboard=await operator.newPage();dashboard.setDefaultTimeout(20000);await dashboard.goto(runtime.origin+`/projects/${owner.projectId}/conversations/${conversationId}`);await dashboard.getByPlaceholder('Type your reply…').fill('Here is the answer for your report');if(width===390){await dashboard.getByRole('button',{name:'Reply tools',exact:true}).click();await dashboard.getByRole('menuitem',{name:'Send & close',exact:true}).click()}else await dashboard.getByRole('button',{name:'Send',exact:true}).click();await widget.getByText('Here is the answer for your report',{exact:true}).waitFor();
  if(width===1440)await api(`/api/dashboard/projects/${owner.projectId}/conversations/${conversationId}`,{token:owner.token,method:'PUT',body:{resolved:true}});await widget.getByText('Did this answer your question?',{exact:true}).waitFor();await widget.getByRole('button',{name:'👍 Yes',exact:true}).click();await widget.getByLabel('Comment (optional)').fill('Clear answer '+width);await widget.getByRole('button',{name:'Send rating',exact:true}).click();await widget.getByText('Thanks for your feedback. You can change it here.',{exact:true}).waitFor();await audit(widget,'widget-rated-'+width);await widget.reload();await widget.getByText('Thanks for your feedback. You can change it here.',{exact:true}).waitFor();assert.equal(await widget.getByLabel('Comment (optional)').inputValue(),'Clear answer '+width);
@@ -26,6 +29,4 @@ try{
  await dashboard.reload();await dashboard.getByPlaceholder('Type your reply…').waitFor();if(await dashboard.getByRole('button',{name:'Show conversation panel',exact:true}).isVisible())await dashboard.getByRole('button',{name:'Show conversation panel',exact:true}).click();await dashboard.getByRole('tab',{name:'Details',exact:true}).click();await dashboard.getByText('Clear answer '+width,{exact:true}).waitFor();
  await api(`/api/conversations/${conversationId}/messages`,{token:owner.token,body:{content:'Follow-up answer',localId:'followup-'+width,expectedRevision:(await api(`/api/conversations/${conversationId}`,{token:owner.token})).revision,authoring:{kind:'human'},resolve:true}});await widget.getByText('Did this answer your question?',{exact:true}).waitFor();await widget.getByRole('button',{name:'👎 No',exact:true}).click();await widget.getByLabel('Comment (optional)').fill('Second cycle '+width);await widget.getByRole('button',{name:'Send rating',exact:true}).click();await dashboard.getByText('Second cycle '+width,{exact:true}).waitFor();await dashboard.getByText('Clear answer '+width,{exact:true}).waitFor();
  await api(`/api/dashboard/projects/${owner.projectId}/conversations/${conversationId}`,{token:owner.token,method:'PUT',body:{resolved:false}});await dashboard.getByLabel('Resolution 2',{exact:true}).waitFor();await dashboard.getByLabel('Resolution 1',{exact:true}).waitFor();await audit(dashboard,'operator-two-past-ratings-'+width);await operator.close();await visitor.close()
- }
- await writeFile(join(directory,'browser.json'),JSON.stringify({records,migrationCount:runtime.migrationCount,checks:['fresh real Wrangler migration install','widget rating socket update and reload','operator rating live and reload','Reports responsive range','both CSV native downloads','reopen removes visitor rating form and preserves operator history live and after reload','two resolution cycles retain separate feedback']},null,2));success=true;console.log('Reports browser: 1440 and 390; rating, operator view, report, both downloads and reopen passed')
-}finally{if(browser)await browser.close();if(server)await new Promise(done=>server.close(done));await runtime.close(success)}
+}catch(error){success=false;throw error}})

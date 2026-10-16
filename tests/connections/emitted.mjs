@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import {WebSocket} from 'ws';
 import {createRuntime} from '../helpers/emitted-runtime.mjs';
+import {phases} from '../journeys/kit/scenarios.mjs';
+const test=phases(import.meta.url);
+
+test('an API reply on the emitted Worker reaches the visitor socket and transcript once; API resolve, visitor rating, reopen and stale-rating refusal stay consistent; another workspace token sees nothing',async()=>{
 // This is the emitted production Worker and its real Durable Object, not the test Worker.
 const runtime=await createRuntime();let socket,success=false;const frames=[];
 async function call(path,token,body,origin){const response=await fetch(runtime.origin+path,{method:body===undefined?'GET':'POST',headers:{...(token?{Authorization:'Bearer '+token}:{}),...(origin?{Origin:origin}:{}),...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,path+' status '+response.status);return response.json()}
@@ -28,3 +32,5 @@ const allowedOrigin='https://widget.example',owner=await runtime.seedTenant({nam
  const foreign=await runtime.seedTenant({name:'Other emitted workspace',email:'foreign-api@example.test'}),foreignToken=await call('/api/management/projects/'+foreign.projectId+'/connections/tokens',foreign.token,{name:'Foreign',scopes:['conversations:read']});assert.equal((await fetch(runtime.origin+'/api/v1/conversations/'+conversation.id,{headers:{Authorization:'Bearer '+foreignToken.token}})).status,404);
  console.log('Emitted Worker: API reply delivered on native visitor socket and transcript; shared resolve, visitor rating, reopen, stale-rating refusal and tenant denial passed.');success=true;
 }finally{if(socket){socket.close();await Promise.race([new Promise(r=>socket.readyState===WebSocket.CLOSED?r():socket.once('close',r)),new Promise(r=>setTimeout(r,1000))]);socket.terminate()}await runtime.close(success)}
+
+});

@@ -15,7 +15,7 @@ export async function nativeHarness({beforeMoveIn,afterMoveIn,beforeIdentityAudi
  const script=await readFile(join(directory,'worker.mjs'),'utf8');
  async function start(){const before=await children();mf=new Miniflare(convertV4MiniflareOptions({name:'move-in-check',modules:true,script,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings:{EMAIL_PROVIDER:'sendgrid',EMAIL_API_KEY:randomBytes(32).toString('hex'),EMAIL_FROM:'test@example.test',OPENAI_API_KEY:randomBytes(32).toString('hex')},d1Databases:{DB:'move-in-check'},r2Buckets:['FILES'],resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService:async()=>{outbound++;throw new Error('External calls prohibited')}}));try{db=await mf.getD1Database('DB');workerdPid=await identifyWorkerd(before)}catch(error){await mf.dispose();throw error}}
  await start();
- const applyMigration=async file=>{const source=(await readFile(join('migrations',file),'utf8')).replace(/^\s*--[^\n]*$/gm,'');for(const [,sql] of source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await db.prepare(sql).run()};
+ const applyMigration=async file=>{const source=(await readFile(join('migrations',file),'utf8')).replace(/^\s*--[^\n]*$/gm,'');await db.batch([...source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(([,sql])=>db.prepare(sql)))};
  // Historical audit fixtures must run at the actual111 boundary. Apply later
  // additive ledgers only after their preserved prior-schema assertions.
  const migrations=(await readdir('migrations')).filter(f=>f.endsWith('.sql')).sort(),auditIndex=migrations.indexOf('111_move_in_identity_audit.sql');

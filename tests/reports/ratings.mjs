@@ -1,4 +1,5 @@
-import test from 'node:test';
+import {phases} from '../journeys/kit/scenarios.mjs';
+const test=phases(import.meta.url);
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {harness,json} from './harness.mjs';

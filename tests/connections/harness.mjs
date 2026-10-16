@@ -23,7 +23,7 @@ export async function harness({beforeIntegrations}={}){
  let db=await mf.getD1Database('DB');
  for(const file of (await readdir('migrations')).filter(f=>f.endsWith('.sql')).sort()){
   if(file==='114_integrations_core.sql'&&beforeIntegrations)await beforeIntegrations(db)
-  const sql=(await readFile(join('migrations',file),'utf8')).replace(/^\s*--[^\n]*$/gm,'');for(const [,statement] of sql.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await db.prepare(statement).run()
+  const sql=(await readFile(join('migrations',file),'utf8')).replace(/^\s*--[^\n]*$/gm,'');await db.batch([...sql.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(([,statement])=>db.prepare(statement)))
  }
  for(const [project,user] of [['p','owner'],['q','foreign']]){await db.prepare('INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES(?,?,?,?,1)').bind(project,project,'widget-'+project,'https://app.example').run();await db.prepare('INSERT INTO users VALUES(?,?,?,1)').bind(user,user+'@example.test',user).run();await db.prepare("INSERT INTO memberships VALUES(?,?,'owner')").bind(project,user).run();await session(user,project,user,'owner')}
  async function session(name,project,actor,role='contact'){sessions[name]=randomBytes(32).toString('hex');await db.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,contact_id,expires_at) VALUES(?,?,?,?,?,?)').bind(sha(sessions[name]),actor,project,role,role==='contact'?actor:null,Date.now()+3600000).run()}

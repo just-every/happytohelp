@@ -1,4 +1,4 @@
-import {phases} from './phases.mjs';
+import {phases} from '../journeys/kit/scenarios.mjs';
 const test=phases(import.meta.url);
 import assert from 'node:assert/strict';
 import {unchanged} from './admission-equality.mjs';

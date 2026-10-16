@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {createHmac,randomBytes} from 'node:crypto';
+import {phases} from '../journeys/kit/scenarios.mjs';const test=phases(import.meta.url);import assert from 'node:assert/strict';import {createHmac,randomBytes} from 'node:crypto';
 import {harness,body} from './harness.mjs';
 import {assertResendPreparationRaces} from './resend-races.mjs';
 const root='/api/management/projects/p/connections';const events=['conversation.created','message.created','conversation.resolved','conversation.rated'];

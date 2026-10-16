@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
+import {phases} from '../journeys/kit/scenarios.mjs';const test=phases(import.meta.url);import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 import {harness} from './harness.mjs';
 import {nativeHarness} from '../move-in/harness.mjs';import {generate} from '../move-in/generator.mjs';
 test('additive integration ledger preserves a genuinely populated 46-migration database',async()=>{

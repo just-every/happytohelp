@@ -9,7 +9,7 @@ const { getPlatformProxy } = await import('wrangler');
 const proxy = await getPlatformProxy({persist:false});
 try {
  const env = proxy.env;
- for (const name of ['0001_identity.sql','0002_conversations.sql','0005_widget_identity.sql','0070_management.sql','0060_customer_context.sql']) {
+ for (const name of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0005_widget_identity.sql','0070_management.sql','0060_customer_context.sql']) {
   const source=await readFile(new URL('../migrations/'+name,import.meta.url),'utf8');
   for(const sql of source.split(';').filter(sql=>sql.trim()))await env.DB.prepare(sql).run();
  }

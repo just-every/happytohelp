@@ -4,6 +4,7 @@ import start from '@tanstack/react-start/server-entry'
 import type { Env,Job } from './platform/env'
 import { app } from './app'
 import { runScheduled } from './jobs'
+import {dispatchOperatorNotifications} from './modules/integrations/notifications'
 import { dispatch } from './base/dispatch'
 import { publicSiteRoutes,isPublicSitePath } from './modules/public-site'
 import { handleEmail } from './modules/integrations'
@@ -24,6 +25,6 @@ export default {
  async fetch(request:Request,env:Env,execution:ExecutionContext){const asset=await staticAssetResponse(request,env);if(asset)return withDocumentHeaders(asset);if(import.meta.env.DEV && import.meta.env.RER_LOCAL_ORIGIN && env.H2H_LOCAL==='true' && !env.RER_INSTALLATION_ID)env={...env,APP_ORIGIN:import.meta.env.RER_LOCAL_ORIGIN};const path=new URL(request.url).pathname,publicSite=!path.startsWith('/preview/')&&await isPublicSitePath(path,env);
  return withDocumentHeaders(withSecurityHeaders(await route(request,env,execution,path,publicSite),headerSurface(path,publicSite),env))},
  async queue(batch:MessageBatch<Job>,env:Env){await consumeQueue(batch,env)},
- async scheduled(_event:ScheduledController,env:Env){await runScheduled(env)},
+ async scheduled(_event:ScheduledController,env:Env){await Promise.all([runScheduled(env),dispatchOperatorNotifications(env)])},
  email:handleEmail,
 } satisfies ExportedHandler<Env,Job>

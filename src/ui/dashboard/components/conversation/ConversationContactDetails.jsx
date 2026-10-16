@@ -57,8 +57,8 @@ export default function ConversationContactDetails({ conversation, onEdit, onEma
                 <ReplyIcon name="chevron-down" />
             </button>
             { actionsOpen && <ul className="dropdown-menu show" role="menu">
-                { contact.blocked_at && <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(() => onToggleBlock(false)) }>Unblock contact</button></li> }
-                { !contact.blocked_at && <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(() => onToggleBlock(true)) }>Block contact</button></li> }
+                { contact.is_blocked && <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(() => onToggleBlock(false)) }>Unblock contact</button></li> }
+                { !contact.is_blocked && <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(() => onToggleBlock(true)) }>Block contact</button></li> }
                 <li role="none"><button type="button" role="menuitem" className="dropdown-item" onClick={ () => handleAction(onEmailTranscript) }>Email conversation</button></li>
             </ul> }
         </div>

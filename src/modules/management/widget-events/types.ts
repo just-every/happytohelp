@@ -9,6 +9,7 @@ export interface WidgetConversation {
 
 /** Object commands have separate fields from context collector/event batches. */
 export interface WidgetCommandData {
+  ids?: string[]
   resolutionId?: string
   comment?: string
   provided_name?: string

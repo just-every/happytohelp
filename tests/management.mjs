@@ -1,4 +1,4 @@
-import {registerHooks} from 'node:module'
+import {registerHooks,createRequire} from 'node:module'
 import {existsSync} from 'node:fs'
 import {readFile,readdir} from 'node:fs/promises'
 import assert from 'node:assert/strict'
@@ -6,10 +6,13 @@ registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&con
 const {routes,dashboardRoutes,publicWidget,widgetEvents}=await import('../src/modules/management/index.ts')
 const {inboundEmail}=await import('../src/modules/integrations/index.ts')
 const {updateEmailSettings}=await import('../src/modules/integrations/mailbox-settings.ts')
+const {widget:widgetIdentity}=await import('../src/modules/identity/widget.ts')
 const {hashToken}=await import('../src/platform/auth.ts')
-const {getPlatformProxy}=await import('wrangler')
-const proxy=await getPlatformProxy({persist:false})
-try{const env={...proxy.env,EMAIL_API_KEY:undefined,EMAIL_FROM:undefined,OPENAI_API_KEY:undefined,GITHUB_TOKEN:undefined,GITHUB_TOKENS:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0101_email_mailbox_lifecycle.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','112_conversation_outcomes.sql'])for(const [,sql] of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run();
+const require=createRequire(import.meta.url),{build}=require('esbuild'),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
+const compiled=await build({entryPoints:['tests/conversation-worker.ts'],bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})
+const runtime=new Miniflare(convertV4MiniflareOptions({name:'management',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}))
+const proxy={env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
+try{const env={...proxy.env,EMAIL_API_KEY:undefined,EMAIL_FROM:undefined,OPENAI_API_KEY:undefined,GITHUB_TOKEN:undefined,GITHUB_TOKENS:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0101_email_mailbox_lifecycle.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','112_conversation_outcomes.sql'])for(const [,sql] of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run();
 await DB.batch([DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)"),DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('q','Other','other','https://other.example',1)"),DB.prepare("INSERT INTO users VALUES('u','owner@example.com','Owner',1)"),DB.prepare("INSERT INTO memberships VALUES('p','u','owner')"),DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'),Date.now()+999999),DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('contact','p','Visitor','visitor@example.com',1)"),DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('c','p','contact',1,1)")]);
 async function call(app,path,method='GET',body){const result=await app.request('https://app.example'+path,{method,headers:{Authorization:'Bearer token','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env);return result}
 assert.equal((await call(routes,'/projects/q/settings')).status,403)
@@ -96,6 +99,38 @@ assert.equal((await call(routes,'/projects/p/agents','POST',{email:'invite@examp
 await DB.prepare("INSERT INTO sessions VALUES(?,'contact','p','contact','contact',?,NULL)").bind(await hashToken('contact-token'),Date.now()+999999).run()
 const widgetContact=await widgetEvents.request('https://app.example/c/widget-events',{method:'POST',headers:{Authorization:'Bearer contact-token','Content-Type':'application/json'},body:JSON.stringify({action:'contact',data:{provided_name:'Updated',provided_email:'updated@example.com'}})},env);assert.equal(widgetContact.status,200)
 assert.equal((await DB.prepare("SELECT name FROM contacts WHERE id='contact'").first()).name,'Updated')
+// Editing from the conversation returns the exact profile shape its sidebar reads.
+await DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.last_seen_at',?,'$.timezone','Asia/Tokyo','$.language','ja','$.country_code','JP','$.ip_address','203.0.113.8','$.user_agent','Browser/1.0','$.account_tier','plus') WHERE id='contact'").bind(Date.now()).run()
+const edited=await(await call(routes,'/projects/p/contacts/contact','PUT',{name:'Canonical name',email:'canonical@example.com',provided_name:'Visitor name',provided_email:'visitor-alias@example.com'})).json()
+assert.deepEqual(edited.data,(await(await call(dashboardRoutes,'/projects/p/conversations/c')).json()).data.contact)
+assert.equal(edited.data.display_name,'Canonical name');assert.equal(edited.data.provided_name,'Visitor name');assert.equal(edited.data.provided_email,'visitor-alias@example.com');assert.equal(edited.data.is_online,true);assert.equal(edited.data.timezone,'Asia/Tokyo');assert.equal(edited.data.account_tier,'plus')
+const blocked=await(await call(routes,'/projects/p/contacts/contact','PUT',{is_blocked:true})).json()
+assert.equal(blocked.data.is_blocked,true);assert.ok(Number.isFinite(new Date(blocked.data.blocked_at).getTime()))
+const blockedAgain=await(await call(routes,'/projects/p/contacts/contact','PUT',{is_blocked:true})).json();assert.equal(blockedAgain.data.blocked_at,blocked.data.blocked_at)
+async function contactPresence(data={}){return widgetEvents.request('https://app.example/c/widget-events',{method:'POST',headers:{Authorization:'Bearer contact-token','Content-Type':'application/json'},body:JSON.stringify({action:'instruction',data})},env)}
+assert.equal((await contactPresence()).status,401,'blocking immediately denies an existing visitor session')
+const unblocked=await(await call(routes,'/projects/p/contacts/contact','PUT',{is_blocked:false})).json();assert.equal(unblocked.data.is_blocked,false);assert.equal(unblocked.data.blocked_at,null);assert.equal((await contactPresence()).status,200)
+await DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.is_blocked',1,'$.blocked_at','2025-01-02T03:04:05.000Z') WHERE id='contact'").run()
+const importedUnblocked=await(await call(routes,'/projects/p/contacts/contact','PUT',{is_blocked:false})).json();assert.equal(importedUnblocked.data.is_blocked,false);assert.equal(importedUnblocked.data.blocked_at,null);assert.equal((await contactPresence()).status,200,'an imported block can be cleared from the same conversation control')
+// Session context comes from browser preferences and request headers, never JSON claims.
+await DB.prepare("UPDATE projects SET verification_secret='context-fixture-secret' WHERE id='p'").run()
+await DB.prepare("UPDATE contacts SET external_id='known-context',is_verified=1 WHERE id='contact'").run()
+const signingKey=await crypto.subtle.importKey('raw',new TextEncoder().encode('context-fixture-secret'),{name:'HMAC',hash:'SHA-256'},false,['sign'])
+async function sign(value){return Array.from(new Uint8Array(await crypto.subtle.sign('HMAC',signingKey,new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('')}
+const identitySignature=await sign('known-context')
+async function contextSession(body,headers={}){return widgetIdentity.request('https://app.example/widget/session',{method:'POST',headers:{Origin:'https://widget.example','Content-Type':'application/json',...headers},body:JSON.stringify({widgetKey:'widget',identifier:'known-context',contact_hash:identitySignature,...body})},env)}
+const business={plan:'pro',ip_address:'forged',country_code:'ZZ',user_agent:'forged',is_blocked:true,blocked_at:1,provided_name:'forged'}
+assert.equal((await contextSession({timezone:'Europe/Paris',language:'fr-fr',ip_address:'forged',country_code:'ZZ',user_agent:'forged',metadata:{...business,hash:await sign(JSON.stringify(business))}},{'CF-Connecting-IP':'203.0.113.10','CF-IPCountry':'FR','User-Agent':'Observed Browser/1.0'})).status,201)
+let contextProfile=(await(await call(dashboardRoutes,'/projects/p/conversations/c')).json()).data.contact
+assert.equal(contextProfile.timezone,'Europe/Paris');assert.equal(contextProfile.language,'fr-FR');assert.equal(contextProfile.ip_address,'203.0.113.10');assert.equal(contextProfile.country_code,'FR');assert.equal(contextProfile.user_agent,'Observed Browser/1.0');assert.equal(contextProfile.provided_name,'Visitor name');assert.equal(contextProfile.is_blocked,false);assert.equal(contextProfile.plan,'pro')
+const replacement={plan:'enterprise'}
+assert.equal((await contextSession({timezone:'Not/AZone',language:'invalid_language',ip_address:'forged',country_code:'ZZ',user_agent:'forged',metadata:{...replacement,hash:await sign(JSON.stringify(replacement))}})).status,201)
+contextProfile=(await(await call(dashboardRoutes,'/projects/p/conversations/c')).json()).data.contact
+assert.equal(contextProfile.timezone,'Europe/Paris');assert.equal(contextProfile.language,'fr-FR');assert.equal(contextProfile.ip_address,'203.0.113.10');assert.equal(contextProfile.country_code,'FR');assert.equal(contextProfile.user_agent,'Observed Browser/1.0');assert.equal(contextProfile.provided_email,'visitor-alias@example.com');assert.equal(contextProfile.plan,'enterprise')
+const newContext=await(await widgetIdentity.request('https://app.example/widget/session',{method:'POST',headers:{Origin:'https://widget.example','Content-Type':'application/json','CF-Connecting-IP':'203.0.113.11','CF-IPCountry':'NZ','User-Agent':'New Browser/2.0'},body:JSON.stringify({widgetKey:'widget',timezone:'Pacific/Auckland',language:'en-NZ',ip_address:'forged'})},env)).json()
+const newProfile=JSON.parse((await DB.prepare('SELECT metadata_json FROM contacts WHERE id=?').bind(newContext.contactId).first()).metadata_json)
+assert.equal(newProfile.timezone,'Pacific/Auckland');assert.equal(newProfile.ip_address,'203.0.113.11');assert.equal(newProfile.country_code,'NZ');assert.equal(newProfile.user_agent,'New Browser/2.0')
+
 assert.equal((await call(inboundEmail,'/email/inbound','POST',{messageId:'mail'})).status,403)
 await call(routes,'/projects/p/email-settings','PUT',{from_name:'Support',from_address:'support@example.com',inbound_address:'inbound@example.com',is_enabled:true})
 const input={messageId:'mail-1',from:'mail-contact@example.com',to:'inbound@example.com',text:'Help by email'}

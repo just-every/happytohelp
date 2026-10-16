@@ -12,7 +12,7 @@ const storageKey=`rer-widget:${api}:${widgetKey}`;
 const bundle=await readFile(new URL('../public/widget.js',import.meta.url));
 const server=createServer((req,res)=>{if(req.url==='/widget.js'){res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(bundle);}else {res.setHeader('Content-Type','text/html; charset=utf-8');res.end(`<html><head><meta charset="utf-8"></head><body style="background:#eee"><h1>Independent host page</h1><script src="/widget.js"></script><script>h2h("init",${JSON.stringify({widgetKey,apiOrigin:api,open:true,settings:{collector:{enabled:false}}})})</script></body></html>`);}});
 await new Promise(resolve=>server.listen(Number(new URL(origin).port),new URL(origin).hostname,resolve));
-const browser=await chromium.launch({headless:true}),context=await browser.newContext({viewport:{width:1000,height:800}}),page=await context.newPage();const errors=[],failed=[];
+const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']}),context=await browser.newContext({viewport:{width:1000,height:800}}),page=await context.newPage();const errors=[],failed=[];
 page.on('pageerror',error=>{errors.push(error.message);console.error('BROWSER ERROR',error.stack)});page.on('response',response=>{if(response.status()>=400)failed.push({url:response.url(),status:response.status()});});
 try{
  await page.goto(origin);await page.locator('textarea[name=content]').waitFor({state:'visible'});await page.waitForTimeout(600);
@@ -39,12 +39,16 @@ try{
  const foreign=await fetch(`${api}/api/conversations/${process.env.WIDGET_TEST_FOREIGN_CONVERSATION || 'widget-foreign-conversation'}/messages`,{headers:{Authorization:`Bearer ${session.token}`,Origin:origin}});assert.equal(foreign.status,404);
  await page.locator('input[name=email]').fill('visitor-updated@example.test');await page.locator('input[name=email]').press('Enter');await page.waitForTimeout(300);
  const updatedContact=await(await fetch(`${api}/api/management/projects/${session.projectId}/contacts/${session.contactId}`,{headers})).json();assert.equal(updatedContact.data.email,'visitor-updated@example.test');
+ const browserContext=await page.evaluate(()=>({timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,language:navigator.language,user_agent:navigator.userAgent}));
+ const observedContext=JSON.parse(updatedContact.data.metadata_json);
+ assert.equal(observedContext.timezone,browserContext.timezone);assert.equal(observedContext.language,Intl.getCanonicalLocales(browserContext.language)[0]);assert.equal(observedContext.user_agent,browserContext.user_agent);assert.ok(Number.isFinite(new Date(observedContext.last_seen_at).getTime()));
+
  await page.screenshot({path:`${evidence}/desktop.png`});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
  const panel=await page.locator('.happytohelp-interact').boundingBox();assert.ok(panel.width<=390);await page.screenshot({path:`${evidence}/mobile.png`});
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
  const recoveryChecks=await widgetRecoveryBrowser({browser,origin,api,widgetKey,ownerToken});
  const failedSendChecks=await widgetFailedSendBrowser({browser,origin,api,widgetKey,ownerToken,evidence});
- const proof={checks:[...recoveryChecks,...failedSendChecks,'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
+ const proof={checks:[...recoveryChecks,...failedSendChecks,'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','browser timezone/language and observed device context survive reload with collector disabled','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
  await writeFile(`${evidence}/browser.json`,JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));
 }catch(error){console.error(JSON.stringify({error:error.message,errors,failed}));await page.screenshot({path:`${evidence}/failed-attempt.png`});throw error;}finally{await browser.close();server.close();}

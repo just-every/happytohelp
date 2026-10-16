@@ -229,14 +229,18 @@ test('erased conversations keep a coherent transcript for operators',async()=>{
 
 test('repeated erasure is idempotent and records the new run',async()=>{
  const state=await erasedScope(),outside=await outsideScope()
+ const followupHistory=await all("SELECT type,payload FROM context_tracked_events WHERE project_id='p' AND subject_id='ct'")
+ const sender=await one('SELECT actor_id FROM messages WHERE id=?',opAfter)
+ assert.ok(followupHistory.some(event=>event.type==='AGENT_ASSIGNED'&&JSON.parse(event.payload).agent_id===sender.actor_id),'the follow-up operator reply also records its server-authored handoff')
  const response=await erase(tokens.owner);assert.equal(response.status,200)
  const second=(await response.json()).data
  assert.equal(second.erased_at,first.erased_at);assert.equal(second.erased_by,'admin');assert.equal(second.runs,2);assert.ok(second.last_erased_at>=first.last_erased_at)
  // The operator message written after the first erasure belongs to the erased conversation.
- assert.deepEqual({...second,runs:1,last_erased_at:first.last_erased_at,messages:second.messages-1},first)
+ assert.deepEqual({...second,runs:1,last_erased_at:first.last_erased_at,messages:second.messages-1,tracked_events:second.tracked_events-followupHistory.length},first)
  const again=await erasedScope()
  assert.deepEqual(await one('SELECT content,local_id FROM messages WHERE id=?',opAfter),{content:'',local_id:'erased:'+opAfter})
- assert.deepEqual({...again,messages:again.messages.filter(m=>m.id!==opAfter)},{...state,messages:state.messages.filter(m=>m.id!==opAfter)})
+ assert.deepEqual({...again,messages:again.messages.filter(m=>m.id!==opAfter)},{...state,messages:state.messages.filter(m=>m.id!==opAfter),context:{...state.context,context_tracked_events:state.context.context_tracked_events-followupHistory.length}})
+ assert.deepEqual(await all("SELECT type,payload FROM context_tracked_events WHERE project_id='p' AND subject_id='ct'"),[],'repeat erasure removes the new handoff observation too')
  assert.deepEqual(await outsideScope(),outside)
  const third=(await(await erase(tokens.owner)).json()).data
  assert.deepEqual({...third,runs:2,last_erased_at:second.last_erased_at},second)

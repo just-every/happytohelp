@@ -17,7 +17,7 @@ const proxy = await getPlatformProxy({ persist: false })
 const originalFetch = globalThis.fetch
 
 try {
-  for (const file of ['0001_identity.sql', '0002_conversations.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql']) {
+  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql']) {
     for (const sql of (await readFile(new URL(`../migrations/${file}`, import.meta.url), 'utf8')).split(';').filter(value => value.trim())) await proxy.env.DB.prepare(sql).run()
   }
   const env = { ...proxy.env, EMAIL_PROVIDER: 'sendgrid', EMAIL_API_KEY: 'fixture-key', EMAIL_FROM: 'help@support.example.com', INBOUND_EMAIL_TOKEN: 'test-only-inbound-email-token' }

@@ -22,7 +22,7 @@ const proxy = await getPlatformProxy({ persist: false })
 const originalFetch = globalThis.fetch
 
 try {
-  for (const file of ['0001_identity.sql', '0005_widget_identity.sql', '0002_conversations.sql', '0070_management.sql', '0080_integrations.sql', '0082_github_oauth.sql']) {
+  for (const file of ['0001_identity.sql', '0005_widget_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0070_management.sql', '0080_integrations.sql', '0082_github_oauth.sql']) {
     for (const sql of (await readFile(new URL(`../migrations/${file}`, import.meta.url), 'utf8')).split(';').filter(value => value.trim())) {
       await proxy.env.DB.prepare(sql).run()
     }

@@ -19,7 +19,7 @@ before(async()=>{
  await build({entryPoints:['tests/local-computer-worker.ts'],outfile:join(folder,'worker.mjs'),bundle:true,format:'esm',platform:'neutral',external:['node:crypto','node:buffer'],logLevel:'silent'});
  mf=new Miniflare(convertV4MiniflareOptions({modules:true,script:await readFile(join(folder,'worker.mjs'),'utf8'),compatibilityDate:'2026-09-01',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],bindings:{ENABLE_SYNTHETIC_EVALUATION:'true'},queueProducers:{JOBS:'training-tests'}}));
  db=await mf.getD1Database('DB');
- for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','030_local_computer.sql','040_training_runs.sql','0070_management.sql','0050_knowledge.sql','0080_integrations.sql','0081_billing_receipts.sql','041_training_model_usage.sql']){const sql=await readFile('migrations/'+file,'utf8');for(const statement of sql.split(';').map(x=>x.trim()).filter(Boolean))await db.prepare(statement).run();}
+ for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0004_message_intent.sql','0005_widget_identity.sql','030_local_computer.sql','040_training_runs.sql','0070_management.sql','0050_knowledge.sql','0080_integrations.sql','0081_billing_receipts.sql','041_training_model_usage.sql']){const sql=await readFile('migrations/'+file,'utf8');for(const statement of sql.split(';').map(x=>x.trim()).filter(Boolean))await db.prepare(statement).run();}
  const operators=['u','u2','u3','u4'];
  await db.batch([
   db.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','http://localhost',1)"),

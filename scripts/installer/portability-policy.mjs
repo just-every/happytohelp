@@ -5,6 +5,7 @@ export const archivePolicy={
  // Reconstruct the full-text index from retained messages after restore.
  derivedTables:['inbox_message_search'],
  excludeTables:[
+  'operator_notification_activity','operator_notifications',
   'sessions','conversation_outbox','identity_tokens','magic_signins','registrations','login_attempts',
   'github_connections','github_oauth_states','preview_grants','edition_codes','edition_consents',
   'local_pairings','local_authorizations','local_grants','local_devices','local_device_settings','local_jobs','local_events','local_attachments','local_receipts','local_attachment_grants','local_result_effects',

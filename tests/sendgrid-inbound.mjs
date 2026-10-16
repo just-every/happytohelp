@@ -17,7 +17,7 @@ const { getPlatformProxy } = await import('wrangler')
 const proxy = await getPlatformProxy({ persist: false })
 
 try {
-  for (const file of ['0001_identity.sql', '0002_conversations.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql', '0100_inbound_email_claims.sql', '0104_inbound_email_classification.sql','112_conversation_outcomes.sql']) {
+  for (const file of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0070_management.sql', '0080_integrations.sql', '0100_inbound_email_claims.sql', '0104_inbound_email_classification.sql','112_conversation_outcomes.sql']) {
     for (const sql of migrationStatements(await readFile(new URL(`../migrations/${file}`, import.meta.url), 'utf8'))) await proxy.env.DB.prepare(sql).run()
   }
   const files = new Map()

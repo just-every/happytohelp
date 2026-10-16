@@ -2,6 +2,7 @@ import { HTTPException } from 'hono/http-exception'
 import { validWidgetOrigin } from '../activation/local-probes'
 import { text } from '../common'
 import {contactWritable} from '../../../platform/contact-state'
+import {contactEnvironment} from '../../identity/contact-environment'
 import type { WidgetCommand } from './types'
 
 export async function updateContact({ c, actor, conversation, data }: WidgetCommand) {
@@ -44,14 +45,18 @@ export async function updateContact({ c, actor, conversation, data }: WidgetComm
   return c.json({ updated: true, contact: { id: contact.id, name: contact.name, email: contact.email, verified: contact.is_verified === 1 } })
 }
 
-export async function recordPresence({ c, actor, data, action }: WidgetCommand) {
-  const row = await c.env.DB.prepare('SELECT metadata_json FROM contacts WHERE id=? AND project_id=?')
-    .bind(actor.contactId!, actor.projectId).first<{ metadata_json: string }>()
-  const metadata = JSON.parse(row?.metadata_json || '{}') as Record<string, unknown>
-  metadata.last_seen_at = Date.now()
+export async function recordPresence({ c, actor, conversation, data, action }: WidgetCommand) {
+  const metadata: Record<string, unknown> = contactEnvironment(c.req.raw, data)
   if (action === 'instruction') metadata.widget_opened = Boolean(data.opened ?? data.value ?? true)
-  const result=await c.env.DB.prepare(`UPDATE contacts SET metadata_json=? WHERE id=? AND project_id=? AND ${contactWritable}`)
-    .bind(JSON.stringify(metadata), actor.contactId!, actor.projectId).run()
+  const result=await c.env.DB.prepare(`UPDATE contacts SET metadata_json=json_patch(metadata_json,?) WHERE id=? AND project_id=? AND ${contactWritable}
+    AND coalesce(json_extract(metadata_json,'$.is_blocked'),0)!=1
+    AND coalesce(json_extract(metadata_json,'$.is_deleted'),0)!=1
+    AND EXISTS(SELECT 1 FROM sessions s JOIN projects p ON p.id=s.project_id WHERE s.token_hash=? AND s.role='contact'
+      AND s.actor_id=contacts.id AND s.contact_id=contacts.id AND s.project_id=contacts.project_id
+      AND s.revoked_at IS NULL AND s.expires_at>max(?,CAST((julianday('now')-2440587.5)*86400000 AS INTEGER))
+      AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=p.id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL))
+    AND EXISTS(SELECT 1 FROM conversations cv WHERE cv.id=? AND cv.contact_id=contacts.id AND cv.project_id=contacts.project_id)`)
+    .bind(JSON.stringify(metadata), actor.contactId!, actor.projectId, c.get('sessionHash'), Date.now(), conversation.id).run()
   if(!result.meta.changes)throw new HTTPException(409)
   // Only accepted authenticated ping commands on the configured website count. Preview,
   // instruction/open events and arbitrary last_seen_at values cannot create a receipt.

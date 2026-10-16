@@ -52,11 +52,17 @@ names are given so you can find the data yourself if you need to.
 | What | Stored in | When it is collected |
 | --- | --- | --- |
 | Name, email and verified identifier (`external_id`, the ID your site passes when it verifies a visitor) | `contacts` | Your site or the widget supplies them, the contact edits them in the widget, an inbound email arrives, or an operator enters them. |
-| The name and email the contact typed, phone, blocked flag, last seen, whether the widget is open, and any extra details your site signs with the workspace's verification secret (for example country, IP address or browser) | `contacts.metadata_json` | Widget sessions and presence events, and operator edits. |
+| The name and email the contact typed, phone, block state/date, last seen, widget open state, browser timezone/language, request-observed IP/country/user agent, and signed business details | `contacts.metadata_json` | Widget sessions and presence events, and operator edits. |
 | Widget sessions | `sessions` (a hash of the session token, with a 30-day expiry) | Each widget session. |
 | Messages | `messages` | Every message in a conversation, including replies from operators and the AI. |
 | Attachments | Rows in `media`, with the files in R2 | Uploads from the widget, the dashboard and inbound email. |
-| Internal notes, conversation participants and read state | `conversation_notes`, `conversation_participants`, `conversation_reads` | Operator actions and widget read receipts. |
+| Internal notes, conversation participants and read state | `conversation_notes`, `conversation_participants`, `conversation_reads`, `context_tracked_events` | Operator actions and widget read receipts. |
+
+Assignment changes retain the server-authored target and actor in
+`context_tracked_events`. Teammate email intents retain message IDs,
+recipient user IDs and revision frontiers in `operator_notification_activity` and
+`operator_notifications`; message text and addresses remain in their existing
+source tables. Provider attempt identity prevents uncertain sends being replayed.
 
 ### Activity and customer context
 

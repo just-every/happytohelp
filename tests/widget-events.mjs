@@ -17,13 +17,13 @@ const built = await build({
   external: ['cloudflare:workers', 'node:*', 'crypto', 'path', 'buffer'], logLevel: 'silent',
 })
 const mf = new Miniflare(convertV4MiniflareOptions({
-  name: 'widget-events', modules: true, script: built.outputFiles[0].text,
+  name: 'widget-events', cf:{country:'US'}, modules: true, script: built.outputFiles[0].text,
   compatibilityDate: '2026-09-14', compatibilityFlags: ['nodejs_compat'],
   d1Databases: ['DB'], durableObjects: { CONVERSATIONS: { className: 'ConversationSocket', useSQLite: true } },
 }))
 try {
   const db = await mf.getD1Database('DB')
-  for (const name of ['0001_identity.sql', '0002_conversations.sql', '0004_message_intent.sql',
+  for (const name of ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0004_message_intent.sql',
     '0005_widget_identity.sql', '0007_conversation_history.sql', '0070_management.sql',
     '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql', '0102_public_abuse_limits.sql','112_conversation_outcomes.sql']) {
     const migration = await readFile(new URL('../migrations/' + name, import.meta.url), 'utf8')
@@ -43,9 +43,9 @@ try {
     await db.prepare('INSERT INTO context_insights VALUES(?,?,?,?,?,?,?,?,NULL)')
       .bind(id, 'p', subject, 'help', 'How can we help?', buttons, '[]', 1).run()
   }
-  async function call(action, data = {}, conversation = 'own', token = 'contact-token') {
+  async function call(action, data = {}, conversation = 'own', token = 'contact-token', headers = {}) {
     return mf.dispatchFetch(`https://app.example/${conversation}/widget-events`, {
-      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...headers },
       body: JSON.stringify({ action, data }),
     })
   }
@@ -77,6 +77,14 @@ try {
   assert.equal((await db.prepare("SELECT revision FROM conversation_reads WHERE conversation_id='own'").first()).revision, 2)
   assert.equal((await call('instruction', { opened: false })).status, 200)
   assert.equal(JSON.parse((await db.prepare("SELECT metadata_json FROM contacts WHERE id='visitor'").first()).metadata_json).widget_opened, false)
+  await db.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.provided_name','Collected name','$.business',json('{\"plan\":\"plus\"}')) WHERE id='visitor'").run()
+  assert.equal((await call('instruction',{opened:true,timezone:'America/New_York',language:'en-us',ip_address:'forged',country_code:'ZZ',user_agent:'forged',last_seen_at:1},'own','contact-token',{'CF-Connecting-IP':'2001:db8::1','CF-IPCountry':'US','User-Agent':'Observed Presence/1.0'})).status,200)
+  const observed=JSON.parse((await db.prepare("SELECT metadata_json FROM contacts WHERE id='visitor'").first()).metadata_json)
+  assert.equal(observed.timezone,'America/New_York');assert.equal(observed.language,'en-US');assert.equal(observed.ip_address,'2001:db8::1');assert.equal(observed.country_code,'US');assert.equal(observed.user_agent,'Observed Presence/1.0');assert.equal(observed.widget_opened,true);assert.ok(observed.last_seen_at>1);assert.equal(observed.provided_name,'Collected name');assert.deepEqual(observed.business,{plan:'plus'})
+  assert.equal((await call('instruction',{timezone:'not-a-timezone',language:'not_a_language',ip_address:'forged'},'own','contact-token',{'CF-Connecting-IP':'2001:db8::1','CF-IPCountry':'US','User-Agent':'Observed Presence/1.0'})).status,200)
+  const retained=JSON.parse((await db.prepare("SELECT metadata_json FROM contacts WHERE id='visitor'").first()).metadata_json)
+  for(const key of ['timezone','language','ip_address','country_code','user_agent','provided_name','business'])assert.deepEqual(retained[key],observed[key])
+
 
   // Every new request rechecks live authority, including previously accepted commands.
   await db.prepare("UPDATE contacts SET metadata_json=? WHERE id='visitor'").bind('{"is_blocked":true}').run()

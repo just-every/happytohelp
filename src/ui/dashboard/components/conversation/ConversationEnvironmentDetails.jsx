@@ -15,6 +15,7 @@ export default function ConversationEnvironmentDetails({ contact }) {
         <ConversationDetailSection className="conversation-details-location" title="Location">
             <div className="conversation-detail-grid">
                 { contact.country_code && <ConversationDetailField className="conversation-detail-field--compact" icon="map-pin" label="Country" value={ <CountryName code={ contact.country_code } /> } /> }
+                { contact.language && <ConversationDetailField className="conversation-detail-field--compact" icon="globe" label="Language" value={ contact.language } /> }
                 { timezone
                     ? <ConversationDetailField className="conversation-detail-field--compact" icon="clock" label="Local time">
                         <Moment tz={ timezone } format="LT">{ new Date() }</Moment>
@@ -27,8 +28,8 @@ export default function ConversationEnvironmentDetails({ contact }) {
 
         { contact.user_agent && userAgent && <ConversationDetailSection className="conversation-details-device" title="Device">
             <div className="conversation-detail-grid">
-                <ConversationDetailField className="conversation-detail-field--compact" icon="monitor" label="Browser" value={ `${ userAgent.browser.name } ${ userAgent.browser.version }` } />
-                <ConversationDetailField className="conversation-detail-field--compact" icon="laptop" label="OS" value={ `${ userAgent.os.name } ${ userAgent.os.version }` } />
+                <ConversationDetailField className="conversation-detail-field--compact" icon="monitor" label="Browser" value={ [userAgent.browser.name, userAgent.browser.version].filter(Boolean).join(' ') || 'Unknown' } />
+                <ConversationDetailField className="conversation-detail-field--compact" icon="laptop" label="OS" value={ [userAgent.os.name, userAgent.os.version].filter(Boolean).join(' ') || 'Unknown' } />
             </div>
         </ConversationDetailSection> }
     </>;

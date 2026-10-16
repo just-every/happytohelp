@@ -1,28 +1,37 @@
 import {migrationStatements} from './helpers/migration-statements.mjs';
-import {registerHooks} from 'node:module'
+import {registerHooks,createRequire} from 'node:module'
 import {existsSync} from 'node:fs'
 import {readFile} from 'node:fs/promises'
 import assert from 'node:assert/strict'
 registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'.ts',c.parentURL);if(existsSync(u))return n(u.href,c)}return n(s,c)}})
-const {handleEmail}=await import('../src/modules/integrations/email-worker.ts'),{getPlatformProxy}=await import('wrangler'),proxy=await getPlatformProxy({persist:false})
-try{const env={...proxy.env,OPENAI_API_KEY:undefined,EMAIL_API_KEY:undefined,CONVERSATIONS:{idFromName:id=>id,get:()=>({fetch:async()=>new Response('ok')})}},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run();await DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)").run();await DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)").run();let rejected;const promises=[];const execution={waitUntil:p=>promises.push(p)};async function deliver(id,to,text,attachment=false){const raw=`From: Customer <customer@example.com>\r\nTo: ${to}\r\nMessage-ID: <${id}>\r\nMIME-Version: 1.0\r\n${attachment?'Content-Type: multipart/mixed; boundary="b"\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\n'+text+'\r\n--b\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename="example.txt"\r\nContent-Transfer-Encoding: base64\r\n\r\nYXR0YWNobWVudA==\r\n--b--':'Content-Type: '+(text.startsWith('<')?'text/html':'text/plain')+'\r\n\r\n'+text}`;return handleEmail({from:'customer@example.com',to,rawSize:raw.length,raw:new Response(raw).body,setReject:reason=>{rejected=reason}},env,execution)}await deliver('first@example.com','inbound@example.com','First email',true);await Promise.all(promises);assert.equal(rejected,undefined);const c=await DB.prepare('SELECT * FROM conversations').first();assert.equal(c.revision,1);assert.equal((await DB.prepare('SELECT * FROM media').first()).filename,'example.txt');await deliver('second@example.com',`inbound+${c.id}@example.com`,'Reply email');await Promise.all(promises);assert.equal((await DB.prepare('SELECT count(*) n FROM conversations').first()).n,1);assert.equal((await DB.prepare('SELECT revision FROM conversations').first()).revision,2);await deliver('second@example.com',`inbound+${c.id}@example.com`,'Reply email');assert.equal((await DB.prepare('SELECT revision FROM conversations').first()).revision,2);await deliver('html@example.com',`inbound+${c.id}@example.com`,'<p>HTML <b>reply</b></p><script>secret()</script>');assert.match((await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content,/HTML reply/);assert.ok(!(await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content.includes('secret()'));console.log('Native Email Worker: MIME attachment R2/D1 admission, reply-address conversation continuity, duplicate delivery coalescing passed')}finally{await proxy.dispose()}
+const require=createRequire(import.meta.url),{build}=require('esbuild'),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
+const compiled=await build({entryPoints:['tests/conversation-worker.ts'],bundle:true,write:false,format:'esm',platform:'node',external:['cloudflare:workers','node:*'],logLevel:'silent'})
+async function notificationRuntime(){
+ const runtime=new Miniflare(convertV4MiniflareOptions({name:'email-worker',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}))
+ return {env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
+}
+const {handleEmail}=await import('../src/modules/integrations/email-worker.ts'),proxy=await notificationRuntime()
+try{const env={...proxy.env,OPENAI_API_KEY:undefined,EMAIL_API_KEY:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run();await DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)").run();await DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)").run();let rejected;const promises=[];const execution={waitUntil:p=>promises.push(p)};async function deliver(id,to,text,attachment=false){const raw=`From: Customer <customer@example.com>\r\nTo: ${to}\r\nMessage-ID: <${id}>\r\nMIME-Version: 1.0\r\n${attachment?'Content-Type: multipart/mixed; boundary="b"\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\n'+text+'\r\n--b\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename="example.txt"\r\nContent-Transfer-Encoding: base64\r\n\r\nYXR0YWNobWVudA==\r\n--b--':'Content-Type: '+(text.startsWith('<')?'text/html':'text/plain')+'\r\n\r\n'+text}`;return handleEmail({from:'customer@example.com',to,rawSize:raw.length,raw:new Response(raw).body,setReject:reason=>{rejected=reason}},env,execution)}await deliver('first@example.com','inbound@example.com','First email',true);await Promise.all(promises);assert.equal(rejected,undefined);const c=await DB.prepare('SELECT * FROM conversations').first();assert.equal(c.revision,1);assert.equal((await DB.prepare('SELECT * FROM media').first()).filename,'example.txt');await deliver('second@example.com',`inbound+${c.id}@example.com`,'Reply email');await Promise.all(promises);assert.equal((await DB.prepare('SELECT count(*) n FROM conversations').first()).n,1);assert.equal((await DB.prepare('SELECT revision FROM conversations').first()).revision,2);await deliver('second@example.com',`inbound+${c.id}@example.com`,'Reply email');assert.equal((await DB.prepare('SELECT revision FROM conversations').first()).revision,2);await deliver('html@example.com',`inbound+${c.id}@example.com`,'<p>HTML <b>reply</b></p><script>secret()</script>');assert.match((await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content,/HTML reply/);assert.ok(!(await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content.includes('secret()'));console.log('Native Email Worker: MIME attachment R2/D1 admission, reply-address conversation continuity, duplicate delivery coalescing passed')}finally{await proxy.dispose()}
 
 // Automatic mail (out-of-office, list, bounce) on the Worker and JSON gateway paths:
 // admitted and labelled, but never answered by AI, notified or emailed onward.
 {
  // message-effects imports module directories through their index.
  registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'/index.ts',c.parentURL);if(existsSync(u))return n(u.href,c)}return n(s,c)}})
- const proxy=await getPlatformProxy({persist:false}),originalFetch=globalThis.fetch
+ const proxy=await notificationRuntime(),originalFetch=globalThis.fetch
  const {applyMessageEffects}=await import('../src/message-effects.ts')
+ const {dispatchOperatorNotifications}=await import('../src/modules/integrations/notifications.ts')
  const {inboundEmail}=await import('../src/modules/integrations/inbound.ts')
  const {routes:conversationRoutes}=await import('../src/modules/conversations/routes.ts')
  const {bucketData}=await import('../src/modules/management/buckets.ts')
+ const {dashboardActions}=await import('../src/modules/management/dashboard-actions.ts')
  const {hashToken}=await import('../src/platform/auth.ts')
  try{
   const jobs=[],outbound=[],pending=[],execution={waitUntil:promise=>pending.push(promise),passThroughOnException(){}}
-  const env={...proxy.env,OPENAI_API_KEY:'fixture-openai',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-resend',EMAIL_FROM:'support@example.com',INBOUND_EMAIL_TOKEN:'fixture-gateway',JOBS:{send:async job=>{jobs.push(job)}},CONVERSATIONS:{idFromName:id=>id,get:()=>({fetch:async()=>new Response('ok')})}},DB=env.DB
+  const env={...proxy.env,APP_ORIGIN:'https://app.example',OPENAI_API_KEY:'fixture-openai',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-resend',EMAIL_FROM:'support@example.com',INBOUND_EMAIL_TOKEN:'fixture-gateway',JOBS:{send:async job=>{jobs.push(job)}}},DB=env.DB
+  const flushAlerts=()=>dispatchOperatorNotifications(env,{now:Date.now()+61000})
   globalThis.fetch=async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})}
-  for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
+  for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
   await DB.batch([
    DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)"),
    DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)"),
@@ -86,6 +95,8 @@ try{const env={...proxy.env,OPENAI_API_KEY:undefined,EMAIL_API_KEY:undefined,CON
   assert.equal(generation?.state,'queued');assert.deepEqual(jobs,[{type:'ai.generate',id:`reply:${customerMessage.id}`,projectId:'p'}])
   await deliver({id:'customer-assigned@example.com',to:'inbound+assigned@example.com',subject:'Re: Question about my order',text:'Any update?'})
   await replay(await admitted('customer-assigned@example.com'))
+  assert.equal(outbound.length,0)
+  await flushAlerts()
   assert.equal(outbound.length,1);assert.equal(outbound[0].url,'https://api.resend.com/emails');assert.deepEqual(outbound[0].body.to,['op@example.com'])
   assert.deepEqual(outbound[0].body.headers,{'Auto-Submitted':'auto-generated','X-Auto-Response-Suppress':'All'})
 
@@ -100,6 +111,8 @@ try{const env={...proxy.env,OPENAI_API_KEY:undefined,EMAIL_API_KEY:undefined,CON
   for(const id of ['gateway-away','gateway-bounce'])await replay(await admitted(id))
   assert.equal(outbound.length,1)
   await replay(await admitted('gateway-customer'))
+  assert.equal(outbound.length,1)
+  await flushAlerts()
   assert.equal(outbound.length,2)
 
   // Operators see why: the transcript API and the dashboard bucket carry message.origin.
@@ -118,6 +131,83 @@ try{const env={...proxy.env,OPENAI_API_KEY:undefined,EMAIL_API_KEY:undefined,CON
   const operatorReply=await conversationRoutes.request('/widget/messages',{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'operator-reply-1',content:'We are on it.',expectedRevision:revision})},env,execution)
   assert.equal(operatorReply.status,200)
   await Promise.all(pending.splice(0))
+  // The operator digest is independent of assignment preferences, coalesces a
+  // burst, and skips the recipient's read frontier at dispatch time.
+  const unreadMail=async(messageId,text)=>{await gateway({messageId,to:'inbound+assigned@example.com',from:'customer@example.com',text});await replay(await admitted(messageId))}
+  await DB.prepare("INSERT INTO user_settings(user_id,is_notifiable_on_conversation_assignment) VALUES('op',0)").run()
+  await unreadMail('digest-first','First unread question')
+  await unreadMail('digest-second','Second unread question')
+  const firstDigest=await admitted('digest-first'),secondDigest=await admitted('digest-second'),beforeDigest=outbound.length
+  await dispatchOperatorNotifications(env)
+  assert.equal(outbound.length,beforeDigest)
+  await DB.prepare("INSERT INTO conversation_reads VALUES('assigned','op',?) ON CONFLICT(conversation_id,user_id) DO UPDATE SET revision=excluded.revision").bind(firstDigest.revision).run()
+  await flushAlerts()
+  assert.equal(outbound.length,beforeDigest+1)
+  assert.match(outbound.at(-1).body.text,/Second unread question/)
+  assert.equal(outbound.at(-1).body.text.split('Unread customer messages:')[1].includes('First unread question'),false)
+  assert.match(outbound.at(-1).body.text,/Previous context:/)
+  await replay(secondDigest);await flushAlerts()
+  assert.equal(outbound.length,beforeDigest+1)
+  await unreadMail('already-read','Read before email')
+  await DB.prepare("UPDATE conversation_reads SET revision=? WHERE conversation_id='assigned' AND user_id='op'").bind((await admitted('already-read')).revision).run()
+  await flushAlerts();assert.equal(outbound.length,beforeDigest+1)
+
+  // Unassigned mail reaches opted-in members only, with an individual read
+  // frontier, and no cross-workspace recipient leakage.
+  await DB.batch([
+   DB.prepare("INSERT INTO users VALUES('watcher','watcher@example.com','Watcher',1)"),
+   DB.prepare("INSERT INTO users VALUES('quiet','quiet@example.com','Quiet',1)"),
+   DB.prepare("INSERT INTO users VALUES('outsider','outsider@example.com','Outsider',1)"),
+   DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('other','Other','other-key','https://other.example',1)"),
+   DB.prepare("INSERT INTO memberships VALUES('p','watcher','operator')"),
+   DB.prepare("INSERT INTO memberships VALUES('p','quiet','operator')"),
+   DB.prepare("INSERT INTO memberships VALUES('other','outsider','owner')"),
+   DB.prepare("INSERT INTO user_project_preferences(project_id,user_id,is_notified_on_unassigned_activity) VALUES('p','op',1),('p','watcher',1),('other','outsider',1)"),
+   DB.prepare("UPDATE conversations SET assigned_to=NULL WHERE id='assigned'")
+  ])
+  await unreadMail('unassigned-burst-1','Unassigned first')
+  await unreadMail('unassigned-burst-2','Unassigned second')
+  await DB.prepare("UPDATE conversation_reads SET revision=? WHERE conversation_id='assigned' AND user_id='op'").bind((await admitted('unassigned-burst-2')).revision).run()
+  const beforeUnassigned=outbound.length
+  await Promise.all([flushAlerts(),flushAlerts()])
+  assert.equal(outbound.length,beforeUnassigned+1)
+  assert.deepEqual(outbound.at(-1).body.to,['watcher@example.com'])
+  assert.match(outbound.at(-1).body.text,/Unassigned first/);assert.match(outbound.at(-1).body.text,/Unassigned second/)
+
+  // A lost provider response is recorded once; outbox and scheduler replay never
+  // send it again. A later read or preference edit cannot alter that identity.
+  await DB.prepare("UPDATE user_project_preferences SET is_notified_on_unassigned_activity=0 WHERE user_id='op'").run()
+  await unreadMail('uncertain-alert','A lost response')
+  let attempts=0
+  globalThis.fetch=async()=>{attempts++;throw new Error('response lost')}
+  await flushAlerts()
+  const uncertain=await DB.prepare("SELECT * FROM email_deliveries WHERE state='uncertain'").first()
+  assert.equal(attempts,1);assert.equal(uncertain.recipient,'watcher@example.com')
+  await replay(await admitted('uncertain-alert'));await flushAlerts()
+  assert.equal(attempts,1)
+  // The real operator mutation creates assignment-mail intent in the same
+  // transaction as ownership. Same-owner writes and self assignment stay quiet.
+  globalThis.fetch=async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})}
+  const assign=async(agent_id,requestEnv=env)=>{
+   const response=await dashboardActions.request('/projects/p/conversations/assigned',{method:'PUT',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({agent_id})},requestEnv,execution)
+   assert.equal(response.status,200,await response.text())
+  }
+  const beforeAssignment=outbound.length
+  await assign('watcher')
+  assert.equal(outbound.length,beforeAssignment+1);assert.deepEqual(outbound.at(-1).body.to,['watcher@example.com']);assert.ok(outbound.at(-1).body.text.includes('https://app.example/projects/p/conversations/assigned'))
+  await assign('watcher');await assign('op')
+  assert.equal(outbound.length,beforeAssignment+1)
+  await DB.prepare("INSERT INTO user_settings(user_id,is_notifiable_on_conversation_assignment) VALUES('watcher',0)").run()
+  await assign('watcher')
+  assert.equal(outbound.length,beforeAssignment+1)
+  await assign('quiet',{...env,EMAIL_API_KEY:undefined})
+  assert.equal(outbound.length,beforeAssignment+1)
+  await dispatchOperatorNotifications(env)
+  assert.equal(outbound.length,beforeAssignment+2);assert.deepEqual(outbound.at(-1).body.to,['quiet@example.com'])
+  await dispatchOperatorNotifications(env)
+  assert.equal(outbound.length,beforeAssignment+2)
+  console.log('Assignment email: real operator mutation, changed nonself ownership, preference off, same/self suppression and durable scheduled recovery passed')
+  console.log('Operator unread mail: inactivity, coalescing, recipient read frontiers, assignment preference independence, opt-in unassigned scope, concurrent recovery and no uncertain replay passed')
   console.log('Automatic inbound mail: Worker and gateway classification, no AI reply or notification on delivery and replay, null-envelope refusal, loop-suppression headers, transcript and dashboard origin, reserved local ids passed')
  }finally{globalThis.fetch=originalFetch;await proxy.dispose()}
 }

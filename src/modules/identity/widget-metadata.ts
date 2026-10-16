@@ -1,16 +1,17 @@
 import type {Env} from '../../platform/env'
 import {contactWritable} from '../../platform/contact-state'
+import {retainedContactMetadata} from './contact-environment'
 
-// Signed business metadata is replaced, but collected identity aliases belong
-// to the contact. Preserve even explicit nulls without copying unrelated fields.
-const retainedCollectorMetadata=['provided_name','provided_email'].reduce((value,key)=>
- `CASE WHEN json_type(metadata_json,'$.${key}') IS NOT NULL
-  THEN json_set(${value},'$.${key}',json_extract(metadata_json,'$.${key}')) ELSE ${value} END`,'?1')
-
-export function updateSignedWidgetMetadata(env:Env,projectId:string,contactId:string,metadata:Record<string,unknown>){
- return env.DB.prepare(`UPDATE contacts SET metadata_json=${retainedCollectorMetadata}
-  WHERE id=?2 AND project_id=?3 AND ${contactWritable}
+// Signed business metadata is replaced. Collected context, including explicit
+// null identity aliases, and operator-owned lifecycle fields remain intact.
+export async function updateSignedWidgetMetadata(env:Env,projectId:string,contactId:string,metadata:Record<string,unknown>){
+ const current=await env.DB.prepare('SELECT metadata_json FROM contacts WHERE id=? AND project_id=?').bind(contactId,projectId).first<{metadata_json:string}>()
+ const stored=JSON.parse(current?.metadata_json||'{}') as Record<string,unknown>
+ const businessMetadata=Object.fromEntries(Object.entries(metadata).filter(([key])=>!retainedContactMetadata.includes(key)))
+ for(const key of retainedContactMetadata)if(Object.hasOwn(stored,key))businessMetadata[key]=stored[key]
+ return env.DB.prepare(`UPDATE contacts SET metadata_json=?
+  WHERE id=? AND project_id=? AND metadata_json IS ? AND ${contactWritable}
   AND coalesce(json_extract(metadata_json,'$.is_blocked'),0)!=1
   AND coalesce(json_extract(metadata_json,'$.is_deleted'),0)!=1`)
-  .bind(JSON.stringify(metadata),contactId,projectId).run()
+  .bind(JSON.stringify(businessMetadata),contactId,projectId,current?.metadata_json??null).run()
 }

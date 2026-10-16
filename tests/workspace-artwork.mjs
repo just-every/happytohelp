@@ -18,7 +18,7 @@ const proxy = await getPlatformProxy({ persist: false });
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1cAAAAASUVORK5CYII=', 'base64');
 try {
   const env = proxy.env, db = env.DB;
-  const migrations = ['0001_identity.sql', '0002_conversations.sql', '0003_identity_credentials.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0007_conversation_history.sql', '0008_account_sessions.sql', '0070_management.sql', '0071_management_preferences.sql', '0080_integrations.sql', '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql'];
+  const migrations = ['0001_identity.sql', '0002_conversations.sql','123_operator_notifications.sql', '0003_identity_credentials.sql', '0004_message_intent.sql', '0005_widget_identity.sql', '0007_conversation_history.sql', '0008_account_sessions.sql', '0070_management.sql', '0071_management_preferences.sql', '0080_integrations.sql', '0050_knowledge.sql', '0060_customer_context.sql', '0060_customer_context_engine.sql', '020_ai_support.sql'];
   for (const file of migrations) {
     const source = await readFile(new URL('../migrations/' + file, import.meta.url), 'utf8');
     for (const [, sql] of source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)) await db.prepare(sql).run();

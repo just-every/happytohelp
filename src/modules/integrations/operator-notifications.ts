@@ -1,0 +1,66 @@
+import type {Env} from '../../platform/env'
+import {isProjectActive} from '../../platform/project-status'
+import {contactAvailableSql} from '../conversations/contact-privacy'
+import {emailConfigured} from './email'
+import {replyAddress} from './inbound-routing'
+import {batchOperatorActivity} from './operator-activity'
+import {deliverNotification,loopSuppressionHeaders,recordedNotification} from './notification-delivery'
+
+export interface AssignmentNotification {
+ id:string;projectId:string;conversationId:string;actorId:string;previousAssignee:string|null;assignee:string|null
+}
+/** Append to the authority-guarded transition transaction, using its receipt
+ * predicate. A committed assignment survives a crash before immediate dispatch. */
+export function assignmentNotificationStatement(env:Env,event:AssignmentNotification,acceptedSql:string,acceptedArgs:unknown[]){
+ return env.DB.prepare(`INSERT OR IGNORE INTO operator_notifications(id,project_id,conversation_id,user_id,kind,through_revision,created_at)
+ SELECT ?,c.project_id,c.id,?,'assignment',c.revision,? FROM conversations c
+ WHERE c.id=? AND c.project_id=? AND c.assigned_to=? AND ? IS NOT NULL AND ? IS NOT ? AND ?<>? AND (${acceptedSql})`)
+ .bind(`assignment:${event.id}`,event.assignee,Date.now(),event.conversationId,event.projectId,event.assignee,event.assignee,event.assignee,event.previousAssignee,event.assignee,event.actorId,...acceptedArgs)
+}
+type Notification={id:string;project_id:string;conversation_id:string;user_id:string;kind:'assignment'|'unread';batch_id:string|null;through_revision:number}
+type Recipient={email:string;assigned_to:string|null;assignment_preference:number;unassigned_preference:number;read_revision:number;inbound_address:string|null;is_enabled:number|null}
+async function recipient(env:Env,row:Notification){
+ return env.DB.prepare(`SELECT u.email,c.assigned_to,coalesce(s.is_notifiable_on_conversation_assignment,1) assignment_preference,
+ coalesce(p.is_notified_on_unassigned_activity,0) unassigned_preference,coalesce(r.revision,0) read_revision,e.inbound_address,e.is_enabled
+ FROM conversations c JOIN users u ON u.id=? JOIN memberships m ON m.user_id=u.id AND m.project_id=c.project_id
+ LEFT JOIN user_settings s ON s.user_id=u.id LEFT JOIN user_project_preferences p ON p.project_id=m.project_id AND p.user_id=u.id
+ LEFT JOIN conversation_reads r ON r.conversation_id=c.id AND r.user_id=u.id LEFT JOIN email_settings e ON e.project_id=c.project_id
+ WHERE c.id=? AND c.project_id=? AND ${contactAvailableSql()} AND (?='assignment' OR c.resolved_at IS NULL)
+ AND (c.assigned_to=u.id OR (?='unread' AND c.assigned_to IS NULL AND p.is_notified_on_unassigned_activity=1
+ AND NOT EXISTS(SELECT 1 FROM conversation_ai ai WHERE ai.conversation_id=c.id AND ai.ai_id IS NOT NULL)))`)
+ .bind(row.user_id,row.conversation_id,row.project_id,row.kind,row.kind).first<Recipient>()
+}
+async function sendNotification(env:Env,row:Notification){
+ if(await recordedNotification(env,row.id))return
+ if(!await isProjectActive(env,row.project_id))return
+ const user=await recipient(env,row)
+ if(!user||user.is_enabled===0||!user.email)return
+ if(row.kind==='assignment'&&user.assignment_preference===0)return
+ let text='A teammate assigned this support conversation to you.'
+ if(row.kind==='unread'){
+  const unread=await env.DB.prepare(`SELECT m.content,m.revision FROM operator_notification_activity a JOIN messages m ON m.id=a.message_id AND m.project_id=a.project_id
+   WHERE a.batch_id=? AND a.conversation_id=? AND a.project_id=? AND m.revision>? ORDER BY m.revision LIMIT 100`)
+   .bind(row.batch_id,row.conversation_id,row.project_id,user.read_revision).all<{content:string;revision:number}>()
+  if(!unread.results.length)return
+  const context=await env.DB.prepare('SELECT actor_role,content FROM messages WHERE conversation_id=? AND project_id=? AND revision<? ORDER BY revision DESC LIMIT 3')
+   .bind(row.conversation_id,row.project_id,unread.results[0].revision).all<{actor_role:string;content:string}>()
+  text=[...(context.results.length?['Previous context:',...context.results.reverse().map(m=>`${m.actor_role}: ${m.content}`),'']:[]),'Unread customer messages:',...unread.results.map(m=>m.content)].join('\n\n')
+ }
+ if(typeof env.APP_ORIGIN==='string')text+=`\n\nOpen conversation: ${new URL(`/projects/${encodeURIComponent(row.project_id)}/conversations/${encodeURIComponent(row.conversation_id)}`,env.APP_ORIGIN).href}`
+ const replyTo=env.INBOUND_EMAIL_TOKEN&&user.inbound_address?replyAddress(user.inbound_address,row.conversation_id)||undefined:undefined
+ await deliverNotification(env,{projectId:row.project_id,to:user.email,subject:row.kind==='assignment'?'A support conversation was assigned to you':'Unread HappyToHelp conversation messages',text,replyTo,headers:loopSuppressionHeaders({}),idempotencyKey:row.id})
+}
+/** Bounded scheduled recovery. No attempted provider delivery is replayed.
+ * `now` allows the scheduler's clock to be supplied by a caller. */
+export async function dispatchOperatorNotifications(env:Env,options:{projectId?:string;conversationId?:string;now?:number}={}){
+ if(!emailConfigured(env))return
+ await batchOperatorActivity(env,options.now??Date.now(),options.projectId,options.conversationId)
+ const pending=await env.DB.prepare(`SELECT * FROM operator_notifications WHERE state='pending' ${options.projectId?'AND project_id=?':''} ${options.conversationId?'AND conversation_id=?':''} ORDER BY created_at,id LIMIT 100`)
+ .bind(...(options.projectId?[options.projectId]:[]),...(options.conversationId?[options.conversationId]:[])).all<Notification>()
+ for(const row of pending.results){
+  try{
+   await sendNotification(env,row)
+   await env.DB.prepare("UPDATE operator_notifications SET state='complete' WHERE id=?").bind(row.id).run()
+  }catch{console.error('Operator notification pending',row.id)}
+ }
+}

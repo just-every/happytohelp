@@ -9,7 +9,7 @@ const { Miniflare, convertV4MiniflareOptions } = require(require.resolve('minifl
 
 const migrationFiles = [
     '0001_identity.sql',
-    '0002_conversations.sql',
+    '0002_conversations.sql','123_operator_notifications.sql',
     '0004_message_intent.sql',
     '0005_widget_identity.sql',
     '0050_knowledge.sql',

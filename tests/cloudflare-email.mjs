@@ -7,7 +7,7 @@ registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL
 const {sendEmail,emailConfigured}=await import('../src/modules/integrations/email.ts')
 const {getPlatformProxy}=await import('wrangler'),proxy=await getPlatformProxy({persist:false}),originalFetch=globalThis.fetch
 try{
- for(const file of ['0001_identity.sql','0002_conversations.sql','0005_widget_identity.sql','0070_management.sql','0080_integrations.sql'])for(const sql of(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).split(';').filter(s=>s.trim()))await proxy.env.DB.prepare(sql).run()
+ for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0005_widget_identity.sql','0070_management.sql','0080_integrations.sql'])for(const sql of(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).split(';').filter(s=>s.trim()))await proxy.env.DB.prepare(sql).run()
  const config=normalizeEmail({provider:'cloudflare',from:'support@example.com',accountId:'a'.repeat(32),apiKey:'private-fixture'}),env={...proxy.env,...emailEnvironment(config)}
  assert.equal(emailConfigured(env),true);assert.equal(emailConfigured({...env,EMAIL_ACCOUNT_ID:''}),false)
  assert.throws(()=>normalizeEmail({provider:'cloudflare',from:'support@example.com',accountId:'a'.repeat(32)},{CLOUDFLARE_API_TOKEN:'provisioning-token'}),/sending API token/)

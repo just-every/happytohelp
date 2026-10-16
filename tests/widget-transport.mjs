@@ -79,7 +79,15 @@ test('verified identity change obtains a signed session and resumes its existing
   assert.equal(transport.conversationId,'existing-known-conversation');
   assert.equal(transport.session.verifiedIdentity,'customer-17');
   const session = requests.find(r => r.url.endsWith('/widget/session'));
-  assert.equal(JSON.parse(session.options.body).contact_hash,'signed-hash');
+  const sessionBody=JSON.parse(session.options.body);
+  assert.equal(sessionBody.contact_hash,'signed-hash');
+  assert.equal(sessionBody.timezone,Intl.DateTimeFormat().resolvedOptions().timeZone);
+  if(typeof navigator!=='undefined')assert.equal(sessionBody.language,navigator.language);
+  for(const key of ['ip_address','country_code','user_agent'])assert.equal(key in sessionBody,false);
+  await transport.action('pingActive',{timezone:'Forged/Zone',language:'forged',opened:true,ip_address:'forged',country_code:'ZZ',user_agent:'forged'});
+  const presence=JSON.parse(requests.find(r=>r.url.endsWith('/widget-events')).options.body);
+  assert.equal(presence.data.timezone,sessionBody.timezone);assert.equal(presence.data.language,sessionBody.language);assert.equal(presence.data.opened,true);
+  for(const key of ['ip_address','country_code','user_agent'])assert.equal(key in presence.data,false);
   assert.equal(requests.filter(r => r.url.endsWith('/api/conversations') && r.options.method === 'POST').length,0);
   transport.close();
 });

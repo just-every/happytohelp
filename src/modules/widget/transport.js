@@ -1,3 +1,9 @@
+/** Only preferences belong in JSON. Network and device context comes from the request. */
+const contactEnvironment = () => ({
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  language: typeof navigator === 'undefined' ? undefined : navigator.language,
+});
+
 /** Native, tenant-scoped browser transport. No dashboard dependency. */
 export class WidgetTransport {
   constructor({ apiOrigin, widgetKey, onEvent = () => {}, onError = () => {} }) {
@@ -66,7 +72,7 @@ export class WidgetTransport {
     try { this.session = JSON.parse(localStorage.getItem(this.storageKey)); } catch { this.session = null; }
     const signedIdentity = contact.hash ? contact.identifier || contact.email : null;
     if (!this.session?.token || signedIdentity && this.session.verifiedIdentity !== signedIdentity) {
-      this.session = await this.request('/api/identity/widget/session', {method: 'POST', json: {widgetKey: this.widgetKey, name: contact.name || contact.provided_name, email: contact.email, provided_name: contact.provided_name, provided_email: contact.provided_email, identifier: contact.identifier, contact_hash: contact.hash, metadata: contact.metadata, previewToken: contact.preview_token}});
+      this.session = await this.request('/api/identity/widget/session', {method: 'POST', json: {...contactEnvironment(), widgetKey: this.widgetKey, name: contact.name || contact.provided_name, email: contact.email, provided_name: contact.provided_name, provided_email: contact.provided_email, identifier: contact.identifier, contact_hash: contact.hash, metadata: contact.metadata, previewToken: contact.preview_token}});
       if (this.session.verified && signedIdentity) this.session.verifiedIdentity = signedIdentity;
       localStorage.setItem(this.storageKey, JSON.stringify(this.session));
     }
@@ -205,7 +211,7 @@ export class WidgetTransport {
   }
   async action(action, data) {
     await this.connect();
-    return this.request(`/api/conversations/${this.conversationId}/widget-events`, {method: 'POST', json: {action, data}});
+    return this.request(`/api/conversations/${this.conversationId}/widget-events`, {method: 'POST', json: {action, data: ['pingActive', 'pingAction', 'instruction'].includes(action) ? {opened: data?.opened, value: data?.value, ...contactEnvironment()} : data}});
   }
   close() {
     this.closed = true; this.abort.abort(); clearTimeout(this.timer); this.socket?.close();

@@ -61,11 +61,17 @@ addresses are separate capabilities from this.
 Once a provider is configured, all of these go through it:
 
 - email sign-in links, password recovery, email verification and invitations;
-- conversation notifications: an email to the assigned operator when a contact
-  writes, and an email to the contact when someone replies (skipped while the
-  contact has been active in the chat widget in the last 90 seconds). These are
-  sent only when the workspace's email settings are enabled (**Enable receiving
-  email** on the **Email** page);
+- customer reply notifications, including while the widget is online;
+- unread operator alerts, grouped after 60 seconds without conversation activity.
+  Each recipient's read frontier excludes messages they have already read. Assigned
+  teammates receive these alerts independently of their assignment preference.
+  Unassigned conversations alert only workspace members who enabled unassigned
+  activity notifications, and AI-owned conversations stay with the assistant;
+- assignment alerts when another teammate changes the assignee to you, if enabled
+  in your account preferences. Self-assignment and unchanged assignments stay quiet.
+  Conversation mail requires enabled workspace email settings (**Enable receiving
+  email** on the **Email** page). Durable intents recover before a provider attempt;
+  failed or uncertain attempts are never automatically replayed;
 - conversation transcripts that an operator chooses to email;
 - reviewed lead emails (see [Lead outreach](#lead-outreach)).
 

@@ -1,0 +1,4 @@
+CREATE TABLE operator_notification_activity( message_id TEXT PRIMARY KEY REFERENCES messages(id), project_id TEXT NOT NULL REFERENCES projects(id), conversation_id TEXT NOT NULL REFERENCES conversations(id), revision INTEGER NOT NULL, batch_id TEXT );
+CREATE INDEX operator_activity_pending ON operator_notification_activity(batch_id,conversation_id,revision);
+CREATE TABLE operator_notifications( id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), conversation_id TEXT NOT NULL REFERENCES conversations(id), user_id TEXT NOT NULL REFERENCES users(id), kind TEXT NOT NULL CHECK(kind IN ('assignment','unread')), batch_id TEXT, through_revision INTEGER NOT NULL, state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','complete')), created_at INTEGER NOT NULL );
+CREATE INDEX operator_notifications_pending ON operator_notifications(state,created_at);

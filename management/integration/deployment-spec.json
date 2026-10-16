@@ -348,6 +348,18 @@
       "name": "123_inbox_message_search.sql",
       "sha256": "62819acb6da4d4b5b5b608256c198e3af33577e34de4c626d989e254eb85ce41",
       "sql": "-- Retained and newly admitted messages share one index, including import/undo\n-- and erasure writes. No historical provider work is replayed by this migration.\nCREATE VIRTUAL TABLE inbox_message_search USING fts5(content, conversation_id UNINDEXED, project_id UNINDEXED, content='messages', content_rowid='rowid');\nINSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild');\nCREATE TRIGGER inbox_message_search_insert AFTER INSERT ON messages BEGIN\n INSERT INTO inbox_message_search(rowid,content,conversation_id,project_id) VALUES(new.rowid,new.content,new.conversation_id,new.project_id);\nEND;\nCREATE TRIGGER inbox_message_search_delete AFTER DELETE ON messages BEGIN\n INSERT INTO inbox_message_search(inbox_message_search,rowid,content,conversation_id,project_id) VALUES('delete',old.rowid,old.content,old.conversation_id,old.project_id);\nEND;\nCREATE TRIGGER inbox_message_search_update AFTER UPDATE ON messages BEGIN\n INSERT INTO inbox_message_search(inbox_message_search,rowid,content,conversation_id,project_id) VALUES('delete',old.rowid,old.content,old.conversation_id,old.project_id);\n INSERT INTO inbox_message_search(rowid,content,conversation_id,project_id) VALUES(new.rowid,new.content,new.conversation_id,new.project_id);\nEND;\nCREATE INDEX conversations_contact_history ON conversations(project_id,contact_id,updated_at DESC,id);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "123_operator_notifications.sql",
+      "sha256": "7682d2e182de9a4f814f26ceb4301b2a94e73001673618a87b82960a18fef183",
+      "sql": "CREATE TABLE operator_notification_activity( message_id TEXT PRIMARY KEY REFERENCES messages(id), project_id TEXT NOT NULL REFERENCES projects(id), conversation_id TEXT NOT NULL REFERENCES conversations(id), revision INTEGER NOT NULL, batch_id TEXT );\nCREATE INDEX operator_activity_pending ON operator_notification_activity(batch_id,conversation_id,revision);\nCREATE TABLE operator_notifications( id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), conversation_id TEXT NOT NULL REFERENCES conversations(id), user_id TEXT NOT NULL REFERENCES users(id), kind TEXT NOT NULL CHECK(kind IN ('assignment','unread')), batch_id TEXT, through_revision INTEGER NOT NULL, state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','complete')), created_at INTEGER NOT NULL );\nCREATE INDEX operator_notifications_pending ON operator_notifications(state,created_at);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "124_message_read_index.sql",
+      "sha256": "4d34f479e32f85493c8e5d8233fa0693153c626409b4155c07a38d484d2dcbef",
+      "sql": "-- First read observations live in the attributed event store.\nCREATE INDEX context_message_read ON context_tracked_events(project_id,json_extract(payload,'$.message_id')) WHERE type='MESSAGE_READ' AND json_valid(payload);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

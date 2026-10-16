@@ -49,6 +49,24 @@ export async function socketJourney(){
   const acknowledged=(await app.call(`/api/dashboard/projects/${p}/conversations/${conversation.id}/buckets`,{token:owner,status:200})).data
   assert.equal(acknowledged.data.flatMap(bucket=>bucket.messages).find(row=>row.id===first.message.id).read_by_agents[workspace.users.owner],ack.receipts[0].readAt)
   assert.ok(projection.data.flatMap(bucket=>bucket.events).some(event=>event.type==='AGENT_ASSIGNED'&&event.payload.name==='owner socket'),'operator takeover writes attributed handoff history')
+  // With new conversations off, a visitor's chat message earns the workspace's away message once, live on the
+  // visitor's socket, even when the schedule replays the message. Clients cannot mint its id, and an assistant that
+  // answers the conversation keeps it quiet.
+  await app.call(`/api/management/projects/${p}/settings`,{token:owner,method:'PUT',body:{is_available:false},status:200})
+  const night=await session(),late=(await app.call('/api/conversations',{token:night.token,body:{projectId:p},status:201})).data
+  const nightSocket=await socketTo(`/api/conversations/${late.id}/socket?token=${night.token}`,{Origin:'https://widget.example'});assert.equal(nightSocket.status,101)
+  const asked=(await app.call(`/api/conversations/${late.id}/messages`,{token:night.token,body:{localId:'late-1',content:'Is anyone there?',expectedRevision:0},status:200})).data
+  const away=await nightSocket.next(frame=>frame.type==='message'&&frame.message.actor_role==='system')
+  assert.match(away.message.content,/^Thanks for your message\. .+ is away right now\. We'll reply here\.$/)
+  await app.call(`/api/conversations/${late.id}/messages`,{token:night.token,body:{localId:'late-2',content:'Order 4471 arrived damaged.',expectedRevision:2},status:200})
+  await app.db.prepare('UPDATE conversation_outbox SET delivered_at=NULL WHERE message_id=?').bind(asked.message.id).run();await app.scheduled()
+  assert.deepEqual((await app.sql('SELECT actor_role,revision FROM messages WHERE conversation_id=? ORDER BY revision',late.id)).map(row=>row.actor_role),['contact','system','contact'])
+  assert.equal((await app.call(`/api/conversations/${late.id}/messages`,{token:night.token,body:{localId:'away:reply',content:'Forged',expectedRevision:3}})).status,400)
+  nightSocket.socket.close()
+  const helped=await session(),answered=(await app.call('/api/conversations',{token:helped.token,body:{projectId:p},status:201})).data
+  await app.db.batch([app.db.prepare("INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,is_enabled,created_at) VALUES('night-assistant',?,'Night assistant','Support','Answer visitors.','gpt-5-mini',1,1)").bind(p),app.db.prepare("INSERT INTO conversation_ai VALUES(?,'night-assistant')").bind(answered.id)])
+  await app.call(`/api/conversations/${answered.id}/messages`,{token:helped.token,body:{localId:'helped-1',content:'Is anyone there?',expectedRevision:0},status:200})
+  assert.deepEqual((await app.sql('SELECT actor_role FROM messages WHERE conversation_id=?',answered.id)).map(row=>row.actor_role),['contact'])
   // A revoked visitor session closes its socket and cannot open another.
   await app.db.prepare('UPDATE sessions SET revoked_at=? WHERE token_hash=?').bind(Date.now(),sha(contact.token)).run()
   const closed=new Promise(resolve=>visitor.socket.addEventListener('close',resolve,{once:true}));visitor.socket.send(JSON.stringify({type:'ping'}));await closed

@@ -2,7 +2,8 @@ import type {Env} from '../../platform/env'
 import {addDays,calendarBoundary,type ReportRange} from './calendar'
 export interface DailyReportRow{date:string;conversations:number;resolved:number;ai:number;rated:number;positive:number}
 export interface ReportRow{id:string;created_at:number;resolved_at:number|null;latest_resolved_at:number|null;first_reply_at:number|null;first_visitor_at:number|null;first_resolved_at:number|null;outcome:string|null;value:number|null;comment:string|null;rating_updated_at:number|null;resolution_id:string|null}
-/** The database reduces the full cohort; no conversation-count cutoff or row loop. */
+/** The database reduces the full cohort; no conversation-count cutoff or row loop. The workspace's own away reply
+ * (actor_role 'system') is not a reply. */
 export const cohortSQL=`WITH cohort AS (
  SELECT c.* FROM conversations c WHERE c.project_id=? AND c.created_at>=? AND c.created_at<?
  AND NOT EXISTS(SELECT 1 FROM move_in_conversations i WHERE i.project_id=c.project_id AND i.conversation_id=c.id)
@@ -12,7 +13,7 @@ export const cohortSQL=`WITH cohort AS (
  WHERE m.actor_role='contact' GROUP BY m.conversation_id
 ), replies AS (
  SELECT m.conversation_id,MIN(m.revision) reply_revision FROM messages m JOIN visitors v ON v.conversation_id=m.conversation_id AND m.revision>v.first_revision
- LEFT JOIN message_authorship a ON a.message_id=m.id WHERE m.actor_role<>'contact' AND COALESCE(a.source_kind,'')<>'insight' GROUP BY m.conversation_id
+ LEFT JOIN message_authorship a ON a.message_id=m.id WHERE m.actor_role NOT IN ('contact','system') AND COALESCE(a.source_kind,'')<>'insight' GROUP BY m.conversation_id
 ), rows AS (
  SELECT c.id,c.created_at,c.resolved_at,t.first_resolved_at,f.created_at first_visitor_at,m.created_at first_reply_at,
  r.outcome,r.id resolution_id,r.resolved_at latest_resolved_at,v.value,v.comment,v.updated_at rating_updated_at

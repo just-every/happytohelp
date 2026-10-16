@@ -146,5 +146,21 @@ export async function sendgridInboundJourney(){
   assert.deepEqual([rosa.conversationId, rosa.actor.contactId], ['chat', 'visitor'])
   const rosaFresh = await (await post(rawForm({ messageId: 'sendgrid-rosa-fresh@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'rosa@acme.test' }, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}' }))).json()
   assert.notEqual(rosaFresh.conversationId, 'chat')
+  // A reply-all names both Rosa's reply address and the bare mailbox in one post. The mail is received once, in
+  // the chat; the bare copy is the same mail already received, so SendGrid gets a success and stops retrying,
+  // and the chat's AI reply still follows. A redelivery of the whole post writes nothing more.
+  await env.DB.batch([
+   env.DB.prepare("INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,created_at) VALUES('ai','p','Assistant','Support','Answer customers.','gpt-5-mini',1)"),
+   env.DB.prepare("INSERT INTO conversation_ai VALUES('chat','ai')"),
+  ])
+  const replyAll = rawForm({ messageId: 'sendgrid-rosa-reply-all@example.com', envelope: { to: [rosaReplyAddress, 'support@reply.support.example.com'], from: 'rosa@acme.test' }, to: `${rosaReplyAddress}, support@reply.support.example.com`, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}', text: 'The order number is 4471.' })
+  const both = await post(replyAll)
+  assert.equal(both.status, 201, await both.clone().text())
+  const replyAllRows = () => env.DB.prepare("SELECT id,conversation_id FROM messages WHERE content='The order number is 4471.'").all().then(rows => rows.results)
+  assert.deepEqual((await replyAllRows()).map(row => row.conversation_id), ['chat'])
+  const [replyAllMessage] = await replyAllRows()
+  await m.app.until(() => env.DB.prepare('SELECT id FROM ai_generations WHERE id=?').bind(`reply:${replyAllMessage.id}`).first(), { message: 'AI reply to the reply-all' })
+  assert.equal((await post(replyAll)).status, 200)
+  assert.equal((await replyAllRows()).length, 1)
  }finally{await m.close()}
 }

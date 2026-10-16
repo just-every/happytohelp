@@ -12,7 +12,7 @@ import {
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {ConnectContext} from "./context/ConnectContext";
 
-export default function CollectCustomer({ needsNotifyEmail, setShowCollector, localContact, contact, sendContact }) {
+export default function CollectCustomer({ needsNotifyEmail, away = false, setShowCollector, localContact, contact, sendContact }) {
     const context = useContext(AppContext);
     const { getCurrentAgent } = useContext(ConnectContext);
     const currentAgent = getCurrentAgent();
@@ -87,7 +87,7 @@ export default function CollectCustomer({ needsNotifyEmail, setShowCollector, lo
         if(needsNotifyEmail) {
             content.push(
                 <div key="collect-notify-email" className="happytohelp-send-message-row happytohelp-collect-notify-email">
-                    { context.text.prompt.email_prompt.replace("{agent_name}", (currentAgent?.first_name ?? currentAgent?.name) || "someone") }
+                    { away ? context.text.away.email_prompt : context.text.prompt.email_prompt.replace("{agent_name}", (currentAgent?.first_name ?? currentAgent?.name) || "someone") }
                 </div>
             );
         }

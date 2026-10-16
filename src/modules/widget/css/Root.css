@@ -2791,7 +2791,9 @@ html.wf-sacramento-n4-active .happytohelp-title {
 #happytohelp-root .happytohelp-connection-state { flex: 0 0 auto; margin: 12px; padding: 12px; border: 1px solid #94a3b8; border-radius: 8px; background: #f8fafc; color: #24384b; font-size: 14px; }
 #happytohelp-root .happytohelp-connection-state button { display: block; margin-top: 8px; min-height: 36px; padding: 4px 12px; border: 1px solid #475569; border-radius: 6px; background: #fff; color: #24384b; cursor: pointer; font: inherit; }
 
-#happytohelp-root .happytohelp-welcome, #happytohelp-root .happytohelp-connection-state { position:relative; z-index:2; }
+#happytohelp-root .happytohelp-away-notice { flex: 0 0 auto; display: flex; flex-direction: column; gap: 2px; margin: 12px; padding: 12px; border: 1px solid #c7a14a; border-radius: 8px; background: #fdf8ec; color: #3d3320; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+#happytohelp-root .happytohelp-away-notice strong { font-weight: 600; }
+#happytohelp-root .happytohelp-welcome, #happytohelp-root .happytohelp-connection-state, #happytohelp-root .happytohelp-away-notice { position:relative; z-index:2; }
 #happytohelp-root .happytohelp-interact-container .happytohelp-chat-header-container { background:#fff; max-height:none; }
 #happytohelp-root .happytohelp-interact .happytohelp-content.happytohelp-content-full { padding-top:calc(var(--happytohelp-header-height, 90px) + 50px); }
 @media (max-height:600px), (max-width:500px) {

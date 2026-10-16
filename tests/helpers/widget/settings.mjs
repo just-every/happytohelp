@@ -73,7 +73,7 @@ try{
  await previewState('Conversation');checks.push('preview renders the default theme in Conversation and Launcher views');
 
  // Texts and Settings tabs show effective values.
- await tab('Texts');const texts=page.locator('.tab-pane.active input[type=text]');assert.equal(await texts.count(),35);
+ await tab('Texts');const texts=page.locator('.tab-pane.active input[type=text]');assert.equal(await texts.count(),43);
  for(const input of await texts.all()){assert.notEqual(await input.inputValue(),'',await input.getAttribute('name'));assert.equal(await input.getAttribute('placeholder'),await input.inputValue(),await input.getAttribute('name'))}
  for(const [name,expected] of Object.entries(textDefaults))assert.equal(await value(`input[name="${name}"]`),expected,name);
  await page.screenshot({path:join(evidenceDir,'desktop-texts-defaults.png'),fullPage:true});

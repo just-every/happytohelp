@@ -67,7 +67,7 @@ export default function EmailSettings({data, status, field, role, projectId}) {
    <div className="settings-grid">{field('email_from_address', 'Support Email From Address', 'email')}{field('email_from_name', 'Support Email From Name')}</div>
    <div className="mt-3">{field('is_enabled', 'Email customers and your team about conversations', 'checkbox')}</div>
    <p className="settings-note">On: customers who leave an email get your replies by email, and teammates get alerts. Off also stops receiving.</p>
-   <p className="settings-note">Who gets alerts: the person a conversation is assigned to, when the customer writes and they have not read it. Unassigned conversations alert only people who turned on <b>Notify on unassigned conversation activity</b>, each set under <Link to={`/projects/${projectId}/agents`}>Agents</Link> (open a person, including yourself). It starts off for everyone, so turn it on for whoever should hear about new conversations.</p>
+   <p className="settings-note">Who gets alerts: the person a conversation is assigned to, when the customer writes and they have not read it. Unassigned conversations alert only people who turned on <b>Notify on unassigned conversation activity</b>, each set under <Link to={`/projects/${projectId}/agents`}>Agents</Link> (open a person, including yourself). It is on for the owner who created the workspace, so a team of one hears about every new conversation; turn it on for whoever else should, or off for anyone who should not.</p>
   </Section>
   <Section title="Receive Email">
    {field('inbound_address', 'Receiving address', 'email')}

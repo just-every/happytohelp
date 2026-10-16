@@ -89,6 +89,11 @@
           "label": "Website knowledge"
         },
         {
+          "slug": "away",
+          "source": "docs/away.md",
+          "label": "When your team is away"
+        },
+        {
           "slug": "help-before-they-ask",
           "source": "docs/help-before-they-ask.md",
           "label": "Help before they ask"

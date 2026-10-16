@@ -7,7 +7,7 @@ import {lifecycleJourney} from '../helpers/widget/lifecycle.mjs'
 
 // The widget in Chromium against the emitted Worker; each case starts its own installation.
 
-test('the installed widget: a cached /widget.js for this installation, the legacy project lookup for allowed origins, current and legacy installs and open modes on a separate site, a failed send and its recovery, and foreign conversations refused',installedJourney)
+test('the installed widget: a cached /widget.js for this installation, the legacy project lookup for allowed origins, current and legacy installs and open modes on a separate site, a failed send and its recovery, after hours an away notice, email ask and one away reply, and foreign conversations refused',installedJourney)
 
 test('opening the widget at 1440 and 390 keeps every opened state readable against its background',openingJourney)
 

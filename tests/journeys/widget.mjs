@@ -8,6 +8,6 @@ import {lostResponseJourney} from '../helpers/widget/lost-response.mjs'
 
 test('widget commands are scoped to the visitor\'s own conversation and workspace, replay an insight pair exactly, record reads and observed presence, recheck live authority each time, gate monitoring on consent and resume one waiting turn',widgetEventsJourney)
 
-test('conversation sockets admit only the right token, origin and membership, replay durably without operator-only data, stream project activity to operators, keep private notes from visitors, deliver first reads live and close on revocation',socketJourney)
+test('conversation sockets admit only the right token, origin and membership, replay durably without operator-only data, stream project activity to operators, keep private notes from visitors, deliver first reads live, post an away team\'s reply once and close on revocation',socketJourney)
 
 test('the widget transport retries a response lost after commit with the same command and frontier, refreshes after a definitive refusal, and surfaces a rate limit without replaying the command',lostResponseJourney)

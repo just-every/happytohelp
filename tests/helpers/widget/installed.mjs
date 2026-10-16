@@ -3,10 +3,11 @@ import {writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {widgetFailedSendBrowser} from '../widget-failed-send-browser.mjs';
 import {widgetRecoveryBrowser} from '../widget-recovery-browser.mjs';
+import {awayWidget} from './away.mjs';
 import {launchBrowser} from '../../journeys/kit/browser.mjs'
 
 // The installed widget on a separate site origin against the emitted Worker: current and legacy installs and
-// open modes, a failed send and its recovery, and a foreign conversation refused.
+// open modes, a failed send and its recovery, after hours (away.mjs), and a foreign conversation refused.
 export async function installedWidget({api,origin,widgetKey,ownerToken,projectId,foreignConversation,evidence}){
 
 if(!api||!origin||!widgetKey||!ownerToken)throw new Error('WIDGET_TEST_API, WIDGET_TEST_ORIGIN, WIDGET_TEST_KEY, WIDGET_TEST_OWNER_TOKEN required');
@@ -61,6 +62,7 @@ try{
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
  const recoveryChecks=await widgetRecoveryBrowser({browser,origin,api,widgetKey,ownerToken});
  const failedSendChecks=await widgetFailedSendBrowser({browser,origin,api,widgetKey,ownerToken,evidence});
+ const awayChecks=projectId?await awayWidget({browser,origin,api,ownerToken,projectId,evidence}):[];
  if(projectId){
   const legacyContext=await browser.newContext({viewport:{width:1440,height:900}}),legacyPage=await legacyContext.newPage();
   legacyPage.on('pageerror',error=>errors.push(error.message));
@@ -105,7 +107,7 @@ try{
   await legacyPage.getByText('Can I keep my existing ChargeDesk support link?',{exact:true}).waitFor();
   await legacyContext.close();assert.deepEqual(errors,[]);
  }
- const proof={checks:[...recoveryChecks,...failedSendChecks,...(projectId?['legacy project resolver and queued init/open/close/settings/update','three legacy script attribute spellings and data-config','launch-chat initial fragment and repeated link opening','consent makes no requests before grant; revoke/remount resumes native conversation','legacy signatures never become verified native authority']:[]),'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','browser timezone/language and observed device context survive reload with collector disabled','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
+ const proof={checks:[...recoveryChecks,...failedSendChecks,...awayChecks,...(projectId?['legacy project resolver and queued init/open/close/settings/update','three legacy script attribute spellings and data-config','launch-chat initial fragment and repeated link opening','consent makes no requests before grant; revoke/remount resumes native conversation','legacy signatures never become verified native authority']:[]),'cross-origin settings/session CORS','Shadow DOM host isolation','widget message durable','operator socket delivery','attachment upload/authenticated download','reload identity/transcript resume','offline reconnect no duplicate','untrusted origin denied','cross-project transcript denied','contact form update','browser timezone/language and observed device context survive reload with collector disabled','mobile panel within viewport'],errors,failed,conversationId:session.conversationId,messages:after.messages.length};
  await writeFile(`${evidence}/browser.json`,JSON.stringify(proof,null,2));
 }catch(error){await page.screenshot({path:`${evidence}/failed-attempt.png`});throw error;}finally{await browser.close();server.close();}
 

@@ -69,7 +69,11 @@ Once a provider is configured, all of these go through it:
   Each recipient's read frontier excludes messages they have already read. Assigned
   teammates receive these alerts independently of their assignment preference.
   Unassigned conversations alert only workspace members who enabled unassigned
-  activity notifications, and AI-owned conversations stay with the assistant;
+  activity notifications, and AI-owned conversations stay with the assistant.
+  The owner who creates a workspace has these alerts on, so a team of one hears
+  about every new conversation; anyone can turn theirs off or on under
+  **Agents** or in their account. Installing this update turns them on for the
+  owner of any workspace where nobody had them on;
 - assignment alerts when another teammate changes the assignee to you, if enabled
   in your account preferences. Self-assignment and unchanged assignments stay quiet.
   Conversation mail requires **Email customers and your team about conversations**
@@ -214,7 +218,11 @@ larger than 25 MB.
    checked. Use a `?token=` query parameter only if your gateway cannot set an
    authorization header.
 
-The route accepts requests up to 30 MB.
+The route accepts requests up to 30 MB. A new email gets HTTP 201 and a repeat
+gets HTTP 200, so SendGrid stops retrying. That includes a reply-all that names
+both a conversation's reply address and your bare inbound address: the email is
+received once, in the conversation, and the second address counts as the same
+email already received.
 
 ### Option 3: Your own JSON gateway
 

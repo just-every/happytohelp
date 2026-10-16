@@ -26,6 +26,8 @@ function MessageItem({ message, conversation, showActor = true, grouped = false,
     const origin = <>
         { message.origin?.automatic && <span className="transcript-message-origin transcript-event-time"
             title={ `Automatic email: no AI reply or notification was sent${ message.origin.reasons?.length ? ` (${ message.origin.reasons.join(', ') })` : '' }` }>automatic</span> }
+        { message.actor_role === 'system' && <span className="transcript-message-origin transcript-event-time"
+            title="Sent automatically because your team was away. It is not emailed and earns no AI reply.">automatic</span> }
         { message.origin?.verified === false && <span className="transcript-message-origin transcript-event-time"
             title="The sender's email address was not authenticated (no aligned DKIM or SPF pass)">unverified sender</span> }
     </>;

@@ -6,7 +6,7 @@ import {chromium} from 'playwright';
 import {createRuntime} from '../helpers/emitted-runtime.mjs';
 import {freePort,post} from './browser-kit.mjs';
 import {inspectState,keyboardScroll,assertAudits} from './qualification-kit.mjs';
-import {profileEffects} from './profile-effects.mjs';
+import {profileEffects,assertProfileReloadEffects} from './profile-effects.mjs';
 const evidence=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/visitor-profile');await mkdir(evidence,{recursive:true});
 const port=await freePort(),origin=`http://127.0.0.1:${port}`;
 const runtime=await createRuntime({port,inspectorPort:0,vars:{H2H_LOCAL:'true',APP_ORIGIN:origin}});
@@ -29,7 +29,7 @@ try{
   for(const width of [1440,390]){
    const context=await browser.newContext({viewport:{width,height:844},bypassCSP:true}),page=await context.newPage();page.setDefaultTimeout(12000);
    try{
-    const mount=async(reload=false)=>{if(reload)await page.reload();else await page.goto(origin+'/help/'+owner.projectId);await page.addScriptTag({url:origin+'/widget.js'});await page.evaluate(options=>window.h2h('init',options),{widgetKey:project.widget_key,apiOrigin:origin,open:true,settings:{collector:{enabled:false}}});await page.locator('textarea[name=content]').waitFor();};
+    const mount=async(reload=false)=>{if(reload)await page.reload();else await page.goto(origin+'/help/'+owner.projectId);await page.addScriptTag({url:origin+'/widget.js'});const ping=page.waitForResponse(response=>response.url().endsWith('/widget-events')&&response.request().postDataJSON()?.action==='pingActive');await page.evaluate(options=>window.h2h('init',options),{widgetKey:project.widget_key,apiOrigin:origin,open:true,settings:{collector:{enabled:false}}});assert.equal((await ping).status(),200);await page.locator('textarea[name=content]').waitFor();};
     await mount();const key=`rer-widget:${origin}:${project.widget_key}`;
     await page.waitForFunction(key=>JSON.parse(localStorage.getItem(key)||'null')?.conversationId,key);
     const session=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);
@@ -49,7 +49,7 @@ try{
      const stored=await page.evaluate(key=>localStorage.getItem(key),key);assert.equal(stored.includes(email),false,'saved profile email is not browser-cached');
      const after=JSON.parse(stored);assert.equal(after.contactId,session.contactId);assert.equal(after.conversationId,session.conversationId);assert.equal(after.token===session.token,true,'reload retains the owning visitor capability');
      assert.deepEqual((await api('/api/conversations/'+session.conversationId+'/messages',session.token)).messages,before.messages);
-     assert.deepEqual(await profileEffects(runtime,session.contactId,email),beforeEffects,'reload preserves saved contact and causes no mail, model, or notification effects');
+     assertProfileReloadEffects(await profileEffects(runtime,session.contactId,email),beforeEffects,'reload preserves saved contact and causes no mail, model, or notification effects');
      await inspectState(page,records,evidence,`${startingMode}-${width}-saved-reloaded`);
      return {sameContact:true,sameConversation:true,sameVisitorSession:true,sameTranscript:true,emailHydrated:true,emailCached:false,reloadSideEffects:0};
     });
@@ -71,7 +71,7 @@ try{
       await mount(true);await page.getByText('Update 24: This genuine support message remains available through keyboard scrolling and reload.',{exact:true}).waitFor();
       await page.locator('.happytohelp-message-show-contact-container').getByText(email,{exact:true}).waitFor();assert.equal(await page.locator('.happytohelp-collect-notify-email').count(),0);
       const stored=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);assert.equal(stored.contactId,session.contactId);assert.equal(stored.conversationId,session.conversationId);assert.equal(stored.token===session.token,true);
-      assert.deepEqual(await profileEffects(runtime,session.contactId,email),beforeEffects);
+      assertProfileReloadEffects(await profileEffects(runtime,session.contactId,email),beforeEffects);
       await inspectState(page,records,evidence,`${startingMode}-${width}-toggle-${mode}`);return {sameContact:true,emailHydrated:true};
      });
     }

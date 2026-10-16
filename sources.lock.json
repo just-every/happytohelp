@@ -7747,11 +7747,11 @@
       "executable": false
     },
     "tests/first-run/profile-browser.mjs": {
-      "sha256": "3349b4aad9e6bf47b2068fec8cc4a838e557e8dc88639af0780a51f201ff2ce5",
+      "sha256": "874b08d4d09822d79ffc320e52cfd31bb520725a2f26a29c4cc8057245a6f6e2",
       "executable": false
     },
     "tests/first-run/profile-effects.mjs": {
-      "sha256": "72f591fba3d22fafac199e8aa5abebefe4bd2d92f5c37d4a0dfe31a556a8affc",
+      "sha256": "2c6af5b70a66f2a9e735767e02bfdef32fc5151f1f220765b8c78e4975d65a85",
       "executable": false
     },
     "tests/first-run/profile-harness.mjs": {
@@ -7959,7 +7959,7 @@
       "executable": false
     },
     "tests/helpers/hero/flow.mjs": {
-      "sha256": "e314d6bbb56d0f5e4e752e36efe7a8107ce2651de61fdd3895421603e477424c",
+      "sha256": "fe62d60609b2832181950a00c448b5b116ae0d6305f9d8f97e1402e4fad3b91a",
       "executable": false
     },
     "tests/helpers/identity-browser-default.mjs": {

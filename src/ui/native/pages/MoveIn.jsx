@@ -15,8 +15,8 @@ function MoveInWorkspace({projectId}){
  const base=`/api/move-in/projects/${projectId}/imports`,[vendor,setVendor]=useState('zendesk'),[file,setFile]=useState(null),[runs,setRuns]=useState([]),[selected,setSelected]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[repeated,setRepeated]=useState(false),[access,setAccess]=useState('loading');
  const reload=()=>nativeRequest(base).then(r=>{setAccess('ready');setRuns(r.data);setSelected(old=>{const fresh=old&&r.data.find(run=>run.id===old.id);return fresh?{...fresh,plan:old.plan?.fingerprint===fresh.plan?.fingerprint?old.plan:fresh.plan}:old})}).catch(e=>{setError(e.message);setAccess(e.status===403?'denied':'failed');setSelected(null);setRuns([]);setFile(null)});
  const showRun=run=>{selectedId.current=run.id;setSelected(run);setRuns(old=>old.map(item=>item.id===run.id?run:item))};
- // The list carries review summaries; one run's decisions and diagnostics load with it.
- const open=run=>{showRun(run);setRepeated(false);setError('');nativeRequest(`${base}/${run.id}`).then(r=>{if(selectedId.current===run.id)showRun(r.data)}).catch(e=>{if(selectedId.current===run.id)setError(e.message)})};
+ // The list carries review summaries; one run's decisions and diagnostics load with it, and its format's guide shows.
+ const open=run=>{showRun(run);setRepeated(false);setError('');if(run.vendor!==vendor){setVendor(run.vendor);setFile(null)}nativeRequest(`${base}/${run.id}`).then(r=>{if(selectedId.current===run.id)showRun(r.data)}).catch(e=>{if(selectedId.current===run.id)setError(e.message)})};
  useEffect(()=>{reload()},[base]);
  // A list refresh can bring a finished review's summary first; load its decisions so the plan shows before Approve.
  useEffect(()=>{if(!selected?.plan||selected.plan.decisions)return;const id=selected.id;nativeRequest(`${base}/${id}`).then(r=>{if(selectedId.current===id)showRun(r.data)}).catch(e=>{if(selectedId.current===id)setError(e.message)})},[base,selected?.id,selected?.plan?.fingerprint,Boolean(selected?.plan?.decisions)]);

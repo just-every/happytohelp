@@ -1,43 +1,88 @@
-// A named credential assignment is different from an environment-presence
-// diagnostic or a reference to the variable holding it. Values still pass all
-// provider, opaque-payload and hash checks in secrets.mjs.
+import {omitTransportCredentials,omitTransportObject} from './transport-secrets.mjs';
+import {opaqueCredentialShape,opaqueReferences} from './references.mjs';
+// Explicit omission policy for rendered support text. Unknown credential-like
+// assignments, JSON fields and opaque payloads still fail in secrets.mjs.
 const credentialName=/(?:key|secret|token|password|salt|credential|encrypt(?:ion)?)$/i;
+const reviewedNames=new Set(['key','secret','token','password','credential','credentials','secret_key','secretkey','api_key','api_token','access_token','accesstoken','client_secret','clienttoken','authorizationfingerprint','auth_token','merchant_account_key','x-api-key','example_key','public_key','publickey','refresh_token','refreshtoken','csrf_token','csrftoken','x-amz-credential']);
+const textColumns={messages:['content'],events:['payload'],insights:['content'],articles:['content'],macros:['content']};
+const derivedColumns={contacts:['ai_profile','metadata'],users:['ai_profile'],projects:['ai_profile'],conversations:['metadata'],dataset_files:['markdown'],datasets:['metadata'],project_optimizations:['ai_profile','metadata'],message_thinkings:['content'],support_delegations:['instructions','context','result'],support_delegation_events:['message','payload'],insights:['analysis','metadata'],leads:['content']};
+const rendered=(table,column)=>textColumns[table]?.includes(column);
+const sanitizable=(table,column)=>rendered(table,column)||derivedColumns[table]?.includes(column);
+export function isRedactedCredentialField(table,column,key,value){return rendered(table,column)&&reviewedName(key)&&value==='<redacted>';}
+function reviewedName(name){return reviewedNames.has(name.toLowerCase())||/^(?:[A-Z][A-Z0-9]*_)+(?:KEY|TOKEN|SECRET|PASSWORD)$/.test(name);}
 function symbolic(value){
-  return /^(?:\$\{?[A-Z][A-Z0-9_]*\}?|!?\!?process\.env\.[A-Z][A-Z0-9_]*)$/.test(value)
-    || /^(?:\.{3}|\*{3,}|<redacted>|\[redacted\]|REDACTED|<YOUR[_A-Z0-9 -]+>|(?:YOUR|DEIN)[_-][A-Z0-9_-]*(?:KEY|TOKEN|PASSWORD|SECRET)[_A-Z0-9-]*)$/i.test(value);
+ return /^(?:\$\{?[A-Z][A-Z0-9_]*\}?|!?\!?process\.env\.[A-Z][A-Z0-9_]*)$/.test(value)
+  || /^(?:\.{3}|\*{3,}|<redacted>|\[redacted\]|REDACTED|<YOUR[_A-Z0-9 -]+>|(?:YOUR|DEIN)[_-][A-Z0-9_-]*(?:KEY|TOKEN|PASSWORD|SECRET)[_A-Z0-9-]*)$/i.test(value);
+}
+function* assignments(text){
+ const pattern=/\b([A-Za-z][\w-]*)(["']?[ \t]*([:=])[ \t]*)(?:"((?:\\.|[^"\\\r\n])*)"|'((?:\\.|[^'\\\r\n])*)'|([^\s"',;}]+))/g;
+ for(const m of text.matchAll(pattern)){
+  const quote=m[4]!==undefined?'"':m[5]!==undefined?"'":'',value=m[4]??m[5]??m[6];
+  yield {raw:m[0],index:m.index,name:m[1],operator:m[3],quote,value,head:m[0].slice(0,m[0].length-value.length-(quote?1:0)),prefix:text.slice(0,m.index),tail:text.slice(m.index+m[0].length)};
+ }
+}
+function noncredential(a){
+ const {name,operator,quote,tail,prefix}=a,value=a.value.replace(/^`|`$/g,'');
+ if(!value||symbolic(value)||value==='sk-...')return true;
+ if(name==='Encryption'&&operator===':')return true;
+ if(/^Idempotency-Key$/i.test(name)||name.toLowerCase()==='key'&&/\bidempotency\s+$/i.test(prefix))return true;
+ if(operator===':'&&/^YOUR_[A-Z_]+$/.test(name)&&['\\','-d','-X','-H'].includes(value))return true;
+ if(operator===':'&&!quote&&/^(?:true|false|null|undefined|None)$/.test(value))return true;
+ // References in code examples do not carry the referenced credential's value.
+ if(!quote&&operator==='='&&name==='secret'&&value==='new'&&/^ TextEncoder\(\)\.encode\(process\.env\.[A-Z_][A-Z0-9_]*\)/.test(tail))return true;
+ if(!quote&&operator==='='&&name==='token'&&value==='request.cookies.get('&&/^["'][A-Za-z_][A-Za-z0-9_]*["']\)\?\.value/.test(tail))return true;
+ if(!quote&&operator===':'&&name==='Key'&&value==='你的'&&/^ (?:API Key|key)\b/.test(tail))return true;
+ if(!quote&&operator==='='&&name==='key'&&value==='Codex'&&/^ imagegen\b/.test(tail))return true;
+ return false;
 }
 export function hasCredentialAssignment(text){
-  const assignments=/\b([A-Za-z][\w-]*)["']?\s*([:=])\s*(?:(["'])([^\r\n]*?)\3|([^\s"',;}]+))/g;
-  for(const match of text.matchAll(assignments)){
-    const [,name,operator,quote,quoted,plain]=match;
-    if(!credentialName.test(name)||/Error$/.test(name)||/^Idempotency-Key$/i.test(name)||name.toLowerCase()==='key'&&/\bidempotency\s+$/i.test(text.slice(0,match.index)))continue;
-    const value=(quote?quoted:plain).replace(/^`|`$/g,'');
-    if(!value||symbolic(value)||value==='sk-...')continue;
-    const tail=text.slice(match.index+match[0].length);
-    // Code references and documentation placeholders carry no credential value.
-    if(!quote&&operator==='='&&name==='secret'&&value==='new'&&/^ TextEncoder\(\)\.encode\(process\.env\.[A-Z_][A-Z0-9_]*\)/.test(tail))continue;
-    if(!quote&&operator==='='&&name==='token'&&value==='request.cookies.get('&&/^["'][A-Za-z_][A-Za-z0-9_]*["']\)\?\.value/.test(tail))continue;
-    if(!quote&&operator===':'&&name==='Key'&&value==='你的'&&/^ (?:API Key|key)\b/.test(tail))continue;
-    if(!quote&&operator==='='&&name==='key'&&value==='Codex'&&/^ imagegen\b/.test(tail))continue;
-    // A colon with an unquoted literal is a typed presence/state observation.
-    // Shell assignments and quoted strings remain credential candidates.
-    if(operator===':'&&!quote&&/^(?:true|false|null|undefined|None)$/.test(value))continue;
-    return true;
-  }
-  return false;
+ for(const a of assignments(text))if(credentialName.test(a.name)&&!/Error$/.test(a.name)&&!noncredential(a))return true;
+ return false;
 }
-
-// These reviewed credential labels occur in diagnostic support transcripts.
-// Omit their values, retain the surrounding support text, and record the count.
-// Unknown assignments and opaque strings still stop extraction.
-const reviewedCredentials=/\b(GPTCODEX_API_KEY|CPACODEX_API_KEY|CODEXMANAGER_API_KEY|CODEXEASY_API_KEY|JWT_SECRET|Credential)(\s*[:=]\s*)(?:(["'])([^\r\n]*?)\3|([^\s"',;}]+))/g;
-export function omitSupportCredentials(table,column,value){
-  if(table!=='messages'||column!=='content'||typeof value!=='string')return {value,omitted:0};
-  let omitted=0;
-  value=value.replace(reviewedCredentials,(_match,name,separator,quote,quoted,plain)=>{
-    if(symbolic(quote?quoted:plain))return _match;
-    omitted++;
-    return name+separator+(quote||'')+'<redacted>'+(quote||'');
-  });
-  return {value,omitted};
+export function omitSupportCredentials(table,column,value,onOmit){
+ if(!sanitizable(table,column)||value===null)return {value,omitted:0};
+ if(typeof value==='object'){
+  let omitted=0;const cleaned=omitTransportObject(value,secret=>{omitted++;onOmit?.(secret);return '<redacted>';});const transform=v=>{const r=omitSupportCredentials(table,column,v,onOmit);omitted+=r.omitted;return r.value;};
+  const mapped=Array.isArray(cleaned)?cleaned.map(transform):Object.fromEntries(Object.entries(cleaned).map(([key,v])=>[key,transform(v)]));
+  return {value:omitted?mapped:value,omitted};
+ }
+ if(typeof value!=='string')return {value,omitted:0};
+ let omitted=0;
+ const removed=secret=>{omitted++;onOmit?.(secret);return '<redacted>';};
+ // JSON diagnostic bodies can carry HAR cookie/header objects as well as prose.
+ try{const parsed=JSON.parse(value);if(parsed&&typeof parsed==='object'){const before=omitted;const cleaned=omitTransportObject(parsed,removed);if(omitted!==before)value=JSON.stringify(cleaned);}}catch{}
+ value=omitTransportCredentials(value,removed);
+ let result='',offset=0;
+ for(const a of assignments(value)){
+  if(!reviewedName(a.name)||noncredential(a))continue;
+  result+=value.slice(offset,a.index)+a.head+removed(a.value)+a.quote;offset=a.index+a.raw.length;
+ }
+ value=result+value.slice(offset);
+ // Known authentication signatures are omitted, rather than copied to custody.
+ value=value.replace(/-----BEGIN ([A-Z ]*PRIVATE KEY|ENCRYPTED[A-Z ]*)-----[\s\S]*?-----END \1-----/g,removed);
+ value=value.replace(/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/g,removed);
+ value=value.replace(/\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\b/g,removed);
+ value=value.replace(/\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/g,removed);
+ value=value.replace(/\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/g,removed);
+ value=value.replace(/\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/gi,removed);
+ value=value.replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,removed);
+ value=value.replace(/\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$[^\s"'<>]+/g,removed);
+ value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+removed(secret));
+ value=value.replace(/(\bAuthorization[ \t]*:[ \t]*Basic[ \t]+)(?!<redacted>)([^\s<>]+)/gi,(_match,head,secret)=>head+removed(secret));
+ value=value.replace(/\b(Basic)[ \t]+([A-Za-z0-9+/]+={0,2})/gi,(match,scheme,secret)=>{
+  const bytes=Buffer.from(secret,'base64');return bytes.toString('base64').replace(/=+$/,'')===secret.replace(/=+$/,'')&&bytes.includes(0x3a)?scheme+' '+removed(secret):match;
+ });
+ value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|auth)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+removed(secret));
+ value=value.replace(/\b([a-z][a-z0-9+.-]*:\/\/)([^\s/@:"'<>()[\]]+):([^\s/@"'<>()[\]]+)@/gi,(_match,scheme,user,secret)=>scheme+removed(user+':'+secret)+'@');
+ value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?removed(url):url);
+ // Opaque diagnostic values have no established public-resource meaning.
+ // Omit them as potential credentials; unknown schema/JSON/assignment names
+ // still stop export. Never turn an encrypted JSON envelope into readable data.
+ const opaque=new Set([...opaqueReferences(value).matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].map(m=>m[0]).filter(opaqueCredentialShape));
+ value=value.replace(/[A-Za-z0-9+/_-]{32,}={0,2}/g,token=>{
+  if(!opaque.has(token))return token;
+  try{const decoded=JSON.parse(Buffer.from(token,'base64').toString('utf8'));if(decoded&&'iv'in decoded&&'value'in decoded&&('mac'in decoded||'tag'in decoded))return token;}catch{}
+  return removed(token);
+ });
+ return {value,omitted};
 }

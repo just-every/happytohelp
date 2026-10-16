@@ -11,7 +11,7 @@ const encryptedAction = Buffer.concat([cipher.update(actionPlaintext), cipher.fi
 // Every value here is synthetic. Scan all artifacts and native stores, not only
 // the archive table that exposed the original connection-key regression.
 export const PLANTED_SECRETS = Object.freeze([
-  'fixture-transcript-environment-value','fixture-contact-admin-capability','fixture-password-hash', 'fixture-remember-token', 'fixture-contact-key-hash',
+  'fixture-profile-known-credential','fixture-reply-cache-credential','fixture-suggestion-cache-credential','fixture-transcript-environment-value','fixture-contact-admin-capability','fixture-password-hash', 'fixture-remember-token', 'fixture-contact-key-hash',
   ...['chargedesk', '12ui'].flatMap(slug => [`fixture-verification-${slug}`, `fixture-invitation-${slug}`]),
   'fixture-connection-shared-key', 'fixture-contact-shared-key', 'fixture-github-access-token',
   'fixture-asymmetric-private-key', 'fixture-asymmetric-public-key',

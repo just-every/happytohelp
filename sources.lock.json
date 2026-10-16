@@ -1508,7 +1508,7 @@
       "executable": false
     },
     "docs/LEGACY-EXPORT.md": {
-      "sha256": "d9350e28dd84c4bbf1cbdc3e810ea57cddaa58da58abb2faba1f2e77471d5390",
+      "sha256": "0e72c89739c44035b16d66e19476786de5fc495f567f3aff348a373817df8838",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2552,15 +2552,15 @@
       "executable": false
     },
     "scripts/legacy-export/scope.mjs": {
-      "sha256": "a3eff164a25cb51770930e40d03a5b81ae13c7ecf1bdffa5f327c83a2fbca9c2",
+      "sha256": "dbb161f12f29e75d583991dd9bf1fcc3a34c2863f633172bbefd04ca079db5b0",
       "executable": false
     },
     "scripts/legacy-export/secrets.mjs": {
-      "sha256": "e9c19424274dc23894f9dda501c397a04b551a84c3729dbefdf1eeb4d3a851c1",
+      "sha256": "70beea59ffbc8e5f179912de09bb577c26be0712b84210e84f1dbdb81466746e",
       "executable": false
     },
     "scripts/legacy-export/text-policy.mjs": {
-      "sha256": "6002c85d5627f1215654c8272c78cc1c62fca1d3ac332c74b3b1b31a55c1af80",
+      "sha256": "8f6f1ed0f8de33e5028bb2b93e1cc7eb7083771f8845f1269f6f9a87799ca9a9",
       "executable": false
     },
     "scripts/local-agent-archive.cjs": {
@@ -8540,11 +8540,11 @@
       "executable": false
     },
     "tests/legacy-export/extended-fixture.mjs": {
-      "sha256": "918d7f6baf0bafa13392f61f59d4002c401ea7de18ae317f8a938d0f45013bfd",
+      "sha256": "302cd88aad093ef3c4b146a7e1fca0547fbaa7ee3be7ceacabe73200e542a3f4",
       "executable": false
     },
     "tests/legacy-export/fixture.mjs": {
-      "sha256": "6939b859516845bb089d5fa8cd01a5e1d3affe3e954062ecab750eab0e0a0b7c",
+      "sha256": "3e43af603f7ce71cf323ae30fad4c71e8a36b2a428d343541857a090672330a0",
       "executable": false
     },
     "tests/legacy-export/live-schema.sql": {
@@ -8556,7 +8556,7 @@
       "executable": false
     },
     "tests/legacy-export/refusals.mjs": {
-      "sha256": "0902e5bf7de8b4776c6bb5be4d5e6af74c9fea45dad6d37ca14cd74132d9dac9",
+      "sha256": "ddc8ba59b21081e18adcc71ce1c83358b6734de4c61c5be688500e41f194df31",
       "executable": false
     },
     "tests/legacy-export/schema.sql": {

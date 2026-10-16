@@ -29,6 +29,6 @@ export const childScopes = {
 // EventItem.js renders these support events; PAGE_VIEW is visitor tracking.
 export const supportEventTypes = ['AGENT_ASSIGNED','USED_INSIGHT','INTERNAL_NOTE'];
 // ChargeDesk's generated administrative links carry an opaque login capability.
-// Customer-reply trigger caches are runtime control state, not history.
+// Reply trigger and unsent composer-suggestion caches are runtime state, not sent history.
 // Remove only these exact paths; unknown nested credential fields still fail.
-export const structuredOmissions = {contacts:{metadata:[['admin']]},conversations:{metadata:[['customer_reply']]}};
+export const structuredOmissions = {messages:{content:[['data','clientConfiguration','braintreeApi','accessToken'],['data','tokenizeUsBankAccount','paymentMethod','id'],['data','tokenizeUsBankAccount','paymentMethod','legacyId']]},contacts:{metadata:[['admin']]},conversations:{metadata:[['customer_reply'],['suggestions']]}};

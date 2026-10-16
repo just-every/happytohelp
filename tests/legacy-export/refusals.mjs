@@ -41,20 +41,33 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
   } finally {await admin.execute('UPDATE contacts SET metadata=? WHERE id=?',[original,contact.id]);}
 
   const [[message]]=await admin.execute('SELECT id,content FROM messages WHERE project_id=? ORDER BY id LIMIT 1',[projectId]);
+  const jwt=[JSON.stringify({alg:'HS256'}),JSON.stringify({sub:'fixture'}),'fixture-signature'].map(value=>Buffer.from(value).toString('base64url')).join('.');
   const signatures=[
-    'A pasted credential: ghp_test_'+'x'.repeat(36),
-    'Authorization: Bearer fixtureOpaqueCredential123456',
-    'A pasted key:\n-----BEGIN PRIVATE KEY-----\nfixture-private-key\n-----END PRIVATE KEY-----',
-    'Session '+[JSON.stringify({alg:'HS256'}),JSON.stringify({sub:'fixture'}),'fixture-signature'].map(value=>Buffer.from(value).toString('base64url')).join('.'),
-    'api_token=fixture-hidden-text-token',
-    'Digest-looking credential: '+'a1'.repeat(32),
-    'Encoded payload: '+Buffer.from(JSON.stringify({iv:'fixture-iv',value:'fixture-ciphertext',mac:'fixture-mac'})).toString('base64'),
+    ['A pasted credential: ghp_test_'+'x'.repeat(36),'ghp_test_'+'x'.repeat(36)],
+    ['Authorization: Bearer fixtureOpaqueCredential123456','fixtureOpaqueCredential123456'],
+    ['A pasted key:\n-----BEGIN PRIVATE KEY-----\nfixture-private-key\n-----END PRIVATE KEY-----','fixture-private-key'],
+    ['Session '+jwt,jwt],
+    ['api_token=fixture-hidden-text-token','fixture-hidden-text-token'],
+    ['Digest-looking credential: '+'a1'.repeat(32),'a1'.repeat(32)],
+    ['Cookie: support_session=fixture-short-cookie','fixture-short-cookie'],
+    ['<input type="hidden" name="_s" value="fixture-short-csrf">','fixture-short-csrf'],
+    [JSON.stringify({request:{headers:[{name:'Cookie',value:'session=fixture-har-cookie'}]}}),'fixture-har-cookie'],
   ];
   try {
-    for (const content of signatures) {
+    // These signatures now have an explicit OMIT classification for support
+    // text. Prove the credential itself is absent; unknown content still refuses.
+    for (const [content,actual] of signatures) {
       await admin.execute('UPDATE messages SET content=? WHERE id=?',[content,message.id]);
-      await refuse();
+      const file=join(output,`omitted-text-${++index}.json`);
+      await run('scripts/export-legacy.mjs',[...snapshotArgs,'--output',file],env);
+      const bundle=JSON.parse(await readFile(file,'utf8'));
+      assert.ok(bundle.source.omittedTextValueCounts['messages.content']>0,'classified credential value omitted');
+      assert.equal(JSON.stringify(bundle).includes(actual),false,'omitted credential is absent from every source table');
     }
+    for(const content of [
+      'new_provider_secret=fixture-unclassified-secret',
+      'Encoded payload: '+Buffer.from(JSON.stringify({iv:'fixture-iv',value:'fixture-ciphertext',mac:'fixture-mac'})).toString('base64'),
+    ]){await admin.execute('UPDATE messages SET content=? WHERE id=?',[content,message.id]);await refuse();}
   } finally {await admin.execute('UPDATE messages SET content=? WHERE id=?',[message.content,message.id]);}
 
   // An old or edited snapshot cannot bypass extraction's column classification.

@@ -1,0 +1,59 @@
+import {createPublicKey} from 'node:crypto';
+// Noncredential identifiers in support history. Strong authentication signatures
+// are always checked against the original text by secrets.mjs.
+const publicConfiguration=new Set([
+ 'data.clientConfiguration.paypal.clientId',
+ 'data.clientConfiguration.paypal.braintreeClientId',
+ 'data.clientConfiguration.usBankAccount.plaidPublicKey',
+]);
+export function publicConfigurationValue(table,column,path){return table==='messages'&&column==='content'&&publicConfiguration.has(path.join('.'));}
+export function publicConfigurationName(table,column,path,key,value){
+ return publicConfigurationValue(table,column,[...path,key])||table==='messages'&&column==='content'&&[...path,key].join('.')==='data.tokenizeUsBankAccount'&&(value===null||typeof value==='object'&&!Array.isArray(value));
+}
+function gravatar(url){
+ if(!['gravatar.com','www.gravatar.com','secure.gravatar.com'].includes(url.hostname)||!/^\/avatar\/(?:[a-f0-9]{32}|[a-f0-9]{64})(?:\.jpg)?$/i.test(url.pathname))return false;
+ return [...url.searchParams].every(([key,value])=>{
+  if(['s','size'].includes(key))return /^\d{1,4}$/.test(value);
+  if(['r','rating'].includes(key))return /^(g|pg|r|x)$/.test(value);
+  if(['d','default'].includes(key)){if(/^(404|mp|mm|identicon|monsterid|wavatar|retro|robohash|blank)$/.test(value))return true;try{const image=new URL(value);return /^https?:$/.test(image.protocol)&&!image.username&&!image.password&&!image.search&&!image.hash&&/\.(?:png|jpe?g|gif|webp|svg)$/i.test(image.pathname);}catch{}}
+  return false;
+ });
+}
+export function opaqueReferences(value){
+ const withoutFiles=value.replaceAll('\\_','_').replaceAll('\\-','-').replace(/(^|[\s"'`(])\/(?:Users|home|tmp|private|var|workspace|mnt|opt|app|usr|root)\/[^\s"'`<>)]+/g,'$1<file-path>');
+ const urls=withoutFiles.replace(/https?:\/\/[^\s<>"'()[\]]+/g,raw=>{
+  try{
+   const url=new URL(raw.replaceAll('&amp;','&'));if(url.username||url.password)return raw;
+   if(gravatar(url))return '<avatar-resource>';
+   for(const key of [...url.searchParams.keys()])if(key==='fbclid'||/^utm_(?:source|medium|campaign|content|term|id)$/.test(key))url.searchParams.delete(key);
+   // Document IDs are separate from OAuth/resource-key access capabilities.
+   if(['docs.google.com','drive.google.com'].includes(url.hostname)){
+    url.pathname=url.pathname.replace(/(\/(?:document|spreadsheets|presentation|file)\/d\/)[A-Za-z0-9_-]+/g,'$1document-id');
+    if(/^\/(?:uc|thumbnail|files\/[^/]+\/export)/.test(url.pathname))for(const key of ['id','revid'])if(url.searchParams.has(key))url.searchParams.set(key,'document-id');
+   }
+   if(url.hostname==='zapier.com'&&/^\/(?:developer|platform)\/public-invite\/[^/]+\/[^/]+\/?$/.test(url.pathname)&&!url.search&&!url.hash)return '<public-integration-invitation>';
+   if(url.search||url.hash)return url.href;
+   if(/\.(?:webp|png|jpe?g|gif|svg|ico)$/i.test(url.pathname))return '<image-resource>';
+   if(['loom.com','www.loom.com'].includes(url.hostname)&&/^\/(?:share|embed)\/[a-f0-9]{32}\/?$/i.test(url.pathname))return '<video-resource>';
+   return url.hostname.replaceAll('.',' ')+url.pathname.replaceAll('/',' ');
+  }catch{return raw;}
+ });
+ return urls.replace(/\bcid:[A-Za-z0-9@._-]+/gi,'<content-id>')
+  .replace(/\b(?:cus|ch|pi|sub|in|pm|src|price|prod|plan|re|txn|evt|acct|seti|dp|po|ba|card|il|ca)_[A-Za-z0-9_]+\b/g,token=>token.includes('_secret_')?token:'<payment-resource-id>')
+  .replace(/\bsha(256|384|512)-([A-Za-z0-9+/]+={0,2})/g,(match,bits,digest)=>{const bytes=Buffer.from(digest,'base64');return bytes.length===Number(bits)/8&&bytes.toString('base64').replace(/=+$/,'')===digest.replace(/=+$/,'')?'<integrity-checksum>':match;})
+  .replace(/\bk=rsa;[ \t]*p=([A-Za-z0-9+/]+={0,2})/gi,(match,key)=>{try{createPublicKey({key:Buffer.from(key,'base64'),format:'der',type:'spki'});return '<public-dkim-key>';}catch{return match;}})
+  .replace(/\b[a-f0-9]{32,64}\.(?:png|jpe?g|gif|webp|svg|pdf|txt|docx?|xlsx?|csv|zip|log|json)\b/gi,'attachment-filename').replace(/(?<![a-f0-9])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![a-f0-9])/gi,'<uuid>');
+}
+
+// Conservative omission boundary for unverified URL capabilities. Public
+// resource formats above remain references; arbitrary opaque URLs do not.
+export function opaqueCredentialShape(value){
+ const normalized=opaqueReferences(value).replace(/\bpk_(?:live|test)_[A-Za-z0-9]{16,}\b/g,'<publishable-application-id>');
+ if(/\b[a-f0-9]{32,}\b/i.test(normalized))return true;
+ return [...normalized.matchAll(/[A-Za-z0-9+/_-]{40,}={0,2}/g)].some(m=>{
+  const text=m[0];if(!/[A-Za-z]/.test(text)||!/[0-9]/.test(text))return false;
+  const counts=new Map();for(const char of text)counts.set(char,(counts.get(char)||0)+1);
+  let entropy=0;for(const n of counts.values()){const p=n/text.length;entropy-=p*Math.log2(p);}
+  return entropy>4.8;
+ });
+}

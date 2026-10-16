@@ -87,10 +87,10 @@ export async function seedLegacy(connection, { objectDirectory }) {
         provided_email: id === contactId ? `preferred@${slug}.example.test` : null,
         nickname: 'Blue Finch', identifier: `${slug}-${id === contactId ? 'customer' : 'accounts'}`,
         timezone: 'Australia/Brisbane', country_code: 'AU', language: 'en',
-        is_verified: 1, key_hashes: json(['fixture-contact-key-hash']), metadata: json({ plan: 'business', company: name,admin:'fixture-contact-admin-capability' }), ...times });
+        is_verified: 1, ai_profile:json({summary:'api_token=fixture-profile-known-credential'}), key_hashes: json(['fixture-contact-key-hash']), metadata: json({ plan: 'business', company: name,admin:'fixture-contact-admin-capability' }), ...times });
     }
     await insert('conversations', { id: conversationId, project_id: projectId, contact_id: contactId,
-      agent_id: ownerId, metadata: json({ subject: `${name}: invoice question` }), unread_contact_messages_count: 1, ...times });
+      agent_id: ownerId, metadata: json({ subject: `${name}: invoice question`,customer_reply:{api_key:'fixture-reply-cache-credential'},suggestions:{tool_response:'fixture-suggestion-cache-credential'} }), unread_contact_messages_count: 1, ...times });
     await insert('conversations', { id: resolvedId, project_id: projectId, contact_id: participantId,
       agent_id: aiId, ai_id: aiId, resolved_at: timestamp, metadata: json({ subject: `${name}: resolved setup` }), ...times });
     await insert('conversation_participants', { id: uuid('42', n), conversation_id: conversationId, contact_id: participantId, ...times });

@@ -1,4 +1,6 @@
-import {hasCredentialAssignment} from './text-policy.mjs';
+import {hasTransportCredentials,transportObject} from './transport-secrets.mjs';
+import {opaqueCredentialShape,publicConfigurationValue,publicConfigurationName} from './references.mjs';
+import {hasCredentialAssignment,isRedactedCredentialField} from './text-policy.mjs';
 import {credentialColumns,skippedTables,structuredOmissions} from './scope.mjs';
 
 const secretName = /key|secret|token|password|hash|salt|credential|encrypt/i;
@@ -36,44 +38,28 @@ function usageField(table, column, path, key, value) {
 }
 
 function basicAuthorization(value){
-  if(/\bAuthorization\s*:\s*Basic\s+\S+/i.test(value))return true;
+  if(/\bAuthorization[ \t]*:[ \t]*Basic[ \t]+(?!<redacted>)([^\s]+)/i.test(value))return true;
   for(const match of value.matchAll(/\bBasic\s+([A-Za-z0-9+/]+={0,2})/gi)){
     const bytes=Buffer.from(match[1],'base64');
     if(bytes.toString('base64').replace(/=+$/,'')===match[1].replace(/=+$/,'')&&bytes.includes(0x3a))return true;
   }
   return false;
 }
-function opaquePayload(value){
-  const counts=new Map();for(const char of value)counts.set(char,(counts.get(char)||0)+1);
-  let entropy=0;for(const n of counts.values()){const p=n/value.length;entropy-=p*Math.log2(p);}
-  // Flattened page navigation and descriptive slugs are not encoded payloads.
-  // Credential signatures and named assignments are checked independently.
-  return entropy>4.8;
-}
 function secretString(value, storageIdentifier = false) {
-  // Absolute local file/run paths are references. Keep all strong credential
-  // signatures on the original text; only the generic opaque/hash checks ignore paths.
-  const withoutPaths=value.replace(/(^|[\s\"'`(])\/(?:Users|home|tmp|private|var|workspace|mnt|opt|app|usr|root)\/[^\s\"'`<>)]+/g,'$1<file-path>');
-  // Inspect URL path components separately: joining a hostname and several
-  // descriptive segments does not turn them into one opaque credential.
-  const references=withoutPaths.replace(/https?:\/\/[^\s<>"')]+/g,raw=>{
-    try{const url=new URL(raw);if(url.username||url.password||url.search||url.hash)return raw;
-      const path=url.pathname;
-      if(['storage.happytohelp.com','images.12ui.com'].includes(url.hostname)&&/\.(?:webp|png|jpe?g|gif|svg)$/i.test(path))return '<public-image-path>';
-      return url.hostname.replaceAll('.',' ')+path.replaceAll('/',' ');
-    }catch{return raw;}
-  });
-  const opaque=references.replace(/(?<![a-f0-9])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![a-f0-9])/gi,'<uuid>');
-  return /-----BEGIN [A-Z ]*(?:PRIVATE KEY|ENCRYPTED)/.test(value)
+  return hasTransportCredentials(value)
+    || /-----BEGIN [A-Z ]*(?:PRIVATE KEY|ENCRYPTED)/.test(value)
     || /\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/.test(value)
     || /\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/.test(value)
     || /[a-z][a-z0-9+.-]*:\/\/[^\s/@:]+:[^\s/@]+@/i.test(value)
+    || /\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\b/.test(value)
+    || /\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/.test(value)
+    || /\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/.test(value)
+    || /\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/i.test(value)
     || /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/.test(value)
     || hasCredentialAssignment(value)
     || /\bBearer\s+[A-Za-z0-9+/_.=-]{12,}/i.test(value) || basicAuthorization(value)
     || /\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$/.test(value)
-    || !storageIdentifier && /\b[a-f0-9]{32,}\b/i.test(opaque)
-    || !storageIdentifier && [...opaque.matchAll(/[A-Za-z0-9+/_-]{40,}={0,2}/g)].some(m=>/[A-Za-z]/.test(m[0])&&/\d/.test(m[0])&&opaquePayload(m[0]));
+    || !storageIdentifier && opaqueCredentialShape(value);
 }
 
 /** Inspect structured values, JSON in TEXT, and free text. Errors never print values. */
@@ -83,9 +69,10 @@ export function classifyValue(table, column, value, path = []) {
   if (Array.isArray(value)) {
     for (const [index,item] of value.entries()) classifyValue(table,column,item,[...path,String(index)]);
   } else if (typeof value === 'object') {
+    if(transportObject(value,path))refuse(location);
     if ('iv' in value && 'value' in value && ('mac' in value || 'tag' in value)) refuse(location);
     for (const [key,item] of Object.entries(value)) {
-      if (secretName.test(key) && !usageField(table,column,path,key,item)) refuse(location);
+      if (secretName.test(key) && !usageField(table,column,path,key,item)&&!publicConfigurationName(table,column,path,key,item)&&!isRedactedCredentialField(table,column,key,item)) refuse(location);
       classifyValue(table,column,item,[...path,key]);
     }
   } else if (typeof value === 'string') {
@@ -108,6 +95,7 @@ export function classifyValue(table, column, value, path = []) {
     if (column==='avatar_url' && ['projects','users','ais','contacts'].includes(table) && !path.length) {
       try {const url=new URL(value);if(url.protocol==='https:'&&['secure.gravatar.com','www.gravatar.com','gravatar.com'].includes(url.hostname)&&!url.username&&!url.password&&!url.hash&&/^\/avatar\/(?:[a-f0-9]{32}|[a-f0-9]{64})(?:\.jpg)?$/i.test(url.pathname)&&[...url.searchParams].every(([key,v])=>key==='s'?/^\d{1,4}$/.test(v):key==='r'?/^(g|pg|r|x)$/.test(v):key==='d'&&/^(404|mp|mm|identicon|monsterid|wavatar|retro|robohash|blank)$/.test(v)))return;}catch{}
     }
+    if(publicConfigurationValue(table,column,path)&&/^[A-Za-z0-9_/-]{8,512}$/.test(value)&&!secretString(value,true))return;
     if (secretString(value)) refuse(location);
   }
 }

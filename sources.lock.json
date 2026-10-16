@@ -7310,6 +7310,10 @@
       "sha256": "032e096d0669952f1f60336b175cf1cb5ea86e9de9c803cdbedda379ac3993c4",
       "executable": false
     },
+    "src/ui/native/WorkspaceLiveCounts.jsx": {
+      "sha256": "22a33c29b2d90a405a8b7a3cdd9b5de006466ca2e5739ffea5e8fd0ffc03f5f8",
+      "executable": false
+    },
     "src/ui/native/WorkspacePages.jsx": {
       "sha256": "c69a5b30ab0aca5963c86978a79433d2daefb1d837402f330e6f00272fb74ab9",
       "executable": false

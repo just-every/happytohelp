@@ -27,5 +27,5 @@ export async function recipientReplyAddress(env:Env,address:unknown,projectId:st
 /** The thread and recipient a reply address was issued for. Whether the sender may
  * use it is decided against that recipient by the inbound policy. */
 export async function replyGrant(env:Env,projectId:string,token:string){
- return env.DB.prepare('SELECT token_hash,conversation_id,lower(recipient) recipient FROM email_reply_grants WHERE token_hash=? AND project_id=?').bind(await hashToken(token),projectId).first<{token_hash:string;conversation_id:string;recipient:string}>()
+ return env.DB.prepare('SELECT conversation_id,lower(recipient) recipient FROM email_reply_grants WHERE token_hash=? AND project_id=?').bind(await hashToken(token),projectId).first<{conversation_id:string;recipient:string}>()
 }

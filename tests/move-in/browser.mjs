@@ -34,10 +34,11 @@ try{
    assert.ok(await page.locator('.transcript-message-time').count()>0);
   }
   const input=page.getByRole('textbox',{name:'New tag',exact:true});await input.fill('Review me');await input.locator('..').getByRole('button',{name:'Add',exact:true}).click();const remove=page.getByRole('button',{name:'Remove tag Review me',exact:true});await remove.waitFor();await inspect(`${label}-tag-added`);await remove.click();await remove.waitFor({state:'hidden'});await inspect(`${label}-tag-removed`);
-  await page.goto(runtime.origin+base+'/conversations');const filter=page.getByRole('combobox',{name:'Filter conversations by tag'});await filter.waitFor();await filter.selectOption({label:'Priority'});
-  // Selecting the tag starts a request while the previous inbox is visible.
-  // Wait for the filtered rows and their labels, then retain the exact checks.
-  await page.waitForFunction(()=>document.querySelectorAll('.conversation-item').length===3&&[...document.querySelectorAll('.conversation-item .conversation-tag')].filter(tag=>tag.textContent.includes('Priority')).length===3);
+  await page.goto(runtime.origin+base+'/conversations');const filter=page.getByRole('combobox',{name:'Filter conversations by tag'});await filter.waitFor();await page.locator('.conversation-item').first().waitFor();
+  // Imported closed history is in Closed, so the Open view already shows only the three Priority rows.
+  // Mark them: a new filter starts from an empty list, so only rows rendered for the filter lack the mark.
+  await page.evaluate(()=>document.querySelectorAll('.conversation-item').forEach(row=>{row.dataset.beforeFilter='1'}));await filter.selectOption({label:'Priority'});
+  await page.waitForFunction(()=>document.querySelectorAll('.conversation-item').length===3&&!document.querySelector('.conversation-item[data-before-filter]')&&[...document.querySelectorAll('.conversation-item .conversation-tag')].filter(tag=>tag.textContent.includes('Priority')).length===3);
   assert.equal(await page.locator('.conversation-item').count(),3);assert.equal(await page.locator('.conversation-item .conversation-tag').filter({hasText:'Priority'}).count(),3);await inspect(`${label}-tag-filter`);
   await page.goto(runtime.origin+base+'/move-in');await page.getByRole('button',{name:`${filename} — Complete`,exact:true}).click();await page.getByRole('button',{name:'Undo whole import',exact:true}).click();await page.getByRole('heading',{name:`Undone: ${filename}`,exact:true}).waitFor({timeout:120000});await inspect(`${label}-undone`);
   const listed=await request(`/api/dashboard/projects/${project}/conversations?view=all`,{token});assert.equal(listed.meta.pagination.total,0);

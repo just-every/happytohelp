@@ -8847,7 +8847,7 @@
       "executable": false
     },
     "tests/move-in/browser.mjs": {
-      "sha256": "21ccea393e527a6543cab63eae4f19f9559823f62497182b6eeef93e8b510dbf",
+      "sha256": "d915239bace02ed2ca2a1a15be990ee8c2e55f6887710de8547045823c825502",
       "executable": false
     },
     "tests/move-in/business-equality.mjs": {

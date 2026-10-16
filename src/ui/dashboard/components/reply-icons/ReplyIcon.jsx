@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import iconNames from './catalog.json';
-import glyphs from './glyphs.json';
+import {controlGlyphs, spriteUrl} from 'virtual:happytohelp-reply-icons';
 
 const replyIconNames = new Set(iconNames);
 
@@ -25,7 +25,9 @@ export default function ReplyIcon({ className, name, title }) {
         role={ title ? 'img' : undefined }
     >
         { title && <title>{ title }</title> }
-        <g dangerouslySetInnerHTML={{ __html: glyphs[name] }} />
+        { controlGlyphs[name]
+            ? <g dangerouslySetInnerHTML={{ __html: controlGlyphs[name] }} />
+            : <use href={ `${spriteUrl}#${name}` } /> }
     </svg>;
 }
 

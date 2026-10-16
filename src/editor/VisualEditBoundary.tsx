@@ -3,10 +3,10 @@ import { useRouterState } from '@tanstack/react-router';
 import { setLiveEditsReady } from './live-edit-runtime';
 
 /** Resume only after the actual leaf commits, including reused wildcard routes. */
-export function withVisualEdits(Component: ComponentType) {
-  return function VisualEditBoundary() {
+export function withVisualEdits<Props extends object>(Component: ComponentType<Props>) {
+  return function VisualEditBoundary(props: Props) {
     const href = useRouterState({ select: state => state.location.href });
     useEffect(() => { setLiveEditsReady(true); }, [href]);
-    return <Component />;
+    return <Component {...props} />;
   };
 }

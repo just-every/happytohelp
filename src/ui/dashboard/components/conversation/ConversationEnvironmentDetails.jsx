@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import Moment from '../../../native/Moment';
+import Moment from '../../../native/ZonedMoment';
 import { contactTimezone } from '../../utils/contactTimezone';
 import { UAParser } from 'ua-parser-js';
 import CountryName from '../includes/CountryName';

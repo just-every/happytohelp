@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {ChatContext} from '../contexts/ChatContext';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
     appendConversationPage,
     hasNextConversationPage,
@@ -14,6 +15,7 @@ function useConversationList({
     filter,
     listKey,
 }) {
+    const {initialInboxListId} = useContext(ChatContext);
     const [ isInitialLoading, setIsInitialLoading ] = useState(false);
     const [ isRefreshing, setIsRefreshing ] = useState(false);
     const [ isLoadingMore, setIsLoadingMore ] = useState(false);
@@ -36,7 +38,7 @@ function useConversationList({
         activeRequest.current = null;
     }, []);
 
-    const startRefresh = useCallback(scope => {
+    const startRefresh = useCallback((scope, initialInboxListRead = false) => {
         if (scope !== listRequestScope.current) {
             return;
         }
@@ -63,6 +65,7 @@ function useConversationList({
             fetchPage: fetchConversationListRef.current,
             filter,
             loadedCount: existingConversations.length,
+            initialInboxListRead,
             signal: controller.signal,
             isCurrent: () => activeRequest.current === request && scope === listRequestScope.current,
         })
@@ -113,7 +116,7 @@ function useConversationList({
         setHasNextPage(false);
         setRefreshError(null);
         setLoadMoreError(null);
-        startRefresh(scope);
+        startRefresh(scope, true);
 
         return () => {
             if (scope === listRequestScope.current) {
@@ -122,7 +125,7 @@ function useConversationList({
                 abortActiveRequest();
             }
         };
-    }, [ abortActiveRequest, listKey, startRefresh ]);
+    }, [ abortActiveRequest, listKey, startRefresh, initialInboxListId ]);
 
     useEffect(() => {
         if (refreshVersion.current === inboxDataVersion) {

@@ -4,7 +4,7 @@ import {sendCommand,connectConversation,connectProject} from '../src/ui/native/t
 
 test('operator message uses durable frontier and retains command identity; conflict is surfaced without retry',async()=>{
  const previous=globalThis.fetch;const calls=[];
- globalThis.fetch=async(url,init={})=>{calls.push({url,init});return calls.length===1?Response.json({revision:7,lastMessageId:'m7'}):Response.json({error:'Conversation changed'},{status:409})};
+ globalThis.fetch=async(url,init={})=>{calls.push({url,init});return calls.length===1?Response.json({revision:7,last_message_id:'m7'}):Response.json({error:'Conversation changed'},{status:409})};
  try{await assert.rejects(sendCommand('p','c','sendMessage',{local_id:'stable-command',content:'reply',media_ids:['media']}),/Conversation changed/);assert.equal(calls.length,2);assert.deepEqual(JSON.parse(calls[1].init.body),{localId:'stable-command',content:'reply',expectedRevision:7,expectedLastMessageId:'m7',mediaIds:['media']});}finally{globalThis.fetch=previous;}
 });
 

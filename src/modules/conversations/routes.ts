@@ -8,8 +8,10 @@ import { admitMessage,reservedLocalId } from './admission'
 import { attachInboundOrigins } from '../integrations/inbound-origin'
 import { clientAddress,enforceRateLimits } from '../../platform/rate-limits'
 import { mediaResponseHeaders } from './media-response'
+import {messageData} from '../management/dashboard-data'
+import type {DeferEmailDelivery} from '../integrations/email'
 /** `responderReady` says whether an assistant's model can reach its provider. Without it every default assistant is assigned. */
-export function createConversationRoutes(onCommittedMessage?:(env:Env,message:Record<string,unknown>,actor:Actor)=>Promise<unknown>,responderReady?:(env:Env,model:string)=>boolean){
+export function createConversationRoutes(onCommittedMessage?:(env:Env,message:Record<string,unknown>,actor:Actor,defer?:DeferEmailDelivery)=>Promise<unknown>,responderReady?:(env:Env,model:string)=>boolean){
 const routes=new Hono<AppEnv>()
 // The project's default assistant for this contact: the signed-in default for a verified contact, else the visitor default.
 const defaultResponderSql="SELECT a.id,a.model FROM ai_profiles a JOIN project_settings s ON s.project_id=a.project_id WHERE s.project_id=? AND a.is_enabled=1 AND a.id=COALESCE((SELECT CASE WHEN ct.is_verified=1 THEN json_extract(s.settings_json,'$.default_verified_user_ai_id') ELSE json_extract(s.settings_json,'$.default_visitor_ai_id') END FROM contacts ct WHERE ct.id=? AND ct.project_id=s.project_id),json_extract(s.settings_json,'$.default_responder'))"
@@ -21,16 +23,38 @@ routes.get('/',async c=>{const actor=await requireActor(c);const rows=await c.en
 routes.post('/',async c=>{const b=await c.req.json();const actor=await requireProject(c,requiredString(b.projectId,'projectId'));const contactId=actor.role==='contact'?actor.contactId:requiredString(b.contactId,'contactId');if(actor.role==='contact')await enforceRateLimits(c.env,[['conversationsPerContactHour',contactId!],['conversationsPerIpHour',`${actor.projectId}|${clientAddress(c.req)}`],['conversationsPerProjectHour',actor.projectId]]);const now=Date.now(),conversationId=id(),responder=await readyResponder(c.env,actor.projectId,contactId!);const result=await c.env.DB.batch([c.env.DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) SELECT ?,project_id,id,?,? FROM contacts WHERE id=? AND project_id=?').bind(conversationId,now,now,contactId!,actor.projectId),...(responder?[c.env.DB.prepare(`INSERT INTO conversation_ai(conversation_id,ai_id) SELECT ?,responder.id FROM (${defaultResponderSql}) responder WHERE responder.id=? AND EXISTS(SELECT 1 FROM conversations WHERE id=?)`).bind(conversationId,actor.projectId,contactId!,responder,conversationId)]:[]),trackingStatement(c.env,conversationId,true)]);if(!result[0].meta.changes)throw new HTTPException(404);return c.json(await c.env.DB.prepare('SELECT * FROM conversations WHERE id=?').bind(conversationId).first(),201)})
 routes.get('/:id',async c=>c.json((await access(c)).conversation))
 // The original email body (content_raw) is operator-only transcript data; customer sessions never receive it.
-routes.get('/:id/messages',async c=>{const {actor,conversation}=await access(c);const messages=await c.env.DB.prepare('SELECT * FROM messages WHERE conversation_id=? ORDER BY revision').bind(conversation.id).all();for(const message of messages.results as any[]){if(actor.role==='contact')delete message.content_raw;message.media=(await c.env.DB.prepare('SELECT id,filename,content_type,size FROM media WHERE message_id=?').bind(message.id).all()).results}
+routes.get('/:id/messages',async c=>{const {actor,conversation}=await access(c);const [messages,media]=await c.env.DB.batch<any>([
+ c.env.DB.prepare('SELECT * FROM messages WHERE conversation_id=? ORDER BY revision').bind(conversation.id),
+ c.env.DB.prepare('SELECT id,message_id,filename,content_type,size FROM media WHERE conversation_id=? AND message_id IS NOT NULL').bind(conversation.id)
+ ]);const byMessage=new Map<string,any[]>();for(const {message_id,...item} of media.results){const key=String(message_id);if(!byMessage.has(key))byMessage.set(key,[]);byMessage.get(key)!.push(item)}for(const message of messages.results){if(actor.role==='contact')delete message.content_raw;message.media=byMessage.get(String(message.id))||[]}
  // Inbound email carries its origin, so an automatic notice that earned no reply is visible as such.
  await attachInboundOrigins(c.env,String(conversation.project_id),messages.results as any[])
  return c.json({messages:messages.results,revision:conversation.revision,lastMessageId:conversation.last_message_id,resolution:await resolutionState(c.env,String(conversation.project_id),String(conversation.id))})})
-routes.post('/:id/messages',async c=>{const {actor,conversation}=await access(c);const b=await c.req.json()
+routes.post('/:id/messages',async c=>{
+ const started=performance.now(),{actor,conversation}=await access(c),accessed=performance.now(),b=await c.req.json()
  // `email:` local ids identify inbound email claims; a client may not mint one to
  // pre-empt an inbound message's admission or borrow its classification. `erased:`
  // ids are written by contact erasure and must stay unique within a conversation.
  if(reservedLocalId(b?.localId))throw new HTTPException(400,{message:'Reserved local id prefix'})
- if(actor.role==='contact')await enforceRateLimits(c.env,[['messagesPerConversationMinute',conversation.id],['messagesPerContactHour',actor.contactId!]]);const result=await admitMessage(c.env,{...b,actor,projectId:actor.projectId,conversationId:conversation.id,generationId:undefined,sessionHash:c.get('sessionHash')});let generationError:string|undefined;if(result.accepted&&!result.duplicate&&onCommittedMessage){try{await onCommittedMessage(c.env,result.message!,actor)}catch(error){generationError=error instanceof Error?error.message:String(error)}}if(result.accepted)c.executionCtx.waitUntil(Promise.all([publishResolution(c.env,actor.projectId,conversation.id),...[conversation.id,`project:${actor.projectId}`].map(key=>c.env.CONVERSATIONS.get(c.env.CONVERSATIONS.idFromName(key)).fetch('https://conversation.internal/broadcast',{method:'POST'}))]));return c.json({...result,...(generationError?{generationError}: {})},result.accepted?200:409)})
+ if(actor.role==='contact')await enforceRateLimits(c.env,[['messagesPerConversationMinute',conversation.id],['messagesPerContactHour',actor.contactId!]])
+ const admitting=performance.now(),result=await admitMessage(c.env,{...b,actor,projectId:actor.projectId,conversationId:conversation.id,generationId:undefined,sessionHash:c.get('sessionHash')}),admitted=performance.now()
+ let generationError:string|undefined
+ // Operator replies acknowledge only after notification preparation and the
+ // durable sending claim. Retain the actual provider attempt through settlement;
+ // its persisted outcome drives the existing transcript mail status.
+ const defer:DeferEmailDelivery|undefined=actor.role==='contact'?undefined:delivery=>{
+  c.executionCtx.waitUntil((async()=>{
+   try{await delivery}catch{console.error('Conversation notification delivery failed; durable status retained')}
+   await Promise.all([conversation.id,`project:${actor.projectId}`].map(key=>c.env.CONVERSATIONS.get(c.env.CONVERSATIONS.idFromName(key)).fetch('https://conversation.internal/broadcast',{method:'POST'})))
+  })().catch(()=>{console.error('Conversation notification status broadcast failed')}))
+ }
+ if(result.accepted&&!result.duplicate&&onCommittedMessage){try{await onCommittedMessage(c.env,result.message!,actor,defer)}catch(error){generationError=error instanceof Error?error.message:String(error)}}
+ const effected=performance.now()
+ if(result.accepted)c.executionCtx.waitUntil(Promise.all([publishResolution(c.env,actor.projectId,conversation.id),...[conversation.id,`project:${actor.projectId}`].map(key=>c.env.CONVERSATIONS.get(c.env.CONVERSATIONS.idFromName(key)).fetch('https://conversation.internal/broadcast',{method:'POST'}))]))
+ const dashboardMessage=result.accepted&&actor.role!=='contact'?await messageData(c.env,result.message!):undefined,hydrated=performance.now()
+ c.header('Server-Timing',`access;dur=${(accessed-started).toFixed(1)},admission;dur=${(admitted-admitting).toFixed(1)},effects;dur=${(effected-admitted).toFixed(1)},hydrate;dur=${(hydrated-effected).toFixed(1)}`)
+ return c.json({...result,...(dashboardMessage?{dashboardMessage}:{}),...(generationError?{generationError}: {})},result.accepted?200:409)
+})
 // Visitor quotas are checked after the bounded body is read, so a 429 is delivered intact rather than as an unread-upload 413.
 routes.post('/:id/media',async c=>{const {actor,conversation}=await access(c);const declared=Number(c.req.header('Content-Length'));if(declared>20000000)throw new HTTPException(413);const data=await c.req.arrayBuffer();if(!data.byteLength||data.byteLength>20000000)throw new HTTPException(413);if(actor.role==='contact')await enforceRateLimits(c.env,[['uploadsPerContactDay',actor.contactId!],['uploadBytesPerContactDay',actor.contactId!,data.byteLength],['uploadsPerProjectDay',actor.projectId],['uploadBytesPerProjectDay',actor.projectId,data.byteLength]]);const mediaId=id(),key=`${actor.projectId}/${conversation.id}/${mediaId}`,filename=c.req.header('X-Filename')||'attachment',contentType=c.req.header('Content-Type')||'application/octet-stream';await c.env.FILES.put(key,data,{httpMetadata:{contentType}});try{await c.env.DB.prepare('INSERT INTO media VALUES(?,?,?,?,?,?,?,?,NULL,?)').bind(mediaId,actor.projectId,conversation.id,actor.id,key,filename,contentType,data.byteLength,Date.now()).run()}catch(error){await c.env.FILES.delete(key);throw error}return c.json({id:mediaId,filename,contentType,size:data.byteLength},201)})
 routes.get('/:id/media/:mediaId',async c=>{const {conversation}=await access(c);const row=await c.env.DB.prepare('SELECT * FROM media WHERE id=? AND conversation_id=?').bind(c.req.param('mediaId'),conversation.id).first<{object_key:string;filename:string;content_type:string}>();if(!row)throw new HTTPException(404);const object=await c.env.FILES.get(row.object_key);if(!object)throw new HTTPException(404);return new Response(object.body,{headers:mediaResponseHeaders(row.content_type,row.filename)})})

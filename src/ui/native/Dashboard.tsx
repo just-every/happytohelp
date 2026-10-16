@@ -1,6 +1,7 @@
-import { withVisualEdits } from '../../editor/VisualEditBoundary';
 import { EditorLauncher } from '../../editor/EditorLauncher';
-import { lazy, Suspense, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
+import DashboardClient, { DashboardContent as PageContent, type DashboardContentProps } from './DashboardClient';
+import { withVisualEdits } from '../../editor/VisualEditBoundary';
 import { Link, useMatches, useRouter } from '@tanstack/react-router';
 import { BrandLockup } from '../homepage/BrandLockup';
 import { DashboardSettingsContext, useDashboardSessionVersion, invalidateDashboardSession } from './dashboard-state';
@@ -10,8 +11,8 @@ import '../identity/identity.css';
 import '../dashboard/styles/dashboard.scss';
 import { PenLine, QuestionBubble } from './drawings';
 
-const DashboardClient = lazy(() => import('./DashboardClient'));
-const Content = lazy(() => import('./DashboardClient').then(module => ({ default: withVisualEdits(module.DashboardContent) })));
+
+const Content = withVisualEdits(PageContent);
 
 // Before the workspace loads, and when it cannot: the identity pages' paper frame under the HappyToHelp lockup.
 export function DashboardPending() {
@@ -36,8 +37,8 @@ export function DashboardError({ error }: { error: unknown }) {
 function ContentPending() {
     return <div className="dashboard-content-pending" aria-busy="true"><p>Loading your workspace…</p></div>;
 }
-export function DashboardContent() {
-    return <Suspense fallback={<ContentPending />}><Content /></Suspense>;
+export function DashboardContent(props: DashboardContentProps) {
+    return <Suspense fallback={<ContentPending />}><Content {...props} /></Suspense>;
 }
 export default function Dashboard() {
     const match = useMatches({ select: matches => matches.at(-1) });

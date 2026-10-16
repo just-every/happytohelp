@@ -20,15 +20,23 @@ export async function admitMessage(env:Env,input:MessageInput){
  if(!Array.isArray(refs)||refs.length>10||refs.some(r=>!r||typeof r.id!=='string'||typeof r.sourceVersion!=='string'))throw new Error('Invalid public citations')
  const mediaIds=[...new Set(input.mediaIds||[])];if(mediaIds.length>20||(!content.trim()&&!mediaIds.length))throw new Error('Invalid message content')
  const intentHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({content,mediaIds:[...mediaIds].sort(),resolve:!!input.resolve,expectedRevision,expectedLastMessageId:input.expectedLastMessageId,generationId:input.generationId,...(refs.length?{citations:refs.map(r=>({id:r.id,sourceVersion:r.sourceVersion}))}: {})}))))).map(x=>x.toString(16).padStart(2,'0')).join('')
- const scope=await env.DB.prepare('SELECT c.contact_id,c.resolved_at,c.assigned_to,(SELECT MAX(ordinal) FROM conversation_resolutions WHERE conversation_id=c.id) ordinal FROM conversations c WHERE c.id=? AND c.project_id=?').bind(conversationId,projectId).first<{contact_id:string;resolved_at:number|null;assigned_to:string|null;ordinal:number|null}>()
- if(!scope||(!input.generationId&&actor.role==='contact'&&!email&&scope.contact_id!==(actor.contactId||actor.id)))return {accepted:false,reason:'conversation_access_denied'}
- if(!input.tokenAuthority&&!input.generationId&&actor.role!=='contact'&&!await env.DB.prepare('SELECT 1 FROM memberships WHERE project_id=? AND user_id=? AND role=?').bind(projectId,actor.id,actor.role).first())return {accepted:false,reason:'conversation_access_denied'}
- const generation=input.generationId?await env.DB.prepare('SELECT ai_id FROM ai_generations WHERE id=? AND project_id=? AND conversation_id=?').bind(input.generationId,projectId,conversationId).first<{ai_id:string}>():null
- if(input.generationId&&!generation)return {accepted:false,reason:'generation_not_found'}
- const writerId=generation?.ai_id||actor.id
  const replayGuard=input.tokenAuthority?tokenGuard(input.tokenAuthority,projectId,'messages:write'):null
  const replayPredicate=replayGuard?`AND erased_at IS NULL AND EXISTS(${replayGuard.sql}) AND EXISTS(SELECT 1 FROM conversations c WHERE c.id=messages.conversation_id AND c.project_id=messages.project_id AND ${contactAvailableSql()})`:''
- const existing=await env.DB.prepare(`SELECT * FROM messages WHERE conversation_id=? AND project_id=? AND local_id=? ${replayPredicate}`).bind(conversationId,projectId,localId,...(replayGuard?.params||[])).first()
+ const checkMembership=!input.tokenAuthority&&!input.generationId&&actor.role!=='contact'
+ // These observations are independent. Keep denial/replay precedence below,
+ // and keep every live-authority and frontier predicate in the write itself.
+ const observations=await env.DB.batch<any>([
+  env.DB.prepare('SELECT c.contact_id,c.resolved_at,c.assigned_to,(SELECT MAX(ordinal) FROM conversation_resolutions WHERE conversation_id=c.id) ordinal FROM conversations c WHERE c.id=? AND c.project_id=?').bind(conversationId,projectId),
+  env.DB.prepare(`SELECT * FROM messages WHERE conversation_id=? AND project_id=? AND local_id=? ${replayPredicate}`).bind(conversationId,projectId,localId,...(replayGuard?.params||[])),
+  ...(checkMembership?[env.DB.prepare('SELECT 1 FROM memberships WHERE project_id=? AND user_id=? AND role=?').bind(projectId,actor.id,actor.role)]:[]),
+  ...(input.generationId?[env.DB.prepare('SELECT ai_id FROM ai_generations WHERE id=? AND project_id=? AND conversation_id=?').bind(input.generationId,projectId,conversationId)]:[])
+ ])
+ const scope=observations[0].results[0]
+ if(!scope||(!input.generationId&&actor.role==='contact'&&!email&&scope.contact_id!==(actor.contactId||actor.id)))return {accepted:false,reason:'conversation_access_denied'}
+ if(checkMembership&&!observations[2].results[0])return {accepted:false,reason:'conversation_access_denied'}
+ const generation=input.generationId?observations[2].results[0]:null
+ if(input.generationId&&!generation)return {accepted:false,reason:'generation_not_found'}
+ const writerId=generation?.ai_id||actor.id,existing=observations[1].results[0]
  if(existing){if(existing.actor_id!==writerId||existing.intent_hash!==intentHash) return {accepted:false,reason:'local_id_conflict'};return {accepted:true,duplicate:true,message:existing}}
  const authorship=await authoringSource(env,actor,conversationId,input.authoring,input.generationId)
  const citations=refs.length?await resolvePublicCitations(env,projectId,input.generationId!,refs):[]
@@ -59,8 +67,15 @@ export async function admitMessage(env:Env,input:MessageInput){
  if(actor.role!=='contact'&&!input.generationId)statements.push(env.DB.prepare("UPDATE ai_generations SET state='cancelled',updated_at=? WHERE conversation_id=? AND project_id=? AND state IN ('queued','running') AND EXISTS(SELECT 1 FROM messages WHERE id=?)").bind(new Date(now).toISOString(),conversationId,projectId,messageId))
  if(mediaIds.length)statements.push(env.DB.prepare(`UPDATE media SET message_id=? WHERE id IN (${mediaIds.map(()=>'?').join(',')}) AND EXISTS(SELECT 1 FROM messages WHERE id=?)`).bind(messageId,...mediaIds,messageId))
  if(input.generationId)statements.push(env.DB.prepare("UPDATE ai_generations SET state='completed' WHERE id=? AND EXISTS(SELECT 1 FROM messages WHERE id=?)").bind(input.generationId,messageId))
- await env.DB.batch(statements)
- const message=await env.DB.prepare(`SELECT * FROM messages WHERE id=? ${replayPredicate}`).bind(messageId,...(replayGuard?.params||[])).first()
- if(!message){const duplicate=await env.DB.prepare(`SELECT * FROM messages WHERE conversation_id=? AND project_id=? AND local_id=? ${replayPredicate}`).bind(conversationId,projectId,localId,...(replayGuard?.params||[])).first();if(duplicate&&duplicate.actor_id===writerId&&duplicate.intent_hash===intentHash)return {accepted:true,duplicate:true,message:duplicate};return {accepted:false,reason:'conversation_changed_or_admission_denied'}}
+ // Read the admitted row and any competing same-command replay in the same
+ // transaction. This preserves their authoritative predicates and avoids a
+ // separate D1 round trip after the guarded write.
+ const committedIndex=statements.length
+ statements.push(
+  env.DB.prepare(`SELECT * FROM messages WHERE id=? ${replayPredicate}`).bind(messageId,...(replayGuard?.params||[])),
+  env.DB.prepare(`SELECT * FROM messages WHERE conversation_id=? AND project_id=? AND local_id=? ${replayPredicate}`).bind(conversationId,projectId,localId,...(replayGuard?.params||[]))
+ )
+ const committed=await env.DB.batch<any>(statements),message=committed[committedIndex].results[0]
+ if(!message){const duplicate=committed[committedIndex+1].results[0];if(duplicate&&duplicate.actor_id===writerId&&duplicate.intent_hash===intentHash)return {accepted:true,duplicate:true,message:duplicate};return {accepted:false,reason:'conversation_changed_or_admission_denied'}}
  return {accepted:true,duplicate:false,message}
 }

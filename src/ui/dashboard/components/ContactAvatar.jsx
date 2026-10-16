@@ -10,8 +10,7 @@ import {
     resolveContactProfileSymbol,
 } from './avatar-symbols';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as freeIcons from '@fortawesome/free-solid-svg-icons';
-const { faArrowUp, faAtom, faBaseballBall, faBell, faBroom, faCaretUp, faCarrot, faCat, faCircle, faCookie, faCrow, faCube, faDiamond, faDice, faDog, faDove, faEgg, faEye, faFeather, faFish, faHeart, faHippo, faHorse, faHotdog, faLeaf, faMeteor, faMinus, faMoon, faPaw, faPencilAlt, faPizzaSlice, faRocket, faScrewdriver, faSeedling, faShieldAlt, faSquare, faStar, faStop, faSun, faTicketAlt, faTimes, faWindowMaximize, faWrench } = freeIcons;
+import { faArrowUp, faAtom, faBaseballBall, faBell, faBroom, faCaretUp, faCarrot, faCat, faCircle, faCookie, faCrow, faCube, faDiamond, faDice, faDog, faDove, faEgg, faEye, faFeather, faFish, faHeart, faHippo, faHorse, faHotdog, faLeaf, faMeteor, faMinus, faMoon, faPaw, faPencilAlt, faPizzaSlice, faRocket, faScrewdriver, faSeedling, faShieldAlt, faSquare, faStar, faStop, faSun, faTicketAlt, faTimes, faWindowMaximize, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 const shapes = {
     'octagon': faStop, 'hexagon': faCube, 'rhombus': faDiamond, 'triangle': faCaretUp, 'square': faSquare, 'rectangle': faWindowMaximize, 'pentagon': faCube, 'circle': faCircle, 'oval': faCircle, 'star': faStar, 'arrow': faArrowUp, 'cross': faTimes, 'line': faMinus, // shapes

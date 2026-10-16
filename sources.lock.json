@@ -2564,7 +2564,7 @@
       "executable": false
     },
     "scripts/legacy-export/queries.mjs": {
-      "sha256": "f3994c58127d30b4cebe02508a251758ec8bfe288fdaf02353139d7c81e8aa82",
+      "sha256": "15949ed97c46cc86e902c707091f776bc14898ad22b9d5c026b6bc74734dbb75",
       "executable": false
     },
     "scripts/legacy-export/references.mjs": {
@@ -2576,7 +2576,7 @@
       "executable": false
     },
     "scripts/legacy-export/secrets.mjs": {
-      "sha256": "80924d5e06c25f52acac97c253ff11f587bcde9d76a7b4153d2953af75c09d77",
+      "sha256": "c809fcfebca48f50aa3f681600dfd0f1ff6ea468d8d22ee044384786dc66385c",
       "executable": false
     },
     "scripts/legacy-export/text-policy.mjs": {

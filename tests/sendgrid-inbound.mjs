@@ -78,26 +78,28 @@ try {
   assert.equal(attachmentOnly.status, 201)
   assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 3)
 
-  // Only the SMTP envelope names the sender: a null return path is refused, and the
-  // header From (chosen by whoever wrote the message) never selects a contact.
-  const rawForm = ({ messageId, envelope, from = 'Customer <customer@example.com>', subject = 'Question', headers = '', text = 'Hello', spf='pass' }) => {
+  // The header From is the sender; SendGrid's DKIM and SPF verdicts verify it. The
+  // envelope (VERP, forwarding SRS, or a null return path) is delivery metadata.
+  const rawForm = ({ messageId, envelope, from = 'Customer <customer@example.com>', subject = 'Question', headers = '', text = 'Hello', spf='pass', dkim='', to = 'support@reply.support.example.com' }) => {
     const form = new FormData()
     if (envelope !== undefined) form.set('envelope', JSON.stringify(envelope))
-    form.set('to', 'support@reply.support.example.com')
+    form.set('to', to)
     form.set('from', from)
     form.set('subject', subject)
     form.set('SPF',spf)
+    if (dkim) form.set('dkim', dkim)
     form.set('text', text)
     form.set('headers', `Message-ID: <${messageId}>\r\n${headers}`)
     return form
   }
   const post = form => sendgridInbound.request('/email/sendgrid/inbound', { method: 'POST', headers: { Authorization: authorization }, body: form }, env, execution)
+  // A null return path is admitted under its unverified header From, and stays quiet.
   for (const envelope of [{ to: ['support@reply.support.example.com'], from: '' }, { to: ['support@reply.support.example.com'], from: '<>' }, { to: ['support@reply.support.example.com'] }, undefined]) {
-    const refused = await post(rawForm({ messageId: 'sendgrid-null-sender@example.com', envelope, from: 'Victim <victim@example.org>', subject: 'Delivery Status Notification (Failure)' }))
-    assert.equal(refused.status, 400)
+    const bounce = await post(rawForm({ messageId: 'sendgrid-null-sender@example.com', envelope, from: 'Victim <victim@example.org>', subject: 'Delivery Status Notification (Failure)' }))
+    assert.equal(bounce.status < 300, true)
+    assert.equal((await bounce.json()).automatic, true)
   }
-  assert.equal((await env.DB.prepare("SELECT count(*) n FROM contacts WHERE email='victim@example.org'").first()).n, 0)
-  assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 3)
+  assert.equal((await env.DB.prepare('SELECT count(*) n FROM messages').first()).n, 4)
 
   // List mail is classified from the raw header block: admitted and broadcast, but no AI reply is requested.
   const scheduled = pending.length
@@ -111,7 +113,7 @@ try {
   assert.deepEqual(listEvidence.reasons, ['list-id', 'list-unsubscribe'])
   assert.equal(listEvidence.envelope_from, 'bounces@news.example.com')
   assert.equal(listEvidence.headers['list-id'], 'Product news <news.example.com>')
-  assert.equal((await env.DB.prepare("SELECT email FROM contacts c JOIN conversations v ON v.contact_id=c.id WHERE v.id=?").bind(listClaim.conversation_id).first()).email, 'bounces@news.example.com')
+  assert.equal((await env.DB.prepare("SELECT email FROM contacts c JOIN conversations v ON v.contact_id=c.id WHERE v.id=?").bind(listClaim.conversation_id).first()).email, 'news@example.com')
   const customer = await post(rawForm({ messageId: 'sendgrid-customer@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'customer@example.com' }, subject: 'Re: Out of office auto-replies are not working' }))
   assert.equal((await customer.json()).automatic, false)
   assert.equal(pending.length - scheduled, 3, 'customer mail schedules the broadcast and the AI reply request')
@@ -123,12 +125,26 @@ try {
   assert.equal(finance.status,201)
   const body=await env.DB.prepare('SELECT content,content_raw FROM messages WHERE id=(SELECT message_id FROM inbound_emails WHERE id=?)').bind('<sendgrid-cc@example.com>').first()
   assert.equal(body.content,'Finance can help.');assert.ok(body.content_raw.includes('Please attach the export'))
-  const ambiguous=await post(rawForm({messageId:'sendgrid-many-recipients@example.com',envelope:{to:['support@reply.support.example.com','second@reply.support.example.com'],from:'customer@example.com'}}))
-  assert.equal(ambiguous.status,400)
-  const unauthenticatedSender=await post(rawForm({messageId:'sendgrid-spoof@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'finance@example.com'},text:'Forged participant envelope',spf:'fail'}))
-  assert.equal(unauthenticatedSender.status,403)
+  // One message to two configured mailboxes reaches each project.
+  assert.equal((await post(rawForm({messageId:'sendgrid-many-recipients@example.com',envelope:{to:['support@reply.support.example.com','second@reply.support.example.com'],from:'customer@example.com'}}))).status,201)
+  assert.deepEqual((await env.DB.prepare("SELECT project_id FROM inbound_emails WHERE local_id IS NOT NULL AND state='delivered' AND evidence_json LIKE '%sendgrid-many-recipients%' ORDER BY project_id").all()).results.map(row=>row.project_id),['p','q'])
+  // SPF not passing: still admitted to the customer's thread, flagged unverified, CC skipped.
+  const unverified=await post(rawForm({messageId:'sendgrid-spf-fail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Sent through an unaligned relay',spf:'fail',headers:'Cc: stranger@example.com\r\n'}))
+  assert.equal(unverified.status,201);assert.equal((await unverified.json()).conversationId,firstBody.conversationId)
+  assert.equal(JSON.parse((await env.DB.prepare("SELECT evidence_json FROM inbound_emails WHERE id='<sendgrid-spf-fail@example.com>'").first()).evidence_json).sender_verified,false)
+  assert.equal(await env.DB.prepare("SELECT id FROM contacts WHERE email='stranger@example.com'").first(),null)
+  // A VERP envelope: the contact is the DKIM-verified From, and Reply-To is only where replies go.
+  const verp=await post(rawForm({messageId:'sendgrid-verp@example.com',envelope:{to:['support@reply.support.example.com'],from:'bounces+5719-d26b-x=example.com@em.sender.example.com'},from:'Proof <proof@sender.example.com>',dkim:'{@sender.example.com : pass}',headers:'Reply-To: Desk <desk@desk.example.net>\r\n'}))
+  const proof=await env.DB.prepare('SELECT c.email,c.metadata_json FROM contacts c JOIN conversations v ON v.contact_id=c.id WHERE v.id=?').bind((await verp.json()).conversationId).first()
+  assert.deepEqual([proof.email,JSON.parse(proof.metadata_json).provided_email],['proof@sender.example.com','desk@desk.example.net'])
+  // Google Workspace forwarding: an SRS envelope, the company address in Delivered-To,
+  // To and Cc, and an envelope recipient that is not itself a mailbox.
+  const forwarded=await post(rawForm({messageId:'sendgrid-forwarded@example.com',envelope:{to:['relay@reply.support.example.com'],from:'SRS0=Hk2=AB=customer.example=ana@company.example'},to:'support@company.example',from:'Ana <ana@customer.example>',dkim:'{@customer.example : pass, @company.example : pass}',headers:'Delivered-To: support@reply.support.example.com\r\nX-Gm-Original-To: support@company.example\r\nCc: Lee <lee@customer.example>, support@company.example\r\n'}))
+  assert.equal(forwarded.status,201)
+  const ana=await forwarded.json(),anaRows=(await env.DB.prepare('SELECT ct.email FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=? AND v.project_id=? UNION ALL SELECT ct.email FROM conversation_participants cp JOIN contacts ct ON ct.id=cp.contact_id WHERE cp.conversation_id=?').bind(ana.conversationId,'p',ana.conversationId).all()).results
+  assert.deepEqual(anaRows.map(row=>row.email),['ana@customer.example','lee@customer.example'])
   await Promise.all(pending)
-  console.log('SendGrid inbound: Basic shared-token auth, multipart attachment bytes, stable Message-ID, D1/R2 admission, and duplicate delivery passed')
+  console.log('SendGrid inbound: Basic shared-token auth, multipart attachment bytes, stable Message-ID, D1/R2 admission, duplicate delivery, From identity over VERP/SRS envelopes, forwarded routing, unverified SPF and multi-mailbox delivery passed')
 } finally {
   await proxy.dispose()
 }

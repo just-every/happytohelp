@@ -15,7 +15,9 @@ import {emailAddress} from './inbound-routing'
 // retained for inspection only and are the first dropped from stored evidence.
 export const EVIDENCE_HEADERS=['auto-submitted','precedence','x-auto-response-suppress','list-id','list-unsubscribe','x-autoreply','x-autorespond','return-path','message-id','in-reply-to','references'] as const
 export type EvidenceHeader=typeof EVIDENCE_HEADERS[number]
-export interface EmailEvidence {envelope_from:string;header_from:string|null;subject:string|null;headers:Partial<Record<EvidenceHeader,string>>}
+/** `sender_verified` records whether the ingress verified the header From (DKIM, DMARC
+ * or aligned SPF); the envelope sender is delivery metadata, never identity. */
+export interface EmailEvidence {envelope_from:string;header_from:string|null;subject:string|null;headers:Partial<Record<EvidenceHeader,string>>;sender_verified?:boolean}
 export interface EmailClassification {automatic:boolean;reasons:string[]}
 export type HeaderEntry={key:unknown;value:unknown}
 

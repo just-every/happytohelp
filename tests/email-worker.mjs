@@ -10,7 +10,7 @@ async function notificationRuntime(){
  const runtime=new Miniflare(convertV4MiniflareOptions({name:'email-worker',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}))
  return {env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
 }
-const {recipientReplyAddress,resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts'),{inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
+const {recipientReplyAddress}=await import('../src/modules/integrations/email-reply-address.ts'),{inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
 const protectedAddress=async(env,to,from)=>{const target=inboundTarget(to);return target?.conversationId?await recipientReplyAddress(env,target.mailbox,'p',target.conversationId,from):to}
 const {handleEmail}=await import('../src/modules/integrations/email-worker.ts'),proxy=await notificationRuntime()
 try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:undefined,EMAIL_API_KEY:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','0004_message_intent.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0104_inbound_email_classification.sql','122_email_content.sql','123_email_reply_grants.sql','112_conversation_outcomes.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run();await DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)").run();await DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)").run();let rejected;const promises=[];const execution={waitUntil:p=>promises.push(p)};async function deliver(id,to,text,attachment=false){to=await protectedAddress(env,to,'customer@example.com');const raw=`From: Customer <customer@example.com>\r\nTo: ${to}\r\nMessage-ID: <${id}>\r\nMIME-Version: 1.0\r\n${attachment?'Content-Type: multipart/mixed; boundary="b"\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\n'+text+'\r\n--b\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename="example.txt"\r\nContent-Transfer-Encoding: base64\r\n\r\nYXR0YWNobWVudA==\r\n--b--':'Content-Type: '+(text.startsWith('<')?'text/html':'text/plain')+'\r\n\r\n'+text}`;return handleEmail({from:'customer@example.com',to,rawSize:raw.length,raw:new Response(raw).body,setReject:reason=>{rejected=reason}},env,execution)}await deliver('first@example.com','inbound@example.com','First email',true);await Promise.all(promises);assert.equal(rejected,undefined);const c=await DB.prepare('SELECT * FROM conversations').first();assert.equal(c.revision,1);assert.equal((await DB.prepare('SELECT * FROM media').first()).filename,'example.txt');await deliver('second@example.com',`inbound+${c.id}@example.com`,'Reply email');await Promise.all(promises);assert.equal((await DB.prepare('SELECT count(*) n FROM conversations').first()).n,1);assert.equal((await DB.prepare('SELECT revision FROM conversations').first()).revision,2);await deliver('second@example.com',`inbound+${c.id}@example.com`,'Reply email');assert.equal((await DB.prepare('SELECT revision FROM conversations').first()).revision,2);await deliver('html@example.com',`inbound+${c.id}@example.com`,'<p>HTML <b>reply</b></p><script>secret()</script>');assert.match((await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content,/HTML reply/);assert.ok(!(await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content.includes('secret()'));await deliver('only-file@example.com',`inbound+${c.id}@example.com`,'',true);assert.equal((await DB.prepare('SELECT content FROM messages ORDER BY revision DESC LIMIT 1').first()).content,'');assert.ok((await DB.prepare('SELECT m.id FROM media a JOIN messages m ON m.id=a.message_id ORDER BY m.revision DESC LIMIT 1').first()).id);console.log('Native Email Worker: MIME attachment R2/D1 admission, reply-address conversation continuity, duplicate delivery coalescing passed')}finally{await proxy.dispose()}
@@ -47,9 +47,9 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
    DB.prepare("INSERT INTO conversation_ai VALUES('widget','ai')"),
    DB.prepare("INSERT INTO conversations(id,project_id,contact_id,assigned_to,created_at,updated_at) VALUES('assigned','p','customer','op',1,1)"),
   ])
-  const deliver=async({id,to,from='customer@example.com',headerFrom='Customer <customer@example.com>',subject='Question about my order',headers='',text='Hello'})=>{
+  const deliver=async({id,to,envelopeTo,from='customer@example.com',headerFrom='Customer <customer@example.com>',subject='Question about my order',headers='',text='Hello'})=>{
    let rejected;if(from&&from!=='<>')to=await protectedAddress(env,to,from);const raw=`From: ${headerFrom}\r\nTo: ${to}\r\nSubject: ${subject}\r\nMessage-ID: <${id}>\r\n${headers}MIME-Version: 1.0\r\nContent-Type: text/plain\r\n\r\n${text}`
-   await handleEmail({from,to,rawSize:raw.length,raw:new Response(raw).body,setReject:reason=>{rejected=reason}},env,execution);await Promise.all(pending.splice(0))
+   await handleEmail({from,to:envelopeTo||to,rawSize:raw.length,raw:new Response(raw).body,setReject:reason=>{rejected=reason}},env,execution);await Promise.all(pending.splice(0))
    return rejected
   }
   // The Worker keeps the Message-ID as parsed, angle brackets included.
@@ -84,10 +84,14 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   await replay(await admitted('bounce@example.com'))
   assert.equal(await count('SELECT count(*) n FROM ai_generations'),0);assert.equal(outbound.length,0)
 
-  // A null envelope sender is refused; the header From never becomes a contact.
-  for(const from of ['','<>'])assert.equal(await deliver({id:`null-${from.length}@example.com`,to:'inbound@example.com',from,headerFrom:'victim@example.org',subject:'Delivery Status Notification (Failure)'}),'Envelope sender required')
-  assert.equal(await count("SELECT count(*) n FROM contacts WHERE email='victim@example.org'"),0)
-  assert.equal(await count("SELECT count(*) n FROM inbound_emails WHERE id LIKE '%null-%'"),0)
+  // A null envelope sender (delivery reports, auto-replies) is admitted under its
+  // unverified header From, and stays quiet.
+  for(const from of ['','<>']){
+   assert.equal(await deliver({id:`null-${from.length}@example.com`,to:'inbound@example.com',from,headerFrom:'victim@example.org',subject:'Delivery Status Notification (Failure)'}),undefined)
+   assert.deepEqual(JSON.parse((await claim(`null-${from.length}@example.com`)).evidence_json).reasons,['subject','null-sender'])
+   await replay(await admitted(`null-${from.length}@example.com`))
+  }
+  assert.equal(outbound.length,0)
 
   // Ordinary customer mail still earns an AI reply and an operator notification.
   await deliver({id:'customer-widget@example.com',to:'inbound+widget@example.com',subject:'Re: Question about my order',text:'Is it shipping today?'})
@@ -121,8 +125,10 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   await DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,contact_id,expires_at) VALUES(?,'op','p','operator',NULL,?)").bind(await hashToken('operator-token'),Date.now()+60000).run()
   const authorization={Authorization:'Bearer operator-token'}
   const transcript=await (await conversationRoutes.request('/widget/messages',{headers:authorization},env,execution)).json()
-  assert.deepEqual(transcript.messages.find(message=>message.id===oooMessage.id).origin,{channel:'email',automatic:true,reasons:['auto-submitted','x-auto-response-suppress','subject']})
-  assert.deepEqual(transcript.messages.find(message=>message.id===customerMessage.id).origin,{channel:'email',automatic:false,reasons:[]})
+  assert.deepEqual(transcript.messages.find(message=>message.id===oooMessage.id).origin,{channel:'email',automatic:true,reasons:['auto-submitted','x-auto-response-suppress','subject'],verified:false})
+  assert.deepEqual(transcript.messages.find(message=>message.id===customerMessage.id).origin,{channel:'email',automatic:false,reasons:[],verified:false})
+  // The original email body is operator-only; the customer's own session never receives it.
+  await DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,contact_id,expires_at) VALUES(?,'customer','p','contact','customer',?)").bind(await hashToken('customer-token'),Date.now()+60000).run()
   const bucket=await bucketData(env,await DB.prepare("SELECT * FROM conversations WHERE id='widget'").first(),'widget')
   assert.equal(bucket.messages.find(message=>message.id===oooMessage.id).origin.automatic,true)
   assert.equal(bucket.messages.find(message=>message.id===customerMessage.id).origin.automatic,false)
@@ -223,35 +229,63 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   assert.equal((await gateway({...ccInput,cc:['outsider@example.com']})).status,409)
   const reply=await gateway({messageId:'participant-reply',to:'inbound+assigned@example.com',from:'finance@example.com',text:'I can confirm the report totals.'})
   assert.equal(reply.status,201);assert.equal((await admitted('participant-reply')).actor_id,participant.id)
-  const forgedPerson=await gateway({messageId:'forged-person',to:'inbound+assigned@example.com',from:'unrelated@example.com',text:'Pretend to be the customer',cc:['hijack@example.com']})
-  assert.equal(forgedPerson.status,403);assert.equal(await DB.prepare("SELECT id FROM contacts WHERE email='hijack@example.com'").first(),null)
+  // Somebody outside a thread who writes to its address starts their own conversation.
+  const outside=async(response,id)=>{assert.equal(response.status,201);assert.notEqual((await admitted(id)).conversation_id,'assigned')}
+  await outside(await gateway({messageId:'forged-person',to:'inbound+assigned@example.com',from:'unrelated@example.com',text:'Pretend to be the customer',cc:['hijack@example.com']}),'forged-person')
+  assert.equal(await DB.prepare("SELECT cp.id FROM conversation_participants cp JOIN contacts ct ON ct.id=cp.contact_id WHERE cp.conversation_id='assigned' AND ct.email='hijack@example.com'").first(),null)
   await DB.prepare("DELETE FROM conversation_participants WHERE conversation_id='assigned' AND contact_id=?").bind(participant.id).run()
-  assert.equal((await gateway({messageId:'removed-person',to:'inbound+assigned@example.com',from:'finance@example.com',text:'No longer a participant'})).status,403)
+  await outside(await gateway({messageId:'removed-person',to:'inbound+assigned@example.com',from:'finance@example.com',text:'No longer a participant'}),'removed-person')
+  const customerView=await (await conversationRoutes.request('/assigned/messages',{headers:{Authorization:'Bearer customer-token'}},env,execution)).json()
+  assert.ok(customerView.messages.length>1&&customerView.messages.every(message=>!('content_raw' in message)))
+  assert.equal((await (await conversationRoutes.request('/assigned/messages',{headers:authorization},env,execution)).json()).messages.find(message=>message.id===ccMessage.id).content_raw,rawReply)
   assert.equal(await deliver({id:'worker-operator@example.com',to:'inbound+assigned@example.com',from:'op@example.com',headerFrom:'Operator <op@example.com>',text:'Reply from the operator mail client'}),undefined)
   assert.equal((await admitted('worker-operator@example.com')).actor_id,'op')
   const operatorAddress=await recipientReplyAddress(env,'inbound@example.com','p','assigned','op@example.com')
-  assert.ok(await deliver({id:'stolen-address@example.com',to:operatorAddress,from:'forged@example.com',text:'Forged sender with somebody else’s reply address'}))
+  assert.equal(await deliver({id:'stolen-address@example.com',to:operatorAddress,from:'forged@example.com',headerFrom:'forged@example.com',text:'Forged sender with somebody else’s reply address'}),undefined)
+  assert.notEqual((await admitted('stolen-address@example.com')).conversation_id,'assigned')
   const operator=await gateway({messageId:'operator-email',to:'inbound+assigned@example.com',from:'op@example.com',text:'Your export is ready.\n\nOn Fri, 16 Oct 2026 Maya wrote:\n> Please help'})
   assert.equal(operator.status,201);assert.equal((await admitted('operator-email')).actor_role,'operator');assert.equal((await admitted('operator-email')).actor_id,'op')
   await DB.prepare("DELETE FROM memberships WHERE project_id='p' AND user_id='op'").run()
-  assert.ok(await deliver({id:'revoked-worker@example.com',to:operatorAddress,from:'op@example.com',text:'Reply after leaving the workspace'}))
-  assert.equal((await gateway({messageId:'revoked-operator',to:'inbound+assigned@example.com',from:'op@example.com',text:'Revoked reply'})).status,403)
+  assert.equal(await deliver({id:'revoked-worker@example.com',to:operatorAddress,from:'op@example.com',headerFrom:'Operator <op@example.com>',text:'Reply after leaving the workspace'}),undefined)
+  assert.equal((await admitted('revoked-worker@example.com')).actor_role,'contact')
+  await outside(await gateway({messageId:'revoked-operator',to:'inbound+assigned@example.com',from:'op@example.com',text:'Revoked reply'}),'revoked-operator')
   await DB.prepare("INSERT INTO memberships VALUES('p','op','operator')").run()
-  // A notification preference never authenticates a reply as the verified contact.
+  // A preferred notification address replies as the customer only through its own
+  // reply address; elsewhere it is a separate sender.
   await DB.prepare("UPDATE contacts SET is_verified=1,metadata_json=json_set(metadata_json,'$.provided_email','preferred@example.com') WHERE id='customer'").run()
-  assert.equal((await gateway({messageId:'preferred-forgery',to:'inbound+assigned@example.com',from:'preferred@example.com',text:'Not canonical identity'})).status,403)
-  // Bare mailbox follows one open primary-contact thread, starts afresh after
-  // resolution, and refuses to guess when retained history has two open threads.
+  await outside(await gateway({messageId:'preferred-forgery',to:'inbound+assigned@example.com',from:'preferred@example.com',text:'Not canonical identity'}),'preferred-forgery')
+  assert.equal(await deliver({id:'preferred-reply@example.com',to:await recipientReplyAddress(env,'inbound@example.com','p','assigned','preferred@example.com'),from:'preferred@example.com',headerFrom:'preferred@example.com',text:'Replying from my preferred address'}),undefined)
+  assert.deepEqual([(await admitted('preferred-reply@example.com')).conversation_id,(await admitted('preferred-reply@example.com')).actor_id],['assigned','customer'])
+  // Bare mailbox follows the most recently active open thread and starts afresh
+  // after resolution.
   const bare=async id=>gateway({messageId:id,to:'inbound@example.com',from:'new-customer@example.com',text:'Question about the account'})
   const firstBare=await (await bare('bare-first')).json(),secondBare=await (await bare('bare-second')).json()
   assert.equal(secondBare.conversationId,firstBare.conversationId)
   await DB.prepare('UPDATE conversations SET resolved_at=? WHERE id=?').bind(Date.now(),firstBare.conversationId).run()
   const nextBare=await (await bare('bare-after-close')).json();assert.notEqual(nextBare.conversationId,firstBare.conversationId)
   await DB.prepare('UPDATE conversations SET resolved_at=NULL WHERE id=?').bind(firstBare.conversationId).run()
-  assert.equal((await bare('bare-ambiguous')).status,409)
+  assert.equal((await (await bare('bare-two-open')).json()).conversationId,nextBare.conversationId)
+  // Ordinary Worker mail is never bounced. The contact is the header From (a VERP or
+  // forwarding SRS envelope is delivery metadata); only Cloudflare's own topmost
+  // verdict verifies it, and only a verified sender's CC recipients join the thread.
+  const verdict=(domain,result='pass')=>`Authentication-Results: mx.cloudflare.net; dkim=${result} header.d=${domain} header.s=s1; dmarc=${result} header.from=${domain}\r\n`
+  const forwardedCc='Delivered-To: support@company.example\r\nCc: Colleague <colleague@customer.example>, support@company.example, inbound@example.com\r\n'
+  const people=async id=>{const message=await admitted(id);return {contact:(await DB.prepare('SELECT email FROM contacts WHERE id=?').bind(message.actor_id).first()).email,verified:JSON.parse((await claim(id)).evidence_json).sender_verified,participants:(await DB.prepare('SELECT ct.email FROM conversation_participants cp JOIN contacts ct ON ct.id=cp.contact_id WHERE cp.conversation_id=?').bind(message.conversation_id).all()).results.map(row=>row.email)}}
+  const forwarded=(id,headerFrom,headers)=>deliver({id,to:'support@company.example',envelopeTo:'inbound@example.com',from:`SRS0=x1=AB=customer.example=${id}@company.example`,headerFrom,headers})
+  assert.equal(await forwarded('first-cc','Ana <ana@customer.example>',forwardedCc),undefined)
+  assert.deepEqual(await people('first-cc'),{contact:'ana@customer.example',verified:false,participants:[]})
+  assert.equal(await forwarded('signed-cc','Ben <ben@customer.example>',verdict('customer.example')+forwardedCc),undefined)
+  assert.deepEqual(await people('signed-cc'),{contact:'ben@customer.example',verified:true,participants:['colleague@customer.example']})
+  assert.equal(await forwarded('forged-verdict','Cy <cy@customer.example>',verdict('customer.example','fail')+verdict('customer.example')+forwardedCc),undefined)
+  assert.deepEqual(await people('forged-verdict'),{contact:'cy@customer.example',verified:false,participants:[]})
+  // A widget-verified customer without a conversation, then a fresh email while it is open.
+  await DB.prepare("INSERT INTO contacts(id,project_id,email,is_verified,created_at) VALUES('signed-in','p','dana@customer.example',1,1)").run()
+  for(const id of ['verified-first','verified-again'])assert.equal(await deliver({id,to:'inbound@example.com',from:'dana@customer.example',headerFrom:'Dana <dana@customer.example>'}),undefined)
+  assert.equal((await admitted('verified-again')).conversation_id,(await admitted('verified-first')).conversation_id)
+  assert.equal((await admitted('verified-first')).actor_id,'signed-in')
   // Original body follows the same erasure custody as visible content.
   await DB.prepare("UPDATE messages SET content='' WHERE id=?").bind(ccMessage.id).run()
   assert.equal((await DB.prepare('SELECT content_raw FROM messages WHERE id=?').bind(ccMessage.id).first()).content_raw,null)
-  console.log('Automatic inbound mail: Worker and gateway classification, no AI reply or notification on delivery and replay, null-envelope refusal, loop-suppression headers, transcript and dashboard origin, reserved local ids passed')
+  console.log('Automatic inbound mail: Worker and gateway classification, no AI reply or notification on delivery and replay, null-envelope admission, loop-suppression headers, transcript and dashboard origin, reserved local ids passed')
  }finally{globalThis.fetch=originalFetch;await proxy.dispose()}
 }

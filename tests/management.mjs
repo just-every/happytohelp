@@ -7,7 +7,7 @@ const {routes,dashboardRoutes,publicWidget,widgetEvents}=await import('../src/mo
 const {inboundEmail}=await import('../src/modules/integrations/index.ts')
 const {updateEmailSettings}=await import('../src/modules/integrations/mailbox-settings.ts')
 const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
-const {resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts')
+const {replyGrant}=await import('../src/modules/integrations/email-reply-address.ts')
 const {widget:widgetIdentity}=await import('../src/modules/identity/widget.ts')
 const {hashToken}=await import('../src/platform/auth.ts')
 const require=createRequire(import.meta.url),{build}=require('esbuild'),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
@@ -144,7 +144,7 @@ async function transcript(body=transcriptBody){return dashboardRoutes.request('h
 try{
  globalThis.fetch=async(url,options)=>{if(String(url)==='https://api.resend.com/emails'){requests.push(JSON.parse(options.body));return rejectTranscript?new Response('unavailable',{status:503}):Response.json({id:'provider-transcript'})}return networkFetch(url,options)}
  const sent=await transcript();assert.equal(sent.status,200);assert.equal((await sent.json()).transcript_delivery.state,'sent')
- const delivered=requests[0];assert.equal(delivered.to[0],'chosen@example.com');assert.equal((await resolveReplyRecipient(transcriptEnv,'p',inboundTarget(delivered.reply_to).replyToken,'chosen@example.com')).conversation_id,'c')
+ const delivered=requests[0];assert.equal(delivered.to[0],'chosen@example.com');assert.deepEqual({...await replyGrant(transcriptEnv,'p',inboundTarget(delivered.reply_to).replyToken)},{conversation_id:'c',recipient:'chosen@example.com'})
  assert.ok(delivered.text.includes('Authored assistant answer'));assert.match(delivered.text,/Imported assistant/);assert.match(delivered.text,/Visitor/);assert.match(delivered.text,/Owner/);assert.match(delivered.html,/<strong>question<\/strong>/);assert.match(delivered.html,/href="https:\/\/example.com\/help"/)
  for(const excluded of ['Hello','System-only content','Later operator-only segment','Automatic receipt','Private note'])assert.ok(!delivered.text.includes(excluded))
  assert.ok(delivered.attachments.some(file=>file.filename==='screenshot.png'&&file.content_id));assert.ok(delivered.attachments.some(file=>file.filename==='details.txt'&&Buffer.from(file.content,'base64').toString()==='Retained file'))

@@ -5,8 +5,9 @@ import assert from 'node:assert/strict'
 registerHooks({resolve(s,c,n){if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'.ts',c.parentURL);if(existsSync(u))return n(u.href,c)}return n(s,c)}})
 const {notifyMessage,dispatchOperatorNotifications}=await import('../src/modules/integrations/notifications.ts')
 const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
-const {resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts')
+const {replyGrant}=await import('../src/modules/integrations/email-reply-address.ts')
 const {sendEmail}=await import('../src/modules/integrations/email.ts')
+const {inboundEmail}=await import('../src/modules/integrations/inbound.ts')
 const {getPlatformProxy}=await import('wrangler'),proxy=await getPlatformProxy({persist:false}),originalFetch=globalThis.fetch
 try{
  for(const file of ['0001_identity.sql','0002_conversations.sql','0005_widget_identity.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','123_email_reply_grants.sql'])for(const sql of(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).split(';').filter(s=>s.trim()))await proxy.env.DB.prepare(sql).run()
@@ -113,8 +114,7 @@ try{
   assert.match(body.html,new RegExp('src="cid:'+body.attachments[0].content_id+'"'))
   const target=inboundTarget(body.reply_to)
   assert.equal(target.mailbox,'inbound@example.com');assert.ok(target.replyToken)
-  assert.equal((await resolveReplyRecipient(env,'p',target.replyToken,body.to[0])).conversation_id,'c')
-  assert.equal(await resolveReplyRecipient(env,'p',target.replyToken,'teammate@example.com'),null)
+  assert.deepEqual({...await replyGrant(env,'p',target.replyToken)},{conversation_id:'c',recipient:body.to[0]})
  }
  const operatorMail=requests.find(request=>request.body.to[0]==='agent@example.com').body
  assert.match(operatorMail.html,/<h2>Unread customer messages:<\/h2>/)
@@ -132,6 +132,26 @@ try{
  await Promise.all([notifyMessage(env,onlyFile,actor),notifyMessage(env,onlyFile,actor)])
  assert.deepEqual(requests.map(r=>r.body.to[0]).sort(),['preferred@example.com','teammate@example.com'])
  assert.ok(requests.every(r=>r.body.text.includes('result.txt')&&r.body.attachments[0].content===btoa('done')))
+ // A file over the provider limit, or missing from storage, never stops the email: it
+ // is left out and named with a link that opens it from the conversation.
+ const large=new Uint8Array(9*1024*1024).fill(65)
+ await env.DB.batch([
+  env.DB.prepare("INSERT INTO messages VALUES('large-files','p','c','large-files','operator','operator','Your statement',4,4)"),
+  env.DB.prepare("INSERT INTO media VALUES('large-media','p','c','operator','large-key','statement.pdf','application/pdf',?,'large-files',4),('missing-media','p','c','operator','missing-key','receipt.pdf','application/pdf',7,'large-files',5)").bind(large.length),
+ ])
+ await proxy.env.FILES.put('large-key',large)
+ requests.length=0
+ const linked={...env,APP_ORIGIN:'https://support.example'}
+ assert.equal((await notifyMessage(linked,{id:'large-files',conversation_id:'c',actor_role:'operator',actor_id:'operator',content:'Your statement'},{id:'operator',projectId:'p',role:'operator'})).state,'sent')
+ assert.equal(requests.length,2)
+ for(const {body} of requests){
+  assert.ok(!body.attachments?.length)
+  assert.match(body.text,/Not attached: receipt\.pdf \(could not be attached\)/)
+  const url=body.text.match(/Not attached: statement\.pdf \(9\.0 MB, too large to attach\)\. View it in the conversation: (\S+)/)[1],path=new URL(url).pathname.replace('/api/integrations','')
+  const file=await inboundEmail.request(path,{},linked)
+  assert.equal(file.status,200);assert.equal((await file.arrayBuffer()).byteLength,large.length)
+  assert.equal((await inboundEmail.request(path.replace(/.$/,c=>c==='0'?'1':'0'),{},linked)).status,404)
+ }
  // Every configured provider transports the same inline image and file content.
  const attachmentInput={...input,idempotencyKey:'provider-rich',html:'<p>Body <img src="cid:shot" /></p>',attachments:[{filename:'shot.png',content:btoa('image'),contentType:'image/png',contentId:'shot'},{filename:'note.txt',content:btoa('note'),contentType:'text/plain'}]}
  for(const provider of ['resend','cloudflare','sendgrid']){

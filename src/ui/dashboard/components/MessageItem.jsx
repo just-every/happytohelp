@@ -21,10 +21,14 @@ function MessageItem({ message, conversation, showActor = true, grouped = false,
     const sender = isCustomer ? contact?.display_name : (message.local_agent?.name || agent?.name);
     // Inbound mail classified automatic (out-of-office, bounce, list) earned no AI reply
     // and no notification; say so rather than let the silence look like a dropped reply.
-    const origin = message.origin?.automatic
-        ? <span className="transcript-message-origin transcript-event-time"
-            title={ `Automatic email: no AI reply or notification was sent${ message.origin.reasons?.length ? ` (${ message.origin.reasons.join(', ') })` : '' }` }>automatic</span>
-        : null;
+    // An email whose From address no provider authenticated (no aligned DKIM or SPF)
+    // is admitted but marked, so identity-sensitive requests get a second look.
+    const origin = <>
+        { message.origin?.automatic && <span className="transcript-message-origin transcript-event-time"
+            title={ `Automatic email: no AI reply or notification was sent${ message.origin.reasons?.length ? ` (${ message.origin.reasons.join(', ') })` : '' }` }>automatic</span> }
+        { message.origin?.verified === false && <span className="transcript-message-origin transcript-event-time"
+            title="The sender's email address was not authenticated (no aligned DKIM or SPF pass)">unverified sender</span> }
+    </>;
     const content = (
         <div className={"message-content transcript-message-content"+( message.content ? " has-content" : "")+( !message.content && message.media && message.media.length ? " image-only" : "")}>
             { message.erased_at && <p className="mb-1 transcript-message-erased"><em>Message erased</em></p> }

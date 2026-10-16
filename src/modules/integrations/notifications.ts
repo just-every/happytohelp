@@ -56,7 +56,7 @@ export async function notifyMessage(env:Env,message:any,actor:Actor){
   if(email&&!excluded.has(email)){recipients.push({id:contact.id,email});excluded.add(email)}
  }
  if(!recipients.length)return operatorActivity||{state:'no_recipient'}
- const content=await renderConversationEmail(env,{projectId:actor.projectId,conversationId:conversation.id,messages:[message]})
+ const {omitted,...content}=await renderConversationEmail(env,{projectId:actor.projectId,conversationId:conversation.id,messages:[message]})
  const inputs:EmailInput[]=await Promise.all(recipients.map(async(recipient,index)=>({...content,replyTo:settings?await recipientReplyAddress(env,settings.inbound_address,actor.projectId,conversation.id,recipient.email):undefined,projectId:actor.projectId,to:recipient.email,subject:'Reply to your support conversation',headers:loopSuppressionHeaders(message),idempotencyKey:index===0?deliveryId:`${deliveryId}:contact:${recipient.id}`})))
  try{return outcome(await sendEmails(env,inputs))}
  catch(error){const existing=await recorded(env,deliveryId);if(existing)return existing;throw error}

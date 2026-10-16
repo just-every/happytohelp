@@ -508,11 +508,11 @@ appear in the message's `origin`, and owners and admins can read the stored
 evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId`
 (see [Inbound email recovery](docs/INBOUND-EMAIL-RECOVERY.md)).
 
-- **Mail with no envelope sender is refused**, not added. The Cloudflare Email
-  Worker rejects it with `Envelope sender required`, and the SendGrid Inbound
-  Parse route returns HTTP 400 when `envelope.from` is empty. Expect bounces
-  addressed to a null return path to be refused. SendGrid may retry responses
-  other than 2xx; that has not been verified against the live service.
+- **Mail with no envelope sender is added as automatic**, under its `From`
+  header. Customer identity always comes from the `From` header (verified by
+  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**), never
+  from the envelope, so forwarding and bounce-address rewrites do not create
+  contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional
   `envelopeFrom`, `subject` and `headers` (an object) fields when it posts to
   `POST /api/integrations/email/inbound`. Without them, automatic mail arriving

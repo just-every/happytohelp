@@ -1,7 +1,8 @@
 import type {Env} from '../../platform/env'
 
-/** Why an inbound email earned no reply, as the transcript and dashboard show it. */
-export interface MessageOrigin {channel:'email';automatic:boolean;reasons:string[]}
+/** Why an inbound email earned no reply, as the transcript and dashboard show it.
+ * `verified:false` marks a From address no provider authenticated. */
+export interface MessageOrigin {channel:'email';automatic:boolean;reasons:string[];verified?:false}
 type ClaimRow={local_id:string;message_id:string|null;conversation_id:string|null;automatic:number;evidence_json:string|null}
 type TranscriptMessage={id?:unknown;local_id?:unknown;conversation_id?:unknown;origin?:MessageOrigin}
 
@@ -11,10 +12,10 @@ const inboundLocalId=(message:TranscriptMessage)=>typeof message?.local_id==='st
 // completion write lost after admission) the claim's local id and conversation,
 // both written before admission, identify the message it owns.
 const owns=(row:ClaimRow,message:TranscriptMessage)=>row.local_id===message.local_id&&(row.message_id!==null?row.message_id===String(message.id):row.conversation_id===String(message.conversation_id))
-function reasons(json:string|null){
- try{const parsed=JSON.parse(json||'null');return Array.isArray(parsed?.reasons)?parsed.reasons.filter((reason:unknown):reason is string=>typeof reason==='string'):[]}catch{return []}
+function stored(json:string|null){
+ try{const parsed=JSON.parse(json||'null');return {reasons:Array.isArray(parsed?.reasons)?parsed.reasons.filter((reason:unknown):reason is string=>typeof reason==='string'):[],unverified:parsed?.sender_verified===false}}catch{return {reasons:[],unverified:false}}
 }
-const origin=(row:ClaimRow):MessageOrigin=>({channel:'email',automatic:row.automatic===1,reasons:reasons(row.evidence_json)})
+const origin=(row:ClaimRow):MessageOrigin=>{const evidence=stored(row.evidence_json);return {channel:'email',automatic:row.automatic===1,reasons:evidence.reasons,...(evidence.unverified?{verified:false as const}:{})}}
 
 async function claims(env:Env,projectId:string,localIds:string[]){
  const rows:ClaimRow[]=[]

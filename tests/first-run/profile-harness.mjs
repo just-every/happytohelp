@@ -11,7 +11,7 @@ export async function profileHarness(){
  const directory=await mkdtemp(join(tmpdir(),'widget-profile-'));let runtime,external=0;const tokens={},widgetSecrets={};
  try{
   await build({entryPoints:['tests/first-run/profile-worker.ts'],bundle:true,format:'esm',platform:'node',external:['node:*','cloudflare:workers'],outfile:join(directory,'worker.mjs'),logLevel:'silent'});
-  runtime=new Miniflare(convertV4MiniflareOptions({name:'widget-profile-check',modules:true,script:await readFile(join(directory,'worker.mjs'),'utf8'),compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:{DB:'widget-profile'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService:async()=>{external++;throw Error('External requests prohibited')}}));
+  runtime=new Miniflare(convertV4MiniflareOptions({name:'widget-profile-check',cf:{country:'US'},modules:true,script:await readFile(join(directory,'worker.mjs'),'utf8'),compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:{DB:'widget-profile'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService:async()=>{external++;throw Error('External requests prohibited')}}));
   const db=await runtime.getD1Database('DB');
   for(const file of (await readdir('migrations')).filter(name=>name.endsWith('.sql')).sort()){
    const sql=(await readFile(join('migrations',file),'utf8')).replace(/^\s*--[^\n]*$/gm,'');

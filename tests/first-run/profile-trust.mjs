@@ -8,6 +8,17 @@ const signedMetadata={plan:'gold',private_note:'Keep this private',source:'https
 const canonical=row=>({name:row.name,email:row.email,identifier:row.external_id,verified:row.is_verified===1});
 const row=(h,id)=>h.db.prepare('SELECT * FROM contacts WHERE id=?').bind(id).first();
 const profile=(id,expected)=>({id,name:expected.name,email:expected.email,verified:expected.verified});
+// Session admission collects request context before the collector runs. Its
+// server time is bounded by this request, and collector edits must retain it.
+async function observedContext(h,id,admittedAfter){
+ const metadata=JSON.parse((await row(h,id)).metadata_json);
+ assert.ok(metadata.last_seen_at>=admittedAfter&&metadata.last_seen_at<=Date.now());
+ assert.equal(typeof metadata.ip_address,'string');assert.ok(metadata.ip_address.length);
+ assert.match(metadata.country_code,/^[A-Z]{2}$/);
+ assert.equal(typeof metadata.user_agent,'string');assert.ok(metadata.user_agent.length);
+ return {last_seen_at:metadata.last_seen_at,ip_address:metadata.ip_address,country_code:metadata.country_code,user_agent:metadata.user_agent};
+}
+
 async function visitor(h,key,options={}){
  const session=await h.widgetSession(key,options);
  const response=await h.raw('/api/conversations',{actor:key,method:'POST',body:{projectId:session.projectId}});
@@ -22,7 +33,7 @@ async function owner(h){
 test('actual HMAC identity keeps canonical fields while signed and unsigned collectors retain distinct provided data',async()=>{
  const h=await profileHarness();
  try{
-  const signed=await visitor(h,'signed',{signed:true,...trusted,metadata:signedMetadata});assert.equal(signed.verified,true);
+  const admittedAfter=Date.now(),signed=await visitor(h,'signed',{signed:true,...trusted,metadata:signedMetadata}),environment=await observedContext(h,signed.contactId,admittedAfter);assert.equal(signed.verified,true);
   assert.deepEqual(canonical(await row(h,signed.contactId)),{...trusted,verified:true});
   const invalid=await h.raw('/api/identity/widget/session',{actor:null,method:'POST',headers:{Origin:'https://app.example'},body:{widgetKey:'widget-p',identifier:trusted.identifier,contact_hash:'0'.repeat(64)}});
   assert.equal(invalid.status,403);
@@ -33,20 +44,20 @@ test('actual HMAC identity keeps canonical fields while signed and unsigned coll
    const response=await collect(h,'signed',signed.conversationId,data);assert.equal(response.status,200);
    assert.deepEqual(await response.json(),{updated:true,contact:profile(signed.contactId,{...trusted,verified:true})});
    const current=await row(h,signed.contactId);assert.deepEqual(canonical(current),{...trusted,verified:true});
-   assert.deepEqual(JSON.parse(current.metadata_json),{...signedMetadata,provided_name:data.provided_name??data.name,provided_email:data.provided_email??data.email});
+   assert.deepEqual(JSON.parse(current.metadata_json),{...signedMetadata,...environment,provided_name:data.provided_name??data.name,provided_email:data.provided_email??data.email});
    const saved=await h.raw(undefined,{actor:'signed'});assert.equal(saved.status,200);assert.deepEqual(await saved.json(),{contact:profile(signed.contactId,{...trusted,verified:true})});
   }
   const refreshedMetadata={plan:'platinum',fresh_private_note:'New signed metadata'};
-  const resumed=await h.widgetSession('resumed',{signed:true,...trusted,metadata:refreshedMetadata});assert.equal(resumed.contactId,signed.contactId);assert.equal(resumed.verified,true);
-  assert.deepEqual(JSON.parse((await row(h,signed.contactId)).metadata_json),{...refreshedMetadata,provided_name:'Provided name',provided_email:'provided@example.test'});
+  const resumedAfter=Date.now(),resumed=await h.widgetSession('resumed',{signed:true,...trusted,metadata:refreshedMetadata});assert.equal(resumed.contactId,signed.contactId);assert.equal(resumed.verified,true);
+  assert.deepEqual(JSON.parse((await row(h,signed.contactId)).metadata_json),{...refreshedMetadata,...await observedContext(h,resumed.contactId,resumedAfter),provided_name:'Provided name',provided_email:'provided@example.test'});
   assert.deepEqual(await (await h.raw(undefined,{actor:'resumed'})).json(),{contact:profile(signed.contactId,{...trusted,verified:true})});
-  const unsigned=await visitor(h,'unsigned',{name:'Guest',email:'guest@example.test'});assert.equal(unsigned.verified,false);
+  const guestAfter=Date.now(),unsigned=await visitor(h,'unsigned',{name:'Guest',email:'guest@example.test'}),guestEnvironment=await observedContext(h,unsigned.contactId,guestAfter);assert.equal(unsigned.verified,false);
   for(const data of [{name:'New guest',email:'new-guest@example.test'},{provided_name:'Collected guest',provided_email:'collected@example.test',is_verified:1,verified:true,external_id:trusted.identifier}]){
    const expected={name:data.provided_name??data.name,email:data.provided_email??data.email,identifier:null,verified:false};
    const response=await collect(h,'unsigned',unsigned.conversationId,data);assert.equal(response.status,200);
    assert.deepEqual(await response.json(),{updated:true,contact:profile(unsigned.contactId,expected)});
    const current=await row(h,unsigned.contactId);assert.deepEqual(canonical(current),expected);
-   assert.deepEqual(JSON.parse(current.metadata_json),{provided_name:expected.name,provided_email:expected.email});
+   assert.deepEqual(JSON.parse(current.metadata_json),{...guestEnvironment,provided_name:expected.name,provided_email:expected.email});
    assert.deepEqual(await (await h.raw(undefined,{actor:'unsigned'})).json(),{contact:profile(unsigned.contactId,expected)});
   }
   await owner(h);
@@ -66,7 +77,7 @@ test('email-identified HMAC session preserves its signed email through collector
  try{
   // No identifier is supplied: the actual native fallback signs this email and
   // stores it as external_id. The name remains canonical data, not an HMAC claim.
-  const signed=await visitor(h,'email-signed',{signed:true,name:expected.name,email:expected.email});
+  const admittedAfter=Date.now(),signed=await visitor(h,'email-signed',{signed:true,name:expected.name,email:expected.email}),environment=await observedContext(h,signed.contactId,admittedAfter);
   assert.equal(signed.verified,true);assert.deepEqual(canonical(await row(h,signed.contactId)),expected);
   for(const data of [
    {name:'Untrusted replacement',email:'replacement@example.test'},
@@ -75,7 +86,7 @@ test('email-identified HMAC session preserves its signed email through collector
    const response=await collect(h,'email-signed',signed.conversationId,data);assert.equal(response.status,200);
    assert.deepEqual((await response.json()).contact,profile(signed.contactId,expected));
    const current=await row(h,signed.contactId);assert.deepEqual(canonical(current),expected);
-   assert.deepEqual(JSON.parse(current.metadata_json),{provided_name:data.provided_name??data.name,provided_email:data.provided_email??data.email});
+   assert.deepEqual(JSON.parse(current.metadata_json),{...environment,provided_name:data.provided_name??data.name,provided_email:data.provided_email??data.email});
    const hydrated=await h.raw(undefined,{actor:'email-signed'});assert.equal(hydrated.status,200);
    assert.deepEqual(await hydrated.json(),{contact:profile(signed.contactId,expected)});
   }
@@ -146,10 +157,10 @@ test('collector commit rechecks live session, privacy, workspace and conversatio
 test('verification established between collector admission and commit protects the new canonical identity',async()=>{
  const h=await profileHarness();
  try{
-  const guest=await visitor(h,'guest',{name:'Before verification',email:'before@example.test'});
+  const admittedAfter=Date.now(),guest=await visitor(h,'guest',{name:'Before verification',email:'before@example.test'}),environment=await observedContext(h,guest.contactId,admittedAfter);
   const response=await h.raw('/_test/collector-race',{actor:'guest',method:'POST',body:{conversationId:guest.conversationId,data:{provided_name:'Untrusted alias',provided_email:'untrusted@example.test'},commands:[{sql:'UPDATE contacts SET name=?,email=?,external_id=?,is_verified=1 WHERE id=?',params:[trusted.name,trusted.email,trusted.identifier,guest.contactId]}]}});
   assert.equal(response.status,200);assert.deepEqual((await response.json()).contact,profile(guest.contactId,{...trusted,verified:true}));
-  const current=await row(h,guest.contactId);assert.deepEqual(canonical(current),{...trusted,verified:true});assert.deepEqual(JSON.parse(current.metadata_json),{provided_name:'Untrusted alias',provided_email:'untrusted@example.test'});
+  const current=await row(h,guest.contactId);assert.deepEqual(canonical(current),{...trusted,verified:true});assert.deepEqual(JSON.parse(current.metadata_json),{...environment,provided_name:'Untrusted alias',provided_email:'untrusted@example.test'});
   assert.deepEqual(await (await h.raw(undefined,{actor:'guest'})).json(),{contact:profile(guest.contactId,{...trusted,verified:true})});assert.equal(h.external,0);
  }finally{await h.close();}
 });

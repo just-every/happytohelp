@@ -1,5 +1,5 @@
 import {assignmentHistoryStatement} from '../outcomes/assignment-history.ts'
-import {inboundAuthority,type InboundAuthority} from '../integrations/inbound-authority'
+import {inboundAuthority,type InboundAuthority} from '../integrations/inbound-authority.ts'
 import {contactAvailableSql} from './contact-privacy.ts'
 import {tokenGuard,type TokenAuthority} from '../../platform/integration-authority.ts'
 import {authoringSource,authorshipStatement,type Authoring} from '../outcomes/provenance.ts'

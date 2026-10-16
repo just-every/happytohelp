@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url'
 const require=createRequire(import.meta.url)
 const {build}=require(require.resolve('esbuild',{paths:[require.resolve('wrangler')]}))
 const {Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
-const bundle=await build({entryPoints:[fileURLToPath(new URL('./helpers/generation-command-identity-worker.mjs',import.meta.url))],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',external:['node:*'],logLevel:'silent'})
+const bundle=await build({entryPoints:[fileURLToPath(new URL('./helpers/generation-command-identity-worker.mjs',import.meta.url))],bundle:true,write:false,format:'esm',platform:'node',target:'es2022',external:['node:*'],logLevel:'silent'})
 let outboundCalls=0
 // All SQL, application calls and existing semantic assertions execute in the
 // Worker against native D1. Only the request/result crosses the async transport.

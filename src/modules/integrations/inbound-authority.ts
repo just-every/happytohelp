@@ -1,8 +1,8 @@
-import type {Actor,Env} from '../../platform/env'
+import type {Actor,Env} from '../../platform/env.ts'
 import {HTTPException} from 'hono/http-exception'
-import {id} from '../../platform/db'
-import {contactWritable} from '../../platform/contact-state'
-import {inboundTarget} from './inbound-routing'
+import {id} from '../../platform/db.ts'
+import {contactWritable} from '../../platform/contact-state.ts'
+import {inboundTarget} from './inbound-routing.ts'
 
 // A Symbol cannot arrive in a public JSON message command. Admission rechecks the
 // receipt and sender authority in the transaction that commits the message.

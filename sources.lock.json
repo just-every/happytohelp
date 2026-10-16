@@ -3190,7 +3190,7 @@
       "executable": false
     },
     "src/modules/conversations/admission.ts": {
-      "sha256": "4bf6d3c9e57101a089317d02e549c52a8e9cfdc9552e9f72eb26031124bfb2e7",
+      "sha256": "353d49e4811cdb9c40d20cddac8629c00da1c89a35ce35c5cd7b59b21e914f2e",
       "executable": false
     },
     "src/modules/conversations/citations.js": {
@@ -3938,7 +3938,7 @@
       "executable": false
     },
     "src/modules/integrations/inbound-authority.ts": {
-      "sha256": "61b60da45361c7f057fe0314b98237fcc985f36dd2aa3dd4bd8c357d3a958971",
+      "sha256": "8ba1d47137e5afa2b492e4bd1563d64adbab0e3eef1529376b6c90daf8d5f6b8",
       "executable": false
     },
     "src/modules/integrations/inbound-effects.ts": {
@@ -7914,7 +7914,7 @@
       "executable": false
     },
     "tests/generation-command-identity.mjs": {
-      "sha256": "c7c0e58b0441c5605cdec076843c77c43d5f069599907ab6b84fc8c00e11fcf4",
+      "sha256": "d1f8da376a96aa83776cb7c67282277fb1c7d26185768671590c905b8c5a741f",
       "executable": false
     },
     "tests/github-discovery.mjs": {

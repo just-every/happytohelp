@@ -1,4 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useLocation } from '@tanstack/react-router';
+import { normalizeEmail } from '@runeditrun/rer/internal/modules/operator-auth/policy.mjs';
 import { loginDestination } from '../native/dashboard-path';
 import IdentityFrame from './IdentityFrame';
 import SignInDrawing from './SignInDrawing';
@@ -13,7 +15,13 @@ function requestedDestination() {
     return destination && !destination.includes('#') ? destination + location.hash : destination;
 }
 
+function emailHint(search: string) {
+    try { return normalizeEmail(new URLSearchParams(search).get('login_hint')); }
+    catch { return ''; }
+}
+
 export default function Login() {
+    const hint = useLocation({ select: location => emailHint(location.searchStr) });
     const [magicPath,setMagicPath]=useState('/login/magic');
     useEffect(()=>{const destination=requestedDestination();if(destination)setMagicPath('/login/magic?returnTo='+encodeURIComponent(loginDestination(destination,location.origin)));},[]);
     const { options } = useAuthOptions();
@@ -35,7 +43,7 @@ export default function Login() {
         {mail?.mailMode === 'local' && <p className="id-note" role="status"><code>rer dev</code> signs you in automatically as the local owner. Open the app address it prints. Email is suppressed during local development. No email is sent.</p>}
         <Alert>{error}</Alert>
         <form method="post" onSubmit={submit}>
-            <Field id="email" label="Email" type="email" autoComplete="username" placeholder="you@example.com" />
+            <Field id="email" label="Email" type="email" autoComplete="username" placeholder="you@example.com" defaultValue={hint} />
             <Field id="password" label="Password" type="password" autoComplete="current-password" placeholder="Your password" />
             <SubmitButton busy={busy} ready={true} busyLabel="Signing in…">Login</SubmitButton>
         </form>

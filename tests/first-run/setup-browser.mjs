@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {audit,passwordLogin,firstOwner,post} from './browser-kit.mjs';
+import {audit,firstOwner,post} from './browser-kit.mjs';
+import {declaredSignIn} from './sign-in-entry.mjs';
 
 const order=async list=>list.locator('> [data-section]').evaluateAll(nodes=>nodes.map(node=>node.dataset.section));
 const needIds=async list=>list.locator('[data-need]').evaluateAll(nodes=>nodes.map(node=>node.dataset.need));
@@ -67,7 +68,8 @@ export async function setupJourney({browser,runtime,width,evidence,password,emai
   assert.doesNotMatch(await list.innerText(),/Not needed for a local trial/);
   await audit(page,evidence,`${width}-first-owner-setup-list`);
   await skipFlow({page,list,evidence,width});
-  await page.context().clearCookies();await passwordLogin(page,runtime.origin,email,password,'');await page.waitForURL(url=>url.pathname===`/projects/${projectId}/activation`);
+  await page.context().clearCookies();
+  await declaredSignIn({page,origin:runtime.origin,email,password,width,evidence,projectId});
   await audit(page,evidence,`${width}-existing-owner-setup-list`);
   const login=await post(runtime.origin,'/api/identity/login',{email,password});
   for(const section of ['activation','widget-settings','articles','reports','contacts','api-settings','webhook-settings','slack-settings','delivery-log','conversations']){

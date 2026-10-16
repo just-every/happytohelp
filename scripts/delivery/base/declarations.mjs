@@ -1,6 +1,10 @@
 import {array, bindingPattern, keys, string, strings} from './bindings.mjs';
 
 const pathPattern = /^\/[A-Za-z0-9/_.~-]*$/;
+const validSignIn = value => value && typeof value === 'object' && !Array.isArray(value)
+  && Object.keys(value).every(key => ['path','loginHint'].includes(key))
+  && typeof value.path === 'string' && /^\/(?!\/)[a-zA-Z0-9/_-]*$/.test(value.path)
+  && typeof value.loginHint === 'boolean';
 const status = (value, label) => {
   if (!Number.isInteger(value) || value < 100 || value > 599) throw Error(`Invalid ${label}`);
 };
@@ -13,11 +17,18 @@ export function validateDeclarations(spec) {
   if (spec.surfaces !== undefined) {
     keys(spec.surfaces, ['app','page','websitePreview'], 'surfaces');
     if (!spec.surfaces.app) throw Error('Surfaces require an app');
-    for (const surface of Object.values(spec.surfaces)) {
-      keys(surface, ['path','hostnameVariable','originVariable','readiness'], 'surface');
+    const origins = new Map();
+    for (const [name, surface] of Object.entries(spec.surfaces)) {
+      keys(surface, ['path','hostnameVariable','originVariable','readiness','signIn'], 'surface');
       string(surface.path, 'surface path', pathPattern);
+      if (surface.signIn !== undefined && (name !== 'app' || !validSignIn(surface.signIn))) throw Error('Invalid project sign-in declaration');
       if (surface.hostnameVariable !== undefined && surface.originVariable !== undefined) throw Error('Surface must choose one address variable');
       for (const field of ['hostnameVariable','originVariable']) if (surface[field] !== undefined) string(surface[field], field, bindingPattern);
+      if (surface.originVariable !== undefined) {
+        const previous = origins.get(surface.originVariable);
+        if (previous !== undefined) throw Error(`Duplicate originVariable ${surface.originVariable} on surfaces.${previous} and surfaces.${name}`);
+        origins.set(surface.originVariable, name);
+      }
       if (surface.readiness !== undefined) {
         const probes = array(surface.readiness, 'surface readiness');
         if (!probes.length || probes.length > 32) throw Error('Invalid readiness probe count');

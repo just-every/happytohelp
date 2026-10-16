@@ -1427,7 +1427,7 @@
       "executable": false
     },
     "base-copies.json": {
-      "sha256": "e88c0c32814e8ccb886017877e09778cc872bbd6ee54fd50bc2fb1cbcf875126",
+      "sha256": "b83787a31f45ac9135304d9e027ec27f63baad03fe093e8a1bbddefcce88ba59",
       "executable": false
     },
     "CHANGELOG.md": {
@@ -1794,6 +1794,10 @@
       "sha256": "9f8189b9701cdd47d52b6342f11ea706a70db1fc54aa8345108c90fa76f97f7b",
       "executable": false
     },
+    "management/integration/deployment-spec.json": {
+      "sha256": "07bdc146028d3cf01720a07d9839f730725937451d987f2d56cf085890c417c9",
+      "executable": false
+    },
     "management/integration/environment.ts": {
       "sha256": "bc9f1988917f6ecff6e4e65b30718e021d56bec67ad65e6894e2db11b64a646e",
       "executable": false
@@ -2055,11 +2059,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "0034d245463d49964a634ac4f6916b01fea1f6b30f9accb98a9eecbfafd0ec07",
+      "sha256": "759d904625f3395df7243ea09e548cf93b7cfc69dabe257ba327aba291064ee4",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "d52caf2c3e1c7700a7d8c03f60a1afa9e81579da742a838cee20943bcf46bf7e",
+      "sha256": "91ebce5ccdb29ddbb29761622017f4686882342b1044170160da09ce70e02421",
       "executable": false
     },
     "public/fonts/inter/InterVariable.woff2": {
@@ -2167,7 +2171,7 @@
       "executable": false
     },
     "scripts/delivery/base/declarations.mjs": {
-      "sha256": "a1da486ff5ddd563a0fece919d30dc5a8d053080c75d9f10b361626b2636a772",
+      "sha256": "d8cf67d18fdc6ff027d323d0986a7815b52c71df01c4cbb3dde428cfc7f55a0c",
       "executable": false
     },
     "scripts/delivery/base/export.mjs": {
@@ -2199,7 +2203,7 @@
       "executable": false
     },
     "scripts/delivery/base/packaging.json": {
-      "sha256": "b62416dde8459b9cafa05cd4919e2fbf0a4779f8b8ee49dc935854c88afc9f71",
+      "sha256": "a27520b8aa17142d1ae77a22e4881c342ba2fb988e2c1c2f76a89773addd93d7",
       "executable": false
     },
     "scripts/delivery/base/paths.mjs": {
@@ -2235,7 +2239,11 @@
       "executable": false
     },
     "scripts/delivery/build.mjs": {
-      "sha256": "308c432ae9a5ab0a245816d5a931897c48ad73ff5a60c9011c686d6b428b409a",
+      "sha256": "d2a174accf5fdab0e0dd3b5c00c3425450c689cce64c6034e7e1144e078187c3",
+      "executable": false
+    },
+    "scripts/delivery/generate-spec.mjs": {
+      "sha256": "29f8918ad4b2308a5efba32e652a3062b67a6458ed2a0c60b4451a457a960190",
       "executable": false
     },
     "scripts/delivery/README.md": {
@@ -6431,7 +6439,7 @@
       "executable": false
     },
     "src/ui/identity/Login.tsx": {
-      "sha256": "27bd91fa1dd295648957395a5e7027df9138c08c3d2d2c9c00b10061be8d8190",
+      "sha256": "a580dc47046b6017cbde560c159062f733c728aecabec9dd489d136f79c3f054",
       "executable": false
     },
     "src/ui/identity/MagicLogin.tsx": {
@@ -6440,6 +6448,10 @@
     },
     "src/ui/identity/Register.tsx": {
       "sha256": "449db682087eb3a49eff64fcd31451971340e4b07b95be41b351a098c8721ef7",
+      "executable": false
+    },
+    "src/ui/identity/rer-policy.d.ts": {
+      "sha256": "3cfeee54496651b25cdddb0d84242ce20bd02b49dd4dbc88b0c6a462f6208574",
       "executable": false
     },
     "src/ui/identity/ResetPassword.tsx": {
@@ -7779,7 +7791,11 @@
       "executable": false
     },
     "tests/first-run/setup-browser.mjs": {
-      "sha256": "f5b375296b70a8d8325338b22abcc82ab3844077750058eb4e2e188c3d45adfa",
+      "sha256": "101006d1755b6fa7cd6a9c07d13d32939e9ac31ed1b11c97c894496957ce0f83",
+      "executable": false
+    },
+    "tests/first-run/sign-in-entry.mjs": {
+      "sha256": "6a6fd901932fd4629900ac333064cf6fa896c88337df3dc5a17a1565801a7268",
       "executable": false
     },
     "tests/first-run/widget-browser.mjs": {
@@ -7923,7 +7939,7 @@
       "executable": false
     },
     "tests/helpers/delivery-oracle/spec-inputs.mjs": {
-      "sha256": "125265f6a9a1e76329d20b09039cb189e17bd86f60324d8852b87acf65250361",
+      "sha256": "f28d337cadbbc8d4bb5b4a6b3016a45f488962f5120cd1904fbd48139b51a960",
       "executable": false
     },
     "tests/helpers/emitted-runtime-proxy-fault.mjs": {

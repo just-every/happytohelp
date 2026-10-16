@@ -94,7 +94,11 @@
       "surfaces": {
         "app": {
           "path": "/",
-          "originVariable": "APP_ORIGIN"
+          "originVariable": "APP_ORIGIN",
+          "signIn": {
+            "path": "/login",
+            "loginHint": true
+          }
         },
         "websitePreview": {
           "path": "/preview/",

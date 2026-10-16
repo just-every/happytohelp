@@ -1,6 +1,6 @@
-import assert from 'node:assert/strict';
-import test from 'node:test';
-import {profileHarness,hash} from './profile-harness.mjs';
+import assert from 'node:assert/strict'
+import {profileApp,hash,literal} from './profile-app.mjs'
+
 
 // Expected identity is declared before session creation or collector writes.
 const trusted={name:'Trusted account name',email:'trusted-account@example.test',identifier:'account-verified-42'};
@@ -29,9 +29,122 @@ async function owner(h){
  await h.db.prepare("INSERT INTO users VALUES('owner','owner@example.test','Owner',1)").run();
  await h.db.prepare("INSERT INTO memberships VALUES('p','owner','owner')").run();await h.session('owner','p','owner',{role:'owner'});
 }
+// A write committed by a concurrent request just before the collector's contact update.
+const racing=command=>({'x-test-before-statement':literal(command.sql,...(command.params||[])),'x-test-statement':'UPDATE contacts SET'})
 
-test('actual HMAC identity keeps canonical fields while signed and unsigned collectors retain distinct provided data',async()=>{
- const h=await profileHarness();
+// A visitor's saved profile: the widget reads its current saved fields without writes or disclosure under current
+// authority only, and signed identity stays canonical while the collector keeps what the visitor provided apart.
+export async function visitorProfileJourney(){
+ for(const part of [savedFields,refusals,noDatabase,corsAndErasure,readRaces,signedIdentity,signedEmail,collectorFences,collectorRaces,verifiedMidway])await part()
+}
+
+// Visitor profile reads current saved fields without writes, metadata disclosure, or verification promotion.
+async function savedFields(){
+ const h=await profileApp();
+ try{
+  await h.contact('visitor');await h.contact('signed','p',{verified:true});await h.contact('foreign','q');
+  const before=await h.snapshot();
+  for(const [actor,verified] of [['visitor',false],['signed',true]]){
+   const response=await h.raw(undefined,{actor});assert.equal(response.status,200);
+   assert.match(response.headers.get('Cache-Control'),/no-store/);
+   assert.deepEqual(await response.json(),{contact:{id:actor,name:'Saved '+actor,email:actor+'@example.test',verified}});
+  }
+  const own=await h.raw('/api/identity/widget/profile?contactId=foreign&projectId=q');
+  assert.equal(own.status,200);assert.equal((await own.json()).contact.id,'visitor','caller IDs cannot select a profile');
+  for(const id of ['foreign','missing'])assert.equal((await h.raw('/api/identity/widget/profile/'+id)).status,404);
+  assert.deepEqual(await h.snapshot(),before,'profile hydration is a read, including native authority epochs and outboxes');
+  assert.equal(h.external,0);
+ }finally{await h.close();}
+}
+
+// Visitor profile refuses non-visitor, missing, expired, revoked, blocked, deleted and cross-project authority.
+async function refusals(){
+ const h=await profileApp();
+ try{
+  await h.contact('visitor');await h.contact('foreign','q');
+  await h.db.prepare("INSERT INTO users VALUES('owner','owner@example.test','Owner',1)").run();
+  await h.db.prepare("INSERT INTO memberships VALUES('p','owner','owner')").run();await h.session('owner','p','owner',{role:'owner'});
+  for(const headers of [{},{Cookie:'h2h_session='+h.token('visitor')},{Authorization:'Bearer invalid',Cookie:'h2h_session='+h.token('visitor')}])assert.equal((await h.raw(undefined,{actor:null,headers})).status,401);
+  assert.equal((await h.raw(undefined,{actor:'owner'})).status,404);
+  await h.session('mismatched','p','foreign');assert.equal((await h.raw(undefined,{actor:'mismatched'})).status,404);
+  for(const [field,value] of [['expires_at',Date.now()-1],['revoked_at',Date.now()]]){
+   await h.db.prepare('UPDATE sessions SET '+field+'=? WHERE token_hash=?').bind(value,hash(h.token('visitor'))).run();
+   assert.equal((await h.raw()).status,401);await h.session('visitor','p','visitor');
+  }
+  for(const flag of ['is_blocked','is_deleted','is_erasing','is_erased']){
+   await h.db.prepare('UPDATE contacts SET metadata_json=? WHERE id=?').bind(JSON.stringify({[flag]:true}),'visitor').run();
+   const response=await h.raw();assert.ok([401,404].includes(response.status));assert.doesNotMatch(await response.text(),/Saved visitor|visitor@example/);
+  }
+  await h.db.prepare("UPDATE contacts SET metadata_json='{}' WHERE id='visitor'").run();
+  await h.db.prepare("INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES('p','{\"deleted_at\":1}',1)").run();
+  assert.equal((await h.raw()).status,401);assert.equal(h.external,0);
+ }finally{await h.close();}
+}
+
+// Native integration bearer and cookie-only profile requests do no database work.
+async function noDatabase(){
+ const h=await profileApp();
+ try{
+  for(const [headers,status] of [[{Authorization:'Bearer int_'+'a'.repeat(64)},404],[{Cookie:'h2h_session=untrusted'},401],[{Authorization:'Bearer int_'+'a'.repeat(64),Origin:'https://foreign.example'},404],[{Cookie:'h2h_session=untrusted',Origin:'https://foreign.example'},401]]){
+   // Any database access would fail the request: the answer comes from the credential's shape alone.
+   const response=await h.raw(undefined,{actor:null,headers:{...headers,'x-test-fault':'no-database'}});
+   assert.equal(response.status,status);assert.match(response.headers.get('Cache-Control'),/no-store/);
+  }
+ }finally{await h.close();}
+}
+
+// Profile obeys native widget CORS and actual contact erasure permanently removes read authority.
+async function corsAndErasure(){
+ const h=await profileApp();
+ try{
+  await h.contact('visitor');
+  await h.db.prepare("UPDATE projects SET allowed_origin='https://widget.example' WHERE id='p'").run();
+  const allowed=await h.raw(undefined,{headers:{Origin:'https://widget.example'}});assert.equal(allowed.status,200);
+  assert.equal(allowed.headers.get('Access-Control-Allow-Origin'),'https://widget.example');assert.equal(allowed.headers.get('Access-Control-Allow-Credentials'),null);
+  const foreign=await h.raw(undefined,{headers:{Origin:'https://foreign.example'}});assert.equal(foreign.status,403);assert.doesNotMatch(await foreign.text(),/Saved visitor|visitor@example/);
+  await h.db.prepare("INSERT INTO users VALUES('owner','owner@example.test','Owner',1)").run();await h.db.prepare("INSERT INTO memberships VALUES('p','owner','owner')").run();await h.session('owner','p','owner',{role:'owner'});
+  const erased=await h.raw('/api/management/projects/p/contacts/visitor/erase',{actor:'owner',method:'POST'});assert.equal(erased.status,200);
+  assert.equal((await h.raw()).status,401);
+  const row=await h.db.prepare("SELECT name,email,metadata_json FROM contacts WHERE id='visitor'").first();assert.equal(row.name,null);assert.equal(row.email,null);assert.equal(JSON.parse(row.metadata_json).is_erased,1);
+  await h.session('visitor','p','visitor');assert.equal((await h.raw()).status,401,'even a newly injected session cannot disclose erased identity');assert.equal(h.external,0);
+ }finally{await h.close();}
+}
+
+// Profile extraction rechecks current authority after admission, including erasure and epoch-changing races.
+async function readRaces(){
+ const h=await profileApp();
+ try{
+  await h.contact('visitor');await h.contact('foreign','q');
+  const races=[
+   {sql:'UPDATE sessions SET revoked_at=1 WHERE token_hash=?',params:[hash(h.token('visitor'))]},
+   {sql:'UPDATE sessions SET expires_at=1 WHERE token_hash=?',params:[]},
+   {sql:"UPDATE sessions SET project_id='q' WHERE token_hash=?",params:[]},
+   {sql:"UPDATE sessions SET actor_id='foreign',contact_id='foreign' WHERE token_hash=?",params:[]},
+   {sql:"UPDATE contacts SET metadata_json='{\"is_erasing\":1}' WHERE id='visitor'",expectedContactMetadata:{is_erasing:1}},
+   {sql:"UPDATE contacts SET metadata_json='{\"is_erased\":1}' WHERE id='visitor'",expectedContactMetadata:{is_erased:1}},
+   {sql:"UPDATE contacts SET metadata_json='{\"is_blocked\":1}' WHERE id='visitor'",expectedContactMetadata:{is_blocked:1}},
+   {sql:"UPDATE contacts SET metadata_json='{\"is_deleted\":1}' WHERE id='visitor'",expectedContactMetadata:{is_deleted:1}},
+   {sql:"INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES('p','{\"deleted_at\":1}',1) ON CONFLICT(project_id) DO UPDATE SET settings_json=excluded.settings_json"},
+  ];
+  for(const race of races){
+   await h.db.prepare("UPDATE contacts SET metadata_json='{}' WHERE id='visitor'").run();await h.db.prepare("DELETE FROM project_settings WHERE project_id='p'").run();await h.session('visitor','p','visitor');
+   const epoch=await h.db.prepare('SELECT revision FROM integration_authority_epoch WHERE id=1').first();
+   const command={...race,...(race.sql.includes('token_hash=?')?{params:[hash(h.token('visitor'))]}:{})};
+   const response=await h.raw(undefined,{headers:{'x-test-before-statement':literal(command.sql,...(command.params||[])),'x-test-statement':'JOIN contacts profile_contact'}});
+   assert.equal(response.status,404);assert.doesNotMatch(await response.text(),/Saved visitor|visitor@example|foreign@example/);
+   const currentEpoch=await h.db.prepare('SELECT revision FROM integration_authority_epoch WHERE id=1').first();
+   if(race.expectedContactMetadata){
+    assert.deepEqual(JSON.parse((await h.db.prepare("SELECT metadata_json FROM contacts WHERE id='visitor'").first()).metadata_json),race.expectedContactMetadata,'the declared contact privacy mutation committed before extraction');
+    assert.equal(currentEpoch.revision,epoch.revision,'contact privacy is fenced directly, not by the integration issuance epoch');
+   }else assert.ok(currentEpoch.revision>epoch.revision,'native session/workspace authority mutation occurred before extraction');
+  }
+  assert.equal(h.external,0);
+ }finally{await h.close();}
+}
+
+// Actual HMAC identity keeps canonical fields while signed and unsigned collectors retain distinct provided data.
+async function signedIdentity(){
+ const h=await profileApp();
  try{
   const admittedAfter=Date.now(),signed=await visitor(h,'signed',{signed:true,...trusted,metadata:signedMetadata}),environment=await observedContext(h,signed.contactId,admittedAfter);assert.equal(signed.verified,true);
   assert.deepEqual(canonical(await row(h,signed.contactId)),{...trusted,verified:true});
@@ -69,11 +182,12 @@ test('actual HMAC identity keeps canonical fields while signed and unsigned coll
   assert.deepEqual(await (await h.raw(undefined,{actor:'signed'})).json(),{contact:profile(signed.contactId,edited)});
   assert.equal(JSON.parse((await row(h,signed.contactId)).metadata_json).provided_email,'new-visitor-note@example.test');assert.equal(h.external,0);
  }finally{await h.close();}
-});
+}
 
-test('email-identified HMAC session preserves its signed email through collector updates and profile hydration',async()=>{
+// Email-identified HMAC session preserves its signed email through collector updates and profile hydration.
+async function signedEmail(){
  const expected={name:'Email account name',email:'verified-email@example.test',identifier:'verified-email@example.test',verified:true};
- const h=await profileHarness();
+ const h=await profileApp();
  try{
   // No identifier is supplied: the actual native fallback signs this email and
   // stores it as external_id. The name remains canonical data, not an HMAC claim.
@@ -92,10 +206,11 @@ test('email-identified HMAC session preserves its signed email through collector
   }
   assert.equal(h.external,0);
  }finally{await h.close();}
-});
+}
 
-test('signed collector rejects foreign ownership and revocation; actual erasure fences canonical and provided identities',async()=>{
- const h=await profileHarness();
+// Signed collector rejects foreign ownership and revocation; actual erasure fences canonical and provided identities.
+async function collectorFences(){
+ const h=await profileApp();
  try{
   const signed=await visitor(h,'signed',{signed:true,...trusted});
   const other=await visitor(h,'other',{name:'Other'}),foreign=await visitor(h,'foreign',{project:'q',name:'Foreign'});
@@ -127,10 +242,11 @@ test('signed collector rejects foreign ownership and revocation; actual erasure 
   }
   assert.deepEqual(await row(h,signed.contactId),erased);assert.equal(h.external,0);
  }finally{await h.close();}
-});
+}
 
-test('collector commit rechecks live session, privacy, workspace and conversation authority after admission',async()=>{
- const h=await profileHarness();
+// Collector commit rechecks live session, privacy, workspace and conversation authority after admission.
+async function collectorRaces(){
+ const h=await profileApp();
  try{
   const signed=await visitor(h,'signed',{signed:true,...trusted}),foreign=await visitor(h,'foreign',{project:'q',name:'Foreign'});
   const races=[
@@ -146,21 +262,22 @@ test('collector commit rechecks live session, privacy, workspace and conversatio
    await h.db.prepare("UPDATE contacts SET metadata_json='{}' WHERE id=?").bind(signed.contactId).run();await h.db.prepare("DELETE FROM project_settings WHERE project_id='p'").run();
    await h.db.prepare('UPDATE conversations SET contact_id=? WHERE id=?').bind(signed.contactId,signed.conversationId).run();await h.session('signed','p',signed.contactId);
    const command={sql:race.sql,params:[...(race.params||[]),...(race.token?[hash(h.token('signed'))]:[])]};
-   const response=await h.raw('/_test/collector-race',{actor:'signed',method:'POST',body:{conversationId:signed.conversationId,data:{name:'Stale write',email:'stale@example.test'},commands:[command]}});
+   const response=await h.raw('/api/conversations/'+signed.conversationId+'/widget-events',{actor:'signed',body:{action:'contact',data:{name:'Stale write',email:'stale@example.test'}},headers:racing(command)});
    assert.equal(response.status,409);assert.doesNotMatch(await response.text(),/trusted-account|Stale write|stale@example/);
    const current=await row(h,signed.contactId);assert.deepEqual(canonical(current),{...trusted,verified:true});assert.equal(JSON.parse(current.metadata_json).provided_email,undefined);
   }
   assert.equal(h.external,0);
  }finally{await h.close();}
-});
+}
 
-test('verification established between collector admission and commit protects the new canonical identity',async()=>{
- const h=await profileHarness();
+// Verification established between collector admission and commit protects the new canonical identity.
+async function verifiedMidway(){
+ const h=await profileApp();
  try{
   const admittedAfter=Date.now(),guest=await visitor(h,'guest',{name:'Before verification',email:'before@example.test'}),environment=await observedContext(h,guest.contactId,admittedAfter);
-  const response=await h.raw('/_test/collector-race',{actor:'guest',method:'POST',body:{conversationId:guest.conversationId,data:{provided_name:'Untrusted alias',provided_email:'untrusted@example.test'},commands:[{sql:'UPDATE contacts SET name=?,email=?,external_id=?,is_verified=1 WHERE id=?',params:[trusted.name,trusted.email,trusted.identifier,guest.contactId]}]}});
+  const response=await h.raw('/api/conversations/'+guest.conversationId+'/widget-events',{actor:'guest',body:{action:'contact',data:{provided_name:'Untrusted alias',provided_email:'untrusted@example.test'}},headers:racing({sql:'UPDATE contacts SET name=?,email=?,external_id=?,is_verified=1 WHERE id=?',params:[trusted.name,trusted.email,trusted.identifier,guest.contactId]})});
   assert.equal(response.status,200);assert.deepEqual((await response.json()).contact,profile(guest.contactId,{...trusted,verified:true}));
   const current=await row(h,guest.contactId);assert.deepEqual(canonical(current),{...trusted,verified:true});assert.deepEqual(JSON.parse(current.metadata_json),{...environment,provided_name:'Untrusted alias',provided_email:'untrusted@example.test',email_unproven:1});
   assert.deepEqual(await (await h.raw(undefined,{actor:'guest'})).json(),{contact:profile(guest.contactId,{...trusted,verified:true})});assert.equal(h.external,0);
  }finally{await h.close();}
-});
+}

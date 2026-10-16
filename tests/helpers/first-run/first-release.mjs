@@ -5,8 +5,10 @@ import assert from 'node:assert/strict'
 import {execFile} from 'node:child_process'
 import {promisify} from 'node:util'
 import {resolve} from 'node:path'
-import {createRuntime} from './helpers/emitted-runtime.mjs'
-const root=resolve(new URL('..',import.meta.url).pathname)
+import {createRuntime} from '../emitted-runtime.mjs'
+const root=resolve(new URL('../../..',import.meta.url).pathname)
+
+export async function firstReleaseJourney(){
 const runtime=await createRuntime();let success=false;const proven=[]
 const step=(number,text)=>{proven.push(`${number}. ${text}`);console.log(`  step ${number} ok`)}
 try{
@@ -70,7 +72,7 @@ try{
  assert.equal(generation.status,409);assert.equal(typeof generation.body.error,'string');assert.match(generation.body.error,/CONFIGURATION_REQUIRED/)
  const afterGeneration=await json(`/api/conversations/${conversationId}/messages`,undefined,login.token);assert.equal(afterGeneration.body.messages.length,2);assert.equal(afterGeneration.body.revision,2);assert.ok(!afterGeneration.body.messages.some(message=>message.actor_role==='ai'),'no ai message may appear without a configured provider')
  assert.equal((await json(`/api/conversations/${conversationId}`,undefined,login.token)).body.revision,2)
- step(6,`AI decision: reply generation was refused 409 with "${generation.body.error}" because no assistant took the conversation: without an installed provider key a default assistant never answers visitors by itself, and an explicit request fails naming what is missing; the transcript kept 2 messages with no ai role and the conversation revision stayed 2. Per-round provider usage and bounded budgets are proven separately by tests/ai-support/lifecycle.test.mjs with provider fixtures; live provider execution is out of scope for this journey`)
+ step(6,`AI decision: reply generation was refused 409 with "${generation.body.error}" because no assistant took the conversation: without an installed provider key a default assistant never answers visitors by itself, and an explicit request fails naming what is missing; the transcript kept 2 messages with no ai role and the conversation revision stayed 2. Per-round provider usage and bounded budgets are proven separately by tests/journeys/ai.mjs with provider fixtures; live provider execution is out of scope for this journey`)
 
  // 7. Persisted transcript, socket replay and session revocation.
  const persisted=await json(`/api/conversations/${conversationId}/messages`,undefined,contact.body.token);assert.equal(persisted.body.messages.length,2);assert.deepEqual(persisted.body.messages.map(message=>message.revision),[1,2]);assert.equal(persisted.body.messages[0].content,command.content);assert.equal(persisted.body.messages[1].content,reply.content);assert.equal(persisted.body.lastMessageId,replied.body.message.id)
@@ -103,3 +105,4 @@ try{
  console.log(' This is local emitted-Worker evidence, not hosted, provider or production-data acceptance.')
  success=true
 }finally{await runtime.close(success)}
+}

@@ -17,22 +17,27 @@ const bindings=(env:Env):Env=>env.H2H_TEST_CAPTURE_QUEUE?{...env,JOBS:{send:asyn
 // or makes the queue refuse (queue-unavailable) or silently lose (queue-lost) sends.
 const faulted=(request:Request,env:Env):Env=>{
  const before=request.headers.get('x-test-before-batch'),after=request.headers.get('x-test-after-batch'),fault=request.headers.get('x-test-fault')
- // x-test-before-statement runs a real D1 write just before the first single statement matching x-test-statement.
+ // x-test-before-statement runs a real D1 write once, just before the first statement (alone or in a batch)
+ // matching x-test-statement; x-test-fault no-database refuses every database access.
  const beforeStatement=request.headers.get('x-test-before-statement'),statementPattern=request.headers.get('x-test-statement')
  if(!before&&!after&&!fault&&!beforeStatement)return env
+ if(fault==='no-database')return {...env,DB:{prepare(){throw new Error('Database access forbidden')},batch(){throw new Error('Database access forbidden')},exec(){throw new Error('Database access forbidden')}} as unknown as D1Database}
  const DB=env.DB,FILES=env.FILES;let puts=0,fired=false
- const intercept=(statement:D1PreparedStatement):D1PreparedStatement=>new Proxy(statement,{get(target,key){
+ const fire=async()=>{if(!fired){fired=true;await DB.exec(beforeStatement!)}}
+ const targets=new WeakMap<object,D1PreparedStatement>()
+ const intercept=(statement:D1PreparedStatement):D1PreparedStatement=>{const proxy=new Proxy(statement,{get(target,key){
   if(key==='bind')return (...values:unknown[])=>intercept(target.bind(...values))
-  if(key==='run'||key==='all'||key==='first'||key==='raw')return async(...args:unknown[])=>{if(!fired){fired=true;await DB.exec(beforeStatement!)}return (target as any)[key](...args)}
+  if(key==='run'||key==='all'||key==='first'||key==='raw')return async(...args:unknown[])=>{await fire();return (target as any)[key](...args)}
   const value=(target as any)[key];return typeof value==='function'?value.bind(target):value
- }})
+ }});targets.set(proxy,statement);return proxy}
  const prepare=(sql:string)=>beforeStatement&&statementPattern&&new RegExp(statementPattern,'i').test(sql)?intercept(DB.prepare(sql)):DB.prepare(sql)
  const queue=fault==='queue-unavailable'?{send:async()=>{throw new Error('Injected queue delivery failure')},sendBatch:async()=>{throw new Error('Injected queue delivery failure')}}:fault==='queue-lost'?{send:async()=>{},sendBatch:async()=>{}}:undefined
  return {...env,...(queue?{JOBS:queue as unknown as Env['JOBS']}:{}),
   DB:{prepare,exec:DB.exec.bind(DB),async batch(statements:D1PreparedStatement[]){
    if(fault==='db-before')throw new Error('Injected D1 failure')
    if(before)await DB.exec(before)
-   const result=await DB.batch(statements)
+   if(statements.some(statement=>targets.has(statement)))await fire()
+   const result=await DB.batch(statements.map(statement=>targets.get(statement)??statement))
    if(after)await DB.exec(after)
    if(fault==='db-after')throw new Error('Injected lost D1 response')
    return result

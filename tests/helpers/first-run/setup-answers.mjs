@@ -1,15 +1,14 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,readFile,stat,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomBytes} from 'node:crypto';
-import {prepareNativeLocal,nativeOwner} from '../../scripts/installer/native-local.mjs';
-import {adapter,commandAdapter} from '../../scripts/installer/local.mjs';
-import {readySummary} from '../../scripts/installer/ui/seed.mjs';
+import {prepareNativeLocal,nativeOwner} from '../../../scripts/installer/native-local.mjs';
+import {adapter,commandAdapter} from '../../../scripts/installer/local.mjs';
+import {readySummary} from '../../../scripts/installer/ui/seed.mjs';
 import {loadInstallerSeed} from '@runeditrun/rer/setup-manifest';
 import {prepareSettings} from '@runeditrun/rer/adapter-settings';
-import {validateRuntimeEnvironment,runtimeVariables} from '../../scripts/deployment/environment.mjs';
+import {validateRuntimeEnvironment,runtimeVariables} from '../../../scripts/deployment/environment.mjs';
 
 const seedFor=()=>loadInstallerSeed(process.cwd(),commandAdapter);
 const owner={target:'local',EMAIL_PROVIDER:'later',OWNER_EMAIL:'owner@example.test',OWNER_PASSWORD:randomBytes(18).toString('base64url'),WIDGET_ORIGIN:'https://example.test'};
@@ -17,7 +16,15 @@ const quiet={step:async()=>{},addSecrets(){}};
 const withRoot=async action=>{const root=await mkdtemp(join(tmpdir(),'h2h-setup-answers-'));try{return await action(root);}finally{await rm(root,{recursive:true,force:true});}};
 const settings=(root,input,manifest)=>prepareSettings({root,store:quiet,input,manifest,selectedOrigin:'http://127.0.0.1:47291'},adapter.hooks);
 
-test('native local preparation selects development suppression and refuses to replace a saved remote provider',async()=>{
+// The installer's answers through the adapter entry points rer calls (preparation, settings, the owner request) and the
+// deployment's runtime validation: local mail is suppressed, only answers that exist are sent, a chosen AI service lands
+// in its own secret, the inbound token is generated once, and saved provider choices are never replaced.
+export async function setupAnswersJourney(){
+ for(const part of [localMailSelection,optionalAnswers,ownerRequest,chosenAiService,inboundToken,inboundDomain])await part();
+}
+
+// Native local preparation selects development suppression and refuses to replace a saved remote provider.
+async function localMailSelection(){
  const root=await mkdtemp(join(tmpdir(),'h2h-local-mail-'));
  try{
   const path=join(root,'.dev.vars');
@@ -30,9 +37,10 @@ test('native local preparation selects development suppression and refuses to re
   assert.throws(()=>validateRuntimeEnvironment({H2H_LOCAL:'true',EMAIL_PROVIDER:'development'}),/cannot be deployed/);
   assert.throws(()=>validateRuntimeEnvironment({EMAIL_PROVIDER:'development'}),/must be resend/);
  }finally{await rm(root,{recursive:true,force:true});}
-});
+}
 
-test('setup needs no workspace name, colour or owner name, and the optional answers are not invented',async()=>{
+// Setup needs no workspace name, colour or owner name, and the optional answers are not invented.
+async function optionalAnswers(){
  const {model}=await seedFor();
  const input=model.validateInput(owner);
  for(const name of ['WORKSPACE_NAME','PRIMARY_COLOR'])assert.ok(!input[name],name);
@@ -41,9 +49,10 @@ test('setup needs no workspace name, colour or owner name, and the optional answ
  assert.throws(()=>model.validateInput({...owner,OWNER_PASSWORD:''}),/Provide required setup inputs/);
  assert.doesNotMatch(readySummary({target:'local'}),/undefined/);
  assert.doesNotMatch(readySummary({target:'remote',OWNER_EMAIL:owner.OWNER_EMAIL}),/undefined/);
-});
+}
 
-test('the owner request carries only the answers that exist',async()=>{
+// The owner request carries only the answers that exist.
+async function ownerRequest(){
  const sent=[];const real=globalThis.fetch;
  globalThis.fetch=async(url,init)=>{
   if(init?.method!=='POST')return Response.json({available:true});
@@ -56,9 +65,10 @@ test('the owner request carries only the answers that exist',async()=>{
  }finally{globalThis.fetch=real;}
  assert.deepEqual(Object.keys(sent[0]).sort(),['allowedOrigin','email','password','setupToken']);
  assert.deepEqual([sent[1].name,sent[1].ownerName,sent[1].primaryColor],['Named','Pat','#123456']);
-});
+}
 
-test('a chosen AI service lands only in its own installation secret',async()=>withRoot(async root=>{
+// A chosen AI service lands only in its own installation secret.
+const chosenAiService=()=>withRoot(async root=>{
  const {model,manifest}=await seedFor();
  const key=randomBytes(24).toString('hex');
  assert.throws(()=>model.validateInput({...owner,AI_PROVIDER:'openai'}),/Provide required setup inputs/);
@@ -73,9 +83,10 @@ test('a chosen AI service lands only in its own installation secret',async()=>wi
  const other=randomBytes(24).toString('hex');
  await assert.rejects(prepareNativeLocal({root,manifest,store:quiet,input:{...owner,AI_PROVIDER:'later',ANTHROPIC_API_KEY:other}}),error=>/ANTHROPIC_API_KEY/.test(error.message)&&!error.message.includes(other));
  await assert.rejects(stat(join(root,'.dev.vars')),{code:'ENOENT'});
-}));
+});
 
-test('a fresh checkout gets a generated inbound token once and an older checkout gains it without other changes',async()=>withRoot(async root=>{
+// A fresh checkout gets a generated inbound token once and an older checkout gains it without other changes.
+const inboundToken=()=>withRoot(async root=>{
  const {model,manifest}=await seedFor();
  const input=model.validateInput(owner);const hex=/^INBOUND_EMAIL_TOKEN=([0-9a-f]{64})$/m;
  const context=()=>({root,input,manifest,store:quiet});
@@ -104,11 +115,12 @@ test('a fresh checkout gets a generated inbound token once and an older checkout
  await writeFile(join(root,'.dev.vars'),older+'EMAIL_PROVIDER="resend"\n',{mode:0o600});
  await assert.rejects(prepareNativeLocal(context()),/saved mail provider/);
  assert.doesNotMatch(await readFile(join(root,'.dev.vars'),'utf8'),/INBOUND_EMAIL_TOKEN/);
-}));
+});
 
-test('the inbound mailbox domain is an optional runtime variable that must be a domain name',()=>{
+// The inbound mailbox domain is an optional runtime variable that must be a domain name.
+function inboundDomain(){
  assert.equal(runtimeVariables({INBOUND_EMAIL_DOMAIN:'in.example.com'}).INBOUND_EMAIL_DOMAIN,'in.example.com');
  assert.deepEqual(runtimeVariables({INBOUND_EMAIL_DOMAIN:''}),{});
  validateRuntimeEnvironment({INBOUND_EMAIL_DOMAIN:'in.example.com'});validateRuntimeEnvironment({});
  for(const bad of ['https://in.example.com','in.example.com/path','user@example.com','localhost'])assert.throws(()=>validateRuntimeEnvironment({INBOUND_EMAIL_DOMAIN:bad}),/INBOUND_EMAIL_DOMAIN/);
-});
+}

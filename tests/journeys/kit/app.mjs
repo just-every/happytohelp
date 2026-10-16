@@ -16,6 +16,8 @@ const bundle=(entry='tests/journeys/kit/app-worker.ts')=>bundles.get(entry)??bun
 let migrationSql
 const migrations=()=>migrationSql??=(async()=>{const files=(await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')).sort();return Promise.all(files.map(async name=>{const source=(await readFile(join(root,'migrations',name),'utf8')).replace(/^\s*--[^\n]*$/gm,'');return {name,statements:[...source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(match=>match[1]).filter(sql=>sql.trim()!==';')}}))})()
 export const sha=value=>createHash('sha256').update(value).digest('hex')
+// Every migration whose file name `select` accepts, in one atomic batch (a single D1 round trip).
+export const applyMigrations=async(db,select=()=>true)=>db.batch((await migrations()).filter(migration=>select(migration.name)).flatMap(migration=>migration.statements).map(sql=>db.prepare(sql)))
 
 export async function startApp({bindings={},outbound,origin='https://app.example',captureQueue=false,migrate=true,listen=false,entry,cf}={}){
  const directory=await mkdtemp(join(tmpdir(),'h2h-app-')),script=await bundle(entry),requests=[]
@@ -27,8 +29,8 @@ export async function startApp({bindings={},outbound,origin='https://app.example
   if(listen){url=String(await mf.ready).replace(/\/$/,'');port=Number(new URL(url).port)}
  }
  await start()
- // One atomic batch for every migration keeps start-up to a single D1 round trip.
- try{if(migrate)await db.batch((await migrations()).flatMap(migration=>migration.statements).map(sql=>db.prepare(sql)))}catch(error){await mf.dispose();await rm(directory,{recursive:true,force:true});throw error}
+ // `migrate` may name the migrations to apply, so a test can stage prior state between them.
+ try{if(migrate)await applyMigrations(db,typeof migrate==='function'?migrate:undefined)}catch(error){await mf.dispose();await rm(directory,{recursive:true,force:true});throw error}
  // A CF-IPCountry header is mirrored into request.cf, as Cloudflare's edge sets both.
  const request=(path,{body,token,method=body===undefined?'GET':'POST',headers={},raw=false,base=origin}={})=>mf.dispatchFetch(base+path,{method,redirect:'manual',...(headers['CF-IPCountry']?{cf:{country:headers['CF-IPCountry']}}:{}),headers:{...(body!==undefined&&!raw?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{}),...headers},body:body===undefined?undefined:raw?body:JSON.stringify(body)})
  const call=async(path,options={})=>{const response=await request(path,options),text=await response.text();let data;try{data=text?JSON.parse(text):null}catch{data=text}if(options.status!==undefined&&response.status!==options.status)throw new Error(`${options.method||(options.body===undefined?'GET':'POST')} ${path}: expected ${options.status}, got ${response.status}: ${text.slice(0,500)}`);return {status:response.status,headers:response.headers,data}}

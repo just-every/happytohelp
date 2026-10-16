@@ -97,7 +97,7 @@ export async function seedLegacy(connection, { objectDirectory }) {
     await insert('buckets', { id: bucketId, project_id: projectId, conversation_id: conversationId,
       is_vectorized:0, counts: json({ contact_messages: 1, agent_messages: 2, agent_events_internal_note: 1, contact_events_page_view: 1 }), ...times });
 
-    const bodies = [`Diagnostic: GPTCODEX_API_KEY=fixture-transcript-environment-value\nCan you explain this ${name} invoice?`, 'The invoice covers your current billing period.',
+    const bodies = [`Diagnostic: GPTCODEX_API_KEY=fixture-transcript-environment-value\nCan you explain this ${name} invoice?`, `The invoice covers your current billing period. Reset password: https://${slug}.example.test/password/reset (never share fixture-transcript-environment-value).`,
       'I can help you find the billing guide.', 'Our team will reply during business hours.', 'Removed duplicate message.'];
     for (let i = 0; i < bodies.length; i++) {
       await insert('messages', { id: messageIds[i], project_id: projectId, conversation_id: conversationId, bucket_id: bucketId,

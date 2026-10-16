@@ -2536,7 +2536,7 @@
       "executable": false
     },
     "scripts/legacy-export/extract.mjs": {
-      "sha256": "91c5be7b10976c7719b58003452869fd2864fdf4a0694b59e12c679998e54d78",
+      "sha256": "c07fdb3548bd9259f516f9a145c69c0a26c10ff0fab60fb9cb35cd13d6bf3318",
       "executable": false
     },
     "scripts/legacy-export/files.mjs": {
@@ -2568,19 +2568,19 @@
       "executable": false
     },
     "scripts/legacy-export/references.mjs": {
-      "sha256": "155193295e1e2baa337662cc0952658fc5b3c641ffc998dab435e9eb219988fa",
+      "sha256": "43302400550e7219436771f6dd88c1cf1177b5e32a2646338d9c99ad6b214ecc",
       "executable": false
     },
     "scripts/legacy-export/scope.mjs": {
-      "sha256": "f6ccf152d3c3682ec0fe39b5b65c894cbfbb90e832170216eea5c3ea4e98fa0e",
+      "sha256": "48969d8b9024b463a2592c831d3e117961a4816cf45ca74aa200a6a64b60d61d",
       "executable": false
     },
     "scripts/legacy-export/secrets.mjs": {
-      "sha256": "c809fcfebca48f50aa3f681600dfd0f1ff6ea468d8d22ee044384786dc66385c",
+      "sha256": "05a937d0527657fcf3e24d8446d3b43a45d9f9cab4d2d9b000b2322273b04372",
       "executable": false
     },
     "scripts/legacy-export/text-policy.mjs": {
-      "sha256": "4d40e9a98a56d8b9fea0b60f7ee93960b97e1c42b09129a3e70591899238aa40",
+      "sha256": "56b2a69f854c9e2f434bb2ff66fda449a03b0b0f54030c47a14eb95a0ab5f998",
       "executable": false
     },
     "scripts/legacy-export/transport-secrets.mjs": {
@@ -8776,7 +8776,7 @@
       "executable": false
     },
     "tests/legacy-export.mjs": {
-      "sha256": "f503a630caa3cf63f1cd5de4372b0c00b0ef258a8d3bebf5452f7d51bab2fe17",
+      "sha256": "bead5865f0329ad8da44d6687f95f6b94ca322518c03b6101a9bcaa1eaccf504",
       "executable": false
     },
     "tests/legacy-export/assertions.mjs": {
@@ -8784,11 +8784,11 @@
       "executable": false
     },
     "tests/legacy-export/extended-fixture.mjs": {
-      "sha256": "302cd88aad093ef3c4b146a7e1fca0547fbaa7ee3be7ceacabe73200e542a3f4",
+      "sha256": "68d4bf5d3a1fbc6b7f3c8d7bbf92378d539438b39bbe713edda848c7552b437d",
       "executable": false
     },
     "tests/legacy-export/fixture.mjs": {
-      "sha256": "3e43af603f7ce71cf323ae30fad4c71e8a36b2a428d343541857a090672330a0",
+      "sha256": "9fdbe265a70e6354d23eaca97be5cade1a5aa06464b8ad5783ce5649951012c2",
       "executable": false
     },
     "tests/legacy-export/live-schema.sql": {

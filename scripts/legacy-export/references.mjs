@@ -10,6 +10,11 @@ export function publicConfigurationValue(table,column,path){return table==='mess
 export function publicConfigurationName(table,column,path,key,value){
  return publicConfigurationValue(table,column,[...path,key])||table==='messages'&&column==='content'&&[...path,key].join('.')==='data.tokenizeUsBankAccount'&&(value===null||typeof value==='object'&&!Array.isArray(value));
 }
+// Sentry DSN public keys ship in every client page; Sentry documents them as safe to expose.
+function sentryEndpoint(url){
+ return /^(?:sentry\.io|o\d+\.ingest(?:\.[a-z]{2})?\.sentry\.io)$/.test(url.hostname)&&/^\/api\/\d+\/(?:security|store|envelope|minidump)\/?$/.test(url.pathname)
+  &&url.searchParams.has('sentry_key')&&[...url.searchParams].every(([key,value])=>key==='sentry_key'?/^[a-f0-9]{32}$/.test(value):/^sentry_(?:version|client|environment|release)$/.test(key));
+}
 function gravatar(url){
  if(!['gravatar.com','www.gravatar.com','secure.gravatar.com'].includes(url.hostname)||!/^\/avatar\/(?:[a-f0-9]{32}|[a-f0-9]{64})(?:\.jpg)?$/i.test(url.pathname))return false;
  return [...url.searchParams].every(([key,value])=>{
@@ -20,11 +25,16 @@ function gravatar(url){
  });
 }
 export function opaqueReferences(value){
- const withoutFiles=value.replaceAll('\\_','_').replaceAll('\\-','-').replace(/(^|[\s"'`(])\/(?:Users|home|tmp|private|var|workspace|mnt|opt|app|usr|root)\/[^\s"'`<>)]+/g,'$1<file-path>');
+ const withoutFiles=value.replaceAll('\\_','_').replaceAll('\\-','-').replace(/(^|[\s"'`(])\/(?:Users|home|tmp|private|var|workspace|mnt|opt|app|usr|root)\/[^\s"'`<>)]+/g,'$1<file-path>')
+  // Rackspace Cloud Files public CDN container hostnames (DNS names, not capabilities).
+  .replace(/\b[a-f0-9]{20}-[a-f0-9]{32}(?=\.(?:ssl|r\d+)\.cf\d\.rackcdn\.com\b)/gi,'cdn-container')
+  // A Markdown link labelled with an attachment's file name: names are exported as customer data.
+  .replace(/\[[^\]\r\n]{1,255}?\.(?:png|jpe?g|gif|webp|heic|svg|pdf|txt|docx?|xlsx?|csv|zip|log|json|mov|mp4)\]\(/gi,'[attachment-filename](');
  const urls=withoutFiles.replace(/https?:\/\/[^\s<>"'()[\]]+/g,raw=>{
   try{
    const url=new URL(raw.replaceAll('&amp;','&'));if(url.username||url.password)return raw;
    if(gravatar(url))return '<avatar-resource>';
+   if(sentryEndpoint(url))return '<error-reporting-endpoint>';
    for(const key of [...url.searchParams.keys()])if(key==='fbclid'||/^utm_(?:source|medium|campaign|content|term|id)$/.test(key))url.searchParams.delete(key);
    // Document IDs are separate from OAuth/resource-key access capabilities.
    if(['docs.google.com','drive.google.com'].includes(url.hostname)){

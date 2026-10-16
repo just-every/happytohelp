@@ -17,7 +17,7 @@ export const PLANTED_SECRETS = Object.freeze([
   'fixture-asymmetric-private-key', 'fixture-asymmetric-public-key',
   'fixture-contact-shared-hash', 'fixture-contact-shared-salt',
   'fixture-crawl-exception-credential','fixture-crawl-webhook-token','fixture-refresh-claim-token','fixture-device-token-hash','fixture-grant-token-hash','fixture-personal-access-token',
-  'fixture-password-reset-token', 'fixture-message-thinking-signature', actionPlaintext, encryptedAction,
+  'fixture-password-reset-token', 'fixture-message-thinking-signature', 'fixture-event-contact-hash', 'fixture-event-contact-admin-capability', actionPlaintext, encryptedAction,
 ]);
 
 export async function seedExtendedLegacy(insert, {projectId, n, slug, name, ownerId, aiId, contactId, conversationId, bucketId, messageId}) {
@@ -29,6 +29,8 @@ export async function seedExtendedLegacy(insert, {projectId, n, slug, name, owne
   await insert('support_delegations',{id:delegationId,project_id:projectId,conversation_id:conversationId,local_agent_device_id:deviceId,created_by_user_id:ownerId,request_id:uuid('b5',n),mode:'investigate',instructions:'Inspect this invoice',status:'running',...times});
   await insert('support_delegation_events',{id:uuid('b6',n),support_delegation_id:delegationId,created_by_user_id:ownerId,event_type:'progress',message:'Reading invoice details',payload:json({step:1}),created_at:timestamp});
   await insert('events',{id:uuid('b7',n),conversation_id:conversationId,bucket_id:bucketId,agent_id:ownerId,type:'AGENT_ASSIGNED',payload:json({name:'Export Owner',is_ai:false}),created_at:timestamp});
+  // Live USED_INSIGHT shape: the widget snapshots the contact, metadata included.
+  await insert('events',{id:uuid('b8',n),conversation_id:conversationId,bucket_id:bucketId,type:'USED_INSIGHT',payload:json({insight_id:uuid('a3',n),close:true,contact_message:{content:'Where is my invoice?',contact:{name,email:`customer@${slug}.example.test`,identifier:`customer-${n}`,hash:'fixture-event-contact-hash',metadata:{plan:'business',admin:'fixture-event-contact-admin-capability',signed_up_at:'2025-01-01',hash:'fixture-event-contact-hash'}}},ai_message:{content:'Your invoice is in Billing.'}}),created_at:timestamp});
 
   await insert('asymmetric_keys', {id:uuid('92', n),project_id:projectId,contact_id:contactId,
     public_key:'fixture-asymmetric-public-key',private_key:'fixture-asymmetric-private-key',...times});

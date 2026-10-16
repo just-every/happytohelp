@@ -30,6 +30,7 @@ export const childScopes = {
 export const supportEventTypes = ['AGENT_ASSIGNED','USED_INSIGHT','INTERNAL_NOTE'];
 // ChargeDesk's generated administrative links carry an opaque login capability.
 // Reply trigger and unsent composer-suggestion caches are runtime state, not sent history.
-// Event snapshots of a widget contact carry its identity-verification HMAC (contact_hash).
+// Event snapshots of a widget contact carry its identity-verification HMAC (contact_hash)
+// and a copy of the contact's metadata, including the same ChargeDesk administrative link.
 // Remove only these exact paths; unknown nested credential fields still fail.
-export const structuredOmissions = {events:{payload:[['contact_message','contact','hash'],['contact_message','contact','metadata','hash']]},messages:{content:[['data','clientConfiguration','braintreeApi','accessToken'],['data','tokenizeUsBankAccount','paymentMethod','id'],['data','tokenizeUsBankAccount','paymentMethod','legacyId']]},contacts:{metadata:[['admin']]},conversations:{metadata:[['customer_reply'],['suggestions']]}};
+export const structuredOmissions = {events:{payload:[['contact_message','contact','hash'],['contact_message','contact','metadata','hash'],['contact_message','contact','metadata','admin']]},messages:{content:[['data','clientConfiguration','braintreeApi','accessToken'],['data','tokenizeUsBankAccount','paymentMethod','id'],['data','tokenizeUsBankAccount','paymentMethod','legacyId']]},contacts:{metadata:[['admin']]},conversations:{metadata:[['customer_reply'],['suggestions']]}};

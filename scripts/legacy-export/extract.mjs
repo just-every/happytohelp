@@ -1,4 +1,4 @@
-import {omitSupportCredentials} from './text-policy.mjs';
+import {omitSupportCredentials,omitKnownCredentials,knownCredentials,sanitizable} from './text-policy.mjs';
 import {identifier,snapshot} from './mysql.mjs';
 import {credentialColumns,skippedTables,supportEventTypes,structuredOmissions,morphTables} from './scope.mjs';
 import {projectQueries} from './queries.mjs';
@@ -13,7 +13,8 @@ export async function extractProject(connection,{projectId,revision,aiModel,mail
     const schema=new Map(inventory.map(t=>[t.name,{engine:t.engine,columns:columns.filter(c=>c.name===t.name)}]));
     for(const [table,info]of schema)if(!skippedTables.includes(table))classifyColumns(table,info.columns);
     if(schema.has('mediables')){const [parents]=await connection.execute('SELECT DISTINCT mediable_type FROM mediables');const known=new Set(Object.keys(morphTables).map(t=>'App\\Models\\'+t));if(parents.some(r=>!known.has(r.mediable_type)))throw Error('Unclassified legacy media parent; add an explicit export/archive/omit scope before exporting');}
-    const scopes=projectQueries(schema,projectId),tables={},omittedColumns={},rowCounts={},cloneCounts={},omittedJsonValueCounts={},omittedTextValueCounts={};let bytes=0;const authors=new Set(),authorFields=new Set(['user_id','agent_id','operator_id','invited_by_id','created_by_id','created_by_user_id','modified_by_id']);
+    const scopes=projectQueries(schema,projectId),tables={},omittedColumns={},rowCounts={},cloneCounts={},omittedJsonValueCounts={},omittedTextValueCounts={},repeatedCredentialValueCounts={};let bytes=0;
+    const known=await removedCredentials(connection,schema,scopes);const authors=new Set(),authorFields=new Set(['user_id','agent_id','operator_id','invited_by_id','created_by_id','created_by_user_id','modified_by_id']);
     for(const [table]of scopes){
       if(table==='users'){const updated=projectQueries(schema,projectId,[...authors]);for(const t of ['users','mediables','media'])if(updated.has(t))scopes.set(t,updated.get(t));}
       const {where,args}=scopes.get(table);
@@ -30,6 +31,7 @@ export async function extractProject(connection,{projectId,revision,aiModel,mail
           else if(Buffer.isBuffer(v))throw Error(`Binary column needs an explicit encoding: ${table}.${c.col}`);
           const sanitized=omitStructured(table,c.col,row[c.col]);row[c.col]=sanitized.value;if(sanitized.omitted)omittedJsonValueCounts[`${table}.${c.col}`]=(omittedJsonValueCounts[`${table}.${c.col}`]||0)+sanitized.omitted;
           const text=omitSupportCredentials(table,c.col,row[c.col]);row[c.col]=text.value;if(text.omitted)omittedTextValueCounts[`${table}.${c.col}`]=(omittedTextValueCounts[`${table}.${c.col}`]||0)+text.omitted;
+          if(sanitizable(table,c.col)){const repeated=omitKnownCredentials(row[c.col],known);row[c.col]=repeated.value;if(repeated.omitted)repeatedCredentialValueCounts[`${table}.${c.col}`]=(repeatedCredentialValueCounts[`${table}.${c.col}`]||0)+repeated.omitted;}
           classifyValue(table,c.col,row[c.col]);
         }
         if(table==='projects'&&row.slug&&!deferMailDomain&&(!mailFromDomain||!/^(?=.{1,253}$)[a-z0-9]+(?:[.-][a-z0-9]+)*\.[a-z0-9-]+$/i.test(mailFromDomain)))throw Error('Project slug requires explicit --mail-from-domain (legacy MAIL_FROM_DOMAIN)');
@@ -43,7 +45,24 @@ export async function extractProject(connection,{projectId,revision,aiModel,mail
     }
     if(rowCounts.projects!==1)throw Error('Requested project does not exist or is not readable');
     if((rowCounts.ais||rowCounts.ai_defaults)&&!aiModel)throw Error('AI rows require an explicit --ai-model for native use');
-    const source={repository:'happytohelp',revision,exportedAt:new Date().toISOString(),projectId,...(aiModel?{aiModel}:{}),...(mailFromDomain?{mailFromDomain:mailFromDomain.toLowerCase()}:{mailboxPending:true}),omittedJsonPaths:structuredOmissions,omittedJsonValueCounts,omittedTextValueCounts,snapshot:'REPEATABLE READ; CONSISTENT SNAPSHOT; READ ONLY; UTC',omittedColumns,excludedTables:inventory.map(t=>t.name).filter(t=>skippedTables.includes(t)),eventTypes:supportEventTypes,rowCounts,cloneCounts,rowBytes:bytes};
+    const source={repository:'happytohelp',revision,exportedAt:new Date().toISOString(),projectId,...(aiModel?{aiModel}:{}),...(mailFromDomain?{mailFromDomain:mailFromDomain.toLowerCase()}:{mailboxPending:true}),omittedJsonPaths:structuredOmissions,omittedJsonValueCounts,omittedTextValueCounts,repeatedCredentialValueCounts,snapshot:'REPEATABLE READ; CONSISTENT SNAPSHOT; READ ONLY; UTC',omittedColumns,excludedTables:inventory.map(t=>t.name).filter(t=>skippedTables.includes(t)),eventTypes:supportEventTypes,rowCounts,cloneCounts,rowBytes:bytes};
     const bundle={format:'happytohelp-legacy-v1',source,tables};if(!sink)source.attachments=enrichMedia(tables);return bundle;
   });
+}
+
+// First read, in the same snapshot: every value the text policy removes from any of the
+// project's rendered or derived text, so its repeats elsewhere are removed as well.
+async function removedCredentials(connection,schema,scopes){
+  const secrets=new Set();
+  for(const [table,{where,args}]of scopes){
+    const columns=classifyColumns(table,schema.get(table).columns).filter(c=>sanitizable(table,c.col));
+    if(!columns.length)continue;
+    const query=connection.connection.query({sql:`SELECT ${columns.map(c=>identifier(c.col)).join(',')} FROM ${identifier(table)} WHERE ${where}`,values:args});
+    for await(const row of query.stream({highWaterMark:16}))for(const c of columns){
+      let value=row[c.col];if(value===null)continue;
+      if(c.type==='json'&&typeof value==='string')value=JSON.parse(value);
+      omitSupportCredentials(table,c.col,omitStructured(table,c.col,value).value,secret=>secrets.add(String(secret)));
+    }
+  }
+  return knownCredentials(secrets);
 }

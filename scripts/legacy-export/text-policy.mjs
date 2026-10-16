@@ -7,7 +7,10 @@ const reviewedNames=new Set(['key','secret','token','password','credential','cre
 const textColumns={messages:['content'],events:['payload'],insights:['content'],articles:['content'],macros:['content']};
 const derivedColumns={contacts:['ai_profile','metadata'],users:['ai_profile'],projects:['ai_profile'],conversations:['metadata'],dataset_files:['markdown'],datasets:['metadata'],project_optimizations:['ai_profile','metadata'],message_thinkings:['content'],support_delegations:['instructions','context','result'],support_delegation_events:['message','payload'],insights:['analysis','metadata'],leads:['content']};
 const rendered=(table,column)=>textColumns[table]?.includes(column);
-const sanitizable=(table,column)=>rendered(table,column)||derivedColumns[table]?.includes(column);
+export const sanitizable=(table,column)=>rendered(table,column)||derivedColumns[table]?.includes(column);
+const userinfo=/\b([a-z][a-z0-9+.-]*:\/\/)([^\s/@:"'<>()[\]]+):([^\s/@"'<>()[\]]+)@/gi;
+// Mail clients wrap addresses as "https://mailto:support@example.com": an address, not user:password.
+export const mailtoLink=user=>user.toLowerCase()==='mailto';
 export function isRedactedCredentialField(table,column,key,value){return rendered(table,column)&&reviewedName(key)&&value==='<redacted>';}
 function reviewedName(name){return reviewedNames.has(name.toLowerCase())||/^(?:[A-Z][A-Z0-9]*_)+(?:KEY|TOKEN|SECRET|PASSWORD)$/.test(name);}
 function symbolic(value){
@@ -23,10 +26,18 @@ function* assignments(text){
   if(m[6]!==undefined)pattern.lastIndex=m.index+m[0].length-m[6].length;
  }
 }
+function publicLink(value){
+ try{const url=new URL(value);return /^https?:$/.test(url.protocol)&&!url.username&&!url.password&&!url.search&&!url.hash&&!opaqueCredentialShape(value);}catch{return false;}
+}
 function noncredential(a){
  const {name,operator,quote,tail,prefix}=a,value=a.value.replace(/^`|`$/g,'');
  if(!value||symbolic(value)||value==='sk-...')return true;
  if(name==='Encryption'&&operator===':')return true;
+ // Slack/Markdown emoji shortcodes (":key: Double-check") label prose; they assign nothing.
+ if(operator===':'&&!quote&&/(?:^|[\s>(*_~[]):$/.test(prefix)&&/^[a-z0-9_+-]+$/.test(name))return true;
+ // A public link ("reset password: https://…/password/reset") is not the credential itself.
+ // Capability-shaped URLs still go through the URL omission below.
+ if(!quote&&publicLink(value))return true;
  if(/^Idempotency-Key$/i.test(name)||name.toLowerCase()==='key'&&/\bidempotency\s+$/i.test(prefix))return true;
  if(operator===':'&&/^YOUR_[A-Z_]+$/.test(name)&&['\\','-d','-X','-H'].includes(value))return true;
  if(operator===':'&&!quote&&/^(?:true|false|null|undefined|None)$/.test(value))return true;
@@ -72,7 +83,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
  value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+removed(secret));
  value=omitBasicAuthorization(value,removed);
  value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|auth)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+removed(secret));
- value=value.replace(/\b([a-z][a-z0-9+.-]*:\/\/)([^\s/@:"'<>()[\]]+):([^\s/@"'<>()[\]]+)@/gi,(_match,scheme,user,secret)=>scheme+removed(user+':'+secret)+'@');
+ value=value.replace(userinfo,(match,scheme,user,secret)=>mailtoLink(user)?match:scheme+removed(user+':'+secret)+'@');
  value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?removed(url):url);
  // Opaque diagnostic values have no established public-resource meaning.
  // Omit them as potential credentials; unknown schema/JSON/assignment names
@@ -84,4 +95,38 @@ export function omitSupportCredentials(table,column,value,onOmit){
   return removed(token);
  });
  return {value,omitted};
+}
+
+// A credential removed from one support text is removed wherever else the project's
+// rendered or derived text repeats it ("enter the manual key `…`"). The exporter
+// collects these values first; length matches the secret scan's searched values.
+export const repeatedCredentialMinimum=12;
+export function knownCredentials(secrets){
+ // Index both stored forms by a fixed-length prefix: one linear pass per string.
+ const forms=new Map();
+ for(const secret of secrets)if(secret.length>=repeatedCredentialMinimum)for(const form of new Set([secret,JSON.stringify(secret).slice(1,-1)])){
+  const key=form.slice(0,repeatedCredentialMinimum);if(!forms.has(key))forms.set(key,[]);forms.get(key).push(form);
+ }
+ for(const list of forms.values())list.sort((a,b)=>b.length-a.length);
+ return forms;
+}
+export function omitKnownCredentials(value,known,onOmit){
+ if(!known.size||value===null||value===undefined)return {value,omitted:0};
+ let omitted=0;
+ const clean=v=>{
+  if(typeof v==='string'){
+   let result='',last=0;
+   for(let i=0;i+repeatedCredentialMinimum<=v.length;){
+    const form=known.get(v.substr(i,repeatedCredentialMinimum))?.find(f=>v.startsWith(f,i));
+    if(!form){i++;continue;}
+    result+=v.slice(last,i)+'<redacted>';i+=form.length;last=i;omitted++;onOmit?.(form);
+   }
+   return last?result+v.slice(last):v;
+  }
+  if(Array.isArray(v))return v.map(clean);
+  if(v&&typeof v==='object')return Object.fromEntries(Object.entries(v).map(([key,item])=>[key,clean(item)]));
+  return v;
+ };
+ const cleaned=clean(value);
+ return {value:omitted?cleaned:value,omitted};
 }

@@ -86,12 +86,13 @@ test('project snapshot → attachment bytes → native import → safe replay', 
     const {getPlatformProxy}=await import('wrangler');const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(persist,'v3')}});
     const native={};
     try{
-      const expected={projects:2,users:1,memberships:2,contacts:4,conversations:4,messages:8,conversation_notes:2,media:2,knowledge_categories:6,knowledge_articles:4,knowledge_article_categories:6,macros:2,project_settings:2,knowledge_datasets:4,knowledge_documents:2,context_insights:4,context_tracked_events:2,local_devices:2,local_grants:2,local_device_settings:2,local_jobs:2,local_events:2,email_settings:2,public_project_aliases:2};
+      const expected={projects:2,users:1,memberships:2,contacts:4,conversations:4,messages:8,conversation_notes:2,media:2,knowledge_categories:6,knowledge_articles:4,knowledge_article_categories:6,macros:2,project_settings:2,knowledge_datasets:4,knowledge_documents:2,context_insights:4,context_tracked_events:4,local_devices:2,local_grants:2,local_device_settings:2,local_jobs:2,local_events:2,email_settings:2,public_project_aliases:2};
       for(const [table,count] of Object.entries(expected)){const row=await proxy.env.DB.prepare(`SELECT COUNT(*) n FROM ${table}`).first();native[table]=row.n;assert.equal(row.n,count,table);}
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM knowledge_categories WHERE is_published=0').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM knowledge_articles WHERE status=\'draft\'').first()).n,2);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM messages WHERE content LIKE \'%Internal only%\' OR content LIKE \'Removed duplicate%\'').first()).n,0);
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM conversation_notes WHERE content LIKE \'%Internal only.%\'').first()).n,2);
+      assert.equal((await proxy.env.DB.prepare("SELECT COUNT(*) n FROM messages WHERE instr(content,'Reset password: https://')>0 AND instr(content,'.example.test/password/reset (never share <redacted>)')>0").first()).n,2,'public links stay; repeated credentials do not');
       assert.equal((await proxy.env.DB.prepare('SELECT COUNT(*) n FROM contacts WHERE email LIKE \'preferred@%\'').first()).n,2);
       await assertMappedBusinessState(proxy.env,sources,files);
       assert.equal((await proxy.env.DB.prepare("SELECT COUNT(*) n FROM local_devices WHERE worker_ready_at IS NULL AND revoked_at IS NOT NULL").first()).n,2,'imported devices carry no authority');

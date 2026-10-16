@@ -1,6 +1,6 @@
 import {hasTransportCredentials,transportObject,hasBasicAuthorization} from './transport-secrets.mjs';
 import {opaqueCredentialShape,publicConfigurationValue,publicConfigurationName} from './references.mjs';
-import {hasCredentialAssignment,isRedactedCredentialField} from './text-policy.mjs';
+import {hasCredentialAssignment,isRedactedCredentialField,mailtoLink} from './text-policy.mjs';
 import {credentialColumns,skippedTables,structuredOmissions} from './scope.mjs';
 
 const secretName = /key|secret|token|password|hash|salt|credential|encrypt/i;
@@ -43,7 +43,7 @@ function secretString(value, storageIdentifier = false) {
     || /-----BEGIN [A-Z ]*(?:PRIVATE KEY|ENCRYPTED)/.test(value)
     || /\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/.test(value)
     || /\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/.test(value)
-    || /[a-z][a-z0-9+.-]*:\/\/[^\s/@:]+:[^\s/@]+@/i.test(value)
+    || [...value.matchAll(/[a-z][a-z0-9+.-]*:\/\/([^\s/@:]+):[^\s/@]+@/gi)].some(m => !mailtoLink(m[1]))
     || /\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\b/.test(value)
     || /\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/.test(value)
     || /\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/.test(value)

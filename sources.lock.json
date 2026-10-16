@@ -4131,7 +4131,7 @@
       "executable": false
     },
     "src/modules/legacy-import/map-knowledge.ts": {
-      "sha256": "7b0ae245ce70eac0ba28abd158cae7a6cd27d25663d3b8f5c364fc6c36727041",
+      "sha256": "63429b4a2c9e35ce6f10b82a5c199a83367171ea888c2e6c27c5cb765c7bf31e",
       "executable": false
     },
     "src/modules/legacy-import/map-operations.ts": {
@@ -8379,7 +8379,7 @@
       "executable": false
     },
     "tests/legacy-export/assertions.mjs": {
-      "sha256": "ff5a78a252e91778e0d3267d1761a906980c4785cc6f33bfe28bc1e218df56c9",
+      "sha256": "9a84236b9f16252f32e111004c21f42d60439912f4cc5dedbeff7df6150b98a3",
       "executable": false
     },
     "tests/legacy-export/extended-fixture.mjs": {

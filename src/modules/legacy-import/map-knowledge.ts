@@ -13,12 +13,19 @@ function excludedUrls(value:unknown,legacy:boolean){
  if(!Array.isArray(urls)||urls.some(url=>typeof url!=='string'))throw new Error('Invalid legacy dataset excluded_urls')
  return stable(urls)
 }
+function crawlSettings(r:Row,legacy:boolean){
+ const excluded=excludedUrls(r.excluded_urls,legacy),depth=crawlLimit(r.max_crawl_depth,'max_crawl_depth'),pages=crawlLimit(r.max_crawl_pages,'max_crawl_pages')
+ // Legacy datasets with a URL came from the crawler. Preserve its input so a
+ // published import remains editable/refreshable through the native interface.
+ const input=r.source_input??(legacy&&r.url?stable({crawl:{url:r.url,excluded_urls:excluded?JSON.parse(excluded):[],max_crawl_depth:depth,max_crawl_pages:pages}}):null)
+ return {source_input:input,excluded_urls:excluded,max_crawl_depth:depth,max_crawl_pages:pages}
+}
 export function mapKnowledge(table:string,r:Row,b:LegacyBundle):MappedRow[]|undefined {
  const created=timestamp(r.created_at),project=r.project_id&&String(r.project_id),id=r.id&&String(r.id);const one=(table:string,row:Row,key=['id'],hold?:string):MappedRow[]=>[{table,row,key,hold}]
  switch(table){
  case 'ais':case 'ai_profiles':{const defaults=(b.tables.ai_defaults||[]).find(d=>d.type===r.type);return one('ai_profiles',{id,project_id:project,name:text(r.name,'ais.name'),role:r.role||defaults?.role||r.type||'assistant',prompt:r.prompt||r.instructions||defaults?.prompt||'',model:text(r.model||b.source.aiModel,'ais.model or source.aiModel explicit selected model'),is_enabled:r.is_enabled===false||r.is_enabled===0?0:1,is_animated:r.is_animated?1:0,avatar_url:r.avatar_url??null,created_at:created})}
  case 'ai_defaults':return one('ai_defaults',{id,role:r.role||r.type,name:r.name||r.type,prompt:r.prompt||'',model:text(r.model||b.source.aiModel,'ai_defaults.model or source.aiModel'),created_at:created})
- case 'datasets':case 'knowledge_datasets':{const files=publishedFiles(r,b);const version=r.published_version||(files.length?`legacy-version:${id}`:null);const mapped=one('knowledge_datasets',{id,project_id:project,name:r.name||r.title||id,status:version?'published':'empty',published_version:version,created_at:created,url:r.url??null,source_input:r.source_input??null,excluded_urls:excludedUrls(r.excluded_urls,table==='datasets'),max_crawl_depth:crawlLimit(r.max_crawl_depth,'max_crawl_depth'),max_crawl_pages:crawlLimit(r.max_crawl_pages,'max_crawl_pages')});if(files.length&&!r.published_version)mapped.push({table:'knowledge_versions',row:{id:version,dataset_id:id,fingerprint:`legacy:${b.source.revision}:${id}`,created_at:created,semantic:0},key:['id']});return mapped}
+ case 'datasets':case 'knowledge_datasets':{const files=publishedFiles(r,b);const version=r.published_version||(files.length?`legacy-version:${id}`:null);const mapped=one('knowledge_datasets',{id,project_id:project,name:r.name||r.title||id,status:version?'published':'empty',published_version:version,created_at:created,url:r.url??null,...crawlSettings(r,table==='datasets')});if(files.length&&!r.published_version)mapped.push({table:'knowledge_versions',row:{id:version,dataset_id:id,fingerprint:`legacy:${b.source.revision}:${id}`,created_at:created,semantic:0},key:['id']});return mapped}
  case 'dataset_files':{const dataset=(b.tables.datasets||b.tables.knowledge_datasets||[]).find(d=>String(d.id)===String(r.dataset_id));if(!dataset||!publishedFiles(dataset,b).some(file=>String(file.id)===id))return [];return one('knowledge_documents',{id,version_id:dataset.published_version||`legacy-version:${r.dataset_id}`,url:r.url||r.original_url||`legacy:${id}`,title:r.title||'',content:r.markdown||r.content})}
  case 'knowledge_versions':return one(table,columns(r,['id','dataset_id','fingerprint','created_at','semantic']))
  case 'knowledge_documents':return one(table,columns(r,['id','version_id','url','title','content']))

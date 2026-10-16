@@ -66,6 +66,7 @@ export async function assertMappedBusinessState(env,sources,files) {
       assert.deepEqual(JSON.parse(actual.excluded_urls),dataset.excluded_urls.split(/\r?\n/).filter(Boolean),'A22 crawl exclusions');
       assert.equal(actual.max_crawl_depth,dataset.max_crawl_depth,'A22 crawl depth, including zero');
       assert.equal(actual.max_crawl_pages,dataset.max_crawl_pages,'A22 crawl pages, including zero');
+      assert.deepEqual(JSON.parse(actual.source_input),{crawl:{url:dataset.url,excluded_urls:JSON.parse(actual.excluded_urls),max_crawl_depth:dataset.max_crawl_depth,max_crawl_pages:dataset.max_crawl_pages}},'A22 retained crawl input keeps imported published sources editable and refreshable');
     }
     const email=await env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(project.id).first();
     assert.ok(email,'C03 mailbox created');

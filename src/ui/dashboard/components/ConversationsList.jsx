@@ -72,7 +72,9 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
         <div className={ `sidebar conversation-inbox px-4 py-3${isScrolled ? ' is-scrolled' : ''}` } aria-hidden={ hideBehindConversation ? 'true' : undefined } inert={ hideBehindConversation || undefined }>
             <InboxViews />
             <div className="conversation-inbox-header">
-                <InboxSearch query={ searchQuery } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } /><InboxTagFilter projectId={settings.isGlobalInbox?null:settings.project?.id} value={String(searchParams.tag||'')} onChange={tag=>navigate({search:{...liveSearch,tag:tag||undefined}})}/>
+                {/* Follow the URL immediately, including Back before a read settles.
+                    A completed view read must not overwrite newer search typing. */}
+                <InboxSearch query={ liveSearch.q == null ? '' : String(liveSearch.q) } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } /><InboxTagFilter projectId={settings.isGlobalInbox?null:settings.project?.id} value={String(searchParams.tag||'')} onChange={tag=>navigate({search:{...liveSearch,tag:tag||undefined}})}/>
                 <ConversationsFilter assignment={ filter.assigned_to } searchScope={ filter.search_scope || searchParams.search_scope || 'all' } searching={ Boolean(searchQuery.trim()) } onChange={ changes => navigate({search:{...liveSearch,...changes}}) } />
             </div>
             <div className="conversation-list-items" ref={ setListRefs }>

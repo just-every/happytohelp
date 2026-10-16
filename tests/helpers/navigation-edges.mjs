@@ -1,14 +1,27 @@
 import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+
+const require=createRequire(import.meta.url);
+const startRequire=createRequire(require.resolve('@tanstack/react-start/package.json'));
+const {fromJSON}=createRequire(startRequire.resolve('@tanstack/start-client-core/package.json'))('seroval');
 
 export async function rapidTenantBack(page,alpha,beta) {
   const nav=page.getByRole('navigation',{name:'Main navigation'}),before=page.url();
   const origin=await page.evaluate(()=>performance.timeOrigin);
   let release;
   const gate=new Promise(resolve=>{release=resolve;});
-  const pattern=`**/api/management/bootstrap?projectId=${beta.id}`;
+  // Decode Start's GET envelope so the gate follows the bootstrap input,
+  // independently of the generated server function's identifier.
+  const pattern=url=>{
+    if(!url.pathname.startsWith('/_serverFn/'))return false;
+    const payload=url.searchParams.get('payload');
+    if(!payload)return false;
+    const {data}=fromJSON(JSON.parse(payload));
+    return data?.projectId===beta.id&&data.inbox==='project';
+  };
   await page.route(pattern,async route=>{await gate;await route.continue().catch(error=>{if(!/already handled|closed|cancel/i.test(error.message))throw error;});});
   try {
-    const pending=page.waitForRequest(request=>request.url().includes(`/api/management/bootstrap?projectId=${beta.id}`));
+    const pending=page.waitForRequest(request=>request.method()==='GET'&&pattern(new URL(request.url())));
     await nav.getByRole('button',{name:/Switch workspace:/}).click();
     await nav.getByRole('button',{name:'Navigation Beta',exact:true}).click();
     const request=await pending;

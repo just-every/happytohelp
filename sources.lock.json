@@ -8899,7 +8899,7 @@
       "executable": false
     },
     "tests/move-in/helpscout-browser-flow.mjs": {
-      "sha256": "24216b6ec068fb912b7661d0cb6355a881763c7ad01ac210ad92e2ba6678eeb1",
+      "sha256": "005bb7946e448fec871cf4ab70b16aa3a0b12e4bf2b9ae4b81618adc0592e20d",
       "executable": false
     },
     "tests/move-in/helpscout-fixtures.mjs": {

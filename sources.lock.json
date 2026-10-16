@@ -3463,7 +3463,7 @@
       "executable": false
     },
     "src/modules/identity/workspace-defaults.ts": {
-      "sha256": "5131961470e1e4b77f983fdbf3164cdf42e42c4099dab3245e4647893820508f",
+      "sha256": "fa7009aa26a50e09f473cb6422c247c6d93943d2948a832bec571d0b2377608e",
       "executable": false
     },
     "src/modules/import-kit/CONTRACT.md": {
@@ -7247,7 +7247,7 @@
       "executable": false
     },
     "src/ui/native/pages/MoveInReview.jsx": {
-      "sha256": "a71a28b3dd86880ed4191af23e1db048249ca1e1a854ff06aca0c8a40a922074",
+      "sha256": "c60aaa034304f14ee3c9e02c4d8e76c4c355f6cc29b0dd6d9f03ebd591178ad7",
       "executable": false
     },
     "src/ui/native/pages/project-parity.css": {
@@ -7671,7 +7671,7 @@
       "executable": false
     },
     "tests/activation/browser-ui.mjs": {
-      "sha256": "f2bbd3e88e77920ea6ba7a9cd868d4dd9dfe9835bf5e8e80ba09b1814aa74811",
+      "sha256": "086d2f4b09128ccc8ece1d27b60ee73bb1fd41e4f3395f2ec044414129c7e522",
       "executable": false
     },
     "tests/activation/browser-widget-probes.mjs": {
@@ -8555,7 +8555,7 @@
       "executable": false
     },
     "tests/helpers/ui-readiness-editor.mjs": {
-      "sha256": "cdd7b0da6a9aa6306fa82847e8d9c84215fa54766480aff7bd490219d3d18bc4",
+      "sha256": "0692c101428ae9eddf725581d9b68be5e07eb24a5553d24922a2e658b4441ee3",
       "executable": false
     },
     "tests/helpers/ui-readiness-transitions.mjs": {
@@ -8627,7 +8627,7 @@
       "executable": false
     },
     "tests/identity-setup.mjs": {
-      "sha256": "97545accccf3116916376dcfe885b756d960dc44f3f612d23e552717a827c35d",
+      "sha256": "e2386fbafc6a9aef0d077da39dd8a391354d37a70221d66afcb7fb8030747cba",
       "executable": false
     },
     "tests/identity.mjs": {

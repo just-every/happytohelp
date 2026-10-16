@@ -19,11 +19,10 @@ const domainOf = (email: string) => {
     const address = email.trim().toLowerCase();
     return address.slice(address.lastIndexOf('@') + 1);
 };
-/** The company domain of an email address, or null for a free-mail provider, a reserved name such as the local trial's
- * `owner@<checkout folder>.test`, or a malformed address. */
+/** The company domain of an email address, or null for a free-mail provider or a malformed address. */
 export function companyDomain(email: string): string | null {
     const domain = domainOf(email);
-    return email.includes('@') && domain.includes('.') && !freeMail.has(domain) && !freeMailByCountry.test(domain) && !reservedTld.has(domain.split('.').pop()!) ? domain : null;
+    return email.includes('@') && domain.includes('.') && !freeMail.has(domain) && !freeMailByCountry.test(domain) ? domain : null;
 }
 /** The host of a website the public internet can reach: a named host, not an address, `localhost` or an internal name. */
 export function publicHost(website: string): string | null {
@@ -51,7 +50,8 @@ function nameFromHost(host: string): string | null {
 }
 /** The workspace name for a website and owner email: the public website's, else the company email domain's, else the fallback. */
 export function deriveWorkspaceName(website: string, email: string): string {
-    const host = publicHost(website), domain = companyDomain(email);
+    // The local trial's owner is owner@<checkout folder>.test: a .test address names no business.
+    const host = publicHost(website), domain = companyDomain(email)?.endsWith('.test') ? null : companyDomain(email);
     if (host && deploymentHost(host)) return FALLBACK_WORKSPACE_NAME;
     return ((host && nameFromHost(host)) || (domain && nameFromHost(domain)) || FALLBACK_WORKSPACE_NAME).slice(0, 200);
 }

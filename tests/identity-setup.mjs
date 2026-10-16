@@ -67,14 +67,14 @@ try {
  try{await sendWelcomeEmail(env,{projectId:owner.projectId,workspaceName:'Example',ownerEmail:winner})}finally{globalThis.fetch=localFetch}
  assert.equal(localProviderCalls,0)
  assert.equal((await db.prepare('SELECT count(*) n FROM email_deliveries').first()).n,0)
- assert.equal((await db.prepare('SELECT name FROM projects').first()).name,FALLBACK_WORKSPACE_NAME,'a reserved domain such as .invalid never names the workspace')
+ assert.equal((await db.prepare('SELECT name FROM projects').first()).name,'Example')
  assert.equal((await db.prepare('SELECT name FROM users').first()).name,deriveOwnerName(winner))
  // Provisioning adds the starter assistant, proposed sender and site read beside the colour and the derived marker.
  const settings=JSON.parse((await db.prepare('SELECT settings_json FROM project_settings').first()).settings_json),starter=await db.prepare('SELECT id,is_enabled FROM ai_profiles').first()
- assert.deepEqual([settings.primary_color,settings.derived],['#713ee0',{name:FALLBACK_WORKSPACE_NAME,colour:true}])
+ assert.deepEqual([settings.primary_color,settings.derived],['#713ee0',{name:'Example',colour:true}])
  assert.deepEqual([settings.default_visitor_ai_id,starter.is_enabled],[starter.id,1])
  assert.equal(deriveWorkspaceName('https://www.acme-widgets.co.uk','h2h-fixture-website' + '@' + 'gmail.com'),'Acme Widgets')
- assert.equal(deriveWorkspaceName('http://127.0.0.1:4729','ada' + '@' + 'northstar.io'),'Northstar')
+ assert.equal(deriveWorkspaceName('http://127.0.0.1:4729','ada@northstar.example'),'Northstar')
  assert.equal(deriveWorkspaceName('http://127.0.0.1:4729','owner@repo.test'),FALLBACK_WORKSPACE_NAME,'a local trial is not named after its checkout folder')
  assert.equal(deriveWorkspaceName('http://localhost:3000','h2h-fixture-personal' + '@' + 'gmail.com'),FALLBACK_WORKSPACE_NAME)
  assert.equal(deriveOwnerName('ada.lovelace+work@northstar.example'),'Ada Lovelace')

@@ -486,7 +486,7 @@ The platform admission index's `move_in_contact_keys.email_digest` remains lazy 
 
 ## Current implementation status
 
-Baseline: the 16 October inventory code audit at `c1aca8a2ccb2802411a95732239733f62264b81f`; current source inspected at `9e32211aef8bf9e44dbb6b622d4d35c873a5edc8`. Repeated vendor inventory rows map to the same buyer behavior. Expanded clauses are partial when existing code covers only part of the new obligation. Done requires implementation plus a cited test; missing means no implementation of the named behavior was located. Local, provider-fixture, hosted and regulated qualification remain distinct.
+Baseline: the 16 October inventory code audit at `c1aca8a2ccb2802411a95732239733f62264b81f`; current source inspected at `5592ec9398fcca084ba1feba88af809a74797dfa`. Repeated vendor inventory rows map to the same buyer behavior. Expanded clauses are partial when existing code covers only part of the new obligation. Done requires implementation plus a cited test; missing means no implementation of the named behavior was located. Local, provider-fixture, hosted and regulated qualification remain distinct.
 
 | Clause | Status | Evidence path and remaining scope |
 | --- | --- | --- |

@@ -2,7 +2,7 @@
 
 The target is a complete US customer support help desk and AI agent replacing Zendesk, Intercom/Fin, Help Scout or Freshdesk: omnichannel intake, shared queue and service commitments, self-service, business-system actions, operational reporting and verified customer recovery. [CONTRACT.md](CONTRACT.md) contains the named requirements. Every clause below has its required journey, current status and repository evidence; missing/partial requirements remain build obligations.
 
-The status assesses implementation visible at `9e32211aef8bf9e44dbb6b622d4d35c873a5edc8`, starting from the pinned 16 October code audit. Done is not a fresh execution, hosted deployment or provider-quality claim. Provider-boundary fakes belong only in tests. Live channels, paid models, commerce actions and compliance require separately identified evidence; do not turn an uncertain external outcome into success or automatically replay it.
+The status assesses implementation visible at `5592ec9398fcca084ba1feba88af809a74797dfa`, starting from the pinned 16 October code audit. Done is not a fresh execution, hosted deployment or provider-quality claim. Provider-boundary fakes belong only in tests. Live channels, paid models, commerce actions and compliance require separately identified evidence; do not turn an uncertain external outcome into success or automatically replay it.
 
 The homepage evidence (`tests/homepage-browser.mjs`, `tests/public-site-runtime.mjs`,
 `tests/homepage-source.mjs`) must cover the exact “Customer Support, Solved.”

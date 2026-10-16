@@ -6851,7 +6851,7 @@
       "executable": false
     },
     "src/ui/native/DashboardClient.jsx": {
-      "sha256": "d23d8be69c5bf091822b29c3711810be66733d5edbab0d1697d73a7d212941fe",
+      "sha256": "dc3840f897a4e4bb92d3cb0a47157ecc812bd2cff6b242a58ffdaeba92f404dc",
       "executable": false
     },
     "src/ui/native/delegation-loader.ts": {
@@ -6915,7 +6915,7 @@
       "executable": false
     },
     "src/ui/native/InboxPage.jsx": {
-      "sha256": "d8466dd121decc706461d74bd55f0eeaa95f4c0f8a9c932edeb133e537f8d847",
+      "sha256": "9ed0f10c301eb85ecd0ec3450365ff9a4053a227dfc27da51a084ae031abc04f",
       "executable": false
     },
     "src/ui/native/initial-inbox-list.d.ts": {
@@ -7307,7 +7307,7 @@
       "executable": false
     },
     "src/ui/native/workspace-scope.ts": {
-      "sha256": "6b707302e53a11201401a18e6d5140656724f18e689e87796805958f1d9c425b",
+      "sha256": "032e096d0669952f1f60336b175cf1cb5ea86e9de9c803cdbedda379ac3993c4",
       "executable": false
     },
     "src/ui/native/WorkspacePages.jsx": {
@@ -9319,7 +9319,7 @@
       "executable": false
     },
     "tests/workspace-shell-browser.mjs": {
-      "sha256": "354d353342081d9148d26ebc8eb018152a89906af6e44f4d1c7056a3eb8dec74",
+      "sha256": "01b694d31a3d290678e2e821e5d42566dd723a852b208fa3fff4eb60838dda60",
       "executable": false
     },
     "tsconfig.json": {

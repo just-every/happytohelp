@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "parent": null,
   "edition": "just-every/happytohelp",
-  "manifest": "c67219d9e6a78461c5c6e9202d95a64bd087dc7e922150f4944e598f9c0abbd9",
+  "manifest": "a2a0144e00e53d9732edb47e50f30f90c99ad32a823b081c21a58c8b45ff3f9e",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -338,6 +338,7 @@
           "migrations/0085_ai_context_guards.sql",
           "migrations/0095_public_site.sql",
           "migrations/090_legacy_import.sql",
+          "migrations/123_inbox_message_search.sql",
           "tests/email-provider.mjs",
           "tests/email-worker.mjs",
           "tests/github-integration.mjs",
@@ -1569,7 +1570,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "c67219d9e6a78461c5c6e9202d95a64bd087dc7e922150f4944e598f9c0abbd9",
+      "sha256": "a2a0144e00e53d9732edb47e50f30f90c99ad32a823b081c21a58c8b45ff3f9e",
       "executable": false
     },
     "HANDOVER.md": {
@@ -2070,6 +2071,10 @@
     },
     "migrations/121_move_in_categories.sql": {
       "sha256": "9d8d8c29aa5a8ea317caf378c96a6b80869f6b8f4c37e5c11557ad5b3c4f3f62",
+      "executable": false
+    },
+    "migrations/123_inbox_message_search.sql": {
+      "sha256": "62819acb6da4d4b5b5b608256c198e3af33577e34de4c626d989e254eb85ce41",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -4332,6 +4337,10 @@
       "sha256": "16ca85a0b62f8c4adcd0feed1a1a4096dc9834f09860ef99d8db0da4dcb13263",
       "executable": false
     },
+    "src/modules/management/inbox-filters.ts": {
+      "sha256": "7e58411b9747dcc00522e290f22310095216bb11027bf4f9a795106c7de52e3e",
+      "executable": false
+    },
     "src/modules/management/inbox-search.ts": {
       "sha256": "526535d1a64d2f9a9313e697e8afabdb92a8d6c17575812c7ea6eed1ac00ffab",
       "executable": false
@@ -4378,6 +4387,10 @@
     },
     "src/modules/management/README.md": {
       "sha256": "b47a1eb78453db98a1accbe6ee9d1c62522ccb1214dea1f2ebf8989b9223bdf6",
+      "executable": false
+    },
+    "src/modules/management/resource-list.ts": {
+      "sha256": "4996dd03d04b3982ec434e3cbf1a3d1f18179d22a5751e61775f9c13b7617b6e",
       "executable": false
     },
     "src/modules/management/resources.ts": {
@@ -5538,6 +5551,10 @@
     },
     "src/ui/dashboard/components/conversationRequestLifecycle.jsx": {
       "sha256": "333f2ddb3cc5a48a4fac5ff7d09565d86f05d62f511145f47683349f8dd39012",
+      "executable": false
+    },
+    "src/ui/dashboard/components/ConversationsFilter.jsx": {
+      "sha256": "0e1fd6fb79c20ba8d45a5e816dac98a2c9903b96247d8e8e73e198aa57e954ba",
       "executable": false
     },
     "src/ui/dashboard/components/ConversationSidebar.jsx": {
@@ -6834,6 +6851,10 @@
     },
     "src/ui/native/pages/knowledge/source-origin.jsx": {
       "sha256": "82ea831adabaad012fdf845527b0b5d8dabb426f1aa938fdbfbfe3af02f448bc",
+      "executable": false
+    },
+    "src/ui/native/pages/knowledge/use-article-search.js": {
+      "sha256": "6009be6fd52539f1ff8cef82105f75ccb192be14566960e84fe5cba26c0f1bd0",
       "executable": false
     },
     "src/ui/native/pages/KnowledgePage.jsx": {

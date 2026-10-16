@@ -8,18 +8,42 @@ let messageHandler = null;
 let pendingTimer = false;
 let pingTimer = false;
 let pingTimerAction = false;
+let analysisRetries = 0;
+let lastSentTime = 0;
 let widgetState = 'closed';
 let collectorEnabled = true
 let actionCallback = [];
 let readyCallback = [];
+let analysisCallback = [];
 let isReady = false;
 
 const ACTIVE_PING_INTERVAL = 50000;
 const ACTION_PING_INTERVAL = 4100;
+const MAX_ACTION_PING_INTERVAL = 60000;
+const ANALYSIS_RETRIES = 5;
+// Activity is batched: one visitor's tabs share a per-minute request allowance.
+const SEND_INTERVAL = 2000;
+
+// The server reports what happened to the activity it received. Only an analysis that
+// was due but blocked by a running or just-finished one is asked for again, with backoff.
+function handleAnalysis(result, retry = false) {
+    const reason = result?.job?.reason;
+    if(reason === 'queued') analysisCallback.forEach(fn => fn());
+    if(reason !== 'schedule_gate') {
+        clearTimeout(pingTimerAction);
+        return;
+    }
+    if(!retry) analysisRetries = 0;
+    if(analysisRetries >= ANALYSIS_RETRIES) return;
+    clearTimeout(pingTimerAction);
+    pingTimerAction = setTimeout(runPing, Math.min(ACTION_PING_INTERVAL * 2 ** analysisRetries, MAX_ACTION_PING_INTERVAL));
+    analysisRetries++;
+}
 
 function sendPending() {
     if(messageHandler && pendingActions.length) {
-        messageHandler('collector', pendingActions);
+        lastSentTime = Date.now();
+        Promise.resolve(messageHandler('collector', pendingActions)).then(result => handleAnalysis(result));
         pendingActions = [];
 
         // Let any pending requests know we have sent context
@@ -37,7 +61,7 @@ function sendPing(type) {
     if(messageHandler) {
         let sentPing = false;
         if(type === 'action' && widgetState !== 'opened' && collectorEnabled) {
-            messageHandler('pingAction');
+            Promise.resolve(messageHandler('pingAction')).then(result => handleAnalysis(result, true));
             sentPing = true;
         }
         if(type === 'active') {
@@ -71,7 +95,7 @@ function writeAction(action, immediate = false, clean = false) {
             sendPending();
         }
         else {
-            pendingTimer = setTimeout(sendPending, 50);
+            pendingTimer = setTimeout(sendPending, Math.max(50, lastSentTime + SEND_INTERVAL - Date.now()));
         }
     }
 }
@@ -87,21 +111,14 @@ function recordAction(action, immediate = false, clean = false) {
 
 function runPing() {
     sendPing('action');
-    if(pingTimerAction) clearTimeout(pingTimerAction);
-    pingTimerAction = setTimeout(runPing, ACTION_PING_INTERVAL);
 }
 
 function setMessageHandler(handler) {
     messageHandler = handler;
     if (!handler) { clearTimeout(pendingTimer); clearTimeout(pingTimer); clearTimeout(pingTimerAction); pendingActions = []; return; }
     sendPending();
-    if(collectorEnabled) {
-        runPing();
-    }
-    else {
-        if(pingTimer) clearTimeout(pingTimer);
-        pingTimer = setTimeout(() => sendPing('active'), ACTIVE_PING_INTERVAL);
-    }
+    if(pingTimer) clearTimeout(pingTimer);
+    pingTimer = setTimeout(() => sendPing('active'), ACTIVE_PING_INTERVAL);
 }
 
 function setWidgetState(newState) {
@@ -118,6 +135,11 @@ function onAction(fn) {
     return () => { actionCallback = actionCallback.filter(callback => callback !== fn); };
 }
 
+function onAnalysisQueued(fn) {
+    analysisCallback.push(fn);
+    return () => { analysisCallback = analysisCallback.filter(callback => callback !== fn); };
+}
+
 function onReady(fn) {
     if(isReady || !collectorEnabled) {
         fn();
@@ -132,10 +154,13 @@ function resetCollectorState() {
     lastAction = null;
     lastActionWriteTime = null;
     pendingTimer = pingTimer = pingTimerAction = false;
+    analysisRetries = 0;
+    lastSentTime = 0;
     widgetState = 'closed';
     collectorEnabled = false;
     actionCallback = [];
     readyCallback = [];
+    analysisCallback = [];
     isReady = false;
 }
 
@@ -149,5 +174,6 @@ export {
     setWidgetState,
     setCollectorEnabled,
     onAction,
+    onAnalysisQueued,
     onReady,
 };

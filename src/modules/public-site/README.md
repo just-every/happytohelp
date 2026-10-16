@@ -23,6 +23,22 @@ maintained Markdown renderer (raw HTML disabled), and draft/deleted projects sta
 private. The importer maps retained legacy project slugs into
 `public_project_aliases` when preserving old help links.
 
+`help-host.ts` also serves the legacy host-root forms `/`, `/search?keyword=...`
+and `/{article_slug}` when deployment explicitly supplies `PUBLIC_HELP_HOSTS` as
+JSON mapping exact lowercase hostnames to retained project slugs or native IDs.
+The map has no default hosts: it does not derive a hostname from a slug, trust
+forwarding headers or use the editable custom-domain setting as proof of domain
+ownership. Unknown or deleted projects and draft articles retain the same publication
+fences as path-based centers. The application hostname in `APP_ORIGIN` is
+excluded, so its homepage and `/run` retain their existing handlers. Hostnames
+are compared with the request URL hostname (no scheme, port, path, wildcard or
+suffix matching); a port does not define a separate host. Only GET/HEAD root,
+search and single article paths are eligible; reserved application and API paths
+retain their normal handlers. The server calls `publicHelpHostResponse` after
+static assets and before application dispatch, applying the ordinary public-site
+security/document headers to a returned response. This source change configures
+no real domains and performs no DNS or TLS work.
+
 Not-found responses are HTML with HTTP 404 inside the Help Center frame
 (`shell.ts`, `not-found.ts`), never an unstyled plain-text response. A known project with a missing or
 unpublished article gets the project's header and search with "Article not found"; the

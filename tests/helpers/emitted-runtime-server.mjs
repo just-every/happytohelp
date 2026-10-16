@@ -28,7 +28,7 @@ const runtime=new Miniflare(convertV4MiniflareOptions({
  resourcePersistencePath:join(persist,'v3'),
  resourceTmpPath:join(persist,'tmp'),
  workers:[{...options,...(process.env.H2H_TEST_OUTBOUND_FIXTURE?{outboundService:(await import(process.env.H2H_TEST_OUTBOUND_FIXTURE)).default}:{}),bindings:{...options.bindings,...JSON.parse(process.env.H2H_TEST_BINDINGS||'{}')},name:'happytohelp-native-isolated-test',modulesRoot,modules:[...modules.filter(module=>module.path===main),...modules.filter(module=>module.path!==main)]},...externalWorkers],
- logRequests:true,log:new Log(LogLevel.INFO),
+ unsafeTriggerHandlers:true,logRequests:true,log:new Log(LogLevel.INFO),
 }))
 let closing=false
 const close=async()=>{if(closing)return;closing=true;await runtime.dispose()}

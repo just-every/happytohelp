@@ -11,9 +11,9 @@ export default function AccountPage({projectId}) {
 
     const router=useRouter(),navigate=useNavigate();
 
-    const path='/api/management/profile';
+    const path='/api/management/profile'+(projectId?'?projectId='+encodeURIComponent(projectId):'');
     const [data,setData]=useState(null),[tab,setTab]=useState('general'),[error,setError]=useState(''),[saved,setSaved]=useState(false);
-    useEffect(()=>{nativeRequest(path).then(r=>setData(r.data||r)).catch(e=>setError(e.message));},[]);
+    useEffect(()=>{nativeRequest(path).then(r=>setData(r.data||r)).catch(e=>setError(e.message));},[path]);
     const change=(key,value)=>{markDirty();setSaved(false);setData(d=>({...d,[key]:value}));};
     const field=(name,label,type)=><Field key={name} {...{name,label,type}} value={data[name]} onChange={change}/>;
     const submit=async e=>{e.preventDefault();setError('');try{
@@ -24,7 +24,7 @@ export default function AccountPage({projectId}) {
     if(!data)return <Feedback error={error}/>;
     return <div className="workspace-settings project-account"><Feedback {...{error,saved}}/><SettingsTabs tab={tab} onChange={setTab} tabs={[["general","General"],["notifications","Notification"],["security","Security"]]}/><form onSubmit={submit}>
         {tab==='general'&&<Section title="Profile"><div className="project-avatar">{!data.avatar_url&&<span className="project-avatar-placeholder">{data.name?.slice(0,1)}</span>}<AvatarUpload projectId={projectId} value={data.avatar_url} onChange={value=>change('avatar_url',value)}/></div>{field('name','Name')}{field('email','Email','email')}<TimezoneField value={data.timezone} onChange={change}/></Section>}
-        {tab==='notifications'&&<Section title="Notifications">{field('is_notifiable_on_conversation_assignment','On conversation assigned','checkbox')}</Section>}
+        {tab==='notifications'&&<Section title="Notifications">{field('is_notifiable_on_conversation_assignment','On conversation assigned','checkbox')}{projectId&&<><p>For this workspace</p>{field('is_notified_on_unassigned_activity','Notify on unassigned conversation activity','checkbox')}</>}</Section>}
         {tab==='security'&&<Section title="Change your password">{field('current_password','Current password','password')}{field('password','New password','password')}{field('password_confirmation','Confirm password','password')}</Section>}
         <div className="settings-actions"><button className="btn btn-primary">Update</button></div>
     </form></div>;

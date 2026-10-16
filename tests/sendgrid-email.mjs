@@ -87,8 +87,8 @@ try {
   assert.equal(notified.state, 'sent')
   const notification = bodies.at(-1).body
   assert.deepEqual(notification.headers, loopHeaders)
-  const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts'),{resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts')
-  assert.equal((await resolveReplyRecipient(env,'p',inboundTarget(notification.reply_to.email).replyToken,'customer@example.com')).conversation_id,'c')
+  const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts'),{replyGrant}=await import('../src/modules/integrations/email-reply-address.ts')
+  assert.deepEqual({...await replyGrant(env,'p',inboundTarget(notification.reply_to.email).replyToken)},{conversation_id:'c',recipient:'customer@example.com'})
   assert.deepEqual(notification.personalizations[0].to, [{ email: 'customer@example.com' }])
   console.log('SendGrid transport: explicit selection, real envelope/reply address, accepted receipt, uncertain no-replay, rejection, and Resend selection passed')
 } finally {

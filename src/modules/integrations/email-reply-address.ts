@@ -24,6 +24,8 @@ export async function recipientReplyAddress(env:Env,address:unknown,projectId:st
  return `${base.slice(0,base.indexOf('@'))}+r.${token}@${base.slice(base.indexOf('@')+1)}`
 }
 
-export async function resolveReplyRecipient(env:Env,projectId:string,token:string,sender:string){
- return env.DB.prepare('SELECT conversation_id FROM email_reply_grants WHERE token_hash=? AND project_id=? AND recipient=?').bind(await hashToken(token),projectId,sender).first<{conversation_id:string}>()
+/** The thread and recipient a reply address was issued for. Whether the sender may
+ * use it is decided against that recipient by the inbound policy. */
+export async function replyGrant(env:Env,projectId:string,token:string){
+ return env.DB.prepare('SELECT conversation_id,lower(recipient) recipient FROM email_reply_grants WHERE token_hash=? AND project_id=?').bind(await hashToken(token),projectId).first<{conversation_id:string;recipient:string}>()
 }

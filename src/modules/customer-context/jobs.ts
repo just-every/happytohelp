@@ -24,7 +24,9 @@ export async function enqueueContextJob(env:Env,projectId:string,subjectId:strin
  if(kind==='monitoring'){
   await env.DB.prepare('INSERT INTO context_collectors(project_id,subject_id) VALUES(?,?) ON CONFLICT DO NOTHING').bind(projectId,subjectId).run()
   const collector=await env.DB.prepare('SELECT * FROM context_collectors WHERE project_id=? AND subject_id=?').bind(projectId,subjectId).first<any>()
-  if(collector.job_id||collector.actions_count-collector.analysis_actions<analysisInterval(collector.analysis_since_insight)||collector.last_run_at>now-4000)return {reason:'schedule_gate'}
+  // Not yet due waits for more activity; due but blocked by a current or just-finished run is retried by the widget.
+  if(collector.actions_count-collector.analysis_actions<analysisInterval(collector.analysis_since_insight))return {reason:'awaiting_activity'}
+  if(collector.job_id||collector.last_run_at>now-4000)return {reason:'schedule_gate'}
   // Visitor activity starts monitoring runs on installation keys; the project's daily ceiling bounds them.
   const reservation=await admitContextRun(env,projectId)
   if(!reservation)return {reason:'daily_ceiling'}

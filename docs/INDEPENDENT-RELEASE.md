@@ -69,9 +69,11 @@ Your data lives in two places: the D1 database (named `<prefix>-db`, where
 `<prefix>` is your resource name) and the R2 file bucket (`<prefix>-files`). To
 take a consistent backup:
 
-1. Stop application writes and background jobs. HappyToHelp has no built-in
-   pause switch, so choose a quiet time and make sure nothing is writing to the
-   installation while you export.
+1. Arrange a maintenance window and stop application traffic, scheduled jobs,
+   queue consumers and every other writer, including inbound webhooks, imports
+   and connected local agents. HappyToHelp has no built-in hosted pause switch;
+   a quiet inbox alone does not stop background work. Keep these stopped until
+   the helper has rebuilt search and you have finished the R2 copy below.
 2. Export the D1 database with this checkout's helper and pinned Wrangler:
 
    ```sh
@@ -87,34 +89,69 @@ take a consistent backup:
    with the provider what actually happened: restoring an old database must not
    repeat effects that already happened outside HappyToHelp.
 
-Cloudflare [cannot export a database containing virtual tables](https://developers.cloudflare.com/d1/best-practices/import-export-data/#known-limitations).
-The helper follows its documented drop/export/recreate workaround for the
-derived `inbox_message_search` cache only. It retains all message rows, business
-tables and triggers, restores the cache from its original schema even if export
-fails, and appends that schema and a rebuild to the SQL backup. Importing the
-backup into an empty database therefore restores conversation search too.
+Cloudflare [documents that export fails for databases containing virtual tables](https://developers.cloudflare.com/d1/best-practices/import-export-data/#known-limitations)
+and recommends dropping them, exporting, then recreating them. It also says a
+running export blocks database requests. Use the helper rather than plain
+`wrangler d1 export` for this installation.
+
+The helper reads the original `inbox_message_search` definition from
+`sqlite_master` and checks that it is an FTS5 table backed by `messages`. Before
+changing it, it writes the private recovery file described below. It then runs:
+
+```sql
+DROP TABLE IF EXISTS "inbox_message_search";
+```
+
+This removes only the derived search table and its FTS shadow tables. Message
+rows, business tables and message-maintenance triggers stay in place. Search is
+unavailable during the gap, and message writes can fail because those triggers
+still reference the missing search table. The entire drop/export/rebuild
+sequence spans separate requests; it is not an atomic transaction.
+
+After Wrangler exports the remaining database, the helper recreates the search
+table with its saved original `CREATE VIRTUAL TABLE` statement and runs:
+
+```sql
+INSERT INTO "inbox_message_search"("inbox_message_search") VALUES('rebuild');
+```
+
+The rebuild indexes the retained messages, including historical rows. The helper
+attempts this restoration even when export fails. After successful restoration
+it removes the recovery file, then appends the same original definition and
+rebuild to the SQL backup, after the authoritative data. Accept the backup only
+when the command exits successfully and prints **Private SQL backup written**.
 
 For a local backup, first stop dev/preview with `rer dev --stop` or
 `rer preview --stop`, then use `--local` in place of `--remote`. The helper
 checks local process ownership and holds the checkout's operation lock. An
 alternate local state directory can be selected with `--persist-to PATH`.
-For a remote backup, you must keep application traffic, scheduled jobs and all
-other writers stopped throughout the operation; the helper cannot enforce that.
+For a remote backup, the helper cannot enforce the maintenance window or check
+that writers are stopped. Keep it in place through recovery if anything fails.
 
 Before removing the cache, the helper writes a private
-`private-backup.sql.search-index-recovery.sql` file beside the output. It removes
-this file once the original database's cache is rebuilt. If a process or machine
-interruption leaves the file, keep writers stopped and execute it against the
-same database, for example:
+`private-backup.sql.search-index-recovery.sql` file beside the output. If an
+interruption or restoration failure leaves it behind, keep writers stopped and
+execute it against the same database and configuration, for example:
 
 ```sh
 pnpm exec wrangler d1 execute <prefix>-db --config wrangler.jsonc --remote --file private-backup.sql.search-index-recovery.sql
 ```
 
-Use `--local` and the same `--persist-to` for local recovery. After successful
-recovery, remove the recovery file and discard the interrupted SQL backup;
-export again to a new filename. Any failed export is incomplete and must not
-be restored. The SQL output is created with private file permissions.
+The recovery file drops any partially recreated search table, recreates its
+original definition and rebuilds it from `messages`. It is safe to rerun while
+writers remain stopped. Use `--local` and the same `--persist-to` for local
+recovery. After it succeeds, check index consistency against message content:
+
+```sh
+pnpm exec wrangler d1 execute <prefix>-db --config wrangler.jsonc --remote --command "INSERT INTO inbox_message_search(inbox_message_search,rank) VALUES('integrity-check',1);"
+```
+
+Then remove the recovery file and discard the interrupted SQL backup; export
+again to a new filename. If no recovery file remains but export failed, discard
+that SQL too: the index may have been restored before backup finalization
+failed. Any failed export is incomplete and must not be restored. The helper
+reserves new output/recovery files with private permissions and refuses to
+overwrite an existing backup.
 
 > [!WARNING]
 > A raw D1 export contains credentials. Keep it private: it is not safe to pass
@@ -137,7 +174,7 @@ complete export of your Cloudflare account.
 ## Restore from a backup
 
 1. Clean the export. Before importing **any** backup, run this script (it needs
-   Python 3):
+   Python 3 with SQLite FTS5 support):
 
    ```sh
    python3 scripts/independent/delegation-backup.py private-backup.sql restore.sql
@@ -146,7 +183,10 @@ complete export of your Cloudflare account.
    Import only the resulting `restore.sql`. It keeps your application records,
    migration history and content-free receipts. It removes the dedicated
    delegation grants, code hashes and consent replay material that let a
-   connected application act for a member.
+   connected application act for a member. It preserves the validated original
+   search definition, omits its derived shadow rows and appends the definition
+   and rebuild after the retained data. Its SQL has no transaction wrappers,
+   as D1 manages the import transaction.
 
 2. Restore into fresh resources that you control. Preserve:
    - the migration history
@@ -155,14 +195,24 @@ complete export of your Cloudflare account.
    - the bytes of every object
    - the `INTEGRATION_ENCRYPTION_KEY`, which stored integrations need
 
-3. Export the restored data again and compare its records and object hashes with
-   your backup before you let traffic in.
+   Keep traffic and writers stopped on the destination. Import the cleaned SQL
+   with `pnpm exec wrangler d1 execute <restore-db> --config <restore-config> --remote --file restore.sql`
+   into an empty database, then restore the matching R2 bytes and metadata.
+   Search is derived: the restore must recreate `inbox_message_search` with its
+   saved definition and run the `rebuild` statement above after loading messages.
+   Check search integrity with the command above against the destination; do
+   not restore FTS shadow tables as ordinary application data. Reapplying an
+   already recorded migration does not rebuild a missing index.
+
+3. Export the restored data again with `node scripts/export-d1.mjs`, selecting
+   the destination database/configuration and a new output filename. Compare
+   its records and object hashes with your backup before you let traffic in.
 
 4. Test that:
    - revoked access, and access from another workspace (foreign access), are
      still refused
    - the owner can sign in
-   - conversations reload
+   - conversations reload and search finds a known historical message
    - knowledge articles can be published
    - the widget's website origin check still works
    - website preview refuses access it should refuse

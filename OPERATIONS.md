@@ -90,6 +90,28 @@ export archives and `.rer/deploy` receipts survive. Active operations refuse.
 A second reset succeeds with an empty inventory, and subsequent setup creates
 an empty installation. Keep answers outside `.seed/installer` if needed after reset.
 
+### Hosted D1 and R2 backups
+
+Use this checkout's supported SQL export helper:
+
+```sh
+node scripts/export-d1.mjs --database <prefix>-db --config wrangler.jsonc --remote --output private-backup.sql
+```
+
+Arrange a maintenance window before starting: stop application traffic,
+scheduled jobs, queue consumers and other writers until the helper has finished
+rebuilding search and you have copied R2 objects with their metadata. There is
+no built-in hosted pause switch, and the helper cannot stop remote writers.
+It temporarily drops the derived conversation search table to satisfy D1's
+virtual-table export restriction; message rows and triggers remain in place.
+Plain `wrangler d1 export` is unsuitable for this database. Keep the SQL,
+configuration and encryption key private.
+
+[Back up your data](docs/INDEPENDENT-RELEASE.md#back-up-your-data) gives the
+complete procedure, interruption recovery and restore checks. For a local SQL
+backup, stop dev/preview and use `--local`; `rer export` above remains the local
+portable archive command.
+
 ## Deploy to your Cloudflare account
 
 Use the real `deploy.json` declaration with Base deploy-kit. The command derives
@@ -508,11 +530,11 @@ appear in the message's `origin`, and owners and admins can read the stored
 evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId`
 (see [Inbound email recovery](docs/INBOUND-EMAIL-RECOVERY.md)).
 
-- **Mail with no envelope sender is refused**, not added. The Cloudflare Email
-  Worker rejects it with `Envelope sender required`, and the SendGrid Inbound
-  Parse route returns HTTP 400 when `envelope.from` is empty. Expect bounces
-  addressed to a null return path to be refused. SendGrid may retry responses
-  other than 2xx; that has not been verified against the live service.
+- **Mail with no envelope sender is added as automatic**, under its `From`
+  header. Customer identity always comes from the `From` header (verified by
+  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**), never
+  from the envelope, so forwarding and bounce-address rewrites do not create
+  contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional
   `envelopeFrom`, `subject` and `headers` (an object) fields when it posts to
   `POST /api/integrations/email/inbound`. Without them, automatic mail arriving

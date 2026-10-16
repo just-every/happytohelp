@@ -10,6 +10,7 @@ import {closeUnclosedMarkdown} from '../includes/markdown';
 import {widgetAppearance} from '../../appearance';
 
 export const ConnectContext = createContext({});
+const INSIGHT_POLL_MIN = 2500, INSIGHT_POLL_MAX = 60000;
 export function ConnectProvider({children, open, setOpen, setInsightOpen, onSettingsUpdated}) {
   const context = useContext(AppContext);
   const transport = useRef(null);
@@ -146,16 +147,18 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
   useEffect(() => {
     Collector.setCollectorEnabled(collectorReady && monitoring?.enabled === true && !open);
     if (collectorReady && monitoring?.enabled === true && !open) Collector.init();
-    Collector.setMessageHandler((action, data) => { sendMessage(action, data).catch(() => {}); });
+    Collector.setMessageHandler((action, data) => sendMessage(action, data).catch(() => null));
   }, [sendMessage, collectorReady, monitoring?.enabled, open]);
   const setMonitoringConsent = useCallback(async consent => {
     const result = await transport.current.action('contextConsent', {consent});
     setMonitoring(result.monitoring);
     if (!consent) { setInsight(null); setInsightOpen(false); }
   }, [setInsightOpen]);
+  // Offers follow analyses: check soon after one is queued, then back off to an idle heartbeat.
   useEffect(() => {
     if (!monitoring?.enabled) return;
-    let active = true;
+    let active = true, timer = null, delay = INSIGHT_POLL_MAX;
+    const schedule = next => { clearTimeout(timer); delay = next; timer = setTimeout(poll, delay); };
     const poll = async () => {
       try {
         const result = await transport.current.action('insights', {});
@@ -165,10 +168,11 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
         const next = result.insights?.find(item => !shownInsights.current.has(item.id));
         if (next) { shownInsights.current.add(next.id); setInsight(next); setInsightOpen(true); }
       } catch {}
+      if (active) schedule(Math.min(delay * 2, INSIGHT_POLL_MAX));
     };
+    const stopListening = Collector.onAnalysisQueued(() => schedule(INSIGHT_POLL_MIN));
     poll();
-    const timer = setInterval(poll, 5000);
-    return () => { active = false; clearInterval(timer); };
+    return () => { active = false; clearTimeout(timer); stopListening(); };
   }, [monitoring?.enabled, open, setInsightOpen]);
   useEffect(() => {
     setLocalContact(current => JSON.stringify(current) === JSON.stringify(context.contact || {}) ? current : {...current, ...context.contact});

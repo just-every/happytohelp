@@ -39,8 +39,8 @@ export async function admitMessage(env:Env,input:MessageInput){
   predicates.push(`EXISTS(SELECT 1 FROM inbound_emails receipt JOIN email_settings mailbox ON mailbox.project_id=receipt.project_id WHERE receipt.id=? AND receipt.project_id=c.project_id AND receipt.conversation_id=c.id AND receipt.claim_token=? AND receipt.state='processing' AND mailbox.is_enabled=1)`,activeSourceProjectSql('c.project_id'),contactAvailableSql())
   args.push(email.receiptId,email.claimToken)
   if(actor.role==='contact'){
-   predicates.push(`EXISTS(SELECT 1 FROM contacts sender WHERE sender.id=? AND sender.project_id=c.project_id AND lower(sender.email)=? AND coalesce(json_extract(sender.metadata_json,'$.is_blocked'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_deleted'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erased'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erasing'),0)!=1 AND (c.contact_id=sender.id OR EXISTS(SELECT 1 FROM conversation_participants cp WHERE cp.conversation_id=c.id AND cp.contact_id=sender.id)))`)
-   args.push(actor.id,email.sender)
+   predicates.push(`EXISTS(SELECT 1 FROM contacts sender WHERE sender.id=? AND sender.project_id=c.project_id AND (lower(sender.email)=? OR c.contact_id=sender.id AND lower(json_extract(sender.metadata_json,'$.provided_email'))=?) AND coalesce(json_extract(sender.metadata_json,'$.is_blocked'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_deleted'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erased'),0)!=1 AND coalesce(json_extract(sender.metadata_json,'$.is_erasing'),0)!=1 AND (c.contact_id=sender.id OR EXISTS(SELECT 1 FROM conversation_participants cp WHERE cp.conversation_id=c.id AND cp.contact_id=sender.id)))`)
+   args.push(actor.id,email.sender,email.sender)
   }else{
    predicates.push('EXISTS(SELECT 1 FROM memberships live JOIN users sender ON sender.id=live.user_id WHERE live.project_id=c.project_id AND live.user_id=? AND live.role=? AND lower(sender.email)=?)')
    args.push(actor.id,actor.role,email.sender)

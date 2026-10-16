@@ -15,7 +15,7 @@ const brand={brand_name:'Orchid Support',logo_url:origin+'/site-assets/images/ha
 brand.logo_url=brand.avatar_url=origin+'/homepage/media/brands/happytohelp-favicon.png';
 const audit=appearanceAudit(directory,records);
 try{
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
  const tenant=await runtime.seedTenant({name:'Orchid',email:'orchid@example.test',allowedOrigin:origin}),other=await runtime.seedTenant({name:'Other tenant',email:'other@example.test',allowedOrigin:origin});
  const settingsPath=`/api/management/projects/${tenant.projectId}/settings`,widgetPath=`/api/management/projects/${tenant.projectId}/widget-settings`;
  const project=await(await api(`/api/identity/projects/${tenant.projectId}`,{token:tenant.token})).json();

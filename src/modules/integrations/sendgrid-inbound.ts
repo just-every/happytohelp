@@ -7,6 +7,8 @@ import {hashToken} from '../../platform/auth'
 import {receiveEmail} from './inbound-service'
 import {scheduleInboundEffects} from './inbound-effects'
 import {emailEvidence,headerBlockEntries} from './email-classification'
+import {emailAddress} from './inbound-routing'
+import {routingCandidates,verifiedBySendGrid} from './inbound-sender'
 
 export const sendgridInbound=new Hono<AppEnv>()
 const maxBody=30*1024*1024
@@ -50,20 +52,34 @@ async function authorized(c:any){
 sendgridInbound.post('/email/sendgrid/inbound',async c=>{
  if(!await authorized(c))throw new HTTPException(403)
  const size=Number(c.req.header('content-length')||0);if(size>maxBody)throw new HTTPException(413,{message:'Inbound email exceeds 30 MB'})
- const raw=await c.req.parseBody(),body=raw as Record<string,unknown>,envelope=json(field(body,'envelope'))||{},envelopeRecipients=Array.isArray(envelope.to)?envelope.to:[],to=envelopeRecipients.length===1?address(envelopeRecipients[0]||''):'',sender=typeof envelope.from==='string'?envelope.from.trim():'',from=sender==='<>'?'':sender,html=field(body,'html'),content=plainEmail(field(body,'text'),html)
+ const raw=await c.req.parseBody(),body=raw as Record<string,unknown>,envelope=json(field(body,'envelope'))||{},envelopeRecipients=(Array.isArray(envelope.to)?envelope.to:[]).map((value:unknown)=>address(String(value||''))),envelopeFrom=typeof envelope.from==='string'?envelope.from.trim():'',html=field(body,'html'),text=plainEmail(field(body,'text'),html)
  const info=json(field(body,'attachment-info'))||{},attachments=[]
  for(const [key,metadata] of Object.entries(info)){
   const file=body[key];if(!(file instanceof File))continue
-  const data=await file.arrayBuffer();if(data.byteLength>20000000)throw new HTTPException(413,{message:'Inbound attachment exceeds 20 MB'})
-  const record=metadata as any;attachments.push({filename:typeof record?.filename==='string'?record.filename.slice(0,200):file.name||'attachment',contentType:typeof record?.type==='string'?record.type.slice(0,200):file.type||'application/octet-stream',content:data})
+  const record=metadata as any;attachments.push({filename:typeof record?.filename==='string'?record.filename.slice(0,200):file.name||'attachment',contentType:typeof record?.type==='string'?record.type.slice(0,200):file.type||'application/octet-stream',content:await file.arrayBuffer()})
  }
- // Only the SMTP envelope names the sender. A null return path (bounces, RFC 3834
- // auto-replies) is refused rather than admitted as whoever the header From claims.
- if(!from)throw new HTTPException(400,{message:'SendGrid inbound payload has no envelope sender'})
- if(!to||(!content&&!attachments.length))throw new HTTPException(400,{message:'SendGrid inbound payload is missing recipient or body'})
- const parsedHeaders=await PostalMime.parse(`${field(body,'headers')}\r\nCc: ${field(body,'cc').replace(/[\r\n]/g,' ')}\r\n\r\n`),cc=(parsedHeaders.cc||[]).flatMap((entry:any)=>entry.group?entry.group.map((member:any)=>member.address):[entry.address]).filter(Boolean)
- const evidence=emailEvidence({envelopeFrom:from,headerFrom:field(body,'from'),subject:field(body,'subject'),headers:headerBlockEntries(field(body,'headers'))})
- const fallback=await hashToken(JSON.stringify({to,from,subject:field(body,'subject'),content,cc,attachments:await Promise.all(attachments.map(async file=>({filename:file.filename,type:file.contentType,size:file.content.byteLength,hash:await contentHash(file.content)})))})),result=await receiveEmail(c.env,{messageId:messageId(field(body,'headers'),fallback),to,from,text:content,cc,senderAuthenticated:field(body,'SPF').trim().toLowerCase()==='pass',evidence,attachments})
- scheduleInboundEffects(c.env,c.executionCtx,result)
- return c.json(result,result.duplicate?200:201)
+ // The header From is who wrote the message, verified by SendGrid's DKIM and SPF
+ // verdicts; the envelope sender (VERP, forwarding SRS, or empty for bounces and
+ // auto-replies) is delivery metadata. Reply-To is a reply target only.
+ const headerBlock=field(body,'headers'),parsedHeaders=await PostalMime.parse(`${headerBlock.replace(/[\r\n]+$/,'')}\r\nTo: ${field(body,'to').replace(/[\r\n]/g,' ')}\r\nCc: ${field(body,'cc').replace(/[\r\n]/g,' ')}\r\n\r\n`),headers=headerBlockEntries(headerBlock)
+ const list=(entries:any[]|undefined)=>(entries||[]).flatMap((entry:any)=>entry.group?entry.group.map((member:any)=>member.address):[entry.address]).filter(Boolean) as string[]
+ const headerFrom=emailAddress(parsedHeaders.from?.address)||emailAddress(field(body,'from')),from=headerFrom||emailAddress(envelopeFrom)
+ if(!from)throw new HTTPException(400,{message:'SendGrid inbound payload has no sender'})
+ // A subject-only email is its subject; only a message with nothing at all is refused.
+ const content=text.trim()||(attachments.length?'':field(body,'subject').trim())
+ if(!content&&!attachments.length)throw new HTTPException(400,{message:'SendGrid inbound payload is missing a body'})
+ const cc=list(parsedHeaders.cc),senderAuthenticated=Boolean(headerFrom)&&verifiedBySendGrid({dkim:field(body,'dkim'),spf:field(body,'SPF'),envelopeFrom,from:headerFrom!})
+ const evidence=emailEvidence({envelopeFrom,headerFrom:field(body,'from'),subject:field(body,'subject'),headers})
+ const fallback=await hashToken(JSON.stringify({to:envelopeRecipients,from,subject:field(body,'subject'),content,cc,attachments:await Promise.all(attachments.map(async file=>({filename:file.filename,type:file.contentType,size:file.content.byteLength,hash:await contentHash(file.content)})))}))
+ // One message may name several configured mailboxes; each project receives its copy.
+ const forwarded=routingCandidates({envelope:[],headers,to:list(parsedHeaders.to)}),targets=envelopeRecipients.filter(Boolean).length?envelopeRecipients.filter(Boolean):['']
+ const results=[]
+ for(const recipient of targets){
+  try{results.push(await receiveEmail(c.env,{messageId:messageId(headerBlock,fallback),to:[...(recipient?[recipient]:[]),...forwarded],from,text:content,cc,replyTo:list(parsedHeaders.replyTo)[0],senderAuthenticated,evidence,attachments}))}
+  catch(error){if(!(error instanceof HTTPException&&error.status===404&&targets.length>1))throw error}
+ }
+ if(!results.length)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})
+ for(const result of results)scheduleInboundEffects(c.env,c.executionCtx,result)
+ const result=results[0]
+ return c.json(result,results.every(entry=>entry.duplicate)?200:201)
 })

@@ -49,7 +49,7 @@ async function sendNotification(env:Env,row:Notification){
    .bind(row.conversation_id,row.project_id,unread.results[0].revision).all<{actor_role:string;content:string}>()
   const previous=context.results.reverse()
   const rendered=await renderConversationEmail(env,{projectId:row.project_id,conversationId:row.conversation_id,messages:unread.results})
-  text=[...(previous.length?['Previous context:',...previous.map(m=>`${m.actor_role}: ${m.content}`),'']:[]),'Unread customer messages:',...unread.results.map(m=>m.content),...(rendered.attachments.length?['Attachments:',...rendered.attachments.map(file=>file.filename)]:[])].join('\n\n')
+  text=[...(previous.length?['Previous context:',...previous.map(m=>`${m.actor_role}: ${m.content}`),'']:[]),'Unread customer messages:',...unread.results.map(m=>m.content),...(rendered.attachments.length?['Attachments:',...rendered.attachments.map(file=>file.filename)]:[]),...(rendered.omitted.length?['Not attached (view in the conversation):',...rendered.omitted.map(file=>file.url?`${file.filename}: ${file.url}`:file.filename)]:[])].join('\n\n')
   rich={html:[...(previous.length?['<h2>Previous context:</h2>',...previous.map(m=>`<p>${escapeHtml(m.actor_role)}: ${escapeHtml(m.content).replace(/\n/g,'<br />')}</p>`)]:[]),'<h2>Unread customer messages:</h2>',rendered.html].join(''),attachments:rendered.attachments}
  }
  if(typeof env.APP_ORIGIN==='string'){

@@ -49,27 +49,30 @@ eligibility. Reopened conversations leave current closed-cycle rate denominators
 
 ## Continue a conversation by email
 
-With the inbound gateway configured, reply to a conversation's reply address from
-its customer's canonical email, a current recipient's canonical email, or a current
-workspace member's email. Notifications carry a recipient-bound reply address; keep
-that full address when replying. SendGrid additionally accepts a verified SPF result
-from its authenticated gateway. The JSON gateway must authenticate the sender before
-posting. A header From or Reply-To alone never proves the sender. Removing a recipient or teammate removes that reply
-authority. Unrelated or ambiguous senders are refused. A supplied reply address is
-used for notifications separately from the website's signed customer identity; it
-does not authenticate inbound replies as that verified customer.
+Customers, recipients and teammates reply to a notification's reply address; keep
+that full address when replying. It is issued to its recipient, so a reply from that
+address joins the conversation as them. A customer's preferred notification address
+counts as the customer only through the reply address issued to it.
 
-Through a sender-authenticated gateway, mail to the bare support mailbox continues
-the sender's single open conversation. The Email Worker requires the recipient reply
-address to continue an existing thread or add CC recipients.
-If none is open it starts a new one; if several are open, reply to the specific
-conversation address instead. CC addresses on accepted human mail become scoped
-recipients. Replies notify the other recipients, excluding the sender.
+The sender is the email's From address. It is verified when DKIM aligns with its
+domain, DMARC passes for it, or SPF passes for an aligned envelope domain (Cloudflare
+Email Routing's own verdict, or SendGrid's); an unverified sender is still accepted
+and labelled **unverified sender** on the message. The envelope sender, which
+SendGrid bounce addresses and Google Workspace forwarding rewrite, is never the
+contact. Reply-To is only where replies go.
+
+No ordinary email is bounced. Mail to the bare support mailbox, or from someone who
+is not a current recipient of the addressed thread, continues that sender's most
+recently active open conversation or starts one. CC addresses become recipients when
+the sender is verified or used their own reply address; otherwise they are skipped.
+Replies notify the other recipients, excluding the sender. Removing a recipient or
+teammate removes their reply authority; their later mail starts their own
+conversation.
 
 Visible replies omit conventional quoted history and signatures. **Original email**
 retains the original text in the inbox. Replies and emailed transcripts carry rich
-text, inline images and files, up to 8 MiB per file and 24 MiB encoded content.
-Unavailable or oversized media is refused explicitly. **Details → Contact actions →
+text, inline images and files, up to 8 MiB per file and 20 MiB encoded content. A
+larger or unavailable file is left out and named in the email with a link to open it. **Details → Contact actions →
 Email conversation** sends the latest customer conversation segment, excluding
 automated messages, with its conversation reply address. Reopening or retrying a
 transcript keeps the same request and revision. Provider acceptance is distinct

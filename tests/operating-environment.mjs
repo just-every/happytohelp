@@ -15,3 +15,6 @@ console.log('Operating configuration: source binding inventory, secret selection
 
 assert.equal(runtimeVariables({RER_MANAGEMENT_ORIGIN:'https://manage.example.invalid'}).RER_MANAGEMENT_ORIGIN,'https://manage.example.invalid')
 for(const origin of ['http://manage.example.invalid','https://manage.example.invalid/path','https://user:password@manage.example.invalid','https://manage.example.invalid?token=x'])assert.throws(()=>validateRuntimeEnvironment({RER_MANAGEMENT_ORIGIN:origin}))
+const helpHosts=JSON.stringify({'help.example.test':'retained-project-slug'})
+assert.equal(runtimeVariables({...fixture,PUBLIC_HELP_HOSTS:helpHosts}).PUBLIC_HELP_HOSTS,helpHosts)
+for(const map of [[],{'*.example.test':'p'},{'https://help.example.test':'p'},{'HELP.example.test':'p'},{'help.example.test':''},{'app.example.invalid':'p'}])assert.throws(()=>validateRuntimeEnvironment({...fixture,PUBLIC_HELP_HOSTS:JSON.stringify(map)}))

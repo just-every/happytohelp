@@ -111,15 +111,47 @@ land back in the same conversation.
 3. Keep inbound mail on a dedicated subdomain, so your main domain's existing MX
    records stay unchanged.
 
-Notification emails use a reply address of the form
-`mailbox+conversationId@domain`. When a contact replies to one, HappyToHelp adds the
-reply to that conversation, but only if the sender is that conversation's contact in
-that workspace.
+Notification emails carry a reply address issued to their recipient, of the form
+`mailbox+r.<token>@domain`. A reply from that recipient joins that conversation as
+them: possessing the address is the proof. A customer's preferred notification
+address replies as the customer only through the reply address issued to it.
+
+Every ordinary email is accepted; none is bounced for who sent it:
+
+- **Who the contact is.** The `From` header names the sender. It is *verified* when
+  the receiving provider reports DKIM aligned with the From domain, DMARC passing for
+  it, or SPF passing for an aligned envelope domain: Cloudflare's own (topmost)
+  `Authentication-Results`, or SendGrid's `dkim` and `SPF` fields. The envelope
+  sender is delivery metadata only, so SendGrid VERP and forwarding SRS rewrites
+  never become contacts. `Reply-To` is only where replies go: for a verified sender
+  it becomes their preferred notification address, never their identity. A From
+  no provider verified is admitted and labelled **unverified sender** in the
+  dashboard.
+- **Which conversation.** Mail to a conversation's reply address joins it when the
+  sender is a current participant (members need a verified From or their own reply
+  address). Everything else, including a fresh email from a customer with an open
+  thread, continues the sender's most recently active open conversation or starts
+  one.
+- **CC recipients** become participants only for a verified sender or a sender using
+  their own reply address. Otherwise they are skipped, never a reason to refuse the
+  message. Workspace addresses the mail was routed through are always skipped.
+- **Which workspace.** The envelope recipient selects the workspace. When it names no
+  configured mailbox, `Delivered-To`, `X-Original-To`, `X-Forwarded-To`,
+  `X-Gm-Original-To`, then `To` and `Cc` are tried, so mail forwarded from a company
+  address (for example Google Workspace address-map routing of
+  `support@company.example`) lands in the right workspace. One email to two
+  workspaces' mailboxes reaches each.
+- Mail from a blocked or erased contact is accepted and dropped (`ignored`).
 
 The Email Worker and the SendGrid route read the MIME message and its HTML, store
-attachments in R2 and add the email to the conversation as a message from the
-contact. However it arrives, one email can carry up to 20 attachments of up to
-20 MB each, and up to 100,000 characters of text.
+attachments in R2 and add the email to the conversation. However it arrives, one
+email keeps up to 20 attachments of up to 20 MB each (others are named in the
+message instead) and up to 100,000 characters of text.
+
+Outgoing notifications and transcripts always send. A file over 8 MiB, past
+20 MiB of encoded attachments, or missing from storage is left out and named in the email with a
+link that opens it (`GET /api/integrations/email/files/:mediaId/:signature`, signed
+with `INBOUND_EMAIL_TOKEN`).
 
 ### Option 1: Cloudflare Email Worker
 
@@ -184,14 +216,10 @@ A customer who merely uses those words in a sentence is still treated as a custo
 
 ### Other rules for incoming mail
 
-- **A null envelope sender is refused, not added.** The Email Worker rejects it
-  with `Envelope sender required`, and the SendGrid route returns HTTP 400. Bounces
-  sent to a null return path are therefore refused.
-- **Who the contact is.** For the Email Worker and the SendGrid route, only the
-  envelope sender decides who the contact is; the `From` header never selects a
-  contact. For your own JSON gateway, the `from` field (the sender your gateway
-  authenticated) picks the contact; `envelopeFrom` is only used to classify the
-  email.
+- **A null envelope sender is automatic.** Delivery reports and auto-replies with an
+  empty return path are added under their `From` header and stay quiet.
+- **Your own JSON gateway** is trusted to have authenticated `from`; `replyTo` is
+  optional, and `envelopeFrom` is only used to classify the email.
 - **The first classification sticks.** HappyToHelp decides whether a message is
   automatic, and saves that answer with its reasons and evidence, before it adds the
   message to the conversation. If the same email is delivered again, the first
@@ -219,7 +247,9 @@ Cloudflare's list of allowed headers has been verified.
   For an automatic message, `applyMessageEffects` and `scheduleInboundEffects`
   request no AI reply and send no notification.
 - The transcript API and the dashboard buckets expose `message.origin`
-  (`{channel:'email',automatic,reasons}`). Owners and admins can read the stored
+  (`{channel:'email',automatic,reasons}`, plus `verified:false` for an unverified
+  From). The original email body (`content_raw`) reaches operators only, never a
+  customer's widget, socket or transcript. Owners and admins can read the stored
   evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId`.
 - Message local IDs starting with `email:` are reserved for inbound emails, and
   `POST /api/conversations/:id/messages` refuses them. It also refuses `erased:`

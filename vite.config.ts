@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 import { archiveOutputGuard } from '@runeditrun/rer/archive-output'
 import { reproducibleOutput } from './scripts/delivery/reproducible-output.ts'
 import { docsSite } from './src/ui/docs/build/plugin.ts'
+import {widgetDevAsset} from './scripts/widget-dev-asset'
 
 export default defineConfig(({ command, isPreview }) => {
  const localOrigin = command === 'serve' && !isPreview ? process.env.RER_DEV_ORIGIN : undefined;
@@ -18,7 +19,7 @@ export default defineConfig(({ command, isPreview }) => {
    deny: ['**/.rer/**', '**/.seed/**', '**/exports/**', '**/*.rer'],
   },
  },
- plugins: [{
+ plugins: [widgetDevAsset(localOrigin),{
   name: 'connector-download-headers',
   configureServer(server) {
     server.middlewares.use((req, res, next) => {

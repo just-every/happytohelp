@@ -2,7 +2,7 @@ import TurndownService from "turndown";
 import {cleanText, removePII} from "./Helper";
 import { describeTarget, nameTags } from "./Describe";
 import { HesitationDetector } from "./Hesitation";
-import { lastAction, recordAction, setMessageHandler, setWidgetState, setCollectorEnabled as setActionCollectorEnabled, onAction, onReady, resetCollectorState } from "./Action";
+import { lastAction, recordAction, setMessageHandler, setWidgetState, setCollectorEnabled as setActionCollectorEnabled, onAction, onAnalysisQueued, onReady, resetCollectorState } from "./Action";
 
 export const captureEvents = [
     {type: "mousedown", action: "clicked on", clearAllTimers: true},
@@ -423,6 +423,7 @@ const Collector = {
     setCollectorEnabled,
     lastAction,
     onAction,
+    onAnalysisQueued,
     onReady,
 }
 export default Collector;

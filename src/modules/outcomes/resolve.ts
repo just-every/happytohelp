@@ -59,7 +59,7 @@ export async function transitionConversation(env:Env,actor:Actor,conversationId:
  if(change.ai_id&&!change.agent_id)await onAssistantAssignment(env,actor.projectId,conversationId,{
   sql:`EXISTS(SELECT 1 FROM conversation_tracking WHERE conversation_id=c.id AND transition_id=?) AND c.assigned_to IS NULL AND c.last_message_id IS ? AND EXISTS(SELECT 1 FROM conversation_ai WHERE conversation_id=c.id AND ai_id=?) AND ${contactAvailableSql()} ${authoritySql} AND NOT EXISTS(SELECT 1 FROM project_settings WHERE project_id=c.project_id AND json_extract(settings_json,'$.deleted_at') IS NOT NULL)`,
   params:[receipt,current.last_message_id,change.ai_id,...authorityArgs]
- })
+ },assignmentChanged)
  return publishResolution(env,actor.projectId,conversationId)
 }
 export function setConversationResolved(env:Env,actor:Actor,conversationId:string,resolved:boolean,sessionHash?:string){return transitionConversation(env,actor,conversationId,{resolved},sessionHash)}

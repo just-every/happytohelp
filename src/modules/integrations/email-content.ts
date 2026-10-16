@@ -2,15 +2,19 @@ import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server.edge'
 import Markdown from 'h2h-widget-markdown'
 import gfm from 'h2h-widget-gfm'
-import {HTTPException} from 'hono/http-exception'
 import type {Env} from '../../platform/env'
 import type {EmailAttachment} from './email'
+import {emailFileLink} from './email-file-links'
 
 type MailMessage={id:string;actor_id?:string;actor_role:string;content:unknown;created_at?:number;erased_at?:number|null;source_author?:{name?:string|null;role?:string}|null}
 type Media={id:string;object_key:string;filename:string;content_type:string;size:number}
+/** A file the email names and links instead of carrying. */
+export type OmittedFile={filename:string;reason:'too_large'|'unavailable';url?:string}
 const inlineImages=new Set(['image/png','image/jpeg','image/gif','image/webp','image/avif','image/bmp'])
 const escape=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!))
-const maxFileBytes=8*1024*1024,maxEncodedBytes=24*1024*1024
+// Encoded attachments stay under the 24 MiB whole-email check (validateEmailInput),
+// leaving room for the text and HTML bodies.
+const maxFileBytes=8*1024*1024,maxEncodedBytes=20*1024*1024
 function base64(bytes:Uint8Array){let binary='';for(let offset=0;offset<bytes.length;offset+=8192)binary+=String.fromCharCode(...bytes.subarray(offset,offset+8192));return btoa(binary)}
 function markdown(content:string){return renderToStaticMarkup(createElement(Markdown,{remarkPlugins:[gfm],children:content,urlTransform:(uri,key)=>((key==='src'?/^https?:\/\//i:/^(?:https?:\/\/|mailto:)/i).test(uri)?uri:'')}))}
 async function authorName(env:Env,projectId:string,conversationId:string,message:MailMessage){
@@ -29,10 +33,13 @@ async function authorName(env:Env,projectId:string,conversationId:string,message
  }
  return message.actor_role==='contact'?'Customer':'Support'
 }
+const megabytes=(size:number)=>`${(size/1024/1024).toFixed(1)} MB`
 /** Shared by notifications and explicit transcript sends. Media bytes are read only
- * through a message + conversation + workspace join, never through a supplied URL. */
+ * through a message + conversation + workspace join, never through a supplied URL.
+ * The email always renders: a file over the provider limit, or one that cannot be
+ * read, is left out and named with a link to it in the conversation. */
 export async function renderConversationEmail(env:Env,input:{projectId:string;conversationId:string;messages:readonly MailMessage[]}){
- const attachments:EmailAttachment[]=[],text:string[]=[],html:string[]=[]
+ const attachments:EmailAttachment[]=[],omitted:OmittedFile[]=[],text:string[]=[],html:string[]=[]
  let encodedBytes=0
  for(const message of input.messages){
   if(message.erased_at||message.actor_role==='system')continue
@@ -42,15 +49,21 @@ export async function renderConversationEmail(env:Env,input:{projectId:string;co
   ])
   const content=String(message.content??''),body:string[]=[markdown(content)],files:string[]=[]
   for(const file of media.results){
-   if(file.size>maxFileBytes)throw new HTTPException(413,{message:'Email attachment exceeds 8 MiB; send a smaller file'})
-   encodedBytes+=4*Math.ceil(file.size/3)
-   if(encodedBytes>maxEncodedBytes)throw new HTTPException(413,{message:'Email attachments exceed the total size limit'})
-   const object=await env.FILES.get(file.object_key)
-   if(!object||object.size!==file.size)throw new HTTPException(409,{message:'Email attachment is unavailable'})
+   const filename=file.filename.replace(/[\x00-\x1f\x7f]/g,'').slice(0,200)||'attachment',encoded=4*Math.ceil(file.size/3)
+   const fits=file.size<=maxFileBytes&&encodedBytes+encoded<=maxEncodedBytes
+   const object=fits?await env.FILES.get(file.object_key):null
+   if(!object||object.size!==file.size){
+    const left:OmittedFile={filename,reason:fits?'unavailable':'too_large',url:await emailFileLink(env,input.projectId,input.conversationId,file.id)}
+    const why=left.reason==='too_large'?`${megabytes(file.size)}, too large to attach`:'could not be attached'
+    omitted.push(left)
+    files.push(`Not attached: ${filename} (${why})${left.url?`. View it in the conversation: ${left.url}`:'. It is in the conversation.'}`)
+    body.push(`<p>Not attached: ${left.url?`<a href="${escape(left.url)}">${escape(filename)}</a>`:escape(filename)} (${escape(why)})${left.url?'':'. It is in the conversation.'}</p>`)
+    continue
+   }
+   encodedBytes+=encoded
    const bytes=new Uint8Array(await object.arrayBuffer())
    const contentType=file.content_type.split(';',1)[0].trim().toLowerCase()
    const type=/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/.test(contentType)?contentType:'application/octet-stream'
-   const filename=file.filename.replace(/[\x00-\x1f\x7f]/g,'').slice(0,200)||'attachment'
    const contentId=inlineImages.has(type)?`media-${attachments.length}@happytohelp`:undefined
    attachments.push({filename,content:base64(bytes),contentType:type,...(contentId?{contentId}:{})})
    files.push(`Attachment: ${filename}`)
@@ -59,5 +72,5 @@ export async function renderConversationEmail(env:Env,input:{projectId:string;co
   text.push([name,content,...files].filter(Boolean).join('\n'))
   html.push(`<section><p><strong>${escape(name)}</strong></p>${body.join('')}</section>`)
  }
- return {text:text.join('\n\n'),html:`<div>${html.join('<hr />')}</div>`,attachments}
+ return {text:text.join('\n\n'),html:`<div>${html.join('<hr />')}</div>`,attachments,omitted}
 }

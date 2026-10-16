@@ -7,7 +7,7 @@ const {routes,dashboardRoutes,publicWidget,widgetEvents}=await import('../src/mo
 const {inboundEmail}=await import('../src/modules/integrations/index.ts')
 const {updateEmailSettings}=await import('../src/modules/integrations/mailbox-settings.ts')
 const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
-const {resolveReplyRecipient}=await import('../src/modules/integrations/email-reply-address.ts')
+const {replyGrant}=await import('../src/modules/integrations/email-reply-address.ts')
 const {widget:widgetIdentity}=await import('../src/modules/identity/widget.ts')
 const {hashToken}=await import('../src/platform/auth.ts')
 const require=createRequire(import.meta.url),{build}=require('esbuild'),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}))
@@ -16,7 +16,7 @@ const runtime=new Miniflare(convertV4MiniflareOptions({name:'management',modules
 const proxy={env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
 try{const env={...proxy.env,EMAIL_API_KEY:undefined,EMAIL_FROM:undefined,OPENAI_API_KEY:undefined,GITHUB_TOKEN:undefined,GITHUB_TOKENS:undefined},DB=env.DB;for(const file of ['0001_identity.sql','0002_conversations.sql','123_operator_notifications.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0100_inbound_email_claims.sql','0101_email_mailbox_lifecycle.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','122_email_content.sql','123_email_reply_grants.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','112_conversation_outcomes.sql'])for(const [,sql] of (await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run();
 await DB.batch([DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','https://widget.example',1)"),DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('q','Other','other','https://other.example',1)"),DB.prepare("INSERT INTO users VALUES('u','owner@example.com','Owner',1)"),DB.prepare("INSERT INTO memberships VALUES('p','u','owner')"),DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'),Date.now()+999999),DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('contact','p','Visitor','visitor@example.com',1)"),DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('c','p','contact',1,1)")]);
-async function call(app,path,method='GET',body){const result=await app.request('https://app.example'+path,{method,headers:{Authorization:'Bearer token','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env);return result}
+async function call(app,path,method='GET',body,token='token'){const result=await app.request('https://app.example'+path,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)},env);return result}
 assert.equal((await call(routes,'/projects/q/settings')).status,403)
 assert.equal((await call(routes,'/projects/p/settings','PUT',{name:'Renamed',timezone:'UTC',is_contact_tracking_enabled:true})).status,200)
 const macro=await(await call(routes,'/projects/p/macros','POST',{title:'Welcome',content:'Hello'})).json();assert.ok(macro.data.id)
@@ -70,6 +70,20 @@ await DB.batch([
 ])
 
 
+// Notification preferences belong to a current member, independent of their role.
+assert.equal((await call(routes,'/projects/p/agents/u','PUT',{role:'owner',is_notified_on_unassigned_activity:true})).status,200)
+assert.equal((await call(routes,'/projects/p/agents/u','PUT',{role:'operator'})).status,409,'real demotion still protects the sole owner')
+for(const role of ['admin','operator']){
+ const memberToken='preference-'+role
+ await DB.batch([DB.prepare('INSERT INTO users VALUES(?,?,?,1)').bind(role,role+'@example.test',role),DB.prepare('INSERT INTO memberships VALUES(?,?,?)').bind('p',role,role),DB.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,?,?,?,?)').bind(await hashToken(memberToken),role,'p',role,Date.now()+60000)])
+ assert.equal((await call(routes,'/projects/p/agents/'+role,'PUT',{role,is_notified_on_unassigned_activity:true},memberToken)).status,200)
+ assert.equal((await call(routes,'/profile?projectId=p','PUT',{name:role,is_notified_on_unassigned_activity:false},memberToken)).status,200)
+ assert.equal((await(await call(routes,'/profile?projectId=p','GET',undefined,memberToken)).json()).data.is_notified_on_unassigned_activity,0)
+ assert.equal((await call(routes,'/profile?projectId=q','PUT',{name:role,is_notified_on_unassigned_activity:true},memberToken)).status,403,'foreign workspace membership is checked on the server')
+ assert.equal((await call(routes,'/projects/p/agents/'+role,'PUT',{role:'owner'},memberToken)).status,403,'preferences cannot elevate a member')
+ await DB.prepare('DELETE FROM memberships WHERE project_id=? AND user_id=?').bind('p',role).run()
+ assert.equal((await call(routes,'/projects/p/agents/'+role,'PUT',{is_notified_on_unassigned_activity:true},memberToken)).status,401,'removed members lose session authority before saving preferences')
+}
 assert.equal((await call(routes,'/projects/p/agents/u','DELETE')).status,409,'last owner protected')
 assert.equal((await call(routes,'/admin/users')).status,403,'project owner is not global administrator')
 const bootstrap=await(await call(routes,'/bootstrap')).json();assert.equal(bootstrap.currentAgent.id,'u');assert.equal(bootstrap.projects.p.name,'Renamed');assert.equal(bootstrap.projects.q,undefined)
@@ -144,7 +158,7 @@ async function transcript(body=transcriptBody){return dashboardRoutes.request('h
 try{
  globalThis.fetch=async(url,options)=>{if(String(url)==='https://api.resend.com/emails'){requests.push(JSON.parse(options.body));return rejectTranscript?new Response('unavailable',{status:503}):Response.json({id:'provider-transcript'})}return networkFetch(url,options)}
  const sent=await transcript();assert.equal(sent.status,200);assert.equal((await sent.json()).transcript_delivery.state,'sent')
- const delivered=requests[0];assert.equal(delivered.to[0],'chosen@example.com');assert.equal((await resolveReplyRecipient(transcriptEnv,'p',inboundTarget(delivered.reply_to).replyToken,'chosen@example.com')).conversation_id,'c')
+ const delivered=requests[0];assert.equal(delivered.to[0],'chosen@example.com');assert.deepEqual({...await replyGrant(transcriptEnv,'p',inboundTarget(delivered.reply_to).replyToken)},{conversation_id:'c',recipient:'chosen@example.com'})
  assert.ok(delivered.text.includes('Authored assistant answer'));assert.match(delivered.text,/Imported assistant/);assert.match(delivered.text,/Visitor/);assert.match(delivered.text,/Owner/);assert.match(delivered.html,/<strong>question<\/strong>/);assert.match(delivered.html,/href="https:\/\/example.com\/help"/)
  for(const excluded of ['Hello','System-only content','Later operator-only segment','Automatic receipt','Private note'])assert.ok(!delivered.text.includes(excluded))
  assert.ok(delivered.attachments.some(file=>file.filename==='screenshot.png'&&file.content_id));assert.ok(delivered.attachments.some(file=>file.filename==='details.txt'&&Buffer.from(file.content,'base64').toString()==='Retained file'))

@@ -177,8 +177,7 @@
           "migrations/0002_conversations.sql",
           "migrations/0004_message_intent.sql",
           "migrations/0007_conversation_history.sql",
-          "tests/journeys/runtime.mjs",
-          "tests/journeys/widget.mjs"
+          "tests/journeys/runtime.mjs"
         ]
       }
     },
@@ -195,8 +194,7 @@
           "src/modules/widget",
           "scripts/build-widget.mjs",
           "tests/journeys/widget.mjs",
-          "tests/journeys/widget-browser.mjs",
-          "tests/helpers/widget"
+          "tests/journeys/widget-browser.mjs"
         ]
       }
     },
@@ -216,8 +214,7 @@
           "migrations/020_ai_support.sql",
           "tests/journeys/ai.mjs",
           "tests/journeys/ai-browser.mjs",
-          "tests/journeys/ai-live.mjs",
-          "tests/helpers/ai"
+          "tests/journeys/ai-live.mjs"
         ]
       }
     },
@@ -235,8 +232,7 @@
           "migrations/0051_knowledge_authoring.sql",
           "migrations/0052_knowledge_imports.sql",
           "migrations/0053_knowledge_recovery.sql",
-          "tests/journeys/knowledge.mjs",
-          "tests/helpers/knowledge"
+          "tests/journeys/knowledge.mjs"
         ]
       }
     },
@@ -253,8 +249,7 @@
           "migrations/0060_customer_context.sql",
           "migrations/0060_customer_context_engine.sql",
           "tests/journeys/context.mjs",
-          "tests/journeys/context-browser.mjs",
-          "tests/helpers/context"
+          "tests/journeys/context-browser.mjs"
         ]
       }
     },
@@ -274,8 +269,7 @@
           "migrations/030_local_computer.sql",
           "tests/provider-helpers",
           "tests/journeys/delegation-computers.mjs",
-          "tests/journeys/delegation-browser.mjs",
-          "tests/helpers/delegation"
+          "tests/journeys/delegation-browser.mjs"
         ]
       }
     },
@@ -321,8 +315,7 @@
         "kind": "local",
         "paths": [
           "src/modules/site-preview",
-          "migrations/0096_site_preview.sql",
-          "tests/journeys/knowledge.mjs"
+          "migrations/0096_site_preview.sql"
         ]
       }
     },
@@ -411,16 +404,39 @@
           "migrations/0108_public_answer_citations.sql",
           "tests/live",
           "migrations/0107_activation_receipts.sql",
-          "tests/activation",
           "tests/demo-activation-browser.mjs",
           "tests/demo-knowledge-activation.mjs",
           "src/modules/sendgrid-email/module.json",
           "scripts/build.mjs",
-          "tests/first-run",
           "live-proofs/git.mjs",
           "RUN-LOCALLY.md",
           "SEED-COMMAND-CONTRACT.md",
-          "tests/journeys"
+          "tests/journeys/connector-browser.mjs",
+          "tests/journeys/connector.mjs",
+          "tests/journeys/delegation.mjs",
+          "tests/journeys/email.mjs",
+          "tests/journeys/erasure-browser.mjs",
+          "tests/journeys/erasure.mjs",
+          "tests/journeys/first-run-browser.mjs",
+          "tests/journeys/first-run.mjs",
+          "tests/journeys/identity-browser.mjs",
+          "tests/journeys/identity.mjs",
+          "tests/journeys/inbox.mjs",
+          "tests/journeys/installer-nightly.mjs",
+          "tests/journeys/installer.mjs",
+          "tests/journeys/legacy.mjs",
+          "tests/journeys/move-in-admission.mjs",
+          "tests/journeys/move-in-browser.mjs",
+          "tests/journeys/move-in-capacity.mjs",
+          "tests/journeys/move-in-custody.mjs",
+          "tests/journeys/move-in-erasure.mjs",
+          "tests/journeys/public-browser.mjs",
+          "tests/journeys/public.mjs",
+          "tests/journeys/restore.mjs",
+          "tests/journeys/upgrade-nightly.mjs",
+          "tests/journeys/kit",
+          "tests/first-run",
+          "tests/activation"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
@@ -1271,7 +1287,6 @@
           "tests/reports/figures.mjs",
           "tests/reports/harness.mjs",
           "tests/reports/worker.ts",
-          "tests/journeys/reports.mjs",
           "tests/journeys/reports-browser.mjs"
         ]
       }

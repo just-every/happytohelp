@@ -7,8 +7,7 @@
     "migrations/0060_customer_context.sql",
     "migrations/0060_customer_context_engine.sql",
     "tests/journeys/context.mjs",
-    "tests/journeys/context-browser.mjs",
-    "tests/helpers/context"
+    "tests/journeys/context-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

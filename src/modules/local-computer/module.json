@@ -10,8 +10,7 @@
     "migrations/030_local_computer.sql",
     "tests/provider-helpers",
     "tests/journeys/delegation-computers.mjs",
-    "tests/journeys/delegation-browser.mjs",
-    "tests/helpers/delegation"
+    "tests/journeys/delegation-browser.mjs"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

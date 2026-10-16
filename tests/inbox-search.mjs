@@ -23,7 +23,7 @@ try{
  await DB.batch([
   DB.prepare("UPDATE contacts SET metadata_json=? WHERE id='plain'").bind(JSON.stringify({provided_name:'Alicia Warehouse',provided_email:'returns@supplied.example'})),
   DB.prepare("UPDATE conversations SET resolved_at=500,assigned_to='u' WHERE id='c-plain'"),
-  DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('history','p','c-plain','history','plain','contact','The cobalt buckle replacement arrived safely',1,100)"),
+  DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('history','p','c-plain','history','plain','contact','The cobalt buckle replacement arrived safely; the refund for my last invoice is pending',1,100)"),
  ])
  for(const [,sql] of (await readFile(new URL('../migrations/123_inbox_message_search.sql',import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run()
  // Derived full-text/shadow storage is not business archive state.
@@ -56,6 +56,9 @@ try{
 
  // Indexed history, supplied identity and independent status/assignment filters.
  assert.deepEqual(await names({q:'cobalt buckle replacement'}),['Alice Archer'],'all-history search finds a retained closed thread from Open')
+ // All unquoted words are required in any order; explicit phrases stay adjacent.
+ for(const q of ['refund invoice','invoice refund','refund "last invoice"','"last invoice" refund'])assert.deepEqual(await names({q}),['Alice Archer'],q)
+ for(const q of ['"refund invoice"','refund "invoice last"','refund missing'])assert.deepEqual(await names({q}),[],q)
  assert.deepEqual(await names({q:'Alicia Warehouse'}),['Alice Archer'])
  assert.deepEqual(await names({q:'returns@supplied.example'}),['Alice Archer'])
  assert.deepEqual(await names({q:'cobalt buckle replacement',search_scope:'view'}),[])
@@ -84,9 +87,10 @@ try{
   DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('foreign','Other workspace','foreign','https://other.example',1)"),
   DB.prepare("INSERT INTO contacts(id,project_id,name,created_at) VALUES('other','foreign','Other customer',1)"),
   DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('foreign-thread','foreign','other',1,1)"),
-  DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('foreign-message','foreign','foreign-thread','history','other','contact','cobalt buckle replacement',1,100)")
+  DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('foreign-message','foreign','foreign-thread','history','other','contact','cobalt buckle replacement; the refund for my last invoice',1,100)")
  ])
  assert.deepEqual(await names({q:'cobalt buckle replacement'}),[],'indexed phrases never cross workspace authority')
+ assert.deepEqual(await names({q:'refund invoice'}),[],'indexed words never cross workspace authority')
  // Any term length is a 200 or a friendly 400; nothing reaches the database as an error.
  assert.equal((await names({q:'a'.repeat(INBOX_SEARCH_MAX_LENGTH)})).length,0,'the longest allowed term still searches')
  for(const length of [49,50,51,200+1,400,6000]){

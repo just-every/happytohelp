@@ -1491,7 +1491,7 @@
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
-      "sha256": "ad360c458aa0e8372ae95ac1e20845a9e33eb9cb2f350894301e5af3aaa9b564",
+      "sha256": "a5ba9e0f3b8c802e3f2c80ffada2a16a3da1fbff70e9b90c5411a44d8a6366e9",
       "executable": false
     },
     "docs/INSTALLER.md": {
@@ -1535,7 +1535,7 @@
       "executable": false
     },
     "docs/PRIVACY.md": {
-      "sha256": "f4bfb8c980985d914460924a37559e3e69692ebf1a46fade44d1daf2e3e6ddc9",
+      "sha256": "ebbb05c0ff3b7e57151238c96d4d34035aa6198a139a0298d593cf67ff07b3bf",
       "executable": false
     },
     "docs/PUBLIC-LIMITS.md": {
@@ -2103,7 +2103,7 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "2a8b04ab4029a504453e91bcd49da5df48f8a7ab67c6a9c83fcf0385b75b88e4",
+      "sha256": "d2ab96b802a40c565fb45834bb1c4d67a7ea31bff9a1813dc5e495edd2168c71",
       "executable": false
     },
     "package.json": {
@@ -2463,7 +2463,7 @@
       "executable": false
     },
     "scripts/independent/delegation-backup.py": {
-      "sha256": "c62f5b8e47bcf5372e8256a7d404dd9a981efc74df3f7303cd30c1f8b7b9db1a",
+      "sha256": "2952f699ad7fd749f1f70c802e6547392ba6d61fb2d4de83009239276c64f11d",
       "executable": false
     },
     "scripts/independent/setup-build.mjs": {
@@ -4431,7 +4431,7 @@
       "executable": false
     },
     "src/modules/management/inbox-search.ts": {
-      "sha256": "526535d1a64d2f9a9313e697e8afabdb92a8d6c17575812c7ea6eed1ac00ffab",
+      "sha256": "2f3697637c45453541c42dc795a088becba822fca3c32f08ac5c0fbd200f41f6",
       "executable": false
     },
     "src/modules/management/index.ts": {
@@ -8407,7 +8407,7 @@
       "executable": false
     },
     "tests/inbox-search.mjs": {
-      "sha256": "13775a1e5e2c3be655a7b73e8ef9a6337dcf0eefcbedc6d24f61cef4ab1d0e59",
+      "sha256": "29e17781d4c02c2c7e62a7c26cf34f03d1fd25f2a6b68b2a52d61616a37f60a9",
       "executable": false
     },
     "tests/independent-browser.mjs": {

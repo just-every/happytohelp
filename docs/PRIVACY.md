@@ -250,4 +250,7 @@ Two other ways to get the data:
 - **Email a transcript** from the conversation's contact menu (**Email conversation**).
 - **Query D1 directly** with `wrangler d1 execute`, filtering on the contact's
   `project_id` and `id`/`subject_id` in the tables listed above, or take a full
-  copy of the database with `wrangler d1 export`.
+  private copy with `node scripts/export-d1.mjs --remote --output private-backup.sql`.
+  Follow [Back up your data](INDEPENDENT-RELEASE.md#back-up-your-data) to select
+  the database/configuration and stop writers throughout the export and search
+  rebuild. This copy contains every workspace's data; keep it private.

@@ -90,6 +90,28 @@ export archives and `.rer/deploy` receipts survive. Active operations refuse.
 A second reset succeeds with an empty inventory, and subsequent setup creates
 an empty installation. Keep answers outside `.seed/installer` if needed after reset.
 
+### Hosted D1 and R2 backups
+
+Use this checkout's supported SQL export helper:
+
+```sh
+node scripts/export-d1.mjs --database <prefix>-db --config wrangler.jsonc --remote --output private-backup.sql
+```
+
+Arrange a maintenance window before starting: stop application traffic,
+scheduled jobs, queue consumers and other writers until the helper has finished
+rebuilding search and you have copied R2 objects with their metadata. There is
+no built-in hosted pause switch, and the helper cannot stop remote writers.
+It temporarily drops the derived conversation search table to satisfy D1's
+virtual-table export restriction; message rows and triggers remain in place.
+Plain `wrangler d1 export` is unsuitable for this database. Keep the SQL,
+configuration and encryption key private.
+
+[Back up your data](docs/INDEPENDENT-RELEASE.md#back-up-your-data) gives the
+complete procedure, interruption recovery and restore checks. For a local SQL
+backup, stop dev/preview and use `--local`; `rer export` above remains the local
+portable archive command.
+
 ## Deploy to your Cloudflare account
 
 Use the real `deploy.json` declaration with Base deploy-kit. The command derives

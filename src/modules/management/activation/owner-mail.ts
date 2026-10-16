@@ -47,7 +47,8 @@ async function latestOwnerDelivery(env:Env,config:Configuration,ownerId?:string)
  return latest
 }
 
-const at=(time:number)=>new Date(time).toISOString()
+// Read by a person: a UTC date and minute, never a raw ISO timestamp.
+const at=(time:number)=>new Date(time).toISOString().replace(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}).*$/,'$1 $2 UTC')
 /**
  * "Email to you". A used emailed sign-in link confirms it without any provider request. Otherwise the latest test or
  * welcome mail is reported as its provider reports it: Resend status is read for the exact message, sender and owner;

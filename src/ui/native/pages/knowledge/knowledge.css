@@ -55,3 +55,9 @@
   .knowledge-table th, .knowledge-table td { padding: 12px; }
   .knowledge-empty { max-width: 100%; }
 }
+.knowledge-import-needs { margin: 16px 0 20px; }
+.knowledge-import-needs ul { margin: 6px 0 10px; padding-left: 0; list-style: none; }
+.knowledge-import-needs li { max-width: 720px; line-height: 1.55; }
+.knowledge-import-needs li + li { margin-top: 8px; }
+.knowledge-import-needs code { overflow-wrap: anywhere; }
+.knowledge-import-needs a { color: var(--ink); text-decoration: underline 1.5px var(--d-cyan-deep); text-underline-offset: 4px; }

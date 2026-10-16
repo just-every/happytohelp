@@ -7,15 +7,16 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.23
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
 rer dev
 ```
 
-Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+`rer install` also downloads Chromium (about 280 MB, into your user cache) the
+first time: `rer verify` and the browser checks run in it. Dev uses its local
+address for the chat widget and generates a private owner password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
@@ -179,7 +180,7 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-Rer 0.2.23 requires the same private mail inputs for deployment dry runs and real
+Rer 0.2.25 requires the same private mail inputs for deployment dry runs and real
 deployment: `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`. The declaration maps
 these to both rer's `MAIL_*` preflight bindings and HappyToHelp's native `EMAIL_*`
 bindings. For Cloudflare mail, supply the additional account ID described in

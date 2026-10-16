@@ -8,14 +8,50 @@ export const inboundAuthority=Symbol('authenticated inbound email')
 export interface InboundAuthority {sender:string;receiptId:string;claimToken:string;raw:string;cc:string[]}
 const availableAs=(alias:string)=>`${contactWritable.replaceAll('metadata_json',`${alias}.metadata_json`)} AND coalesce(json_extract(${alias}.metadata_json,'$.is_blocked'),0)!=1 AND coalesce(json_extract(${alias}.metadata_json,'$.is_deleted'),0)!=1`,available=availableAs('contacts')
 
+/** A contact's address is proven, so mail from that address is theirs, when mail
+ * this desk received created the contact, or a widget signature names exactly that
+ * address. An address a widget visitor typed (`email_unproven`, set by the widget) is
+ * where notifications may go, never who mail is from: otherwise an anonymous visitor
+ * who types a customer's address would read that customer's mail. */
+const unproven=(alias:string)=>`coalesce(json_extract(${alias}.metadata_json,'$.email_unproven'),0)=1`
+export const provenAddressSql=(alias:string)=>`(coalesce(${alias}.is_verified,0)=1 AND lower(${alias}.external_id)=lower(${alias}.email) OR coalesce(${alias}.is_verified,0)!=1 AND NOT ${unproven(alias)})`
+/** No widget visitor reads this contact's conversations: mail created it. Only then
+ * does a preference it holds (`provided_email`) write as the contact. */
+export const mailOnlyContactSql=(alias:string)=>`(coalesce(${alias}.is_verified,0)!=1 AND NOT ${unproven(alias)})`
+
+// A contact kept apart for mail whose From could not be authenticated (below).
+const UNVERIFIED_SENDER="coalesce(json_extract(metadata_json,'$.unverified_sender'),0)=1"
+const UNUSABLE_FROM="coalesce(json_extract(metadata_json,'$.unusable_from'),0)=1"
+const ownContact=`NOT ${UNVERIFIED_SENDER} AND ${provenAddressSql('contacts')}`
+
 /** The project's contact for a sender address, created on first mail. Retained
  * history may hold two contacts with one address; the earliest keeps the mail, as
  * legacy did. A blocked, deleted or erased contact receives nothing (null). */
 export async function emailContact(env:Env,projectId:string,email:string){
- const read=()=>env.DB.prepare('SELECT * FROM contacts WHERE project_id=? AND lower(email)=? ORDER BY created_at,id LIMIT 1').bind(projectId,email).first<any>()
+ return senderContact(env,projectId,email,ownContact,'{}')
+}
+
+/** Mail whose From was not authenticated, when that address belongs to a widget-
+ * verified customer or the provider reported an explicit fail, is written by a
+ * separate contact flagged `unverified_sender`. Its conversations never continue
+ * the customer's, and replies reach only the From address it used. */
+export async function unverifiedSenderContact(env:Env,projectId:string,email:string){
+ return senderContact(env,projectId,email,`${UNVERIFIED_SENDER} AND NOT ${UNUSABLE_FROM}`,'{"unverified_sender":1}')
+}
+/** Mail with no usable From is kept under its envelope sender by a contact flagged
+ * `unverified_sender` and `unusable_from`. Nothing is sent to it automatically
+ * (notifications.ts); an operator chooses who, if anybody, receives a reply. */
+export async function unusableFromContact(env:Env,projectId:string,envelopeSender:string){
+ return senderContact(env,projectId,envelopeSender,`${UNVERIFIED_SENDER} AND ${UNUSABLE_FROM}`,'{"unverified_sender":1,"unusable_from":1}')
+}
+export async function isVerifiedCustomerAddress(env:Env,projectId:string,email:string){
+ return Boolean(await env.DB.prepare(`SELECT 1 FROM contacts WHERE project_id=? AND lower(email)=? AND is_verified=1 AND ${ownContact}`).bind(projectId,email).first())
+}
+async function senderContact(env:Env,projectId:string,email:string,kind:string,metadata:string){
+ const read=()=>env.DB.prepare(`SELECT * FROM contacts WHERE project_id=? AND lower(email)=? AND ${kind} ORDER BY created_at,id LIMIT 1`).bind(projectId,email).first<any>()
  let contact=await read()
  if(!contact){
-  await env.DB.prepare('INSERT INTO contacts(id,project_id,email,created_at) SELECT ?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM contacts WHERE project_id=? AND lower(email)=?)').bind(id(),projectId,email,Date.now(),projectId,email).run()
+  await env.DB.prepare(`INSERT INTO contacts(id,project_id,email,metadata_json,created_at) SELECT ?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM contacts WHERE project_id=? AND lower(email)=? AND ${kind})`).bind(id(),projectId,email,metadata,Date.now(),projectId,email).run()
   contact=await read()
  }
  if(!contact||!await env.DB.prepare(`SELECT id FROM contacts WHERE id=? AND project_id=? AND ${available}`).bind(contact.id,projectId).first())return null
@@ -24,19 +60,21 @@ export async function emailContact(env:Env,projectId:string,email:string){
 
 /** The current participant or workspace member a sender address names in this
  * conversation, or null. Member authority needs `members`: an authenticated From
- * or possession of that member's reply address. */
+ * or possession of that member's reply address. A contact whose address is not
+ * proven never writes mail into its conversations, even through its reply address. */
 export async function emailActor(env:Env,projectId:string,conversation:any,sender:string,members:boolean):Promise<Actor|null>{
  const people=members?(await env.DB.prepare('SELECT u.id,m.role FROM users u JOIN memberships m ON m.user_id=u.id WHERE m.project_id=? AND lower(u.email)=? LIMIT 2').bind(projectId,sender).all<{id:string;role:Actor['role']}>()).results:[]
- const contacts=(await env.DB.prepare(`SELECT ct.id FROM contacts ct WHERE ct.project_id=? AND lower(ct.email)=? AND ${availableAs('ct')} AND (ct.id=? OR EXISTS(SELECT 1 FROM conversation_participants cp WHERE cp.conversation_id=? AND cp.contact_id=ct.id))`).bind(projectId,sender,conversation.contact_id,conversation.id).all<{id:string}>()).results
+ const contacts=(await env.DB.prepare(`SELECT ct.id FROM contacts ct WHERE ct.project_id=? AND lower(ct.email)=? AND ${provenAddressSql('ct')} AND ${availableAs('ct')} AND (ct.id=? OR EXISTS(SELECT 1 FROM conversation_participants cp WHERE cp.conversation_id=? AND cp.contact_id=ct.id))`).bind(projectId,sender,conversation.contact_id,conversation.id).all<{id:string}>()).results
  if(people.length+contacts.length!==1)return null
  if(people[0])return {id:people[0].id,role:people[0].role,projectId}
  return {id:contacts[0].id,contactId:contacts[0].id,role:'contact',projectId}
 }
 
 /** A reply from the primary contact's preferred notification address, through the
- * reply address issued to that preference, is the primary contact's own reply. */
+ * reply address issued to that preference, is the primary contact's own reply, when
+ * mail created that contact; a preference typed into the widget only receives mail. */
 export async function preferredAddressActor(env:Env,projectId:string,conversation:any,sender:string):Promise<Actor|null>{
- const contact=await env.DB.prepare(`SELECT id FROM contacts WHERE id=? AND project_id=? AND lower(json_extract(metadata_json,'$.provided_email'))=? AND ${available}`).bind(conversation.contact_id,projectId,sender).first<{id:string}>()
+ const contact=await env.DB.prepare(`SELECT id FROM contacts WHERE id=? AND project_id=? AND lower(json_extract(metadata_json,'$.provided_email'))=? AND ${mailOnlyContactSql('contacts')} AND ${available}`).bind(conversation.contact_id,projectId,sender).first<{id:string}>()
  return contact?{id:contact.id,contactId:contact.id,role:'contact',projectId}:null
 }
 

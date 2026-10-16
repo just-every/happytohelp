@@ -2,6 +2,7 @@ import type {Actor,Env} from '../../platform/env'
 import {sendEmails,emailConfigured,type EmailInput,type EmailOutcome,type DeferEmailDelivery} from './email'
 import {renderConversationEmail} from './email-content'
 import {recipientReplyAddress} from './email-reply-address'
+import {withChatReplyNotice} from './reply-notice'
 import {loopSuppressionHeaders} from './notification-delivery'
 import {queueOperatorActivity} from './operator-activity'
 export {loopSuppressionHeaders} from './notification-delivery'
@@ -12,8 +13,10 @@ type Recorded={state:string;provider_id:string|null;recipient:string}
 const mailbox=(value:unknown)=>typeof value==='string'&&value.length<=254&&/^[^\s@<>(),:;"\\]+@[^\s@<>(),:;"\\]+\.[^\s@<>(),:;"\\]+$/.test(value.trim())?value.trim().toLowerCase():null
 function metadata(contact:Recipient){return JSON.parse(contact.metadata_json||'{}')}
 /** A collected preference chooses only a notification destination. It never
- * changes canonical identity, verification, participants or inbound authority. */
-export function notificationAddress(contact:Recipient){return mailbox(metadata(contact).provided_email)||mailbox(contact.email)}
+ * changes canonical identity, verification, participants or inbound authority.
+ * Mail with no usable From names nobody to answer: its contact is notified only at
+ * an address an operator chose for it. */
+export function notificationAddress(contact:Recipient){const flags=metadata(contact);return mailbox(flags.provided_email)||(flags.unusable_from?null:mailbox(contact.email))}
 function outcome(deliveries:EmailOutcome[]){
  const first=deliveries[0]
  const state=['uncertain','sending','failed'].find(state=>deliveries.some(delivery=>delivery.state===state))||first.state
@@ -72,7 +75,7 @@ export async function notifyMessage(env:Env,message:any,actor:Actor,defer?:Defer
  }
  if(!recipients.length)return operatorActivity||{state:'no_recipient'}
  const {omitted,...content}=await renderConversationEmail(env,{projectId:actor.projectId,conversationId:conversation.id,messages:[message]})
- const inputs:EmailInput[]=await Promise.all(recipients.map(async(recipient,index)=>({...content,replyTo:settings?await recipientReplyAddress(env,settings.inbound_address,actor.projectId,conversation.id,recipient.email):undefined,projectId:actor.projectId,to:recipient.email,subject:'Reply to your support conversation',headers:loopSuppressionHeaders(message),idempotencyKey:index===0?deliveryId:`${deliveryId}:contact:${recipient.id}`})))
+ const inputs:EmailInput[]=await Promise.all(recipients.map(async(recipient,index)=>{const replyTo=settings?await recipientReplyAddress(env,settings.inbound_address,actor.projectId,conversation.id,recipient.email):undefined;return {...(replyTo?content:await withChatReplyNotice(env,actor.projectId,content)),replyTo,projectId:actor.projectId,to:recipient.email,subject:'Reply to your support conversation',headers:loopSuppressionHeaders(message),idempotencyKey:index===0?deliveryId:`${deliveryId}:contact:${recipient.id}`}}))
  try{return outcome(await sendEmails(env,inputs,defer))}
  catch(error){const existing=await recorded(env,deliveryId);if(existing)return existing;throw error}
 }

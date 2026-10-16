@@ -5,6 +5,7 @@ import {requiredString} from '../../platform/db'
 import {attachInboundOrigins} from '../integrations/inbound-origin'
 import {recipientReplyAddress} from '../integrations/email-reply-address'
 import {renderConversationEmail} from '../integrations/email-content'
+import {withChatReplyNotice} from '../integrations/reply-notice'
 import {sendEmail} from '../integrations/email'
 
 export function recipientAddress(value:unknown){
@@ -37,7 +38,7 @@ export async function emailConversationTranscript(env:Env,conversation:any,actor
  const idempotencyKey=`transcript:${await hashToken(JSON.stringify([conversation.project_id,conversation.id,actorId,key]))}`
  // Rendering may read media; recheck the live session and membership before sending.
  await recheckAuthority()
- try{return await sendEmail(env,{...content,to,subject:'Conversation transcript',projectId:conversation.project_id,replyTo,idempotencyKey})}
+ try{return await sendEmail(env,{...(replyTo?content:await withChatReplyNotice(env,conversation.project_id,content)),to,subject:'Conversation transcript',projectId:conversation.project_id,replyTo,idempotencyKey})}
  catch(error){
   const delivery=await env.DB.prepare('SELECT state,recipient FROM email_deliveries WHERE id=? AND project_id=?').bind(idempotencyKey,conversation.project_id).first<{state:string;recipient:string}>()
   // Identity conflicts are refusals, not a status for a different intent.

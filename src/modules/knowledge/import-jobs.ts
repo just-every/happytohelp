@@ -4,11 +4,12 @@ import {dispatchKnowledgeJob} from './recovery'
 import type {Env,Job} from '../../platform/env'
 import {hashToken} from '../../platform/auth'
 import {htmlToMarkdown,type ImportPlatform} from './importers'
+import {checkImportSubdomain,importPageFailure} from './import-requirements'
 interface Task {path:string;key?:string;kind:'category'|'section'|'article';parentId?:string}
 interface State {platform:ImportPlatform;subdomain?:string;pending:Task[]}
 export async function queueImport(env:Env,projectId:string,platform:ImportPlatform,subdomain?:string){
  await requireActiveProject(env,projectId);
- if(!['intercom','zendesk','freshdesk'].includes(platform))throw new Error('Invalid import platform');if(platform!=='intercom'&&(!subdomain||!/^[a-z0-9-]+$/i.test(subdomain)))throw new Error('Invalid subdomain');
+ if(!['intercom','zendesk','freshdesk'].includes(platform))throw new Error('Invalid import platform');checkImportSubdomain(platform,subdomain);
  const id=crypto.randomUUID();const pending:Task[]=platform==='intercom'?[{path:'/help_center/collections',key:'data',kind:'category'},{path:'/help_center/sections',key:'data',kind:'section'},{path:'/articles',key:'data',kind:'article'}]:platform==='zendesk'?[{path:'/api/v2/help_center/categories.json',key:'categories',kind:'category'},{path:'/api/v2/help_center/sections.json',key:'sections',kind:'section'},{path:'/api/v2/help_center/articles.json',key:'articles',kind:'article'}]:[{path:'/api/v2/solutions/categories?per_page=100',kind:'category'}];
  await env.FILES.put(`knowledge/imports/${id}/0.json`,JSON.stringify({platform,subdomain,pending}));const admitted=await env.DB.prepare(`INSERT INTO knowledge_imports(id,project_id,platform,status,created_at) SELECT ?,?,?,'queued',? WHERE ${activeProjectSql}`).bind(id,projectId,platform,Date.now(),projectId).run();if(!admitted.meta.changes){await env.FILES.delete(`knowledge/imports/${id}/0.json`);throw new Error('Project is deleted or unavailable')}await dispatchKnowledgeJob(env,{type:'knowledge.import',id,projectId,cursor:0});return {id,status:'queued'}
 }
@@ -18,9 +19,9 @@ export async function consumeImport(job:Job,env:Env){
  try{
  const state=await(await env.FILES.get(`knowledge/imports/${job.id}/${job.cursor}.json`))!.json<State>();const {platform}=state;const task=state.pending.shift()!;
  const origin=platform==='intercom'?'https://api.intercom.io':`https://${state.subdomain}.${platform}.com`;
- const secret=(key:string)=>{const value=env[key];if(typeof value!=='string'||!value)throw new Error(`CONFIGURATION_INVALID: ${key} required`);return value};
+ const secret=(key:string)=>{const value=env[key];if(typeof value!=='string'||!value)throw new Error(`${key} is not set on this installation. Add it, then import again.`);return value};
  const authorization=platform==='intercom'?`Bearer ${secret('INTERCOM_TOKEN')}`:platform==='freshdesk'?`Basic ${btoa(`${secret('FRESHDESK_TOKEN')}:x`)}`:`Basic ${btoa(`${secret('ZENDESK_EMAIL')}/token:${secret('ZENDESK_TOKEN')}`)}`;
- const url=new URL(task.path,origin);if(url.origin!==origin)throw new Error('Provider pagination changed origin');if(!await isProjectActive(env,job.projectId))return true;const response=await fetch(url,{headers:{Authorization:authorization,Accept:'application/json'}});if(!await isProjectActive(env,job.projectId))return true;if(!response.ok)throw new Error(`Import page failed (${response.status})`);const data=await response.json<any>();const rows=task.key?data[task.key]:data;if(!Array.isArray(rows))throw new Error('Invalid provider response');
+ const url=new URL(task.path,origin);if(url.origin!==origin)throw new Error('Provider pagination changed origin');if(!await isProjectActive(env,job.projectId))return true;const response=await fetch(url,{headers:{Authorization:authorization,Accept:'application/json'}});if(!await isProjectActive(env,job.projectId))return true;if(!response.ok)throw new Error(importPageFailure(platform,response.status,origin));const data=await response.json<any>();const rows=task.key?data[task.key]:data;if(!Array.isArray(rows))throw new Error('Invalid provider response');
  const identity=async(kind:string,external:string)=>(await hashToken(`${job.projectId}:${platform}:${kind}:${external}`)).slice(0,32);let categoryCount=0;let articleCount=0;
  for(const item of rows){
  if(!await isProjectActive(env,job.projectId))return true;

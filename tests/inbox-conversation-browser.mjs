@@ -279,7 +279,10 @@ try{
   const mobile=await open(conversationPath('reopen'),{viewport:{width:390,height:844},hasTouch:true,isMobile:true})
   const mobileReopen=mobile.page.locator('.conversation-header').getByRole('button',{name:'Reopen',exact:true})
   await mobileReopen.waitFor()
+  // Visibility can precede the existing mobile panel slide now that history is ready sooner.
+  await mobileReopen.evaluate(async button=>{await Promise.all(button.closest('.main').getAnimations().map(animation=>animation.finished))});
   const mobileBox=await mobileReopen.boundingBox();assert.ok(mobileBox.x>=0&&mobileBox.x+mobileBox.width<=390&&mobileBox.height>=24)
+  await mobile.page.screenshot({path:join(evidence,'closed-reopen-390.png')})
   check('Reopen is visible at 390px')
   await mobile.context.close()
  }

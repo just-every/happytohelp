@@ -107,13 +107,15 @@ function rowFor(data, id) {
    return withObservation('set', facts.mail?.mode === 'local' ? 'Email is suppressed during local development. No email is sent.' : observed ? `${/delivered/i.test(own.receiptRef || '') ? 'Delivered' : 'Received'}. ${own.checkedAt ? `Confirmed ${utc(own.checkedAt)}.` : ''}`.trim() : 'Not confirmed yet. Signing in with an emailed link, or the test on the Email page, confirms it.');
   }
   case 'inbound_address': {
-   const mailbox = facts.inboundAddress, lead = mailbox ? `${mailbox}. ` : '';
-   if (facts.inbound?.customDomainRequired) return {...base, state: 'unavailable', value: 'Replies by email need a custom domain and an inbound email route. A workers.dev address cannot receive mail. Configure INBOUND_EMAIL_DOMAIN and route incoming mail to this installation, then save the receiving address in Email settings.'};
-   if (own && own.applicable === false) return {...base, state: 'unavailable', value: `${lead}${local ? 'Replies by email need a mail provider.' : 'Replies by email are not available with this mail provider.'}`};
-   if (facts.inbound && !facts.inbound.gateway) return {...base, state: 'unavailable', value: `${lead}Replies by email need INBOUND_EMAIL_TOKEN in this installation.`};
-   if (!mailbox) return {...base, state: 'unavailable', value: 'Replies by email need an inbound address. Set it on the Email page.'};
-   if (facts.inbound && !facts.inbound.enabled) return {...base, state: 'off', value: `${lead}The mailbox is off. Turn it on in Email settings.`};
-   return withObservation('set', `${lead}${observed ? 'Replies arrive here.' : 'Waiting for the first reply. This address needs an inbound email route to this installation.'}`);
+   // Replies by email: customers answer an emailed reply by pressing Reply. Each reason says what is true and where to act.
+   const mailbox = facts.inboundAddress, lead = mailbox ? `${mailbox}. ` : '', reason = facts.inbound?.receiving;
+   if (reason === 'workers_dev' || facts.inbound?.customDomainRequired) return {...base, state: 'unavailable', value: `${lead}This address can’t receive email: workers.dev addresses have no mail server. Customers answer in the chat for now. To let them reply by email, use an address on your own domain; the Email page shows how.`};
+   if (own && own.applicable === false) return {...base, state: 'unavailable', value: `${lead}${local ? 'Email can’t be received on a local trial. It works once you deploy with your own domain.' : 'Replies by email are not available with this mail provider.'}`};
+   if (facts.inbound && !facts.inbound.gateway) return {...base, state: 'unavailable', value: `${lead}This installation has no inbound token, so it can’t receive email. Run rer setup in your checkout, then deploy again.`};
+   if (!mailbox) return {...base, state: 'unavailable', value: 'Customers answer your emails in the chat for now. To let them reply by email, set a receiving address on the Email page.'};
+   if (facts.inbound && !facts.inbound.enabled) return {...base, state: 'off', value: `${lead}Conversation email is off. Turn it on in Email settings.`};
+   if (reason === 'no_mx' && !observed) return {...base, state: 'waiting', value: `${lead}Not receiving yet: its domain has no mail server (MX record). The Email page has the routing steps.`};
+   return withObservation('set', `${lead}${observed ? 'Replies arrive here.' : 'Waiting for the first email. Send one to this address to confirm it arrives.'}`);
   }
   case 'spend_ceilings': return withObservation('set', ceilingsValue(data) || sentence(own?.detail || ''));
   case 'model_key': {

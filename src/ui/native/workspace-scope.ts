@@ -26,3 +26,8 @@ export function isInboxPath(pathname: string, settings: { accountOnly?: boolean;
     if (settings.accountOnly || settings.projectUnavailable) return false;
     return pathname === '/' || pathname.startsWith('/conversations') || /\/conversations(?:\/|$)/.test(pathname);
 }
+
+/** Live inbox state belongs to one session, agent and workspace scope; a change remounts it. */
+export function workspaceScopeKey(settings: { sessionVersion?: unknown; currentAgent?: { id?: string }; isGlobalInbox?: boolean; projectId?: string; project?: { id?: string } }): string {
+    return `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
+}

@@ -129,10 +129,27 @@ try {
   assert.equal((await post(rawForm({messageId:'sendgrid-many-recipients@example.com',envelope:{to:['support@reply.support.example.com','second@reply.support.example.com'],from:'customer@example.com'}}))).status,201)
   assert.deepEqual((await env.DB.prepare("SELECT project_id FROM inbound_emails WHERE local_id IS NOT NULL AND state='delivered' AND evidence_json LIKE '%sendgrid-many-recipients%' ORDER BY project_id").all()).results.map(row=>row.project_id),['p','q'])
   // SPF not passing: still admitted to the customer's thread, flagged unverified, CC skipped.
-  const unverified=await post(rawForm({messageId:'sendgrid-spf-fail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Sent through an unaligned relay',spf:'fail',headers:'Cc: stranger@example.com\r\n'}))
+  const unverified=await post(rawForm({messageId:'sendgrid-spf-softfail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Sent through an unaligned relay',spf:'softfail',headers:'Cc: stranger@example.com\r\n'}))
   assert.equal(unverified.status,201);assert.equal((await unverified.json()).conversationId,firstBody.conversationId)
-  assert.equal(JSON.parse((await env.DB.prepare("SELECT evidence_json FROM inbound_emails WHERE id='<sendgrid-spf-fail@example.com>'").first()).evidence_json).sender_verified,false)
+  assert.equal(JSON.parse((await env.DB.prepare("SELECT evidence_json FROM inbound_emails WHERE id='<sendgrid-spf-softfail@example.com>'").first()).evidence_json).sender_verified,false)
   assert.equal(await env.DB.prepare("SELECT id FROM contacts WHERE email='stranger@example.com'").first(),null)
+  // An explicit SPF fail (DKIM only for another domain) may be forged: it starts a
+  // separate conversation from a contact flagged as an unverified sender.
+  const failed=await (await post(rawForm({messageId:'sendgrid-spf-fail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'bounce@attacker.example'},text:'Please send my refund elsewhere',spf:'fail',dkim:'{@attacker.example : pass}'}))).json()
+  assert.notEqual(failed.conversationId,firstBody.conversationId)
+  assert.equal(JSON.parse((await env.DB.prepare('SELECT ct.metadata_json FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=?').bind(failed.conversationId).first()).metadata_json).unverified_sender,1)
+  // A header From with no usable address has no author to authenticate; SendGrid's SPF
+  // fail for the envelope still counts. With MAIL FROM the customer's address it never
+  // joins their thread as them, only one separate conversation flagged unverified.
+  const unusable=[['', ''], ['Customer', 'From: Customer\r\n'], ['customer@example', 'From: customer@example\r\n'], ['<>', 'From: <>\r\n']]
+  const kept=[]
+  for (const [from, header] of unusable) {
+    const response = await post(rawForm({ messageId: `sendgrid-unusable-${kept.length}@example.com`, envelope: { to: ['support@reply.support.example.com'], from: 'customer@example.com' }, from, headers: header, text: 'Please change my bank details', spf: 'fail' }))
+    assert.equal(response.status, 201, from)
+    kept.push((await response.json()).conversationId)
+  }
+  assert.equal(new Set(kept).size, 1); assert.notEqual(kept[0], firstBody.conversationId)
+  assert.deepEqual(JSON.parse((await env.DB.prepare('SELECT ct.metadata_json FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=?').bind(kept[0]).first()).metadata_json), { unverified_sender: 1, unusable_from: 1 })
   // A VERP envelope: the contact is the DKIM-verified From, and Reply-To is only where replies go.
   const verp=await post(rawForm({messageId:'sendgrid-verp@example.com',envelope:{to:['support@reply.support.example.com'],from:'bounces+5719-d26b-x=example.com@em.sender.example.com'},from:'Proof <proof@sender.example.com>',dkim:'{@sender.example.com : pass}',headers:'Reply-To: Desk <desk@desk.example.net>\r\n'}))
   const proof=await env.DB.prepare('SELECT c.email,c.metadata_json FROM contacts c JOIN conversations v ON v.contact_id=c.id WHERE v.id=?').bind((await verp.json()).conversationId).first()

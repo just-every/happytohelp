@@ -2,13 +2,14 @@ import './first-run.css';
 import React, { useEffect, useRef } from 'react';
 import { Outlet } from '@tanstack/react-router';
 import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
-import { isInboxPath } from './workspace-scope';
+import { isInboxPath, workspaceScopeKey } from './workspace-scope';
 import { useSessionProjectGuard } from './session-project-sync';
 import { InboxPage, WorkspacePages } from './dashboard-page-code';
 import Navigation from './Navigation';
 import { NavigationGuard } from './NavigationGuard';
 import { MobileNavigationProvider } from './MobileNavigation';
 import DemoWorkspaceBanner from './demo/DemoWorkspaceBanner';
+import WorkspaceLiveCounts from './WorkspaceLiveCounts';
 export default function DashboardClient({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
@@ -43,6 +44,8 @@ export default function DashboardClient({ settings }) {
     return <NavigationGuard><MobileNavigationProvider>
         <a className="workspace-skip-link" href="#workspace-main">Skip to main content</a>
         <Navigation settings={settings} />
+        {/* The inbox holds these connections itself, with its listing. */}
+        {!isInbox && <WorkspaceLiveCounts key={workspaceScopeKey(settings)} settings={settings} />}
         <main id="workspace-main" tabIndex={-1}>
             <DemoWorkspaceBanner settings={settings} />
             <Outlet />

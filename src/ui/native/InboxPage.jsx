@@ -1,9 +1,10 @@
 import React from 'react';
 import Chat from '../dashboard/components/Chat';
 import { Provider } from '../dashboard/contexts/ChatContext';
+import { workspaceScopeKey } from './workspace-scope';
 
 export default function InboxPage({ settings, Conversation }) {
-    const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
+    const scopeKey = workspaceScopeKey(settings);
     const initial = settings.initialInboxReads;
     const initialActiveConversationId = initial?.matches({projectId: settings.project?.id, conversationId: initial.conversationId, path: settings.dashboardLocation?.pathname}) ? initial.conversationId : undefined;
     return <Provider key={scopeKey} {...settings} activeConversationId={initialActiveConversationId} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>

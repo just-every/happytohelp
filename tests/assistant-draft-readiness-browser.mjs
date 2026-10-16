@@ -11,7 +11,7 @@ const runtime = await createRuntime();
 const checks = [], errors = [];
 let browser, visitor, setup, success = false;
 try {
-    browser = await chromium.launch({headless:true});
+    browser = await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']});
     // Seed before any dashboard sockets are open; every response below is native.
     const tenant = await runtime.seedTenant({name:'Draft readiness', email:'draft-readiness@test.example', allowedOrigin:runtime.origin});
     setup = await browser.newContext();
@@ -20,7 +20,10 @@ try {
     const project = await (await setup.request.get(runtime.origin + `/api/identity/projects/${tenant.projectId}`)).json();
     visitor = await visitorConversation({browser, origin:runtime.origin, widgetKey:project.widget_key, projectId:tenant.projectId, viewport:{width:390,height:900}});
     const fixture = await assistantDraftFixture(runtime, setup, visitor.session, tenant, 'readiness');
-    const url = runtime.origin + `/projects/${tenant.projectId}/conversations/${visitor.session.conversationId}`;
+    // A global conversation deep link resolves its project through the native
+    // metadata API. It exercises genuinely pending history rather than holding
+    // a later refresh after the scoped document already supplied fresh history.
+    const url = runtime.origin + `/conversations/${visitor.session.conversationId}`;
 
     for (const width of [1440, 390, 1280, 1279]) {
         const context = await browser.newContext({viewport:{width,height:900}});
@@ -89,6 +92,7 @@ try {
             await page.keyboard.press('Shift+Tab');
             assert.ok(await composer.evaluate(element => element === document.activeElement));
             assert.equal((await visitor.transcript()).filter(message => message.actor_role === 'owner').length, 0, 'Use and editing never send');
+            await panel.evaluate(async element => { await Promise.all(element.getAnimations().map(animation => animation.finished)); });
             await page.screenshot({path:join(evidence, `ready-${width}.png`)});
             checks.push({width, bucketStatus, localAndLegacyBlocked:true, compactTrap:width < 1280, nativeTab:true, providerCalls:0});
         } finally {

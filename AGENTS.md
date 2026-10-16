@@ -29,7 +29,7 @@ pnpm exec rer describe
 Reset erases the printed local inventory; export your data **before** resetting
 if you need it. Import requires an empty destination and retains native owners.
 Deploy requires explicit owner authorization and private account configuration;
-`--dry-run` requires the same private mail inputs as real deployment in rer 0.2.23;
+`--dry-run` requires the same private mail inputs as real deployment in rer 0.2.25;
 it validates input shape and the build locally without provider requests or mail.
 See [OPERATIONS.md](OPERATIONS.md) for state, deployment and restore requirements.
 

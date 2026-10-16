@@ -57,9 +57,23 @@ counts as the customer only through the reply address issued to it.
 The sender is the email's From address. It is verified when DKIM aligns with its
 domain, DMARC passes for it, or SPF passes for an aligned envelope domain (Cloudflare
 Email Routing's own verdict, or SendGrid's); an unverified sender is still accepted
-and labelled **unverified sender** on the message. The envelope sender, which
+and labelled **unverified sender** on the message. An unverified From that names a
+widget-verified customer, or that the provider reported as failing, starts its own
+conversation marked **Unverified sender**: it never joins that customer's threads,
+and replies to it go only to the address it came from. The envelope sender, which
 SendGrid bounce addresses and Google Workspace forwarding rewrite, is never the
-contact. Reply-To is only where replies go.
+contact. Reply-To is only where replies go, and never replaces a widget-verified
+customer's preferred address.
+
+Mail whose From names no usable address (missing, a name only, `<>`, several
+addresses) has no author to check: it starts its own **Unverified sender**
+conversation under its envelope sender, joins a thread only through the reply
+address issued to that sender, and nobody is emailed automatically; add a recipient
+or a preferred address to answer it. Mail reaches only a customer whose address is
+proven: one who first wrote by email, or a widget visitor whose signed identifier is
+that address. An address a visitor only typed into the widget receives
+notifications, but mail from it starts that address's own email conversation and
+never appears in the widget.
 
 No ordinary email is bounced. Mail to the bare support mailbox, or from someone who
 is not a current recipient of the addressed thread, continues that sender's most

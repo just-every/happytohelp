@@ -9,7 +9,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.23
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -21,7 +21,7 @@ password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout pins **`@runeditrun/rer` 0.2.23** in `package.json` and
+The checkout pins **`@runeditrun/rer` 0.2.25** in `package.json` and
 `pnpm-lock.yaml`. The global launcher installed by npm may have a different
 version; inside the checkout it provisions the tools and delegates to the pinned
 local package. Updating the global launcher does not change the project's pin.
@@ -162,7 +162,7 @@ deliberately.
 
 The declaration maps the same `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
 inputs to rer's shared `MAIL_PROVIDER`, `MAIL_FROM` and `MAIL_API_KEY` preflight
-bindings as well as HappyToHelp's native bindings. Rer 0.2.23 requires these same
+bindings as well as HappyToHelp's native bindings. Rer 0.2.25 requires these same
 mail inputs for both `rer deploy --dry-run` and real deployment. Dry run validates
 their shape and the build locally; it makes no provider requests and sends no mail.
 
@@ -170,7 +170,7 @@ Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
 declaration's `secrets` array, plus
 `{"binding":"MAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}`, and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.23 requires
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.25 requires
 every declared secret on a new Worker and has no conditional secret declaration.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
@@ -532,7 +532,10 @@ evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId
 
 - **Mail with no envelope sender is added as automatic**, under its `From`
   header. Customer identity always comes from the `From` header (verified by
-  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**), never
+  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**; a
+  possible forgery of a widget-verified customer, or mail the provider reported
+  as failing, or with no usable From, gets its own **Unverified sender**
+  conversation; an address only typed into the widget never receives mail), never
   from the envelope, so forwarding and bounce-address rewrites do not create
   contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional

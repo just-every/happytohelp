@@ -6,8 +6,9 @@ import { chromium } from 'playwright';
 // Call only against fresh isolated test storage: this exercises real first-owner setup.
 export async function checkSetupBrowser(origin, evidenceDir) {
     await mkdir(evidenceDir, { recursive: true });
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 960 } });
+    const browser = await chromium.launch({ headless: true, args: ['--use-mock-keychain', '--password-store=basic'] });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 960 } });
+    const page = await context.newPage();
     const errors = [], failed = [], checks = [], submissions = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -96,6 +97,9 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         await page.waitForURL(/\/projects\/[^/]+\/activation$/);
         assert.equal(await page.getByRole('button', { name: 'Create workspace', exact: true }).count(), 0);
         checks.push('a signed-in owner opening /setup continues to the workspace');
+        // The URL commits before the fresh Setup checks finish. Complete that
+        // signed-in page before deliberately revoking its session below.
+        await page.waitForLoadState('networkidle');
         assert.equal(await page.evaluate(async () => (await fetch('/api/identity/session', { method: 'DELETE' })).status), 200);
         await page.goto(origin + '/setup');
         await page.getByRole('link', { name: 'Sign in', exact: true }).waitFor();
@@ -108,6 +112,7 @@ export async function checkSetupBrowser(origin, evidenceDir) {
         return { checks, errors, failed };
     } finally {
         await writeFile(join(evidenceDir, 'result.json'), JSON.stringify({ checks, errors, failed }, null, 2));
+        await context.close();
         await browser.close();
     }
 }

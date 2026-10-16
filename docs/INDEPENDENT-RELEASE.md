@@ -49,7 +49,7 @@ The current package-mode instructions require current public source; the
 older `v0.4.1` tag does not contain this command-package conversion.
 
 The build and deployment dry run preserve local data and private settings and
-make no deployment. Rer 0.2.22's dry-run preflight requires the same private mail
+make no deployment. Rer 0.2.25's dry-run preflight requires the same private mail
 inputs as real deployment; see [deployment prerequisites](../OPERATIONS.md#deploy-to-your-cloudflare-account). Do not reset or replace `.wrangler/state` during an update.
 Run setup with your existing owner and private answers to apply local migrations,
 then start `pnpm exec rer dev --foreground`. For a hosted installation, apply the
@@ -234,7 +234,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.22
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -266,7 +266,7 @@ Use `pnpm exec rer deploy --environment production` with the real
 [Deploy to your Cloudflare account](../OPERATIONS.md#deploy-to-your-cloudflare-account)
 covers prerequisites, secret custody and health boundaries. Local
 `pnpm exec rer deploy --dry-run` requires the same private mail inputs as real
-deployment with rer 0.2.22. It validates their shape and builds locally without
+deployment with rer 0.2.25. It validates their shape and builds locally without
 provider requests or sending mail.
 
 **Website preview** lets owners and admins see their website with the chat

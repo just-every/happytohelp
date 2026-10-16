@@ -7,7 +7,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.22
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -75,7 +75,7 @@ answers use the declared `rer-setup.json` field names.
 rer deploy --dry-run
 ```
 
-With rer 0.2.22, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+With rer 0.2.25, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
 `EMAIL_API_KEY` inputs for dry run and real deployment, as described in
 [Operations](OPERATIONS.md#deploy-to-your-cloudflare-account). Dry run validates
 the input shape, real deployment declaration and build locally; no deployment

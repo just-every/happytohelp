@@ -37,12 +37,13 @@ work delegated to your own Codex or Claude. It works with human replies without
 an AI provider. The editable React application runs on Cloudflare Workers with
 Hono, D1, R2, Queues and Durable Objects.
 
-## Release 0.5.0
+## Release 0.5.0 (not yet tagged)
 
-Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
+The latest tagged release is 0.4.1; `main` carries 0.5.0 until its `v0.5.0` tag
+is cut. Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.23; local dev starts without private setup
+`@runeditrun/rer` package pinned to 0.2.25; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
@@ -81,15 +82,16 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.23
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
 rer dev
 ```
 
-Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+`rer install` also downloads Chromium (about 280 MB, into your user cache) the
+first time: `rer verify` and the browser checks run in it. Dev uses its local
+address for the chat widget and generates a private owner password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
@@ -123,7 +125,7 @@ rer deploy --dry-run
 rer deploy --environment production
 ```
 
-With rer 0.2.23, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+With rer 0.2.25, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
 `EMAIL_API_KEY` inputs for dry run and real deployment. Dry run validates their
 shape and the build locally, makes no provider request and sends no mail. Deployment
 provisions declared resources, applies migrations, publishes and checks health

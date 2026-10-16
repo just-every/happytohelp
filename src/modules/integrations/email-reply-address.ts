@@ -1,14 +1,14 @@
 import type {Env} from '../../platform/env'
 import {hashToken} from '../../platform/auth'
 import {emailAddress,mailbox} from './inbound-routing'
-import {localMailOrigin} from '../../edition/local-mail/configuration'
+import {receivingState} from './inbound-capability'
 
 /** Stable per-recipient possession proof. Gateway authentication alone proves
- * which service posted a message, not ownership of an SMTP envelope address. */
+ * which service posted a message, not ownership of an SMTP envelope address.
+ * None is issued for a mailbox that cannot receive mail: a reply there would be lost. */
 export async function recipientReplyAddress(env:Env,address:unknown,projectId:string,conversationId:string,recipient:string,allowUnscoped=false){
  const base=mailbox(address),email=emailAddress(recipient),secret=env.INBOUND_EMAIL_TOKEN
- if(localMailOrigin(env))return undefined
- if(!base||!email||typeof secret!=='string'||!secret)return undefined
+ if(!base||!email||typeof secret!=='string'||!secret||!(await receivingState(env,base)).ready)return undefined
  const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign'])
  const signature=await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(JSON.stringify(['reply-v1',projectId,conversationId,email])))
  const token=Array.from(new Uint8Array(signature)).map(byte=>byte.toString(16).padStart(2,'0')).join('').slice(0,32)

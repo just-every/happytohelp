@@ -79,8 +79,8 @@ function ConversationItem({ conversation, setConversation }) {
                             <div className="conversation-tags">{(conversation.tags||[]).map(tag=><span className="conversation-tag" key={tag.id}>{tag.name}</span>)}</div>
                             <div className="conversation-item-preview d-flex align-items-center">
                                 { conversation.last_message && <div className="text-truncate me-auto">
-                                    { conversation.last_message.agent && <h4 className="d-inline">{ conversation.last_message.agent.name }: </h4> }
-                                    { conversation.last_message.content}
+                                    { !conversation.matched_message && conversation.last_message.agent && <h4 className="d-inline">{ conversation.last_message.agent.name }: </h4> }
+                                    { (conversation.matched_message || conversation.last_message).content}
                                 </div> }
                                 { conversation.agent && <span className="conversation-item-agent" role="img" title={ `Assigned to ${ conversation.agent.name }` } aria-label={ `Assigned to ${ conversation.agent.name }` }>
                                     <AgentAvatar agent={ conversation.agent } className="avatar-xs" projectId={ conversation.project_id } />

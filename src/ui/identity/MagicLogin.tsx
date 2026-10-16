@@ -9,7 +9,7 @@ export default function MagicLogin() {
  const {options,failed}=useSignInMail();
  const local=options?.mailMode==='local';
  const available=options?.mailMode==='remote';
- const [returnTo,setReturnTo]=useState('');
+ const [returnTo,setReturnTo]=useState(''),[hint,setHint]=useState('');
  const [token, setToken] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState(''), [sent, setSent] = useState('');
  useEffect(() => {
   const capture = () => {
@@ -20,7 +20,7 @@ export default function MagicLogin() {
    // Remove the capability after capture, without consuming it or creating history.
    history.replaceState(null, '', '/login/magic'+location.search);
   };
-  setReturnTo(new URLSearchParams(location.search).get('returnTo')||'');capture();
+  setReturnTo(new URLSearchParams(location.search).get('returnTo')||'');setHint(new URLSearchParams(location.search).get('login_hint')||'');capture();
   window.addEventListener('hashchange',capture);
   return () => window.removeEventListener('hashchange',capture);
  }, []);
@@ -43,7 +43,7 @@ export default function MagicLogin() {
   <Alert>{error}</Alert>
   {sent && <p role="status" className="id-note">{sent}</p>}
   {(token||available)&&<form method="post" onSubmit={submit}>
-   {!token && <Field id="email" label="Email" type="email" autoComplete="email" />}
+   {!token && <Field key={hint} id="email" label="Email" type="email" autoComplete="email" defaultValue={hint} />}
    <SubmitButton busy={busy} ready={ready} busyLabel={token ? 'Signing in…' : 'Requesting link…'}>{token ? 'Sign in' : 'Email me a sign-in link'}</SubmitButton>
   </form>}
   <div className="id-links"><a href="/login">Use your password</a>{token&&available && <a href="/login/magic">Request a new link</a>}</div>

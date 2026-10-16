@@ -2,14 +2,15 @@ import type {Env} from '../../../platform/env'
 import {hashToken} from '../../../platform/auth'
 import type {Configuration} from './configuration'
 import type {Probe} from './types'
-import {inboundNeedsCustomDomain} from './inbound-domain'
+import {receivingState} from '../../integrations/inbound-capability'
 
 /** Verify the immutable ingress intent as well as the settings snapshot. A mailbox
  * can change between ingress lookup and insertion; the trigger alone is not proof
  * of the recipient. A plain-text receipt can be reconstructed without opening R2. */
 export async function checkInbound(env:Env,config:Configuration):Promise<Probe> {
  const email=config.email
- if(inboundNeedsCustomDomain(email?.inbound_address))return {state:'unavailable',detail:'Replies by email need a custom domain and an inbound email route. A workers.dev address cannot receive mail. Configure INBOUND_EMAIL_DOMAIN and route incoming mail to this installation, then save the receiving address in Email settings.'}
+ const receiving=await receivingState(env,email?.inbound_address)
+ if(receiving.reason==='workers_dev')return {state:'unavailable',detail:`${receiving.address} cannot receive email: workers.dev addresses have no mail server. Use an address on a domain you own; the Email page has the steps.`}
  // Without the installation's gateway token no mailbox can receive, whatever is saved.
  if(!env.INBOUND_EMAIL_TOKEN)return {state:'unavailable',detail:'CONFIGURATION_REQUIRED: INBOUND_EMAIL_TOKEN. Configure the authenticated inbound gateway in the installation.'}
  if(!email?.is_enabled||!email.inbound_address)return {state:'pending',detail:'Save and enable your receiving address in Email settings.'}
@@ -26,5 +27,6 @@ export async function checkInbound(env:Env,config:Configuration):Promise<Probe> 
   const hashes=await Promise.all([null,row.conversation_id].map(conversationId=>hashToken(JSON.stringify({to:address,from:row.sender,content:row.content,conversationId,attachments:[]}))))
   if(hashes.includes(row.intent_hash))return {state:'done',detail:`A message was received through the configured inbound gateway for ${address}.`,receiptRef:`inbound:${row.id}`}
  }
+ if(receiving.reason==='no_mx')return {state:'pending',detail:`${address} cannot receive email yet: its domain has no mail server (MX record). The Email page has the routing steps.`}
  return {state:'pending',detail:`Waiting for a plain-text message without attachments through your inbound provider to ${address}. Saving the address alone does not prove receiving. The check sends no email.`}
 }

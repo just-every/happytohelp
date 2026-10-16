@@ -2081,11 +2081,11 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "759d904625f3395df7243ea09e548cf93b7cfc69dabe257ba327aba291064ee4",
+      "sha256": "6328475e4bb4476df643a8ce284e46890bcf7a328f5c448527f4645602e126b4",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "91ebce5ccdb29ddbb29761622017f4686882342b1044170160da09ce70e02421",
+      "sha256": "8e2f0944ea4b842dd9352e5332738b6be408222ff93e9637491345c7ffb9c4be",
       "executable": false
     },
     "public/fonts/inter/InterVariable.woff2": {

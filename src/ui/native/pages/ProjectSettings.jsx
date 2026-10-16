@@ -1,7 +1,8 @@
 import {Link} from '@tanstack/react-router';
 import { useUnsavedChanges } from '../NavigationGuard';
 import React, { useEffect, useState } from 'react';
-import {OwnerTestMail,ProviderSetupNotice} from '../activation';
+import OwnerTestMail from '../activation/OwnerTestMail';
+import ProviderSetupNotice from '../activation/ProviderSetupNotice';
 import BrandImage from './BrandImage';
 import HelpCenterAddress from './HelpCenterAddress';
 import DeleteWorkspace from './DeleteWorkspace';

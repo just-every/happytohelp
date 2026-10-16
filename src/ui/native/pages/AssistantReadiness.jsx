@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ProviderSetupNotice} from '../activation';
+import ProviderSetupNotice from '../activation/ProviderSetupNotice';
 import {nativeRequest} from '../transport';
 
 /** What the Setup snapshot states that this page's sentences depend on: whether the installed key's provider can be

@@ -23,17 +23,17 @@ async function fetchInitialConversationBuckets({
     isCurrent,
     onConversation,
 }) {
-    const conversationResult = await fetchConversation(conversationId, projectId, { signal });
-    if (!isCurrent()) {
-        return null;
-    }
-
+    // A project URL already supplies both request scopes. Fetch history and
+    // conversation metadata together instead of adding another network round trip.
+    const conversationRequest = fetchConversation(conversationId, projectId, { signal });
+    const bucketsRequest = projectId ? fetchBucketList(
+        conversationId, { newest_with_messages: 1 }, projectId, { signal },
+    ) : null;
+    const [conversationResult, initialBuckets] = await Promise.all([conversationRequest, bucketsRequest]);
+    if (!isCurrent()) return null;
     onConversation(conversationResult.data);
-    const bucketResult = await fetchBucketList(
-        conversationId,
-        { newest_with_messages: 1 },
-        conversationResult.data.project_id,
-        { signal },
+    const bucketResult = initialBuckets || await fetchBucketList(
+        conversationId, { newest_with_messages: 1 }, conversationResult.data.project_id, { signal },
     );
 
     if (!isCurrent()) {

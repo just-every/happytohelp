@@ -1,6 +1,5 @@
 import React from 'react';
-import ArticleMarkdownEditor from '../../../dashboard/components/ArticleMarkdownEditor';
-import '../../../dashboard/article-editor.css';
+import { ArticleMarkdownEditor } from './article-editor-code';
 import { Field } from '../forms';
 import {CRAWL_DEPTH,CRAWL_PAGES} from '../../../../modules/knowledge/crawl-limits';
 import {datasetLimitHints} from './dataset-validation';

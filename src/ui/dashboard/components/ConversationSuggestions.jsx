@@ -3,7 +3,7 @@ import AgentAvatar from './AgentAvatar';
 import ConversationSuggestionCard from './ConversationSuggestionCard';
 import { useReplySuggestions } from '../contexts/ConversationSuggestionsContext';
 import ConversationAIInstructions from './ConversationAIInstructions';
-import { ProviderSetupNotice } from '../../native/activation';
+import ProviderSetupNotice from '../../native/activation/ProviderSetupNotice';
 
 const providerBySecret = {
     OPENAI_API_KEY: 'OpenAI',

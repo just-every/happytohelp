@@ -1,12 +1,10 @@
 import './first-run.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Outlet } from '@tanstack/react-router';
 import { useDashboardSettings, useDashboardLocation } from './dashboard-state';
 import { isInboxPath } from './workspace-scope';
 import { useSessionProjectGuard } from './session-project-sync';
-import Chat from '../dashboard/components/Chat';
-import { Provider } from '../dashboard/contexts/ChatContext';
-import WorkspacePages from './WorkspacePages';
+import { InboxPage, WorkspacePages } from './dashboard-page-code';
 import Navigation from './Navigation';
 import { NavigationGuard } from './NavigationGuard';
 import { MobileNavigationProvider } from './MobileNavigation';
@@ -15,6 +13,21 @@ export default function DashboardClient({ settings }) {
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
     useSessionProjectGuard(settings.projectId);
+    const initialReadMount = useRef(null);
+    useEffect(() => {
+        const initial = settings.initialWorkspaceReads;
+        if (!initial) return;
+        const mount = {};
+        initialReadMount.current = mount;
+        const timer = setTimeout(() => initial.expire(), 0);
+        return () => {
+            clearTimeout(timer);
+            queueMicrotask(() => {
+                // A StrictMode replacement installs its lease synchronously.
+                if (initialReadMount.current === mount) initial.expire();
+            });
+        };
+    }, [settings.initialWorkspaceReads]);
     useEffect(() => {
         document.body.className = `${isInbox ? 'conversation-workspace' : 'workspace-page'} workspace-themed`;
     }, [isInbox]);
@@ -27,24 +40,21 @@ export default function DashboardClient({ settings }) {
         window.addEventListener('workspace-appearance',update);
         return () => { window.removeEventListener('workspace-appearance',update); delete document.body.dataset.theme; };
     }, [settings]);
-    const scopeKey = `${settings.sessionVersion}:${settings.currentAgent?.id}:${settings.isGlobalInbox ? 'global' : settings.projectId}:${settings.project?.id}`;
     return <NavigationGuard><MobileNavigationProvider>
         <a className="workspace-skip-link" href="#workspace-main">Skip to main content</a>
         <Navigation settings={settings} />
-        <Provider key={scopeKey} {...settings} conversationLists={{}} conversationData={{}} projectId={settings.project?.id}>
-            <main id="workspace-main" tabIndex={-1}>
-                <DemoWorkspaceBanner settings={settings} />
-                <Outlet />
-            </main>
-        </Provider>
+        <main id="workspace-main" tabIndex={-1}>
+            <DemoWorkspaceBanner settings={settings} />
+            <Outlet />
+        </main>
     </MobileNavigationProvider></NavigationGuard>;
 }
 
-export function DashboardContent() {
+export function DashboardContent({ Inbox = InboxPage, Workspace = WorkspacePages, Conversation }) {
     const settings = useDashboardSettings();
     const pathname = useDashboardLocation().pathname;
     const isInbox = isInboxPath(pathname, settings);
     return isInbox
-        ? <div className="main-content inbox-with-header"><header className="inbox-workspace-header"><h1 className="visually-hidden">Inbox</h1></header><div id="chat"><Chat /></div></div>
-        : <WorkspacePages settings={settings} />;
+        ? <Inbox settings={settings} Conversation={Conversation} />
+        : <Workspace settings={settings} />;
 }

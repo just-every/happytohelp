@@ -15,8 +15,9 @@ export default function useInboxRefresh({
     lastConnected,
     isWindowFocused,
     delayMs = 100,
+    initialCounts,
 }) {
-    const [ inboxViewCounts, setInboxViewCounts ] = useState({});
+    const [ inboxViewCounts, setInboxViewCounts ] = useState(initialCounts || {});
     const [ inboxDataVersion, setInboxDataVersion ] = useState(0);
     const schedulerRef = useRef(null);
     const wasFocusedRef = useRef(isWindowFocused);
@@ -65,8 +66,8 @@ export default function useInboxRefresh({
         });
 
         schedulerRef.current = { scheduler, sourceKey };
-        setInboxViewCounts({});
-        scheduler.loadInitialCounts();
+        setInboxViewCounts(initialCounts || {});
+        if (!initialCounts) scheduler.loadInitialCounts();
 
         return () => {
             scheduler.dispose();
@@ -75,7 +76,7 @@ export default function useInboxRefresh({
                 schedulerRef.current = null;
             }
         };
-    }, [ delayMs, isGlobalInbox, projectId, sourceKey ]);
+    }, [ delayMs, isGlobalInbox, projectId, sourceKey, initialCounts ]);
 
     useEffect(() => {
         if (lastConnected) refreshInboxData();
@@ -91,6 +92,7 @@ export default function useInboxRefresh({
     return {
         inboxDataVersion,
         inboxViewCounts,
+        applyInboxViewCounts: setInboxViewCounts,
         refreshInboxData,
         fetchInboxViewCounts,
     };

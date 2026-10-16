@@ -1,22 +1,34 @@
+import {takeInitialWorkspaceRead} from './initial-workspace-reads.js';
 /** Native command transport. Commands are persisted by the server before UI acknowledgement. */
 export async function nativeRequest(path, init = {}) {
+    const initial = await takeInitialWorkspaceRead(path, init);
+    if (initial) {
+        if ('error' in initial) {
+            notifyExpiredSession(path, initial.error.status);
+            throw Object.assign(new Error(initial.error.message), {status: initial.error.status, data: initial.error.data});
+        }
+        return initial.result;
+    }
     const response = await fetch(path, { credentials: 'same-origin', ...init });
     const body = await response.json();
-    if (response.status === 401 && typeof window !== 'undefined' && window.chatSettings
+    notifyExpiredSession(path, response.status);
+    if (!response.ok) throw Object.assign(new Error(body.error?.message || body.error || `Request failed (${response.status})`), { status: response.status, data: body });
+    return body;
+}
+function notifyExpiredSession(path, status) {
+    if (status === 401 && typeof window !== 'undefined' && window.chatSettings
         && path !== '/api/identity/login' && path !== '/api/identity/password') {
         window.dispatchEvent(new CustomEvent('h2h:session-expired'));
     }
-    if (!response.ok) throw Object.assign(new Error(body.error?.message || body.error || `Request failed (${response.status})`), { status: response.status, data: body });
-    return body;
 }
 export async function sendCommand(projectId, conversationId, action, data) {
     if (action === 'setConversationId') return;
     if (action === 'sendMessage') {
-        const frontier = await nativeRequest(`/api/conversations/${encodeURIComponent(conversationId)}/messages`);
+        const frontier = await nativeRequest(`/api/conversations/${encodeURIComponent(conversationId)}`);
         return nativeRequest(`/api/conversations/${encodeURIComponent(conversationId)}/messages`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ localId: data.local_id, content: data.content, expectedRevision: frontier.revision,
-                expectedLastMessageId: frontier.lastMessageId, mediaIds: data.media_ids, resolve: data.resolve, authoring: data.authoring }),
+                expectedLastMessageId: frontier.last_message_id, mediaIds: data.media_ids, resolve: data.resolve, authoring: data.authoring }),
         });
     }
     return nativeRequest(`/api/dashboard/projects/${encodeURIComponent(projectId)}/conversations/${encodeURIComponent(conversationId)}/actions`, {

@@ -35,14 +35,16 @@ function appendConversationPage(existingConversations, result) {
     return uniqueConversations([ ...existingConversations, ...conversationRows(result) ]);
 }
 
-async function refreshConversationPages({ fetchPage, filter, loadedCount, signal, isCurrent }) {
+async function refreshConversationPages({ fetchPage, filter, loadedCount, signal, isCurrent, initialInboxListRead = false }) {
     let conversations = [];
     let nextFilter = filter;
     let shouldFetchPage = true;
     let nextPageExists = false;
 
     while (shouldFetchPage) {
-        const result = await fetchPage(nextFilter, { signal });
+        const result = await fetchPage(nextFilter, { signal,
+            ...(initialInboxListRead && nextFilter === filter ? {initialInboxListRead: true} : {}),
+        });
         if (!isCurrent()) {
             return null;
         }

@@ -9,6 +9,7 @@ import { sendCommand, connectConversation, connectProject } from '../../native/t
 import useInboxRefresh from '../hooks/useInboxRefresh';
 import { affectsInboxListing } from '../utils/inboxRefreshScheduler';
 import { mergeConversationSuggestionMetadata } from '../hooks/replySuggestionLifecycle';
+import {mergeMessageReadReceipts} from '../utils/messageReadReceipts';
 
 
 import Favcount from '../favcount';
@@ -31,14 +32,45 @@ export const Provider = (props) => {
         projectId,
         projects,
         isGlobalInbox,
+        inboxViewCounts: initialInboxViewCounts,
+        initialInboxReads,
+        initialInboxList,
+        dashboardLocation,
         children,
     } = props;
 
+    const initialListRef = useRef(initialInboxList);
+    const initialListLease = useRef(null);
+    const initialListLocationRef = useRef(dashboardLocation);
+    initialListRef.current = initialInboxList;
+    initialListLocationRef.current = dashboardLocation;
+    useEffect(() => {
+        if (!initialInboxList) return;
+        // The list's initial effect reserves its read before this next task.
+        // Responses not requested by that mount cannot serve a later refresh.
+        const lease = {};
+        initialListLease.current = lease;
+        const timer = setTimeout(() => initialInboxList.expire(), 0);
+        return () => {
+            clearTimeout(timer);
+            queueMicrotask(() => {
+                if (initialListRef.current !== initialInboxList || initialListLease.current === lease) initialInboxList.expire();
+            });
+        };
+    }, [initialInboxList?.id]);
+    const initialReadsRef = useRef(initialInboxReads);
+    const initialPathRef = useRef(dashboardLocation?.pathname);
+    initialReadsRef.current = initialInboxReads;
+    initialPathRef.current = dashboardLocation?.pathname;
+    const [initialChildrenMounted, setInitialChildrenMounted] = useState(null);
     const [ lastConnected, setLastConnected ] = useState(0);
     const [ activeConversationId, setActiveConversationId ] = useState(initialActiveConversationId);
     const [ conversationLists, setConversationLists ] = useState(initialConversationLists);
     const [ conversationData, setConversationData ] = useState(initialConversationData);
     const [ buckets, setBuckets ] = useState([]);
+    const applyReadReceipts = useCallback(receipts => {
+        setBuckets(current => mergeMessageReadReceipts(current, receipts));
+    }, []);
     // Websocket state is kept per project: the global inbox holds one connection per
     // project, since connections (and their encryption keys) are project scoped.
     // conversation id -> project id, so callbacks can address the right connection
@@ -61,8 +93,8 @@ export const Provider = (props) => {
     const pluginsFor = projectIdToGet => getProject(projectIdToGet).plugins || initialPlugins || [];
     const publicKeyFor = projectIdToGet => getProject(projectIdToGet).publicKey || publicKey;
 
-    const { inboxViewCounts, inboxDataVersion, refreshInboxData, fetchInboxViewCounts } = useInboxRefresh({
-        isGlobalInbox, projectId, lastConnected, isWindowFocused,
+    const { inboxViewCounts, inboxDataVersion, refreshInboxData, fetchInboxViewCounts, applyInboxViewCounts } = useInboxRefresh({
+        isGlobalInbox, projectId, lastConnected, isWindowFocused, initialCounts: initialInboxViewCounts,
     });
 
     /**
@@ -100,6 +132,28 @@ export const Provider = (props) => {
     const activeProjectIdRef = useRef(null);
     activeConversationIdRef.current = activeConversationId;
     activeProjectIdRef.current = activeProjectId;
+
+    const takeInitialInboxRead = useCallback((resource, conversationId, readProjectId, options = {}) => {
+        const initial = initialReadsRef.current;
+        if (!initial || !options.initialInboxRead) return Promise.resolve(undefined);
+        return initial.take(resource, {
+            projectId: readProjectId, conversationId, path: initialPathRef.current, signal: options.signal,
+            isCurrent: () => initialReadsRef.current === initial && activeConversationIdRef.current === conversationId,
+        });
+    }, []);
+    const completeInitialInboxMount = useCallback((id, failed) => {
+        const initial = initialReadsRef.current;
+        if (initial?.id !== id) return;
+        if (failed) initial.expire();
+        else setInitialChildrenMounted(id);
+    }, []);
+    useEffect(() => {
+        if (!initialInboxReads || initialChildrenMounted !== initialInboxReads.id) return;
+        // Metadata has committed the initial conversation children. Their effects
+        // may adopt connections now; a drawer mounted later must read again.
+        const timer = setTimeout(() => initialInboxReads.expire(), 0);
+        return () => clearTimeout(timer);
+    }, [initialInboxReads?.id, initialChildrenMounted]);
 
     // Projects we hold a websocket connection for
     const connectedProjectIds = isGlobalInbox
@@ -261,8 +315,11 @@ export const Provider = (props) => {
     const fetchBucketList = (conversationId, params, bucketProjectId = null, options = {}) => {
         const bucketProject = bucketProjectId || projectIdFor(conversationId);
 
-        return Api.get(`/projects/${ bucketProject }/conversations/${ conversationId }/buckets`, params, options)
-            .then(result => {
+        const request = options.initialInboxRead && params?.newest_with_messages === 1
+            ? takeInitialInboxRead('buckets', conversationId, bucketProject, options).then(initial => initial
+                ? initial.result : Api.get(`/projects/${ bucketProject }/conversations/${ conversationId }/buckets`, params, options))
+            : Api.get(`/projects/${ bucketProject }/conversations/${ conversationId }/buckets`, params, options);
+        return request.then(result => {
                 if (options.signal?.aborted || activeConversationIdRef.current !== conversationId) return result;
                 const newBuckets = result.data;
                 newBuckets.forEach(bucket => markUnreadMessagesAsRead(bucket.messages ?? [], bucketProject));
@@ -272,12 +329,23 @@ export const Provider = (props) => {
             });
     }
 
-    const fetchConversationList = (params, options) => {
-        const request = isGlobalInbox
+    const fetchConversationList = (params, options = {}) => {
+        const read = () => isGlobalInbox
             ? Api.get('/conversations', params, options)
             : Api.get(`/projects/${ projectId }/conversations`, params, options);
+        const initial = initialListRef.current;
+        const request = initial && options.initialInboxListRead
+            ? initial.take(params, {
+                projectId: isGlobalInbox ? undefined : projectId,
+                path: initialListLocationRef.current?.pathname,
+                search: initialListLocationRef.current?.searchStr,
+                signal: options.signal,
+                isCurrent: () => initialListRef.current === initial,
+            }).then(outcome => outcome ? outcome.result : read())
+            : read();
 
         return request.then(result => {
+            if (options.signal?.aborted) return result;
             (result.data || []).forEach(rememberConversationProject);
 
             return result;
@@ -288,11 +356,15 @@ export const Provider = (props) => {
         const conversationProject = conversationProjectId || projectIdFor(conversationId);
 
         // Deep links into the global inbox carry no project, so resolve it server side
-        const request = conversationProject
+        const read = () => conversationProject
             ? Api.get(`/projects/${ conversationProject }/conversations/${ conversationId }`, undefined, options)
             : Api.get(`/conversations/${ conversationId }`, undefined, options);
+        const request = options?.initialInboxRead
+            ? takeInitialInboxRead('conversation', conversationId, conversationProject, options).then(initial => initial ? initial.result : read())
+            : read();
 
         return request.then(result => {
+            if (options?.signal?.aborted) return result;
             rememberConversationProject(result.data);
 
             return result;
@@ -305,6 +377,9 @@ export const Provider = (props) => {
         if (!targetProjectId) throw new Error('No project available for this action');
         const result = await sendCommand(targetProjectId, conversationId, action, data);
         if (action === 'sendMessage') {
+            // Render only the server's persisted, enriched acknowledgement. Socket replay
+            // merges by message identity, so it cannot duplicate this message.
+            handleMessageEvent(result.dashboardMessage, targetProjectId);
             setLastConnected(Date.now());
             refreshInboxData();
         }
@@ -384,7 +459,10 @@ export const Provider = (props) => {
         // within one mount, and closing a socket mid-handshake only logs a browser warning.
         let close = [];
         const timer = setTimeout(() => {
-            close = connectedProjectIds.map(id => connectProject(id, () => refreshInboxData(),
+            close = connectedProjectIds.map(id => connectProject(id, frame => {
+                if (frame.type === 'activity' && frame.kind === 'read' && Array.isArray(frame.reads)) applyReadReceipts(frame.reads);
+                else refreshInboxData();
+            },
                 () => { refreshInboxData(); setLastConnected(Date.now()); },
                 error => console.warn(error.message)));
         }, PROJECT_SOCKET_SETTLE_MS);
@@ -399,8 +477,8 @@ export const Provider = (props) => {
                 setLastConnected(Date.now());
                 refreshInboxData();
             } else if (frame.type === 'activity') {
-                setLastConnected(Date.now());
-                refreshInboxData();
+                if (frame.kind === 'read' && Array.isArray(frame.reads)) applyReadReceipts(frame.reads);
+                else { setLastConnected(Date.now()); refreshInboxData(); }
             } else if (frame.type === 'resolution') {
                 // Operator history is read through authenticated dashboard data, never broadcast to visitors.
                 setLastConnected(Date.now());
@@ -464,7 +542,11 @@ export const Provider = (props) => {
 
             Object.keys(idsByProject).forEach(unreadProjectId => {
                 const ids = idsByProject[unreadProjectId];
-                sendAction('markAsRead', { ids }, unreadProjectId)
+                sendAction('markAsRead', { ids, globalInbox: isGlobalInbox }, unreadProjectId)
+                    .then(result => {
+                        applyInboxViewCounts(result.counts);
+                        applyReadReceipts(result.receipts);
+                    })
                     .catch(error => {
                         console.error('Unable to mark conversation messages as read', error);
                         refreshInboxData();
@@ -473,9 +555,8 @@ export const Provider = (props) => {
             });
 
             setUnreadMessages([]);
-            refreshInboxData();
         }
-    }, [ isWindowFocused, unreadMessages, refreshInboxData ] );
+    }, [ isWindowFocused, unreadMessages, refreshInboxData, isGlobalInbox, applyInboxViewCounts ] );
 
     useEffect(() => {
         sendPluginEvent('setConversation', conversationData[activeConversationId]);
@@ -544,6 +625,11 @@ export const Provider = (props) => {
         activeProjectId,
         projectIdFor,
         lastConnected,
+        initialInboxListId: initialInboxList?.id,
+        initialInboxReadsId: initialInboxReads?.id,
+        initialInboxConversationId: initialInboxReads?.conversationId,
+        takeInitialInboxRead,
+        completeInitialInboxMount,
     };
 
     return (

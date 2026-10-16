@@ -90,6 +90,30 @@ try {
   const {inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts'),{replyGrant}=await import('../src/modules/integrations/email-reply-address.ts')
   assert.deepEqual({...await replyGrant(env,'p',inboundTarget(notification.reply_to.email).replyToken)},{conversation_id:'c',recipient:'customer@example.com'})
   assert.deepEqual(notification.personalizations[0].to, [{ email: 'customer@example.com' }])
+  // A reply can acknowledge its durable send claim while the paid transport is
+  // still pending. Provider outcomes still settle once, and unknown is not replayed.
+  for (const outcome of ['sent', 'uncertain']) {
+    let finish
+    const response = new Promise(resolve => { finish = resolve })
+    const before = calls
+    globalThis.fetch = async () => { calls++; return response }
+    const pending = []
+    const message = { id: `deferred-${outcome}`, conversation_id: 'c', actor_role: 'operator', content: 'Durable reply' }
+    const actor = { id: 'operator', projectId: 'p', role: 'operator' }
+    const prepared = await notifyMessage(env, message, actor, task => pending.push(task))
+    assert.equal(prepared.state, 'sending')
+    const deliveryId = `message:${message.id}:notification`
+    assert.equal((await env.DB.prepare('SELECT state FROM email_deliveries WHERE id=?').bind(deliveryId).first()).state, 'sending')
+    assert.equal(pending.length, 1)
+    assert.equal((await notifyMessage(env, message, actor)).state, 'sending')
+    assert.equal(calls, before + 1, 'a pending claim cannot submit a second provider attempt')
+    const settled = pending[0].catch(error => error)
+    finish(outcome === 'sent' ? new Response(null, { status: 202, headers: { 'X-Message-Id': 'deferred-receipt' } }) : new Response(null, { status: 500 }))
+    await settled
+    assert.equal((await env.DB.prepare('SELECT state FROM email_deliveries WHERE id=?').bind(deliveryId).first()).state, outcome)
+    assert.equal((await notifyMessage(env, message, actor)).state, outcome)
+    assert.equal(calls, before + 1, 'settled and unknown outcomes cannot trigger automatic replay')
+  }
   console.log('SendGrid transport: explicit selection, real envelope/reply address, accepted receipt, uncertain no-replay, rejection, and Resend selection passed')
 } finally {
   globalThis.fetch = originalFetch

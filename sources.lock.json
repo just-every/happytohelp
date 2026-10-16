@@ -8167,7 +8167,7 @@
       "executable": false
     },
     "tests/first-run/profile-trust.mjs": {
-      "sha256": "de461417eeead4d5c9b198892e2b1996ada78d1d83fffe9dd63f7648a1ca6d85",
+      "sha256": "43d62d69a7a14aa4d7e773a3501094579f044a2bb69b52b5209337fc293d6d4c",
       "executable": false
     },
     "tests/first-run/profile-worker.ts": {

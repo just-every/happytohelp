@@ -7,11 +7,12 @@ const guide = '/docs/website-knowledge';
 const examples = { APIFY_TOKEN: 'your-apify-api-token', APIFY_CRAWLER_ACTOR_ID: 'apify~website-content-crawler' };
 
 /** What this installation's website reading needs, read once per page: which reader runs and the crawler's settings. */
-export function useWebsiteReader(projectId) {
+export function useWebsiteReader(projectId, enabled = true) {
     const [reader, setReader] = useState(null);
     useEffect(() => {
+        if (!enabled) return;
         nativeRequest('/api/knowledge/' + projectId + '/website-reader').then(setReader).catch(() => setReader(null));
-    }, [projectId]);
+    }, [projectId, enabled]);
     return reader;
 }
 

@@ -48,7 +48,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
     const [busy, setBusy] = useState(false);
     const [tab, setTab] = useState('overview');
     const [fieldErrors, setFieldErrors] = useState({});
-    const reader = useWebsiteReader(projectId);
+    const reader = useWebsiteReader(projectId, section === 'datasets');
     const datasetActive = section === 'datasets' && Boolean(items?.some(datasetIsActive));
     const articleReady = Boolean(draft && (recordId === 'create' ? !draft.id : draft.id === recordId));
 

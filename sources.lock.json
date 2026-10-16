@@ -7211,11 +7211,11 @@
       "executable": false
     },
     "src/ui/native/pages/knowledge/WebsiteReader.jsx": {
-      "sha256": "1baed112ab18958d519c0508cbfba3882bcfca0aa8d2fb6b0922e86383904669",
+      "sha256": "5a10118ee704deea81cfecdd4ff4c8ab7d694f1997d4b0e72def95fe5e630e02",
       "executable": false
     },
     "src/ui/native/pages/KnowledgePage.jsx": {
-      "sha256": "47d1ad4ce975a51e106a426c332fa04b4c353771c0ef425d84ef90b425d5324e",
+      "sha256": "4d9c8b0a4917e2c1aa0bfd3b63f2946f9792669572072f8e2c942b2160bcbb96",
       "executable": false
     },
     "src/ui/native/pages/LocalComputerAuthorize.jsx": {

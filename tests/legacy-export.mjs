@@ -18,7 +18,7 @@ test('project snapshot → attachment bytes → native import → safe replay', 
   const admin=await mysql.createConnection({host,port,user:process.env.LEGACY_TEST_MYSQL_USER||'root',password:process.env.LEGACY_TEST_MYSQL_PASSWORD||'',
     ...(process.env.LEGACY_TEST_MYSQL_SOCKET?{socketPath:process.env.LEGACY_TEST_MYSQL_SOCKET}:{})});
   const run=(script,args=[],env={})=>new Promise((resolveRun,reject)=>{
-    const child=spawn(process.execPath,[script,...args],{env:{...process.env,WRANGLER_SEND_METRICS:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false',...env},stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
+    const child=spawn(process.execPath,[script,...args],{env:{...process.env,WRANGLER_SEND_METRICS:'false',WRANGLER_LOG:'error',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false',...env},stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
     child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
     child.once('error',reject);child.once('exit',code=>code===0?resolveRun(stdout):reject(Error(`${script} exited ${code}: ${stdout}\n${stderr}`)));
   });

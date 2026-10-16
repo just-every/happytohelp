@@ -135,8 +135,9 @@ Every ordinary email is accepted; none is bounced for who sent it:
   sender is delivery metadata only, so SendGrid VERP and forwarding SRS rewrites
   never become contacts. Cloudflare's verdict is read with RFC 8601 quoting and
   comment rules; anything sender text could have shaped (a quote, a `;` in a
-  comment, an unbalanced bracket, a repeated result or one after the HELO's SPF
-  result) is treated as a fail, and SPF counts only for the envelope sender the
+  comment, an unbalanced bracket, a repeated result, one after the HELO's SPF
+  result, a DKIM result after DMARC, a non-domain `header.d`, `header.from` or
+  `smtp.helo`, or a DMARC `header.from` other than the From domain) is treated as a fail, and SPF counts only for the envelope sender the
   Worker received. `Reply-To` is only where replies go: for a verified sender it
   becomes their preferred notification address, never their identity, and it
   never replaces the preference of a widget-verified customer. A From no provider
@@ -149,6 +150,21 @@ Every ordinary email is accepted; none is bounced for who sent it:
   shown with an **Unverified sender** chip. It never joins the customer's
   conversations, and replies to it go only to the From address it used. The
   sender's own reply address still proves possession and joins its thread.
+- **No usable From, no author.** When the From header names no usable address
+  (none, a display name only, no domain or TLD, `<>`, a group, several mailboxes or
+  several From headers), the mail is kept under its envelope sender by a contact
+  flagged `unverified_sender` and `unusable_from`, in its own conversation, and the
+  provider's fail verdict is still recorded. It joins an existing thread only
+  through the reply address issued to that envelope sender for that thread. Nothing
+  is emailed to it automatically: an operator chooses a recipient (a preferred
+  address on the contact, or an added recipient).
+- **Only a proven address receives mail.** Mail resolves to a contact whose
+  address is proven: one created from mail this desk received, or a widget-verified
+  contact whose signed identifier is that address. An address a visitor typed into
+  the widget (marked `email_unproven`), or a verified visitor's unsigned email or
+  preference, is only where notifications may go: mail from it, even through its
+  reply address, goes to that address's own email contact and never appears in the
+  widget session.
 - **Which conversation.** Mail to a conversation's reply address joins it when the
   sender is a current participant (members need a verified From or their own reply
   address). Everything else, including a fresh email from a customer with an open

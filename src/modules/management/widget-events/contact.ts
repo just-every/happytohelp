@@ -21,7 +21,10 @@ export async function updateContact({ c, actor, conversation, data }: WidgetComm
     }
   }
   if (metadata.length) {
-    fields.push(`metadata_json=json_set(metadata_json,${metadata.map(() => '?').join(',')})`)
+    // A typed address is a notification preference, never inbound mail authority
+    // (integrations/inbound-authority.ts).
+    const typedEmail = metadata.includes('$.provided_email') ? `,'$.email_unproven',1` : ''
+    fields.push(`metadata_json=json_set(metadata_json,${metadata.map(() => '?').join(',')}${typedEmail})`)
     values.push(...metadata)
   }
   // Read back the actual canonical values in the same guarded write. Verification

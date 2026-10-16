@@ -65,6 +65,16 @@ SendGrid bounce addresses and Google Workspace forwarding rewrite, is never the
 contact. Reply-To is only where replies go, and never replaces a widget-verified
 customer's preferred address.
 
+Mail whose From names no usable address (missing, a name only, `<>`, several
+addresses) has no author to check: it starts its own **Unverified sender**
+conversation under its envelope sender, joins a thread only through the reply
+address issued to that sender, and nobody is emailed automatically; add a recipient
+or a preferred address to answer it. Mail reaches only a customer whose address is
+proven: one who first wrote by email, or a widget visitor whose signed identifier is
+that address. An address a visitor only typed into the widget receives
+notifications, but mail from it starts that address's own email conversation and
+never appears in the widget.
+
 No ordinary email is bounced. Mail to the bare support mailbox, or from someone who
 is not a current recipient of the addressed thread, continues that sender's most
 recently active open conversation or starts one. CC addresses become recipients when

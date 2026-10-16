@@ -1,3 +1,4 @@
+import {addressParser} from 'postal-mime'
 import {emailAddress} from './inbound-routing'
 import type {HeaderEntry} from './email-classification'
 import {cloudflareConsistent,parseAuthenticationResults} from './authentication-results'
@@ -10,6 +11,17 @@ import {cloudflareConsistent,parseAuthenticationResults} from './authentication-
  * and Reply-To is only ever a reply target.
  */
 const domainOf=(value:unknown)=>emailAddress(value)?.split('@')[1]||null
+/** The one mailbox the header From names, or null when there is no usable From: none,
+ * a display name only, an invalid address, `<>`, a group, several mailboxes or several
+ * From headers. Without one there is no author identity to authenticate. `fallback` is
+ * a From the provider copied out of the headers (SendGrid's `from` field). */
+export function headerFromAddress(headers:Iterable<HeaderEntry>,fallback=''){
+ const values=[...headers].filter(header=>typeof header?.key==='string'&&header.key.trim().toLowerCase()==='from').map(header=>String(header.value??''))
+ const from=values.length?values:fallback.trim()?[fallback]:[]
+ if(from.length!==1)return null
+ const mailboxes=addressParser(from[0])
+ return mailboxes.length===1&&!mailboxes[0].group?emailAddress(mailboxes[0].address):null
+}
 /** Relaxed alignment without a public suffix list: equal, or one a subdomain of the other. */
 export function alignedDomain(left:string|null|undefined,right:string|null|undefined){
  const a=String(left||'').trim().toLowerCase().replace(/\.$/,''),b=String(right||'').trim().toLowerCase().replace(/\.$/,'')
@@ -27,25 +39,30 @@ const sameEnvelope=(value:string|undefined,envelopeFrom:string)=>{
  const envelope=emailAddress(envelopeFrom),identity=String(value||'').toLowerCase()
  return Boolean(envelope&&identity&&(identity.includes('@')?identity===envelope:identity===envelope.split('@')[1]))
 }
+const sameDomain=(left:string|undefined,right:string)=>String(left||'').toLowerCase().replace(/\.$/,'')===right
 /** SPF passes only for the MAIL FROM the provider received (`envelopeFrom`), so a
- * verdict naming any other envelope identity never verifies the From. */
-export function authenticationVerdict(headers:Iterable<HeaderEntry>,from:string,envelopeFrom:string,authserv=CLOUDFLARE_AUTHSERV):SenderVerdict{
+ * verdict naming any other envelope identity never verifies the From. With no usable
+ * From (`from` null) nothing verifies, and the verdict's fails still count. A DMARC
+ * result for any domain other than the From's means the provider read a different
+ * From than we did, which is ambiguous. */
+export function authenticationVerdict(headers:Iterable<HeaderEntry>,from:string|null,envelopeFrom:string,authserv=CLOUDFLARE_AUTHSERV):SenderVerdict{
  const fromDomain=domainOf(from)
  const top=[...headers].find(header=>typeof header?.key==='string'&&header.key.trim().toLowerCase()==='authentication-results')
- if(!fromDomain||!top||typeof top.value!=='string'||top.value.trim().split(/[\s;(]/)[0].toLowerCase()!==authserv)return {verified:false,failed:false}
+ if(!top||typeof top.value!=='string'||top.value.trim().split(/[\s;(]/)[0].toLowerCase()!==authserv)return {verified:false,failed:false}
  const parsed=parseAuthenticationResults(top.value)
- if(!parsed||parsed.authserv!==authserv||!cloudflareConsistent(parsed.results))return {verified:false,failed:true}
- const verified=parsed.results.some(({method,result,properties})=>result==='pass'&&(
+ if(!parsed||parsed.authserv!==authserv||!cloudflareConsistent(parsed.results)||parsed.results.some(({method,properties})=>method==='dmarc'&&'header.from' in properties&&!(fromDomain&&sameDomain(properties['header.from'],fromDomain))))return {verified:false,failed:true}
+ const verified=Boolean(fromDomain)&&parsed.results.some(({method,result,properties})=>result==='pass'&&(
   method==='dmarc'&&alignedDomain(properties['header.from'],fromDomain)||
   method==='dkim'&&alignedDomain(properties['header.d']||domainOf(properties['header.i']),fromDomain)||
   method==='spf'&&sameEnvelope(properties['smtp.mailfrom'],envelopeFrom)&&alignedDomain(domainOf(properties['smtp.mailfrom'])||properties['smtp.mailfrom'],fromDomain)))
  return {verified,failed:!verified&&parsed.results.some(({method,result})=>AUTHENTICATED.has(method)&&result==='fail')}
 }
 
-/** SendGrid Inbound Parse reports `dkim` as `{@domain : pass, ...}` and `SPF` for the envelope sender. */
-export function sendGridVerdict(input:{dkim:string;spf:string;envelopeFrom:string;from:string}):SenderVerdict{
+/** SendGrid Inbound Parse reports `dkim` as `{@domain : pass, ...}` and `SPF` for the
+ * envelope sender. With no usable From nothing verifies, and an SPF fail still counts. */
+export function sendGridVerdict(input:{dkim:string;spf:string;envelopeFrom:string;from:string|null}):SenderVerdict{
  const fromDomain=domainOf(input.from),spf=input.spf.trim().toLowerCase()
- if(!fromDomain)return {verified:false,failed:false}
+ if(!fromDomain)return {verified:false,failed:spf==='fail'}
  for(const match of input.dkim.matchAll(/@([^\s:,{}]+)\s*:\s*([a-z]+)/gi))if(match[2].toLowerCase()==='pass'&&alignedDomain(match[1],fromDomain))return {verified:true,failed:false}
  const verified=spf==='pass'&&alignedDomain(domainOf(input.envelopeFrom),fromDomain)
  return {verified,failed:!verified&&spf==='fail'}

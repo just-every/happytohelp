@@ -534,7 +534,8 @@ evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId
   header. Customer identity always comes from the `From` header (verified by
   DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**; a
   possible forgery of a widget-verified customer, or mail the provider reported
-  as failing, gets its own **Unverified sender** conversation), never
+  as failing, or with no usable From, gets its own **Unverified sender**
+  conversation; an address only typed into the widget never receives mail), never
   from the envelope, so forwarding and bounce-address rewrites do not create
   contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional

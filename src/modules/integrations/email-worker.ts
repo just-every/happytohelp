@@ -6,7 +6,7 @@ import {receiveEmail} from './inbound-service'
 import {hashToken} from '../../platform/auth'
 import {scheduleInboundEffects} from './inbound-effects'
 import {emailEvidence} from './email-classification'
-import {routingCandidates,authenticationVerdict} from './inbound-sender'
+import {routingCandidates,authenticationVerdict,headerFromAddress} from './inbound-sender'
 import {emailAddress} from './inbound-routing'
 const addressList=(entries:any[]|undefined)=>(entries||[]).flatMap((entry:any)=>entry.group?entry.group.map((member:any)=>member.address):[entry.address]).filter(Boolean)
 export async function handleEmail(message:ForwardableEmailMessage,env:Env,execution:ExecutionContext){
@@ -14,16 +14,17 @@ export async function handleEmail(message:ForwardableEmailMessage,env:Env,execut
  const raw=await new Response(message.raw).arrayBuffer(),parsed=await PostalMime.parse(raw,{attachmentEncoding:'arraybuffer'})
  // The header From is who wrote the message, verified by Cloudflare's own
  // Authentication-Results; the envelope sender (VERP, forwarding SRS, or empty for
- // bounces and auto-replies) is delivery metadata.
- const envelopeFrom=String(message.from||'').trim(),headerFrom=emailAddress(parsed.from?.address),from=headerFrom||emailAddress(envelopeFrom)
+ // bounces and auto-replies) is delivery metadata. Mail with no usable From is kept
+ // under its envelope sender, as an unverified sender (inbound-service.ts).
+ const envelopeFrom=String(message.from||'').trim(),headerFrom=headerFromAddress(parsed.headers),from=headerFrom||emailAddress(envelopeFrom)
  if(!from){message.setReject('Sender address required');return}
  // A subject-only email is its subject; only a message with nothing at all is refused.
  const body=plainEmail(parsed.text||'',parsed.html||'').trim()||(parsed.attachments.length?'':String(parsed.subject||'').trim());if(!body&&!parsed.attachments.length){message.setReject('A message body is required');return}
  const rawId=parsed.messageId||await hashToken(new TextDecoder().decode(raw)),messageId=rawId.length>200?await hashToken(rawId):rawId
- const verdict=headerFrom?authenticationVerdict(parsed.headers,headerFrom,envelopeFrom):{verified:false,failed:false}
+ const verdict=authenticationVerdict(parsed.headers,headerFrom,envelopeFrom)
  const evidence=emailEvidence({envelopeFrom,headerFrom:parsed.from?.address,subject:parsed.subject,headers:parsed.headers})
  try{
- const result=await receiveEmail(env,{messageId,from,to:routingCandidates({envelope:[message.to],headers:parsed.headers,to:addressList(parsed.to)}),text:body,senderAuthenticated:verdict.verified,senderFailed:verdict.failed,replyTo:addressList(parsed.replyTo)[0],cc:addressList(parsed.cc),evidence,attachments:parsed.attachments.map(file=>({filename:file.filename||'attachment',contentType:file.mimeType,content:file.content as ArrayBuffer}))})
+ const result=await receiveEmail(env,{messageId,from,to:routingCandidates({envelope:[message.to],headers:parsed.headers,to:addressList(parsed.to)}),text:body,senderAuthenticated:verdict.verified,senderFailed:verdict.failed,fromUnusable:!headerFrom,replyTo:addressList(parsed.replyTo)[0],cc:addressList(parsed.cc),evidence,attachments:parsed.attachments.map(file=>({filename:file.filename||'attachment',contentType:file.mimeType,content:file.content as ArrayBuffer}))})
  scheduleInboundEffects(env,execution,result)
  }catch(error){
   // 409: this Message-ID already holds different content (another copy of mail

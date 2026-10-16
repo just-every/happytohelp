@@ -10,15 +10,17 @@ import {routingAddresses} from './inbound-sender'
 import {inboundLocalId,legacyInboundLocalId,scopedInboundId} from './inbound-identity'
 import {visibleEmailReply} from './email-reply'
 import {replyGrant} from './email-reply-address'
-import {inboundAuthority,emailContact,unverifiedSenderContact,isVerifiedCustomerAddress,emailActor,preferredAddressActor,openEmailConversation,ccContacts} from './inbound-authority'
+import {inboundAuthority,emailContact,unverifiedSenderContact,unusableFromContact,isVerifiedCustomerAddress,emailActor,preferredAddressActor,openEmailConversation,ccContacts} from './inbound-authority'
 import {classifyInboundEmail,evidenceJson,type EmailEvidence} from './email-classification'
 /** `to` lists the recipient addresses in routing order (envelope, forwarding headers,
  * To); the first configured mailbox selects the project. `from` is the header From and
  * `senderAuthenticated` whether the ingress verified it; `senderFailed` that the
  * provider reported an explicit DKIM, SPF or DMARC fail (or an ambiguous verdict).
+ * `fromUnusable`: the header From named no usable address, so `from` is only the
+ * envelope sender, which nobody authenticated as an author.
  * `replyTo` is a reply target only. `evidence` is what the ingress retained for automatic-mail classification. It
  * is not part of the delivery identity, so a redelivery keeps its first classification. */
-export interface IncomingEmail {messageId:string;to:string|readonly string[];from:string;text:string;conversationId?:string;cc?:string[];replyTo?:string;senderAuthenticated?:boolean;senderFailed?:boolean;evidence?:EmailEvidence;attachments?:{filename:string;contentType:string;content:ArrayBuffer}[]}
+export interface IncomingEmail {messageId:string;to:string|readonly string[];from:string;text:string;conversationId?:string;cc?:string[];replyTo?:string;senderAuthenticated?:boolean;senderFailed?:boolean;fromUnusable?:boolean;evidence?:EmailEvidence;attachments?:{filename:string;contentType:string;content:ArrayBuffer}[]}
 // A receipt still `processing` this long after it was written belongs to an attempt
 // that ended without admitting (a crashed or killed Worker). The retry reclaims it;
 // the claim token fences admission, so even a live slow attempt cannot admit twice.
@@ -34,7 +36,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
  // Malformed or excess CC entries are skipped, never a reason to refuse the message.
  let content=visibleEmailReply(raw);const cc=[...new Set((input.cc||[]).map(value=>emailAddress(value)).filter((value):value is string=>Boolean(value)))].sort().slice(0,20)
  const received=await receivingMailbox(env,[...to,...cc]);if(!received)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})
- const {project,target}=received,authenticated=input.senderAuthenticated!==false
+ const {project,target}=received,unusable=input.fromUnusable===true,authenticated=!unusable&&input.senderAuthenticated!==false
  if(input.conversationId&&target.conversationId&&input.conversationId!==target.conversationId)throw new HTTPException(400,{message:'Conflicting conversation address'})
  const grant=target.replyToken?await replyGrant(env,project.project_id,target.replyToken):null
  if(input.conversationId&&grant&&input.conversationId!==grant.conversation_id)throw new HTTPException(400,{message:'Conflicting conversation address'})
@@ -85,7 +87,10 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
   // An unauthenticated From naming a widget-verified customer, or one the provider
   // reported as failing, may be forged: it never writes as that customer or into
   // their threads, only into its own conversation flagged as an unverified sender.
-  const isolated=!trusted&&(input.senderFailed===true||await isVerifiedCustomerAddress(env,project.project_id,from))
+  // Mail with no usable From has no author to authenticate: only the reply address
+  // issued to its envelope sender admits it to that thread; otherwise it is kept
+  // apart the same way, and no reply is sent to anybody until an operator chooses.
+  const isolated=!trusted&&(unusable||input.senderFailed===true||await isVerifiedCustomerAddress(env,project.project_id,from))
   const addressedConversation=addressed&&!isolated?await env.DB.prepare('SELECT * FROM conversations WHERE id=? AND project_id=?').bind(addressed,project.project_id).first<any>():null
   if(addressedConversation&&(trusted||!grant)){
    actor=await emailActor(env,project.project_id,addressedConversation,from,trusted)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
@@ -94,7 +99,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
   // Everything else is the sender's own mail to the support mailbox: it continues
   // their most recently active open thread or starts one, and is never refused.
   if(!actor){
-   const contact=isolated?await unverifiedSenderContact(env,project.project_id,from):await emailContact(env,project.project_id,from)
+   const contact=!isolated?await emailContact(env,project.project_id,from):unusable?await unusableFromContact(env,project.project_id,from):await unverifiedSenderContact(env,project.project_id,from)
    if(!contact){
     await env.DB.prepare("UPDATE inbound_emails SET state='ignored',error='Contact is unavailable' WHERE id=? AND claim_token=?").bind(recordId,claimToken).run()
     return {id:messageId,state:'ignored',conversationId:null,duplicate:false,automatic}

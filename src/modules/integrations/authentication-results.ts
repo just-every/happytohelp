@@ -38,6 +38,11 @@ function segments(value:string):string[]|null{
  out.push(current)
  return out
 }
+// Properties that name a domain hold only a domain (or, for HELO, an address literal);
+// anything else there is sender text reshaping the verdict.
+const DOMAIN=/^(?=.{1,253}\.?$)[a-z0-9_](?:[a-z0-9_-]{0,61}[a-z0-9_])?(?:\.[a-z0-9_](?:[a-z0-9_-]{0,61}[a-z0-9_])?)*\.?$/i
+const ADDRESS_LITERAL=/^\[(?:IPv6:)?[0-9a-f.:]+\]$/i
+const DOMAIN_VALUED:Record<string,(value:string)=>boolean>={'header.d':value=>DOMAIN.test(value),'header.from':value=>DOMAIN.test(value),'smtp.helo':value=>DOMAIN.test(value)||ADDRESS_LITERAL.test(value)}
 /** Each result must be exactly `method[/version]=result` followed by `reason=` and
  * `ptype.property=` values, each named once; anything else is ambiguous. */
 function result(segment:string):AuthResult|null{
@@ -47,7 +52,7 @@ function result(segment:string):AuthResult|null{
  const properties:Record<string,string>={}
  for(const word of words){
   const match=word.match(/^(reason|[a-z0-9-]+\.[a-z0-9-]+)=([\x21-\x7e]+)$/i),key=match?.[1].toLowerCase()
-  if(!match||key! in properties)return null
+  if(!match||key! in properties||DOMAIN_VALUED[key!]&&!DOMAIN_VALUED[key!](match[2]))return null
   properties[key!]=match[2]
  }
  return {method:head[1].toLowerCase(),result:head[2].toLowerCase(),properties}
@@ -64,8 +69,10 @@ export function parseAuthenticationResults(value:string):AuthResults|null{
 
 // Cloudflare Email Routing copies the sender's HELO into its SPF result for that
 // identity, and any text smuggled in there lands right after that entry, where an
-// honest verdict has only the MAIL FROM's SPF result and ARC. DMARC, each SPF
-// identity and ARC appear once, and each SPF result names exactly one identity.
+// honest verdict has only the MAIL FROM's SPF result and ARC. It writes every DKIM
+// result before DMARC, whose header.from carries the From domain, so a DKIM result
+// after DMARC was smuggled in there. DMARC, each SPF identity and ARC appear once,
+// and each SPF result names exactly one identity.
 const ONCE=new Set(['dmarc','spf:smtp.helo','spf:smtp.mailfrom','arc'])
 const AFTER_HELO=new Set(['spf:smtp.mailfrom','arc'])
 const known=new Set(['dkim',...ONCE])
@@ -79,7 +86,7 @@ export function cloudflareConsistent(results:AuthResult[]){
    key=`spf:${identities[0]}`
   }
   if(!known.has(key))continue
-  if(ONCE.has(key)&&seen.has(key)||seen.has('spf:smtp.helo')&&!AFTER_HELO.has(key))return false
+  if(ONCE.has(key)&&seen.has(key)||seen.has('spf:smtp.helo')&&!AFTER_HELO.has(key)||key==='dkim'&&seen.has('dmarc'))return false
   seen.add(key)
  }
  return true

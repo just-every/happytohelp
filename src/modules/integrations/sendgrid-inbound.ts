@@ -8,7 +8,7 @@ import {receiveEmail} from './inbound-service'
 import {scheduleInboundEffects} from './inbound-effects'
 import {emailEvidence,headerBlockEntries} from './email-classification'
 import {emailAddress} from './inbound-routing'
-import {routingCandidates,sendGridVerdict} from './inbound-sender'
+import {routingCandidates,sendGridVerdict,headerFromAddress} from './inbound-sender'
 
 export const sendgridInbound=new Hono<AppEnv>()
 const maxBody=30*1024*1024
@@ -60,22 +60,23 @@ sendgridInbound.post('/email/sendgrid/inbound',async c=>{
  }
  // The header From is who wrote the message, verified by SendGrid's DKIM and SPF
  // verdicts; the envelope sender (VERP, forwarding SRS, or empty for bounces and
- // auto-replies) is delivery metadata. Reply-To is a reply target only.
+ // auto-replies) is delivery metadata. Reply-To is a reply target only. Mail with no
+ // usable From is kept under its envelope sender, as an unverified sender.
  const headerBlock=field(body,'headers'),parsedHeaders=await PostalMime.parse(`${headerBlock.replace(/[\r\n]+$/,'')}\r\nTo: ${field(body,'to').replace(/[\r\n]/g,' ')}\r\nCc: ${field(body,'cc').replace(/[\r\n]/g,' ')}\r\n\r\n`),headers=headerBlockEntries(headerBlock)
  const list=(entries:any[]|undefined)=>(entries||[]).flatMap((entry:any)=>entry.group?entry.group.map((member:any)=>member.address):[entry.address]).filter(Boolean) as string[]
- const headerFrom=emailAddress(parsedHeaders.from?.address)||emailAddress(field(body,'from')),from=headerFrom||emailAddress(envelopeFrom)
+ const headerFrom=headerFromAddress(parsedHeaders.headers,field(body,'from')),from=headerFrom||emailAddress(envelopeFrom)
  if(!from)throw new HTTPException(400,{message:'SendGrid inbound payload has no sender'})
  // A subject-only email is its subject; only a message with nothing at all is refused.
  const content=text.trim()||(attachments.length?'':field(body,'subject').trim())
  if(!content&&!attachments.length)throw new HTTPException(400,{message:'SendGrid inbound payload is missing a body'})
- const cc=list(parsedHeaders.cc),verdict=headerFrom?sendGridVerdict({dkim:field(body,'dkim'),spf:field(body,'SPF'),envelopeFrom,from:headerFrom}):{verified:false,failed:false}
+ const cc=list(parsedHeaders.cc),verdict=sendGridVerdict({dkim:field(body,'dkim'),spf:field(body,'SPF'),envelopeFrom,from:headerFrom})
  const evidence=emailEvidence({envelopeFrom,headerFrom:field(body,'from'),subject:field(body,'subject'),headers})
  const fallback=await hashToken(JSON.stringify({to:envelopeRecipients,from,subject:field(body,'subject'),content,cc,attachments:await Promise.all(attachments.map(async file=>({filename:file.filename,type:file.contentType,size:file.content.byteLength,hash:await contentHash(file.content)})))}))
  // One message may name several configured mailboxes; each project receives its copy.
  const targets=envelopeRecipients.filter(Boolean).length?envelopeRecipients.filter(Boolean):['']
  const results=[]
  for(const recipient of targets){
-  try{results.push(await receiveEmail(c.env,{messageId:messageId(headerBlock,fallback),to:routingCandidates({envelope:recipient?[recipient]:[],headers,to:list(parsedHeaders.to)}),from,text:content,cc,replyTo:list(parsedHeaders.replyTo)[0],senderAuthenticated:verdict.verified,senderFailed:verdict.failed,evidence,attachments}))}
+  try{results.push(await receiveEmail(c.env,{messageId:messageId(headerBlock,fallback),to:routingCandidates({envelope:recipient?[recipient]:[],headers,to:list(parsedHeaders.to)}),from,text:content,cc,replyTo:list(parsedHeaders.replyTo)[0],senderAuthenticated:verdict.verified,senderFailed:verdict.failed,fromUnusable:!headerFrom,evidence,attachments}))}
   catch(error){if(!(error instanceof HTTPException&&error.status===404&&targets.length>1))throw error}
  }
  if(!results.length)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})

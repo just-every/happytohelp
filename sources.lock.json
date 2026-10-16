@@ -8391,7 +8391,7 @@
       "executable": false
     },
     "tests/identity-setup.mjs": {
-      "sha256": "44309fa49941d4a991730c8f3ea591a9f5c546adae4ed82d4d6a87e3ad166bf4",
+      "sha256": "9e092a7a831a42f74efb7815ee872ba812d3875815515f3bd576209a84fe9298",
       "executable": false
     },
     "tests/identity.mjs": {

@@ -158,16 +158,20 @@ Every ordinary email is accepted; none is bounced for who sent it:
   through the reply address issued to that envelope sender for that thread. Nothing
   is emailed to it automatically: an operator chooses a recipient (a preferred
   address on the contact, or an added recipient).
-- **Only a proven address receives mail.** Mail resolves to a contact whose
+- **Only a proven address receives fresh mail.** Mail resolves to a contact whose
   address is proven: one created from mail this desk received, or a widget-verified
   contact whose signed identifier is that address. An address a visitor typed into
   the widget (marked `email_unproven`), or a verified visitor's unsigned email or
-  preference, is only where notifications may go: mail from it, even through its
-  reply address, goes to that address's own email contact and never appears in the
-  widget session.
+  preference, is where notifications go: an answer to one of them through the reply
+  address issued to that address for that conversation continues the conversation
+  as the visitor, because whoever reads that mailbox was sent the thread. Any other
+  mail from such an address (fresh mail, a conversation address without that reply
+  address, another thread) goes to that address's own email contact and never
+  appears in the widget session.
 - **Which conversation.** Mail to a conversation's reply address joins it when the
   sender is a current participant (members need a verified From or their own reply
-  address). Everything else, including a fresh email from a customer with an open
+  address), or holds the reply address issued to the email or preferred address of
+  the primary contact or a participant. Everything else, including a fresh email from a customer with an open
   thread, continues the sender's most recently active open conversation or starts
   one.
 - **CC recipients** become participants only for a verified sender or a sender using

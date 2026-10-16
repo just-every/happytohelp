@@ -7,7 +7,7 @@ test('native knowledge deletion is a reviewable rejection and cannot be undone b
  await h.call(`/api/knowledge/p/articles/${target.id}`,{method:'DELETE'});
  const reviewed=(await uploadBody(h,'\n'+JSON.stringify(article()))).data;await h.drain();const result=await state(h,reviewed);
  assert.equal(result.state,'ready');assert.equal(result.error,null);assert.equal(result.plan.decisions[0].rejection,'native_target_missing');assert.equal(result.plan.counts.rejected,1);assert.equal(result.plan.counts.effects,0);
- await apply(h,reviewed);assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM knowledge_articles').first()).n,0);assert.equal(h.outbound,0);
+ assert.equal((await h.raw(`${root}/${reviewed.id}/apply`,json({fingerprint:result.plan.fingerprint}))).response.status,409);assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM knowledge_articles').first()).n,0);assert.equal(h.outbound,0);
  }finally{await h.close()}});
 
 test('a collision in a later review partition prevents any earlier publication',async()=>{const h=await nativeHarness();try{
@@ -52,4 +52,11 @@ for(const mutation of ['insert','edit'])test(`publication refuses a late native 
  if(mutation==='insert')await h.db.prepare("INSERT INTO contacts(id,project_id,email,name,created_at) VALUES('native','p','SAME@example.test','Native keeper',1)").run();else await h.db.prepare("UPDATE contacts SET email='SAME@example.test',name='Native keeper' WHERE id='native'").run();
  const approved=await h.raw(`${root}/${run.id}/apply`,json({fingerprint:(await state(h,run)).plan.fingerprint}));if(approved.response.ok)await h.drain();else assert.equal(approved.response.status,409);
  assert.notEqual((await state(h,run)).state,'completed');assert.deepEqual((await h.db.prepare('SELECT id,email,name FROM contacts ORDER BY id').all()).results,[{id:'native',email:'SAME@example.test',name:'Native keeper'}]);assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM knowledge_articles').first()).n,0);assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM move_in_origins').first()).n,0);assert.equal(h.outbound,0);
+ }finally{await h.close()}});
+
+test('a rejected record holds no source ID: its corrected copy imports beside what was already imported',async()=>{const h=await nativeHarness();try{
+ const reply=(visible_to)=>({type:'macro',id:'refund',name:'Refund timing',body:'Refunds take 5 days.',visible_to,available_on:['inbox'],created_at:'2024-01-01T00:00:00Z',updated_at:'2024-01-02T00:00:00Z'});
+ const first=await upload(h,[person(),reply('team')]);await h.drain();assert.equal((await state(h,first)).plan.decisions.find(d=>d.kind==='macro').rejection,'restricted_macro_not_imported');assert.equal((await apply(h,first)).state,'completed');
+ const fixed=await upload(h,[person(),reply('everyone')],'fixed.jsonl');await h.drain();const review=await state(h,fixed);assert.deepEqual(review.plan.decisions.map(d=>[d.kind,d.rejection??null,d.targets.length]),[['contact',null,1],['macro',null,1]]);
+ assert.equal((await apply(h,fixed)).state,'completed');assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM macros').first()).n,1);assert.equal((await h.db.prepare('SELECT COUNT(*) n FROM contacts').first()).n,1);
  }finally{await h.close()}});

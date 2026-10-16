@@ -13,6 +13,7 @@ registerHooks({ resolve(specifier, context, next) {
 } })
 
 const { sendgridInbound } = await import('../src/modules/integrations/sendgrid-inbound.ts')
+const { recipientReplyAddress } = await import('../src/modules/integrations/email-reply-address.ts')
 const { getPlatformProxy } = await import('wrangler')
 const proxy = await getPlatformProxy({ persist: false })
 
@@ -160,6 +161,21 @@ try {
   assert.equal(forwarded.status,201)
   const ana=await forwarded.json(),anaRows=(await env.DB.prepare('SELECT ct.email FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=? AND v.project_id=? UNION ALL SELECT ct.email FROM conversation_participants cp JOIN contacts ct ON ct.id=cp.contact_id WHERE cp.conversation_id=?').bind(ana.conversationId,'p',ana.conversationId).all()).results
   assert.deepEqual(anaRows.map(row=>row.email),['ana@customer.example','lee@customer.example'])
+  // A widget visitor's typed address answers its notification through the reply
+  // address issued to it: the answer continues the chat as the visitor; fresh mail
+  // from that address does not.
+  // The receiving mailbox's MX lookup answers, so a reply address is issued.
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async (url, init) => String(url).startsWith('https://cloudflare-dns.com/') ? Response.json({ Status: 0, Answer: [{ type: 15, data: '10 mx.example.com.' }] }) : originalFetch(url, init)
+  await env.DB.batch([
+   env.DB.prepare("INSERT INTO contacts(id,project_id,email,metadata_json,created_at) VALUES('visitor','p','rosa@acme.test','{\"email_unproven\":1}',1)"),
+   env.DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('chat','p','visitor',1,1)"),
+  ])
+  const rosaReplyAddress = await recipientReplyAddress(env, 'support@reply.support.example.com', 'p', 'chat', 'rosa@acme.test')
+  const rosa = await (await post(rawForm({ messageId: 'sendgrid-rosa-answer@example.com', envelope: { to: [rosaReplyAddress], from: 'rosa@acme.test' }, to: rosaReplyAddress, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}', text: 'Photo attached, the corner is crushed.' }))).json()
+  assert.deepEqual([rosa.conversationId, rosa.actor.contactId], ['chat', 'visitor'])
+  const rosaFresh = await (await post(rawForm({ messageId: 'sendgrid-rosa-fresh@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'rosa@acme.test' }, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}' }))).json()
+  assert.notEqual(rosaFresh.conversationId, 'chat')
   await Promise.all(pending)
   console.log('SendGrid inbound: Basic shared-token auth, multipart attachment bytes, stable Message-ID, D1/R2 admission, duplicate delivery, From identity over VERP/SRS envelopes, forwarded routing, unverified SPF and multi-mailbox delivery passed')
 } finally {

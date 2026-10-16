@@ -123,6 +123,28 @@ Enable R2 before provisioning. Commit source before a real deployment.
 
 ### What you need first
 
+These are the deploy-kit owner-account instructions that rer's deploy message
+points to.
+
+1. In the [Cloudflare dashboard](https://dash.cloudflare.com/), open the
+   account you will deploy to, then **Manage Account → Account API Tokens →
+   Create Token → Create Custom Token**.
+2. Add the four account permissions below, keep **Account Resources** on that
+   one account, create the token and copy it.
+3. Copy the **Account ID** (see [Find your account ID](#find-your-account-id)).
+4. Put both in a private file only you can read, and pass it to rer:
+
+   ```sh
+   umask 077
+   cat > ~/happytohelp-deploy.env <<'EOF_ENV'
+   CLOUDFLARE_ACCOUNT_ID=paste-the-account-id
+   CLOUDFLARE_API_TOKEN=paste-the-token
+   EOF_ENV
+   rer deploy --environment production --env-file ~/happytohelp-deploy.env
+   ```
+
+   The same file holds the mail and owner values described below.
+
 Use an account-owned API token pinned to the intended account, with account
 permissions **Workers Scripts: Edit**, **D1: Edit**, **Workers R2 Storage: Edit**
 and **Queues: Edit**. This declaration does not need KV or zone permissions.
@@ -535,7 +557,8 @@ evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId
   DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**; a
   possible forgery of a widget-verified customer, or mail the provider reported
   as failing, or with no usable From, gets its own **Unverified sender**
-  conversation; an address only typed into the widget never receives mail), never
+  conversation; an address only typed into the widget receives only answers sent
+  through its notification's reply address), never
   from the envelope, so forwarding and bounce-address rewrites do not create
   contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional

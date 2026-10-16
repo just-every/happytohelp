@@ -29,8 +29,8 @@ export default function ResolutionRating() {
             <button type="button" aria-pressed={value === -1} disabled={saving} onClick={() => setValue(-1)}>👎 No</button>
         </div>
         <label htmlFor="happytohelp-rating-comment">Comment (optional)</label>
-        <textarea id="happytohelp-rating-comment" maxLength={1000} rows={2} value={comment} onChange={event => setComment(event.target.value)} disabled={saving}/>
-        <span className="happytohelp-rating-count">{comment.length}/1,000</span>
+        <textarea id="happytohelp-rating-comment" name="rating_comment" maxLength={1000} rows={2} value={comment} onChange={event => setComment(event.target.value)} disabled={saving} aria-describedby="happytohelp-rating-count"/>
+        <span id="happytohelp-rating-count" className="happytohelp-rating-count">{comment.length}/1,000</span>
         <button type="submit" disabled={saving || value === null || unchanged}>{saving ? 'Saving…' : resolution.rating ? 'Update rating' : 'Send rating'}</button>
         {resolution.rating && <p role="status">Thanks for your feedback. You can change it here.</p>}
         {error && <p role="alert">{error}</p>}

@@ -93,7 +93,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
   const isolated=!trusted&&(unusable||input.senderFailed===true||await isVerifiedCustomerAddress(env,project.project_id,from))
   const addressedConversation=addressed&&!isolated?await env.DB.prepare('SELECT * FROM conversations WHERE id=? AND project_id=?').bind(addressed,project.project_id).first<any>():null
   if(addressedConversation&&(trusted||!grant)){
-   actor=await emailActor(env,project.project_id,addressedConversation,from,trusted)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
+   actor=await emailActor(env,project.project_id,addressedConversation,from,trusted,possessed)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
    if(actor)conversation=addressedConversation
   }
   // Everything else is the sender's own mail to the support mailbox: it continues
@@ -128,7 +128,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
    await env.DB.prepare('INSERT OR IGNORE INTO media(id,project_id,conversation_id,uploaded_by,object_key,filename,content_type,size,created_at) VALUES(?,?,?,?,?,?,?,?,?)').bind(key,project.project_id,conversation.id,actor.id,objectKey,file.filename,file.contentType,file.content.byteLength,Date.now()).run()
    mediaIds.push(key)
   }
-  const result=await admitMessage(env,{projectId:project.project_id,conversationId:conversation.id,actor,localId,content,expectedRevision:conversation.revision,expectedLastMessageId:conversation.last_message_id,mediaIds,[inboundAuthority]:{sender:from,receiptId:recordId,claimToken,raw,cc:participants}})
+  const result=await admitMessage(env,{projectId:project.project_id,conversationId:conversation.id,actor,localId,content,expectedRevision:conversation.revision,expectedLastMessageId:conversation.last_message_id,mediaIds,[inboundAuthority]:{sender:from,receiptId:recordId,claimToken,raw,cc:participants,...(possessed?{grant:await hashToken(target.replyToken!)}:{})}})
   if(!result.accepted)throw new Error(result.reason)
   await env.DB.prepare("UPDATE inbound_emails SET state='delivered',message_id=?,error=NULL WHERE id=?").bind(String(result.message!.id),recordId).run()
   await keepReplyTarget(env,project.project_id,actor,input.replyTo,{authenticated,automatic,workspace})

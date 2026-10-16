@@ -50,7 +50,8 @@ function nameFromHost(host: string): string | null {
 }
 /** The workspace name for a website and owner email: the public website's, else the company email domain's, else the fallback. */
 export function deriveWorkspaceName(website: string, email: string): string {
-    const host = publicHost(website), domain = companyDomain(email);
+    // The local trial's owner is owner@<checkout folder>.test: a .test address names no business.
+    const host = publicHost(website), domain = companyDomain(email)?.endsWith('.test') ? null : companyDomain(email);
     if (host && deploymentHost(host)) return FALLBACK_WORKSPACE_NAME;
     return ((host && nameFromHost(host)) || (domain && nameFromHost(domain)) || FALLBACK_WORKSPACE_NAME).slice(0, 200);
 }

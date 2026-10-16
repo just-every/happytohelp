@@ -72,8 +72,9 @@ address issued to that sender, and nobody is emailed automatically; add a recipi
 or a preferred address to answer it. Mail reaches only a customer whose address is
 proven: one who first wrote by email, or a widget visitor whose signed identifier is
 that address. An address a visitor only typed into the widget receives
-notifications, but mail from it starts that address's own email conversation and
-never appears in the widget.
+notifications, and an answer through a notification's reply address continues the
+chat; any other mail from it starts that address's own email conversation and never
+appears in the widget.
 
 No ordinary email is bounced. Mail to the bare support mailbox, or from someone who
 is not a current recipient of the addressed thread, continues that sender's most

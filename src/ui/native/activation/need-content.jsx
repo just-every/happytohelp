@@ -4,6 +4,10 @@ import {buildAnonymousEmbedCode} from '../../dashboard/components/widget-setting
 import CopyCommand from '../setup-help/CopyCommand';
 import SecretSteps from '../setup-help/SecretSteps';
 import {hostOf, modelKeyState} from './setup-model';
+// Serves a test page on a port nothing else is using, and prints its address.
+const testPageCommand=`PORT=\$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])')
+echo "Test page: http://127.0.0.1:\$PORT"
+python3 -m http.server "\$PORT" --bind 127.0.0.1`;
 
 // The words and actions of each thing that needs the owner. Local and hosted copy is chosen here, never hidden by CSS.
 const keyPages = {
@@ -56,7 +60,7 @@ function widgetNeed({data, projectId}) {
  return {
   title: 'Add the widget to your website',
   copy: <>Paste this before the closing body tag of every page on your own website, the one your customers visit. We can’t edit your site, so this one is yours.{own ? <> The widget is set to answer only on this HappyToHelp address (<b>{host}</b>), which is not your website: first enter your website’s address in <Link to={`/projects/${projectId}/widget-settings`}>Widget settings</Link> under Website.</> : host ? <> The widget answers only on <b>{host}</b>; if your site has another address, change it in <Link to={`/projects/${projectId}/widget-settings`}>Widget settings</Link>.</> : null}</>,
-  how: <><p><b>Try it on your computer first:</b> save the snippet in a file named <code>test.html</code> inside <code>&lt;html&gt;&lt;body&gt; … &lt;/body&gt;&lt;/html&gt;</code>, then serve that folder and open the page:</p><CopyCommand text="python3 -m http.server 8852"/><p>Open <code>http://127.0.0.1:8852/test.html</code>. For that test, set the Website in Widget settings to <code>http://127.0.0.1:8852</code>, and set it back to your real site when you’re done.</p></>,
+  how: <><p><b>Try it on your computer first:</b> save the snippet in a file named <code>test.html</code> inside <code>&lt;html&gt;&lt;body&gt; … &lt;/body&gt;&lt;/html&gt;</code>, then run this in that folder. It picks a free port and prints the address:</p><CopyCommand text={testPageCommand}/><p>Open that address with <code>/test.html</code> on the end. For that test, set the Website in Widget settings to the printed address, and set it back to your real site when you’re done.</p></>,
   snippet,
   actions: snippet ? [{kind: 'copy', text: snippet}, {kind: 'mailto', text: snippet, host: own ? '' : host}, {kind: 'how'}] : [],
  };

@@ -1,7 +1,7 @@
 import type { Diagnostic, SourceRecord } from '../../import-kit/src/types'
 import { sha256 } from '../../import-kit/src/provenance/identity'
 import { LIMITS, type Vendor } from '../types'
-import { issue, sourceRecord } from './common'
+import { issue, sourceRecord, wrappedVendor } from './common'
 import {lowerPosition,recordSourceId,RecordStructureError} from './classification'
 import type { ExportFile } from './archive'
 export interface ParsedItem { record?:SourceRecord; diagnostic?:Diagnostic; ordinal:number;serialized?:string }
@@ -13,10 +13,10 @@ export interface RecordPosition extends JsonPosition {}
 function* items(file:ExportFile,vendor:Vendor,maxRecords:number):Generator<Item> {
  if(/(?:^|\/)attachments\//i.test(file.name))throw new Error('attachment_original_retained_not_imported')
  const raw=new TextDecoder('utf-8',{fatal:true}).decode(file.bytes).replace(/^\uFEFF/,''),extension=file.name.split('.').pop()?.toLowerCase()
- if(vendor==='zendesk'||extension==='jsonl'){
+ if(wrappedVendor(vendor)||extension==='jsonl'){
   if(vendor==='intercom'&&extension!=='jsonl')throw new Error('unsupported_file_extension')
  let row=1,start=0;while(start<raw.length){const newline=raw.indexOf('\n',start),end=newline<0?raw.length:newline,line=raw.slice(start,end);if(line.trim()){
-  try{for(const position of vendor==='helpscout'?helpScoutPositions(line,maxRecords):jsonPositions(line,maxRecords,vendor==='zendesk'))yield {...position,raw:line.slice(position.start,position.end),start:start+position.start,end:start+position.end,row}}
+  try{for(const position of vendor==='helpscout'?helpScoutPositions(line,maxRecords):jsonPositions(line,maxRecords,wrappedVendor(vendor)))yield {...position,raw:line.slice(position.start,position.end),start:start+position.start,end:start+position.end,row}}
   catch(error){if(error instanceof IndexLimitError)throw new IndexLimitError(row,error.pointer);throw error}
  };start=end+1;row++}return
  }

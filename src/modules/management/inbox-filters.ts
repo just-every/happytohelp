@@ -13,7 +13,7 @@ export function inboxFilters(query:(name:string)=>string|undefined,search:string
  if(assignment==='myself'){conditions.push('c.assigned_to=?');params.push(userId)}
  if(assignment==='none')conditions.push('c.assigned_to IS NULL')
  if(view==='unread'){
-  conditions.push("EXISTS(SELECT 1 FROM messages msg WHERE msg.conversation_id=c.id AND msg.actor_role='contact' AND msg.revision>coalesce((SELECT revision FROM conversation_reads WHERE conversation_id=c.id AND user_id=?),0))")
+  conditions.push("EXISTS(SELECT 1 FROM messages msg WHERE msg.conversation_id=c.id AND msg.actor_role='contact' AND NOT EXISTS(SELECT 1 FROM move_in_message_sources ims WHERE ims.message_id=msg.id) AND msg.revision>coalesce((SELECT revision FROM conversation_reads WHERE conversation_id=c.id AND user_id=?),0))")
   params.push(userId)
  }
  return {conditions,params}

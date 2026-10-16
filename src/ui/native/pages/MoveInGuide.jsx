@@ -1,6 +1,6 @@
 import React from 'react';
 import CopyCommand from '../setup-help/CopyCommand';
-import {helpScoutScript,intercomContactsScript,zendeskScript} from './move-in-guides';
+import {freshdeskScript,helpScoutScript,intercomContactsScript,zendeskScript} from './move-in-guides';
 
 const tools = <>Run it in Terminal on a Mac or Linux computer with <code>curl</code> and <code>jq</code> installed (on a Mac: <code>brew install jq</code>). It asks for the secret without showing or saving it.</>;
 
@@ -12,7 +12,7 @@ export const vendorGuides = {
    <li>Copy this script, change the first two lines to your Zendesk address and admin email, and run it. {tools}<CopyCommand text={zendeskScript}/></li>
    <li>It writes <code>zendesk-move-in-1.ndjson</code>, <code>-2</code> and so on: 50 tickets each, with every comment and the people in them. Upload them one at a time below.</li>
   </ol>
-  <p className="sh-note">Saved replies (macros) and Help Center articles are optional extras; see <a href="/docs/moving-in#zendesk">Zendesk in the Move in guide</a>. To copy only your help articles, use Knowledge, Import instead.</p>
+  <p className="sh-note">Saved replies (macros) and Help Center articles are optional extras, each a line like <code>{'{"macro":{...}}'}</code>; the <a href="/docs/moving-in#zendesk">Zendesk section of the Move in guide</a> shows a complete example of each. To copy only your help articles, use Knowledge, Import instead.</p>
  </>},
  intercom: {label: 'Intercom', accept: '.json,.jsonl,.zip', guide: <>
   <ol>
@@ -32,8 +32,13 @@ export const vendorGuides = {
   </ol>
   <p className="sh-note">Docs articles: see <a href="/docs/moving-in#help-scout-inbox-v2-and-docs-v1">Help Scout in the Move in guide</a>.</p>
  </>},
- freshdesk: {label: 'Freshdesk', guide: <>
-  <p>Freshdesk conversation history can’t be moved in yet: there is no reader for its tickets. Your Freshdesk help articles can come across now with <b>Knowledge</b>, <b>Import</b>, <b>Freshdesk</b>.</p>
+ freshdesk: {label: 'Freshdesk', accept: '.json,.jsonl,.ndjson,.zip', guide: <>
+  <ol>
+   <li>In Freshdesk, open your profile picture, <b>Profile settings</b>, and copy <b>Your API Key</b> from the right of the page.</li>
+   <li>Copy this script, change the first line to your Freshdesk address, and run it. {tools}<CopyCommand text={freshdeskScript}/></li>
+   <li>It writes <code>freshdesk-move-in-1.ndjson</code>, <code>-2</code> and so on: 50 tickets each, with every reply and note and the people in them. It also writes <code>freshdesk-move-in-saved-replies.ndjson</code> with your canned responses. Upload them one at a time below.</li>
+  </ol>
+  <p className="sh-note">Attachments stay in Freshdesk: their names are kept, not the files. Help articles come across with Knowledge, Import, Freshdesk. Details: <a href="/docs/moving-in#freshdesk">Freshdesk in the Move in guide</a>.</p>
  </>},
  happytohelp: {label: 'HappyToHelp (the original service)', guide: <>
   <p>History from the original HappyToHelp service moves in with a command run on your computer, not an upload here. Follow <a href="/docs/operations#import-data-from-the-original-happytohelp-service">Import data from the original HappyToHelp service</a>.</p>

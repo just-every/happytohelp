@@ -42,3 +42,27 @@ jq -r '.. | objects | select(.type? == "contact") | .id' intercom-export/*.json*
   curl -fsS -H "Authorization: Bearer $IC_TOKEN" -H 'Intercom-Version: 2.16' "https://api.intercom.io/contacts/$id"; echo
 done | jq -sc '{contacts: .}' > intercom-contacts.json
 zip -j intercom-move-in.zip intercom-export/*.json* intercom-contacts.json`;
+
+export const freshdeskScript = `FD=yourcompany              # the first part of yourcompany.freshdesk.com
+read -rsp 'Freshdesk API key: ' FD_KEY; echo
+api() { curl -gfsS --retry 5 --retry-delay 20 -u "$FD_KEY:X" "https://$FD.freshdesk.com/api/v2/$1"; }
+all() { p=1; q='?per_page=100&page='; [[ $1 == *\\?* ]] && q='&per_page=100&page='
+  while r=$(api "$1$q$p"); do jq -c '.[]' <<<"$r"; [ "$(jq length <<<"$r")" -lt 100 ] && return; p=$((p+1)); done; }
+# Signed attachment and avatar links, address lists and empty custom fields are left out.
+CLEAN='def clean: walk(if type == "object" then del(.attachment_url, .thumb_url, .avatar, .to_emails, .cc_emails, .bcc_emails, .fwd_emails, .reply_cc_emails, .ticket_cc_emails, .from_email, .support_email) | (if (.custom_fields | type) == "object" then .custom_fields |= with_entries(select(.value != null)) else . end) | (if .custom_fields == {} then del(.custom_fields) else . end) else . end);'
+all agents | jq -c "$CLEAN {agent: clean}" > agents.ndjson; jq -r .agent.id agents.ndjson | sort > agent-ids.txt
+all 'tickets?updated_since=2000-01-01T00:00:00Z&order_by=created_at&order_type=asc' | jq -r .id > ids.txt
+split -l 50 ids.txt batch-; n=1
+for batch in batch-*; do
+  [ -e "$batch" ] || { echo 'No tickets found.'; break; }
+  : > tickets.ndjson
+  for id in $(cat "$batch"); do
+    t=$(api "tickets/$id?include=stats") && all "tickets/$id/conversations" | jq -sc --argjson t "$t" "$CLEAN {ticket: (\\$t + {conversations: .}) | clean}" >> tickets.ndjson
+  done
+  jq -r '.ticket | .requester_id, .conversations[].user_id' tickets.ndjson | sort -u | comm -23 - agent-ids.txt > people.txt
+  { cat agents.ndjson; for c in $(cat people.txt); do api "contacts/$c" | jq -c "$CLEAN {contact: clean}"; done; cat tickets.ndjson; } > "freshdesk-move-in-$n.ndjson"
+  n=$((n+1))
+done
+for f in $(api canned_response_folders | jq -r '.[].id'); do for r in $(api "canned_response_folders/$f/responses" | jq -r '.[].id'); do
+  api "canned_responses/$r" | jq -c "$CLEAN {canned_response: clean}"; done; done > freshdesk-move-in-saved-replies.ndjson
+rm -f ids.txt agent-ids.txt agents.ndjson tickets.ndjson people.txt batch-*; ls freshdesk-move-in-*.ndjson`;

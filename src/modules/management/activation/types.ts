@@ -36,6 +36,8 @@ export type ColourSource = 'site'|'default'|'chosen'
 /** Stored or installation facts for the page's rows. Structured values only: no wording, keys, tokens or fingerprints. */
 export type ActivationFacts = {
  workspaceName:string
+ /** False while the workspace keeps the name setup chose for it, such as My workspace. */
+ workspaceNamed:boolean
  /** The project's allowed widget origin. */
  website:string|null
  colour:{hex:string; source:ColourSource}

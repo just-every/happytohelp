@@ -33,6 +33,7 @@ export async function activationFacts(env:Env,config:Configuration,receipts:Rece
  const provider=config.mailMode==='local'?null:config.providerName,switched=senderSwitch(settings)
  return {
   workspaceName:String(config.project?.name||''),
+  workspaceNamed:!(typeof settings.derived?.name==='string'&&settings.derived.name===config.project?.name),
   website:config.project?.allowed_origin||null,
   colour:colour(settings),
   mail:{mode:config.mailMode,provider,statusApi:provider==='resend',sender:config.sender,proposedSender:config.proposedSender,senderDnsDomain:senderDnsDomain(config),

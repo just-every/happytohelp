@@ -85,6 +85,8 @@ async function assertTranscriptKeyboardScroll(page) {
   try {
    await page.keyboard.press('Home');
    await page.waitForFunction(element => element.scrollTop <= 1, element);
+   // Home may already read as zero before its native scroll reaches the compositor.
+   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
    await page.keyboard.press('PageDown');
    try {
     await page.waitForFunction(element => element.scrollTop > 1, element);
@@ -173,6 +175,8 @@ export async function exerciseLongAppearance({page, browser, origin, tenant, pro
    await audit(visitor, `${viewport.width}-long-help-index`);
    await visitor.getByRole('searchbox', {name: 'Search the Help Center'}).fill('Long content guide');
    await visitor.getByRole('button', {name: 'Search', exact: true}).click();
+   await visitor.waitForURL(url => url.pathname === `/help/${tenant.projectId}/search`);
+   await visitor.getByRole('heading', {name: 'Search results', exact: true}).waitFor();
    await visitor.getByRole('link', {name: title, exact: true}).waitFor();
    await audit(visitor, `${viewport.width}-long-help-search`);
    await visitor.getByRole('link', {name: title, exact: true}).click();

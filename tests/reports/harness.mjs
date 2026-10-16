@@ -7,11 +7,16 @@ import {randomBytes,createHash} from 'node:crypto';
 import {build} from 'esbuild';
 const require=createRequire(import.meta.url),{Miniflare,convertV4MiniflareOptions}=require(require.resolve('miniflare',{paths:[require.resolve('wrangler')]}));
 export const json=body=>({method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'application/json'}});
-export async function harness({beforeOutcomes}={}){
+export async function optIntoProactiveHelp(h,conversationId){
+ // Insight admission requires the workspace policy and the visitor's own consent.
+ await h.db.prepare(`INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES('p','{"is_contact_tracking_enabled":true,"proactive_help_enabled":true}',?) ON CONFLICT(project_id) DO UPDATE SET settings_json=json_set(settings_json,'$.is_contact_tracking_enabled',json('true'),'$.proactive_help_enabled',json('true')),updated_at=excluded.updated_at`).bind(Date.now()).run();
+ await h.call('/api/conversations/'+conversationId+'/widget-events',{...json({action:'contextConsent',data:{consent:true}}),actor:'visitor'});
+}
+export async function harness({beforeOutcomes,bindings={}}={}){
  const directory=await mkdtemp(join(tmpdir(),'reports-'));let mf,external=0;const tokens={};
  try{
  await build({entryPoints:['tests/reports/worker.ts'],bundle:true,format:'esm',platform:'node',external:['node:*','cloudflare:workers'],outfile:join(directory,'worker.mjs'),logLevel:'silent'});
- mf=new Miniflare(convertV4MiniflareOptions({name:'reports-check',modules:true,script:await readFile(join(directory,'worker.mjs'),'utf8'),compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:{DB:'reports-check'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService:async()=>{external++;throw Error('External requests prohibited')}}));
+ mf=new Miniflare(convertV4MiniflareOptions({name:'reports-check',modules:true,script:await readFile(join(directory,'worker.mjs'),'utf8'),compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],bindings,d1Databases:{DB:'reports-check'},r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:'ConversationSocket'},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),outboundService:async()=>{external++;throw Error('External requests prohibited')}}));
  const db=await mf.getD1Database('DB');
  for(const file of (await readdir('migrations')).filter(x=>x.endsWith('.sql')).sort()){
   if(file==='112_conversation_outcomes.sql'&&beforeOutcomes)await beforeOutcomes(db)

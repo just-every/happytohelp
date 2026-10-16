@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
+import {notificationPreferencesJourney} from './helpers/notification-preferences-browser.mjs';
 import {createRuntime} from './helpers/emitted-runtime.mjs';
 const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
 
@@ -9,7 +10,7 @@ const {chromium}=await import(process.env.H2H_PLAYWRIGHT_MODULE||'playwright');
 // mobile tables that keep every column and action reachable, validated training-run and create forms.
 const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-management-library-')),'management-library');
 await mkdir(evidenceDir,{recursive:true});console.log('Management library browser evidence:',evidenceDir);
-const runtime=await createRuntime({port:Number(process.env.H2H_TEST_PORT)||0,inspectorPort:process.env.H2H_RUNTIME_INSPECTOR_PORT?Number(process.env.H2H_RUNTIME_INSPECTOR_PORT):undefined}),origin=runtime.origin;
+const runtime=await createRuntime({vars:{EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-management-mail',EMAIL_FROM:'support@example.test'},outboundFixture:new URL('./helpers/notification-mail-fixture.mjs',import.meta.url).href,port:Number(process.env.H2H_TEST_PORT)||0,inspectorPort:process.env.H2H_RUNTIME_INSPECTOR_PORT?Number(process.env.H2H_RUNTIME_INSPECTOR_PORT):undefined}),origin=runtime.origin;
 let browser,success=false;
 const request=async(path,{token,body,method=body===undefined?'GET':'POST',raw=false}={})=>{const response=await fetch(origin+path,{method,headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});if(raw)return response;assert.ok(response.ok,`${method} ${path}: ${response.status} ${await response.clone().text()}`);return response.json();};
 const results=[],failures=[];
@@ -26,7 +27,7 @@ try{
  // A second owner (so self-removal is possible without orphaning the project) and a plain agent.
  const joinAs=async(email,name)=>{const invite=await request('/api/identity/invitations',{token,body:{email,role:'operator'}});await request('/api/identity/accept-token',{body:{token:invite.token,name,password:'synthetic-native-library-member-2026'}});const row=(await request(`${api}/agents`,{token})).data.find(agent=>agent.email===email);assert.ok(row?.id,'member joined');return row;};
  const second=await joinAs('second-owner@example.test','Second Owner'),helper=await joinAs('helper-agent@example.test','Helper Agent');
- await request(`${api}/agents/${second.id}`,{token,method:'PUT',body:{role:'owner'}});
+
  const macro=await make('macros',{title:'Greeting reply',content:'Hello {{contact.name}}'});
  const contact=await make('contacts',{name:'Long Email Contact',email:'a.very.long.contact.address.for.mobile@studio-marin-long-domain.example.test'});
  const assistant=await make('ais',{name:'Delete Me AI',role:'Delete helper',model:'gpt-5.6-luna',prompt:'Be helpful.'});
@@ -44,6 +45,8 @@ try{
  await page.goto(origin+'/login?returnTo='+encodeURIComponent(`/projects/${projectId}/conversations`));await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click();await page.waitForURL('**/conversations');
  const base=`${origin}/projects/${projectId}`,shot=name=>page.screenshot({path:join(evidenceDir,name),fullPage:true});
 
+ await check('notification preferences: sole owner saves, reloads and receives unassigned activity',()=>notificationPreferencesJourney({page,request,runtime,token,owner,projectId,project:project.project||project,evidenceDir}),page);
+ await request(`${api}/agents/${second.id}`,{token,method:'PUT',body:{role:'owner'}});
  // 1. One shared in-app confirmation for every destructive delete.
  const deleteCases=[
   {name:'saved reply',url:`${base}/macros/${macro.id}`,list:`${base}/macros`,subject:'Greeting reply',gone:()=>remaining('macros',macro.id)},

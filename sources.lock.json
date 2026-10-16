@@ -8399,7 +8399,7 @@
       "executable": false
     },
     "tests/legacy-export.mjs": {
-      "sha256": "7e1d88801bcb5f3163f273ca04d088c0143104b977dfcd76bda008bb9c43a414",
+      "sha256": "d76bf6f451628f3103ce71e846b8a8e960d468ae0ab0857da953f9ae66272f5f",
       "executable": false
     },
     "tests/legacy-export/fixture.mjs": {

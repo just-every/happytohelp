@@ -8883,7 +8883,7 @@
       "executable": false
     },
     "tests/public-site-runtime.mjs": {
-      "sha256": "92001109c84c592b57ded646d4ad3f9fb742e5150ca48e04e8509e21a03dcc38",
+      "sha256": "920eb303e77516183c12678e4419b5509d95242c49c2dcfb4eb927dc0c7f8aad",
       "executable": false
     },
     "tests/publication-metadata.mjs": {

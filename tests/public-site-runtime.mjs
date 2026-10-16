@@ -60,11 +60,13 @@ for (const asset of html.matchAll(/(?:src|href)="(\/(?:site-assets|homepage)\/[^
 for (const path of ['/marketing', '/pricing', '/waitlist', '/features/sales', '/company/terms', '/demo?website=https://example.com']) {
  assert.equal((await fetch(origin + path)).status, 404, path)
 }
-for (const [page, section] of [['install', 'widget'], ['widget-hash', 'identity'], ['javascript-api', 'javascript-api'], ['javascript-options', 'widget'], ['values', 'caller-decisions'], ['safety', 'identity']]) {
+for (const page of ['install', 'widget-hash', 'javascript-api', 'javascript-options', 'values', 'safety']) {
  const response = await fetch(`${origin}/resources/${page}`, { redirect: 'manual' })
  assert.equal(response.status, 308, page)
- assert.equal(response.headers.get('location'), `/docs/legacy-entry-points#${section}`, page)
- assert.equal((await fetch(new URL(response.headers.get('location'), origin))).status, 200, 'documentation destination ' + page)
+ assert.equal(response.headers.get('location'), `/docs/legacy-entry-points#${page}`, page)
+ const destination = await fetch(new URL(response.headers.get('location'), origin))
+ assert.equal(destination.status, 200, 'documentation destination ' + page)
+ assert.ok((await destination.text()).includes(`id="${page}"`), 'documentation anchor ' + page)
 }
 assert.equal((await fetch(origin + '/waitlist', {method: 'POST', body: new URLSearchParams({email: 'removed@example.invalid'})})).status, 404)
 // Unknown application paths: a branded HTML 404 with a descriptive title, a message and links home and to the workspace.

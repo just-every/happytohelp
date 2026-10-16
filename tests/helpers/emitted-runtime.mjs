@@ -26,9 +26,12 @@ export async function createRuntime({port=Number(process.env.H2H_RUNTIME_PORT||p
  }
  // Runs SQL against the isolated test database, for states the public APIs cannot produce (an expired link, a pending sign-up).
  const execute=command=>run(['d1','execute','DB','--local','--config',configPath,'--persist-to',persist,'--command',command])
- const restart=async()=>{
+ const restart=async(beforeStart)=>{
   child.kill('SIGTERM');await Promise.race([new Promise(resolveStop=>child.exitCode!==null?resolveStop():child.once('exit',resolveStop)),new Promise(resolveStop=>setTimeout(resolveStop,3000))]);
   if(child.exitCode===null){child.kill('SIGKILL');await new Promise(resolveStop=>child.exitCode!==null?resolveStop():child.once('exit',resolveStop));}
+  // Historical fixture mutations use a separate D1 owner only while the
+  // application is fully stopped, then return through the emitted Worker.
+  if(beforeStart)await beforeStart();
   child=spawn(process.execPath,[join(root,'tests/helpers/emitted-runtime-server.mjs'),configPath,persist,new URL(origin).port,...(inspectorPort!==undefined?[String(inspectorPort)]:port?[String(port+1)]:[])],{cwd:directory,env,stdio:['ignore','pipe','pipe']});
   child.stdout.on('data',record);child.stderr.on('data',record);
   const deadline=Date.now()+60000;

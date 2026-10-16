@@ -82,6 +82,16 @@ body.conversation-workspace {
         }
     }
 
+    #chat .chat-footer .chat-entry-form:has(> .saved-replies-picker) {
+        flex-direction: column;
+        gap: .75rem;
+    }
+
+    #chat .saved-replies-picker__results {
+        max-height: min(12rem, 24dvh);
+        overflow-y: auto;
+    }
+
     #chat .chat-footer .chat-buttons {
         flex: 0 0 auto;
         align-items: center;

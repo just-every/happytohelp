@@ -69,7 +69,7 @@ export default function MacrosPicker({ onPicked, projectId }) {
     if (!macrosProjectId) return null;
 
     return (
-        <div className="w-100 mt-2">
+        <div className="saved-replies-picker w-100 mt-2">
             <ul className="nav nav-tabs nav-tabs-sm border-0 gap-1">
                 <li className="nav-item"><span className="nav-link active">Saved Replies</span></li>
                 <li className="nav-item"><Link to={`/projects/${macrosProjectId}/macros`} className="nav-link">Edit
@@ -80,7 +80,7 @@ export default function MacrosPicker({ onPicked, projectId }) {
                 <input className="form-control" type="search" aria-label="Search saved replies" placeholder="Search saved replies" value={search} onChange={event => { setSearch(event.target.value); setPage(1); }} />
                 {loadError && <p role="alert">Couldn’t load saved replies.</p>}
                 {!hasLoaded && !loadError && <p role="status">Loading…</p>}
-                <div className="row">
+                <div className="row saved-replies-picker__results">
                     <div className="col">
                         {macros.map(macro => (
                             <a

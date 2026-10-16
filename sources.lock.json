@@ -5682,7 +5682,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/MacrosPicker.jsx": {
-      "sha256": "6f68a2b8cec157af02cedaa548c2fe2d89fef32d9005b2b2030efd059e181dff",
+      "sha256": "987e6860e47bde57da489e5d7352e386f12efd83c4f12c40cff3bc03891f763a",
       "executable": false
     },
     "src/ui/dashboard/components/Media.jsx": {
@@ -6026,7 +6026,7 @@
       "executable": false
     },
     "src/ui/dashboard/styles/layouts/_conversation-composer.scss": {
-      "sha256": "b6a091c5acb33bb881738a24f8a0acf5f15d48831bd8a64be062d5f9d055a66e",
+      "sha256": "6f53c91b437b88f3170890792d24c946bae7fd16f80c59c63fc238a6e128aee7",
       "executable": false
     },
     "src/ui/dashboard/styles/layouts/_conversation-delegation-results.scss": {
@@ -8402,7 +8402,7 @@
       "executable": false
     },
     "tests/management-library-browser.mjs": {
-      "sha256": "1bc2201d9edb4c8a5aa0b8436d006e88f7d757298517556f2050de2cf83df9de",
+      "sha256": "bf5f771957a866883be7f8bb990fd5a50fcd7d19f2649da6d6749af92c6ffc0e",
       "executable": false
     },
     "tests/management.mjs": {

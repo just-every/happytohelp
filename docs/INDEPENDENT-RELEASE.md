@@ -72,11 +72,10 @@ take a consistent backup:
 1. Stop application writes and background jobs. HappyToHelp has no built-in
    pause switch, so choose a quiet time and make sure nothing is writing to the
    installation while you export.
-2. Export the D1 database. Wrangler, Cloudflare's command-line tool, can do
-   this from your checkout:
+2. Export the D1 database with this checkout's helper and pinned Wrangler:
 
    ```sh
-   pnpm exec wrangler d1 export <prefix>-db --remote --output private-backup.sql
+   node scripts/export-d1.mjs --database <prefix>-db --config wrangler.jsonc --remote --output private-backup.sql
    ```
 
 3. Export every R2 object, with both its metadata and its bytes. HappyToHelp
@@ -87,6 +86,35 @@ take a consistent backup:
    marks these as *uncertain*). Before you let HappyToHelp try one again, check
    with the provider what actually happened: restoring an old database must not
    repeat effects that already happened outside HappyToHelp.
+
+Cloudflare [cannot export a database containing virtual tables](https://developers.cloudflare.com/d1/best-practices/import-export-data/#known-limitations).
+The helper follows its documented drop/export/recreate workaround for the
+derived `inbox_message_search` cache only. It retains all message rows, business
+tables and triggers, restores the cache from its original schema even if export
+fails, and appends that schema and a rebuild to the SQL backup. Importing the
+backup into an empty database therefore restores conversation search too.
+
+For a local backup, first stop dev/preview with `rer dev --stop` or
+`rer preview --stop`, then use `--local` in place of `--remote`. The helper
+checks local process ownership and holds the checkout's operation lock. An
+alternate local state directory can be selected with `--persist-to PATH`.
+For a remote backup, you must keep application traffic, scheduled jobs and all
+other writers stopped throughout the operation; the helper cannot enforce that.
+
+Before removing the cache, the helper writes a private
+`private-backup.sql.search-index-recovery.sql` file beside the output. It removes
+this file once the original database's cache is rebuilt. If a process or machine
+interruption leaves the file, keep writers stopped and execute it against the
+same database, for example:
+
+```sh
+pnpm exec wrangler d1 execute <prefix>-db --config wrangler.jsonc --remote --file private-backup.sql.search-index-recovery.sql
+```
+
+Use `--local` and the same `--persist-to` for local recovery. After successful
+recovery, remove the recovery file and discard the interrupted SQL backup;
+export again to a new filename. Any failed export is incomplete and must not
+be restored. The SQL output is created with private file permissions.
 
 > [!WARNING]
 > A raw D1 export contains credentials. Keep it private: it is not safe to pass

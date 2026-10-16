@@ -66,6 +66,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
     const key=id(),now=Date.now()
     await env.DB.batch([
      env.DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) SELECT ?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM conversations WHERE project_id=? AND contact_id=? AND resolved_at IS NULL)').bind(key,project.project_id,contact.id,now,now,project.project_id,contact.id),
+     env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=? AND EXISTS(SELECT 1 FROM conversations WHERE id=? AND project_id=?)').bind(key,recordId,key,project.project_id),
      trackingStatement(env,key,true),
     ])
     conversation=await openEmailConversation(env,project.project_id,contact.id)

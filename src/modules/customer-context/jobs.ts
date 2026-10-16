@@ -8,7 +8,7 @@ import * as profileCooldown from './profiles/cooldown.js'
 // @ts-ignore Preserved evidence-version eligibility.
 import * as version from './profiles/version.js'
 export const PROFILE_TASKS=['project','agent','contact','optimize','optimizeContact'] as const
-export async function enqueueContextJob(env:Env,projectId:string,subjectId:string,kind:string,model:string){
+export async function enqueueContextJob(env:Env,projectId:string,subjectId:string,kind:string,model:string,visitorMonitoring=false){
  await requireActiveProject(env,projectId)
  if(![...PROFILE_TASKS,'monitoring'].includes(kind as any))throw new Error('Unknown context task')
  if(typeof model!=='string'||!model.trim()||model.length>120)throw new Error('Explicit context model required')
@@ -18,7 +18,7 @@ export async function enqueueContextJob(env:Env,projectId:string,subjectId:strin
  if(kind!=='monitoring'&&version.isCurrentProfile(source.saved[kind],packet))return {reason:'unchanged_evidence'}
  if(kind==='optimizeContact'&&!packet.approved_broad_personalization.length)return {reason:'no_public_signals'}
  if(kind!=='monitoring'&&kind!=='optimizeContact'&&!packet.evidence.length&&!packet.trusted_evidence.length)return {reason:'no_eligible_evidence'}
- const payload=JSON.stringify({packet,summaryPacket:source.summaryPacket,context:{project:source.context.project,contact:source.context.contact,agent:source.context.agent,projectOptimize:source.context.projectOptimize},existing:source.saved[kind]||{}})
+ const payload=JSON.stringify({visitorMonitoring,packet,summaryPacket:source.summaryPacket,context:{project:source.context.project,contact:source.context.contact,agent:source.context.agent,projectOptimize:source.context.projectOptimize},existing:source.saved[kind]||{}})
  const insert=env.DB.prepare(`INSERT INTO context_jobs(id,project_id,subject_id,kind,state,source_revision,packet_json,model,created_at) SELECT ?,?,?,?,'queued',?,?,?,? WHERE EXISTS(SELECT 1 FROM projects p WHERE p.id=? AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=p.id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)) AND EXISTS(SELECT 1 FROM context_subjects WHERE project_id=? AND subject_id=? AND revision=?) AND NOT EXISTS(SELECT 1 FROM context_jobs WHERE project_id=? AND subject_id=? AND kind=? AND state IN ('queued','running','uncertain'))`).bind(id,projectId,subjectId,kind,source.subject.revision,payload,model,now,projectId,projectId,subjectId,source.subject.revision,projectId,subjectId,kind)
  let admitted=false
  if(kind==='monitoring'){

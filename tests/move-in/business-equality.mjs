@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {isSearchShadow} from '../helpers/search-index.mjs';
 // Owner decision 2026-10-09. Only named platform accounting, audit and import
-// journal tables are excluded. Every other table (including move_in_* business
+// journal tables are excluded. Every other business table (including move_in_* business
 // notes, source links, origins and identity/erasure state) participates.
+// SQLite-proven FTS shadow pages are retained raw and content-validated; the
+// virtual index projection and every authoritative message row still compare.
 const excluded=new Set([
  '_cf_METADATA','sqlite_sequence','abuse_counters','management_audit','native_integration_audit',
  'ik_jobs','ik_original_sets','ik_originals','ik_sources','ik_provenance','ik_stages','ik_batches','ik_targets',
@@ -12,7 +15,7 @@ const excluded=new Set([
  'move_in_runs','move_in_records','move_in_batches','move_in_identity_links',
 ]);
 export function businessSnapshot(snapshot){
- const result=Object.fromEntries(Object.entries(snapshot).filter(([name])=>!excluded.has(name)));
+ const result=Object.fromEntries(Object.entries(snapshot).filter(([name,rows])=>!excluded.has(name)&&!isSearchShadow(rows)));
  // Admission's lazy digest memoization is derived platform state, not contact
  // content. Keep every project/contact link and validate any populated digest
  // independently against the exact native email. Never omit the whole table.

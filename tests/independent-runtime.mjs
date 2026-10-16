@@ -2,17 +2,21 @@ import {readArtifact} from './helpers/artifact-payloads.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {createHash,randomBytes} from 'node:crypto';
 import {artifactRuntime} from './helpers/independent-artifact.mjs';
 import {verifyStreamedRejection} from './helpers/streamed-rejection.mjs';
+import {validateStoredSearch,markSearchShadows,assertSearchShadowEquality} from './helpers/search-index.mjs';
+import {exportD1Sql} from '../scripts/installer/search-index-sql.mjs';
 const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
 const evidence=process.env.H2H_EVIDENCE_DIR||await mkdtemp(join(tmpdir(),'h2h-independent-proof-'));
 const setupToken=randomBytes(32).toString('hex');
 const runtime=await artifactRuntime(artifact,{variables:{H2H_SETUP_TOKEN:setupToken}});let restored;
 const call=async(r,path,body,token,method=body===undefined?'GET':'POST',headers={})=>fetch(r.origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} :{}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});
 const body={name:'Independent owner workspace',email:'independent@example.test',password:randomBytes(24).toString('base64url'),allowedOrigin:'https://website.example'};
-async function snapshot(r){const tables=(await r.inspect({sql:"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' ORDER BY name"})).results;const result={};for(const {name}of tables){result[name]=(await r.inspect({sql:`SELECT * FROM "${name.replaceAll('"','""')}"`})).results.map(row=>JSON.stringify(row)).sort()}return result}
+async function snapshot(r){const search=await validateStoredSearch(r.inspect);const tables=(await r.inspect({sql:"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' ORDER BY name"})).results;const result={};for(const {name}of tables){result[name]=(await r.inspect({sql:`SELECT * FROM "${name.replaceAll('"','""')}"`})).results.map(row=>JSON.stringify(row)).sort()}if(search)markSearchShadows(result,search.shadows);return result}
 try{
  console.log('runtime ready',runtime.directory);
  await assert.rejects(runtime.withStorage(()=>{}),/Stop the application/);
@@ -57,14 +61,18 @@ try{
   const uploaded=(await storage.inspect({sql:'SELECT object_key FROM media WHERE id=?',values:[media.id]})).results[0];
   assert.deepEqual(objects.find(o=>o.key===uploaded.object_key).bytes,object.bytes);
  });
- const sqlFile=join(evidence,'native-export.sql');await runtime.run(['d1','export','DB','--local','--output',sqlFile]);
+ // A real exporter failure still restores search before the operator retries.
+ await assert.rejects(exportD1Sql({inspect:input=>runtime.withStorage(storage=>storage.inspect(input)),runExport:()=>runtime.run(['d1','export','DB','--local','--unsupported-export-option']),output:join(evidence,'failed-export.sql')}),/Native Wrangler command failed/);
+ await runtime.withStorage(async storage=>{await validateStoredSearch(storage.inspect)});
+ const sqlFile=join(evidence,'native-export.sql');
+ await promisify(execFile)(process.execPath,[resolve('scripts/export-d1.mjs'),'--local','--config',join(runtime.directory,'wrangler.json'),'--output',sqlFile],{timeout:120000});
  restored=await artifactRuntime(artifact,{port:12501,restoreFile:sqlFile,variables:{H2H_SETUP_TOKEN:setupToken},start:false});
  await restored.withStorage(async storage=>{
   for(const o of objects)await storage.inspect({key:o.key,bytes:o.bytes,options:{httpMetadata:o.httpMetadata,customMetadata:o.customMetadata}});
-  assert.deepEqual(await snapshot(storage),before);
+  const after=await snapshot(storage);assert.deepEqual(Object.keys(after),Object.keys(before));for(const name of Object.keys(before))if(!assertSearchShadowEquality(before[name],after[name]))assert.deepEqual(after[name],before[name],`restored authoritative rows: ${name}`);
   for(const o of objects)assert.deepEqual(await storage.inspect({key:o.key}),o);
  });
- const repeatExport=join(evidence,'restored-export.sql');await restored.run(['d1','export','DB','--local','--output',repeatExport]);
+ const repeatExport=join(evidence,'restored-export.sql');await exportD1Sql({inspect:input=>restored.withStorage(storage=>storage.inspect(input)),runExport:()=>restored.run(['d1','export','DB','--local','--output',repeatExport]),output:repeatExport});
  assert.equal(await readFile(repeatExport,'utf8'),await readFile(sqlFile,'utf8'));
  await restored.start();await download(restored);
  const transcript=await(await call(restored,`/api/conversations/${conversation.id}/messages`,undefined,owner.token)).json();assert.equal(transcript.messages[0].content,command.content);

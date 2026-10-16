@@ -1,4 +1,5 @@
 import {readArtifact} from './helpers/artifact-payloads.mjs';
+import {exportD1Sql} from '../scripts/installer/search-index-sql.mjs';
 import assert from 'node:assert/strict';
 import {readFile, writeFile, mkdir, rm, copyFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
@@ -44,7 +45,7 @@ try {
     assert.match(project.verification_secret, /^[a-f0-9]{64}$/, 'Project verification secret must survive full row comparison');
   });
   const exportFile = join(output, 'native-export.sql');
-  await original.run(['d1', 'export', 'DB', '--local', '--output', exportFile]);
+  await exportD1Sql({inspect:input=>original.withStorage(storage=>storage.inspect(input)),runExport:()=>original.run(['d1','export','DB','--local','--output',exportFile]),output:exportFile});
   restored = await recoveryRuntime(artifact, {directory: join(output, 'restored-runtime'), port: port + 2, inspectorPort: port + 3, variables, restoreFile: exportFile});
   let after;
   await restored.withStorage(async storage => {
@@ -54,7 +55,7 @@ try {
     compareSnapshots(before, after);
   });
   const repeatExport = join(output, 'restored-export.sql');
-  await restored.run(['d1', 'export', 'DB', '--local', '--output', repeatExport]);
+  await exportD1Sql({inspect:input=>restored.withStorage(storage=>storage.inspect(input)),runExport:()=>restored.run(['d1','export','DB','--local','--output',repeatExport]),output:repeatExport});
   assert.deepEqual(await readFile(repeatExport), await readFile(exportFile), 'Native SQL re-export differs');
   await restored.start();
   await verifyAccess(restored, journey, journey.owner.token);

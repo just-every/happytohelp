@@ -61,12 +61,12 @@
     },
     {
       "document": "docs/INDEPENDENT-RELEASE.md",
-      "date": "2026-10-15",
+      "date": "2026-10-16",
       "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
       "change": "changed",
-      "summary": "Public-source updates use package-mode commands.",
+      "summary": "Public-source updates use package-mode commands and SQL backups preserve derived search.",
       "was": "Updates described merging source and using the bundled CLI.",
-      "now": "Stop and back up, merge current public source while preserving customization, install frozen dependencies, build and dry-run; v0.4.1 predates package conversion and reset is never an upgrade."
+      "now": "Stop and back up, merge current public source while preserving customization, install frozen dependencies, build and dry-run; v0.4.1 predates package conversion and reset is never an upgrade. The SQL backup command exports authoritative rows and restores the derived conversation search index in both the source and the backup."
     },
     {
       "document": "docs/SETUP-WORKFLOW.md",

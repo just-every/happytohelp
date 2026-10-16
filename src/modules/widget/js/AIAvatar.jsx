@@ -31,6 +31,10 @@ export default function AIAvatar({ ai, canAnimate = false}) {
 
     const avatarUrl = ai.avatar_url ?? ai.avatar;
     const avatarUrlMove = ai.animated_avatar_url || avatarUrl;
+    if (!avatarUrl) {
+        const initials = (ai.name || 'AI').trim().split(/\s+/).map(part => part[0]).join('').slice(0, 2);
+        return <span className="happytohelp-ai-avatar-container"><div className="happytohelp-agent-avatar happytohelp-agent-avatar-initials" style={context.theme.avatar}><span>{initials}</span></div></span>;
+    }
 
     return (
         <span className="happytohelp-ai-avatar-container">

@@ -10,6 +10,7 @@ import ArticleEditorActions from './knowledge/ArticleEditorActions';
 import KnowledgeLists from './knowledge/KnowledgeLists';
 import { KnowledgeFields } from './knowledge/KnowledgeForms';
 import KnowledgeTabs from './knowledge/KnowledgeTabs';
+import DatasetProgress, { datasetIsActive } from './knowledge/DatasetProgress';
 import { SourceOrigin, canCrawl } from './knowledge/source-origin';
 import './knowledge/knowledge.css';
 import './stack-table.css';
@@ -46,6 +47,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
     const [busy, setBusy] = useState(false);
     const [tab, setTab] = useState('overview');
     const [fieldErrors, setFieldErrors] = useState({});
+    const datasetActive = section === 'datasets' && Boolean(items?.some(datasetIsActive));
     const articleReady = Boolean(draft && (recordId === 'create' ? !draft.id : draft.id === recordId));
 
     const load = async () => {
@@ -62,6 +64,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
     useEffect(() => {
         setDraft(null);
         setItems(null);
+        setPages([]);
         setError('');
         setSaved(false);
         setSavedStatus('');
@@ -91,7 +94,40 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                 .then(response => setPages(response.data || response.pages || response))
                 .catch(loadError => setError(loadError.message));
         }
-    }, [path, recordId]);
+    }, [path, recordId, draft?.published_version]);
+
+    useEffect(() => {
+        if (!datasetActive) return;
+        let cancelled = false;
+        let timer;
+        const poll = async () => {
+            try {
+                const response = await nativeRequest(path);
+                const rows = response.data || response;
+                if (cancelled) return;
+                setItems(rows);
+                const row = rows.find(item => item.id === recordId);
+                if (row) {
+                    // Poll only server-owned progress; preserve any settings being edited.
+                    setDraft(current => current?.id === row.id ? {
+                        ...current,
+                        status: row.status,
+                        claim_token: row.claim_token,
+                        ingest_cursor: row.ingest_cursor,
+                        error: row.error,
+                        published_version: row.published_version,
+                        last_refreshed_at: row.last_refreshed_at,
+                        page_count: row.page_count,
+                    } : current);
+                }
+            } catch (pollError) {
+                if (!cancelled) setError(pollError.message);
+            }
+            if (!cancelled) timer = setTimeout(poll, 2000);
+        };
+        timer = setTimeout(poll, 2000);
+        return () => { cancelled = true; clearTimeout(timer); };
+    }, [path, recordId, datasetActive]);
 
     const change = (key, value) => {
         markDirty();
@@ -209,12 +245,12 @@ export default function KnowledgePage({ projectId, section, recordId, project })
             </>}
             {existingDataset && tab === 'overview' ? <div className="knowledge-form">
                 <dl>
-                    <dt>Status</dt><dd>{draft.status}</dd>
+                    <dt>Status</dt><dd><DatasetProgress source={draft}/></dd>
                     <dt>Last refreshed</dt><dd>{draft.last_refreshed_at ? new Date(draft.last_refreshed_at).toLocaleString() : 'Not recorded'}</dd>
-                    <dt>Indexed pages</dt><dd>{pages.length}</dd>
+                    <dt>Indexed pages</dt><dd>{draft.page_count ?? pages.length}</dd>
                 </dl>
                 {draft.error && <p role="alert" className="alert alert-danger">{draft.error}</p>}
-                {canCrawl(draft) ? <button className="btn btn-primary" disabled={busy} onClick={refresh}>Refresh now</button> : <SourceOrigin source={draft}/>}
+                {canCrawl(draft) ? <button className="btn btn-primary" disabled={busy || datasetIsActive(draft)} onClick={refresh}>Refresh now</button> : <SourceOrigin source={draft}/>}
             </div> : existingDataset && tab === 'pages' ? <div className="table-responsive">
                 <table className="table knowledge-table stack-table">
                     <thead><tr><th>Page</th><th>Content</th></tr></thead>

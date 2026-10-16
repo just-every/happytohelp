@@ -20,6 +20,12 @@ export async function refreshDataset(env:Env,projectId:string,datasetId:string,i
  if(!claim.meta.changes){await env.FILES.delete([`knowledge/sources/${token}.json`,`knowledge/jobs/${token}.json`]);throw new Error('Dataset missing or refresh already active')}
  await dispatchKnowledgeJob(env,{type:job.type,id:token,projectId,datasetId});return {id:token,status:'queued'}
 }
+/** Start from saved website settings for both creation and explicit refresh. */
+export async function crawlDataset(env:Env,projectId:string,datasetId:string,semantic=false){
+ const dataset=await env.DB.prepare('SELECT * FROM knowledge_datasets WHERE id=? AND project_id=?').bind(datasetId,projectId).first<any>();
+ if(!dataset)throw new Error('Dataset not found');
+ return refreshDataset(env,projectId,datasetId,{crawl:{url:dataset.url,excluded_urls:JSON.parse(dataset.excluded_urls),max_crawl_depth:dataset.max_crawl_depth,max_crawl_pages:dataset.max_crawl_pages},semantic})
+}
 async function fail(env:Env,datasetId:string,token:string,error:unknown){await env.DB.prepare("UPDATE knowledge_datasets SET status='failed',error=?,claim_token=NULL,next_refresh_at=NULL WHERE id=? AND claim_token=?").bind(String(error).slice(0,1000),datasetId,token).run()}
 export async function consumeJob(job:Job,env:Env):Promise<boolean>{
  if(job.type.startsWith('knowledge.')&&!await isProjectActive(env,job.projectId))return true;

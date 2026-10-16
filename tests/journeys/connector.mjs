@@ -111,12 +111,12 @@ test('provider failures are recorded once with only the provider reason and real
   const db=app.db
   const queued=await delegate(conversationId,config.device.id,'resolve_reply','Untrusted connector test'),claim=await api.claim({claim_id:'malicious'}),endpoint=`/api/local-agents/jobs/${queued.id}/result`
   const body={run_id:claim.run_id,event_id:'malicious',status:'failed',result:{summary:'PRIVATE_SUMMARY',actions:[{description:'PRIVATE_ACTION',evidence:'PRIVATE_EVIDENCE'}],verified:false,reply_draft:'PRIVATE_REPLY',replies:[{id:'send',body:'PRIVATE_PROPOSAL'}],unexpected:'PRIVATE_EXTRA',provider_error:{provider:'codex',http_status:400,message:'Invalid schema. https://PRIVATE_USER:PRIVATE_PASSWORD@example.test/api?token=PRIVATE_QUERY#PRIVATE_HASH\nBearer PRIVATE_BEARER\nCookie: PRIVATE_COOKIE\n'+'x'.repeat(900)+'\nprompt: PRIVATE_PROMPT'}}}
-  for(const invalid of [{http_status:'400'},{http_status:99},{http_status:600},{provider:'untrusted'},{message:'x'.repeat(8001)},{extra:'PRIVATE_EXTRA'}]){const attempted=structuredClone(body);Object.assign(attempted.result.provider_error,invalid);assert.equal((await request(endpoint,attempted,token)).status,422)}
-  assert.equal((await request(endpoint,{...body,status:'completed'},token)).status,422);assert.equal((await request(endpoint,{...body,run_id:'wrong'},token)).status,409);assert.equal((await request(endpoint,body,'wrong-device')).status,401)
-  const admitted=await request(endpoint,body,token);assert.equal(admitted.status,200);assert.doesNotMatch(JSON.stringify(admitted),/PRIVATE_/);assert.ok(admitted.data.result.provider_error.message.length<=600)
+  for(const invalid of [{http_status:'400'},{http_status:99},{http_status:600},{provider:'untrusted'},{message:'x'.repeat(8001)},{extra:'PRIVATE_EXTRA'}]){const attempted=structuredClone(body);Object.assign(attempted.result.provider_error,invalid);assert.equal((await request(endpoint,attempted,config.token)).status,422)}
+  assert.equal((await request(endpoint,{...body,status:'completed'},config.token)).status,422);assert.equal((await request(endpoint,{...body,run_id:'wrong'},config.token)).status,409);assert.equal((await request(endpoint,body,'wrong-device')).status,401)
+  const admitted=await request(endpoint,body,config.token);assert.equal(admitted.status,200);assert.doesNotMatch(JSON.stringify(admitted),/PRIVATE_/);assert.ok(admitted.data.result.provider_error.message.length<=600)
   assert.doesNotMatch(JSON.stringify(await app.sql('SELECT result FROM local_jobs WHERE id=?',queued.id))+JSON.stringify(await app.sql('SELECT payload FROM local_events WHERE job_id=?',queued.id)),/PRIVATE_/)
   for(const table of ['local_receipts','local_result_effects'])assert.equal((await app.first(`SELECT COUNT(*) n FROM ${table} WHERE job_id=?`,queued.id)).n,0,table)
-  await checkUnmarkedFailures({request,api,db,jobsPath:delegations(conversationId),device:config.device.id,token})
+  await checkUnmarkedFailures({request,api,db,jobsPath:delegations(conversationId),device:config.device.id,token:config.token})
   assert.equal((await app.first("SELECT COUNT(*) n FROM messages WHERE conversation_id=? AND actor_role!='contact'",conversationId)).n,0,'no failure report reached the customer')
  }finally{await codex.close()}
 })

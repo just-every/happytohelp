@@ -10,6 +10,12 @@ function build(bundle:LegacyBundle){
  const revisions=new Map<string,number>()
  for(const rows of messages.values()){rows.sort((a,b)=>timestamp(a.created_at)-timestamp(b.created_at)||String(a.id).localeCompare(String(b.id)));rows.forEach((r,i)=>revisions.set(String(r.id),i+1))}
  const mediaMessages=new Map((bundle.tables.mediables||[]).filter(r=>String(r.mediable_type).endsWith('Message')).map(r=>[String(r.media_id),r]))
- return {find:(table:string,id:unknown)=>ids.get(table)?.get(String(id)),messages,revisions,mediaMessages}
+ // Legacy allowed several contacts per identifier; native keeps it on the earliest one.
+ const identityOwners=new Map<string,Row>()
+ const earlier=(a:Row,b:Row)=>timestamp(a.created_at)-timestamp(b.created_at)||(String(a.id)<String(b.id)?-1:1)
+ for(const row of bundle.tables.contacts||[]){const identity=contactIdentity(row);if(identity===null)continue;const key=`${row.project_id}\u0000${identity}`,owner=identityOwners.get(key);if(!owner||earlier(row,owner)<0)identityOwners.set(key,row)}
+ return {find:(table:string,id:unknown)=>ids.get(table)?.get(String(id)),messages,revisions,mediaMessages,identityOwner:(project:unknown,identity:string)=>identityOwners.get(`${project}\u0000${identity}`)}
 }
+// Legacy stores "no identifier" as an empty string.
+export function contactIdentity(row:Row):string|null{const value=row.identifier??row.external_id;return value===undefined||value===null||String(value)===''?null:String(value)}
 export function relationships(bundle:LegacyBundle){let result=cache.get(bundle);if(!result){result=build(bundle);cache.set(bundle,result)}return result}

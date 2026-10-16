@@ -27,7 +27,7 @@ export async function writePart(root,file,value){const bytes=JSON.stringify(valu
 // Only relationships used by native mapping are held while importing. Payload
 // tables (notably AI usage) stay on disk and are processed one bounded chunk at a time.
 const contextFields={projects:null,users:['id','type','email','deleted_at'],ais:null,ai_defaults:null,
- contacts:['id','project_id','deleted_at'],conversations:['id','project_id','contact_id','deleted_at'],
+ contacts:['id','project_id','deleted_at','identifier','external_id','created_at'],conversations:['id','project_id','contact_id','deleted_at'],
  messages:['id','project_id','conversation_id','contact_id','agent_id','ai_id','created_at','deleted_at'],
  mediables:null,datasets:null,dataset_files:['id','dataset_id','deleted_at','updated_at','created_at','markdown','content'],
  media:null};

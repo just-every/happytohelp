@@ -19,6 +19,13 @@ try{
   DB.prepare("INSERT INTO sessions VALUES(?,'u','p','owner',NULL,?,NULL)").bind(await hashToken('token'),Date.now()+999999),
   ...contacts.flatMap(([id,name,email],index)=>[DB.prepare('INSERT INTO contacts(id,project_id,name,email,created_at) VALUES(?,?,?,?,?)').bind(id,'p',name,email,1),DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind('c-'+id,'p',id,1,10+index)]),
  ])
+ // A closed, assigned retained thread predates the index migration.
+ await DB.batch([
+  DB.prepare("UPDATE contacts SET metadata_json=? WHERE id='plain'").bind(JSON.stringify({provided_name:'Alicia Warehouse',provided_email:'returns@supplied.example'})),
+  DB.prepare("UPDATE conversations SET resolved_at=500,assigned_to='u' WHERE id='c-plain'"),
+  DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('history','p','c-plain','history','plain','contact','The cobalt buckle replacement arrived safely',1,100)"),
+ ])
+ for(const [,sql] of (await readFile(new URL('../migrations/123_inbox_message_search.sql',import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run()
  const list=async(params)=>dashboardRoutes.request('https://app.example/projects/p/conversations?'+new URLSearchParams({view:'open',...params}),{headers:{Authorization:'Bearer token'}},env)
  const names=async(params)=>{const response=await list(params);assert.equal(response.status,200,`${JSON.stringify(params).slice(0,80)} -> ${response.status}`);return (await response.json()).data.map(row=>row.contact.name).sort()}
 
@@ -38,9 +45,35 @@ try{
  assert.deepEqual(await names({q:'charlie.mixed@case'}),['CHARLIE UPPER'])
  assert.deepEqual(await names({q:'Zoë'}),['Zoë Ünal'],'a non-ASCII term matches itself')
  assert.deepEqual(await names({q:'nobody'}),[])
- assert.equal((await names({})).length,contacts.length,'no term lists everything')
- assert.equal((await names({q:'   '})).length,contacts.length,'a blank term is no term')
+ assert.ok(!(await names({})).includes('Alice Archer'),'open omits the closed thread')
+ assert.deepEqual(await names({q:'   '}),await names({}),'a blank term is no term')
 
+ // Indexed history, supplied identity and independent status/assignment filters.
+ assert.deepEqual(await names({q:'cobalt buckle replacement'}),['Alice Archer'],'all-history search finds a retained closed thread from Open')
+ assert.deepEqual(await names({q:'Alicia Warehouse'}),['Alice Archer'])
+ assert.deepEqual(await names({q:'returns@supplied.example'}),['Alice Archer'])
+ assert.deepEqual(await names({q:'cobalt buckle replacement',search_scope:'view'}),[])
+ assert.deepEqual(await names({q:'cobalt buckle replacement',search_scope:'view',status:'resolved',assigned_to:'myself'}),['Alice Archer'])
+ assert.deepEqual(await names({status:'resolved',assigned_to:'none'}),[])
+ assert.deepEqual(await names({status:'resolved',assigned_to:'myself'}),['Alice Archer'])
+ await DB.prepare("INSERT INTO ai_profiles(id,project_id,name,role,prompt,model,created_at) VALUES('ai','p','Assistant','assistant','Help','test',1)").run()
+ await DB.prepare("INSERT INTO conversation_ai VALUES('c-pct','ai'),('c-plain','ai')").run()
+ assert.ok(!(await names({})).includes('100% Pat'),'human Open excludes AI')
+ assert.deepEqual(await names({view:'ai',assigned_to:'myself'}),['Alice Archer'],'AI includes closed history and composes with assignment')
+ assert.deepEqual(await names({view:'closed'}),[],'human Closed excludes AI')
+ // The same triggers cover normal commits, import, erasure and undo.
+ await DB.prepare("UPDATE messages SET content='A different retained answer' WHERE id='history'").run()
+ assert.deepEqual(await names({q:'cobalt buckle replacement'}),[],'replaced/erased words leave the index')
+ assert.deepEqual(await names({q:'different retained answer'}),['Alice Archer'])
+ await DB.prepare("DELETE FROM messages WHERE id='history'").run()
+ assert.deepEqual(await names({q:'different retained answer'}),[],'removed imported history leaves the index')
+ await DB.batch([
+  DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('foreign','Other workspace','foreign','https://other.example',1)"),
+  DB.prepare("INSERT INTO contacts(id,project_id,name,created_at) VALUES('other','foreign','Other customer',1)"),
+  DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('foreign-thread','foreign','other',1,1)"),
+  DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('foreign-message','foreign','foreign-thread','history','other','contact','cobalt buckle replacement',1,100)")
+ ])
+ assert.deepEqual(await names({q:'cobalt buckle replacement'}),[],'indexed phrases never cross workspace authority')
  // Any term length is a 200 or a friendly 400; nothing reaches the database as an error.
  assert.equal((await names({q:'a'.repeat(INBOX_SEARCH_MAX_LENGTH)})).length,0,'the longest allowed term still searches')
  for(const length of [49,50,51,200+1,400,6000]){

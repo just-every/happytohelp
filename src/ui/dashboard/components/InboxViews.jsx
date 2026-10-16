@@ -30,7 +30,7 @@ export default function InboxViews() {
             return <Link
                 key={ view.id }
                 to={ location.pathname }
-                search={{ view: view.id, ...(searchParams.q ? { q: searchParams.q } : {}) }}
+                search={{ ...searchParams, view: view.id, assigned_to: view.id === 'mine' || view.id === 'unassigned' ? undefined : searchParams.assigned_to }}
                 onClick={ onSelect }
                 className={ `inbox-view-link${ current ? ' is-active' : '' }` }
                 aria-current={ current ? 'page' : undefined }>

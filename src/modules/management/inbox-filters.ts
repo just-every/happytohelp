@@ -1,0 +1,20 @@
+/** Legacy view links remain useful shortcuts; explicit status and assignment compose. */
+export function inboxFilters(query:(name:string)=>string|undefined,search:string,userId:string){
+ const view=query('view')||query('filter')||'open'
+ const defaults:Record<string,[string,string]>={open:['unresolved','anyone'],mine:['unresolved','myself'],unassigned:['unresolved','none'],closed:['resolved','anyone'],ai:['ai','anyone'],all:['all','anyone'],unread:['unresolved','anyone']}
+ const [defaultStatus,defaultAssignment]=defaults[view]||defaults.open
+ const status=query('status')||defaultStatus,assignment=query('assigned_to')||defaultAssignment
+ const conditions:string[]=[],params:any[]=[]
+ // Search explicitly defaults to all history, independent of the previous queue.
+ if(search&&query('search_scope')!=='view')return {conditions,params}
+ const ai='EXISTS(SELECT 1 FROM conversation_ai ca WHERE ca.conversation_id=c.id AND ca.ai_id IS NOT NULL)'
+ if(status==='ai')conditions.push(ai)
+ if(status==='unresolved'||status==='resolved')conditions.push(status==='resolved'?'c.resolved_at IS NOT NULL':'c.resolved_at IS NULL',`NOT ${ai}`)
+ if(assignment==='myself'){conditions.push('c.assigned_to=?');params.push(userId)}
+ if(assignment==='none')conditions.push('c.assigned_to IS NULL')
+ if(view==='unread'){
+  conditions.push("EXISTS(SELECT 1 FROM messages msg WHERE msg.conversation_id=c.id AND msg.actor_role='contact' AND msg.revision>coalesce((SELECT revision FROM conversation_reads WHERE conversation_id=c.id AND user_id=?),0))")
+  params.push(userId)
+ }
+ return {conditions,params}
+}

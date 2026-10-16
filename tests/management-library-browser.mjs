@@ -35,7 +35,7 @@ try{
  const category=(await request(`${knowledge}/categories`,{token,body:{name:'Getting started'}}));
  const dataset=(await request(`${knowledge}/datasets`,{token,body:{name:'Docs',url:'https://example.test/docs',max_crawl_depth:3,max_crawl_pages:50}}));
 
- browser=await chromium.launch({headless:true,...(process.env.H2H_BROWSER_CHANNEL?{channel:process.env.H2H_BROWSER_CHANNEL}:{})});
+ browser=await chromium.launch({headless:true,args:["--use-mock-keychain","--password-store=basic"]});
  const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
  const pageErrors=[],nativeDialogs=[],deletes=[],posts=[];
  page.on('pageerror',error=>pageErrors.push(error.message));
@@ -197,6 +197,39 @@ try{
   await shot('desktop-agent-last-owner.png');
  });
 
+
+ await check('complete directories: paging, supplied identity, conversation links and saved reply body search at desktop and phone',async()=>{
+  const actor=(await request('/api/management/bootstrap',{token})).currentAgent.id;
+  const quote=value=>"'"+String(value).replaceAll("'","''")+"'";
+  const rows=Array.from({length:211},(_,i)=>({suffix:String(i).padStart(3,'0'),seen:i+1}));
+  await runtime.execute(rows.map(({suffix,seen})=>`INSERT INTO contacts(id,project_id,name,email,metadata_json,created_at) VALUES('archive-contact-${suffix}',${quote(projectId)},'Archive contact ${suffix}','archive${suffix}@example.test',${quote(JSON.stringify({provided_name:suffix==='210'?'Supplied archive name':null,provided_email:suffix==='210'?'supplied-archive@example.test':null,last_seen_at:seen,country_name:seen%2?'Australia':'Canada'}))},1); INSERT INTO macros VALUES('archive-reply-${suffix}',${quote(projectId)},'Archive reply ${suffix}',${quote(suffix==='210'?'Distinctive body phrase for the older saved reply.':'Reusable archive reply.')},${quote(actor)},${seen},${seen});`).join('\n')+Array.from({length:55},(_,i)=>`INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('archive-thread-${String(i).padStart(3,'0')}',${quote(projectId)},'archive-contact-210',1,${i+1});`).join('\n'));
+  for(const width of [1440,390]){
+   await page.setViewportSize({width,height:1000});
+   await page.goto(`${base}/contacts`);await page.getByLabel('Sort by',{exact:true}).selectOption('name');await page.getByLabel('Sort direction').selectOption('asc');
+   await page.getByRole('link',{name:'Archive contact 000',exact:true}).waitFor();
+   const pages=page.getByRole('navigation',{name:'Contact pages',exact:true});
+   for(let next=0;next<4;next++){await pages.getByRole('button',{name:'Next',exact:true}).click();await page.getByRole('link',{name:`Archive contact ${String((next+1)*50).padStart(3,'0')}`,exact:true}).waitFor();}
+   await page.getByRole('link',{name:'Supplied archive name',exact:true}).waitFor();
+   for(const term of ['archive210@example.test','Supplied archive name','supplied-archive@example.test']){await page.getByRole('textbox',{name:'Search',exact:true}).fill(term);await page.getByRole('link',{name:'Supplied archive name',exact:true}).waitFor();await page.waitForFunction(()=>document.querySelectorAll('tbody tr').length===1);}
+   await page.getByRole('link',{name:'Supplied archive name',exact:true}).click();
+   const conversationPages=page.getByRole('navigation',{name:'Conversation pages',exact:true});await conversationPages.getByRole('button',{name:'Next',exact:true}).click();
+   const oldest=page.locator('a[href$="/conversations/archive-thread-000"]');await oldest.waitFor();await oldest.click();await page.getByRole('textbox',{name:'Reply to conversation',exact:true}).waitFor();
+   await page.goto(`${base}/macros`);await page.getByRole('link',{name:'Archive reply 000',exact:true}).waitFor();
+   const replyPages=page.getByRole('navigation',{name:'Saved reply pages',exact:true});
+   for(let next=0;next<4;next++){await replyPages.getByRole('button',{name:'Next',exact:true}).click();await page.getByRole('link',{name:`Archive reply ${String((next+1)*50).padStart(3,'0')}`,exact:true}).waitFor();}
+   await page.getByRole('link',{name:'Archive reply 210',exact:true}).waitFor();
+   await page.getByRole('textbox',{name:'Search',exact:true}).fill('Distinctive body phrase');await page.getByRole('link',{name:'Archive reply 210',exact:true}).waitFor();await page.waitForFunction(()=>document.querySelectorAll('tbody tr').length===1);
+   await page.getByLabel('Sort by',{exact:true}).selectOption('created_at');await page.getByLabel('Sort direction').selectOption('desc');await page.getByRole('link',{name:'Archive reply 210',exact:true}).waitFor();
+   await page.screenshot({path:join(evidenceDir,`complete-library-${width}.png`),fullPage:true});
+   await page.goto(`${base}/conversations/archive-thread-000`);const composer=page.getByRole('textbox',{name:'Reply to conversation',exact:true});await composer.waitFor();
+   await page.getByRole('button',{name:'Reply tools',exact:true}).click();await page.getByRole('menuitem',{name:'Saved replies',exact:true}).click();
+   const pickerPages=page.getByRole('navigation',{name:'Saved reply picker pages',exact:true});await page.getByRole('link',{name:'Archive reply 000',exact:true}).waitFor();
+   for(let next=0;next<4;next++){await pickerPages.getByRole('button',{name:'Next',exact:true}).click();await page.getByRole('link',{name:`Archive reply ${String((next+1)*50).padStart(3,'0')}`,exact:true}).waitFor();}
+   await page.getByRole('link',{name:'Archive reply 210',exact:true}).waitFor();await page.getByRole('searchbox',{name:'Search saved replies',exact:true}).fill('Distinctive body phrase');
+   const reply=page.getByRole('link',{name:'Archive reply 210',exact:true});await reply.waitFor();await reply.click();assert.equal(await composer.inputValue(),'Distinctive body phrase for the older saved reply.');
+   await composer.fill('');
+  }
+ },page);
  await context.close();
  assert.deepEqual(pageErrors,[],'no page errors');
  await writeFile(join(evidenceDir,'result.json'),JSON.stringify({passed:results,failed:failures},null,2));

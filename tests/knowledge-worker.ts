@@ -41,7 +41,21 @@ export default {async fetch(request:Request,env:Env){
  await env.DB.prepare("INSERT INTO users(id,email,name,created_at) VALUES('owner','owner@example.com','Owner',0)").run();await env.DB.prepare("INSERT INTO memberships(project_id,user_id,role) VALUES('p','owner','owner')").run();await env.DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,'owner','p','owner',?)").bind(await hashToken('owner-test'),Date.now()+60000).run();
  const send=async(path:string,method:string,body:unknown)=>routes.request(path,{method,headers:{Authorization:'Bearer owner-test','Content-Type':'application/json'},body:JSON.stringify(body)},env);
  const categoryResponse=await send('/p/categories','POST',{title:'Category',summary:'Summary'});check(categoryResponse.status===201,'original category fields and automatic slug');const category=await categoryResponse.json<any>();
- const articleResponse=await send('/p/articles','POST',{title:'Authored',content:'Content',categories:[category.id],is_published:true});check(articleResponse.status===201,'article multicategory authoring');const authored=await articleResponse.json<any>();
+ const articleResponse=await send('/p/articles','POST',{title:'Authored',summary:'Cobalt zephyr',content:'Copper horizon',categories:[category.id],is_published:true});check(articleResponse.status===201,'article multicategory authoring');const authored=await articleResponse.json<any>();
+ const readArticles=async(query:string)=>routes.request(`/p/articles?q=${encodeURIComponent(query)}`,{headers:{Authorization:'Bearer owner-test'}},env);
+ for(const phrase of ['Authored','Cobalt zephyr','Copper horizon']){
+  const response=await readArticles(phrase);check(response.status===200,'authoring search succeeds');
+  const rows=await response.json<any[]>();check(rows.length===1&&rows[0].id===authored.id,'authoring finds title, summary and body through the server');
+ }
+ check((await (await readArticles('no matching phrase')).json<any[]>()).length===0,'authoring search has an empty result');
+ check((await (await readArticles('   ')).json<any[]>()).some(row=>row.id===authored.id),'clearing authoring search restores the library');
+ check((await routes.request('/p/articles?q=Cobalt',{},env)).status===401,'article search requires an actor');
+ check((await routes.request('/other/articles?q=Cobalt',{headers:{Authorization:'Bearer owner-test'}},env)).status===403,'article search requires current project authority');
+ await env.DB.prepare("UPDATE knowledge_articles SET summary='Cobalt zephyr' WHERE id='draft'").run();
+ await env.DB.prepare("INSERT INTO knowledge_articles(id,project_id,slug,title,content,summary,status,updated_at) VALUES('foreign','other','foreign','Foreign','Foreign body','Cobalt zephyr','published',0)").run();
+ const authorMatches=await (await readArticles('Cobalt zephyr')).json<any[]>();check(authorMatches.some(row=>row.id==='draft')&&!authorMatches.some(row=>row.id==='foreign'),'authoring search includes owned drafts and excludes other projects');
+ const summarySearch=await routes.request('/public/p/search?q=Cobalt%20zephyr',{},env);check(summarySearch.status===200,'public summary search needs no actor');
+ const summaryMatches=await summarySearch.json<any[]>();check(summaryMatches.length===1&&summaryMatches[0].id===authored.id,'public summary search excludes drafts and other tenants');
  check((await send(`/p/categories/${category.id}`,'PUT',{title:'Cycle',parent_id:category.id})).status===400,'category cycles denied');
  check((await send('/other/articles','POST',{title:'Cross tenant',content:'No',is_published:true})).status===403,'cross tenant authoring denied');
  await send(`/p/articles/${authored.id}`,'DELETE',{});

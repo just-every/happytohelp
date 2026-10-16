@@ -380,6 +380,7 @@
           "migrations/0085_ai_context_guards.sql",
           "migrations/0095_public_site.sql",
           "migrations/090_legacy_import.sql",
+          "migrations/123_inbox_message_search.sql",
           "tests/email-provider.mjs",
           "tests/email-worker.mjs",
           "tests/github-integration.mjs",

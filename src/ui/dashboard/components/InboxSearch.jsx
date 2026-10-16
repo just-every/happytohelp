@@ -42,8 +42,8 @@ export default function InboxSearch({ query, viewPhrase, onSearch }) {
                     value={ value }
                     onChange={ event => setValue(event.target.value) }
                     className="form-control form-control-lg bg-white"
-                    placeholder="Search by name or email…"
-                    aria-label={ `Search ${ viewPhrase } by customer name or email` } />
+                    placeholder="Search messages or customers…"
+                    aria-label="Search conversations by message, name or email" />
                 <div className="input-group-append">
                     <button className="btn btn-lg btn-ico btn-secondary btn-minimal bg-white" type="submit" aria-label="Search conversations">
                         <i className="fe fe-search" aria-hidden="true"></i>

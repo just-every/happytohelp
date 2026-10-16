@@ -13,7 +13,7 @@ const optionalPort=name=>process.env[name]?Number(process.env[name]):undefined
 const evidence=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-inbox-conversation-')),'inbox-conversation')
 await mkdir(evidence,{recursive:true})
 const runtime=await createRuntime({port:optionalPort('H2H_RUNTIME_PORT')??0,inspectorPort:optionalPort('H2H_RUNTIME_INSPECTOR_PORT')})
-const browser=await chromium.launch({headless:true,...(process.env.H2H_BROWSER_CHANNEL?{channel:process.env.H2H_BROWSER_CHANNEL}:{})})
+const browser=await chromium.launch({headless:true,args:['--use-mock-keychain','--password-store=basic']})
 const checks=[],problems=[]
 let success=false
 const check=(label)=>checks.push(label)
@@ -99,9 +99,6 @@ try{
   const {context,page}=await open(inboxPath())
   const input=page.locator('.conversation-inbox input[type=search]')
   await input.waitFor()
-  assert.match(await input.getAttribute('placeholder'),/name or email/i)
-  assert.match(await input.getAttribute('aria-label'),/name or email/i)
-  assert.doesNotMatch(await input.getAttribute('placeholder')+await input.getAttribute('aria-label'),/message|content/i)
   const rows=page.locator('.conversation-list-items .conversation-item')
   await input.fill('%');await input.press('Enter')
   await page.getByText('Rate 100% Rhea').first().waitFor();await page.waitForFunction(()=>document.querySelectorAll('.conversation-list-items .conversation-item').length===1)
@@ -144,6 +141,30 @@ try{
   check('clearing a rejected search preserves its workspace, open status and native tag filter')
   await context.close()
  }
+
+ // Search crosses retained status by default and can deliberately compose filters.
+ for(const width of [1440,390]){
+  const {context,page}=await open(inboxPath(),{viewport:{width,height:844}})
+  const input=page.locator('.conversation-inbox input[type=search]'),rows=page.locator('.conversation-list-items')
+  await input.fill('Invoice reminder resolved');await input.press('Enter')
+  await rows.getByText('Hannah Closed',{exact:true}).waitFor()
+  const scope=page.getByRole('combobox',{name:'Conversation search scope'})
+  await scope.selectOption('view')
+  await rows.getByText(/No results/).waitFor()
+  await page.getByRole('link',{name:'Closed',exact:true}).click()
+  await rows.getByText('Hannah Closed',{exact:true}).waitFor()
+  await page.getByRole('combobox',{name:'Filter conversations by assignment'}).selectOption('myself')
+  await rows.getByText(/No results/).waitFor()
+  await page.getByRole('combobox',{name:'Filter conversations by assignment'}).selectOption('none')
+  await rows.getByText('Hannah Closed',{exact:true}).waitFor()
+  await page.reload();await rows.getByText('Hannah Closed',{exact:true}).waitFor()
+  assert.equal(await page.getByRole('combobox',{name:'Filter conversations by assignment'}).inputValue(),'none')
+  assert.equal(await page.getByRole('combobox',{name:'Conversation search scope'}).inputValue(),'view')
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
+  await page.screenshot({path:join(evidence,`history-search-${width}.png`)})
+  await context.close()
+ }
+ check('message phrases search all history; current filters compose Closed with Me/Unassigned and survive reload at 1440/390')
 
  // 4. Assignment menu closes on Escape however it was opened.
  {

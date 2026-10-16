@@ -7,6 +7,7 @@ import { useDashboardSettings, useDashboardLocation } from '../../native/dashboa
 import InboxTagFilter from './InboxTagFilter';
 import InboxSearch from './InboxSearch';
 import InboxViews from './InboxViews';
+import ConversationsFilter from './ConversationsFilter';
 import InboxStart from './InboxStart';
 import { InboxTray } from '../../native/drawings';
 import { inboxViewFilter, inboxViewPhrase, normalizeInboxView } from './inboxViewDefinitions';
@@ -32,7 +33,7 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
     const navigate = useNavigate();
     const selectedView = normalizeInboxView(searchParams.view, inboxViewCounts);
     const searchQuery = searchParams.q == null ? '' : String(searchParams.q);
-    const filter = useMemo(() => ({...inboxViewFilter(selectedView, searchQuery),...(searchParams.tag?{tag:String(searchParams.tag)}:{})}), [ selectedView, searchQuery, searchParams.tag ]);
+    const filter = useMemo(() => ({...inboxViewFilter(selectedView, searchQuery, searchParams.assigned_to, searchParams.search_scope),...(searchParams.tag?{tag:String(searchParams.tag)}:{})}), [ selectedView, searchQuery, searchParams.tag, searchParams.assigned_to, searchParams.search_scope ]);
     const listKey = JSON.stringify(filter);
     const {
         conversations,
@@ -72,13 +73,14 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
             <InboxViews />
             <div className="conversation-inbox-header">
                 <InboxSearch query={ searchQuery } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } /><InboxTagFilter projectId={settings.isGlobalInbox?null:settings.project?.id} value={String(searchParams.tag||'')} onChange={tag=>navigate({search:{...liveSearch,tag:tag||undefined}})}/>
+                <ConversationsFilter assignment={ filter.assigned_to } searchScope={ filter.search_scope || searchParams.search_scope || 'all' } searching={ Boolean(searchQuery.trim()) } onChange={ changes => navigate({search:{...liveSearch,...changes}}) } />
             </div>
             <div className="conversation-list-items" ref={ setListRefs }>
                 { conversations.map(conversation => <ConversationItem key={ conversation.id } conversation={ conversation } />) }
                 { isInitialLoading && conversations.length === 0 && <p className="text-center" role="status">Loading conversations...</p> }
                 { !isInitialLoading && !refreshError && !hasNextPage && conversations.length === 0 && (
                     searchQuery.trim()
-                        ? <p className="conversation-empty-state" role="status">No results for “{ searchQuery.trim() }” in { inboxViewPhrase(selectedView) }. Search looks at customer names and email addresses.</p>
+                        ? <p className="conversation-empty-state" role="status">No results for “{ searchQuery.trim() }” in { filter.search_scope === 'view' ? inboxViewPhrase(selectedView) : 'all history' }. Search matches message phrases, customer names and email addresses.</p>
                         : <>
                             { startHere
                                 ? <InboxStart name={ currentAgent.name }/>

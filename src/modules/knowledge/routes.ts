@@ -13,7 +13,7 @@ routes.use('/public/:projectId/*',async(c,next)=>{const project=await c.env.DB.p
 routes.get('/public/:projectId/articles',async c=>c.json((await c.env.DB.prepare("SELECT id,slug,title,summary,category_id categoryId FROM knowledge_articles WHERE project_id=? AND status='published' ORDER BY position,title").bind(c.req.param('projectId')).all()).results))
 routes.get('/public/:projectId/articles/:slug',async c=>{const article=await c.env.DB.prepare("SELECT id,slug,title,content,summary,category_id categoryId FROM knowledge_articles WHERE project_id=? AND slug=? AND status='published'").bind(c.req.param('projectId'),c.req.param('slug')).first();return article?c.json(article):c.json({error:'Not found'},404)})
 routes.get('/public/:projectId/categories',async c=>c.json((await c.env.DB.prepare('SELECT id,name,title,summary,parent_id,position FROM (SELECT *,name title FROM knowledge_categories) WHERE project_id=? AND is_published=1 ORDER BY position,name').bind(c.req.param('projectId')).all()).results))
-routes.get('/public/:projectId/search',async c=>{const query=requiredString(c.req.query('q'),'query',200);return c.json((await c.env.DB.prepare("SELECT id,slug,title,summary FROM knowledge_articles WHERE project_id=? AND status='published' AND (title LIKE ? OR content LIKE ?) ORDER BY position,title").bind(c.req.param('projectId'),`%${query}%`,`%${query}%`).all()).results)})
+routes.get('/public/:projectId/search',async c=>{const query=requiredString(c.req.query('q'),'query',200);return c.json((await c.env.DB.prepare("SELECT id,slug,title,summary FROM knowledge_articles WHERE project_id=? AND status='published' AND (title LIKE ? OR summary LIKE ? OR content LIKE ?) ORDER BY position,title").bind(c.req.param('projectId'),`%${query}%`,`%${query}%`,`%${query}%`).all()).results)})
 routes.route('/',authoring)
 routes.use('/:projectId/*',async(c,next)=>{await requireProject(c,c.req.param('projectId'),true);await next()})
 routes.get('/:projectId/datasets',async c=>c.json((await c.env.DB.prepare('SELECT * FROM knowledge_datasets WHERE project_id=?').bind(c.req.param('projectId')).all()).results))
@@ -25,7 +25,11 @@ routes.get('/:projectId/categories',async c=>c.json((await c.env.DB.prepare('SEL
 routes.post('/:projectId/categories',async c=>{const b=await c.req.json();b.parentId=b.parent_id??b.parentId;if(b.parentId&&!await c.env.DB.prepare('SELECT id FROM knowledge_categories WHERE id=? AND project_id=?').bind(b.parentId,c.req.param('projectId')).first())return c.json({error:'Parent not found'},400);const categoryId=id();await c.env.DB.prepare('INSERT INTO knowledge_categories(id,project_id,parent_id,name,slug,summary,is_published,position) VALUES(?,?,?,?,?,?,?,?)').bind(categoryId,c.req.param('projectId'),b.parentId||null,requiredString(b.name??b.title,'name',200),requiredString(b.slug||`${String(b.name??b.title).toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${categoryId.slice(0,8)}`,'slug',200),b.summary||'',b.is_published===false?0:1,b.position??0).run();return c.json({id:categoryId},201)})
 routes.get('/:projectId/articles',async c=>{
  const projectId=c.req.param('projectId')
- const rows=await c.env.DB.prepare('SELECT a.*,category_id categoryId,(SELECT json_group_array(category_id) FROM knowledge_article_categories WHERE article_id=a.id) categories FROM knowledge_articles a WHERE project_id=? ORDER BY position,updated_at DESC').bind(projectId).all<any>()
+ const query=c.req.query('q')?.trim()||''
+ if(query)requiredString(query,'query',200)
+ const filter=query?' AND (a.title LIKE ? OR a.summary LIKE ? OR a.content LIKE ?)':''
+ const bindings=query?[projectId,...Array(3).fill(`%${query}%`)]:[projectId]
+ const rows=await c.env.DB.prepare(`SELECT a.*,category_id categoryId,(SELECT json_group_array(category_id) FROM knowledge_article_categories WHERE article_id=a.id) categories FROM knowledge_articles a WHERE project_id=?${filter} ORDER BY position,updated_at DESC`).bind(...bindings).all<any>()
  return c.json(await Promise.all(rows.results.map(row=>presentArticle(c.env,projectId,row))))
 })
 routes.post('/:projectId/articles',async c=>c.json(await writeArticle(c.env,c.req.param('projectId'),await c.req.json()),201))

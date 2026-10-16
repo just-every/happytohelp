@@ -16,6 +16,55 @@ assert.equal((await call(routes,'/projects/q/settings')).status,403)
 assert.equal((await call(routes,'/projects/p/settings','PUT',{name:'Renamed',timezone:'UTC',is_contact_tracking_enabled:true})).status,200)
 const macro=await(await call(routes,'/projects/p/macros','POST',{title:'Welcome',content:'Hello'})).json();assert.ok(macro.data.id)
 assert.equal((await call(routes,'/projects/q/macros/'+macro.data.id,'PUT',{title:'Stolen'})).status,403)
+// Established directories and reply libraries remain reachable through the scoped public routes.
+const directory=Array.from({length:211},(_,i)=>({id:`directory-${String(i).padStart(3,'0')}`,name:`Person ${String(i).padStart(3,'0')}`,email:`person${String(i).padStart(3,'0')}@example.test`,seen:i+1,country:i%2?'Australia':'Canada'}))
+await DB.batch(directory.flatMap((row,i)=>[
+ DB.prepare('INSERT INTO contacts(id,project_id,name,email,created_at,metadata_json) VALUES(?,?,?,?,?,?)').bind(row.id,'p',row.name,row.email,1,JSON.stringify({provided_name:i===0?'Supplied Person':null,provided_email:i===0?'supplied@example.test':null,last_seen_at:row.seen,country_name:row.country})),
+ DB.prepare('INSERT INTO macros VALUES(?,?,?,?,?,?,?)').bind(`reply-${row.id}`,'p',`Reply ${String(i).padStart(3,'0')}`,i===210?'Needle in the saved body':'Reusable content','u',i+1,i+1),
+]))
+await DB.batch([
+ DB.prepare("INSERT INTO contacts(id,project_id,name,email,created_at,metadata_json) VALUES('foreign-directory','q','Foreign','foreign@example.test',1,'{}')"),
+ DB.prepare("INSERT INTO contacts(id,project_id,name,created_at,metadata_json) VALUES('deleted-directory','p','Deleted',1,'{\"is_deleted\":true}')"),
+ DB.prepare("INSERT INTO macros VALUES('foreign-reply','q','Foreign reply','Needle in the saved body','u',1,1)"),
+])
+async function listed(path){const result=await call(routes,path);assert.equal(result.status,200,await result.clone().text());return result.json()}
+async function allPages(path){const rows=[];for(let page=1;;page++){const result=await listed(`${path}${path.includes('?')?'&':'?'}page=${page}`);rows.push(...result.data);if(!result.pagination.hasMore)return rows;assert.ok(page<20,'pagination terminates')}}
+const contacts=await allPages('/projects/p/contacts?sort=last_seen_at&direction=desc')
+assert.deepEqual(contacts.filter(row=>row.id.startsWith('directory-')).map(row=>row.id),directory.toReversed().map(row=>row.id))
+assert.ok(!contacts.some(row=>['foreign-directory','deleted-directory'].includes(row.id)))
+for(const [term,id] of [['Person 210','directory-210'],['person210@example.test','directory-210'],['Supplied Person','directory-000'],['supplied@example.test','directory-000']])assert.deepEqual((await listed('/projects/p/contacts?search='+encodeURIComponent(term))).data.map(row=>row.id),[id])
+for(const [sort,field] of [['name','name'],['email','email'],['country','country']]){
+ const result=(await allPages(`/projects/p/contacts?sort=${sort}&direction=asc`)).filter(row=>row.id.startsWith('directory-'))
+ const value=row=>sort==='country'?JSON.parse(row.metadata_json).country_name:JSON.parse(row.metadata_json)[`provided_${field}`]||row[field]
+ assert.deepEqual(result.map(value),result.map(value).toSorted((a,b)=>a<b?-1:a>b?1:0),`${sort} orders the complete directory`)
+}
+assert.deepEqual((await listed('/projects/p/macros?search=Needle')).data.map(row=>row.id),['reply-directory-210'],'body search crosses the old cap without foreign results')
+assert.deepEqual((await listed('/projects/p/macros?search=Reply%20210')).data.map(row=>row.id),['reply-directory-210'])
+const replies=(await allPages('/projects/p/macros?sort=title&direction=asc')).filter(row=>row.id.startsWith('reply-directory-'))
+assert.deepEqual(replies.map(row=>row.id),directory.map(row=>`reply-${row.id}`),'paging reaches every reply')
+assert.deepEqual((await allPages('/projects/p/macros?sort=created_at&direction=desc')).filter(row=>row.id.startsWith('reply-directory-')).map(row=>row.id),directory.toReversed().map(row=>`reply-${row.id}`))
+assert.deepEqual((await listed('/projects/p/macros?search=%25')).data,[],'search treats SQL wildcard characters as text')
+for(const query of ['page=0','limit=0','sort=content%20DESC','direction=sideways'])assert.equal((await call(routes,'/projects/p/contacts?'+query)).status,400)
+// A profile includes all its own and participant conversations, with deterministic pages and tenant fences.
+const profileConversations=Array.from({length:55},(_,i)=>({id:`profile-${String(i).padStart(3,'0')}`,updated:i+1}))
+await DB.batch(profileConversations.map(row=>DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,?,?)').bind(row.id,'p','directory-000',1,row.updated)))
+await DB.batch([
+ DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('participant-thread','p','contact',1,100)"),
+ DB.prepare("INSERT INTO conversation_participants VALUES('participant-link','participant-thread','directory-000',1)"),
+ DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('foreign-profile','q','foreign-directory',1,1000)"),
+ DB.prepare("INSERT INTO conversation_participants VALUES('foreign-participant-link','foreign-profile','directory-000',1)"),
+])
+assert.deepEqual((await allPages('/projects/p/contacts/directory-000/conversations')).map(row=>row.id),['participant-thread',...profileConversations.toReversed().map(row=>row.id)])
+assert.equal((await call(routes,'/projects/p/contacts/foreign-directory/conversations')).status,404)
+assert.equal((await call(routes,'/projects/q/contacts/foreign-directory/conversations')).status,403)
+await DB.batch([
+ DB.prepare("DELETE FROM conversation_participants WHERE id IN ('participant-link','foreign-participant-link')"),
+ DB.prepare("DELETE FROM conversations WHERE id LIKE 'profile-%' OR id IN ('participant-thread','foreign-profile')"),
+ DB.prepare("DELETE FROM macros WHERE id LIKE 'reply-directory-%' OR id='foreign-reply'"),
+ DB.prepare("DELETE FROM contacts WHERE id LIKE 'directory-%' OR id IN ('foreign-directory','deleted-directory')"),
+])
+
+
 assert.equal((await call(routes,'/projects/p/agents/u','DELETE')).status,409,'last owner protected')
 assert.equal((await call(routes,'/admin/users')).status,403,'project owner is not global administrator')
 const bootstrap=await(await call(routes,'/bootstrap')).json();assert.equal(bootstrap.currentAgent.id,'u');assert.equal(bootstrap.projects.p.name,'Renamed');assert.equal(bootstrap.projects.q,undefined)

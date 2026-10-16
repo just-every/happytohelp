@@ -24,11 +24,13 @@ export function inboxViewPhrase(view) {
     return getInboxView(view).phrase;
 }
 
-export function inboxViewFilter(view, query = '') {
+export function inboxViewFilter(view, query = '', assignment, searchScope = 'all') {
     const filter = { ...getInboxView(view).filter };
+    if (['anyone', 'myself', 'none'].includes(assignment)) filter.assigned_to = assignment;
 
     if (query.trim()) {
         filter.q = query.trim();
+        filter.search_scope = searchScope === 'view' ? 'view' : 'all';
     }
 
     return filter;

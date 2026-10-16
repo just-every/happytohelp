@@ -2,6 +2,8 @@
 // Live bearer grants, provider credentials and pending outbound deliveries do not.
 export const archivePolicy={
  product:'just-every/happytohelp',buckets:{FILES:{}},
+ // Reconstruct the full-text index from retained messages after restore.
+ derivedTables:['inbox_message_search'],
  excludeTables:[
   'sessions','conversation_outbox','identity_tokens','magic_signins','registrations','login_attempts',
   'github_connections','github_oauth_states','preview_grants','edition_codes','edition_consents',

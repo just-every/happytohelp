@@ -26,6 +26,12 @@ try{
   DB.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at) VALUES('history','p','c-plain','history','plain','contact','The cobalt buckle replacement arrived safely',1,100)"),
  ])
  for(const [,sql] of (await readFile(new URL('../migrations/123_inbox_message_search.sql',import.meta.url),'utf8')).matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g))await DB.prepare(sql).run()
+ // Derived full-text/shadow storage is not business archive state.
+ const {catalogue,policy}=await import('@runeditrun/rer/internal/modules/portability/catalogue.mjs')
+ const {archivePolicy}=await import('../scripts/installer/portability-policy.mjs')
+ const catalog=await catalogue(DB,policy({product:archivePolicy.product,derivedTables:archivePolicy.derivedTables}))
+ assert.ok(catalog.tables.some(table=>table.name==='messages'),'transcripts remain archived')
+ assert.ok(!catalog.tables.some(table=>table.name.startsWith('inbox_message_search')),'the message index is rebuilt, not archived')
  const list=async(params)=>dashboardRoutes.request('https://app.example/projects/p/conversations?'+new URLSearchParams({view:'open',...params}),{headers:{Authorization:'Bearer token'}},env)
  const names=async(params)=>{const response=await list(params);assert.equal(response.status,200,`${JSON.stringify(params).slice(0,80)} -> ${response.status}`);return (await response.json()).data.map(row=>row.contact.name).sort()}
 

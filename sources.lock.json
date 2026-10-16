@@ -1818,7 +1818,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "07bdc146028d3cf01720a07d9839f730725937451d987f2d56cf085890c417c9",
+      "sha256": "c14e97fb6fad06ad0b53b97ae04fb43cfcc3bee7f7364f6670d60f53b02b5f66",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -2454,7 +2454,7 @@
       "executable": false
     },
     "scripts/installer/local.mjs": {
-      "sha256": "1ff8f269b80f481489c6d6972e45f38f6160ddf340a6c402dc9324c3747177c4",
+      "sha256": "17a1349213dc29a7ff69207bcf65182d08d154c441d98a8674bf18f13f917d1e",
       "executable": false
     },
     "scripts/installer/native-local.mjs": {
@@ -2462,7 +2462,7 @@
       "executable": false
     },
     "scripts/installer/portability-policy.mjs": {
-      "sha256": "c48e37be517ba2d27e888211d9112ae42a3836bb2e6727e0779653751129b0ce",
+      "sha256": "1ddb5b874524909cfcd4037fc9a819fa8de3dbf8ed7ae4b92ef59094cd388474",
       "executable": false
     },
     "scripts/installer/ui/seed.mjs": {
@@ -8122,7 +8122,7 @@
       "executable": false
     },
     "tests/helpers/rer-data.mjs": {
-      "sha256": "51ed096072848c31de144e72ff60fa928f2cc46ef31beaf67665809a67036ef1",
+      "sha256": "17b00406f2dbf8cab93404d9e144eeed2f2dfc567b69a4c557dbe3f4ca0921df",
       "executable": false
     },
     "tests/helpers/runtime-cors.mjs": {
@@ -8246,7 +8246,7 @@
       "executable": false
     },
     "tests/inbox-search.mjs": {
-      "sha256": "99bff5ee8d29eafe5142a8796d9f53cd2b9f876f69f22cbd72a0a9b6b6ead89b",
+      "sha256": "8a824d315cb1966c6e196143d998457382ae4a9cc1c99ede08b85e905017c3cf",
       "executable": false
     },
     "tests/independent-browser.mjs": {

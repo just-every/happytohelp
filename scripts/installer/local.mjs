@@ -32,7 +32,14 @@ export const adapter=localInstaller({
 });
 export const install=(root,input,store,onApp,signal)=>installOperator(root,input,store,onApp,signal,adapter.hooks);
 const transfer=localPortability({database:'DB',buckets:{FILES:'FILES'},policy:archivePolicy,transient:['ConversationSocket connections (messages are in D1)','queue execution leases','active sessions and one-use sign-in links','GitHub and integration credentials','local computer pairing, grants and job execution records']});
-const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async context=>{await context.store.run('Collecting local migrations',process.execPath,['scripts/migrations.mjs'],{cwd:context.root,signal:context.signal});return transfer[verb](context);} ]));
+const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async context=>{
+ await context.store.run('Collecting local migrations',process.execPath,['scripts/migrations.mjs'],{cwd:context.root,signal:context.signal});
+ const result=await transfer[verb](context);
+ // Restore deliberately suspends business triggers. Rebuild derived search
+ // before reporting a completed import, including a resumed import.
+ if(verb==='import')await context.store.run('Rebuilding conversation search','pnpm',['exec','wrangler','d1','execute','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc','--command',"INSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild')"],{cwd:context.root,signal:context.signal});
+ return result;
+} ]));
 // Local setup keeps the entered-password hook; hosted deploy has no installer input.
 // Give rer its standard claim contract so it observes 303/409 and retires the token.
 const hostedLifecycle={...adapter,hooks:{...adapter.hooks,owner:{path:'/auth/bootstrap',tokenKey:'H2H_SETUP_TOKEN',returnTo:'/setup'}}};

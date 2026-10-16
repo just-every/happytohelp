@@ -42,6 +42,7 @@ export async function seedPortableData(origin,projectId,token,json){
  await json(`/api/management/projects/${projectId}/contacts/${visitor.contactId}/erase`,{},token);
  const kept=await json('/api/identity/widget/session',{widgetKey:project.widget_key,name:'Retained archive contact'});
  const retained=await json('/api/conversations',{projectId},kept.token);
+ await json(`/api/conversations/${retained.id}/messages`,{localId:'archive-search',content:'The retained cobalt parcel label',expectedRevision:0},kept.token);
  const bytes=Uint8Array.from([0,255,128,42,13,10]);
  const upload=await fetch(origin+`/api/conversations/${retained.id}/media`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Filename':'retained.bin'},body:bytes});assert.equal(upload.status,201);const media=await upload.json();
  const imports=await seedImportHistory(origin,projectId,token,json);
@@ -51,5 +52,7 @@ export async function verifyPortableData(origin,state,token,json){
  const contact=(await json(`/api/management/projects/${state.projectId}/contacts/${state.erasedContactId}`,undefined,token)).data;
  assert.equal(contact.email,null);assert.equal(JSON.parse(contact.metadata_json).is_erased,1);
  await verifyImportHistory(origin,state.projectId,state.imports,token,json);
+ const matches=await json(`/api/dashboard/projects/${state.projectId}/conversations?q=retained%20cobalt%20parcel`,undefined,token);
+ assert.ok(matches.data.some(row=>row.id===state.conversationId),'restored messages are searchable after the derived index rebuild');
  const response=await fetch(origin+`/api/conversations/${state.conversationId}/media/${state.mediaId}`,{headers:{Authorization:`Bearer ${token}`}});assert.equal(response.status,200);assert.deepEqual([...new Uint8Array(await response.arrayBuffer())],state.bytes);
 }

@@ -6,19 +6,20 @@ import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {DatabaseSync} from 'node:sqlite';
-import {collectMigrations} from '../scripts/migrations.mjs';
-import {createRuntime} from './helpers/emitted-runtime.mjs';
-import {baselines, repository} from './helpers/upgrade-baselines.mjs';
-import {findDatabase, snapshot, schema, bucketSnapshot} from './helpers/upgrade-snapshot.mjs';
-import {expectedMigrationRows, expectedSchema, schemaExceptions} from './helpers/upgrade-exceptions.mjs';
-import {readBack, priorState} from './helpers/upgrade-readback.mjs';
+import {collectMigrations} from '../../scripts/migrations.mjs';
+import {createRuntime} from './emitted-runtime.mjs';
+import {baselines, repository} from './upgrade-baselines.mjs';
+import {findDatabase, snapshot, schema, bucketSnapshot} from './upgrade-snapshot.mjs';
+import {expectedMigrationRows, expectedSchema, schemaExceptions} from './upgrade-exceptions.mjs';
+import {readBack, priorState} from './upgrade-readback.mjs';
+
 
 // Prior-data upgrade: build each released source, populate it through its own
 // API, apply this source's migrations in place, compare every pre-existing row,
 // then serve the upgraded store with this source's emitted Worker.
 // Usage: node tests/upgrade.mjs [0.2.1|0.3.0|0.3.x|0.4.0|0.4.1 ...] after `pnpm run build`.
 const run = promisify(execFile);
-const root = resolve(new URL('..', import.meta.url).pathname);
+const root = resolve(new URL('../..', import.meta.url).pathname);
 const release = JSON.parse(await readFile(join(root, 'RELEASE.json'), 'utf8'));
 const evidence = process.env.H2H_EVIDENCE_DIR;
 const command = async (file, args, cwd) => {
@@ -113,4 +114,5 @@ async function upgrade(label) {
   }
 }
 
-for (const label of process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(baselines)) await upgrade(label);
+export async function releaseUpgrades(labels=Object.keys(baselines)){for (const label of labels) await upgrade(label)}
+

@@ -1,4 +1,6 @@
-import test from 'node:test';
+// Historical conversations upgraded into outcome cycles, each from its own populated prior state.
+export const historyScenarios=[];
+const test=(name,fn)=>historyScenarios.push({name,fn});
 import assert from 'node:assert/strict';
 import {harness} from './harness.mjs';
 async function snapshot(db){const tables=(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' ORDER BY name").all()).results;const result={};for(const {name} of tables)result[name]=(await db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()).results;return result}

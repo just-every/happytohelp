@@ -12,6 +12,9 @@ import {snapshot} from '../helpers/recovery/snapshot.mjs';
 import {m9Migrations} from '../helpers/recovery/m9-inventory.mjs';
 import {createHash} from 'node:crypto';
 import {seedCategoryUpgrade,assertCategoryUpgrade} from './upgrade-categories.mjs';
+
+// A packaged install populated before the outcome, integration, mail and import stages upgrades in place; every prior row and file is kept.
+export async function priorSchemaUpgrade(){
 const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
 const completeMigrations=artifact.deploymentSpec.migrations;
 assert.deepEqual(completeMigrations.filter(m=>importRuntimeMigrations.includes(m.name)).map(m=>m.name),importRuntimeMigrations);
@@ -186,3 +189,5 @@ try {
   if(process.env.H2H_EVIDENCE_DIR){await mkdir(resolve(process.env.H2H_EVIDENCE_DIR),{recursive:true});await writeFile(join(resolve(process.env.H2H_EVIDENCE_DIR),'upgrade.json'),JSON.stringify(receipt,null,2)+'\n')}
   console.log(JSON.stringify(receipt));
 }finally{artifact.deploymentSpec.migrations=completeMigrations;if(runtime)await runtime.close();await rm(directory,{recursive:true,force:true});}
+
+}

@@ -28,23 +28,17 @@ export default function SendMessage({ mainView, setView, messages, localContact,
     const [showCollector, setShowCollector] = useState(needsNotifyEmail || (context.settings.collect.require_name && !contact.name) || (context.settings.collect.require_email && !contact.email));
     const textareaRef = useRef(null);
 
-    const handleSend = event => {
-        event.preventDefault();
-        var error_messages = [];
-        if(context.settings.collect.require_name && !contact.name) {
-            error_messages.push(context.text.message.error_name);
-        }
-        if(context.settings.collect.require_email && !contact.email) {
-            error_messages.push(context.text.message.error_email);
-        }
-        if(!message && !files.length) {
-            error_messages.push(context.text.message.error_message);
-        }
-        if(error_messages.length) {
-            displayError(error_messages, {clear: true});
-            return;
-        }
-        onSend(message, files); // Don't wait for response? Improves UI if we clear inputs straight away.
+    // A Send pressed while the name or email just typed is still being saved (the field saves when it loses focus,
+    // which a quick Send causes) waits for that save, then checks again, instead of reporting the field as empty.
+    const pendingSend = useRef(null);
+    const contactMissing = () => {
+        const missing = [];
+        if(context.settings.collect.require_name && !contact.name) missing.push(context.text.message.error_name);
+        if(context.settings.collect.require_email && !contact.email) missing.push(context.text.message.error_email);
+        return missing;
+    };
+    const send = (content, attachments) => {
+        onSend(content, attachments); // Don't wait for response? Improves UI if we clear inputs straight away.
         setMessage('');
         setFiles([]);
 
@@ -52,7 +46,34 @@ export default function SendMessage({ mainView, setView, messages, localContact,
             // Ensure focus is retained
             textareaRef.current.focus({preventScroll: true});
         }
+    };
+
+    const handleSend = event => {
+        event.preventDefault();
+        if(!message && !files.length) {
+            displayError([...contactMissing(), context.text.message.error_message], {clear: true});
+            return;
+        }
+        if(contact.loading_name || contact.loading_email) {
+            pendingSend.current = {message, files};
+            return;
+        }
+        const missing = contactMissing();
+        if(missing.length) {
+            displayError(missing, {clear: true});
+            return;
+        }
+        send(message, files);
     }
+
+    useEffect(() => {
+        if(!pendingSend.current || contact.loading_name || contact.loading_email) return;
+        const waiting = pendingSend.current;
+        pendingSend.current = null;
+        const missing = contactMissing();
+        if(missing.length) displayError(missing, {clear: true});
+        else send(waiting.message, waiting.files);
+    }, [ contact ]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const isContactLoading = contact.loading_name || contact.loading_email;

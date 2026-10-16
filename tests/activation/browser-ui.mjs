@@ -49,10 +49,10 @@ export async function knowledgeViews({page,runtime,projectId,evidence,artifacts,
   await page.getByRole('heading',{name:'Edit article',exact:true}).waitFor();await page.reload();await page.getByRole('heading',{name:'Edit article',exact:true}).waitFor();
   await page.evaluate(()=>{const element=document.querySelector('#workspace-main');element?.scrollTo(0,element.scrollHeight);window.scrollTo(0,document.body.scrollHeight)});
   await visibleControl(page.getByRole('button',{name:'Save',exact:true}),`${width} edit Save`);
-  await visibleControl(page.getByRole('button',{name:'Publish',exact:true}),`${width} edit Publish`);
+  assert.equal(await page.getByRole('button',{name:'Publish',exact:true}).count(),0,`${width} a published article offers no second Publish`);
   const saved=page.waitForResponse(response=>new URL(response.url()).pathname===`/api/knowledge/${projectId}/articles`&&response.request().method()==='POST');await page.getByRole('button',{name:'Save',exact:true}).click();assert.equal((await saved).status(),201);await noOverflow(page,'article editor');await capture(page,evidence,`${width}-article-actions`,artifacts);
  }
- checks.push('one primary Knowledge/AI/Local computers navigation, source status and long new/edit article Save/Publish at both widths');
+ checks.push('one primary Knowledge/AI/Local computers navigation, source status and long new article Save/Publish and published-article Save at both widths');
 }
 export async function demoAndAiViews({page,runtime,projectId,evidence,artifacts,checks}){
  const base=`${runtime.origin}/projects/${projectId}`;await page.goto(base+'/conversations');await page.getByRole('button',{name:'Try a demo inbox',exact:true}).click();await page.waitForURL(/\/projects\/demo-[^/]+\/conversations/);const demoId=new URL(page.url()).pathname.split('/')[2];

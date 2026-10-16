@@ -20,7 +20,6 @@ body.workspace-page {
     .settings-section.h2h-card { padding: 28px; border-bottom: 1px solid var(--rule-strong); }
     .settings-section.h2h-card .settings-section { margin-top: 24px; padding: 24px 0 0; border-top: 1px solid var(--rule); border-bottom: 0; }
     .settings-section.h2h-card .settings-section .settings-section__heading { font-size: 16px; }
-    .settings-section.h2h-card .form-switch { padding-left: 56px; }
     .settings-section.h2h-card .form-group:last-child { margin-bottom: 0; }
 
     .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }

@@ -1,11 +1,15 @@
 import {type ImportPlatform} from './importers'
 import {queueImport} from './import-jobs'
+import {ImportInputError,checkImportSecrets,importSecrets,missingImportSecrets} from './import-requirements'
+import {installation} from '../management/installation'
 import { Hono } from 'hono'
 import type { AppEnv } from '../../platform/env'
 import { requireProject } from '../../platform/auth'
 import { requiredString } from '../../platform/db'
 import { crawlDataset } from './service'
 import { crawlInputError } from './crawl-limits'
+import { crawlerSetupProblem,websiteReader } from './crawl'
+import { BUILT_IN_PAGE_LIMIT } from './website-reader'
 export const authoring=new Hono<AppEnv>()
 authoring.use('/:projectId/*',async(c,next)=>{await requireProject(c,c.req.param('projectId'),true);await next()})
 authoring.get('/:projectId/datasets/:datasetId',async c=>{const row=await c.env.DB.prepare('SELECT d.*,(SELECT count(*) FROM knowledge_documents f WHERE f.version_id=d.published_version) page_count FROM knowledge_datasets d WHERE project_id=? AND id=?').bind(c.req.param('projectId'),c.req.param('datasetId')).first();return row?c.json(row):c.json({error:'Not found'},404)})
@@ -18,6 +22,11 @@ authoring.delete('/:projectId/articles/:articleId',async c=>{await c.env.DB.prep
 authoring.put('/:projectId/articles/:articleId/categories',async c=>{const b=await c.req.json();if(!Array.isArray(b.categoryIds))return c.json({error:'categoryIds required'},400);const pid=c.req.param('projectId');const aid=c.req.param('articleId');if(!await c.env.DB.prepare('SELECT id FROM knowledge_articles WHERE id=? AND project_id=?').bind(aid,pid).first())return c.json({error:'Not found'},404);for(const cid of b.categoryIds)if(!await c.env.DB.prepare('SELECT id FROM knowledge_categories WHERE id=? AND project_id=?').bind(cid,pid).first())return c.json({error:'Invalid category'},400);await c.env.DB.batch([c.env.DB.prepare('DELETE FROM knowledge_article_categories WHERE article_id=?').bind(aid),...b.categoryIds.map((cid:string)=>c.env.DB.prepare('INSERT INTO knowledge_article_categories(article_id,category_id) VALUES(?,?)').bind(aid,cid))]);return c.json({updated:true})})
 authoring.put('/:projectId/articles/:articleId/order',async c=>{const b=await c.req.json();if(!Number.isInteger(b.position))return c.json({error:'Integer position required'},400);await c.env.DB.prepare('UPDATE knowledge_articles SET position=? WHERE id=? AND project_id=?').bind(b.position,c.req.param('articleId'),c.req.param('projectId')).run();return c.json({updated:true})})
 
-authoring.post('/:projectId/import/:platform',async c=>{try{const b=await c.req.json();return c.json(await queueImport(c.env,c.req.param('projectId'),c.req.param('platform') as ImportPlatform,b.subdomain))}catch(e){return c.json({error:String(e)},502)}})
+// Which reader website sources use here and what the crawler service needs: names only, never values.
+authoring.get('/:projectId/website-reader',c=>c.json({...websiteReader(c.env),problem:crawlerSetupProblem(c.env),builtInPageLimit:BUILT_IN_PAGE_LIMIT,installation:installation(c.env,c.req.url)}))
+
+// What the import needs before it is submitted: names only, never values.
+authoring.get('/:projectId/import/:platform',async c=>{const platform=c.req.param('platform') as ImportPlatform;if(!Object.hasOwn(importSecrets,platform))return c.json({error:'Not found'},404);const missing=missingImportSecrets(c.env,platform);return c.json({secrets:importSecrets[platform].map(name=>({name,set:!missing.includes(name)})),installation:installation(c.env,c.req.url)})})
+authoring.post('/:projectId/import/:platform',async c=>{try{const b=await c.req.json(),platform=c.req.param('platform') as ImportPlatform;if(Object.hasOwn(importSecrets,platform))checkImportSecrets(c.env,platform);return c.json(await queueImport(c.env,c.req.param('projectId'),c.req.param('platform') as ImportPlatform,b.subdomain))}catch(e){if(e instanceof ImportInputError)return c.json({error:e.message,field:e.field},400);return c.json({error:e instanceof Error?e.message:String(e)},502)}})
 
 authoring.get('/:projectId/imports/:importId',async c=>{const row=await c.env.DB.prepare('SELECT * FROM knowledge_imports WHERE id=? AND project_id=?').bind(c.req.param('importId'),c.req.param('projectId')).first();return row?c.json(row):c.json({error:'Not found'},404)})

@@ -18,7 +18,7 @@ try{
  assert.equal((await sendEmail(env,input)).state,'sent')
  assert.equal(calls,1)
  await assert.rejects(sendEmail(env,{...input,text:'Changed'}),/identity conflict/)
- globalThis.fetch=async()=>{calls++;throw new Error('lost response')}
+ globalThis.fetch=async url=>{if(String(url).startsWith('https://cloudflare-dns.com/'))return Response.json({Status:0,Answer:[{type:15,data:'10 mx.example.com.'}]});calls++;throw new Error('lost response')}
  await assert.rejects(sendEmail(env,{...input,idempotencyKey:'send-2'}),/lost response/)
  await assert.rejects(sendEmail(env,{...input,idempotencyKey:'send-2'}),/uncertain/)
  assert.equal(calls,2)
@@ -57,7 +57,7 @@ try{
  await proxy.env.FILES.put('file-key',pdf)
  await proxy.env.FILES.put('foreign-key','private')
  const requests=[]
- globalThis.fetch=async(url,init)=>{calls++;const body=JSON.parse(init.body);requests.push({url,body});return Response.json({id:`provider-${calls}`})}
+ globalThis.fetch=async(url,init)=>{if(String(url).startsWith('https://cloudflare-dns.com/'))return Response.json({Status:0,Answer:[{type:15,data:'10 mx.example.com.'}]});calls++;const body=JSON.parse(init.body);requests.push({url,body});return Response.json({id:`provider-${calls}`})}
  const notified=await notifyMessage(env,rich,actor)
  assert.equal(notified.state,'sent')
  assert.deepEqual(requests.map(r=>r.body.to[0]).sort(),['preferred@example.com','teammate@example.com'])

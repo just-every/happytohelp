@@ -1,3 +1,4 @@
+import type {Receiving} from '../../integrations/inbound-capability'
 export const stepLabels = {
  owner_mail: 'Check a test email arrives', sender_dns: 'Verify your sending address', inbound_address: 'Receive replies by email',
  model_key: 'Connect an AI provider', spend_ceilings: 'Set limits for AI use', published_article: 'Publish a help article',
@@ -35,6 +36,8 @@ export type ColourSource = 'site'|'default'|'chosen'
 /** Stored or installation facts for the page's rows. Structured values only: no wording, keys, tokens or fingerprints. */
 export type ActivationFacts = {
  workspaceName:string
+ /** False while the workspace keeps the name setup chose for it, such as My workspace. */
+ workspaceNamed:boolean
  /** The project's allowed widget origin. */
  website:string|null
  colour:{hex:string; source:ColourSource}
@@ -52,7 +55,7 @@ export type ActivationFacts = {
  starterAssistant:{id:string; name:string; model:string; provider:string|null; edited:boolean}|null
  inboundAddress:string|null
  /** `gateway` says the installation holds INBOUND_EMAIL_TOKEN (presence only); workers.dev cannot receive mail. */
- inbound:{enabled:boolean; gateway:boolean; customDomainRequired:boolean}
+ inbound:{enabled:boolean; gateway:boolean; customDomainRequired:boolean; receiving:Receiving['reason']}
  /** Null when AI_DAILY_CEILINGS is invalid. */
  ceilings:{repliesPerProject:number; repliesPerInstallation:number; spendUsdPerProject:number; contextRunsPerProject:number; resetUtc:'00:00'; source:'defaults'|'installation'}|null
  /** From the last sender_dns observation still valid for the current configuration (Resend domain detail). */

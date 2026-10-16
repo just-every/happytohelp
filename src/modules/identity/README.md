@@ -46,7 +46,9 @@ in `tests/first-run/profile.mjs`, `profile-transport.mjs`, and `profile-browser.
 
 The collector stores visitor-entered name/email as `provided_name` and
 `provided_email` metadata for operator context and erasure. For unsigned contacts
-these also update the displayed canonical fields. Existing verified identities
+these also update the displayed canonical fields. A typed email marks the contact
+`email_unproven`: it is a notification destination, never inbound mail authority
+(only a signed identifier that is the address proves it). Existing verified identities
 keep their canonical name/email, external identifier and verification state;
 collector input cannot promote or demote verification. The guarded write returns
 the current canonical fields and verification state atomically, including when

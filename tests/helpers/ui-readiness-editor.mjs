@@ -39,7 +39,7 @@ export async function checkDelayedArticle({page, origin, projectId, article, api
         const content = page.getByRole('textbox', {name: 'Article content in Markdown', exact: true});
         assert.equal(await content.inputValue(), article.content);
         assert.ok(await save.isEnabled());
-        assert.ok(await publish.isEnabled());
+        assert.equal(await publish.count(), 0, 'a loaded published article offers Save, not Publish again');
         const changedTitle = `Edited loaded article ${width}`;
         await page.getByLabel('Title', {exact: true}).fill(changedTitle);
         const changedContent = `The loaded record keeps its identity at ${width}.`;

@@ -218,7 +218,7 @@ test('placement and the applicable count follow the installation, and facts carr
  assert.deepEqual(data.facts.ceilings,{...aiCeilings(base),resetUtc:'00:00',source:'defaults'})
  assert.deepEqual(data.facts.colour,{hex:DEFAULT_WORKSPACE_COLOUR,source:'default'})
  assert.deepEqual(data.facts.ai,{assistantId:null,provider:null,secretName:null,keyInstalled:true,checkable:false})
- assert.deepEqual(data.facts.inbound,{enabled:false,gateway:true,customDomainRequired:false});assert.equal(data.facts.starterAssistant,null)
+ assert.deepEqual(data.facts.inbound,{enabled:false,gateway:true,customDomainRequired:false,receiving:'no_address'});assert.equal(data.facts.starterAssistant,null)
  assert.equal((await api.get({env:{...base,OPENAI_API_KEY:undefined}})).facts.ai.keyInstalled,false)
  for(const response of [hosted,trial,other,data])assert.doesNotMatch(JSON.stringify(response),/fixture-|rotated-|fingerprint/)
 })

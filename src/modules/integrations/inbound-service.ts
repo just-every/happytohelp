@@ -5,36 +5,38 @@ import {id,requiredString} from '../../platform/db'
 import {hashToken} from '../../platform/auth'
 import {admitMessage} from '../conversations/admission'
 import {emailAddress,inboundTarget} from './inbound-routing'
+import {receivingMailbox} from './inbound-receiving'
+import {routingAddresses} from './inbound-sender'
 import {inboundLocalId,legacyInboundLocalId,scopedInboundId} from './inbound-identity'
 import {visibleEmailReply} from './email-reply'
 import {replyGrant} from './email-reply-address'
-import {inboundAuthority,emailContact,emailActor,preferredAddressActor,openEmailConversation,ccContacts} from './inbound-authority'
+import {inboundAuthority,emailContact,unverifiedSenderContact,unusableFromContact,isVerifiedCustomerAddress,emailActor,preferredAddressActor,openEmailConversation,ccContacts} from './inbound-authority'
 import {classifyInboundEmail,evidenceJson,type EmailEvidence} from './email-classification'
 /** `to` lists the recipient addresses in routing order (envelope, forwarding headers,
  * To); the first configured mailbox selects the project. `from` is the header From and
- * `senderAuthenticated` whether the ingress verified it. `replyTo` is a reply target
- * only. `evidence` is what the ingress retained for automatic-mail classification. It
+ * `senderAuthenticated` whether the ingress verified it; `senderFailed` that the
+ * provider reported an explicit DKIM, SPF or DMARC fail (or an ambiguous verdict).
+ * `fromUnusable`: the header From named no usable address, so `from` is only the
+ * envelope sender, which nobody authenticated as an author.
+ * `replyTo` is a reply target only. `evidence` is what the ingress retained for automatic-mail classification. It
  * is not part of the delivery identity, so a redelivery keeps its first classification. */
-export interface IncomingEmail {messageId:string;to:string|readonly string[];from:string;text:string;conversationId?:string;cc?:string[];replyTo?:string;senderAuthenticated?:boolean;evidence?:EmailEvidence;attachments?:{filename:string;contentType:string;content:ArrayBuffer}[]}
-const enabledMailbox="SELECT e.project_id,lower(e.from_address) from_address FROM email_settings e WHERE lower(e.inbound_address)=? AND e.is_enabled=1 AND NOT EXISTS(SELECT 1 FROM project_settings s WHERE s.project_id=e.project_id AND json_extract(s.settings_json,'$.deleted_at') IS NOT NULL)"
-async function receivingMailbox(env:Env,candidates:string[]){
- for(const candidate of candidates){
-  const target=inboundTarget(candidate);if(!target)continue
-  const project=await env.DB.prepare(enabledMailbox).bind(target.mailbox).first<{project_id:string;from_address:string|null}>()
-  if(project)return {project,target}
- }
- return null
-}
+export interface IncomingEmail {messageId:string;to:string|readonly string[];from:string;text:string;conversationId?:string;cc?:string[];replyTo?:string;senderAuthenticated?:boolean;senderFailed?:boolean;fromUnusable?:boolean;evidence?:EmailEvidence;attachments?:{filename:string;contentType:string;content:ArrayBuffer}[]}
+// A receipt still `processing` this long after it was written belongs to an attempt
+// that ended without admitting (a crashed or killed Worker). The retry reclaims it;
+// the claim token fences admission, so even a live slow attempt cannot admit twice.
+const STALE_CLAIM_MS=2*60*1000
+const alreadyProcessing=()=>new HTTPException(503,{message:'Inbound email is already processing; retry later'})
 export async function receiveEmail(env:Env,input:IncomingEmail){
- const recipients=(Array.isArray(input.to)?input.to:[input.to]) as unknown[]
- if(!recipients.length||recipients.length>50)throw new HTTPException(400,{message:'Inbound email address is invalid'})
- const messageId=requiredString(input.messageId,'messageId',200),to=recipients.map(value=>emailAddress(requiredString(value,'to',320))),from=emailAddress(requiredString(input.from,'from',320)),raw=typeof input.text==='string'?input.text.slice(0,100000):undefined;if(raw===undefined)throw new HTTPException(400,{message:'Invalid text'})
- if(!from||to.some(address=>!address))throw new HTTPException(400,{message:'Inbound email address is invalid'})
+ // Routing candidates are deduplicated and bounded; only a message with no valid
+ // recipient at all is refused.
+ const to=routingAddresses(Array.isArray(input.to)?input.to:[input.to])
+ const messageId=requiredString(input.messageId,'messageId',200),from=emailAddress(requiredString(input.from,'from',320)),raw=typeof input.text==='string'?input.text.slice(0,100000):undefined;if(raw===undefined)throw new HTTPException(400,{message:'Invalid text'})
+ if(!from||!to.length)throw new HTTPException(400,{message:'Inbound email address is invalid'})
  if(!Array.isArray(input.cc||[]))throw new HTTPException(400,{message:'Invalid CC recipients'})
  // Malformed or excess CC entries are skipped, never a reason to refuse the message.
  let content=visibleEmailReply(raw);const cc=[...new Set((input.cc||[]).map(value=>emailAddress(value)).filter((value):value is string=>Boolean(value)))].sort().slice(0,20)
- const received=await receivingMailbox(env,[...to as string[],...cc]);if(!received)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})
- const {project,target}=received,authenticated=input.senderAuthenticated!==false
+ const received=await receivingMailbox(env,[...to,...cc]);if(!received)throw new HTTPException(404,{message:'Inbound mailbox is not configured'})
+ const {project,target}=received,unusable=input.fromUnusable===true,authenticated=!unusable&&input.senderAuthenticated!==false
  if(input.conversationId&&target.conversationId&&input.conversationId!==target.conversationId)throw new HTTPException(400,{message:'Conflicting conversation address'})
  const grant=target.replyToken?await replyGrant(env,project.project_id,target.replyToken):null
  if(input.conversationId&&grant&&input.conversationId!==grant.conversation_id)throw new HTTPException(400,{message:'Conflicting conversation address'})
@@ -59,7 +61,11 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
    await env.DB.prepare("UPDATE inbound_emails SET state='delivered',conversation_id=?,message_id=?,error=NULL WHERE id=?").bind(admitted.conversation_id,admitted.id,recordId).run()
    return {id:messageId,state:'delivered',conversationId:admitted.conversation_id,duplicate:true,automatic:Boolean(prior.automatic)}
   }
-  if(prior.state!=='failed')return {id:messageId,state:prior.state,conversationId:prior.conversation_id,duplicate:true,automatic:Boolean(prior.automatic)}
+  // A retry of mail whose earlier attempt never admitted it is never accepted
+  // silently: a stale claim is reclaimed and processed here; a fresh one may still
+  // be live, so the sender is told to retry (a temporary failure, never a bounce).
+  if(prior.state==='processing'){if(Date.now()-Number(prior.created_at)<STALE_CLAIM_MS)throw alreadyProcessing()}
+  else if(prior.state!=='failed')return {id:messageId,state:prior.state,conversationId:prior.conversation_id,duplicate:true,automatic:Boolean(prior.automatic)}
  }
  // Classified once, before admission, so the committed message and its outbox can
  // never exist without the classification that suppresses its effects. A receipt
@@ -67,26 +73,33 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
  const classified=prior?.local_id!=null?null:input.evidence?classifyInboundEmail(input.evidence):{automatic:false,reasons:[]}
  const automatic=classified?classified.automatic:Boolean(prior.automatic),evidence=classified&&input.evidence?evidenceJson({...input.evidence,sender_verified:authenticated},classified):null
  const claimToken=id(),claimed=prior
-  ?await env.DB.prepare("UPDATE inbound_emails SET state='processing',error=NULL,claim_token=?,automatic=CASE WHEN local_id IS NULL THEN ? ELSE automatic END,evidence_json=CASE WHEN local_id IS NULL THEN ? ELSE evidence_json END,local_id=coalesce(local_id,?) WHERE id=? AND state='failed'").bind(claimToken,automatic?1:0,evidence,localId,recordId).run()
+  ?await env.DB.prepare("UPDATE inbound_emails SET state='processing',error=NULL,claim_token=?,automatic=CASE WHEN local_id IS NULL THEN ? ELSE automatic END,evidence_json=CASE WHEN local_id IS NULL THEN ? ELSE evidence_json END,local_id=coalesce(local_id,?) WHERE id=? AND (state='failed' OR state='processing' AND claim_token IS ? AND NOT EXISTS(SELECT 1 FROM messages WHERE project_id=? AND local_id IN (?,?)))").bind(claimToken,automatic?1:0,evidence,localId,recordId,prior.claim_token,project.project_id,localId,legacyLocalId).run()
   :await env.DB.prepare("INSERT OR IGNORE INTO inbound_emails(id,project_id,conversation_id,intent_hash,state,error,created_at,claim_token,automatic,evidence_json,local_id) VALUES(?,?,NULL,?,'processing',NULL,?,?,?,?,?)").bind(recordId,project.project_id,intentHash,Date.now(),claimToken,automatic?1:0,evidence,localId).run()
- if(!claimed.meta.changes)throw new HTTPException(409,{message:'Inbound email is already processing'})
+ if(!claimed.meta.changes)throw alreadyProcessing()
  try{
   // Workspace addresses the mail was routed through never become participants.
-  const workspace=new Set<string>([from,target.mailbox,...to as string[],...(project.from_address?[project.from_address]:[]),...cc.filter(address=>inboundTarget(address)?.mailbox===target.mailbox)])
+  const workspace=new Set<string>([from,target.mailbox,...to,...(project.from_address?[project.from_address]:[]),...cc.filter(address=>inboundTarget(address)?.mailbox===target.mailbox)])
   // An addressed thread admits its current participants and members. A reply address
   // issued to this sender is possession proof; otherwise member authority, and any
   // authority through somebody else's reply address, needs an authenticated From.
   let conversation:any=null,actor:Actor|null=null
   const possessed=Boolean(grant&&grant.recipient===from),trusted=possessed||authenticated
-  const addressedConversation=addressed?await env.DB.prepare('SELECT * FROM conversations WHERE id=? AND project_id=?').bind(addressed,project.project_id).first<any>():null
+  // An unauthenticated From naming a widget-verified customer, or one the provider
+  // reported as failing, may be forged: it never writes as that customer or into
+  // their threads, only into its own conversation flagged as an unverified sender.
+  // Mail with no usable From has no author to authenticate: only the reply address
+  // issued to its envelope sender admits it to that thread; otherwise it is kept
+  // apart the same way, and no reply is sent to anybody until an operator chooses.
+  const isolated=!trusted&&(unusable||input.senderFailed===true||await isVerifiedCustomerAddress(env,project.project_id,from))
+  const addressedConversation=addressed&&!isolated?await env.DB.prepare('SELECT * FROM conversations WHERE id=? AND project_id=?').bind(addressed,project.project_id).first<any>():null
   if(addressedConversation&&(trusted||!grant)){
-   actor=await emailActor(env,project.project_id,addressedConversation,from,trusted)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
+   actor=await emailActor(env,project.project_id,addressedConversation,from,trusted,possessed)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
    if(actor)conversation=addressedConversation
   }
   // Everything else is the sender's own mail to the support mailbox: it continues
   // their most recently active open thread or starts one, and is never refused.
   if(!actor){
-   const contact=await emailContact(env,project.project_id,from)
+   const contact=!isolated?await emailContact(env,project.project_id,from):unusable?await unusableFromContact(env,project.project_id,from):await unverifiedSenderContact(env,project.project_id,from)
    if(!contact){
     await env.DB.prepare("UPDATE inbound_emails SET state='ignored',error='Contact is unavailable' WHERE id=? AND claim_token=?").bind(recordId,claimToken).run()
     return {id:messageId,state:'ignored',conversationId:null,duplicate:false,automatic}
@@ -97,13 +110,13 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
     const key=id(),now=Date.now()
     await env.DB.batch([
      env.DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) SELECT ?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM conversations WHERE project_id=? AND contact_id=? AND resolved_at IS NULL)').bind(key,project.project_id,contact.id,now,now,project.project_id,contact.id),
-     env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=? AND EXISTS(SELECT 1 FROM conversations WHERE id=? AND project_id=?)').bind(key,recordId,key,project.project_id),
+     env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=? AND claim_token=? AND EXISTS(SELECT 1 FROM conversations WHERE id=? AND project_id=?)').bind(key,recordId,claimToken,key,project.project_id),
      trackingStatement(env,key,true),
     ])
     conversation=await openEmailConversation(env,project.project_id,contact.id)
    }
   }
-  await env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=?').bind(conversation.id,recordId).run()
+  await env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=? AND claim_token=?').bind(conversation.id,recordId,claimToken).run()
   // CC recipients become participants atomically with message admission, only for a
   // sender whose identity or reply address is proven; otherwise they are skipped.
   const participants=automatic||!trusted?[]:await ccContacts(env,project.project_id,conversation,cc,workspace)
@@ -115,18 +128,19 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
    await env.DB.prepare('INSERT OR IGNORE INTO media(id,project_id,conversation_id,uploaded_by,object_key,filename,content_type,size,created_at) VALUES(?,?,?,?,?,?,?,?,?)').bind(key,project.project_id,conversation.id,actor.id,objectKey,file.filename,file.contentType,file.content.byteLength,Date.now()).run()
    mediaIds.push(key)
   }
-  const result=await admitMessage(env,{projectId:project.project_id,conversationId:conversation.id,actor,localId,content,expectedRevision:conversation.revision,expectedLastMessageId:conversation.last_message_id,mediaIds,[inboundAuthority]:{sender:from,receiptId:recordId,claimToken,raw,cc:participants}})
+  const result=await admitMessage(env,{projectId:project.project_id,conversationId:conversation.id,actor,localId,content,expectedRevision:conversation.revision,expectedLastMessageId:conversation.last_message_id,mediaIds,[inboundAuthority]:{sender:from,receiptId:recordId,claimToken,raw,cc:participants,...(possessed?{grant:await hashToken(target.replyToken!)}:{})}})
   if(!result.accepted)throw new Error(result.reason)
   await env.DB.prepare("UPDATE inbound_emails SET state='delivered',message_id=?,error=NULL WHERE id=?").bind(String(result.message!.id),recordId).run()
   await keepReplyTarget(env,project.project_id,actor,input.replyTo,{authenticated,automatic,workspace})
   return {id:messageId,state:'delivered',conversationId:conversation.id,duplicate:false,automatic,message:result.message,actor}
- }catch(error){await env.DB.prepare("UPDATE inbound_emails SET state='failed',error=? WHERE id=? AND state='processing'").bind(String(error).slice(0,1000),recordId).run();throw error}
+ }catch(error){await env.DB.prepare("UPDATE inbound_emails SET state='failed',error=? WHERE id=? AND state='processing' AND claim_token=?").bind(String(error).slice(0,1000),recordId,claimToken).run();throw error}
 }
 /** An authenticated contact's Reply-To becomes where replies to them are sent (their
- * preferred notification address). It never changes who they are. */
+ * preferred notification address). It never changes who they are, and never the
+ * preference of a widget-verified customer, which only they or an operator set. */
 async function keepReplyTarget(env:Env,projectId:string,actor:Actor,value:unknown,context:{authenticated:boolean;automatic:boolean;workspace:ReadonlySet<string>}){
  const replyTo=emailAddress(value)
  if(!replyTo||actor.role!=='contact'||!context.authenticated||context.automatic||context.workspace.has(replyTo)||inboundTarget(replyTo)&&await env.DB.prepare('SELECT 1 FROM email_settings WHERE lower(inbound_address)=?').bind(inboundTarget(replyTo)!.mailbox).first())return
- await env.DB.prepare(`UPDATE contacts SET metadata_json=json_set(coalesce(metadata_json,'{}'),'$.provided_email',?) WHERE id=? AND project_id=? AND coalesce(json_extract(metadata_json,'$.is_erasing'),0)!=1 AND coalesce(json_extract(metadata_json,'$.is_erased'),0)!=1
+ await env.DB.prepare(`UPDATE contacts SET metadata_json=json_set(coalesce(metadata_json,'{}'),'$.provided_email',?) WHERE id=? AND project_id=? AND coalesce(is_verified,0)!=1 AND coalesce(json_extract(metadata_json,'$.is_erasing'),0)!=1 AND coalesce(json_extract(metadata_json,'$.is_erased'),0)!=1
   AND NOT EXISTS(SELECT 1 FROM users u JOIN memberships m ON m.user_id=u.id WHERE m.project_id=? AND lower(u.email)=?)`).bind(replyTo,actor.contactId,projectId,projectId,replyTo).run()
 }

@@ -10,6 +10,9 @@ async function notificationRuntime(){
  const runtime=new Miniflare(convertV4MiniflareOptions({name:'email-worker',modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-09-14',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['FILES'],durableObjects:{CONVERSATIONS:{className:'ConversationSocket',useSQLite:true}}}))
  return {env:await runtime.getBindings(),dispose:()=>runtime.dispose()}
 }
+// The workspace mailboxes here receive mail: their MX lookup answers before any provider stub.
+const withMx=handler=>async(url,init)=>String(url).startsWith('https://cloudflare-dns.com/')?Response.json({Status:0,Answer:[{type:15,data:'10 mx.example.com.'}]}):handler(url,init)
+globalThis.fetch=withMx(globalThis.fetch)
 const {recipientReplyAddress}=await import('../src/modules/integrations/email-reply-address.ts'),{inboundTarget}=await import('../src/modules/integrations/inbound-routing.ts')
 const protectedAddress=async(env,to,from)=>{const target=inboundTarget(to);return target?.conversationId?await recipientReplyAddress(env,target.mailbox,'p',target.conversationId,from):to}
 const {handleEmail}=await import('../src/modules/integrations/email-worker.ts'),proxy=await notificationRuntime()
@@ -32,8 +35,8 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   const jobs=[],outbound=[],pending=[],execution={waitUntil:promise=>pending.push(promise),passThroughOnException(){}}
   const env={...proxy.env,APP_ORIGIN:'https://app.example',OPENAI_API_KEY:'fixture-openai',EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'fixture-resend',EMAIL_FROM:'support@example.com',INBOUND_EMAIL_TOKEN:'fixture-gateway',JOBS:{send:async job=>{jobs.push(job)}}},DB=env.DB
   const flushAlerts=()=>dispatchOperatorNotifications(env,{now:Date.now()+61000})
-  globalThis.fetch=async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})}
-  for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
+  globalThis.fetch=withMx(async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})})
+  for(const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','123_operator_notifications.sql','0100_inbound_email_claims.sql','0102_public_abuse_limits.sql','0104_inbound_email_classification.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql','122_email_content.sql','123_email_reply_grants.sql','0106_project_verification_secret.sql'])for(const sql of migrationStatements(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')))await DB.prepare(sql).run()
   await DB.batch([
    DB.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','w','https://example.com',1)"),
    DB.prepare("INSERT INTO email_settings VALUES('p','Support','support@example.com','inbound@example.com',1,1)"),
@@ -187,7 +190,7 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   await DB.prepare("UPDATE user_project_preferences SET is_notified_on_unassigned_activity=0 WHERE user_id='op'").run()
   await unreadMail('uncertain-alert','A lost response')
   let attempts=0
-  globalThis.fetch=async()=>{attempts++;throw new Error('response lost')}
+  globalThis.fetch=withMx(async()=>{attempts++;throw new Error('response lost')})
   await flushAlerts()
   const uncertain=await DB.prepare("SELECT * FROM email_deliveries WHERE state='uncertain'").first()
   assert.equal(attempts,1);assert.equal(uncertain.recipient,'watcher@example.com')
@@ -195,7 +198,7 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   assert.equal(attempts,1)
   // The real operator mutation creates assignment-mail intent in the same
   // transaction as ownership. Same-owner writes and self assignment stay quiet.
-  globalThis.fetch=async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})}
+  globalThis.fetch=withMx(async(url,init)=>{outbound.push({url:String(url),body:JSON.parse(String(init.body))});return Response.json({id:`resend-${outbound.length}`})})
   const assign=async(agent_id,requestEnv=env)=>{
    const response=await dashboardActions.request('/projects/p/conversations/assigned',{method:'PUT',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({agent_id})},requestEnv,execution)
    assert.equal(response.status,200,await response.text())
@@ -250,9 +253,9 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   assert.equal((await admitted('revoked-worker@example.com')).actor_role,'contact')
   await outside(await gateway({messageId:'revoked-operator',to:'inbound+assigned@example.com',from:'op@example.com',text:'Revoked reply'}),'revoked-operator')
   await DB.prepare("INSERT INTO memberships VALUES('p','op','operator')").run()
-  // A preferred notification address replies as the customer only through its own
-  // reply address; elsewhere it is a separate sender.
-  await DB.prepare("UPDATE contacts SET is_verified=1,metadata_json=json_set(metadata_json,'$.provided_email','preferred@example.com') WHERE id='customer'").run()
+  // A mail customer's preferred notification address replies as the customer only
+  // through its own reply address; elsewhere it is a separate sender.
+  await DB.prepare("UPDATE contacts SET metadata_json=json_set(metadata_json,'$.provided_email','preferred@example.com') WHERE id='customer'").run()
   await outside(await gateway({messageId:'preferred-forgery',to:'inbound+assigned@example.com',from:'preferred@example.com',text:'Not canonical identity'}),'preferred-forgery')
   assert.equal(await deliver({id:'preferred-reply@example.com',to:await recipientReplyAddress(env,'inbound@example.com','p','assigned','preferred@example.com'),from:'preferred@example.com',headerFrom:'preferred@example.com',text:'Replying from my preferred address'}),undefined)
   assert.deepEqual([(await admitted('preferred-reply@example.com')).conversation_id,(await admitted('preferred-reply@example.com')).actor_id],['assigned','customer'])
@@ -278,11 +281,103 @@ try{const env={...proxy.env,INBOUND_EMAIL_TOKEN:'worker-fixture',OPENAI_API_KEY:
   assert.deepEqual(await people('signed-cc'),{contact:'ben@customer.example',verified:true,participants:['colleague@customer.example']})
   assert.equal(await forwarded('forged-verdict','Cy <cy@customer.example>',verdict('customer.example','fail')+verdict('customer.example')+forwardedCc),undefined)
   assert.deepEqual(await people('forged-verdict'),{contact:'cy@customer.example',verified:false,participants:[]})
-  // A widget-verified customer without a conversation, then a fresh email while it is open.
-  await DB.prepare("INSERT INTO contacts(id,project_id,email,is_verified,created_at) VALUES('signed-in','p','dana@customer.example',1,1)").run()
-  for(const id of ['verified-first','verified-again'])assert.equal(await deliver({id,to:'inbound@example.com',from:'dana@customer.example',headerFrom:'Dana <dana@customer.example>'}),undefined)
-  assert.equal((await admitted('verified-again')).conversation_id,(await admitted('verified-first')).conversation_id)
+  // A widget-verified customer: signed mail continues their thread, and its Reply-To
+  // never replaces the preference they chose.
+  await DB.prepare("INSERT INTO contacts(id,project_id,email,external_id,is_verified,metadata_json,created_at) VALUES('signed-in','p','dana@customer.example','dana@customer.example',1,'{\"provided_email\":\"dana-home@customer.example\"}',1)").run()
+  const dana=(id,headers)=>deliver({id,to:'inbound@example.com',from:'dana@customer.example',headerFrom:'Dana <dana@customer.example>',headers:headers+'Reply-To: attacker@attacker.example\r\n'})
+  assert.equal(await dana('verified-first',verdict('customer.example')),undefined)
+  const danaThread=(await admitted('verified-first')).conversation_id
   assert.equal((await admitted('verified-first')).actor_id,'signed-in')
+  // Mail that may forge her From never writes as her: the gate's injections into
+  // Cloudflare's own verdict, an honest fail and no verdict at all each land in one
+  // separate conversation flagged as an unverified sender.
+  const cloudflare=results=>`Authentication-Results: mx.cloudflare.net; ${results}\r\n`
+  const forgeries={
+   'quoted-mail-from':cloudflare('dkim=none; spf=pass smtp.mailfrom="x;dkim=pass header.d=customer.example z"@attacker.example; dmarc=fail header.from=customer.example'),
+   'spf-comment':cloudflare('dkim=none (no signatures found); spf=pass (mx.cloudflare.net: domain of "a);dkim=pass header.d=customer.example (b"@attacker.example designates 192.0.2.1 as permitted sender) smtp.mailfrom=attacker.example; dmarc=fail header.from=customer.example'),
+   'helo-semicolon':cloudflare('dkim=none; spf=none smtp.helo=evil;dmarc=pass header.from=customer.example; spf=pass smtp.mailfrom=attacker.example'),
+   'honest-fail':cloudflare('dkim=fail header.d=customer.example; spf=fail smtp.mailfrom=attacker.example; dmarc=fail header.from=customer.example'),
+   'unsigned':'',
+  }
+  for(const [id,header] of Object.entries(forgeries))assert.equal(await dana(id,header),undefined,id)
+  const isolated=await Promise.all(Object.keys(forgeries).map(async id=>({...await people(id),conversation:(await admitted(id)).conversation_id})))
+  assert.deepEqual(new Set(isolated.map(row=>JSON.stringify([row.verified,row.participants,row.conversation===danaThread]))),new Set([JSON.stringify([false,[],false])]))
+  assert.equal(new Set(isolated.map(row=>row.conversation)).size,1)
+  const impostor=await DB.prepare('SELECT ct.email,ct.metadata_json FROM conversations c JOIN contacts ct ON ct.id=c.contact_id WHERE c.id=?').bind(isolated[0].conversation).first()
+  assert.deepEqual([impostor.email,JSON.parse(impostor.metadata_json)],['dana@customer.example',{unverified_sender:1}])
+  assert.equal((await DB.prepare("SELECT json_extract(metadata_json,'$.provided_email') p FROM contacts WHERE id='signed-in'").first()).p,'dana-home@customer.example')
+  // An operator's reply there goes only to the unverified From address.
+  const isolatedHead=await DB.prepare('SELECT revision FROM conversations WHERE id=?').bind(isolated[0].conversation).first()
+  assert.equal((await conversationRoutes.request(`/${isolated[0].conversation}/messages`,{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'isolated-reply',content:'Your refund code is 4417',expectedRevision:isolatedHead.revision})},env,execution)).status,200)
+  await applyMessageEffects(env,await DB.prepare("SELECT * FROM messages WHERE local_id='isolated-reply'").first(),{id:'op',projectId:'p',role:'operator'})
+  assert.deepEqual(outbound.filter(mail=>mail.body.text?.includes('4417')).map(mail=>mail.body.to),[['dana@customer.example']])
+  // A header From with no usable address has no author to authenticate, and
+  // Cloudflare's SPF fail for the envelope still counts: with MAIL FROM a customer's
+  // address it never joins her thread as her. Each lands in one separate conversation
+  // flagged unverified, and an operator's reply there emails nobody automatically.
+  const anaThread=(await admitted('first-cc')).conversation_id,anaContact=(await admitted('first-cc')).actor_id
+  const spfFail=cloudflare('dkim=none; dmarc=none policy.dmarc=none; spf=none smtp.helo=mx.attacker.test; spf=fail (mx.cloudflare.net: domain of ana@customer.example does not designate 192.0.2.7 as permitted sender) smtp.mailfrom=ana@customer.example; arc=none smtp.remote-ip=192.0.2.7')
+  const noFrom=async(id,fromLines,to='inbound@example.com')=>{let rejected;const raw=`${spfFail}${fromLines}To: ${to}\r\nSubject: Bank details\r\nMessage-ID: <${id}>\r\nContent-Type: text/plain\r\n\r\nPlease change my bank details`;await handleEmail({from:'ana@customer.example',to,rawSize:raw.length,raw:new Response(raw).body,setReject:reason=>{rejected=reason}},env,execution);await Promise.all(pending.splice(0));return rejected}
+  const unusable={'no-from':'','display-only':'From: Ana Customer\r\n','no-tld':'From: ana@customer\r\n','empty-angle':'From: <>\r\n'}
+  for(const [id,line] of Object.entries(unusable))assert.equal(await noFrom(id,line),undefined,id)
+  const kept=await Promise.all(Object.keys(unusable).map(admitted))
+  assert.equal(new Set(kept.map(message=>message.conversation_id)).size,1);assert.notEqual(kept[0].conversation_id,anaThread);assert.notEqual(kept[0].actor_id,anaContact)
+  assert.deepEqual(JSON.parse((await DB.prepare('SELECT metadata_json FROM contacts WHERE id=?').bind(kept[0].actor_id).first()).metadata_json),{unverified_sender:1,unusable_from:1})
+  const keptHead=await DB.prepare('SELECT revision FROM conversations WHERE id=?').bind(kept[0].conversation_id).first(),sentBefore=outbound.length
+  assert.equal((await conversationRoutes.request(`/${kept[0].conversation_id}/messages`,{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'unusable-reply',content:'Your new bank details are saved',expectedRevision:keptHead.revision})},env,execution)).status,200)
+  await applyMessageEffects(env,await DB.prepare("SELECT * FROM messages WHERE local_id='unusable-reply'").first(),{id:'op',projectId:'p',role:'operator'})
+  assert.equal(outbound.length,sentBefore)
+  // Only the reply address issued to that envelope sender for her thread admits it there.
+  assert.equal(await noFrom('no-from-owned','',await recipientReplyAddress(env,'inbound@example.com','p',anaThread,'ana@customer.example')),undefined)
+  assert.deepEqual([(await admitted('no-from-owned')).conversation_id,(await admitted('no-from-owned')).actor_id],[anaThread,anaContact])
+  // An anonymous widget visitor who types a customer's address never receives that
+  // customer's mail, nor the operator's reply to it.
+  const {widget}=await import('../src/modules/identity/widget.ts')
+  const visitor=await (await widget.request('/widget/session',{method:'POST',headers:{Origin:'https://example.com','Content-Type':'application/json'},body:JSON.stringify({widgetKey:'w',name:'Visitor',email:'ceo@bigco.example'})},env)).json()
+  const visitorAuth={Authorization:`Bearer ${visitor.token}`,'Content-Type':'application/json'}
+  const visitorThread=await (await conversationRoutes.request('/',{method:'POST',headers:visitorAuth,body:JSON.stringify({projectId:'p'})},env,execution)).json()
+  assert.equal((await conversationRoutes.request(`/${visitorThread.id}/messages`,{method:'POST',headers:visitorAuth,body:JSON.stringify({localId:'visitor-hello',content:'Hi, I am the CEO',expectedRevision:0})},env,execution)).status,200)
+  assert.equal(await deliver({id:'ceo-mail@example.com',to:'inbound@example.com',from:'ceo@bigco.example',headerFrom:'CEO <ceo@bigco.example>',headers:verdict('bigco.example'),text:'CONFIDENTIAL: renewal terms are 2.4M'}),undefined)
+  const ceoMail=await admitted('ceo-mail@example.com');assert.notEqual(ceoMail.conversation_id,visitorThread.id);assert.notEqual(ceoMail.actor_id,visitor.contactId)
+  const ceoHead=await DB.prepare('SELECT revision FROM conversations WHERE id=?').bind(ceoMail.conversation_id).first()
+  assert.equal((await conversationRoutes.request(`/${ceoMail.conversation_id}/messages`,{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'ceo-reply',content:'The renewal draft is attached',expectedRevision:ceoHead.revision})},env,execution)).status,200)
+  await applyMessageEffects(env,await DB.prepare("SELECT * FROM messages WHERE local_id='ceo-reply'").first(),{id:'op',projectId:'p',role:'operator'})
+  assert.deepEqual(outbound.filter(mail=>mail.body.text?.includes('renewal draft')).map(mail=>mail.body.to),[['ceo@bigco.example']])
+  const visitorView=JSON.stringify(await (await conversationRoutes.request(`/${visitorThread.id}/messages`,{headers:visitorAuth},env,execution)).json())
+  assert.ok(visitorView.includes('Hi, I am the CEO'));assert.ok(!visitorView.includes('2.4M')&&!visitorView.includes('renewal draft'))
+  assert.equal((await conversationRoutes.request(`/${ceoMail.conversation_id}/messages`,{headers:visitorAuth},env,execution)).status>=400,true)
+  // A visitor who typed her own address answers the operator's emailed reply through
+  // the reply address it carries: the answer continues her chat, as her.
+  const rosa=await (await widget.request('/widget/session',{method:'POST',headers:{Origin:'https://example.com','Content-Type':'application/json'},body:JSON.stringify({widgetKey:'w',name:'Rosa',email:'rosa@acme.test'})},env)).json()
+  const rosaAuth={Authorization:`Bearer ${rosa.token}`,'Content-Type':'application/json'}
+  const rosaThread=await (await conversationRoutes.request('/',{method:'POST',headers:rosaAuth,body:JSON.stringify({projectId:'p'})},env,execution)).json()
+  assert.equal((await conversationRoutes.request(`/${rosaThread.id}/messages`,{method:'POST',headers:rosaAuth,body:JSON.stringify({localId:'rosa-hello',content:'My parcel arrived damaged',expectedRevision:0})},env,execution)).status,200)
+  assert.equal((await conversationRoutes.request(`/${rosaThread.id}/messages`,{method:'POST',headers:{...authorization,'Content-Type':'application/json'},body:JSON.stringify({localId:'rosa-reply',content:'Could you send a photo of the box?',expectedRevision:1})},env,execution)).status,200)
+  await applyMessageEffects(env,await DB.prepare("SELECT * FROM messages WHERE local_id='rosa-reply'").first(),{id:'op',projectId:'p',role:'operator'})
+  const rosaNotice=outbound.find(mail=>mail.body.text?.includes('photo of the box'));assert.deepEqual(rosaNotice.body.to,['rosa@acme.test']);assert.match(rosaNotice.body.reply_to,/^inbound\+r\./)
+  assert.equal(await deliver({id:'rosa-answer@example.com',to:rosaNotice.body.reply_to,from:'rosa@acme.test',headerFrom:'Rosa <rosa@acme.test>',headers:verdict('acme.test'),text:'Photo attached, the corner is crushed.'}),undefined)
+  assert.deepEqual([(await admitted('rosa-answer@example.com')).conversation_id,(await admitted('rosa-answer@example.com')).actor_id],[rosaThread.id,rosa.contactId])
+  assert.ok(JSON.stringify(await (await conversationRoutes.request(`/${rosaThread.id}/messages`,{headers:rosaAuth},env,execution)).json()).includes('the corner is crushed'))
+  // Fresh mail from her typed address still starts that address's own conversation.
+  assert.equal(await deliver({id:'rosa-fresh@example.com',to:'inbound@example.com',from:'rosa@acme.test',headerFrom:'Rosa <rosa@acme.test>',headers:verdict('acme.test'),text:'A separate question'}),undefined)
+  assert.notEqual((await admitted('rosa-fresh@example.com')).conversation_id,rosaThread.id);assert.notEqual((await admitted('rosa-fresh@example.com')).actor_id,rosa.contactId)
+  // A reply-all to more than 50 addresses is routed, never refused.
+  const crowd=[...Array.from({length:60},(_,index)=>`person${index}@crowd.example`),`${'x'.repeat(330)}@crowd.example`,'inbound@example.com'].join(', ')
+  assert.equal(await deliver({id:'reply-all@example.com',to:crowd,envelopeTo:'inbound@example.com',from:'ana@customer.example',headerFrom:'ana@customer.example'}),undefined)
+  assert.equal((await claim('reply-all@example.com')).state,'delivered')
+  // A retry after an attempt that crashed mid-admission is never dropped: while the
+  // claim may be live the sender is told to retry (thrown, not bounced); a stale
+  // claim is reclaimed and the mail admitted exactly once.
+  await DB.prepare("CREATE TRIGGER crash_admission BEFORE INSERT ON messages BEGIN SELECT RAISE(ABORT,'worker crashed'); END").run()
+  const crashed=()=>deliver({id:'crashed@example.com',to:'inbound@example.com',from:'ana@customer.example',headerFrom:'ana@customer.example'})
+  await assert.rejects(crashed(),/worker crashed/)
+  await DB.prepare('DROP TRIGGER crash_admission').run()
+  await DB.prepare("UPDATE inbound_emails SET state='processing' WHERE id='<crashed@example.com>'").run()
+  await assert.rejects(crashed(),/already processing/)
+  await DB.prepare("UPDATE inbound_emails SET created_at=created_at-180000 WHERE id='<crashed@example.com>'").run()
+  assert.equal(await crashed(),undefined)
+  assert.equal(await crashed(),undefined)
+  assert.equal((await DB.prepare('SELECT count(*) n FROM messages WHERE local_id=?').bind((await claim('crashed@example.com')).local_id).first()).n,1)
   // Original body follows the same erasure custody as visible content.
   await DB.prepare("UPDATE messages SET content='' WHERE id=?").bind(ccMessage.id).run()
   assert.equal((await DB.prepare('SELECT content_raw FROM messages WHERE id=?').bind(ccMessage.id).first()).content_raw,null)

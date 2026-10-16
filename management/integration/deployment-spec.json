@@ -372,6 +372,12 @@
       "name": "124_message_read_index.sql",
       "sha256": "4d34f479e32f85493c8e5d8233fa0693153c626409b4155c07a38d484d2dcbef",
       "sql": "-- First read observations live in the attributed event store.\nCREATE INDEX context_message_read ON context_tracked_events(project_id,json_extract(payload,'$.message_id')) WHERE type='MESSAGE_READ' AND json_valid(payload);\n"
+    },
+    {
+      "binding": "DB",
+      "name": "125_contact_email_proof.sql",
+      "sha256": "3db92370743f8f19f2d94a9d609c6da37d58af749ec1135b0d2fa1641c53f8ce",
+      "sql": "-- An address a widget visitor typed is a notification preference, never inbound\n-- mail authority. Mark existing widget contacts whose address no signature names.\nUPDATE contacts SET metadata_json=json_set(coalesce(metadata_json,'{}'),'$.email_unproven',1)\n WHERE (email IS NOT NULL OR json_extract(metadata_json,'$.provided_email') IS NOT NULL)\n AND NOT (coalesce(is_verified,0)=1 AND email IS NOT NULL AND lower(trim(external_id))=lower(trim(email)) AND json_extract(metadata_json,'$.provided_email') IS NULL)\n AND EXISTS(SELECT 1 FROM sessions s WHERE s.contact_id=contacts.id AND s.project_id=contacts.project_id AND s.role='contact');\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

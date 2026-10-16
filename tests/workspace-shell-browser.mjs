@@ -130,6 +130,8 @@ try {
       const entry=menu.getByRole('link',{name,exact:true});
       if(!await entry.isVisible())await menu.getByTestId('settings-menu-more').locator('summary').click();
       await entry.click();await entry.and(menu.locator('[aria-current="page"]')).waitFor();
+      // The link is current while the destination still loads; continue once its page is shown.
+      await page.getByRole('heading',{level:1,name:{Integrations:'Plugins',GitHub:'Project'}[name]||name,exact:true}).waitFor();
       assert.equal(await menu.locator('[aria-current="page"]').count(),1,name);
       assert.equal(await nav().getByTestId('nav-settings').getAttribute('aria-current'),'page',name);
       assert.equal(await page.locator('h1').count(),1,name);paths.add(new URL(page.url()).pathname);
@@ -210,9 +212,12 @@ try {
   await check('the dashboard load-error screen is headed by the HappyToHelp lockup',async()=>{
     const failing=await context.newPage();
     try{
-      // Fail the workspace's API calls for one load: the route's error screen shows.
+      // A document load reads the workspace on the server; a client navigation
+      // reads it through Start's server function. Fail that load and its API calls.
+      await failing.goto(runtime.origin+'/projects');await failing.locator('.project-list-table').waitFor();
       await failing.route('**/api/**',route=>route.abort());
-      await failing.goto(runtime.origin+'/conversations');
+      await failing.route('**/_serverFn/**',route=>route.abort());
+      await failing.locator('.project-list-table').getByRole('link',{name:names[other.id],exact:true}).click();
       const heading=failing.getByRole('heading',{level:1,name:'HappyToHelp'});
       await heading.waitFor();
       assert.equal(await heading.count(),1,'one heading named HappyToHelp');
@@ -220,7 +225,7 @@ try {
       assert.ok(await heading.locator('.brand-name').evaluate(name=>{const box=name.getBoundingClientRect();return box.width<=1&&box.height<=1}),'the lockup\'s name is visually hidden');
       assert.equal(await failing.getByRole('button',{name:'Try again'}).count(),1,'a way to retry');
       await failing.screenshot({path:join(evidence,'dashboard-load-error.png')});
-      await failing.unroute('**/api/**');
+      await failing.unroute('**/api/**');await failing.unroute('**/_serverFn/**');
     }finally{await failing.close()}
   });
   await check('Projects list: owner reads Owner, Name is not a fake sort control, row actions are tappable',async()=>{

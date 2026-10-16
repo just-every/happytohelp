@@ -3,22 +3,25 @@ import type { MappingInput, PreparedMapping, Vendor } from '../types'
 import { recordKey,LIMITS } from '../types'
 import { completeNativeValue,nativeStatementCount } from '../targets'
 import {prepareHelpScout,helpScoutTags} from './helpscout-mapping'
+import {prepareFreshdesk,freshdeskTags} from './freshdesk-mapping'
+import {closedAt} from './closed-state'
 import {auditShape,shapeReason} from './shapes'
 import {htmlToMarkdown} from '../../knowledge/importers'
 import { nativeId, object, sourceId, sourceRecord, tagKey, text, time } from './common'
 export interface NativeValue { tables:Record<string,Record<string,any>[]>; source:Record<string,any> }
 const email=(value:unknown)=>typeof value==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?value:null
 const array=(value:unknown):any[]=>Array.isArray(value)?value:[]
-const tags=(record:SourceRecord):string[]=>record.namespace==='helpscout'?helpScoutTags(record):record.namespace==='zendesk'?array((record.payload as any)?.tags).filter(v=>typeof v==='string'&&v.trim()):array((record.payload as any)?.tags?.tags ?? (record.payload as any)?.tags?.data).filter(v=>object(v)&&typeof v.name==='string'&&v.name.trim()).map(v=>v.name)
+const tags=(record:SourceRecord):string[]=>record.namespace==='helpscout'?helpScoutTags(record):record.namespace==='freshdesk'?freshdeskTags(record):record.namespace==='zendesk'?array((record.payload as any)?.tags).filter(v=>typeof v==='string'&&v.trim()):array((record.payload as any)?.tags?.tags ?? (record.payload as any)?.tags?.data).filter(v=>object(v)&&typeof v.name==='string'&&v.name.trim()).map(v=>v.name)
 export function withTags(source:SourceBundle,vendor:Vendor):SourceBundle {
  const seen=new Set<string>(),added:SourceRecord[]=[]
  for(const record of source.records.filter(r=>['ticket','conversation'].includes(r.kind)||vendor==='helpscout'&&r.kind==='tag'))for(const name of tags(record)){if(name.trim().length>80){source.diagnostics.push({severity:'error',code:'tag_name_limit',message:'Tag names longer than 80 characters are not imported',location:record.location});continue}const key=tagKey(name);if(seen.has(key))continue;if(source.records.length+added.length>=LIMITS.records)throw new Error('export_record_limit');seen.add(key);added.push(sourceRecord(vendor,'tag-name',key,{name:name.trim()},record.location.artifact,record.artifactHash,record.location.row??1,`${record.location.pointer??''}/tags`))}
  return {...source,records:[...added,...source.records].sort((a,b)=>rank(a.kind)-rank(b.kind))}
 }
-const rank=(kind:string)=>kind==='tag-name'?0:kind==='user'||kind==='contact'?1:kind==='collection'?2:kind==='category'?3:4
+const rank=(kind:string)=>kind==='tag-name'?0:kind==='user'||kind==='contact'||kind==='agent'?1:kind==='collection'?2:kind==='category'?3:4
 export async function prepareMapping(input:MappingInput):Promise<PreparedMapping> {
  if(input.vendor==='helpscout')return prepareHelpScout(input)
- const {projectId,actorId,vendor,source,tagIds}=input,result:PreparedMapping={effects:new Map(),rejections:new Map(),omissions:new Map()}
+ if(input.vendor==='freshdesk')return prepareFreshdesk(input)
+ const {projectId,actorId,vendor,source,tagIds}=input,result:PreparedMapping={known:new Set(),effects:new Map(),rejections:new Map(),omissions:new Map()}
  const records=new Map(source.records.map(r=>[recordKey(r),r])),id=(kind:string,source:string)=>nativeId(projectId,vendor,kind,source)
  const author=(value:any)=>{if(vendor==='zendesk'){const sid=sourceId(value,vendor),user=records.get(`user/${sid}`)?.payload as any;if(!user||!['end-user','agent','admin'].includes(user.role))throw new Error('comment_author_role_missing');return {id:sid,name:typeof user.name==='string'?user.name:null,role:user.role==='end-user'?'contact':'operator'}}
   if(!object(value))throw new Error('author_missing');const sid=sourceId(value.id,vendor),kind=value.type
@@ -66,9 +69,8 @@ export async function prepareMapping(input:MappingInput):Promise<PreparedMapping
      if(array(p.source.attachments).length||p.conversation_parts.conversation_parts.some((v:any)=>array(v.attachments).length))omissions.push('attachments_metadata_retained_bytes_not_imported')
     }
     rows.sort((a,b)=>a.created_at-b.created_at||a.local_id.localeCompare(b.local_id));rows.forEach((row,index)=>{row.revision=index+1})
-    tables.conversations=[{id:target,project_id:projectId,contact_id:id('contact',contactSource),revision:rows.length,last_message_id:rows.at(-1)?.id??null,assigned_to:null,resolved_at:null,created_at:created,updated_at:updated}]
-    // Source resolution remains provenance; do not invent a resolution timestamp from updated_at.
-    if(['closed','solved'].includes(state))omissions.push('historical_resolution_time_unavailable_source_state_preserved')
+    const resolved=['closed','solved'].includes(state)?closedAt([],p.updated_at,omissions,vendor==='zendesk'?'iso':'unix'):null
+    tables.conversations=[{id:target,project_id:projectId,contact_id:id('contact',contactSource),revision:rows.length,last_message_id:rows.at(-1)?.id??null,assigned_to:null,resolved_at:resolved,created_at:created,updated_at:updated}]
     tables.move_in_conversations=[{conversation_id:target,project_id:projectId,vendor,source_id:record.sourceId,subject:typeof p.subject==='string'?p.subject:typeof p.title==='string'?p.title:typeof p.source?.subject==='string'?p.source.subject:'',source_state:state,source_channel:vendor==='zendesk'?(p.via?.channel??'unknown'):p.channel.initial}]
     tables.messages=rows;tables.move_in_message_sources=sources;tables.move_in_notes=notes
     tables.conversation_tags=[...new Set(tags(record).map(tagKey))].map(name=>({project_id:projectId,conversation_id:target,tag_id:tagIds.get(name)??id('tag',name)}))

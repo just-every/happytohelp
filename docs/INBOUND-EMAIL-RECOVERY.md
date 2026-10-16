@@ -2,9 +2,10 @@
 
 Use this page when an email sent to your HappyToHelp mailbox did not end up in a
 conversation, for example because processing failed or was cut off partway. In
-most cases the fix is to deliver the same email again. If the email is stuck
-part-way through processing, an owner or admin first releases it through the
-management API, then delivers it again.
+most cases the fix is to deliver the same email again; the sending server's own
+retry does this. Only when an email is stuck part-way through processing and its
+sender never retries does an owner or admin release it through the management
+API, then deliver it again.
 
 This page is for workspace owners and admins, and for whoever runs the mail
 relay that delivers email to HappyToHelp. Setting up incoming email in the first
@@ -48,13 +49,19 @@ email does not settle that; it needs its own separate reconciliation.
 
 ## Release an email stuck in processing
 
-A receipt can stay in `processing` with no message in the conversation. That
-can mean the run that was handling it (a Cloudflare Worker invocation) is still
-going, so HappyToHelp never releases it automatically, however old it is.
-Redelivering the email while it is still `processing` does not retry it.
+A receipt can stay in `processing` with no message in the conversation, when the
+run that was handling it (a Cloudflare Worker invocation) crashed or is still
+going. A redelivery is never accepted silently:
 
-Once you have confirmed that the earlier run has ended, an owner or admin of
-the workspace can release the receipt:
+- **Within two minutes of the receipt** the run may still be live, so the
+  delivery gets a temporary failure (the Worker throws; SendGrid and the gateway
+  get `503`) and the sending server retries later. It is never bounced.
+- **After that** the redelivery reclaims the receipt and adds the message. The
+  claim token fences admission, so even a slow earlier run that is still going
+  cannot add it a second time: the email is added exactly once.
+
+If the sender never retries, an owner or admin of the workspace can release the
+receipt once they have confirmed that the earlier run has ended:
 
 1. Read the receipt. URL-encode the `Message-ID` wherever it appears in a path
    (for example, `<abc@example.com>` becomes `%3Cabc%40example.com%3E`):

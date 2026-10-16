@@ -15,7 +15,10 @@ export default {async fetch(request:Request,env:any){
   if(url.pathname==='/eligible')return Response.json(await isArticleEligibleForAI(env,body.projectId,body.id,body.sourceVersion))
   if(url.pathname==='/read')return Response.json(await readKnowledgeSource(env,body.projectId,body.ref))
   if(url.pathname==='/admit'){
-   if(body.mutateBeforeBatch){const db=env.DB;env={...env,DB:{prepare:(sql:string)=>db.prepare(sql),batch:async(statements:any[])=>{await db.exec(body.mutateBeforeBatch);return db.batch(statements)}}}}
+   if(body.mutateBeforeBatch){
+    const db=env.DB;let messageWritePrepared=false
+    env={...env,DB:{prepare:(sql:string)=>{if(/^\s*INSERT\s+INTO\s+messages\b/i.test(sql))messageWritePrepared=true;return db.prepare(sql)},batch:async(statements:any[])=>{if(messageWritePrepared){messageWritePrepared=false;await db.exec(body.mutateBeforeBatch)}return db.batch(statements)}}}
+   }
    return Response.json(await admitMessage(env,body))
   }
   const row=await env.DB.prepare('SELECT * FROM ai_generations WHERE id=?').bind(body.generationId).first()

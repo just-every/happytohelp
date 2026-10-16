@@ -1,7 +1,8 @@
 import {isProjectActive,requireActiveProject} from '../../platform/project-status'
 import {dispatchKnowledgeJob,recoverKnowledgeJobs} from './recovery'
 import {consumeImport} from './import-jobs'
-import {startCrawl,crawlStatus,type CrawlConfig} from './crawl'
+import {startCrawl,crawlStatus,websiteReader,type CrawlConfig} from './crawl'
+import {readWebsite} from './website-reader'
 import {stageCorpus,consumePage} from './ingestion'
 import type { Env, Job } from '../../platform/env'
 import { apifyDocuments, collection, embeddings, qdrant, type DocumentInput } from './providers'
@@ -26,7 +27,7 @@ export async function crawlDataset(env:Env,projectId:string,datasetId:string,sem
  if(!dataset)throw new Error('Dataset not found');
  return refreshDataset(env,projectId,datasetId,{crawl:{url:dataset.url,excluded_urls:JSON.parse(dataset.excluded_urls),max_crawl_depth:dataset.max_crawl_depth,max_crawl_pages:dataset.max_crawl_pages},semantic})
 }
-async function fail(env:Env,datasetId:string,token:string,error:unknown){await env.DB.prepare("UPDATE knowledge_datasets SET status='failed',error=?,claim_token=NULL,next_refresh_at=NULL WHERE id=? AND claim_token=?").bind(String(error).slice(0,1000),datasetId,token).run()}
+async function fail(env:Env,datasetId:string,token:string,error:unknown){await env.DB.prepare("UPDATE knowledge_datasets SET status='failed',error=?,claim_token=NULL,next_refresh_at=NULL WHERE id=? AND claim_token=?").bind((error instanceof Error?error.message:String(error)).slice(0,1000),datasetId,token).run()}
 export async function consumeJob(job:Job,env:Env):Promise<boolean>{
  if(job.type.startsWith('knowledge.')&&!await isProjectActive(env,job.projectId))return true;
  if(job.type==='knowledge.import')return consumeImport(job,env);
@@ -46,6 +47,7 @@ export async function consumeJob(job:Job,env:Env):Promise<boolean>{
  try{
  const file=await env.FILES.get(`knowledge/jobs/${job.id}.json`);if(!file)throw new Error('Ingestion input missing');const input=await file.json<any>();
  if(!await isProjectActive(env,job.projectId))return true;
+ if(input.crawl&&websiteReader(env).reader==='built-in'){const docs=await readWebsite(input.crawl);if(!await isProjectActive(env,job.projectId))return true;await stageCorpus(env,job,validateDocuments(docs),!!input.semantic);return true}
  if(input.crawl){const run=await startCrawl(env,input.crawl);if(!await isProjectActive(env,job.projectId))return true;await env.FILES.put(`knowledge/crawl/${job.id}.json`,JSON.stringify(run));await env.DB.prepare("UPDATE knowledge_datasets SET status='crawling' WHERE id=? AND claim_token=?").bind(job.datasetId,job.id).run();await dispatchKnowledgeJob(env,{...job,type:'knowledge.crawl-poll',runId:run.runId},60);return true}
  const messageDocs=input.messages?[{url:`h2h://conversation/${encodeURIComponent(String(job.datasetId))}`,title:'Conversation history',content:input.messages.map((m:any)=>`${String(m.role).toUpperCase()}: ${m.content}`).join('\n\n')}]:undefined;
  if(!await isProjectActive(env,job.projectId))return true;

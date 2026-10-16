@@ -40,6 +40,7 @@ export default function SetupList({projectId,role}) {
    </section>
    <footer className="sl-foot">
     {['owner','admin'].includes(role)&&<p><Link className="h2h-link" to={`/projects/${projectId}/move-in`}>Move in your existing support history</Link> <span>(optional)</span></p>}
+    <p><Link className="h2h-link" to={`/projects/${projectId}/settings`} hash="help-before-they-ask">Help before they ask: offer help when a visitor seems stuck</Link> <span>(optional, needs an AI key)</span></p>
     <button type="button" className="activation-text-action" data-again disabled={busy} onClick={checkAgain}>Check again</button>
    </footer>
  </section>;

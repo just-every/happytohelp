@@ -452,6 +452,13 @@ textarea.form-control {
   background: var(--muted-chip) !important;
 }
 
+// A warning about identity, such as an unverified email sender.
+.badge.text-bg-danger-subtle {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger) !important;
+  background: var(--bs-danger-bg-subtle) !important;
+}
+
 // Count discs: aqua circles with an ink numeral, pills when three digits.
 .h2h-count {
   display: inline-flex;

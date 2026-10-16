@@ -68,7 +68,9 @@ export default function ConversationHeader({
                     </div>
                 </div>
                 <div className="conversation-header-chips">
-                    { conversation.contact.is_verified ? <span className="badge text-bg-primary">Verified</span> : <span className="badge text-bg-secondary-subtle">Unverified</span> }
+                    { conversation.contact.unverified_sender
+                        ? <span className="badge text-bg-danger-subtle" title="This email's From address was not authenticated, so it is kept apart from the customer who uses that address. Replies go only to that address.">Unverified sender</span>
+                        : conversation.contact.is_verified ? <span className="badge text-bg-primary">Verified</span> : <span className="badge text-bg-secondary-subtle">Unverified</span> }
                     { conversation.resolved_at
                         ? <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-resolved-at` }><TimeAgo date={ conversation.resolved_at } /></Tooltip> }><span className="conversation-header-status is-closed">{ statusLabel }</span></OverlayTrigger>
                         : <span className="conversation-header-status is-open">{ statusLabel }</span> }

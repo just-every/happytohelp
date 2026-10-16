@@ -15,7 +15,7 @@ export default function CategoryChips({ id, categories, value = [], onChange }) 
         setText('');
         return true;
     };
-    return <div className="category-chips form-control">
+    return <><div className="category-chips form-control">
         {selected.map(category => <span className="h2h-chip category-chips__chip" key={category.id}>{name(category)}
             <button type="button" aria-label={`Remove category ${name(category)}`} onClick={() => onChange(value.filter(categoryId => String(categoryId) !== String(category.id)))}><i className="fe fe-x" aria-hidden="true"/></button>
         </span>)}
@@ -23,5 +23,5 @@ export default function CategoryChips({ id, categories, value = [], onChange }) 
             onChange={event => { if (!add(event.target.value)) setText(event.target.value); }}
             onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); add(text); } }}/>
         <datalist id={listId}>{available.map(category => <option key={category.id} value={name(category)}/>)}</datalist>
-    </div>;
+    </div>{!categories.length && <div className="form-text">No categories yet. Add one in the Categories tab above, then choose it here.</div>}</>;
 }

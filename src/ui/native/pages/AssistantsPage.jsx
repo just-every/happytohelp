@@ -65,7 +65,7 @@ export default function AssistantsPage({ projectId, recordId }) {
     const field = (name, label, type = 'text', required = false) => <Field {...{ name, label, type, required }} value={draft[name]} onChange={(key, value) => { markDirty();setDraft(current => ({ ...current, [key]: value })); setSaved(false); }}/>;
     const defaultNames = ['default_visitor_ai_id', 'default_verified_user_ai_id'];
     const invalidDefaults = defaultNames.some(name => settings?.[name] && settings[name] !== '-' && !(items || []).some(item => item.id === settings[name] && item.is_enabled));
-    const responders = [{ value: '-', label: 'None' }, ...(items || []).filter(item => item.is_enabled).map(item => ({ value: item.id, label: item.role || item.name }))];
+    const responders = [{ value: '-', label: 'None' }, ...(items || []).filter(item => item.is_enabled).map(item => ({ value: item.id, label: item.name || item.role }))];
     return <div className="workspace-settings"><PageHeaderTabs><nav aria-label="AI settings"><ul className="nav nav-tabs header-tabs">{[['ais','AI'],['datasets','Knowledge sources'],['training-runs','Evaluation runs']].map(([path,label])=><li className="nav-item" key={path}><Link className={`nav-link ${path==='ais'?'active':''}`} aria-current={path==='ais'?'page':undefined} to={`/projects/${projectId}/${path}`}>{label}</Link></li>)}</ul></nav></PageHeaderTabs><Feedback {...{ error, saved }}/><AssistantReadiness projectId={projectId} status={readiness}/>
         {!items && !error && <p role="status">Loading assistants…</p>}
         {recordId && draft && <form onSubmit={saveAssistant}>

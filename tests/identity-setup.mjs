@@ -75,6 +75,7 @@ try {
  assert.deepEqual([settings.default_visitor_ai_id,starter.is_enabled],[starter.id,1])
  assert.equal(deriveWorkspaceName('https://www.acme-widgets.co.uk','h2h-fixture-website' + '@' + 'gmail.com'),'Acme Widgets')
  assert.equal(deriveWorkspaceName('http://127.0.0.1:4729','ada@northstar.example'),'Northstar')
+ assert.equal(deriveWorkspaceName('http://127.0.0.1:4729','owner@repo.test'),FALLBACK_WORKSPACE_NAME,'a local trial is not named after its checkout folder')
  assert.equal(deriveWorkspaceName('http://localhost:3000','h2h-fixture-personal' + '@' + 'gmail.com'),FALLBACK_WORKSPACE_NAME)
  assert.equal(deriveOwnerName('ada.lovelace+work@northstar.example'),'Ada Lovelace')
  assert.match(success.headers.get('set-cookie'),/HttpOnly/);assert.doesNotMatch(success.headers.get('set-cookie'),/Secure/)

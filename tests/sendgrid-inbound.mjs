@@ -13,6 +13,7 @@ registerHooks({ resolve(specifier, context, next) {
 } })
 
 const { sendgridInbound } = await import('../src/modules/integrations/sendgrid-inbound.ts')
+const { recipientReplyAddress } = await import('../src/modules/integrations/email-reply-address.ts')
 const { getPlatformProxy } = await import('wrangler')
 const proxy = await getPlatformProxy({ persist: false })
 
@@ -129,10 +130,27 @@ try {
   assert.equal((await post(rawForm({messageId:'sendgrid-many-recipients@example.com',envelope:{to:['support@reply.support.example.com','second@reply.support.example.com'],from:'customer@example.com'}}))).status,201)
   assert.deepEqual((await env.DB.prepare("SELECT project_id FROM inbound_emails WHERE local_id IS NOT NULL AND state='delivered' AND evidence_json LIKE '%sendgrid-many-recipients%' ORDER BY project_id").all()).results.map(row=>row.project_id),['p','q'])
   // SPF not passing: still admitted to the customer's thread, flagged unverified, CC skipped.
-  const unverified=await post(rawForm({messageId:'sendgrid-spf-fail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Sent through an unaligned relay',spf:'fail',headers:'Cc: stranger@example.com\r\n'}))
+  const unverified=await post(rawForm({messageId:'sendgrid-spf-softfail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'customer@example.com'},text:'Sent through an unaligned relay',spf:'softfail',headers:'Cc: stranger@example.com\r\n'}))
   assert.equal(unverified.status,201);assert.equal((await unverified.json()).conversationId,firstBody.conversationId)
-  assert.equal(JSON.parse((await env.DB.prepare("SELECT evidence_json FROM inbound_emails WHERE id='<sendgrid-spf-fail@example.com>'").first()).evidence_json).sender_verified,false)
+  assert.equal(JSON.parse((await env.DB.prepare("SELECT evidence_json FROM inbound_emails WHERE id='<sendgrid-spf-softfail@example.com>'").first()).evidence_json).sender_verified,false)
   assert.equal(await env.DB.prepare("SELECT id FROM contacts WHERE email='stranger@example.com'").first(),null)
+  // An explicit SPF fail (DKIM only for another domain) may be forged: it starts a
+  // separate conversation from a contact flagged as an unverified sender.
+  const failed=await (await post(rawForm({messageId:'sendgrid-spf-fail@example.com',envelope:{to:[`support+${firstBody.conversationId}@reply.support.example.com`],from:'bounce@attacker.example'},text:'Please send my refund elsewhere',spf:'fail',dkim:'{@attacker.example : pass}'}))).json()
+  assert.notEqual(failed.conversationId,firstBody.conversationId)
+  assert.equal(JSON.parse((await env.DB.prepare('SELECT ct.metadata_json FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=?').bind(failed.conversationId).first()).metadata_json).unverified_sender,1)
+  // A header From with no usable address has no author to authenticate; SendGrid's SPF
+  // fail for the envelope still counts. With MAIL FROM the customer's address it never
+  // joins their thread as them, only one separate conversation flagged unverified.
+  const unusable=[['', ''], ['Customer', 'From: Customer\r\n'], ['customer@example', 'From: customer@example\r\n'], ['<>', 'From: <>\r\n']]
+  const kept=[]
+  for (const [from, header] of unusable) {
+    const response = await post(rawForm({ messageId: `sendgrid-unusable-${kept.length}@example.com`, envelope: { to: ['support@reply.support.example.com'], from: 'customer@example.com' }, from, headers: header, text: 'Please change my bank details', spf: 'fail' }))
+    assert.equal(response.status, 201, from)
+    kept.push((await response.json()).conversationId)
+  }
+  assert.equal(new Set(kept).size, 1); assert.notEqual(kept[0], firstBody.conversationId)
+  assert.deepEqual(JSON.parse((await env.DB.prepare('SELECT ct.metadata_json FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=?').bind(kept[0]).first()).metadata_json), { unverified_sender: 1, unusable_from: 1 })
   // A VERP envelope: the contact is the DKIM-verified From, and Reply-To is only where replies go.
   const verp=await post(rawForm({messageId:'sendgrid-verp@example.com',envelope:{to:['support@reply.support.example.com'],from:'bounces+5719-d26b-x=example.com@em.sender.example.com'},from:'Proof <proof@sender.example.com>',dkim:'{@sender.example.com : pass}',headers:'Reply-To: Desk <desk@desk.example.net>\r\n'}))
   const proof=await env.DB.prepare('SELECT c.email,c.metadata_json FROM contacts c JOIN conversations v ON v.contact_id=c.id WHERE v.id=?').bind((await verp.json()).conversationId).first()
@@ -143,6 +161,21 @@ try {
   assert.equal(forwarded.status,201)
   const ana=await forwarded.json(),anaRows=(await env.DB.prepare('SELECT ct.email FROM conversations v JOIN contacts ct ON ct.id=v.contact_id WHERE v.id=? AND v.project_id=? UNION ALL SELECT ct.email FROM conversation_participants cp JOIN contacts ct ON ct.id=cp.contact_id WHERE cp.conversation_id=?').bind(ana.conversationId,'p',ana.conversationId).all()).results
   assert.deepEqual(anaRows.map(row=>row.email),['ana@customer.example','lee@customer.example'])
+  // A widget visitor's typed address answers its notification through the reply
+  // address issued to it: the answer continues the chat as the visitor; fresh mail
+  // from that address does not.
+  // The receiving mailbox's MX lookup answers, so a reply address is issued.
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async (url, init) => String(url).startsWith('https://cloudflare-dns.com/') ? Response.json({ Status: 0, Answer: [{ type: 15, data: '10 mx.example.com.' }] }) : originalFetch(url, init)
+  await env.DB.batch([
+   env.DB.prepare("INSERT INTO contacts(id,project_id,email,metadata_json,created_at) VALUES('visitor','p','rosa@acme.test','{\"email_unproven\":1}',1)"),
+   env.DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('chat','p','visitor',1,1)"),
+  ])
+  const rosaReplyAddress = await recipientReplyAddress(env, 'support@reply.support.example.com', 'p', 'chat', 'rosa@acme.test')
+  const rosa = await (await post(rawForm({ messageId: 'sendgrid-rosa-answer@example.com', envelope: { to: [rosaReplyAddress], from: 'rosa@acme.test' }, to: rosaReplyAddress, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}', text: 'Photo attached, the corner is crushed.' }))).json()
+  assert.deepEqual([rosa.conversationId, rosa.actor.contactId], ['chat', 'visitor'])
+  const rosaFresh = await (await post(rawForm({ messageId: 'sendgrid-rosa-fresh@example.com', envelope: { to: ['support@reply.support.example.com'], from: 'rosa@acme.test' }, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}' }))).json()
+  assert.notEqual(rosaFresh.conversationId, 'chat')
   await Promise.all(pending)
   console.log('SendGrid inbound: Basic shared-token auth, multipart attachment bytes, stable Message-ID, D1/R2 admission, duplicate delivery, From identity over VERP/SRS envelopes, forwarded routing, unverified SPF and multi-mailbox delivery passed')
 } finally {

@@ -37,12 +37,13 @@ work delegated to your own Codex or Claude. It works with human replies without
 an AI provider. The editable React application runs on Cloudflare Workers with
 Hono, D1, R2, Queues and Durable Objects.
 
-## Release 0.5.0
+## Release 0.5.0 (not yet tagged)
 
-Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
+The latest tagged release is 0.4.1; `main` carries 0.5.0 until its `v0.5.0` tag
+is cut. Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.23; local dev starts without private setup
+`@runeditrun/rer` package pinned to 0.2.25; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
@@ -71,8 +72,8 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 
 ## Run it on your computer
 
-Start with the public [run guide](https://github.com/just-every/run-happytohelp/blob/main/docs/INSTALLER.md)
-for installation, local sign-in and stopping the app.
+The [install and run guide](https://happytohelp.com/docs/install) covers
+installation, local sign-in and stopping the app, step by step.
 
 You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
 if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
@@ -81,15 +82,16 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.23
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
 rer dev
 ```
 
-Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+`rer install` also downloads Chromium (about 280 MB, into your user cache) the
+first time: `rer verify` and the browser checks run in it. Dev uses its local
+address for the chat widget and generates a private owner password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
@@ -115,17 +117,37 @@ own operating contract; this seed's CLI is not a platform admission requirement.
 
 ## Deploy to your own Cloudflare account
 
-Read [deployment prerequisites](OPERATIONS.md#deploy-to-your-cloudflare-account),
-configure the real declaration and private account credentials, then:
+Read [deployment prerequisites](OPERATIONS.md#deploy-to-your-cloudflare-account).
+When rer says **See the deploy-kit owner-account instructions**, it means
+[What you need first](OPERATIONS.md#what-you-need-first): how to make the
+Cloudflare API token and find the account ID. Configure the real declaration
+and private account credentials, then:
 
 ```sh
 rer deploy --dry-run
 rer deploy --environment production
 ```
 
-With rer 0.2.23, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
+With rer 0.2.25, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
 `EMAIL_API_KEY` inputs for dry run and real deployment. Dry run validates their
-shape and the build locally, makes no provider request and sends no mail. Deployment
+shape and the build locally, makes no provider request and sends no mail.
+It needs no Cloudflare account. To see a dry run before you have chosen a mail
+service, give it stand-in mail values in a private file; nothing is sent. Replace
+`YOUR-DOMAIN` with your business's domain and `YOUR-EMAIL` with your own address:
+the owner email must be real, because example and test domains are refused.
+
+```sh
+umask 077
+cat > ~/happytohelp-dry-run.env <<'EOF_ENV'
+EMAIL_PROVIDER=resend
+EMAIL_FROM=support@YOUR-DOMAIN
+EMAIL_API_KEY=re_stand_in
+OWNER_EMAIL=YOUR-EMAIL
+EOF_ENV
+rer deploy --dry-run --env-file ~/happytohelp-dry-run.env
+```
+
+Deployment
 provisions declared resources, applies migrations, publishes and checks health
 through Base deploy-kit. After a healthy deploy, `rer deploy` claims the owner named
 by `OWNER_EMAIL` (a real setup owner, or the value you supply privately) with a one-time
@@ -154,8 +176,9 @@ email and optional AI providers bill your own accounts. Enable R2 and the accoun
 capabilities required by the declaration before deployment. An email sender must
 be verified. Local development needs no external mail or AI credential.
 
-Configure optional model keys, Apify crawl, Qdrant search, GitHub and email only
-when you need them. See [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)
+Configure optional model keys, the Apify crawler (for website sources larger than
+the built-in reader's 40 pages; see [Website knowledge](docs/website-knowledge.md)),
+Qdrant search, GitHub and email only when you need them. See [Optional features and their settings](OPERATIONS.md#optional-features-and-their-settings)
 and [Measure local usage and costs](OPERATIONS.md#measure-local-usage-and-costs).
 The optional [local agent](local-agent/README.md) runs on the computer doing the
 support work and has its own runtime prerequisites.

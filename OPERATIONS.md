@@ -9,7 +9,7 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.23
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
@@ -21,7 +21,7 @@ password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout pins **`@runeditrun/rer` 0.2.23** in `package.json` and
+The checkout pins **`@runeditrun/rer` 0.2.25** in `package.json` and
 `pnpm-lock.yaml`. The global launcher installed by npm may have a different
 version; inside the checkout it provisions the tools and delegates to the pinned
 local package. Updating the global launcher does not change the project's pin.
@@ -123,6 +123,28 @@ Enable R2 before provisioning. Commit source before a real deployment.
 
 ### What you need first
 
+These are the deploy-kit owner-account instructions that rer's deploy message
+points to.
+
+1. In the [Cloudflare dashboard](https://dash.cloudflare.com/), open the
+   account you will deploy to, then **Manage Account → Account API Tokens →
+   Create Token → Create Custom Token**.
+2. Add the four account permissions below, keep **Account Resources** on that
+   one account, create the token and copy it.
+3. Copy the **Account ID** (see [Find your account ID](#find-your-account-id)).
+4. Put both in a private file only you can read, and pass it to rer:
+
+   ```sh
+   umask 077
+   cat > ~/happytohelp-deploy.env <<'EOF_ENV'
+   CLOUDFLARE_ACCOUNT_ID=paste-the-account-id
+   CLOUDFLARE_API_TOKEN=paste-the-token
+   EOF_ENV
+   rer deploy --environment production --env-file ~/happytohelp-deploy.env
+   ```
+
+   The same file holds the mail and owner values described below.
+
 Use an account-owned API token pinned to the intended account, with account
 permissions **Workers Scripts: Edit**, **D1: Edit**, **Workers R2 Storage: Edit**
 and **Queues: Edit**. This declaration does not need KV or zone permissions.
@@ -162,7 +184,7 @@ deliberately.
 
 The declaration maps the same `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
 inputs to rer's shared `MAIL_PROVIDER`, `MAIL_FROM` and `MAIL_API_KEY` preflight
-bindings as well as HappyToHelp's native bindings. Rer 0.2.23 requires these same
+bindings as well as HappyToHelp's native bindings. Rer 0.2.25 requires these same
 mail inputs for both `rer deploy --dry-run` and real deployment. Dry run validates
 their shape and the build locally; it makes no provider requests and sends no mail.
 
@@ -170,7 +192,7 @@ Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
 declaration's `secrets` array, plus
 `{"binding":"MAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}`, and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.23 requires
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.25 requires
 every declared secret on a new Worker and has no conditional secret declaration.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
@@ -310,7 +332,7 @@ platform administrators (see [the integrations guide](src/modules/integrations/R
 | --- | --- | --- |
 | Owner access and sign-up | `APP_ORIGIN` (deployment derives it), `REGISTRATION_ENABLED`, optional `H2H_SETUP_OWNER_EMAIL` | `H2H_SETUP_TOKEN` (used once by `rer deploy` to claim the owner; `/setup` recovery only); optional `TURNSTILE_SECRET` |
 | AI replies, assist, profiles and monitoring (Ensemble) | The installer's `AI_PROVIDER` answer (`openai`, `anthropic`, `google`, `deepseek`, `xai`, `openrouter` or `later`, the default) chooses which key to store at setup; models are selected in workspace and AI configuration (the dashboard's **AI** page); `CONTEXT_MODEL` for widget-triggered context work. Every new workspace's starter assistant answers visitors by itself once any provider key is installed, within `AI_DAILY_CEILINGS`; with none, new conversations stay with the team | Selected `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`; the key is optional at setup and never stored with `later` |
-| Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID`, `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`. Keyword search over content you supply needs none of these providers. |
+| Knowledge crawl and semantic search | `APIFY_CRAWLER_ACTOR_ID` (`apify~website-content-crawler`), `QDRANT_URL`, `KNOWLEDGE_EMBEDDING_MODEL` | `APIFY_TOKEN`, `QDRANT_API_KEY`, `OPENAI_API_KEY`. Website sources need none of these: without the two Apify values HappyToHelp reads up to 40 pages of a public site itself ([Website knowledge](docs/website-knowledge.md)). Keyword search needs none of these providers. |
 | Help center import from another provider (Intercom, Freshdesk or Zendesk) | Platform/subdomain and destination workspace chosen for each import | `INTERCOM_TOKEN`, `FRESHDESK_TOKEN`, `ZENDESK_TOKEN`/`ZENDESK_EMAIL` for the selected provider |
 | Email, sending and receiving | `EMAIL_PROVIDER` (`resend`, `cloudflare` or `sendgrid`), `EMAIL_ACCOUNT_ID` for Cloudflare, optional `INBOUND_EMAIL_DOMAIN` (the domain new workspaces' reply mailboxes are created under; default `in.` plus the workspace's website host), workspace email settings; built-in inbound endpoints | `EMAIL_API_KEY`, `EMAIL_FROM` (the installation sender every new workspace uses until its own domain is verified), `INBOUND_EMAIL_TOKEN` (generated by local setup and deployed for inbound authentication; with it every new workspace gets a reply-by-email mailbox; provider domain routing and a webhook still need configuration) |
 | Lead research and reviewed outreach | `LEAD_MODEL`; each lead is saved and reviewed before sending | `OPENAI_API_KEY`, selected email configuration |
@@ -532,7 +554,11 @@ evidence with `GET /api/management/projects/:projectId/inbound-emails/:messageId
 
 - **Mail with no envelope sender is added as automatic**, under its `From`
   header. Customer identity always comes from the `From` header (verified by
-  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**), never
+  DKIM, DMARC or aligned SPF, otherwise labelled **unverified sender**; a
+  possible forgery of a widget-verified customer, or mail the provider reported
+  as failing, or with no usable From, gets its own **Unverified sender**
+  conversation; an address only typed into the widget receives only answers sent
+  through its notification's reply address), never
   from the envelope, so forwarding and bounce-address rewrites do not create
   contacts. See [Receive email](src/modules/integrations/README.md#receive-email).
 - **If you use your own email gateway**, have it forward the optional

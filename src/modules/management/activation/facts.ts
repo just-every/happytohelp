@@ -7,6 +7,7 @@ import {starterMarker,starterProfile,untouched} from './starter'
 import {senderSwitch,senderDnsDomain} from './sender'
 import type {ActivationFacts,ColourSource,Receipt,SenderRecord} from './types'
 import {inboundNeedsCustomDomain} from './inbound-domain'
+import {receivingState} from '../../integrations/inbound-capability'
 
 function colour(settings:any):{hex:string;source:ColourSource} {
  const chosen=typeof settings.primary_color==='string'&&/^#[0-9a-f]{6}$/i.test(settings.primary_color)?settings.primary_color.toLowerCase():null
@@ -32,6 +33,7 @@ export async function activationFacts(env:Env,config:Configuration,receipts:Rece
  const provider=config.mailMode==='local'?null:config.providerName,switched=senderSwitch(settings)
  return {
   workspaceName:String(config.project?.name||''),
+  workspaceNamed:!(typeof settings.derived?.name==='string'&&settings.derived.name===config.project?.name),
   website:config.project?.allowed_origin||null,
   colour:colour(settings),
   mail:{mode:config.mailMode,provider,statusApi:provider==='resend',sender:config.sender,proposedSender:config.proposedSender,senderDnsDomain:senderDnsDomain(config),
@@ -40,7 +42,7 @@ export async function activationFacts(env:Env,config:Configuration,receipts:Rece
    checkable:Boolean(config.provider&&metadataProviders.has(config.provider))},
   starterAssistant:starter&&marker?{id:starter.id,name:starter.name,model:starter.model,provider:modelProvider(starter.model),edited:!untouched(starter,marker.seed)}:null,
   inboundAddress:config.email?.inbound_address||null,
-  inbound:{enabled:Boolean(config.email?.is_enabled),gateway:typeof env.INBOUND_EMAIL_TOKEN==='string'&&Boolean(env.INBOUND_EMAIL_TOKEN),customDomainRequired:inboundNeedsCustomDomain(config.email?.inbound_address)},
+  inbound:{enabled:Boolean(config.email?.is_enabled),gateway:typeof env.INBOUND_EMAIL_TOKEN==='string'&&Boolean(env.INBOUND_EMAIL_TOKEN),customDomainRequired:inboundNeedsCustomDomain(config.email?.inbound_address),receiving:(await receivingState(env,config.email?.inbound_address)).reason},
   ceilings:ceilings(env),
   senderRecords:senderRecords(config,receipts),
   widget:{key:String(config.project?.widget_key||''),scriptUrl:new URL('/widget.js',origin).href,apiOrigin:origin},

@@ -7,15 +7,16 @@ on macOS). The global `rer` command itself needs that Node. It then provisions t
 checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
 
 ```sh
-npm install -g @runeditrun/rer@0.2.23
+npm install -g @runeditrun/rer@0.2.25
 git clone https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 rer install
 rer dev
 ```
 
-Dev uses its local address for the chat widget and generates a private owner
-password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
+`rer install` also downloads Chromium (about 280 MB, into your user cache) the
+first time: `rer verify` and the browser checks run in it. Dev uses its local
+address for the chat widget and generates a private owner password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
@@ -136,20 +137,23 @@ Use a real page to send a customer message, then reply from your workspace inbox
 2. Create an `index.html` in a separate test folder with a normal HTML document
    and paste the snippet before `</body>`. Serve that folder with your website's
    development server. For example, if Python 3 is installed, run this from the
-   test folder:
+   test folder. It picks a port nothing else is using and prints the page's
+   address:
 
    ```sh
-   python3 -m http.server 8840 --bind 127.0.0.1
+   PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])')
+   echo "Test page: http://127.0.0.1:$PORT"
+   python3 -m http.server "$PORT" --bind 127.0.0.1
    ```
 
-3. In **Settings → Widget → Settings**, set **Widget website origin** to
-   `http://127.0.0.1:8840` and save. Use the actual origin if your server differs:
+3. In **Settings → Widget → Settings**, set **Widget website origin** to the
+   address it printed, such as `http://127.0.0.1:52817`, and save. Use the actual origin if your server differs:
    scheme, hostname and optional port, without a path. `localhost` and `127.0.0.1`
    are different hosts, and different ports are different origins.
    The widget has no email field by default. To collect an address for emailed
    operator replies, enable **Required contact details → Require email** on this
    same settings page and save. Visitors then enter their email before sending.
-4. Open `http://127.0.0.1:8840` in another browser profile or private window. Open
+4. Open that address in another browser profile or private window. Open
    the widget and send a message. In your signed-in app,
    open **Inbox**, choose the conversation and reply. Check the reply in the
    visitor's widget. Local visitor and teammate email is suppressed without
@@ -179,7 +183,7 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-Rer 0.2.23 requires the same private mail inputs for deployment dry runs and real
+Rer 0.2.25 requires the same private mail inputs for deployment dry runs and real
 deployment: `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`. The declaration maps
 these to both rer's `MAIL_*` preflight bindings and HappyToHelp's native `EMAIL_*`
 bindings. For Cloudflare mail, supply the additional account ID described in
@@ -189,6 +193,9 @@ bindings. For Cloudflare mail, supply the additional account ID described in
 provider requests, sends no mail and makes no deployment. `rer deploy --environment
 production` requires owner authorization and the private credentials/declaration
 in Operations. Local development still needs no email account.
+Stop `rer dev` first (`rer dev --stop`): while it runs it owns the checkout's local
+state, and `rer deploy`, including `--dry-run`, refuses with "An active local
+operation owns the state".
 `rer describe` lists the remaining commands and real flags.
 All new verbs accept `--help`, `--cwd PATH`, `--non-interactive` and `--json`;
 release has its own preserved parser. No command implies provider acceptance.

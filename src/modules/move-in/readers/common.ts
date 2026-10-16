@@ -2,8 +2,10 @@ import { canonicalJson, sha256 } from '../../import-kit/src/provenance/identity'
 import type { SourceRecord, Diagnostic, Json } from '../../import-kit/src/types'
 import type { Vendor } from '../types'
 export const object = (value:unknown):value is Record<string,any> => value !== null && typeof value === 'object' && !Array.isArray(value)
+/** Zendesk and Freshdesk files hold one singular wrapper per line, such as `{"ticket":{...}}`. */
+export const wrappedVendor=(vendor:Vendor)=>vendor==='zendesk'||vendor==='freshdesk'
 export function sourceId(value:unknown,vendor:Vendor):string {
- if(vendor==='zendesk' && (typeof value==='number'&&Number.isSafeInteger(value)&&value>0 || typeof value==='string'&&/^[1-9][0-9]*$/.test(value)))return String(value)
+ if(wrappedVendor(vendor) && (typeof value==='number'&&Number.isSafeInteger(value)&&value>0 || typeof value==='string'&&/^[1-9][0-9]*$/.test(value)))return String(value)
  if((vendor==='intercom'||vendor==='helpscout') && (typeof value==='string'&&!!value.trim()&&value.length<=512 || typeof value==='number'&&Number.isSafeInteger(value)&&value>=0))return String(value)
  throw new Error('invalid_source_id')
 }

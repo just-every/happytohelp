@@ -61,7 +61,10 @@ addresses are separate capabilities from this.
 Once a provider is configured, all of these go through it:
 
 - email sign-in links, password recovery, email verification and invitations;
-- customer reply notifications, including while the widget is online;
+- your team's replies to customers. Each reply is emailed straight away to a
+  customer who left an email, even while they are still active in the chat
+  widget, so the answer reaches them if they close the page. There is no quiet
+  period: replying in a live chat also sends that email;
 - unread operator alerts, grouped after 60 seconds without conversation activity.
   Each recipient's read frontier excludes messages they have already read. Assigned
   teammates receive these alerts independently of their assignment preference.
@@ -69,8 +72,8 @@ Once a provider is configured, all of these go through it:
   activity notifications, and AI-owned conversations stay with the assistant;
 - assignment alerts when another teammate changes the assignee to you, if enabled
   in your account preferences. Self-assignment and unchanged assignments stay quiet.
-  Conversation mail requires enabled workspace email settings (**Enable receiving
-  email** on the **Email** page). Durable intents recover before a provider attempt;
+  Conversation mail requires **Email customers and your team about conversations**
+  on the **Email** page. Durable intents recover before a provider attempt;
   failed or uncertain attempts are never automatically replayed;
 - conversation transcripts that an operator chooses to email;
 - reviewed lead emails (see [Lead outreach](#lead-outreach)).
@@ -102,9 +105,10 @@ land back in the same conversation.
 
 ### Set up an inbound address
 
-1. On the workspace's **Email** settings page, enter a **Receive Email Address** and
-   tick **Enable receiving email**. Any email sent to that address creates a
-   support conversation. Use a plain address without a `+`; each address can belong
+1. On the workspace's **Email** settings page, enter a **Receiving address** and keep
+   **Email customers and your team about conversations** on. Once mail can reach it,
+   any email sent to that address creates a support conversation; the page shows
+   whether it can yet. Use a plain address without a `+`; each address can belong
    to only one active workspace.
 2. Route mail for that address to HappyToHelp in one of the three ways below. Your
    email routing must deliver that mailbox, or a catch-all, to the Worker.
@@ -112,7 +116,13 @@ land back in the same conversation.
    records stay unchanged.
 
 Notification emails carry a reply address issued to their recipient, of the form
-`mailbox+r.<token>@domain`. A reply from that recipient joins that conversation as
+`mailbox+r.<token>@domain`, only when the receiving address can actually receive
+mail: the installation holds `INBOUND_EMAIL_TOKEN`, the address is not on
+`workers.dev`, and its domain has an MX record (Cloudflare Email Routing and
+SendGrid Inbound Parse both add one). Otherwise the email has no `Reply-To` and
+ends with a line telling the customer that replies to it are not received, with a
+link that opens the chat on the workspace's website (`<website>/#launch-chat`).
+**Settings → Email** shows which case applies and the routing steps. A reply from that recipient joins that conversation as
 them: possessing the address is the proof. A customer's preferred notification
 address replies as the customer only through the reply address issued to it.
 
@@ -123,19 +133,53 @@ Every ordinary email is accepted; none is bounced for who sent it:
   it, or SPF passing for an aligned envelope domain: Cloudflare's own (topmost)
   `Authentication-Results`, or SendGrid's `dkim` and `SPF` fields. The envelope
   sender is delivery metadata only, so SendGrid VERP and forwarding SRS rewrites
-  never become contacts. `Reply-To` is only where replies go: for a verified sender
-  it becomes their preferred notification address, never their identity. A From
-  no provider verified is admitted and labelled **unverified sender** in the
-  dashboard.
+  never become contacts. Cloudflare's verdict is read with RFC 8601 quoting and
+  comment rules; anything sender text could have shaped (a quote, a `;` in a
+  comment, an unbalanced bracket, a repeated result, one after the HELO's SPF
+  result, a DKIM result after DMARC, a non-domain `header.d`, `header.from` or
+  `smtp.helo`, or a DMARC `header.from` other than the From domain) is treated as a fail, and SPF counts only for the envelope sender the
+  Worker received. `Reply-To` is only where replies go: for a verified sender it
+  becomes their preferred notification address, never their identity, and it
+  never replaces the preference of a widget-verified customer. A From no provider
+  verified is admitted and labelled **unverified sender** in the dashboard.
+- **Possible forgeries are kept apart.** When the From is unverified and either
+  belongs to a widget-verified customer or the provider reported an explicit fail
+  (DKIM, SPF or DMARC fail, or an ambiguous verdict, on Cloudflare; SPF fail on
+  SendGrid), the mail is written by a separate contact flagged
+  `unverified_sender` and starts (or continues) that contact's own conversation,
+  shown with an **Unverified sender** chip. It never joins the customer's
+  conversations, and replies to it go only to the From address it used. The
+  sender's own reply address still proves possession and joins its thread.
+- **No usable From, no author.** When the From header names no usable address
+  (none, a display name only, no domain or TLD, `<>`, a group, several mailboxes or
+  several From headers), the mail is kept under its envelope sender by a contact
+  flagged `unverified_sender` and `unusable_from`, in its own conversation, and the
+  provider's fail verdict is still recorded. It joins an existing thread only
+  through the reply address issued to that envelope sender for that thread. Nothing
+  is emailed to it automatically: an operator chooses a recipient (a preferred
+  address on the contact, or an added recipient).
+- **Only a proven address receives fresh mail.** Mail resolves to a contact whose
+  address is proven: one created from mail this desk received, or a widget-verified
+  contact whose signed identifier is that address. An address a visitor typed into
+  the widget (marked `email_unproven`), or a verified visitor's unsigned email or
+  preference, is where notifications go: an answer to one of them through the reply
+  address issued to that address for that conversation continues the conversation
+  as the visitor, because whoever reads that mailbox was sent the thread. Any other
+  mail from such an address (fresh mail, a conversation address without that reply
+  address, another thread) goes to that address's own email contact and never
+  appears in the widget session.
 - **Which conversation.** Mail to a conversation's reply address joins it when the
   sender is a current participant (members need a verified From or their own reply
-  address). Everything else, including a fresh email from a customer with an open
+  address), or holds the reply address issued to the email or preferred address of
+  the primary contact or a participant. Everything else, including a fresh email from a customer with an open
   thread, continues the sender's most recently active open conversation or starts
   one.
 - **CC recipients** become participants only for a verified sender or a sender using
   their own reply address. Otherwise they are skipped, never a reason to refuse the
   message. Workspace addresses the mail was routed through are always skipped.
-- **Which workspace.** The envelope recipient selects the workspace. When it names no
+- **Which workspace.** Routing candidates are deduplicated and bounded to 50
+  (receiving addresses first), so a long reply-all is routed, never refused. The
+  envelope recipient selects the workspace. When it names no
   configured mailbox, `Delivered-To`, `X-Original-To`, `X-Forwarded-To`,
   `X-Gm-Original-To`, then `To` and `Cc` are tried, so mail forwarded from a company
   address (for example Google Workspace address-map routing of

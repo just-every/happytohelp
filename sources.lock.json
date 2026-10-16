@@ -2514,6 +2514,10 @@
       "sha256": "c2095f2d17c55d3c06eec86e53a9a008dc217d82dec1205a232eaf8c98004f81",
       "executable": false
     },
+    "scripts/legacy-export/secrets.mjs": {
+      "sha256": "a04dd4b964c640905c39f662c5aef491f044c8e3e52ab84c15f2710ca3cea8f9",
+      "executable": false
+    },
     "scripts/local-agent-archive.cjs": {
       "sha256": "74678c10f123bbf7a3ef1ee3a1c0aa7f6077a39f2f514b33d47ca5f5d886f7f7",
       "executable": false
@@ -4132,6 +4136,10 @@
     },
     "src/modules/legacy-import/map-operations.ts": {
       "sha256": "160e6987351ce8473e9365357603a208fb0694178a2ef156a12ae79dc4a2763d",
+      "executable": false
+    },
+    "src/modules/legacy-import/map-project.ts": {
+      "sha256": "db9dafe8b3c77671558d85f9e28bb93857155a5fe416bcc472db8ff13ac5532b",
       "executable": false
     },
     "src/modules/legacy-import/mapping-shared.ts": {
@@ -8370,8 +8378,24 @@
       "sha256": "ec403d4179cefbb2e3245c82dbd2501c37fbba470942963e30a8da0707585d96",
       "executable": false
     },
+    "tests/legacy-export/assertions.mjs": {
+      "sha256": "ff5a78a252e91778e0d3267d1761a906980c4785cc6f33bfe28bc1e218df56c9",
+      "executable": false
+    },
+    "tests/legacy-export/extended-fixture.mjs": {
+      "sha256": "d4012734c355703253110304b282351e3b0190edccfb66161ba218c4f75743f0",
+      "executable": false
+    },
     "tests/legacy-export/fixture.mjs": {
       "sha256": "b9a5dabfd98f72a0912ca64bf7cb79eee2a3bfcb6a45a265e909963a6b7c35c0",
+      "executable": false
+    },
+    "tests/legacy-export/rebuild-schema.py": {
+      "sha256": "a36d5abd3c23ce9dcb1061eedc43f49b6dd501d180bc468850caaf4a8bcdc6b8",
+      "executable": false
+    },
+    "tests/legacy-export/refusals.mjs": {
+      "sha256": "30fc5b8f3622789dda7ff3acf52cf937c81f63e2c7c2c8cede1be93f803e0154",
       "executable": false
     },
     "tests/legacy-export/schema.sql": {

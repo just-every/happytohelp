@@ -4,14 +4,15 @@ import {connectLegacy} from './legacy-export/mysql.mjs';
 import {extractProject} from './legacy-export/extract.mjs';
 import {hydrateObjects} from './legacy-export/attachments.mjs';
 import {readBundle,writeBundle} from './legacy-export/files.mjs';
+import {classifySnapshot} from './legacy-export/secrets.mjs';
 
 const {values,positionals}=parseArgs({allowPositionals:true,options:{
   project:{type:'string'},revision:{type:'string'},'ai-model':{type:'string'},output:{type:'string'},input:{type:'string'},
-  'objects-dir':{type:'string'},bucket:{type:'string'},region:{type:'string'},
+  'objects-dir':{type:'string'},bucket:{type:'string'},region:{type:'string'},'mail-from-domain':{type:'string'},
   'max-row-bytes':{type:'string'},'max-object-bytes':{type:'string'},'max-json-bytes':{type:'string'},help:{type:'boolean'},
 }});
 if(values.help){console.log(`Read-only legacy HappyToHelp export (one project per snapshot):
-  node scripts/export-legacy.mjs snapshot --project UUID --revision SOURCE_SHA [--ai-model MODEL] --output snapshot.json
+  node scripts/export-legacy.mjs snapshot --project UUID --revision SOURCE_SHA --mail-from-domain DOMAIN [--ai-model MODEL] --output snapshot.json
   node scripts/export-legacy.mjs attachments --input snapshot.json --objects-dir copied-bucket --output import.json
   node scripts/export-legacy.mjs attachments --input snapshot.json --bucket BUCKET --region REGION --output import.json
 
@@ -26,12 +27,13 @@ try {
   if(positionals[0]==='snapshot'){
     if(!values.project||!values.revision)throw Error('Snapshot requires --project and --revision');
     const connection=await connectLegacy();
-    try{bundle=await extractProject(connection,{projectId:values.project,revision:values.revision,aiModel:values['ai-model'],maxBytes:limit('max-row-bytes')});}
+    try{bundle=await extractProject(connection,{projectId:values.project,revision:values.revision,aiModel:values['ai-model'],mailFromDomain:values['mail-from-domain'],maxBytes:limit('max-row-bytes')});}
     finally{await connection.end();}
   }else{
     if(!values.input)throw Error('Attachments requires --input');
     bundle=await readBundle(values.input,limit('max-json-bytes'));
     if(bundle.format!=='happytohelp-legacy-v1')throw Error('Not a legacy snapshot');
+    classifySnapshot(bundle);
     bundle=await hydrateObjects(bundle,{directory:values['objects-dir'],bucket:values.bucket,region:values.region,maxBytes:limit('max-object-bytes'),maxJsonBytes:limit('max-json-bytes')});
   }
   await writeBundle(values.output,bundle,limit('max-json-bytes'));

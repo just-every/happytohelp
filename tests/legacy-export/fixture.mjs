@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import {seedExtendedLegacy, PLANTED_SECRETS} from './extended-fixture.mjs';
 
 const uuid = (group, number) => `${group}000000-0000-4000-8000-${String(number).padStart(12, '0')}`;
 export const LEGACY_IDS = Object.freeze({
@@ -34,6 +35,8 @@ export async function seedLegacy(connection, { objectDirectory }) {
   await user(ownerId, 'Export Owner', 'export-owner@example.test');
   await insert('ai_defaults', { id: uuid('21', 1), type: 'support', role: 'Customer support',
     prompt: 'Answer using the project knowledge base.', ...times });
+
+  await insert('password_resets', {email:'export-owner@example.test',token:'fixture-password-reset-token',created_at:timestamp});
 
   for (const [index, name] of ['ChargeDesk', '12ui'].entries()) {
     const n = index + 1;
@@ -131,8 +134,9 @@ export async function seedLegacy(connection, { objectDirectory }) {
     await insert('article_categories', { id: uuid('74', n), article_id: articleId, category_id: categoryId, ...times });
     await insert('article_categories', { id: uuid('75', n), article_id: articleId, category_id: draftCategoryId, ...times });
     await insert('article_categories', { id: uuid('76', n), article_id: uuid('73', n), category_id: draftCategoryId, ...times });
+    await seedExtendedLegacy(insert,{projectId,n,slug,name,ownerId,aiId,contactId,conversationId,messageId:messageIds[2]});
     await insert('macros', { id: uuid('90', n), project_id: projectId, created_by_id: ownerId,
       title: `${name} billing reply`, content: `Thanks for contacting ${name}. Please open your billing page to download invoices.`, ...times });
   }
-  return { projectIds: [...projectIds], ownerId, counts };
+  return { projectIds: [...projectIds], ownerId, counts, secrets:PLANTED_SECRETS };
 }

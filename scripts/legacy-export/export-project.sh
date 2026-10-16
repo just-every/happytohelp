@@ -11,7 +11,8 @@ native_model=$3
 output_directory=$4
 : "${LEGACY_S3_BUCKET:?Set the confirmed attachments bucket name}"
 : "${LEGACY_AWS_REGION:?Set its region}"
+: "${LEGACY_MAIL_FROM_DOMAIN:?Set the legacy MAIL_FROM_DOMAIN for project inbound addresses}"
 umask 077
 mkdir -p -- "$output_directory"
-node scripts/export-legacy.mjs snapshot --project "$project_id" --revision "$source_revision" --ai-model "$native_model" --output "$output_directory/snapshot.json"
+node scripts/export-legacy.mjs snapshot --project "$project_id" --revision "$source_revision" --ai-model "$native_model" --mail-from-domain "$LEGACY_MAIL_FROM_DOMAIN" --output "$output_directory/snapshot.json"
 node scripts/export-legacy.mjs attachments --input "$output_directory/snapshot.json" --bucket "$LEGACY_S3_BUCKET" --region "$LEGACY_AWS_REGION" --output "$output_directory/import.json"

@@ -345,6 +345,18 @@
     },
     {
       "binding": "DB",
+      "name": "122_email_content.sql",
+      "sha256": "4c095370310617956792b90e7818aba81d2794a4d34964831f1fdb2e613cbf98",
+      "sql": "-- Original email text is private transcript data, separate from its visible reply.\nALTER TABLE messages ADD COLUMN content_raw TEXT;\nCREATE TRIGGER erase_original_email AFTER UPDATE OF content ON messages\nWHEN NEW.content='' AND NEW.content_raw IS NOT NULL\nBEGIN\n UPDATE messages SET content_raw=NULL WHERE id=NEW.id;\nEND;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "123_email_reply_grants.sql",
+      "sha256": "5189fac000639a5970ee4255b8ff915700bfcab6f7612cbafd4c1f9b42a76135",
+      "sql": "-- Opaque reply addresses bind possession of a recipient's mail to this thread.\nCREATE TABLE email_reply_grants(\n token_hash TEXT PRIMARY KEY,\n project_id TEXT NOT NULL REFERENCES projects(id),\n conversation_id TEXT NOT NULL REFERENCES conversations(id),\n recipient TEXT NOT NULL,\n created_at INTEGER NOT NULL\n);\nCREATE INDEX email_reply_grants_conversation ON email_reply_grants(project_id,conversation_id);\n"
+    },
+    {
+      "binding": "DB",
       "name": "123_inbox_message_search.sql",
       "sha256": "62819acb6da4d4b5b5b608256c198e3af33577e34de4c626d989e254eb85ce41",
       "sql": "-- Retained and newly admitted messages share one index, including import/undo\n-- and erasure writes. No historical provider work is replayed by this migration.\nCREATE VIRTUAL TABLE inbox_message_search USING fts5(content, conversation_id UNINDEXED, project_id UNINDEXED, content='messages', content_rowid='rowid');\nINSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild');\nCREATE TRIGGER inbox_message_search_insert AFTER INSERT ON messages BEGIN\n INSERT INTO inbox_message_search(rowid,content,conversation_id,project_id) VALUES(new.rowid,new.content,new.conversation_id,new.project_id);\nEND;\nCREATE TRIGGER inbox_message_search_delete AFTER DELETE ON messages BEGIN\n INSERT INTO inbox_message_search(inbox_message_search,rowid,content,conversation_id,project_id) VALUES('delete',old.rowid,old.content,old.conversation_id,old.project_id);\nEND;\nCREATE TRIGGER inbox_message_search_update AFTER UPDATE ON messages BEGIN\n INSERT INTO inbox_message_search(inbox_message_search,rowid,content,conversation_id,project_id) VALUES('delete',old.rowid,old.content,old.conversation_id,old.project_id);\n INSERT INTO inbox_message_search(rowid,content,conversation_id,project_id) VALUES(new.rowid,new.content,new.conversation_id,new.project_id);\nEND;\nCREATE INDEX conversations_contact_history ON conversations(project_id,contact_id,updated_at DESC,id);\n"

@@ -83,7 +83,7 @@ Contacts and Settings disclosures that list one link per project.
 
 Settings is a single row to the project's page; the twelve destinations it holds
 (Project, Agents, Email, Widget, Saved Replies, API tokens, Webhooks, Slack,
-Delivery log, Integrations, GitHub, Connected applications) share their own
+Delivery log, Plugins, GitHub, Connected applications) share their own
 Settings menu in the page, defined in `src/ui/native/settings-destinations.js`
 and rendered by `SettingsMenu.jsx` from `WorkspacePages.jsx`. A wide screen shows
 a short column beside the page with five destinations and a disclosure for the

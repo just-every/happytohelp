@@ -11,7 +11,7 @@ export const settingsDestinations = [
     { label: 'Webhooks', path: 'webhook-settings' },
     { label: 'Slack', path: 'slack-settings' },
     { label: 'Delivery log', path: 'delivery-log' },
-    { label: 'Integrations', path: 'plugins' },
+    { label: 'Plugins', path: 'plugins' },
     { label: 'GitHub', path: 'github-settings' },
     { label: 'Connected applications', absolute: '/delegation/settings' },
 ];

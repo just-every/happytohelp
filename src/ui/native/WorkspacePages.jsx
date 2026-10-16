@@ -6,7 +6,7 @@ import { useDashboardLocation } from './dashboard-state';
 import { adminTitles } from './pages/AdminRecords';
 import { workspacePageComponents, workspacePageRoute } from './workspace-page-code';
 import { AdminRequired, PageNotFound, ProjectUnavailable } from './pages/WorkspaceNotices';
-const titles={'api-settings':'API tokens','webhook-settings':'Webhooks','slack-settings':'Slack','delivery-log':'Delivery log',reports:'Reports','move-in':'Move in',edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Integrations',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
+const titles={'api-settings':'API tokens','webhook-settings':'Webhooks','slack-settings':'Slack','delivery-log':'Delivery log',reports:'Reports','move-in':'Move in',edit:'Project',settings:'Project',ais:'AI',datasets:'Knowledge',articles:'Knowledge',categories:'Knowledge',agents:'Agents','local-agent':'Local computers','email-settings':'Email','widget-settings':'Widget',macros:'Saved Replies',contacts:'Contacts',plugins:'Plugins',users:'Profile',insights:'Insights','training-runs':'Evaluation runs'};
 export default function WorkspacePages({ settings, pages = {} }) {
     const { Connections, Reports, MoveIn, ActivationPage, SetupTitle, GitHubSettings, ArticleImport,
         ProjectsPage, AdminPage, KnowledgePage, ManagementPage, ProjectSettings, WidgetSettingsPage,
@@ -43,7 +43,6 @@ export default function WorkspacePages({ settings, pages = {} }) {
     if(section==='articles')title=recordId==='import'?'Import articles':recordId==='create'?'New article':recordId?'Edit article':'Knowledge';
     if(section==='macros'&&recordId==='create')title='Save a Reply';
     if(section==='agents'&&recordId==='create')title='Invite Agent';
-    if(section==='plugins')title='Plugins';
     if(section==='activation')title=<SetupTitle projectId={projectId}/>;
     if(section==='delegation')title=recordId==='authorize'?'Connect to Slate':'Connected applications';
     if(section==='github-settings')title='Project';

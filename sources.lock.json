@@ -1539,7 +1539,7 @@
       "executable": false
     },
     "docs/NAVIGATION.md": {
-      "sha256": "b674c7a62076c41b383d37d0d2c46b2c92452ca7dd1a2f86305a8a04fcc9da02",
+      "sha256": "cff3d73a1409a86588d3470360ff11b13df283bf77331f8565c73561366256ff",
       "executable": false
     },
     "docs/plugins.md": {
@@ -7355,7 +7355,7 @@
       "executable": false
     },
     "src/ui/native/settings-destinations.js": {
-      "sha256": "814f0f93655f985076ab0da7b38338fd39d0da251f986c6d51fab6a5c7dc2f5b",
+      "sha256": "e299d4d7f6a17c5080d145fa69c33d3459f0516507980b483485f7afca9b758d",
       "executable": false
     },
     "src/ui/native/settings-menu.css": {
@@ -7427,7 +7427,7 @@
       "executable": false
     },
     "src/ui/native/WorkspacePages.jsx": {
-      "sha256": "c69a5b30ab0aca5963c86978a79433d2daefb1d837402f330e6f00272fb74ab9",
+      "sha256": "0ce21f43cc09ba1baa691657950b5e02d005ce94d6564dc72f54bfe3af4d3b32",
       "executable": false
     },
     "src/ui/native/WorkspaceSidebarArtwork.jsx": {

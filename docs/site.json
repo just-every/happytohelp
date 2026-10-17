@@ -104,6 +104,11 @@
           "label": "When your team is away"
         },
         {
+          "slug": "tickets",
+          "source": "docs/tickets.md",
+          "label": "Tickets and the inbox"
+        },
+        {
           "slug": "help-before-they-ask",
           "source": "docs/help-before-they-ask.md",
           "label": "Help before they ask"

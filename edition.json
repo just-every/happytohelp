@@ -445,7 +445,11 @@
           "tests/journeys/upgrade-nightly.mjs",
           "tests/journeys/kit",
           "tests/first-run",
-          "tests/activation"
+          "tests/activation",
+          "src/modules/tickets",
+          "migrations/130_ticket_model.sql",
+          "migrations/131_ticket_views_bulk.sql",
+          "migrations/132_ticket_erasure.sql"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",

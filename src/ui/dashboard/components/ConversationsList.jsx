@@ -1,4 +1,6 @@
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
+import TicketViews from './tickets/TicketViews';
+import TicketBulkActions from './tickets/TicketBulkActions';
 import ConversationItem from "./ConversationItem";
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { ChatContext } from "../contexts/ChatContext";
@@ -25,6 +27,7 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
         inboxDataVersion,
         inboxViewCounts,
         currentAgent,
+        refreshInboxData,
     } = useContext(ChatContext);
     const settings = useDashboardSettings();
     const searchParams = useDashboardLocation().search;
@@ -34,7 +37,14 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
     const selectedView = normalizeInboxView(searchParams.view, inboxViewCounts);
     const searchQuery = searchParams.q == null ? '' : String(searchParams.q);
     const filter = useMemo(() => ({...inboxViewFilter(selectedView, searchQuery, searchParams.assigned_to, searchParams.search_scope),...(searchParams.tag?{tag:String(searchParams.tag)}:{})}), [ selectedView, searchQuery, searchParams.tag, searchParams.assigned_to, searchParams.search_scope ]);
-    const listKey = JSON.stringify(filter);
+    const projectId = settings.isGlobalInbox ? null : settings.project?.id;
+    const ticketQueue = projectId && !settings.project?.is_demo;
+    const [selected, setSelected] = useState({}), [selecting, setSelecting] = useState(false);
+    const queueFilter = useMemo(() => ticketQueue && (searchParams.saved_view || searchParams.filters)
+        ? { ...(searchQuery.trim() ? { q: searchQuery.trim(), search_scope: searchParams.search_scope || 'all' } : {}), ...(searchParams.tag ? { tag: String(searchParams.tag) } : {}), ...(searchParams.saved_view ? { saved_view: String(searchParams.saved_view) } : { filters: typeof searchParams.filters === 'string' ? searchParams.filters : JSON.stringify(searchParams.filters), sort: typeof searchParams.sort === 'string' ? searchParams.sort : JSON.stringify(searchParams.sort || []) }) }
+        : filter, [ticketQueue, searchParams.saved_view, searchParams.filters, searchParams.sort, filter]);
+    const listKey = JSON.stringify(queueFilter);
+    useEffect(() => { setSelected({}); }, [listKey, projectId]);
     const {
         conversations,
         hasNextPage,
@@ -50,7 +60,7 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
         setConversationLists,
         fetchConversationList,
         inboxDataVersion,
-        filter,
+        filter: queueFilter,
         listKey,
     });
     const [ sentryRef, { rootRef } ] = useInfiniteScroll({
@@ -75,10 +85,15 @@ function ConversationsList({ isFirstRun = false, startHere = false, hideBehindCo
                 {/* Follow the URL immediately, including Back before a read settles.
                     A completed view read must not overwrite newer search typing. */}
                 <InboxSearch query={ liveSearch.q == null ? '' : String(liveSearch.q) } viewPhrase={ inboxViewPhrase(selectedView) } onSearch={ handleSearch } /><InboxTagFilter projectId={settings.isGlobalInbox?null:settings.project?.id} value={String(searchParams.tag||'')} onChange={tag=>navigate({search:{...liveSearch,tag:tag||undefined}})}/>
-                <ConversationsFilter assignment={ filter.assigned_to } searchScope={ filter.search_scope || searchParams.search_scope || 'all' } searching={ Boolean(searchQuery.trim()) } onChange={ changes => navigate({search:{...liveSearch,...changes}}) } />
+                <ConversationsFilter assignment={ filter.assigned_to } searchScope={ filter.search_scope || searchParams.search_scope || 'all' } searching={ Boolean(searchQuery.trim()) } onChange={ changes => navigate({search:{...liveSearch,saved_view:undefined,filters:undefined,sort:undefined,...changes}}) } />
             </div>
+            {ticketQueue && <>
+                <TicketViews key={projectId} projectId={projectId} currentAgentId={currentAgent.id}/>
+                <div className="ticket-queue-actions"><button type="button" className="btn btn-sm btn-link" onClick={() => { setSelecting(value => !value); setSelected({}); }}>{selecting ? 'Done selecting' : 'Select tickets'}</button>{selecting && <button type="button" className="btn btn-sm btn-link" onClick={() => setSelected(Object.fromEntries(conversations.slice(0, 100).map(item => [item.id, { id: item.id, subject: item.subject, ticket_version: item.ticket_version }])))}>Select loaded tickets</button>}</div>
+                {selecting && Object.keys(selected).length > 0 && <TicketBulkActions key={projectId} projectId={projectId} selected={Object.values(selected)} onClear={() => setSelected({})} onApplied={refreshInboxData}/>}
+            </>}
             <div className="conversation-list-items" ref={ setListRefs }>
-                { conversations.map(conversation => <ConversationItem key={ conversation.id } conversation={ conversation } />) }
+                { conversations.map(conversation => selecting && ticketQueue ? <div className="ticket-bulk-row" key={conversation.id}><input className="form-check-input" type="checkbox" aria-label={`Select ticket ${conversation.subject || conversation.contact?.display_name || conversation.id}`} checked={Boolean(selected[conversation.id])} disabled={!selected[conversation.id] && Object.keys(selected).length >= 100} onChange={event => { const checked = event.target.checked; setSelected(current => { const next = { ...current }; if (checked) next[conversation.id] = { id: conversation.id, subject: conversation.subject, ticket_version: conversation.ticket_version }; else delete next[conversation.id]; return next; }); }}/><ConversationItem conversation={conversation}/></div> : <ConversationItem key={conversation.id} conversation={conversation}/>) }
                 { isInitialLoading && conversations.length === 0 && <p className="text-center" role="status">Loading conversations...</p> }
                 { !isInitialLoading && !refreshError && !hasNextPage && conversations.length === 0 && (
                     searchQuery.trim()

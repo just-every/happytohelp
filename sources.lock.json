@@ -1552,7 +1552,7 @@
       "executable": false
     },
     ".github/workflows/installer-journeys.yml": {
-      "sha256": "6af0830fbc22595dd067f7a849e862d611fcd6956d712d9482906b017f98e114",
+      "sha256": "44294e763da713be8d625e9dadd0e73360d0178eba84fa185d8dce2c20851078",
       "executable": false
     },
     ".github/workflows/live-proof.yml": {
@@ -1600,7 +1600,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "cf813f0736dd066e082bb878f3627563c45f6a822033b69230e3f375e298b1c8",
+      "sha256": "8ca6a1a571fefb9d7c96dadaaa0e48ef9f72cf45f53c7fe59f60e0ebffef9146",
       "executable": false
     },
     "CLAUDE.md": {
@@ -2268,7 +2268,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "29e4780bc3129035ee3d395cb32a9cc27d1c0b39c9e21a154c0e804f81ffecc8",
+      "sha256": "fc9c1d437733ab395a83387648b3b7b0023af6352b1ede39760704fab482cc55",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -2332,11 +2332,11 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "40c637778affe9cefdbcb53728d30c2956e8887e69a9160ca48b6d3424006c3c",
+      "sha256": "60a2b696e1bb6d6d2757769ea7e71dafab0ff51a0c4d6c584b4410edc732f1eb",
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "1991516fbc31e62a5fb2bc1e40c2af4bb257d2d729be0c6ca94ca6fb14dc8974",
+      "sha256": "da22a48c2be132ae3a649edcc75b0a8351f8b2fdee50df8583778058d3d7227a",
       "executable": false
     },
     "rer-project.json": {
@@ -2695,6 +2695,10 @@
       "sha256": "3b6247a001c546ba34f06fb2f70f7aaa0a9d98199960f608b127c75fd3d6c92d",
       "executable": false
     },
+    "scripts/installer/qualify.mjs": {
+      "sha256": "7f97c21b17199758d9be79571e8dad42dc3b33f925d73b560e4bd0369d8b7b74",
+      "executable": false
+    },
     "scripts/installer/search-index-sql.mjs": {
       "sha256": "dbe66e666793ad19f22f4a3fb50f27d7bd8720bb678a6b04590fecbf5d142ad2",
       "executable": false
@@ -2840,7 +2844,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "b5fbffc88b4077a85631b3296123ddc83407a109f226c5e35aa9a20995a7d037",
+      "sha256": "4ec50d9258b766e20488eac20753716455b6d703bcf5f4cd46d99b25f2896f96",
       "executable": false
     },
     "src/app.ts": {
@@ -8884,7 +8888,7 @@
       "executable": false
     },
     "tests/helpers/delegation-journey/browser.mjs": {
-      "sha256": "f6165f7f3ad3fb5f4d4b39ec32075c67d0b341fe87b509340cf34695f7ec5e53",
+      "sha256": "c77b45ac8704588e6a12f72ec145f729e9da23112af2e57b3f2bde11a6cdd1e5",
       "executable": false
     },
     "tests/helpers/delegation-journey/case.mjs": {
@@ -9244,7 +9248,7 @@
       "executable": false
     },
     "tests/helpers/installer/fresh-install.mjs": {
-      "sha256": "2ef6c08fe38cacc6a07e053239ede3d54b4e6bdd64f9dc0eba50e75bdb9039cc",
+      "sha256": "341638b715028ec6a0f71ad67ec74323735781a11738ffc166b4cbc537e2a45d",
       "executable": false
     },
     "tests/helpers/installer/readme-restore.mjs": {
@@ -9376,7 +9380,7 @@
       "executable": false
     },
     "tests/helpers/release-upgrade.mjs": {
-      "sha256": "febba025c2dc1ba8e2db73edfc5112f1b0e4b72c69bfdb1f7d8a8219963337f7",
+      "sha256": "6b81bdb38b52cacbdbdf0974a721103cb53595cd2f7e0084c2f95b72efe743c7",
       "executable": false
     },
     "tests/helpers/rer-archive.mjs": {
@@ -9428,19 +9432,27 @@
       "executable": false
     },
     "tests/helpers/upgrade-baselines.mjs": {
-      "sha256": "30a6c867e455bb4135ccf2a9bec22fc617cd813709124261a3a3c5a00a1e5a0f",
+      "sha256": "962369a47d93266e47b0191e40a121c6717171ed29406f1f3a232b003cbc9133",
+      "executable": false
+    },
+    "tests/helpers/upgrade-data-expectations.mjs": {
+      "sha256": "434550334365351d326b42ca779ec51bed682b850787478e8939af5f9aff2457",
       "executable": false
     },
     "tests/helpers/upgrade-exceptions.mjs": {
-      "sha256": "d846cda1ac746f4e9bdd96eb246ea55c32bac0f062e4108f6c370b753e7392c2",
+      "sha256": "fe4167d1a30201a281f75fd0dd6967aa0c029b6f60e0fcd28a008f8845e7f812",
       "executable": false
     },
     "tests/helpers/upgrade-readback.mjs": {
       "sha256": "5bcfe9ec124877447c3a542c4ee88fd76430dbebf2ef4749d4965a058f644aef",
       "executable": false
     },
+    "tests/helpers/upgrade-schema-expectations.mjs": {
+      "sha256": "776b77f2140f677275c6057926dda58a8e0a5bca4b751c595950761f01f601d9",
+      "executable": false
+    },
     "tests/helpers/upgrade-snapshot.mjs": {
-      "sha256": "2fcbd84a2a126eb1a38fb9ed470e59f7b866dc134c671d9ccddd4ed79df7f3b6",
+      "sha256": "94b525e815aeba1a4a87ae00b72e4384c690aee836d8339883e095ea8ead5d1c",
       "executable": false
     },
     "tests/helpers/widget-failed-send-browser.mjs": {

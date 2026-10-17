@@ -1,6 +1,6 @@
 {
   "name": "happytohelp",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Open-source customer support workspace: chat widget, team inbox, AI-assisted replies and help centers on Cloudflare Workers.",
   "license": "MIT",
   "repository": {
@@ -26,7 +26,7 @@
     "test:journey": "node --test --test-concurrency=1 --test-name-pattern=\"first release\" tests/journeys/first-run.mjs",
     "test:routes": "node --test --test-concurrency=1 tests/journeys/ai.mjs tests/journeys/connections.mjs tests/journeys/connector.mjs tests/journeys/context.mjs tests/journeys/delegation.mjs tests/journeys/delegation-computers.mjs tests/journeys/email.mjs tests/journeys/erasure.mjs tests/journeys/first-run.mjs tests/journeys/identity.mjs tests/journeys/inbox.mjs tests/journeys/installer.mjs tests/journeys/knowledge.mjs tests/journeys/legacy.mjs tests/journeys/move-in-admission.mjs tests/journeys/move-in-custody.mjs tests/journeys/move-in-erasure.mjs tests/journeys/move-in-capacity.mjs tests/journeys/public.mjs tests/journeys/reports.mjs tests/journeys/restore.mjs tests/journeys/runtime.mjs tests/journeys/upgrade.mjs tests/journeys/widget.mjs",
     "test:browsers": "node --test --test-concurrency=1 tests/journeys/ai-browser.mjs tests/journeys/connections-browser.mjs tests/journeys/connector-browser.mjs tests/journeys/context-browser.mjs tests/journeys/delegation-browser.mjs tests/journeys/erasure-browser.mjs tests/journeys/first-run-browser.mjs tests/journeys/identity-browser.mjs tests/journeys/inbox-browser.mjs tests/journeys/move-in-browser.mjs tests/journeys/public-browser.mjs tests/journeys/reports-browser.mjs tests/journeys/widget-browser.mjs",
-    "test:nightly": "node --test --test-concurrency=1 tests/journeys/installer-nightly.mjs tests/journeys/upgrade-nightly.mjs",
+    "test:nightly": "pnpm run test:installer-nightly",
     "test:live": "node --test --test-concurrency=1 tests/journeys/ai-live.mjs",
     "test:ai": "node --test --test-concurrency=1 tests/journeys/ai.mjs tests/journeys/ai-browser.mjs",
     "test:context": "node --test --test-concurrency=1 tests/journeys/context.mjs tests/journeys/context-browser.mjs",
@@ -71,7 +71,7 @@
     "verify:visual": "node scripts/verify-visual-edit.mjs",
     "test:widget-lifecycle-browser": "node --test --test-concurrency=1 tests/journeys/widget-browser.mjs",
     "test:independent-runtime": "node --test --test-concurrency=1 tests/journeys/restore.mjs",
-    "test:reproducible-build": "node --test --test-concurrency=1 --test-name-pattern=\"byte-identical\" tests/journeys/installer-nightly.mjs",
+    "test:reproducible-build": "pnpm run test:installer-nightly --test-name-pattern=byte-identical",
     "test:contact-erasure-browser": "node --test --test-concurrency=1 tests/journeys/erasure-browser.mjs",
     "test:management-library-browser": "node --test --test-concurrency=1 tests/journeys/inbox-browser.mjs",
     "test:training-readiness-browser": "node --test --test-concurrency=1 tests/journeys/ai-browser.mjs",
@@ -118,7 +118,8 @@
     "rer": "rer",
     "test:delegation-journey": "node --test --test-concurrency=1 --test-name-pattern=\"agent fix\" tests/journeys/delegation.mjs",
     "verify:release": "pnpm run build && H2H_UPGRADE_RELEASES=0.4.1 node --test --test-concurrency=1 tests/journeys/upgrade-nightly.mjs",
-    "test:legacy-export": "node --test tests/legacy-export.mjs"
+    "test:legacy-export": "node --test tests/legacy-export.mjs",
+    "test:installer-nightly": "node scripts/installer/qualify.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",

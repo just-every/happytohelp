@@ -1,322 +1,87 @@
 {
-  "version": "0.4.2",
-  "previousVersion": "0.4.1",
+  "version": "0.4.3",
+  "previousVersion": "0.4.2",
   "date": "2026-10-17",
   "contractChanges": {
     "NATIVE-001": {
       "change": "changed",
-      "summary": "Lifecycle commands use the published rer package.",
-      "was": "Commands ran through the bundled node scripts/rer.mjs entry point.",
-      "now": "Commands run through rer; local setup still stops its runtime, dev opens the local owner automatically, and deployment dry-run makes no provider requests."
+      "summary": "Release qualification follows the complete local owner entry and exact portable state.",
+      "was": "Slow qualification invoked reproducibility without pnpm, dropped dev admission on browser API reads and compared restore with pre-export snapshot metadata.",
+      "now": "One pnpm entry point qualifies fresh clones, README restores, reproducibility, delegation at 1440/390 and every published upgrade baseline. Restore preserves the exported Durable Object snapshot. Upgrades compare every original column except the exact documented 125 contact email-proof and 129 owner-alert transformations."
     },
-    "FIRST-RUN-001": {
+    "STATUS-001": {
       "change": "changed",
-      "summary": "New workspaces are provisioned with a starter assistant and installation mail settings, with a smaller first-run form.",
-      "was": "First-run led to a setup checklist and ordinary workspace creation led with the widget snippet.",
-      "now": "One-screen setup derives optional names and colours. Non-demo workspaces gain a default starter assistant, a mailbox when INBOUND_EMAIL_TOKEN exists and the installation sender until their domain is verified. Explicit creation may send one welcome email; uncertain mail is never replayed. Setup separates owner-only tasks from provisioned settings."
-    },
-    "ACTIVATION-001": {
-      "change": "changed",
-      "summary": "Setup observes applicable steps automatically and supports durable owner/admin skips.",
-      "was": "The empty inbox and Setup showed the same eight-step checklist; validation was explicit and publication counted as a step.",
-      "now": "Only Setup loads the observations. Signed-in checks perform bounded non-generative reads, never send mail; GET writes nothing. Published articles do not count. Owner-only steps can be skipped without provider work, remain unconfirmed and leave the denominator; an observation wins and rejected keys remain Needs you. Observation details can be stored without backfilling old receipts.",
+      "summary": "Native ticket lifecycle and custom statuses.",
+      "was": "Resolution was open or closed.",
+      "now": "New, Open, Pending, On-hold, Solved and Closed plus category-mapped custom statuses retain conversation history. Closed tickets are final; time-based auto-close and linked follow-ups remain unimplemented.",
       "migrationIds": [
-        "120_activation_observations.sql"
+        "130_ticket_model.sql"
       ]
     },
-    "AI-001": {
+    "QUEUE-001": {
       "change": "changed",
-      "summary": "A starter assistant without its provider key leaves new conversations with the team.",
-      "was": "Missing providers failed explicitly when model execution was requested.",
-      "now": "Requested model execution still fails explicitly without a provider; new conversations do not assign a default assistant whose provider has no key. Uncertain attempts remain uncertain and daily ceilings still apply."
+      "summary": "Manual group and teammate assignment.",
+      "was": "Manual human/AI assignment only.",
+      "now": "Groups and membership permit manual group/operator assignment. Automated capacity and round-robin routing remain unimplemented."
     },
-    "IDENTITY-003": {
+    "QUEUE-002": {
       "change": "changed",
-      "summary": "Mailbox confirmation covers new and existing accounts with unknown passwords.",
-      "was": "Moved-in teammates and email-claimed owners encountered a password-only step-up.",
-      "now": "Accounts without a second factor can confirm beside their password by a single-use, 15-minute account-bound email sign-in link. Requests claim shared account/IP rate limits atomically and are audited. Only the fresh mailbox sign-in session gains proof. Recent mailbox proof authorizes replacing an unknown existing password without its old value; a held session cannot. Existing deliberately chosen passwords remain valid. New email claims create no unknown password or recent proof. Every enrolled second-factor gate and recovery rule remains unchanged. Migration 190 admits the distinct email_link proof method while retaining existing session proofs and timestamps."
+      "summary": "Fields, priorities, saved views and previewed bulk updates.",
+      "was": "Tags and basic filters.",
+      "now": "Ticket fields, priorities, saved filters/sorts and per-record previewed bulk changes preserve permissions and stale-write guards.",
+      "migrationIds": [
+        "130_ticket_model.sql",
+        "131_ticket_views_bulk.sql",
+        "132_ticket_erasure.sql"
+      ]
     },
-    "REPORTS-001": {
+    "QUEUE-003": {
       "change": "changed",
-      "summary": "Reports exclude empty drafts and export complete workspace history.",
-      "was": "Analytics counted empty widget conversations and exported no message text.",
-      "now": "Reports and analytical CSVs require a persisted message; the widget session contract is retained. A separate guarded streaming JSON export includes all workspace conversations, messages, private notes and attachment metadata across dates and imports, excluding attachment bytes."
-    },
-    "INTEGRATION-001": {
-      "change": "changed",
-      "summary": "Same-address suppression is visible.",
-      "was": "A visitor matching the reply sender was shown no attempt recorded.",
-      "now": "Message status explains when the visitor address matches the reply sender; shared recipient selection preserves preferred addresses, participants and recorded delivery outcomes."
+      "summary": "Personal and shared saved views.",
+      "was": "Basic filters and stale-frontier guards.",
+      "now": "Personal/shared saved views accompany existing internal notes, saved replies and stale-frontier guards; presence and mention features remain incomplete."
     }
   },
   "proseChanges": [
     {
       "document": "README.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Installation now starts with three commands and describes the provisioned workspace.",
-      "was": "The README described the 0.4.1 fix and an explicit private-answer local setup.",
-      "now": "The 0.4.2 section describes this release and its two migrations. The npm rer bootstrap, clone and rer dev path needs no private answers or external mail/AI account. AI key setup and the provisioned workspace are explained."
-    },
-    {
-      "document": "AGENTS.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Contributor commands use the package and document automatic local dev defaults.",
-      "was": "Commands used the bundled CLI and setup answers were required for local dev.",
-      "now": "Contributors use Node 22.20.0, pnpm 10.12.4 and rer; automatic local origin/password defaults and source-lock duties are explicit."
-    },
-    {
-      "document": "docs/INSTALLER.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Zero-setup development and optional private answers are documented.",
-      "was": "Local development required explicit setup answers.",
-      "now": "rer dev provisions pinned tools and local setup, derives local origin and a private password, and opens the owner automatically; scripted private setup remains available."
-    },
-    {
-      "document": "docs/INDEPENDENT-RELEASE.md",
-      "date": "2026-10-16",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Public-source updates use package-mode commands and SQL backups preserve derived search.",
-      "was": "Updates described merging source and using the bundled CLI.",
-      "now": "Stop and back up, merge current public source while preserving customization, install frozen dependencies, build and dry-run; v0.4.1 predates package conversion and reset is never an upgrade. The SQL backup command exports authoritative rows and restores the derived conversation search index in both the source and the backup."
-    },
-    {
-      "document": "docs/SETUP-WORKFLOW.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Setup distinguishes provisioned settings, observations and owner-only tasks.",
-      "was": "Setup documented eight explicit checklist observations and no automatic workspace provisioning.",
-      "now": "New workspaces gain the starter assistant and mail settings; a bounded one-time website read retains private knowledge without publishing articles. Setup performs freshness-bounded reads and permits durable skips."
-    },
-    {
-      "document": "docs/api.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Uncertain webhook resend policy matches runtime.",
-      "was": "The reference promised retries for explicit HTTP 5xx and did not document deliberate resend.",
-      "now": "Only 429 retries automatically within four attempts. Owners/admins can approve uncertain resends with the original ID/body and current authority checks; approvals beyond budget permit one audited attempt."
-    },
-    {
-      "document": "docs/SOURCE-PROVENANCE.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Provenance records package-mode tooling and guarded native resend.",
-      "was": "Provenance described bundled tooling and server-failure retries.",
-      "now": "The published package supplies commands; copied Base sources remain byte-exact. Native approval gates uncertain webhook resends."
-    },
-    {
-      "document": "docs/moving-in.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Help Scout response-body import and preservation limits are documented.",
-      "was": "Move in documented supported Zendesk and Intercom inputs.",
-      "now": "Supported Help Scout Inbox v2 and Docs v1 response bodies map to native history/knowledge, with explicit JSON/JSONL/ZIP packaging conventions, omitted saved replies/attachment bytes and synthetic-shape qualification only."
-    },
-    {
-      "document": "ACCEPTANCE.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Delegation acceptance includes the joined connector journey.",
-      "was": "Delegation listed component authority and recovery requirements.",
-      "now": "Required local proof includes the seven-step agent-fix case, refusal branches and fresh browser journey; hosted and live-provider acceptance remain separate."
-    },
-    {
-      "document": "OPERATIONS.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Package-mode commands and retained-state updates are documented.",
-      "was": "Operations used the bundled CLI and explicit local setup.",
-      "now": "Operations use rer while retaining backup, migration-before-runtime, owner authorization and restore limits."
-    },
-    {
-      "document": "RUN-LOCALLY.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Automatic development setup is documented.",
-      "was": "Local commands used bundled CLI entry points and private setup answers.",
-      "now": "rer dev uses its local origin and a generated private password; optional explicit private setup and managed shutdown remain documented."
-    },
-    {
-      "document": "SEED-COMMAND-CONTRACT.md",
-      "date": "2026-10-15",
-      "ownerAction": "Read the current guide; preserve private settings, native authority and data. No provider or hosted acceptance is implied.",
-      "change": "changed",
-      "summary": "Command declarations use the published package.",
-      "was": "The command contract named the bundled CLI.",
-      "now": "The same declared lifecycle effects are reached through rer with package-mode inspection and checks."
-    },
-    {
-      "document": "docs/AGENT-FIX.md",
-      "change": "added",
-      "date": "2026-10-15",
-      "summary": "The guide separates investigation, approved fix, observation and human Send.",
-      "now": "Seven steps describe the local connector flow and refusal branches, with a scripted model-provider boundary and disposable target fixture.",
-      "ownerAction": "Inspect independent evidence and the transcript before sending or retrying uncertain work; real providers and hosted acceptance are unqualified."
-    },
-    {
-      "document": "SECURITY.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Security reporting targets the public repository.",
-      "was": "Reports linked to the former happytohelp repository URL; fixes used the bundled CLI.",
-      "now": "Reports use run-happytohelp private vulnerability reporting and package-mode deployment commands.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/AUTHORING.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Authoring distinguishes package tooling from byte-exact copied source.",
-      "was": "Authoring described a self-contained CLI export.",
-      "now": "The exact rer package supplies shared commands; SEED-COMMAND-CONTRACT.md is edition-maintained documentation rather than a byte-exact Base copy.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/PUBLIC-SOURCE-PROVENANCE.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Licensing attribution reflects package mode.",
-      "was": "The attribution listed scripts/base-onboarding as a copied Base location.",
-      "now": "Attribution includes src/vendor/base, edition-authoring and the @runeditrun/rer dependency while retaining the Base MIT notice.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/NAVIGATION.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Workspace and Settings navigation are documented.",
-      "was": "The sidebar carried inbox views and additional settings links.",
-      "now": "Inbox views sit above the conversation list; More holds local computers, Reports and Insights. Twelve Settings destinations share a responsive in-page menu; global links remain project-specific.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/UI-PARITY.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Parity records the revised workspace layout.",
-      "was": "The parity record described original purple navigation and the prior settings layout.",
-      "now": "The record retains account/workspace behaviors while documenting the shorter sidebar, inbox views and shared Settings menu.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/WORKSPACE-WORKFLOWS.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Workspace trials use provisioned Setup with optional skips.",
-      "was": "The trial description led with the local checklist.",
-      "now": "Setup separates owner-only tasks from provisioned settings, permits skips and describes development email as suppressed without sending or storage.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/moving-in-shapes.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Help Scout source custody and pagination are documented.",
-      "was": "Shape custody covered the prior import vendors.",
-      "now": "Separate Inbox and Docs shapes retain strict syntax validation, list/page receipts, customer identities and source-located diagnostics before mapping.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/PUBLIC-LIMITS.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "Optional limits use package-mode deployment.",
-      "was": "Limit configuration used the bundled CLI deployment entry point.",
-      "now": "Optional settings use pnpm exec rer deploy with the real declaration; private configuration and limits retain the same authority.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "HANDOVER.md",
-      "change": "changed",
-      "date": "2026-10-15",
-      "summary": "The maintainer handover covers provisioning, site reads and package commands.",
-      "was": "The architecture described bundled CLI commands and the prior setup path.",
-      "now": "The handover identifies the exact package pin, provisioning and missing-key assignment, pure GET observations, bounded private site knowledge and migration 120.",
-      "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
-    },
-    {
-      "document": "docs/account-security.md",
       "change": "changed",
       "date": "2026-10-17",
-      "summary": "Passwordless accounts confirm in the dialog by mailbox and can set their first password.",
-      "was": "Re-sign-in by email was described as the way out of password step-up.",
-      "now": "The dialog sends a link, verifies the same account on return and retries the guarded action; merely requesting mail grants no proof.",
-      "ownerAction": "Keep mailbox access available; enrolled second factors remain required."
+      "summary": "Deploy the current qualified tag.",
+      "was": "The guide named v0.4.2 and its earlier qualification boundary.",
+      "now": "The current release is v0.4.3, with the exact missing migrations listed for updates from v0.4.2.",
+      "ownerAction": "Back up, retain private settings and existing data, and apply only the missing migrations in order before serving traffic."
+    },
+    {
+      "document": "CHANGELOG.md",
+      "change": "changed",
+      "date": "2026-10-17",
+      "summary": "Describe release qualification and native ticket work.",
+      "was": "The guide named v0.4.2 and its earlier qualification boundary.",
+      "now": "The current release is v0.4.3, with the exact missing migrations listed for updates from v0.4.2.",
+      "ownerAction": "Back up, retain private settings and existing data, and apply only the missing migrations in order before serving traffic."
     }
   ],
   "extensionPointChanges": [],
   "migrations": [
     {
-      "id": "120_activation_observations.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+      "id": "130_ticket_model.sql",
+      "buyerSteps": "Adds ticket columns and backfills only those new columns from retained conversation state; adds statuses per project. Existing conversation columns remain exact."
     },
     {
-      "id": "121_move_in_categories.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+      "id": "131_ticket_views_bulk.sql",
+      "buyerSteps": "Creates saved-view storage without changing existing rows."
     },
     {
-      "id": "122_email_content.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+      "id": "132_ticket_erasure.sql",
+      "buyerSteps": "Adds contact_erasures.ticket_records with default 0; prior erasure values remain."
     },
     {
-      "id": "123_email_reply_grants.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "123_inbox_message_search.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "123_operator_notifications.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "124_message_read_index.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "125_contact_email_proof.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "129_owner_unassigned_alerts.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "170_knowledge_experience.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "171_csat_surveys.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "180_account_security.sql",
-      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
-    },
-    {
-      "id": "181_context_message_subjects.sql",
-      "buyerSteps": "Apply before 190 and before the updated Worker starts. Indexes message subjects created by the legacy importer while preserving existing business data."
-    },
-    {
-      "id": "190_email_step_up.sql",
-      "buyerSteps": "Apply before starting the updated Worker. Extends the allowed session proof methods with email_link, retaining every existing session proof and timestamp. Email links never satisfy an enrolled second factor."
+      "id": "182_import_kit_reversal_retirement.sql",
+      "buyerSteps": "Adds import preparation, retirement and erasure custody and narrows the stream revision trigger for recorded retirement; existing custody rows remain exact."
     }
   ],
-  "breaking": true,
-  "agentUpdateInstructions": "Update from v0.4.1 to v0.4.2 while preserving owner customizations, native credentials, tenant authority, private settings and human Send. Stop the runtime and back up D1, R2 and Durable Object business state. Install frozen dependencies with @runeditrun/rer 0.2.42. Apply every listed migration in filename order before the updated Worker serves traffic. Never reset to upgrade. Rer deploy claims the configured OWNER_EMAIL for a new installation without choosing a password; the owner signs in by email, and existing owners are preserved. Mailbox links do not bypass any enrolled second factor. First-password installation and sensitive actions require recent proof. Retain uncertain outcomes without replay, reviewed imports and erasure fences. Reports offers full conversation JSON with messages/private notes and attachment names; bytes remain in the portable archive. Preserve all existing qualification limits and the accessibility owner HOLD. An older 0.3 installation follows OPERATIONS.md first.",
-  "publicReleaseNotes": "HappyToHelp v0.4.2 is the current deployable release. It includes mailbox step-up and first-password setup including existing accounts whose passwords were never known, complete conversation JSON export, honest same-address mail status and Reports that exclude empty widget drafts. It also carries the native two-factor, roles, audit, portable Durable Object, knowledge/feedback and import improvements since v0.4.1. Commands pin @runeditrun/rer 0.2.42; hosted deployment claims the configured owner, who signs in by email. Existing owners and passwords remain. Apply the listed migrations before serving traffic. Provider fixtures establish local protocol behavior only; paid-provider quality, real-vendor compatibility and hosted operating costs remain separately qualified. Accessibility remains on owner HOLD. app.happytohelp.com is separate legacy production."
+  "breaking": false,
+  "agentUpdateInstructions": "Update from v0.4.2 to v0.4.3 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.42. Apply the listed missing migrations in filename order before serving traffic. Preserve owner credentials, native support history, permissions, imports and erasure fences. Older releases apply their intermediate migrations too: 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Keep uncertain external outcomes without replay and retain human Send.",
+  "publicReleaseNotes": "HappyToHelp v0.4.3 qualifies fresh installation, README restore, reproducibility, delegation and upgrades from every published baseline, including v0.4.2. Portable restores retain the exact exported Durable Object metadata, native owners, support history and files. Upgrades preserve original values except the documented contact email-proof and owner-alert migrations when those are newly applied. Native ticket statuses, priorities, groups, fields, saved views and previewed bulk updates are included. Back up and apply the listed missing migrations before serving traffic. Commands retain @runeditrun/rer 0.2.42. Hosted and paid-provider quality remain separately qualified; accessibility remains on owner HOLD. Production is separate and unchanged."
 }

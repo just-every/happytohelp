@@ -12,6 +12,7 @@ import {snapshot} from '../helpers/recovery/snapshot.mjs';
 import {m9Migrations} from '../helpers/recovery/m9-inventory.mjs';
 import {createHash} from 'node:crypto';
 import {seedCategoryUpgrade,assertCategoryUpgrade} from './upgrade-categories.mjs';
+import {knowledgeUpgradeDefaults,assertKnowledgeHistoryBackfill} from '../helpers/knowledge/upgrade.mjs';
 
 // A packaged install populated before the outcome, integration, mail and import stages upgrades in place; every prior row and file is kept.
 export async function priorSchemaUpgrade(){
@@ -147,11 +148,11 @@ try {
       if(name==='d1_migrations')assert.deepEqual(final.rows[name].filter(row=>!remaining.some(m=>m.name===JSON.parse(row).name)),rows);
       else if(name==='sqlite_sequence')assert.deepEqual(final.rows[name].map(JSON.parse).filter(row=>row.name!=='d1_migrations'),rows.map(JSON.parse).filter(row=>row.name!=='d1_migrations'));
       else {
-        // M122 retains every original field and initializes only content_raw.
-        // Re-encode the full expected row using snapshot's canonical key order;
-        // the actual snapshot remains byte-exact and includes unknown columns.
-        const expected=name==='messages'?rows.map(serialized=>{
-          const row={...JSON.parse(serialized),content_raw:null};
+        // Retain every original field, including unknown columns, and assert
+        // the exact defaults of the deliberate mail and knowledge additions.
+        const expected=['messages','knowledge_articles','knowledge_categories'].includes(name)?rows.map(serialized=>{
+          const original=JSON.parse(serialized);
+          const row=knowledgeUpgradeDefaults(name,name==='messages'?{...original,content_raw:null}:original);
           return JSON.stringify(Object.fromEntries(Object.keys(row).sort().map(key=>[key,row[key]])));
         }).sort():rows;
         assert.deepEqual(final.rows[name],expected,'additional stages preserve every prior row: '+name);
@@ -180,7 +181,10 @@ try {
       const expected=final.rows.messages.map(value=>{const {content,conversation_id,project_id}=JSON.parse(value);return canonical({content,conversation_id,project_id})}).sort();
       assert.deepEqual(final.rows[search.table],expected,'the new search projection contains exactly the retained messages');
     }
-    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)&&!derived.has(name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
+    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)&&!derived.has(name))){
+      if(table==='knowledge_article_history')assertKnowledgeHistoryBackfill(final.rows[table],beforeAdditional.rows.knowledge_articles);
+      else assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
+    }
   });
   await assertCategoryUpgrade(runtime.directory);
   artifact.deploymentSpec.migrations=completeMigrations;

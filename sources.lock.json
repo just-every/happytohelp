@@ -1948,7 +1948,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "02e6abfe48adfbb2ec5169c436f2aa7c87903be747e8e36a774aeb0a1a3fa692",
+      "sha256": "1d5e0e62152ed49017ad72e02175a53742217931057a19b4a549ff211944ef93",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -9216,7 +9216,7 @@
       "executable": false
     },
     "tests/helpers/delegation/browser-use.mjs": {
-      "sha256": "abb9d275b6df3c8ffa15cafc97ff02644a998ab1c4b2dfe1cd5febd26dbde556",
+      "sha256": "8636519fa11d58a952ee7684478ed5a28e184014e5ddd063ce9113dcc31ac48a",
       "executable": false
     },
     "tests/helpers/delegation/computers.mjs": {

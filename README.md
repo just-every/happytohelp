@@ -43,7 +43,7 @@ Deploy the latest tagged release, **`v0.4.3`**, using the commands below.
 This release qualifies fresh installs, README restores and upgrades from every
 published baseline, including v0.4.2. It adds ticket statuses, fields, groups, saved
 views and previewed bulk changes. Existing support history and native edits remain. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.42; local dev starts without private setup
+`@runeditrun/rer` package pinned to 0.2.45; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply every migration listed in [RELEASE.json](RELEASE.json), in filename

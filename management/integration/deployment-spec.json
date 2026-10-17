@@ -369,6 +369,12 @@
     },
     {
       "binding": "DB",
+      "name": "124_contact_email_proof_guard.sql",
+      "sha256": "64cbae4636b8c79b673cd1477bac1f54583d0aa69c95a72f4164ab3043a7a376",
+      "sql": "-- Writers must remain stopped until all missing migrations finish. Migration\n-- 125 marks email proof only; an already-fenced contact must not erase retained\n-- integration history again as a side effect of that metadata backfill. Applied\n-- SQL stays immutable. Migration 126 restores the exact runtime erasure guard.\nDROP TRIGGER native_integration_erasure;\n"
+    },
+    {
+      "binding": "DB",
       "name": "124_message_read_index.sql",
       "sha256": "4d34f479e32f85493c8e5d8233fa0693153c626409b4155c07a38d484d2dcbef",
       "sql": "-- First read observations live in the attributed event store.\nCREATE INDEX context_message_read ON context_tracked_events(project_id,json_extract(payload,'$.message_id')) WHERE type='MESSAGE_READ' AND json_valid(payload);\n"
@@ -378,6 +384,12 @@
       "name": "125_contact_email_proof.sql",
       "sha256": "3db92370743f8f19f2d94a9d609c6da37d58af749ec1135b0d2fa1641c53f8ce",
       "sql": "-- An address a widget visitor typed is a notification preference, never inbound\n-- mail authority. Mark existing widget contacts whose address no signature names.\nUPDATE contacts SET metadata_json=json_set(coalesce(metadata_json,'{}'),'$.email_unproven',1)\n WHERE (email IS NOT NULL OR json_extract(metadata_json,'$.provided_email') IS NOT NULL)\n AND NOT (coalesce(is_verified,0)=1 AND email IS NOT NULL AND lower(trim(external_id))=lower(trim(email)) AND json_extract(metadata_json,'$.provided_email') IS NULL)\n AND EXISTS(SELECT 1 FROM sessions s WHERE s.contact_id=contacts.id AND s.project_id=contacts.project_id AND s.role='contact');\n"
+    },
+    {
+      "binding": "DB",
+      "name": "126_restore_contact_erasure.sql",
+      "sha256": "9ad9d3a8bd6df679442b1333e3971446fc6b9ecac60174a436406f80c73bb1e1",
+      "sql": "-- Restore the identical 115 runtime guard after the 125 email-proof backfill.\n-- This migration changes no row. Finish all migrations before serving traffic.\nCREATE TRIGGER native_integration_erasure AFTER UPDATE OF metadata_json ON contacts WHEN json_extract(NEW.metadata_json,'$.is_erasing')=1 OR json_extract(NEW.metadata_json,'$.is_erased')=1 BEGIN\n DELETE FROM integration_deliveries WHERE namespace=NEW.project_id AND id IN (SELECT i.id FROM native_integration_intents i JOIN native_integration_events e ON e.id=i.event_id WHERE e.project_id=NEW.project_id AND e.contact_id=NEW.id);\n UPDATE native_integration_intents SET error_code='contact_erased',prepared_at=COALESCE(prepared_at,unixepoch()*1000) WHERE event_id IN (SELECT id FROM native_integration_events WHERE project_id=NEW.project_id AND contact_id=NEW.id);\n UPDATE native_integration_events SET body='{}',conversation_id=NULL,contact_id=NULL,erased_at=unixepoch()*1000 WHERE project_id=NEW.project_id AND contact_id=NEW.id;\nEND;\n"
     },
     {
       "binding": "DB",

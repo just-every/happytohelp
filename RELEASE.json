@@ -1,7 +1,7 @@
 {
   "version": "0.4.3",
   "previousVersion": "0.4.2",
-  "date": "2026-10-17",
+  "date": "2026-10-18",
   "contractChanges": {
     "NATIVE-001": {
       "change": "changed",
@@ -50,7 +50,7 @@
     {
       "document": "README.md",
       "change": "changed",
-      "date": "2026-10-17",
+      "date": "2026-10-18",
       "summary": "Deploy the current qualified tag.",
       "was": "The guide named v0.4.2 and its earlier qualification boundary.",
       "now": "The current release is v0.4.3, with the exact missing migrations listed for updates from v0.4.2.",
@@ -59,7 +59,7 @@
     {
       "document": "CHANGELOG.md",
       "change": "changed",
-      "date": "2026-10-17",
+      "date": "2026-10-18",
       "summary": "Describe release qualification and native ticket work.",
       "was": "The guide named v0.4.2 and its earlier qualification boundary.",
       "now": "The current release is v0.4.3, with the exact missing migrations listed for updates from v0.4.2.",
@@ -94,10 +94,10 @@
     },
     {
       "id": "191_ticket_history_conversation.sql",
-      "buyerSteps": "Apply after 190 and before the updated Worker starts. Adds an index only; every row is retained. New conversations and ticket changes no longer scan the whole ticket history."
+      "buyerSteps": "Apply before the updated Worker starts. Adds an index only; every row is retained. New conversations and ticket changes no longer scan the whole ticket history."
     }
   ],
   "breaking": false,
-  "agentUpdateInstructions": "Update from v0.4.2 to v0.4.3 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.42. Apply the listed missing migrations in filename order before serving traffic. Migrations 124_contact_email_proof_guard.sql and 126_restore_contact_erasure.sql bracket the immutable 125 backfill: the identical runtime erasure trigger must be restored by 126 before writers resume, including when 125 was already applied. Preserve owner credentials, native support history, permissions, imports and erasure fences. Older releases apply their intermediate migrations too: 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Keep uncertain external outcomes without replay and retain human Send.",
-  "publicReleaseNotes": "HappyToHelp v0.4.3 qualifies fresh installation, README restore, reproducibility, delegation and upgrades from every published baseline, including v0.4.2. Portable restores retain the exact exported Durable Object metadata, native owners, support history and files. Upgrades preserve original values except the documented contact email-proof and owner-alert migrations when those are newly applied. Native ticket statuses, priorities, groups, fields, saved views and previewed bulk updates are included. Back up and apply the listed missing migrations before serving traffic. Commands retain @runeditrun/rer 0.2.42. Hosted and paid-provider quality remain separately qualified; accessibility remains on owner HOLD. Production is separate and unchanged."
+  "agentUpdateInstructions": "Update from v0.4.2 to v0.4.3 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.45. Apply the listed missing migrations in filename order before serving traffic. Migrations 124_contact_email_proof_guard.sql and 126_restore_contact_erasure.sql bracket the immutable 125 backfill: the identical runtime erasure trigger must be restored by 126 before writers resume, including when 125 was already applied. Preserve owner credentials, native support history, permissions, imports and erasure fences. Older releases apply their intermediate migrations too: 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Keep uncertain external outcomes without replay and retain human Send.",
+  "publicReleaseNotes": "HappyToHelp v0.4.3 qualifies fresh installation, README restore, reproducibility, delegation and upgrades from every published baseline, including v0.4.2. Portable restores retain the exact exported Durable Object metadata, native owners, support history and files. Upgrades preserve original values except the documented contact email-proof and owner-alert migrations when those are newly applied. Native ticket statuses, priorities, groups, fields, saved views and previewed bulk updates are included. Back up and apply the listed missing migrations before serving traffic. Commands use @runeditrun/rer 0.2.45. Hosted and paid-provider quality remain separately qualified; accessibility remains on owner HOLD. Production is separate and unchanged."
 }

@@ -13,7 +13,9 @@ export async function ticketArchivePolicy(root,input){
  const scratch=new DatabaseSync(':memory:'),config=policy(input),acceptedSchemas={...input.acceptedSchemas};
  const db={prepare(sql){return {bind(...args){this.args=args;return this;},async all(){return {results:scratch.prepare(sql).all(...(this.args??[]))};}};}};
  try{
-  const names=(await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')&&!/^13[0-9]_/.test(name)).sort();
+  // v0.4.2, the last pre-ticket release, ends at 190; every later migration
+  // (191's ticket_history index onward) only ever runs after the ticket model.
+  const names=(await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')&&!/^13[0-9]_/.test(name)&&name<'191_').sort();
   const plan=await Promise.all(names.map(async name=>unstable_splitSqlQuery(await readFile(join(root,'migrations',name),'utf8'))));
   for(let index=0;index<plan.length;index++){
    for(const sql of plan[index])scratch.exec(sql);

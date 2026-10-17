@@ -2730,7 +2730,7 @@
       "executable": false
     },
     "scripts/installer/ticket-archive-upgrade.mjs": {
-      "sha256": "9e117f8a857ee073da0e39fd60cf6c9363e050d1806a9075cba80d8719654108",
+      "sha256": "c3f3f71b3ee4939e43d7bfcb61f860a7de8e662812bbe710be72a4c22caa2339",
       "executable": false
     },
     "scripts/installer/ui/seed.mjs": {

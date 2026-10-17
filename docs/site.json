@@ -237,6 +237,10 @@
     {
       "source": "docs/LEGACY-EXPORT.md",
       "reason": "Read-only legacy database export tooling and access instructions for migration operators"
+    },
+    {
+      "source": "DEMO.md",
+      "reason": "Copied Base guide to rer demo and the hosted demo for maintainers"
     }
   ]
 }

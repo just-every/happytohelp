@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "domain": "run-happytohelp.com",
+  "name": "HappyToHelp",
+  "ownerEmail": "jordan@fernwoodhome.example",
+  "settings": {
+    "EMAIL_PROVIDER": "resend",
+    "EMAIL_FROM": "support@fernwoodhome.example"
+  }
+}

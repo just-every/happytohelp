@@ -1,8 +1,8 @@
 {
-  "key": "46cd1a397372505517c560d5715a7c6ede66ec6fbf772c7a9c9efe6e1935673d",
+  "key": "928e02bfcbbdc0715288121d37c010b1e378d39fcb3e6134140111a951df7dff",
   "origin": {
     "repository": "https://github.com/runeditrun/base.git",
-    "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+    "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
     "path": ".",
     "paths": [
       "live-proofs/git.mjs",

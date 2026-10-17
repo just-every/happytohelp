@@ -77,6 +77,58 @@ plans or the durable job; secret-bearing keys and credential URLs in persisted
 metadata are rejected rather than retained.
 
 
+## Optional D1 import door
+
+`src/door/index.ts` exports `createImportDoorHandler(options)`, returning an
+async `(request: Request) => Promise<Response | null>` handler for POST
+`/api/rer/import/{uploads,plan,apply,status,reconcile,undo}`. A seed must mount it
+explicitly, retain its own product parser and D1 target adapter, and apply
+`importDoorSchema` as a new numbered migration after the D1 schemas. No seed is
+mounted by this module. The door is disabled by default and answers 404 until
+the installation opts in. See `src/door/README.md` for the wire contract.
+
+Every request requires a short-lived, single-use ES256 grant under the same
+`OwnerClaimConfig` trusted key ring as owner-claim. Grants bind issuer, audience,
+installation, owner email, action, namespace, expiry, nonce and upload/record
+quotas. Apply additionally binds the retained plan fingerprint and the owner's
+approval record and time. Its body `reviewedFingerprint` must equal both the
+signed fingerprint and retained plan. Fresh grants are required for each chunk,
+status request and retry. Wrong installation, action, fingerprint, expired or
+replayed grants fail closed. Current enablement, key revocation and expiry are
+checked inside kit mutation batches; operator-session authority is unchanged.
+
+The seed calls `writeImportDoorSettings(database, installationId, settings,
+ownerPredicate)` from its existing server-only owner session or provisioning
+under the owner's approved plan. The SQL predicate checks that authority at the
+write. Settings contain `enabled` and optional `revokedKids`; revoked key ids
+remain revoked permanently, so rotation uses a new id. These controls are not
+public door routes. `readImportDoorHistory(database, installationId,
+ownerPredicate)` joins approval metadata to the real kit jobs, with the caption
+"approved via Business by <owner> at <time>, fingerprint <x>". Configure
+`ownerPrincipalId` as the seed owner's actual principal, and use that same
+principal in its ordinary history and undo context. The door does not rebind
+existing operator jobs or weaken their authority predicates.
+
+Each logical namespace has a lineage of distinct bundle snapshots. Kit
+namespaces derive from that logical namespace and the bundle SHA-256, preserving
+original source ids. Unchanged records have no effects but remain accounted for;
+changed records replace only rows the import created, fenced by their original
+provenance revision and native values. Missing source records are listed, never
+deleted. One plan remains pending per logical namespace until applied or undone;
+kit job state recovers the lineage after interrupted calls. The same bundle
+reuses its exact retained plan; changing mapping requires a fresh explicit
+namespace and review. Undo proceeds newest first and preserves native edits.
+
+Bounded catch-up requires a nonempty prior snapshot and a standing owner approval
+record and time. It refuses gone, conflicting, rejected or unmapped records and
+refuses when additions plus replacements are at least 5% of the baseline source
+count. Counts come from retained server-side source and native/provenance state,
+not caller totals. Reconciliation reports source-id disposition and presence,
+native/provenance revision, value, attachments and counts. Original bytes remain
+in the seed; RER keeps receipts only. Native field sampling and integrated seed
+acceptance remain the adopting seed's responsibility. This D1-only door has no
+external side effects and makes no hosted capacity claim.
+
 ## Exact originals and attribution (additive v1 custody contract)
 
 Readers supply `SourceArtifact.original = { status: 'available', base64 }` for
@@ -147,6 +199,22 @@ readback exposes `unavailable-after-erasure` and the named policy; original byte
 are never rewritten or reconstructed. The changed plan binds the choice, and
 artifact metadata and peer provenance locations lose potentially personal names.
 See the D1 erasure documentation for lineage requirements and supported scope.
+
+### Person erasure retires custody
+
+Retained jobs are never removed as an erasure shortcut, with one exception:
+`retireD1ImportCustody` deletes the whole custody of a job or stream whose
+header (namespace, operation key, original name, stage header) equals an exact
+identifier of the person being erased, because renaming it would break the source
+identities undo and resume depend on. The person's own records elsewhere become
+tombstones and every other job keeps undo and resume. A retired job or stream
+keeps only a plain retirement row naming the append-only erasure journal entry,
+answers `IMPORT_JOB_RETIRED` or `IMPORT_STREAM_RETIRED`, and keeps the native rows
+it wrote. Matching is exact; nothing is matched as a substring. The journal holds
+counts, receipt id and time, never an erased value; it and the retirements are
+append-only (no update, delete or insert over an existing key). A batch that
+rewrites or retires custody carries the product's restore checkpoint, so an
+archive older than the erasure is refused whole under the later journal.
 
 Credential-key validation permits a JSON boolean under the exact key `secret`,
 a common noncredential visibility flag. Every nonboolean value under that key,

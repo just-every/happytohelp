@@ -7,6 +7,7 @@ import {emailConfigured, providerRequest, providerReceipt, selectedEmailProvider
 import {SendGridSendError} from '../../vendor/base/modules/sendgrid-email/src/sender'
 export {emailConfigured} from './email-provider'
 import {HTTPException} from 'hono/http-exception'
+import {demoEffect} from '../../vendor/base/modules/demo/index.mjs'
 
 /** `headers` are extra message headers (loop suppression on notifications); like every
  * other field they are part of the delivery identity. */
@@ -46,7 +47,8 @@ function sendGridFailure(error:unknown){
 }
 async function submitClaimed(env:Env,input:EmailInput,from:string):Promise<EmailOutcome>{
  try{
-  const providerId=await sendThroughSelectedProvider(env,input,from)
+  // In a demo copy the send is mocked: it completes with a provider id and nothing leaves.
+  const providerId=await demoEffect(()=>sendThroughSelectedProvider(env,input,from),()=>`demo_${crypto.randomUUID()}`)
   await updateDelivery(env,input.idempotencyKey,'sent',null,providerId)
   return {id:providerId,state:'sent',...(emailMode(env)==='local'?{mode:'local' as const}:{})}
  }catch(error){

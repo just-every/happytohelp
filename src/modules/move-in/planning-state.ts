@@ -15,7 +15,9 @@ export async function planningState(env:Env,run:Run,records:SourceRecord[],prepa
  const {rows:nativeRows,oversized}=await readNativeCandidates(env.DB,run.project_id,candidates)
  for(const record of records)for(const effect of prepared.effects.get(`${record.kind}/${record.sourceId}`)??[])if(oversized.has(`${effect.targetKind}/${effect.targetId}`))prepared.rejections.set(`${record.kind}/${record.sourceId}`,'native_target_review_size_limit')
  const identities=records.map(record=>sourceIdentity(run.project_id,run.vendor,record.kind,record.sourceId))
- const claims=(await env.DB.prepare('SELECT s.identity,s.source_hash,s.mapping_version,s.effects_hash,s.job_id FROM ik_sources s JOIN ik_jobs j ON j.id=s.job_id WHERE j.destination=? AND j.namespace=? AND s.identity IN (SELECT value FROM json_each(?))').bind(run.project_id,run.vendor,JSON.stringify(identities)).all<SourceClaim>()).results
+ // Start with the requested identities even when a job index is available;
+ // unrelated sources in the same workspace must not enter this bounded read.
+ const claims=(await env.DB.prepare('SELECT s.identity,s.source_hash,s.mapping_version,s.effects_hash,s.job_id FROM json_each(?3) wanted CROSS JOIN ik_sources s ON s.identity=wanted.value CROSS JOIN ik_jobs j ON j.id=s.job_id WHERE j.destination=?1 AND j.namespace=?2').bind(run.project_id,run.vendor,JSON.stringify(identities)).all<SourceClaim>()).results
  const nativeIds=new Map<string,Set<string>>()
  for(const [kind,table] of [['contact','contacts'],['conversation','conversations'],['macro','macros'],['article','knowledge_articles'],['category','knowledge_categories'],['tag','workspace_tags']]){
   const ids=candidates.filter(candidate=>candidate.kind===kind).map(candidate=>candidate.id)

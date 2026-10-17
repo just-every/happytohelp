@@ -2263,6 +2263,10 @@
       "sha256": "c9f42925ee5686831e5c49dc5f7f9faf8674d38ad3b48983b74ad3b9ea6ac4ad",
       "executable": false
     },
+    "migrations/145_macro_audit_incarnations.sql": {
+      "sha256": "4f3e8aa31faf6ea9e006a7f32c8c386bce2ae88c2dd22d67c5fa0c9b6f55ab64",
+      "executable": false
+    },
     "migrations/170_knowledge_experience.sql": {
       "sha256": "ff77baa524431ca5334bf6be4d94aeb798faa5f0a5bf583b43b75cdb42a80933",
       "executable": false
@@ -3704,7 +3708,7 @@
       "executable": false
     },
     "src/modules/conversations/admission.ts": {
-      "sha256": "5fe7d4af7d9619e58f4d687f9860164f24d1f2d9cfe4bdf6feeec28aca17bef5",
+      "sha256": "43e37b7c7d4cb11addcbf968c1056f36dd8c57287de4e7e2d4e40803d1772a5b",
       "executable": false
     },
     "src/modules/conversations/citations.js": {
@@ -3716,7 +3720,7 @@
       "executable": false
     },
     "src/modules/conversations/insight-admission.ts": {
-      "sha256": "84d125733495d3d7077633a10cda61cd525009a937efa4e8d5b2c9335cde62a8",
+      "sha256": "07fdb6498c391861b0f3ea0a8ee117f34a06c5debac87d2984a98554eb2baaee",
       "executable": false
     },
     "src/modules/conversations/media-response.ts": {
@@ -5624,7 +5628,7 @@
       "executable": false
     },
     "src/modules/outcomes/state.ts": {
-      "sha256": "86625f24a64f287c531ed8fa23f8fc43f0a34411f2b73a726f28f483291463a5",
+      "sha256": "c8171c22c2759fa6a8428a042c29ba11fa0266d34d111218506a601e06ccd8ae",
       "executable": false
     },
     "src/modules/outcomes/survey-delivery.ts": {
@@ -5645,6 +5649,10 @@
     },
     "src/modules/outcomes/survey-store.ts": {
       "sha256": "ab22bade4ff13aa463674da730873ec3583d3015049effff216885cf6d4ea0b0",
+      "executable": false
+    },
+    "src/modules/outcomes/tracking.ts": {
+      "sha256": "e15e49a4ef606da59c20cf01d814940cbcc1bf45f8423d3d59c5e92a8cc0e973",
       "executable": false
     },
     "src/modules/plugin-sdk/host.ts": {
@@ -8948,7 +8956,7 @@
       "executable": false
     },
     "tests/demo-inbox.mjs": {
-      "sha256": "219788c0545dc76d31a20a4051eebcb60299358d572c321b2dbbbeeb58673fc2",
+      "sha256": "384d8b506b1937f60d0ee194291b3856b08d77948a668c4eb10623374cb249f3",
       "executable": false
     },
     "tests/demo-knowledge-activation.mjs": {
@@ -8956,7 +8964,7 @@
       "executable": false
     },
     "tests/demo-transcript-events.mjs": {
-      "sha256": "e4fd77d39ed01872fe6c8d367882697d3dea19b373a340cc2e7a9b8a6714d58e",
+      "sha256": "7bc7170b84d89e37d15c1efb0fda291eff979b422bdeb1c0d811c66955c369f3",
       "executable": false
     },
     "tests/eval-harness/fixtures/assist-human-voice.json": {
@@ -9208,7 +9216,7 @@
       "executable": false
     },
     "tests/helpers/delegation/browser-use.mjs": {
-      "sha256": "19906b1beb9049e958c7a3879a9b44abba856897e6b6bc3fdcccc3d1186fc178",
+      "sha256": "abb9d275b6df3c8ffa15cafc97ff02644a998ab1c4b2dfe1cd5febd26dbde556",
       "executable": false
     },
     "tests/helpers/delegation/computers.mjs": {

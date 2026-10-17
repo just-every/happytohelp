@@ -72,12 +72,12 @@ test('a chunked legacy package imports one chunk at a time into the same native 
   await importLegacy({DB:whole.db,FILES:await whole.files},bundle)
   const env={DB:app.db,FILES:await app.files},total=Object.values(bundle.tables).flat().length
   const damaged=join(scratch,'damaged');await cp(root,damaged,{recursive:true});const chunk=join(damaged,'rows-000003.json'),text=await readFile(chunk,'utf8');await writeFile(chunk,text.replace(/"id":"(.)/,(_,c)=>`"id":"${c==='x'?'y':'x'}`))
-  await assert.rejects(importPackage(damaged,env,packageModules),/digest mismatch/);await assert.rejects(importPackage(root,env,packageModules,{expectManifestSha256:'0'.repeat(64)}),/digest differs/)
+  await assert.rejects(importPackage(damaged,{env},packageModules),/digest mismatch/);await assert.rejects(importPackage(root,{env},packageModules,{expectManifestSha256:'0'.repeat(64)}),/digest differs/)
   assert.equal((await app.first('SELECT COUNT(*) n FROM legacy_import_runs')).n,0,'a damaged or unexpected package is refused before any write')
   let batches=0;const dropping={FILES:env.FILES,DB:new Proxy(env.DB,{get(target,key){if(key==='batch')return async statements=>{if(++batches>5)throw new Error('connection lost');return target.batch(statements)};const value=target[key];return typeof value==='function'?value.bind(target):value}})}
-  await assert.rejects(importPackage(root,dropping,packageModules),/connection lost/)
-  const resumed=await importPackage(root,env,packageModules,{expectManifestSha256:manifestSha256});assert.deepEqual([resumed.replayed,resumed.applied,resumed.sourceRows],[5,total-5,total])
-  const replay=await importPackage(root,env,packageModules);assert.deepEqual([replay.applied,replay.replayed],[0,total])
+  await assert.rejects(importPackage(root,{env:dropping},packageModules),/connection lost/)
+  const resumed=await importPackage(root,{env},packageModules,{expectManifestSha256:manifestSha256});assert.deepEqual([resumed.replayed,resumed.applied,resumed.sourceRows],[5,total-5,total])
+  const replay=await importPackage(root,{env},packageModules);assert.deepEqual([replay.applied,replay.replayed],[0,total])
   // Native publication triggers give each install's article its own random incarnation.
   const rows=async(target,table)=>(await target.sql(`SELECT * FROM ${table}`)).map(({source_incarnation,publication_version,...row})=>JSON.stringify(row)).sort()
   for(const table of ['projects','project_settings','public_project_aliases','email_settings','users','memberships','contacts','conversations','conversation_ai','conversation_buckets','messages','conversation_notes','context_tracked_events','media','ai_profiles','knowledge_datasets','knowledge_documents','knowledge_articles','local_jobs','billing_ledger'])assert.deepEqual(await rows(app,table),await rows(whole,table),table)

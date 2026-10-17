@@ -29,7 +29,7 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
  // legacy_import_rows records together in one batch.
  const identity=(table:string,values:unknown[])=>table+'\u0000'+JSON.stringify(values)
  const priors=new Map((await env.DB.prepare('SELECT source_table,source_id,row_digest FROM legacy_import_rows WHERE run_id=?').bind(plan.id).all<{source_table:string;source_id:string;row_digest:string}>()).results.map(r=>[identity(r.source_table,[r.source_id]),r.row_digest]))
- let applied=0,replayed=0
+ let applied=0,replayed=0,d1Ms=0,maxBatchMs=0
  for(const source of plan.rows){const prior=priors.get(identity(source.table,[source.sourceId]));if(prior!==undefined){if(prior!==source.rowDigest)throw new Error('Source row replay differs');replayed++}}
  const pending=plan.rows.filter(source=>!priors.has(identity(source.table,[source.sourceId])))
  const schemas=await targetSchemas(env.DB,pending.flatMap(source=>source.mapped.map(m=>m.table)))
@@ -39,7 +39,8 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
   const [table,keyList]=shape.split('\u0000'),keys=keyList.split(','),seen=new Set<string>()
   const wanted=rows.map(m=>{const row=columnsOf(m);for(const key of keys)text(row[key],`${table}.${key}`);return keys.map(k=>row[k])}).filter(values=>{const id=identity(table,values);if(seen.has(id))return false;seen.add(id);return true})
   for(const part of byteSlices(wanted,values=>utf8.encode(JSON.stringify(values)).length)){
-   const found=await env.DB.prepare(`SELECT t.* FROM ${sqlName(table)} t JOIN json_each(?) j ON ${keys.map((k,i)=>`t.${sqlName(k)} IS json_extract(j.value,'$[${i}]')`).join(' AND ')}`).bind(JSON.stringify(part)).all<Row>()
+   // Key columns are required and non-null, so a row-value IN reaches each key through its index.
+   const found=await env.DB.prepare(`SELECT * FROM ${sqlName(table)} WHERE (${keys.map(sqlName).join(',')}) IN (SELECT ${keys.map((_,i)=>`json_extract(value,'$[${i}]')`).join(',')} FROM json_each(?))`).bind(JSON.stringify(part)).all<Row>()
    for(const values of part)current.set(identity(table,values),null)
    for(const row of found.results)current.set(identity(table,keys.map(k=>row[k])),row)
   }
@@ -62,9 +63,10 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
   if(holds.length)statements.push(insertJson(env.DB,'INSERT OR IGNORE INTO legacy_import_holds(id,run_id,source_table,source_id,reason)',5,holds))
   if(reporting.length)statements.push(insertJson(env.DB,'INSERT OR IGNORE INTO reporting_legacy_conversations(project_id,conversation_id,run_id)',3,reporting))
   statements.push(insertJson(env.DB,'INSERT INTO legacy_import_rows(run_id,source_table,source_id,row_digest,source_json,target_table,target_key,status)',8,journal))
-  await env.DB.batch(statements);applied+=group.length
+  // D1 reports each statement's server time; the batch's sum is its share of the database's CPU.
+  const batch=(await env.DB.batch(statements)).reduce((ms,result)=>ms+Number(result.meta?.duration||0),0);applied+=group.length;d1Ms+=batch;maxBatchMs=Math.max(maxBatchMs,batch)
  }
- await env.DB.prepare("UPDATE legacy_import_runs SET state='complete',completed_at=? WHERE id=?").bind(Date.now(),plan.id).run();return {id:plan.id,...plan.summary,applied,replayed}
+ await env.DB.prepare("UPDATE legacy_import_runs SET state='complete',completed_at=? WHERE id=?").bind(Date.now(),plan.id).run();return {id:plan.id,...plan.summary,applied,replayed,d1Ms:Math.round(d1Ms),maxBatchMs:Math.round(maxBatchMs)}
 }
 // D1 limits a bound value to 2 MB. Half a megabyte of source rows keeps a group's
 // largest JSON parameter (its journal, which repeats each row escaped) under it.

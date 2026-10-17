@@ -1,6 +1,6 @@
 import {open} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {packageFile} from './package.mjs';
+import {inWaves,packageFile} from './package.mjs';
 
 const partBytes=8*1024*1024;
 const hex=buffer=>Buffer.from(buffer).toString('hex');
@@ -12,16 +12,15 @@ async function storedSha256(bucket,key){const object=await bucket.get(key);retur
  * its stored checksum; one without it (multipart, or written by something else) is
  * read back whole and hashed. An existing object with other bytes stops the import.
  * Each object is recorded in legacy_import_objects for the package run. */
-export async function importObjects(env,root,manifest,runId,{concurrency=1,progress=()=>{}}={}){
-  let index=0,uploaded=0,present=0;
-  const confirm=async object=>{const head=await env.FILES.head(object.key);if(!head)return false;if(head.size!==object.size||(head.checksums?.sha256?hex(head.checksums.sha256):await storedSha256(env.FILES,object.key))!==object.sha256)throw Error(`Existing R2 object differs: ${object.key}`);return true;};
-  const worker=async()=>{while(index<manifest.objects.length){const object=manifest.objects[index++];
+export async function importObjects(target,root,manifest,runId,{concurrency=1,progress=()=>{}}={}){
+  let uploaded=0,present=0;
+  const confirm=async object=>{const {FILES}=target.env,head=await FILES.head(object.key);if(!head)return false;if(head.size!==object.size||(head.checksums?.sha256?hex(head.checksums.sha256):await storedSha256(FILES,object.key))!==object.sha256)throw Error(`Existing R2 object differs: ${object.key}`);return true;};
+  await inWaves(manifest.objects,concurrency,async object=>{
     if(await confirm(object))present++;
-    else{await putObject(env.FILES,packageFile(root,object.file),object,runId);if(!await confirm(object))throw Error(`Imported R2 object missing: ${object.key}`);uploaded++;}
-    await env.DB.prepare('INSERT OR IGNORE INTO legacy_import_objects VALUES(?,?,?,?)').bind(runId,object.key,object.sha256,object.size).run();
+    else{await putObject(target.env.FILES,packageFile(root,object.file),object,runId);if(!await confirm(object))throw Error(`Imported R2 object missing: ${object.key}`);uploaded++;}
+    await target.env.DB.prepare('INSERT OR IGNORE INTO legacy_import_objects VALUES(?,?,?,?)').bind(runId,object.key,object.sha256,object.size).run();
     if((uploaded+present)%250===0)progress({objects:uploaded+present,uploaded,present});
-  }};
-  await Promise.all(Array.from({length:Math.max(1,concurrency)},worker));
+  },target);
   return {uploaded,present};
 }
 

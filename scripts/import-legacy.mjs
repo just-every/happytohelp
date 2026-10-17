@@ -16,14 +16,14 @@ const {localTarget,remoteTarget}=await import('./legacy-import/target.mjs')
 const concurrency=Number(value('--concurrency')??1);if(!Number.isSafeInteger(concurrency)||concurrency<1||concurrency>16)throw new Error(usage)
 // Progress is one JSON line per step or chunk on stderr: counts, ids and timings only.
 const progress=line=>process.stderr.write(JSON.stringify({at:new Date().toISOString(),...line})+'\n')
-async function run(env){
- if(pkg)return importPackage(pkg,env,{planImport,importLegacy,tableOrder,relationships,types},{expectManifestSha256:value('--expect-manifest-sha256'),concurrency,progress})
- const bundle=JSON.parse(await readFile(file,'utf8'));if(env)return importLegacy(env,bundle)
+async function run(target){
+ if(pkg)return importPackage(pkg,target,{planImport,importLegacy,tableOrder,relationships,types},{expectManifestSha256:value('--expect-manifest-sha256'),concurrency,progress})
+ const bundle=JSON.parse(await readFile(file,'utf8'));if(target)return importLegacy(target.env,bundle)
  const plan=await planImport(bundle);return {id:plan.id,...plan.summary}
 }
 if(!apply)console.log(JSON.stringify(await run(null),null,2))
 else{
  const target=remote?await remoteTarget({database:value('--database'),bucket:value('--bucket')}):await localTarget(value('--persist-to')??'.wrangler/state')
  progress({step:'target',target:target.label})
- try{console.log(JSON.stringify(await run(target.env),null,2))}finally{await target.close()}
+ try{console.log(JSON.stringify(await run(target),null,2))}finally{await target.close()}
 }

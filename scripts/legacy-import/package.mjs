@@ -51,3 +51,6 @@ export async function verifyPackage(root,manifest){
   if(entries.length!==manifest.objects.length||entries.some(e=>!manifest.objects.some(o=>o.key===e.key&&String(o.mediaId)===String(e.mediaId))))throw Error('Package attachment manifest mismatch');
   return counts;
 }
+
+/** Run up to `size` items at a time; between waves the target may renew its session. */
+export async function inWaves(items,size,run,target){for(let i=0;i<items.length;i+=Math.max(1,size)){await Promise.all(items.slice(i,i+Math.max(1,size)).map(run));await target?.renew?.();}}

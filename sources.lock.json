@@ -1741,7 +1741,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "df1781c7c495aa321aa41fb2c4b669df3505bbea943707411d38c6a320701bf1",
+      "sha256": "f7060b27437c485c9736a410577a150c49af6e2222515f77f447fce1ad572519",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -2034,6 +2034,10 @@
     },
     "migrations/180_account_security.sql": {
       "sha256": "45cc1b0f5a51616c5eff7d0e76b2abf150db7b77713f3b02d5052a0ab84e484e",
+      "executable": false
+    },
+    "migrations/181_context_message_subjects.sql": {
+      "sha256": "5fa04e8c84d8deade9fe2f4562c51c7d7f38a4d1dc87b7383a3d01c261768878",
       "executable": false
     },
     "OPERATIONS.json": {
@@ -2413,7 +2417,7 @@
       "executable": false
     },
     "scripts/import-legacy.mjs": {
-      "sha256": "f27c089db263fc86f58eb82b3fb500cab43096efc7b083ed1f36539f58043cfb",
+      "sha256": "de6df626bce246ffba34051c332866cbda2fa0a4aea74d37b98163cab57654b0",
       "executable": false
     },
     "scripts/independent/delegation-backup.py": {
@@ -2533,19 +2537,19 @@
       "executable": false
     },
     "scripts/legacy-import/import-package.mjs": {
-      "sha256": "d72c15bc7b35d4297c2cb7d3e58799ba2b38b2ff3dba134630065c1432d83f2b",
+      "sha256": "4b44ad8e63571262c837197640d0d2dab4e21f30260d8c08cd6a74d1efa8362d",
       "executable": false
     },
     "scripts/legacy-import/objects.mjs": {
-      "sha256": "72aa412653e975a34647391f2c167f381fee02e2b70d8a1f9dd2bafd3566251f",
+      "sha256": "879cc6fa82262e1cf265863fabaef45aee457e4f52fa69b8f33b02a87690d1a6",
       "executable": false
     },
     "scripts/legacy-import/package.mjs": {
-      "sha256": "5d2605d3ea1caf299639b5bb5fff9509fea6bf7d0f60d691214dd8938c64b75a",
+      "sha256": "8d66fc42e4e9c0f26855b191a90d012a44965a371a804e94e45f28a6d35c891f",
       "executable": false
     },
     "scripts/legacy-import/target.mjs": {
-      "sha256": "1169579436388122c774897e41a5fcdcaf9e4275e4d0e6627ca1cdf72e805299",
+      "sha256": "dc64b45723f1f1367c3c5fe15524774b4d2d3a1f7ff35ca7b4099c9a49227082",
       "executable": false
     },
     "scripts/legacy-scan/signatures.mjs": {
@@ -4353,7 +4357,7 @@
       "executable": false
     },
     "src/modules/legacy-import/importer.ts": {
-      "sha256": "7aefb5da87b7fd0db0a7018e677ffb722b8965831fede79b4fe60b2094f89a7f",
+      "sha256": "632de8de6f9aea0dde07ec45101a62269381340f08f8807eb549ccbacf479000",
       "executable": false
     },
     "src/modules/legacy-import/map-core.ts": {
@@ -4377,11 +4381,11 @@
       "executable": false
     },
     "src/modules/legacy-import/mapping.ts": {
-      "sha256": "eece52068f763c46edb36e8eaf053c8d8c9325aa39f5819b6666591cdc8ada2f",
+      "sha256": "ff47f8fd1846727af914d1752586038c3385fcb7eadc8b6542b5fa11299595c1",
       "executable": false
     },
     "src/modules/legacy-import/README.md": {
-      "sha256": "79473961701f7cb85011ec0c8a307395cadbb8a7501d215df7e3df53d97e9c4a",
+      "sha256": "351cee0db05d5e13b89ed247569e46978009f8015b7606e84c059001d8742819",
       "executable": false
     },
     "src/modules/legacy-import/relationships.ts": {
@@ -8985,7 +8989,7 @@
       "executable": false
     },
     "tests/journeys/legacy.mjs": {
-      "sha256": "a912e88ad8d03f686e128c9855d6e276e5c81c2ed03e6003a8faf4b2d7f8b8b4",
+      "sha256": "a0b5945180593564856d61cf9eb4623128547aebe7c04b32e573a50ec14ab121",
       "executable": false
     },
     "tests/journeys/move-in-admission.mjs": {

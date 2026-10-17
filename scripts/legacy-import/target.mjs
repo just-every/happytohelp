@@ -16,6 +16,12 @@ export async function localTarget(directory){
   }catch(error){await lock.close();await unlink(lockFile);throw error;}
 }
 
+// Wrangler's remote bindings (4.129) keep about one local workerd connection open
+// per binding call until the session ends. A long import renews its session after
+// this many calls, at a point with no call in flight, so it never runs the
+// machine out of ephemeral ports.
+const callsPerSession=1000;
+
 /** A deployed installation's own D1 database and R2 bucket, reached through
  * Wrangler remote bindings with the operator's Cloudflare API token. Only the
  * DB and FILES bindings exist: no queue, mail, AI or other binding is created,
@@ -31,8 +37,18 @@ export async function remoteTarget({database,bucket}){
   const directory=await mkdtemp(path.join(tmpdir(),'h2h-legacy-remote-')),configPath=path.join(directory,'wrangler.json');
   await writeFile(configPath,JSON.stringify({name:'happytohelp-legacy-import',compatibility_date:'2026-09-08',d1_databases:[{binding:'DB',database_name:database,database_id:matches[0].uuid,remote:true}],r2_buckets:[{binding:'FILES',bucket_name:bucket,remote:true}]}),{mode:0o600});
   const {getPlatformProxy}=await import('wrangler');
-  try{
-    const proxy=await getPlatformProxy({configPath,remoteBindings:true,persist:false});
-    return {env:proxy.env,label:`remote ${database} + ${bucket}`,database:matches[0].uuid,async close(){await proxy.dispose();await rm(directory,{recursive:true,force:true});}};
-  }catch(error){await rm(directory,{recursive:true,force:true});throw error;}
+  let proxy,env,calls=0,sessions=0;
+  const connect=async()=>{proxy=await getPlatformProxy({configPath,remoteBindings:true,persist:false});env=counted(proxy.env,()=>calls++);calls=0;sessions++;};
+  try{await connect();}catch(error){await rm(directory,{recursive:true,force:true});throw error;}
+  return {
+    get env(){return env;},label:`remote ${database} + ${bucket}`,database:matches[0].uuid,
+    get sessions(){return sessions;},
+    async renew(){if(calls<callsPerSession)return;await proxy.dispose();await connect();},
+    async close(){await proxy.dispose();await rm(directory,{recursive:true,force:true});},
+  };
+}
+// Each statement costs a prepare, a bind and an execution call.
+function counted(env,count){
+  const wrap=(target,costs)=>new Proxy(target,{get(object,key){const value=object[key];if(typeof value!=='function')return value;return (...args)=>{for(let i=0;i<(costs[key]??0);i++)count();return value.apply(object,args);};}});
+  return {DB:wrap(env.DB,{prepare:3,batch:1}),FILES:wrap(env.FILES,{head:1,get:2,put:1,createMultipartUpload:3,delete:1})};
 }

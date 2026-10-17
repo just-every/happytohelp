@@ -2549,7 +2549,7 @@
       "executable": false
     },
     "scripts/legacy-import/target.mjs": {
-      "sha256": "dc64b45723f1f1367c3c5fe15524774b4d2d3a1f7ff35ca7b4099c9a49227082",
+      "sha256": "09dc4afd28db6ead02f1cc64395474b4280a6f0f46dc218fd930bbec8b97e09c",
       "executable": false
     },
     "scripts/legacy-scan/signatures.mjs": {
@@ -4357,7 +4357,7 @@
       "executable": false
     },
     "src/modules/legacy-import/importer.ts": {
-      "sha256": "632de8de6f9aea0dde07ec45101a62269381340f08f8807eb549ccbacf479000",
+      "sha256": "be29300575ee42b43d7e6f25641a2c4006c6cd7398bee3a771babc88c2173b39",
       "executable": false
     },
     "src/modules/legacy-import/map-core.ts": {
@@ -4385,7 +4385,7 @@
       "executable": false
     },
     "src/modules/legacy-import/README.md": {
-      "sha256": "351cee0db05d5e13b89ed247569e46978009f8015b7606e84c059001d8742819",
+      "sha256": "a4a8ff4cd53c04b2a93117d7327da4566e291e65b1c153156c35201fd94ebfae",
       "executable": false
     },
     "src/modules/legacy-import/relationships.ts": {

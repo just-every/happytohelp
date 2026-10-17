@@ -45,7 +45,7 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
    for(const row of found.results)current.set(identity(table,keys.map(k=>row[k])),row)
   }
  }
- for(const group of byteSlices(pending,source=>utf8.encode(stable(source.row)).length)){
+ for(const group of byteSlices(pending,source=>utf8.encode(JSON.stringify(stable(source.row))).length)){
   const inserts=new Map<string,Map<string,unknown[][]>>(),holds:unknown[][]=[],reporting:unknown[][]=[],journal:unknown[][]=[]
   for(const source of group){
    for(const mapped of source.mapped){
@@ -68,9 +68,9 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
  }
  await env.DB.prepare("UPDATE legacy_import_runs SET state='complete',completed_at=? WHERE id=?").bind(Date.now(),plan.id).run();return {id:plan.id,...plan.summary,applied,replayed,d1Ms:Math.round(d1Ms),maxBatchMs:Math.round(maxBatchMs)}
 }
-// D1 limits a bound value to 2 MB. Half a megabyte of source rows keeps a group's
-// largest JSON parameter (its journal, which repeats each row escaped) under it.
-const groupBytes=512*1024,parameterBytes=2_000_000,utf8=new TextEncoder()
+// D1 limits a bound value to 2 MB. A group holds at most 1.25 MB of its journal's
+// escaped source rows, the largest of its JSON parameters.
+const groupBytes=1_250_000,parameterBytes=2_000_000,utf8=new TextEncoder()
 function byteSlices<T>(items:T[],size:(item:T)=>number){const result:T[][]=[];let part:T[]=[],bytes=0;for(const item of items){const n=size(item);if(part.length&&bytes+n>groupBytes){result.push(part);part=[];bytes=0}part.push(item);bytes+=n}if(part.length)result.push(part);return result}
 function insertJson(db:D1Database,into:string,width:number,rows:unknown[][]){const json=JSON.stringify(rows);if(utf8.encode(json).length>parameterBytes)throw new Error('Legacy import group exceeds the D1 bound value limit');return db.prepare(`${into} SELECT ${Array.from({length:width},(_,i)=>`json_extract(value,'$[${i}]')`).join(',')} FROM json_each(?)`).bind(json)}
 const schemaCache=new WeakMap<D1Database,Map<string,Set<string>>>()

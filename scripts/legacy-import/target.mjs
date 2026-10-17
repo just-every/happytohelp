@@ -16,11 +16,11 @@ export async function localTarget(directory){
   }catch(error){await lock.close();await unlink(lockFile);throw error;}
 }
 
-// Wrangler's remote bindings (4.129) keep about one local workerd connection open
-// per binding call until the session ends. A long import renews its session after
-// this many calls, at a point with no call in flight, so it never runs the
-// machine out of ephemeral ports.
-const callsPerSession=1000;
+// Wrangler's remote bindings (4.129) open local connections for every binding call
+// and keep about one of them open until the session ends, while the rest close
+// into TIME_WAIT. A long import therefore paces its calls and renews its session
+// between waves of work, so it never runs the machine out of ephemeral ports.
+const callsPerSession=500,callsPerSecond=25;
 
 /** A deployed installation's own D1 database and R2 bucket, reached through
  * Wrangler remote bindings with the operator's Cloudflare API token. Only the
@@ -37,8 +37,8 @@ export async function remoteTarget({database,bucket}){
   const directory=await mkdtemp(path.join(tmpdir(),'h2h-legacy-remote-')),configPath=path.join(directory,'wrangler.json');
   await writeFile(configPath,JSON.stringify({name:'happytohelp-legacy-import',compatibility_date:'2026-09-08',d1_databases:[{binding:'DB',database_name:database,database_id:matches[0].uuid,remote:true}],r2_buckets:[{binding:'FILES',bucket_name:bucket,remote:true}]}),{mode:0o600});
   const {getPlatformProxy}=await import('wrangler');
-  let proxy,env,calls=0,sessions=0;
-  const connect=async()=>{proxy=await getPlatformProxy({configPath,remoteBindings:true,persist:false});env=counted(proxy.env,()=>calls++);calls=0;sessions++;};
+  let proxy,env,calls=0,sessions=0;const pace=pacer(callsPerSecond);
+  const connect=async()=>{proxy=await getPlatformProxy({configPath,remoteBindings:true,persist:false});env=paced(proxy.env,n=>{calls+=n;return pace(n);});calls=0;sessions++;};
   try{await connect();}catch(error){await rm(directory,{recursive:true,force:true});throw error;}
   return {
     get env(){return env;},label:`remote ${database} + ${bucket}`,database:matches[0].uuid,
@@ -47,8 +47,22 @@ export async function remoteTarget({database,bucket}){
     async close(){await proxy.dispose();await rm(directory,{recursive:true,force:true});},
   };
 }
-// Each statement costs a prepare, a bind and an execution call.
-function counted(env,count){
-  const wrap=(target,costs)=>new Proxy(target,{get(object,key){const value=object[key];if(typeof value!=='function')return value;return (...args)=>{for(let i=0;i<(costs[key]??0);i++)count();return value.apply(object,args);};}});
-  return {DB:wrap(env.DB,{prepare:3,batch:1}),FILES:wrap(env.FILES,{head:1,get:2,put:1,createMultipartUpload:3,delete:1})};
+/** Wait so that calls average no more than `rate` per second, in arrival order. */
+function pacer(rate){let next=0;return n=>{const now=Date.now(),start=Math.max(now,next);next=start+n*1000/rate;return start>now?new Promise(resolve=>setTimeout(resolve,start-now)):undefined;};}
+// Synchronous calls (prepare, bind) are counted and paid for at the next asynchronous
+// call. Wrapped statements are unwrapped before they reach batch().
+function paced(env,spend){
+  let owed=0;const real=new WeakMap(),pay=async n=>{const due=n+owed;owed=0;await spend(due);};
+  const statement=inner=>{const outer=new Proxy(inner,{get(object,key){const value=object[key];if(typeof value!=='function')return value;
+    if(key==='bind')return (...args)=>{owed++;return statement(value.apply(object,args));};
+    if(['first','all','run','raw'].includes(key))return async(...args)=>{await pay(1);return value.apply(object,args);};
+    return value.bind(object);}});real.set(outer,inner);return outer;};
+  const DB=new Proxy(env.DB,{get(object,key){const value=object[key];if(typeof value!=='function')return value;
+    if(key==='prepare')return sql=>{owed++;return statement(value.call(object,sql));};
+    if(key==='batch')return async statements=>{await pay(1);return value.call(object,statements.map(s=>real.get(s)??s));};
+    return value.bind(object);}});
+  const FILES=new Proxy(env.FILES,{get(object,key){const value=object[key];if(typeof value!=='function')return value;
+    if(['head','get','put','delete','createMultipartUpload'].includes(key))return async(...args)=>{await pay(1);return value.apply(object,args);};
+    return value.bind(object);}});
+  return {DB,FILES};
 }

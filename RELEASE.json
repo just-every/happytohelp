@@ -1,49 +1,19 @@
 {
-  "version": "0.4.3",
-  "previousVersion": "0.4.2",
+  "version": "0.4.4",
+  "previousVersion": "0.4.3",
   "date": "2026-10-18",
   "contractChanges": {
-    "NATIVE-001": {
-      "change": "changed",
-      "summary": "Release qualification follows the complete local owner entry and exact portable state.",
-      "was": "Slow qualification invoked reproducibility without pnpm, dropped dev admission on browser API reads and compared restore with pre-export snapshot metadata.",
-      "now": "One pnpm entry point qualifies fresh clones, README restores, reproducibility, delegation at 1440/390 and every published upgrade baseline. Restore preserves the exported Durable Object snapshot. Upgrades compare every original column except the exact documented 125 contact email-proof and 129 owner-alert transformations. New migrations bracket the immutable 125 backfill with suspension/restoration of the identical 115 erasure trigger so an interrupted erasure cannot rewrite retained integration history during upgrade.",
-      "migrationIds": [
-        "124_contact_email_proof_guard.sql",
-        "126_restore_contact_erasure.sql"
-      ]
-    },
     "STATUS-001": {
       "change": "changed",
-      "summary": "Native ticket lifecycle and custom statuses.",
-      "was": "Resolution was open or closed.",
-      "now": "New, Open, Pending, On-hold, Solved and Closed plus category-mapped custom statuses retain conversation history. Closed tickets are final; time-based auto-close and linked follow-ups remain unimplemented.",
-      "migrationIds": [
-        "130_ticket_model.sql"
-      ]
+      "summary": "Replies to Closed tickets by email.",
+      "was": "Closed tickets were final and a customer reply opened a new ticket, but a widget visitor's emailed reply could land on a separate contact, a reply could join another open ticket of the customer's, and a teammate's emailed reply was handled like a customer's.",
+      "now": "The sender of mail to a Closed ticket is recognized exactly as on an open ticket, including a widget visitor answering through the reply address. Each customer reply opens a new ticket for that same customer, never joining another ticket of theirs. A teammate's emailed reply is refused: the Email Worker bounces it with the reason and SendGrid or the mail gateway sends the teammate one notice. Nothing is stored and no contact is made from their address. Time-based auto-close and linked follow-up tickets remain unimplemented."
     },
-    "QUEUE-001": {
+    "MAIL-001": {
       "change": "changed",
-      "summary": "Manual group and teammate assignment.",
-      "was": "Manual human/AI assignment only.",
-      "now": "Groups and membership permit manual group/operator assignment. Automated capacity and round-robin routing remain unimplemented."
-    },
-    "QUEUE-002": {
-      "change": "changed",
-      "summary": "Fields, priorities, saved views and previewed bulk updates.",
-      "was": "Tags and basic filters.",
-      "now": "Ticket fields, priorities, saved filters/sorts and per-record previewed bulk changes preserve permissions and stale-write guards.",
-      "migrationIds": [
-        "130_ticket_model.sql",
-        "131_ticket_views_bulk.sql",
-        "132_ticket_erasure.sql"
-      ]
-    },
-    "QUEUE-003": {
-      "change": "changed",
-      "summary": "Personal and shared saved views.",
-      "was": "Basic filters and stale-frontier guards.",
-      "now": "Personal/shared saved views accompany existing internal notes, saved replies and stale-frontier guards; presence and mention features remain incomplete."
+      "summary": "Inbound mail identifies its sender before applying the Closed-ticket rule.",
+      "was": "Mail addressed to a Closed ticket took the new-ticket path before its sender was resolved against that ticket.",
+      "now": "The Email Worker, SendGrid Inbound Parse and JSON gateway resolve the sender against the Closed ticket (its reply address, requester, participants and preferred address) first, so customers, widget visitors and teammates receive the same outcome through each door. Teammate mail is refused with a bounce, or a 422 and one notice; redelivered mail is still received once."
     }
   },
   "proseChanges": [
@@ -52,52 +22,32 @@
       "change": "changed",
       "date": "2026-10-18",
       "summary": "Deploy the current qualified tag.",
-      "was": "The guide named v0.4.2 and its earlier qualification boundary.",
-      "now": "The current release is v0.4.3, with the exact missing migrations listed for updates from v0.4.2.",
-      "ownerAction": "Back up, retain private settings and existing data, and apply only the missing migrations in order before serving traffic."
+      "was": "The guide named v0.4.3.",
+      "now": "The current release is v0.4.4, with no migrations missing from v0.4.3.",
+      "ownerAction": "Back up, retain private settings and existing data, and replace the Worker."
     },
     {
       "document": "CHANGELOG.md",
       "change": "changed",
       "date": "2026-10-18",
-      "summary": "Describe release qualification and native ticket work.",
-      "was": "The guide named v0.4.2 and its earlier qualification boundary.",
-      "now": "The current release is v0.4.3, with the exact missing migrations listed for updates from v0.4.2.",
-      "ownerAction": "Back up, retain private settings and existing data, and apply only the missing migrations in order before serving traffic."
+      "summary": "Describe replies to Closed tickets and the capacity check.",
+      "was": "The newest notes were for v0.4.3.",
+      "now": "The v0.4.4 notes describe customer and teammate email replies to Closed tickets and the live-memory capacity check.",
+      "ownerAction": "Read the notes for every version between yours and v0.4.4."
+    },
+    {
+      "document": "docs/tickets.md",
+      "change": "changed",
+      "date": "2026-10-18",
+      "summary": "Explain how email replies to Closed tickets are handled.",
+      "was": "A customer reply to a Closed ticket opened a new ticket; teammate replies were not described.",
+      "now": "Customer replies are recognized exactly as on an open ticket and open a new ticket for the same customer; teammate email replies are refused with a bounce or notice.",
+      "ownerAction": "Teammates answer Closed-ticket follow-ups from the dashboard."
     }
   ],
   "extensionPointChanges": [],
-  "migrations": [
-    {
-      "id": "124_contact_email_proof_guard.sql",
-      "buyerSteps": "With all writers stopped, suspend the 115 native_integration_erasure trigger before the immutable 125 metadata-only email-proof backfill. Preserve pre-existing integration rows for interrupted erasures. Do not serve traffic until 126 restores the guard."
-    },
-    {
-      "id": "126_restore_contact_erasure.sql",
-      "buyerSteps": "Restore the exact 115 native_integration_erasure trigger after 125, without changing rows. The original runtime erasure guard is in place before traffic resumes."
-    },
-    {
-      "id": "130_ticket_model.sql",
-      "buyerSteps": "Adds ticket columns and backfills only those new columns from retained conversation state; adds statuses per project. Existing conversation columns remain exact."
-    },
-    {
-      "id": "131_ticket_views_bulk.sql",
-      "buyerSteps": "Creates saved-view storage without changing existing rows."
-    },
-    {
-      "id": "132_ticket_erasure.sql",
-      "buyerSteps": "Adds contact_erasures.ticket_records with default 0; prior erasure values remain."
-    },
-    {
-      "id": "182_import_kit_reversal_retirement.sql",
-      "buyerSteps": "Adds import preparation, retirement and erasure custody and narrows the stream revision trigger for recorded retirement; existing custody rows remain exact."
-    },
-    {
-      "id": "191_ticket_history_conversation.sql",
-      "buyerSteps": "Apply before the updated Worker starts. Adds an index only; every row is retained. New conversations and ticket changes no longer scan the whole ticket history."
-    }
-  ],
+  "migrations": [],
   "breaking": false,
-  "agentUpdateInstructions": "Update from v0.4.2 to v0.4.3 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.45. Apply the listed missing migrations in filename order before serving traffic. Migrations 124_contact_email_proof_guard.sql and 126_restore_contact_erasure.sql bracket the immutable 125 backfill: the identical runtime erasure trigger must be restored by 126 before writers resume, including when 125 was already applied. Preserve owner credentials, native support history, permissions, imports and erasure fences. Older releases apply their intermediate migrations too: 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Keep uncertain external outcomes without replay and retain human Send.",
-  "publicReleaseNotes": "HappyToHelp v0.4.3 qualifies fresh installation, README restore, reproducibility, delegation and upgrades from every published baseline, including v0.4.2. Portable restores retain the exact exported Durable Object metadata, native owners, support history and files. Upgrades preserve original values except the documented contact email-proof and owner-alert migrations when those are newly applied. Native ticket statuses, priorities, groups, fields, saved views and previewed bulk updates are included. Back up and apply the listed missing migrations before serving traffic. Commands use @runeditrun/rer 0.2.45. Hosted and paid-provider quality remain separately qualified; accessibility remains on owner HOLD. Production is separate and unchanged."
+  "agentUpdateInstructions": "Update from v0.4.3 to v0.4.4 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.45. v0.4.4 adds no migrations; replace the Worker and resume traffic. Older releases first apply every migration they lack in filename order, as listed in the v0.4.3 release: migrations 124_contact_email_proof_guard.sql and 126_restore_contact_erasure.sql bracket the immutable 125 backfill, and the identical runtime erasure trigger must be restored by 126 before writers resume. 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Preserve owner credentials, native support history, permissions, imports and erasure fences. Keep uncertain external outcomes without replay and retain human Send.",
+  "publicReleaseNotes": "HappyToHelp v0.4.4 handles email replies to Closed tickets: a customer's reply, including a widget visitor's through the reply address, opens a new ticket for that same customer, and a teammate's reply is refused with a bounce or notice and never stored. The 1,000-conversation import check now measures live memory after garbage collection. There are no new migrations; installations on v0.4.3 back up and replace the Worker. Commands use @runeditrun/rer 0.2.45. Hosted and paid-provider quality remain separately qualified; accessibility remains on owner HOLD. Production is separate and unchanged."
 }

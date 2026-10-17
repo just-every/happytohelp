@@ -8,10 +8,11 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
-## Unreleased
+## 0.4.4 — 2026-10-18
 
 - **Replies to Closed tickets.** A customer's emailed reply to a Closed ticket is recognized as on an open ticket, including a widget visitor answering through the reply address, and always opens a new ticket for that customer instead of a separate contact or another open ticket of theirs. A teammate's emailed reply to a Closed ticket is refused with a bounce or an email notice, never stored as a customer message.
 - **Capacity check.** The 1,000-conversation import journey asserts live isolate memory after a forced garbage collection, below 64 MiB, instead of an uncollected heap figure that moved with GC timing.
+- **Upgrade from 0.4.3.** No new migrations. Back up, then replace the Worker; existing credentials, support history and file bytes remain.
 
 ## 0.4.3 — 2026-10-18
 

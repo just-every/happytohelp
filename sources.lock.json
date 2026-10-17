@@ -1397,7 +1397,7 @@
       "executable": false
     },
     "AGENTS.md": {
-      "sha256": "f03fb4775ae58f5914a968c15af131b6cb8ec728c7c5dd68ca06b75e4e74b87e",
+      "sha256": "a8bbc04778cd37d619930e31278a4db8e4c5ec3ed8e1d155ec4f2d77f1bf3b60",
       "executable": false
     },
     "base-copies.json": {
@@ -1457,11 +1457,11 @@
       "executable": false
     },
     "docs/INDEPENDENT-RELEASE.md": {
-      "sha256": "7a26808e7866f94f3eb3eda03ee0ba5d5529004de5d4c5d8911c7a19c9b009cf",
+      "sha256": "0fda8f83594a2c7323658b0ce0e6bd86791890b9f58431255fe5b7192e74227a",
       "executable": false
     },
     "docs/INSTALLER.md": {
-      "sha256": "0668991ac0d676cba308647be6eb31eb84c32e8cab77f424649de9890d4beeba",
+      "sha256": "f317edcfc80125091ffdb162bca202eff0d248e5830c9fbc6c1c20ac15e62f1c",
       "executable": false
     },
     "docs/legacy-entry-points.md": {
@@ -2013,15 +2013,15 @@
       "executable": false
     },
     "OPERATIONS.md": {
-      "sha256": "b96a539ecb83f773a7a91ecbff391a697b3b6afaa608732d5fc296f221638cba",
+      "sha256": "fc50dd818e97578ca08992f7d697eb6e4839c183e6fd862119577b76976f171b",
       "executable": false
     },
     "package.json": {
-      "sha256": "9fc43930a074f5a1f462eb9faefd23cc30e9668a884e2b95fd6c847c5e84d62d",
+      "sha256": "cccf60c99424e5e27e3d9befaa72ca4db3bb738005e3394e44ae6644ff6e80a5",
       "executable": false
     },
     "pnpm-lock.yaml": {
-      "sha256": "63692254f3e0fd2e2cd6e08485c6194cb36ccc19adbadf367e71794466659b73",
+      "sha256": "4460150a808d21d2051c90609f37db13f056302f617a7cf878cf6e7cd32594ca",
       "executable": false
     },
     "public/fonts/inter/InterVariable.woff2": {
@@ -2073,7 +2073,7 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "c1f3e2043dfbac7b97fd8d3cb4f56c17c7f2be2ecca8331171d2e29c90f32118",
+      "sha256": "f53b0f42dac4fae38e2975fcec0471b889d1eb15fc71ae9031ccdf33a897547c",
       "executable": false
     },
     "RELEASE.json": {
@@ -2089,7 +2089,7 @@
       "executable": false
     },
     "RUN-LOCALLY.md": {
-      "sha256": "ffba1d08d46783b5f6b6d65a73f717471609b097c27ef474f18bf586a536635b",
+      "sha256": "816f3a5500fad402374d8819253befe34b51d52691b943232af7bffe14585813",
       "executable": false
     },
     "scripts/build-local-agent.cjs": {
@@ -2457,7 +2457,7 @@
       "executable": false
     },
     "SEED-COMMAND-CONTRACT.md": {
-      "sha256": "3f5c0e21b82abef2a08560e7d3e65f467d6fce396e85555bf7f804ce3f6ce48c",
+      "sha256": "26fa9d9e8952d1fa5551f4806dec25d36b7e5257ec4619b6e0f52a2535cc7329",
       "executable": false
     },
     "seed.json": {

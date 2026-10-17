@@ -43,7 +43,7 @@ The latest tagged release is 0.4.1; `main` carries 0.5.0 until its `v0.5.0` tag
 is cut. Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
-`@runeditrun/rer` package pinned to 0.2.25; local dev starts without private setup
+`@runeditrun/rer` package pinned to 0.2.42; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
 Back up and apply `120_activation_observations.sql` then
@@ -127,11 +127,12 @@ rer deploy --dry-run
 rer deploy --environment production
 ```
 
-With rer 0.2.25, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
-`EMAIL_API_KEY` inputs for dry run and real deployment. Dry run validates their
-shape and the build locally, makes no provider request and sends no mail.
-It needs no Cloudflare account. To see a dry run before you have chosen a mail
-service, give it stand-in mail values in a private file; nothing is sent. Replace
+Real deployment needs private `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
+inputs. With rer 0.2.42 a dry run validates their shape when you supply them, and
+otherwise goes ahead and lists them as needed for the real deploy. Dry run builds
+locally, makes no provider request and sends no mail.
+It needs no Cloudflare account. To check mail values before you deploy, put them
+in a private file; nothing is sent. Replace
 `YOUR-DOMAIN` with your business's domain and `YOUR-EMAIL` with your own address:
 the owner email must be real, because example and test domains are refused.
 

@@ -74,8 +74,9 @@ answers use the declared `rer-setup.json` field names.
 rer deploy --dry-run
 ```
 
-With rer 0.2.25, supply the same private `EMAIL_PROVIDER`, `EMAIL_FROM` and
-`EMAIL_API_KEY` inputs for dry run and real deployment, as described in
+Real deployment needs private `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
+inputs. With rer 0.2.42 a dry run validates them when supplied and otherwise lists
+them as needed for the real deploy, as described in
 [Operations](OPERATIONS.md#deploy-to-your-cloudflare-account). Dry run validates
 the input shape, real deployment declaration and build locally; no deployment
 occurs, no provider request is made and no mail is sent. Real `rer deploy`

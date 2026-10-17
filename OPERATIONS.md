@@ -20,7 +20,7 @@ password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI
 account are needed. Use `rer dev --stop` from the checkout to stop the managed app.
 
-The checkout pins **`@runeditrun/rer` 0.2.25** in `package.json` and
+The checkout pins **`@runeditrun/rer` 0.2.42** in `package.json` and
 `pnpm-lock.yaml`. The launcher you run (npx or a global install) may have a different
 version; inside the checkout it provisions the tools and delegates to the pinned
 local package. Updating the launcher does not change the project's pin.
@@ -194,20 +194,26 @@ a real mailbox privately in `OWNER_EMAIL` or an owned 0600 `--env-file` for both
 dry run and deployment. Rer generates missing setup/encryption secrets. It also deploys
 the generated `INBOUND_EMAIL_TOKEN` for reply-mailbox authentication. Existing
 Worker secrets are retained; use `rer deploy --set-secret NAME` to change one
-deliberately.
+deliberately. Rer keeps the values it generates (`INBOUND_EMAIL_TOKEN`,
+`INTEGRATION_ENCRYPTION_KEY`, `H2H_OWNER_RECOVERY_KEY`) in the private 0600 file
+`.rer/deploy/<environment>.secrets.env` beside `.rer/deploy/<environment>.json`.
+Back up both with the installation; to deploy from another checkout, copy both
+there. Without the secrets file, a redeploy still keeps every secret the live
+Worker already holds and sends only ones it lacks.
 
 The declaration maps the same `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`
 inputs to rer's shared `MAIL_PROVIDER`, `MAIL_FROM` and `MAIL_API_KEY` preflight
-bindings as well as HappyToHelp's native bindings. Rer 0.2.25 requires these same
-mail inputs for both `rer deploy --dry-run` and real deployment. Dry run validates
-their shape and the build locally; it makes no provider requests and sends no mail.
+bindings as well as HappyToHelp's native bindings. Real deployment requires these
+mail inputs. With rer 0.2.42, `rer deploy --dry-run` validates their shape when you
+supply them, and otherwise goes ahead without them and lists them as needed for the
+real deploy. Dry run builds locally; it makes no provider requests and sends no mail.
 
 Cloudflare Email Sending additionally needs `EMAIL_ACCOUNT_ID`. Add
 `{"binding":"EMAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}` to the
 declaration's `secrets` array, plus
 `{"binding":"MAIL_ACCOUNT_ID","environment":"EMAIL_ACCOUNT_ID"}`, and supply that account ID privately before deploying
-with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.25 requires
-every declared secret on a new Worker and has no conditional secret declaration.
+with Cloudflare mail. It is not required for Resend or SendGrid; rer 0.2.42 requires
+every declared secret not marked `optional` on a new Worker.
 
 Preserve existing keys and owner data. Configure other optional mail/model inputs
 through the supported runtime declaration and native workspace settings. Local

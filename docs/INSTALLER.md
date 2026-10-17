@@ -182,8 +182,9 @@ restore. Re-enter private configuration before setup/dev. See
 
 ## Deploy and inspect
 
-Rer 0.2.25 requires the same private mail inputs for deployment dry runs and real
-deployment: `EMAIL_PROVIDER`, `EMAIL_FROM` and `EMAIL_API_KEY`. The declaration maps
+Real deployment requires private mail inputs: `EMAIL_PROVIDER`, `EMAIL_FROM` and
+`EMAIL_API_KEY`. With rer 0.2.42 a dry run validates them when supplied and
+otherwise lists them as needed. The declaration maps
 these to both rer's `MAIL_*` preflight bindings and HappyToHelp's native `EMAIL_*`
 bindings. For Cloudflare mail, supply the additional account ID described in
 [Operations](../OPERATIONS.md#deploy-to-your-cloudflare-account).

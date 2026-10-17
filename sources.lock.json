@@ -3404,6 +3404,10 @@
       "sha256": "fdf79861eff2e88872960b73fc3b2a6cb3e79f3ebb7cbb05d4b23bf1400982db",
       "executable": false
     },
+    "src/modules/identity/two-factor/password-proof.ts": {
+      "sha256": "8839a9a7513441f890545ceb96aa0acce85aff993adff458350bb92f76b7a6a1",
+      "executable": false
+    },
     "src/modules/identity/two-factor/policy-routes.ts": {
       "sha256": "a1411567560a8382f90352006a93da0a863467d63f4f318af689aaf38d33f982",
       "executable": false

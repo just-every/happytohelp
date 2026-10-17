@@ -9385,7 +9385,7 @@
       "executable": false
     },
     "tests/reports/prior-schema-upgrade.mjs": {
-      "sha256": "69f3f99d6624fa1e03dcc77fbc47e36336cff73ddb6878f4d377c65b3265317b",
+      "sha256": "0cd7c19a78555961706fd9a180feff0120d6fba118e04145ba9aec31d2eb165e",
       "executable": false
     },
     "tests/reports/ratings.mjs": {

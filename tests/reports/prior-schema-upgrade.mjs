@@ -166,6 +166,12 @@ try {
         assert.equal(current,undefined,'category creation has no blanket invalidation trigger');
         continue;
       }
+      // Migration 181 redefines the message context trigger to reach its contact and author through the subject key.
+      if(entry.name==='context_message_added'){
+        assert.ok(current?.sql.includes('subject_id IN (SELECT contact_id FROM conversations WHERE id=NEW.conversation_id AND project_id=NEW.project_id UNION SELECT NEW.actor_id)'),'the message context trigger reaches its subjects through the key');
+        assert.deepEqual({...current,sql:entry.sql},entry,'the message context trigger keeps its schema identity');
+        continue;
+      }
       if(entry.name==='edition_category_delete'){
         assert.ok(current,'category deletion retains its invalidation trigger');
         assert.deepEqual({...current,sql:entry.sql},entry,'category deletion retains its schema identity');

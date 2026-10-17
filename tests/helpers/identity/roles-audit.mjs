@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import {startApp} from '../../journeys/kit/app.mjs'
+import {startApp,sha} from '../../journeys/kit/app.mjs'
 import {challengeOf,consentPage,decide} from '../delegation/applications.mjs'
 
 /**
@@ -77,6 +77,9 @@ export async function rolesAuditJourney(){
   const profilePath=`/api/management/profile?projectId=${w.projectId}`,profile=(await call(profilePath,undefined,w.tokens.owner)).data.data
   const moved=await call(profilePath,{...profile,email:'owner-elsewhere@example.com'},w.tokens.owner,'PUT');assert.equal(moved.status,403);assert.equal(moved.data.code,'step_up_required')
   assert.equal((await call(profilePath,profile,w.tokens.owner,'PUT')).status,200)
+  // A first password is a credential install too: the owner has none (as no teammate moved in from legacy has), and an aged proof cannot set one.
+  const firstPassword=await call('/api/identity/password',{password:'held-session-chosen-password'},w.tokens.owner);assert.equal(firstPassword.status,403);assert.equal(firstPassword.data.code,'step_up_required')
+  assert.equal((await app.first('SELECT count(*) n FROM credentials WHERE user_id=?',w.users.owner)).n,0);assert.equal((await app.first('SELECT count(*) n FROM sessions WHERE actor_id=? AND revoked_at IS NOT NULL',w.users.owner)).n,0)
   // Installing a connected application with an aged proof is refused too: registering one, and approving its access.
   const ownerConsent=await consentPage(browser,consent,w.tokens.owner)
   for(const refused of [await browser('/delegation/settings/clients',{cookie:w.tokens.owner,body:{...register,id:'docs'}}),await decide(browser,ownerConsent,'approve',w.tokens.owner)]){assert.equal(refused.status,403);assert.equal((await refused.json()).code,'step_up_required')}
@@ -119,5 +122,20 @@ export async function rolesAuditJourney(){
   assert.ok(page.data.every(row=>row.category==='auth'))
   assert.equal((await call(`${P}/audit/holds/${hold.data.data.id}/release`,{},w.tokens.owner)).status,200)
   assert.equal((await call(`${P}/audit`,undefined,w.tokens.operator)).status,403,'agents do not read the security log')
+
+  // A side-panel plugin receives the open conversation: adding one or pointing it elsewhere on an aged proof is refused, like a webhook.
+  await app.db.prepare("INSERT INTO plugins(id,project_id,name,url,created_at) VALUES('plugin-r',?,'Order lookup','https://plugins.example/lookup.html',1)").bind(w.projectId).run()
+  await app.db.prepare('UPDATE session_factors SET verified_at=verified_at-? WHERE user_id=?').bind(20*60*1000,w.users.admin).run()
+  const plugin={name:'Lookup',url:'https://plugins.example/elsewhere.html'}
+  for(const [path,method] of [[`${P}/plugins`,'POST'],[`${P}/plugins/plugin-r`,'PUT']]){const refused=await call(path,plugin,w.tokens.admin,method);assert.equal(refused.status,403,method);assert.equal(refused.data.code,'step_up_required',method)}
+  assert.deepEqual(await app.sql('SELECT id,url FROM plugins'),[{id:'plugin-r',url:'https://plugins.example/lookup.html'}])
+  assert.equal((await call(`${P}/plugins/plugin-r`,{name:'Order lookup, renamed'},w.tokens.admin,'PUT')).status,200,'renaming a plugin needs no step-up')
+  // An email link proves its account for 15 minutes: the admin, who has no password, signs in by link, then adds the plugin and sets a first password.
+  const link=sha('roles-admin-link');await app.db.prepare('INSERT INTO magic_signins VALUES(?,?,?,?,?,NULL)').bind(sha(link),w.users.admin,w.projectId,'admin-roles@example.test',Date.now()+60000).run()
+  const linked=await app.call('/api/identity/magic-link/consume',{body:{token:link}});assert.equal(linked.status,200)
+  const session=linked.headers.get('Set-Cookie').match(/h2h_session=([^;]+)/)[1]
+  assert.equal((await call(`${P}/plugins`,plugin,session)).status,201)
+  assert.equal((await call('/api/identity/password',{password:'admin-first-password-2026'},session)).status,200)
+  assert.equal((await call('/api/identity/login',{email:'admin-roles@example.test',password:'admin-first-password-2026'})).status,200)
  }finally{await app.close()}
 }

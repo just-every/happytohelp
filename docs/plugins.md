@@ -15,7 +15,10 @@ to the chat, or to give your team buttons that write a reply for them.
    **URL** is your page's address. Use `https://`; plain `http://` works only
    for a page on your own computer (`localhost` or `127.0.0.1`).
 4. Choose **Add**, then open any conversation: your page loads in its side
-   panel. **Move Up** and **Move Down** on the Plugins list set the order of
+   panel. A plugin sees the open conversation and its customer, so adding one,
+   changing its URL or turning it back on asks you to
+   [confirm it is you](account-security.md#confirming-it-is-you) if you have not
+   in the last 15 minutes. **Move Up** and **Move Down** on the Plugins list set the order of
    several plugins.
 
 Your page's server must allow being shown in a frame on your HappyToHelp

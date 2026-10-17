@@ -1413,7 +1413,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "c065ede744a82463e2c8eb2c23f522b37d0934b5df76fc82795bb43dd5caafb4",
+      "sha256": "3027953576e16fd335a4c3127fd83946fa23fc0bf12fb75ab8749496d98f72f8",
       "executable": false
     },
     "deploy.json": {
@@ -1425,7 +1425,7 @@
       "executable": false
     },
     "docs/account-security.md": {
-      "sha256": "650c7aee5f7ddc6224b0c801e73d437ce50b2a83516877db36996be29520df6c",
+      "sha256": "3eae8b0220f3e19822638da622fc982e7f50b21b1fb1d73285cc0ebdc00e1753",
       "executable": false
     },
     "docs/AGENT-FIX.md": {
@@ -1501,7 +1501,7 @@
       "executable": false
     },
     "docs/plugins.md": {
-      "sha256": "8fd354c73006a7c451d6328408c3bc63b48cff900c3a3684b6a71d2950477ba6",
+      "sha256": "2300023191a65fee36c16490947bc5a52a08e74e98a60cf9d71c0f84d703ddc8",
       "executable": false
     },
     "docs/PRIVACY.md": {
@@ -3329,7 +3329,7 @@
       "executable": false
     },
     "src/modules/identity/accounts.ts": {
-      "sha256": "0a2d96017882791a1aa1e42683aa2659ef8e3da16a263f247d9a8309b8f11757",
+      "sha256": "34232bf8d3ad7e3f2809079d6abcc11d6931798ae2d16d630c4f33988ec503f9",
       "executable": false
     },
     "src/modules/identity/availability.ts": {
@@ -4557,7 +4557,7 @@
       "executable": false
     },
     "src/modules/management/resources.ts": {
-      "sha256": "8fdbcdc1a47511883f3c510846197e7eeffb77efce15eb869aa5a75fd6c382bc",
+      "sha256": "509d8d8a0ae8f5e51cc3e3f336696ec7eb7c9d0ca583d62abcd9761cca0df74a",
       "executable": false
     },
     "src/modules/management/site-read/fetch.ts": {
@@ -8245,7 +8245,7 @@
       "executable": false
     },
     "tests/helpers/identity/roles-audit.mjs": {
-      "sha256": "edc751b4051bf621c483df0084668e6fec5b457f1f7453281a7e94d70efa441c",
+      "sha256": "18157bd3cd51c865b1a1bbcddbbb549e340e6e7075a347fe9b9b44629b3b9e47",
       "executable": false
     },
     "tests/helpers/identity/security-browser.mjs": {

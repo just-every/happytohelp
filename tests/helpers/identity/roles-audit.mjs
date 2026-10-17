@@ -17,7 +17,7 @@ export async function rolesAuditJourney(){
   const w=await app.seedWorkspace('roles'),P=`/api/management/projects/${w.projectId}`,C=`/api/dashboard/projects/${w.projectId}/conversations/conv-r`
   await app.db.batch([
    app.db.prepare("INSERT INTO contacts(id,project_id,name,email,created_at) VALUES('ct-r',?,'Riley Customer','riley@example.com',1)").bind(w.projectId),
-   app.db.prepare("INSERT INTO conversations(id,project_id,contact_id,revision,last_message_id,created_at,updated_at) VALUES('conv-r',?,'ct-r',1,'m-r',2,2)").bind(w.projectId),
+   app.db.prepare("INSERT INTO conversations(id,project_id,contact_id,revision,last_message_id,created_at,updated_at) VALUES('conv-r',?,'ct-r',1,'m-r',?,?)").bind(w.projectId,Date.now(),Date.now()),
    app.db.prepare("INSERT INTO messages(id,project_id,conversation_id,local_id,actor_id,actor_role,content,revision,created_at,intent_hash) VALUES('m-r',?,'conv-r','c-r','ct-r','contact','Where is my order?',1,2,'hash-r')").bind(w.projectId),
   ])
   // The owner invites a collaborator, who accepts with a password and signs in.

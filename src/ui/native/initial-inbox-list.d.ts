@@ -1,5 +1,5 @@
 import type {InitialReadOutcome} from './dashboard-bootstrap';
-export type InboxListSearch = Partial<Record<'view' | 'q' | 'tag' | 'assigned_to' | 'search_scope', string>>;
+export type InboxListSearch = Partial<Record<'view' | 'q' | 'tag' | 'assigned_to' | 'search_scope' | 'saved_view' | 'filters' | 'sort', string>>;
 export type InitialInboxListData = {
     projectId?: string;
     filter: Record<string,string>;

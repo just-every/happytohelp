@@ -1,0 +1,2 @@
+import {invalid,named,object} from './model'
+export function groupDefinition(value:unknown){const body=object(value),members=body.members??[];if(!Array.isArray(members)||members.length>200||members.some(v=>typeof v!=='string'||!v||v.length>200)||new Set(members).size!==members.length)invalid('Group members must be unique workspace user IDs');return {name:named(body.name),members:members as string[]}}

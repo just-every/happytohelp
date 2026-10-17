@@ -1,0 +1,67 @@
+import assert from 'node:assert/strict'
+import {createRuntime} from '../emitted-runtime.mjs'
+import {launchBrowser,evidence} from '../../journeys/kit/browser.mjs'
+import {seedTicketBrowser} from './ticket-browser-fixture.mjs'
+
+export async function ticketsBrowser({count=12,installation}={}){
+ const runtime=installation?{origin:installation.origin,close:async()=>{}}:await createRuntime({vars:{H2H_LOCAL:'true',EMAIL_PROVIDER:'development',EMAIL_FROM:'support@localhost.test'}}),browser=await launchBrowser(),shot=await evidence('tickets')
+ let success=false
+ try{
+  const fixture=await seedTicketBrowser(runtime.origin,count,installation),{projectId,base,owner}=fixture,context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage(),errors=[]
+  page.on('pageerror',error=>errors.push(error.message));page.setDefaultTimeout(15000)
+  await page.goto(runtime.origin+'/login?'+new URLSearchParams({returnTo:`/projects/${projectId}/ticket-settings`}))
+  await page.getByLabel('Email',{exact:true}).fill(owner.email);await page.getByLabel('Password',{exact:true}).fill(owner.password);await page.getByRole('button',{name:'Login',exact:true}).click()
+  const capture=async name=>{if(!await page.evaluate(()=>Boolean(window.axe)))await page.addScriptTag({path:'node_modules/axe-core/axe.min.js'});for(const width of [1440,390]){
+   await page.setViewportSize({width,height:width===390?844:1000});
+   await page.waitForTimeout(500);
+   if(/^0[1-6]/.test(name))await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0)});
+   if(/^0[78]/.test(name)){
+    await page.waitForTimeout(100);
+    if(await page.locator('#conversation-assistant').getAttribute('aria-hidden')==='true')await page.getByRole('button',{name:'Show conversation panel',exact:true}).click();
+    await page.getByRole('tab',{name:'Details',exact:true}).click();
+    if(name.includes('custom'))await page.getByLabel('Reason',{exact:true}).scrollIntoViewIfNeeded();
+    else if(name.startsWith('08'))await page.locator('.ticket-history li').first().scrollIntoViewIfNeeded();
+    else await page.getByText('Ticket',{exact:true}).scrollIntoViewIfNeeded();
+   }
+   if(/^09|^10|^11/.test(name))await page.locator('details.ticket-queue-tools').evaluate(element=>{element.scrollTop=0});
+   if(name==='10b-view-save')await page.getByLabel('View name',{exact:true}).scrollIntoViewIfNeeded();
+   if(/^1[23]/.test(name))await page.getByRole('region',{name:'Bulk ticket changes',exact:true}).locator('.ticket-result-list').scrollIntoViewIfNeeded();
+   await page.waitForTimeout(200);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${name} ${width} overflow`);
+   const violations=await page.evaluate(async()=>{const selector='.workspace-settings, .ticket-editor, .ticket-queue-tools';if(!document.querySelector(selector))return [];const result=await window.axe.run({include:[selector]},{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});return result.violations.map(({id,nodes})=>({id,nodes:nodes.map(node=>node.target)}))});
+   assert.deepEqual(violations,[],`${name} ${width} accessibility`);console.log(`${name} ${width}: no horizontal overflow or WCAG axe violations`);
+   await page.screenshot({path:shot(`${name}-${width}.png`),fullPage:true});
+  }await page.setViewportSize({width:1440,height:1000})}
+
+  await page.getByRole('heading',{name:'Ticket statuses',exact:true}).waitFor();await capture('01-statuses')
+  await page.getByRole('button',{name:'New status',exact:true}).click();await page.getByLabel('Name',{exact:true}).fill('Waiting for warehouse');await page.getByLabel('Lifecycle category').selectOption('on_hold');await capture('02-status-form');await page.getByRole('button',{name:'Create',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor()
+  await page.getByRole('button',{name:'Fields',exact:true}).click();await page.getByRole('heading',{name:'Ticket fields',exact:true}).waitFor();await capture('03-fields')
+  await page.getByRole('button',{name:'New field',exact:true}).click();await page.getByLabel('Name',{exact:true}).fill('Warehouse reference');await page.getByLabel('Type',{exact:true}).selectOption('regex');await page.getByLabel('Validation pattern').fill('^WH-[0-9]{4}$');await capture('04-field-form');await page.getByRole('button',{name:'Create',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor()
+  await page.getByRole('button',{name:'Groups',exact:true}).click();await capture('05-groups');await page.getByRole('button',{name:'New group',exact:true}).click();await page.getByLabel('Name',{exact:true}).fill('Warranty');await page.getByLabel(owner.ownerName,{exact:true}).check();await capture('06-group-form');await page.getByRole('button',{name:'Create',exact:true}).click();await page.getByRole('status').filter({hasText:'Saved.'}).waitFor()
+  await page.goto(`${runtime.origin}/projects/${projectId}/conversations/${fixture.tickets[0].id}`)
+  await page.getByRole('tab',{name:'Details',exact:true}).click();await page.getByLabel('Subject',{exact:true}).waitFor();await capture('07-ticket-fields')
+  await capture('07b-custom-fields');
+  await page.getByLabel('Priority',{exact:true}).selectOption('high');await page.getByRole('button',{name:'Save ticket',exact:true}).click();await page.getByText('Ticket saved.',{exact:true}).waitFor()
+  assert.equal((await fixture.api(`${base}/conversations/${fixture.tickets[0].id}/ticket`)).data.priority,'high')
+  await page.getByText('Status and field history',{exact:true}).click();await capture('08-ticket-history')
+  await page.goto(`${runtime.origin}/projects/${projectId}/conversations`)
+  await page.getByText('Saved views and ticket filters',{exact:true}).click();await capture('09-views')
+  await page.getByRole('button',{name:'Edit filters',exact:true}).click();await page.getByRole('button',{name:'Add filter',exact:true}).click();
+  await page.getByLabel('Filter 1 field').selectOption('priority');await page.getByLabel('Value',{exact:true}).selectOption({label:'Urgent'});
+  await page.getByRole('button',{name:'Add filter',exact:true}).click();await page.getByLabel('Filter 2 field').selectOption('group_id');await page.locator('#view-filter-1').selectOption({label:'Returns & replacements'});
+  await page.getByRole('button',{name:'Add sort',exact:true}).click();await page.getByLabel('Sort 1 field').selectOption('subject');await page.getByLabel('Sort 1 direction').selectOption('asc');
+  await page.getByLabel('View name',{exact:true}).fill('Urgent returns');await page.getByLabel('Visibility',{exact:true}).selectOption('shared');await capture('10-view-form');await capture('10b-view-save');
+  await page.getByRole('button',{name:'Save new view',exact:true}).click();await page.getByText('View saved.',{exact:true}).waitFor();await capture('11-saved-view');
+  const savedViews=(await fixture.api(base+'/ticket-views')).data;assert.ok(savedViews.some(view=>view.name==='Urgent returns'&&view.visibility==='shared'));
+  await page.getByLabel('Saved view',{exact:true}).selectOption('');await page.getByText('Saved views and ticket filters',{exact:true}).click();
+  await page.getByRole('button',{name:'Select tickets',exact:true}).click();await page.getByRole('checkbox',{name:/Select ticket/}).first().check();await page.getByRole('checkbox',{name:/Select ticket/}).nth(1).check();
+  const bulk=page.getByRole('region',{name:'Bulk ticket changes',exact:true});await bulk.getByLabel('Priority',{exact:true}).selectOption('urgent');
+  await bulk.getByLabel('Assign to',{exact:true}).selectOption({label:owner.ownerName});await bulk.getByLabel('Status',{exact:true}).selectOption({label:'Pending'});await bulk.getByLabel('Add tags',{exact:true}).selectOption({label:'Needs return label'});
+  await bulk.getByRole('button',{name:'Preview changes',exact:true}).click();await bulk.getByText('Preview — no changes applied',{exact:true}).waitFor();await capture('12-bulk-preview');
+  await bulk.getByRole('button',{name:'Apply to eligible tickets',exact:true}).click();await bulk.getByText('Bulk update results',{exact:true}).waitFor();await capture('13-bulk-results');
+  await page.goto(runtime.origin+'/docs/tickets');await page.getByRole('heading',{name:'Tickets',level:1,exact:true}).waitFor();await capture('14-ticket-docs');
+  await fixture.api(`/api/management/projects/${projectId}/contacts/${fixture.tickets[0].visitor.contactId}/erase`,{},'POST');
+  await page.goto(`${runtime.origin}/projects/${projectId}/contacts/${fixture.tickets[0].visitor.contactId}`);await page.getByText('Personal data erased.',{exact:true}).waitFor();await capture('15-erasure');
+  assert.deepEqual(errors,[]);success=true
+  return {fixture,origin:runtime.origin}
+ }finally{await browser.close();await runtime.close(success)}
+}

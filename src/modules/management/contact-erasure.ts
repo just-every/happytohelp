@@ -13,7 +13,7 @@ import {auditStatement,requestSource} from '../audit/record'
 import {requireStepUp} from '../identity/two-factor/step-up'
 import {knowledgeErasureStatements} from '../knowledge/feedback'
 
-export interface ContactErasure {project_id: string; contact_id: string; erased_by: string; erased_at: number; last_erased_at: number; runs: number; conversations: number; messages: number; attachments: number; tracked_events: number; context_records: number; sessions: number}
+export interface ContactErasure {project_id: string; contact_id: string; erased_by: string; erased_at: number; last_erased_at: number; runs: number; conversations: number; messages: number; attachments: number; tracked_events: number; context_records: number; sessions: number; ticket_records:number}
 
 /**
  * Permanently erase one contact's personal data inside its project. Steps are ordered
@@ -48,7 +48,7 @@ contactErasure.post('/projects/:projectId/contacts/:contactId/erase', async c =>
   const now = Date.now()
   await c.env.DB.batch([
     ...providerErasureStatements(c.env, {projectId: actor.projectId, contactId, externalId: reach?.external_id ?? null, now, usedAi: Boolean(reach?.ai), usedComputers: Boolean(reach?.computers)}),
-    auditStatement(c.env.DB, {projectId: actor.projectId, category: 'erasure', action: 'contact.erased', actor: {type: 'user', id: actor.id}, source: requestSource(c), target: {type: 'contact', id: contactId}, detail: {run: erasure.runs, conversations: erasure.conversations, messages: erasure.messages, attachments: erasure.attachments, trackedEvents: erasure.tracked_events, contextRecords: erasure.context_records, sessions: erasure.sessions}}, now),
+    auditStatement(c.env.DB, {projectId: actor.projectId, category: 'erasure', action: 'contact.erased', actor: {type: 'user', id: actor.id}, source: requestSource(c), target: {type: 'contact', id: contactId}, detail: {run: erasure.runs, conversations: erasure.conversations, messages: erasure.messages, attachments: erasure.attachments, trackedEvents: erasure.tracked_events, contextRecords: erasure.context_records, sessions: erasure.sessions, ticketRecords:erasure.ticket_records}}, now),
   ])
   return c.json({data: {...erasure, providers: await providerRequests(c.env, actor.projectId, contactId)}})
 })

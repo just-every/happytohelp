@@ -9,10 +9,45 @@ import {conversationData,conversationsData} from './dashboard-data'
 import {inboxSearchTerm,inboxSearchCondition,attachMatchedMessages} from './inbox-search'
 import {inboxFilters} from './inbox-filters'
 import {hasMessages} from './inbox-visible'
+import {compileFilters,parseFilters,queryJSON} from '../tickets/filters'
+import {compileSort,parseSort} from '../tickets/sort'
+import {savedQueue} from '../tickets/views'
 export const dashboard=new Hono<AppEnv>()
 export async function dashboardAccess(c:any){const actor=await requireActor(c);if(actor.role==='contact')throw new HTTPException(403);const row=await c.env.DB.prepare('SELECT c.*,m.role membership_role FROM conversations c JOIN memberships m ON m.project_id=c.project_id WHERE c.id=? AND m.user_id=? AND EXISTS(SELECT 1 FROM projects p WHERE p.id=c.project_id) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=c.project_id AND json_extract(ps.settings_json,"$.deleted_at") IS NOT NULL)').bind(c.req.param('conversationId'),actor.id).first();if(!row||c.req.param('projectId')&&row.project_id!==c.req.param('projectId'))throw new HTTPException(404);return {actor:{...actor,projectId:row.project_id,role:row.membership_role},conversation:row}}
 for(const prefix of ['/conversations','/projects/:projectId/conversations']){
- dashboard.get(prefix,async c=>{const a=await requireActor(c);if(a.role==='contact')throw new HTTPException(403);const project=c.req.param('projectId');if(project)await scope(c);const page=Math.max(1,parseInt(c.req.query('page')||'1')||1),search=inboxSearchTerm(c);const conditions=["EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=c.project_id AND m.user_id=?)",hasMessages,"NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=c.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)"],params:any[]=[a.id];if(project){conditions.push('c.project_id=?');params.push(project)}const filters=inboxFilters(name=>c.req.query(name),search,a.id);conditions.push(...filters.conditions);params.push(...filters.params);const tag=c.req.query('tag');if(tag){if(!project||!await c.env.DB.prepare('SELECT id FROM workspace_tags WHERE id=? AND project_id=?').bind(tag,project).first())throw new HTTPException(404);conditions.push('EXISTS(SELECT 1 FROM conversation_tags ct WHERE ct.conversation_id=c.id AND ct.project_id=c.project_id AND ct.tag_id=?)');params.push(tag)}if(search){const match=inboxSearchCondition(search);conditions.push(match.sql);params.push(...match.params)}const before=c.req.query('last_message_before'),beforeId=c.req.query('last_conversation_before');if(before&&beforeId){const stamp=Date.parse(before);if(!Number.isFinite(stamp))throw new HTTPException(400);conditions.push('(coalesce((SELECT created_at FROM messages WHERE id=c.last_message_id),c.updated_at)<? OR (coalesce((SELECT created_at FROM messages WHERE id=c.last_message_id),c.updated_at)=? AND c.id<?))');params.push(stamp,stamp,beforeId)}const where=conditions.join(' AND '),listing=await c.env.DB.batch<any>([c.env.DB.prepare(`SELECT count(*) total FROM conversations c WHERE ${where}`).bind(...params),c.env.DB.prepare(`SELECT c.* FROM conversations c WHERE ${where} ORDER BY coalesce((SELECT created_at FROM messages WHERE id=c.last_message_id),c.updated_at) DESC,c.id DESC LIMIT 30 OFFSET ?`).bind(...params,(page-1)*30)]),count=listing[0].results[0],rows=listing[1].results,data=await conversationsData(c.env,rows,a.id);if(search)await attachMatchedMessages(c.env,search,data);return c.json({data,meta:{pagination:{total:count!.total,current_page:page,total_pages:Math.max(1,Math.ceil(count!.total/30))}}})})
+ dashboard.get(prefix,async c=>{
+ const a=await requireActor(c)
+ if(a.role==='contact')throw new HTTPException(403)
+ const project=c.req.param('projectId')
+ if(project)await scope(c)
+ const page=Math.max(1,parseInt(c.req.query('page')||'1')||1),search=inboxSearchTerm(c)
+ const conditions=["EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=c.project_id AND m.user_id=?)",hasMessages,"NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=c.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)"],params:any[]=[a.id]
+ if(project){conditions.push('c.project_id=?');params.push(project)}
+ const saved=await savedQueue(c.env,a,project,c.req.query('saved_view'))
+ const requestedFilters=queryJSON(c.req.query('filters'),'filters'),requestedSort=queryJSON(c.req.query('sort'),'sort')
+ const structured=saved!==undefined||requestedFilters!==undefined
+ const filters=structured?await compileFilters(c.env,a,project,saved?.filters??parseFilters(requestedFilters)):inboxFilters(name=>c.req.query(name),search,a.id)
+ conditions.push(...filters.conditions);params.push(...filters.params)
+ const sort=await compileSort(c.env,a,project,requestedSort===undefined?saved?.sort??[]:parseSort(requestedSort))
+ const tag=c.req.query('tag')
+ if(tag){
+  if(!project||!await c.env.DB.prepare('SELECT id FROM workspace_tags WHERE id=? AND project_id=?').bind(tag,project).first())throw new HTTPException(404)
+  conditions.push('EXISTS(SELECT 1 FROM conversation_tags ct WHERE ct.conversation_id=c.id AND ct.project_id=c.project_id AND ct.tag_id=?)');params.push(tag)
+ }
+ if(search){const match=inboxSearchCondition(search);conditions.push(match.sql);params.push(...match.params)}
+ const before=c.req.query('last_message_before'),beforeId=c.req.query('last_conversation_before')
+ if(before&&beforeId){
+  if(saved?.sort.length||requestedSort!==undefined)throw new HTTPException(400,{message:'Use page pagination with a custom sort'})
+  const stamp=Date.parse(before);if(!Number.isFinite(stamp))throw new HTTPException(400)
+  conditions.push('(coalesce((SELECT created_at FROM messages WHERE id=c.last_message_id),c.updated_at)<? OR (coalesce((SELECT created_at FROM messages WHERE id=c.last_message_id),c.updated_at)=? AND c.id<?))');params.push(stamp,stamp,beforeId)
+ }
+ const where=conditions.join(' AND '),listing=await c.env.DB.batch<any>([
+  c.env.DB.prepare(`SELECT count(*) total FROM conversations c WHERE ${where}`).bind(...params),
+  c.env.DB.prepare(`SELECT c.* FROM conversations c WHERE ${where} ORDER BY ${sort.sql} LIMIT 30 OFFSET ?`).bind(...params,...sort.params,(page-1)*30)
+ ]),count=listing[0].results[0],rows=listing[1].results,data=await conversationsData(c.env,rows,a.id)
+ if(search)await attachMatchedMessages(c.env,search,data)
+ return c.json({data,meta:{pagination:{total:count!.total,current_page:page,total_pages:Math.max(1,Math.ceil(count!.total/30))}}})
+ })
  dashboard.get(`${prefix}/counts`,async c=>{const a=await requireActor(c);if(a.role==='contact')throw new HTTPException(403);const project=c.req.param('projectId');if(project)await scope(c);const counts=await inboxCounts(c.env,a.id,project);return c.json({data:counts})})
  dashboard.get(`${prefix}/:conversationId`,async c=>{const {actor,conversation}=await dashboardAccess(c);return c.json({data:await conversationData(c.env,conversation,actor.id,true)})})
  dashboard.get(`${prefix}/:conversationId/buckets`,async c=>{

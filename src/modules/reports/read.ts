@@ -16,7 +16,7 @@ export const cohortSQL=`WITH cohort AS (
  SELECT m.conversation_id,MIN(m.revision) reply_revision FROM messages m JOIN visitors v ON v.conversation_id=m.conversation_id AND m.revision>v.first_revision
  LEFT JOIN message_authorship a ON a.message_id=m.id WHERE m.actor_role NOT IN ('contact','system') AND COALESCE(a.source_kind,'')<>'insight' GROUP BY m.conversation_id
 ), rows AS (
- SELECT c.id,c.created_at,c.resolved_at,t.first_resolved_at,f.created_at first_visitor_at,m.created_at first_reply_at,
+ SELECT c.id,c.created_at,CASE WHEN c.status_category IN ('solved','closed') THEN c.resolved_at END resolved_at,c.status_category,t.first_resolved_at,f.created_at first_visitor_at,m.created_at first_reply_at,
  r.outcome,r.id resolution_id,r.resolved_at latest_resolved_at,v.value,v.comment,v.updated_at rating_updated_at
  FROM cohort c LEFT JOIN conversation_tracking t ON t.conversation_id=c.id AND t.project_id=c.project_id
  LEFT JOIN visitors q ON q.conversation_id=c.id LEFT JOIN messages f ON f.conversation_id=c.id AND f.revision=q.first_revision

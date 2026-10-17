@@ -17,6 +17,9 @@ const {localTarget,remoteTarget}=await import('./legacy-import/target.mjs')
 const concurrency=Number(value('--concurrency')??1);if(!Number.isSafeInteger(concurrency)||concurrency<1||concurrency>16)throw new Error(usage)
 // Progress is one JSON line per step or chunk on stderr: counts, ids and timings only.
 const progress=line=>process.stderr.write(JSON.stringify({at:new Date().toISOString(),...line})+'\n')
+// A killed run cannot delete its private index of package rows; the next run does.
+const {removeStaleDirectories}=await import('./legacy-import/scratch.mjs')
+const stale=await removeStaleDirectories();if(stale.length)progress({step:'removed-stale',directories:stale.length})
 async function run(target){
  if(pkg)return importPackage(pkg,target,{planImport,importLegacy,tableOrder,relationships,types},{expectManifestSha256:value('--expect-manifest-sha256'),excludeTables,concurrency,progress})
  const bundle=JSON.parse(await readFile(file,'utf8'));if(target)return importLegacy(target.env,bundle)

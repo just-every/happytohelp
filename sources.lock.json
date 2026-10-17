@@ -2664,7 +2664,7 @@
       "executable": false
     },
     "scripts/import-legacy.mjs": {
-      "sha256": "be3403d6a48dc51516f7963c2c60a87e2c75cf52e44fa75e59cca0962df521e5",
+      "sha256": "c831c4259aaf0f4fa6e55ae7fd04acf65e38e94bb781fd8171bcf8b14deefcc4",
       "executable": false
     },
     "scripts/independent/delegation-backup.py": {
@@ -2780,7 +2780,7 @@
       "executable": false
     },
     "scripts/legacy-import/context-index.mjs": {
-      "sha256": "bfb60b324b3d928d69c040d6f6cb1568efde9fc4ca82f0f7a6e37a1a6f68b62e",
+      "sha256": "db77ec5cb14af8794b1f33998e2ba8126c1102081174e99371570935c6aa8e96",
       "executable": false
     },
     "scripts/legacy-import/import-package.mjs": {
@@ -2796,7 +2796,7 @@
       "executable": false
     },
     "scripts/legacy-import/target.mjs": {
-      "sha256": "09dc4afd28db6ead02f1cc64395474b4280a6f0f46dc218fd930bbec8b97e09c",
+      "sha256": "dfb890177c83a85de18d2b18781bd86b9c3b5ea20f8fe3a76513af55c49e894f",
       "executable": false
     },
     "scripts/legacy-scan/signatures.mjs": {
@@ -4752,7 +4752,7 @@
       "executable": false
     },
     "src/modules/legacy-import/importer.ts": {
-      "sha256": "be29300575ee42b43d7e6f25641a2c4006c6cd7398bee3a771babc88c2173b39",
+      "sha256": "9e0a1623212a5cac584ec51a43eacb2e7d6cbd3912db5239c6fb9c984cdcbe16",
       "executable": false
     },
     "src/modules/legacy-import/map-core.ts": {
@@ -4780,7 +4780,7 @@
       "executable": false
     },
     "src/modules/legacy-import/README.md": {
-      "sha256": "0810afbd9adf21cbc51b12a90d08d5ce3e8244070c7dbd4d3a48e0b8fec69392",
+      "sha256": "eee64b655dd41c308bdc428ef77f3bc77025ff3c89767aff015219772e28a091",
       "executable": false
     },
     "src/modules/legacy-import/relationships.ts": {
@@ -9672,7 +9672,7 @@
       "executable": false
     },
     "tests/journeys/legacy.mjs": {
-      "sha256": "3678b2fa2f0abe67b9d6333847421590b1017046240c951cf5a451bc4a52b078",
+      "sha256": "7a89e8a5fe169bd93f1e698449e56a44115b7d33b133e1ff5b152b60e10c2916",
       "executable": false
     },
     "tests/journeys/move-in-admission.mjs": {

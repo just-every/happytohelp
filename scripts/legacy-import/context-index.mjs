@@ -1,8 +1,8 @@
 import {DatabaseSync} from 'node:sqlite';
-import {mkdtemp,rm} from 'node:fs/promises';
-import {tmpdir} from 'node:os';
+import {rm} from 'node:fs/promises';
 import path from 'node:path';
 import {readPart} from './package.mjs';
+import {privateDirectory} from './scratch.mjs';
 
 // Tables that stay small whatever the company's volume (one project, its team,
 // assistants and knowledge sources) are held in memory, as native mapping reads
@@ -13,7 +13,7 @@ const memoryTables=new Set(['projects','users','ais','ai_defaults','datasets','d
 /** Build the package's cross-table context in a private temporary directory and
  * return it as a mapping context. close() deletes the index. */
 export async function packageContext(root,manifest,{timestamp,contactIdentity,transcriptOrder,isMessageMedia,useRelationships}){
-  const directory=await mkdtemp(path.join(tmpdir(),'h2h-legacy-context-'));
+  const directory=await privateDirectory('context');
   const db=new DatabaseSync(path.join(directory,'context.sqlite'));
   try{
     db.exec(`PRAGMA journal_mode=OFF;PRAGMA synchronous=OFF;

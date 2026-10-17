@@ -10,6 +10,8 @@ const press=async(page,locator)=>{const answered=page.waitForResponse(r=>new URL
 
 /** Skip for now: leave a need, see it under Skipped with Undo, the counts and heading follow, it lasts a reload, and Undo returns it in place. */
 async function skipFlow({page,list,evidence,width}){
+ // Skip joins an in-flight automatic check. Sample its baseline only after that observation is rendered.
+ await page.waitForFunction(()=>document.querySelector('[data-testid="setup-list"] [data-again]')?.disabled===false);
  const before=await counts(list),heading=page.locator('h1 [data-setup-state]');
  assert.equal(await heading.getAttribute('data-setup-state'),'needs-you');
  await press(page,list.locator('[data-need="model_key"] button[data-skip]'));

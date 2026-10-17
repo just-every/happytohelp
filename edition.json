@@ -449,7 +449,14 @@
           "src/modules/tickets",
           "migrations/130_ticket_model.sql",
           "migrations/131_ticket_views_bulk.sql",
-          "migrations/132_ticket_erasure.sql"
+          "migrations/132_ticket_erasure.sql",
+          "src/modules/workflows",
+          "migrations/150_workflow_journal.sql",
+          "migrations/151_workflow_sla.sql",
+          "migrations/152_workflow_rules.sql",
+          "migrations/153_workflow_schedules.sql",
+          "migrations/154_workflow_routing.sql",
+          "docs/workflows.md"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",

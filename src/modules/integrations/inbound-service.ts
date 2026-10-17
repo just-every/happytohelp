@@ -107,12 +107,8 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
    actor=await emailActor(env,project.project_id,addressedConversation,from,trusted,possessed)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
    if(actor)conversation=addressedConversation
   }
-  // Until linked follow-ups exist, that contact's reply to a Closed ticket always opens a
-  // new ticket of their own (a retry returns to it), never another open ticket of theirs.
-  if(conversation?.status_category==='closed'){
-   const contactId=actor!.contactId!
-   conversation=(prior?.conversation_id&&prior.conversation_id!==conversation.id?await env.DB.prepare("SELECT * FROM conversations WHERE id=? AND project_id=? AND contact_id=? AND status_category<>'closed'").bind(prior.conversation_id,project.project_id,contactId).first<any>():null)||await newConversation(env,project.project_id,contactId,recordId,claimToken)
-  }
+  // That contact's reply to a Closed ticket is admitted into the ticket's linked follow-up
+  // (workflows/followups.ts; a retry returns to it), never another open ticket of theirs.
   // Everything else is the sender's own mail to the support mailbox: it continues
   // their most recently active open thread or starts one, and is never refused.
   if(!actor){
@@ -147,7 +143,7 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
   if(!result.accepted)throw new Error(result.reason)
   await env.DB.prepare("UPDATE inbound_emails SET state='delivered',message_id=?,error=NULL WHERE id=?").bind(String(result.message!.id),recordId).run()
   await keepReplyTarget(env,project.project_id,actor,input.replyTo,{authenticated,automatic,workspace})
-  return {id:messageId,state:'delivered',conversationId:conversation.id,duplicate:false,automatic,message:result.message,actor}
+  return {id:messageId,state:'delivered',conversationId:result.followupConversationId??conversation.id,duplicate:false,automatic,message:result.message,actor}
  }catch(error){await env.DB.prepare("UPDATE inbound_emails SET state='failed',error=? WHERE id=? AND state='processing' AND claim_token=?").bind(String(error).slice(0,1000),recordId,claimToken).run();throw error}
 }
 /** A conversation for the contact, recorded on the receipt in the same transaction.

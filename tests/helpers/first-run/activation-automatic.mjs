@@ -171,7 +171,7 @@ async function starterJourney(a){
 // What the provider probes accept: OpenRouter validates the selected mapped model, never just the key; sender DNS
 // needs SPF, DKIM and DMARC published; a check in flight reads as checking.
 async function probesJourney(a){
- const {app,s}=a,since=a.since,router={OPENROUTER_API_KEY:'fixture-openrouter-key'}
+ const {app,s}=a,since=a.since,router={OPENROUTER_API_KEY:'synthetic-fixture-openrouter-key'}
  const ws=await app.seedWorkspace('router'),api=a.kit(ws,router);await a.defaultAssistant(ws,'router-assistant','gpt-oss-120b')
  const model=async(env)=>step(await api.check({step:'model_key'},env?{env}:undefined),'model_key')
  let start=app.requests.length

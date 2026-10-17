@@ -64,9 +64,20 @@ password on an account that has none), changing your sign-in email,
 deleting a workspace and changing the two-factor policy ask you to confirm it is
 you if you have not done so in the last 15 minutes. With two-factor on, you
 confirm with your app, passkey or a recovery code; without it, with your
-password. The action then continues. An account moved in without a password
-(as teammates moved in from your old HappyToHelp are) signs in with an emailed
-link, which counts for 15 minutes: set your password straight after it. Five wrong answers in 15 minutes, whether a
+password. Accounts without a second factor also see **Email me a sign-in link**
+in the dialog, beside the password when one exists. Open it in the same browser, press **Sign in**, then return to the
+original tab and press **Continue**. Each link works once, expires after 15
+minutes and proves only its account in the fresh sign-in session. Requests are
+rate-limited and logged; requesting mail supplies no proof. An enrolled second
+factor is still required.
+
+On **Profile → Security**, an account without a password sees **Set a password**,
+with no current-password field. An existing account can choose **Confirm by email
+to set a password**; after recent mailbox confirmation, it shows **Set a new
+password** without the old password. This covers older email claims and passwords
+a teammate never chose, while preserving every existing credential until its
+owner replaces it. Saving requires recent mailbox or factor proof
+and signs out the account’s sessions. Five wrong answers in 15 minutes, whether a
 code or a password (also when changing your password), lock that check for the
 rest of the 15 minutes.
 Refund and billing approvals will ask the same when they arrive.

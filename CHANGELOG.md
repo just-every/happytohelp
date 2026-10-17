@@ -8,7 +8,12 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
-## Unreleased
+## 0.4.2 — 2026-10-17
+
+- **Mailbox confirmation.** Owners claimed by email and moved-in teammates without a second factor confirm sensitive actions by a single-use, 15-minute email sign-in link. Requests are limited atomically and audited. Email is also offered beside existing passwords. After mailbox proof, Profile lets an owner replace an unknown password without the old one; deliberately set passwords keep working. Merely requesting email grants no proof.
+- **Conversation history export.** Reports downloads full workspace JSON with messages, private notes and attachment names. Empty widget drafts no longer inflate Reports or its analytics CSVs.
+- **Honest mail status.** A reply whose visitor address matches the sender explains why no email was sent.
+- **Deployable tag.** The install guide covers PATH and names v0.4.2, using rer 0.2.42.
 
 - **Two-factor sign-in.** Add an authenticator app or a passkey (security key, Touch ID, Windows Hello) on your profile, with ten single-use recovery codes. Owners can require it by role from Settings → Security; teammates set it up at their next sign-in before they see anything, and sessions without it end. Wrong, reused and spent codes are refused, limited and logged. An owner can reset a teammate's factors, and a locked-out owner recovers with an installation key set through `rer`, never by email alone.
 - **Confirm it's you.** Exports, contact erasure, role changes, installing integrations and credentials, and deleting a workspace ask for the second factor (or the password, without one) again after 15 minutes.
@@ -23,13 +28,11 @@ updating and backing up an installation, see
 - **Imported history lands as it was.** Solved and closed conversations from Zendesk, Intercom, Help Scout and Freshdesk land closed, and imported messages never count as unread.
 - **Pages a newcomer can finish.** API tokens, Webhooks, Slack and Local computers explain each value and where it comes from, with copyable commands and a webhook signature check. A published article no longer offers Publish again. A local trial's workspace is no longer named after its checkout folder; Setup asks for your business name instead.
 
-## 0.5.0 — not yet tagged
-
-On `main` until the `v0.5.0` tag is cut; the latest tagged release is 0.4.1.
+### Included since 0.4.1
 
 ### Added
 
-- **Hosted native owner claim.** Rer can claim the configured installation owner once through `/auth/bootstrap`, then retire its private token. The claim uses the native account, password credential, workspace and session transaction; concurrent or repeated claims preserve the existing owner. Local password setup remains available.
+- **Hosted native owner claim.** Rer can claim the configured installation owner once through `/auth/bootstrap`, then retire its private token. The claim uses the native account, workspace and session transaction without installing an unknown password; concurrent or repeated claims preserve the existing owner. Local password setup remains available.
 
 - **Help Scout Move in.** Review and import supported Inbox v2 and Docs v1 API response bodies as native history and knowledge. JSON, JSONL and ZIP groupings are packaging conventions, not Help Scout exports. Saved replies and attachment bytes are omitted; real-account compatibility remains unverified.
 - **Deliberate uncertain webhook resend.** Owners/admins can inspect the receiver and approve the original delivery ID/body again from Connections → Delivery log. Only 429 retries automatically within the existing four-attempt budget; 5xx, 408, timeouts and redirects remain uncertain. Each approval beyond the budget permits one audited attempt. A resend can duplicate an effect.

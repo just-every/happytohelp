@@ -17,7 +17,7 @@ const rules:Record<string,Rule>={
  'POST /api/identity/switch-project':'self','POST /api/identity/password':'self','POST /api/identity/accept-invitation':'self','DELETE /api/identity/session':'self',
  'PUT /api/management/profile':'self',[`PUT ${P}/agents/:userId/primary`]:'self',
  'POST /api/identity/two-factor/totp':'self','POST /api/identity/two-factor/totp/confirm':'self','POST /api/identity/two-factor/webauthn/options':'self','POST /api/identity/two-factor/webauthn':'self',
- 'DELETE /api/identity/two-factor/factors/:factorId':'self','POST /api/identity/two-factor/recovery-codes':'self','POST /api/identity/two-factor/verify':'self','POST /api/identity/two-factor/assertion-options':'self','POST /api/identity/step-up':'self',
+ 'DELETE /api/identity/two-factor/factors/:factorId':'self','POST /api/identity/two-factor/recovery-codes':'self','POST /api/identity/two-factor/verify':'self','POST /api/identity/two-factor/assertion-options':'self','POST /api/identity/step-up':'self','POST /api/identity/step-up/email':'self',
  'POST /api/identity/password-reset':'members.manage',
  // Conversations
  'POST /api/conversations':'conversations.reply','POST /api/conversations/:id/messages':'conversations.reply','POST /api/conversations/:id/media':'conversations.reply',

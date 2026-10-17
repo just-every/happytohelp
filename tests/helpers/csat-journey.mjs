@@ -5,7 +5,7 @@ import {mailApp} from './email/app.mjs'
 // Real application, scheduler and providers; only the paid mail-provider edge is faked.
 export async function csatJourney({progress=()=>{}}={}){
  progress("Starting real application")
- const secret='fixture-csat-gateway-signing-secret',m=await mailApp({bindings:{INBOUND_EMAIL_TOKEN:secret}}),{app,mail}=m
+ const secret='synthetic-fixture-csat-gateway-signing-secret',m=await mailApp({bindings:{INBOUND_EMAIL_TOKEN:secret}}),{app,mail}=m
  try{
   progress("Application ready")
   const a=await app.seedWorkspace('csat'),foreign=await app.seedWorkspace('csat-foreign'),endpoint=`/api/outcomes/projects/${a.projectId}`,owner={token:a.tokens.owner},settings={enabled:true,scale:'five',delayMinutes:0,expiresDays:14,locale:'en'}

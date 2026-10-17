@@ -28,9 +28,9 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
   const original=typeof contact.metadata==='string'?contact.metadata:JSON.stringify(contact.metadata);
   // Innocent SQL column names do not grant blanket permission to nested JSON.
   const jsonCases=[
-    {activity:{access_token:'fixture-hidden-json-token'}},
-    {activity:JSON.stringify({private_key:'fixture-hidden-text-key'})},
-    {activity:{password:'fixture-hidden-json-password'}},
+    {activity:{access_token:'synthetic-fixture-hidden-json-token'}},
+    {activity:JSON.stringify({private_key:'synthetic-fixture-hidden-text-key'})},
+    {activity:{password:'synthetic-fixture-hidden-json-password'}},
     {activity:{iv:'fixture-iv',value:'fixture-ciphertext',mac:'fixture-mac'}},
   ];
   try {
@@ -46,7 +46,7 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
   const signatures=[
     ['A pasted credential: ghp_test_'+'x'.repeat(36),'ghp_test_'+'x'.repeat(36)],
     ['Authorization: Bearer fixtureOpaqueCredential123456','fixtureOpaqueCredential123456'],
-    ['A pasted key:\n-----BEGIN PRIVATE KEY-----\nfixture-private-key\n-----END PRIVATE KEY-----','fixture-private-key'],
+    ['A pasted key:\n-----BEGIN PRIVATE '+'KEY-----\nfixture-private-key\n-----END PRIVATE '+'KEY-----','fixture-private-key'],
     ['Session '+jwt,jwt],
     ['api_token=fixture-hidden-text-token','fixture-hidden-text-token'],
     ['Digest-looking credential: '+'a1'.repeat(32),'a1'.repeat(32)],

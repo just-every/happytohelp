@@ -1,0 +1,41 @@
+import type {Env} from '../../platform/env'
+import {transcriptRecords,transcriptGroups} from './transcript-records'
+
+async function* array(records:AsyncIterable<Record<string,unknown>>){
+ let first=true
+ yield '['
+ for await(const row of records){yield (first?'':',')+JSON.stringify(row);first=false}
+ yield ']'
+}
+
+async function* transcriptJSON(env:Env,projectId:string){
+ const conversations=transcriptRecords(env,'SELECT id,id AS conversationId,contact_id AS contactId,assigned_to AS assignedTo,revision,created_at AS createdAt,updated_at AS updatedAt,resolved_at AS resolvedAt FROM conversations WHERE project_id=?',[projectId])
+ const messages=transcriptGroups(transcriptRecords(env,'SELECT id,conversation_id AS conversationId,local_id AS localId,actor_id AS actorId,actor_role AS actorRole,content,content_raw AS contentRaw,revision,created_at AS createdAt,erased_at AS erasedAt FROM messages WHERE project_id=?',[projectId],'revision'))
+ const notes=transcriptGroups(transcriptRecords(env,`SELECT n.id,n.conversation_id AS conversationId,'native' AS source,n.user_id AS authorId,NULL AS author,n.content,n.created_at AS createdAt FROM conversation_notes n JOIN conversations c ON c.id=n.conversation_id WHERE c.project_id=?
+  UNION ALL SELECT id,conversation_id AS conversationId,'imported' AS source,NULL AS authorId,author_json AS author,content,created_at AS createdAt FROM move_in_notes WHERE project_id=?`,[projectId,projectId]))
+ const attachments=transcriptGroups(transcriptRecords(env,'SELECT id,conversation_id AS conversationId,message_id AS messageId,filename,content_type AS contentType,size,created_at AS createdAt FROM media WHERE project_id=?',[projectId]))
+ try{
+  yield JSON.stringify({projectId,exportedAt:new Date().toISOString(),scope:'all_workspace_conversations'}).slice(0,-1)+',"conversations":['
+  let first=true
+  for await(const {conversationId:_,...conversation} of conversations){
+   yield (first?'':',')+JSON.stringify(conversation).slice(0,-1)+',"messages":'
+   first=false
+   yield* array(messages.take(conversation.id))
+   yield ',"privateNotes":'
+   yield* array(notes.take(conversation.id))
+   yield ',"attachments":'
+   yield* array(attachments.take(conversation.id))
+   yield '}'
+  }
+  yield ']}'
+ }finally{await Promise.all([conversations.return(undefined),messages.close(),notes.close(),attachments.close()])}
+}
+
+/** Complete workspace history, including imports and empty drafts; attachment bytes stay in the workspace. */
+export function exportTranscripts(env:Env,projectId:string){
+ const chunks=transcriptJSON(env,projectId),encoder=new TextEncoder()
+ return new ReadableStream<Uint8Array>({
+  async pull(controller){try{const chunk=await chunks.next();if(chunk.done)controller.close();else controller.enqueue(encoder.encode(chunk.value))}catch(error){controller.error(error)}},
+  async cancel(){await chunks.return(undefined)}
+ })
+}

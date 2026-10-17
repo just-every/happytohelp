@@ -11,6 +11,7 @@ import { options } from './options'
 import { linkStatus } from './link-status'
 import { magicLink } from './magic-link'
 import { twoFactor } from './two-factor/routes'
+import { emailStepUp } from './two-factor/email-step-up'
 import { ownerRecovery } from './two-factor/owner-recovery'
 import { pendingFactor } from './two-factor/state'
 export const routes=new Hono<AppEnv>()
@@ -24,6 +25,7 @@ routes.route('/',options)
 routes.route('/',linkStatus)
 routes.route('/',magicLink)
 routes.route('/',twoFactor)
+routes.route('/',emailStepUp)
 routes.route('/',ownerRecovery)
 routes.get('/session',async c=>{const {security,...actor}=await requireActor(c),twoFactor=security?pendingFactor(security):null;return c.json(twoFactor?{...actor,twoFactor}:actor)})
 routes.delete('/session',async c=>{await requireActor(c);const token=c.req.header('Authorization')?.replace(/^Bearer /,'')||c.req.header('Cookie')?.match(/h2h_session=([^;]+)/)?.[1];await c.env.DB.prepare('UPDATE sessions SET revoked_at=? WHERE token_hash=?').bind(Date.now(),await hashToken(token!)).run();return c.json({revoked:true})})

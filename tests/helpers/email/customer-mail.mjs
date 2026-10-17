@@ -9,8 +9,9 @@ const b64=bytes=>btoa(String.fromCharCode(...bytes))
 // frozen at first send, a lost provider response never resent, and oversized or missing files linked instead.
 export async function customerMailJourney(){
  const m=await mailApp({outbox:'sender@example.com'}),{DB,app,mail,replay,idle}=m
+ const initialMailStatus=new Map()
  const upload=async(name,type,bytes)=>{const response=await app.request('/api/conversations/c/media',{method:'POST',raw:true,headers:{...m.operator,'Content-Type':type,'X-Filename':name},body:bytes});assert.equal(response.status,201,await response.clone().text());return (await response.json()).id}
- const reply=async(localId,content,mediaIds=[])=>{const head=await DB.prepare("SELECT revision,last_message_id FROM conversations WHERE id='c'").first();const response=await m.post('c/messages',{localId,content,expectedRevision:head.revision,expectedLastMessageId:head.last_message_id,mediaIds});assert.equal(response.status,200,await response.clone().text());const message=(await response.json()).message;await app.scheduled();return message}
+ const reply=async(localId,content,mediaIds=[])=>{const head=await DB.prepare("SELECT revision,last_message_id FROM conversations WHERE id='c'").first();const response=await m.post('c/messages',{localId,content,expectedRevision:head.revision,expectedLastMessageId:head.last_message_id,mediaIds});assert.equal(response.status,200,await response.clone().text());const result=await response.json(),message=result.message;initialMailStatus.set(message.id,result.dashboardMessage.email_status.state);await app.scheduled();return message}
  const deliveries=id=>DB.prepare("SELECT recipient,state FROM email_deliveries WHERE id LIKE ? ORDER BY recipient").bind(`message:${id}:%`).all().then(rows=>rows.results)
  try{
   await DB.batch([
@@ -66,5 +67,37 @@ export async function customerMailJourney(){
    const file=await app.request(url.pathname+url.search);assert.equal(file.status,200);assert.equal((await file.arrayBuffer()).byteLength,large.length)
    assert.equal((await app.request(url.pathname.replace(/.$/,c=>c==='0'?'1':'0')+url.search)).status,404)
   }
+  // An operator replying to their own visitor address gets a reason, with no provider
+  // attempt. Preferred addresses use the same selection as sending; another eligible
+  // participant still receives the reply and its durable outcome wins on reload.
+  await DB.prepare("DELETE FROM conversation_participants WHERE conversation_id='c'").run()
+  const readMailStatus=async messageId=>{
+   const response=await app.request('/api/dashboard/projects/p/conversations/c/buckets/c',{headers:m.operator})
+   assert.equal(response.status,200,await response.clone().text())
+   const bucket=(await response.json()).data
+   return bucket.messages.find(message=>message.id===messageId).email_status.state
+  }
+  for(const [key,email,flags,state] of [
+   ['same-address',' OP@EXAMPLE.COM ',{},'sender_address'],
+   ['same-preferred','other@example.com',{provided_email:' OP@EXAMPLE.COM '},'sender_address'],
+   ['different-preferred','op@example.com',{provided_email:'another@example.com'},'sent'],
+   ['missing-address',null,{},'no_recipient'],
+   ['blocked-address','op@example.com',{is_blocked:true},'no_recipient'],
+  ]){
+   await DB.prepare("UPDATE contacts SET email=?,metadata_json=? WHERE id='contact'").bind(email,JSON.stringify(flags)).run()
+   const attempts=mail.attempts,message=await reply(key,'Mail status '+key)
+   assert.equal(await readMailStatus(message.id),state,key+' retains its reason on reload')
+   if(state==='sent')assert.deepEqual(await deliveries(message.id),[{recipient:'another@example.com',state:'sent'}])
+   else{
+    assert.equal(initialMailStatus.get(message.id),state,key+' names the reason in the send response')
+    assert.equal(mail.attempts,attempts,key+' does not contact a provider')
+    assert.deepEqual(await deliveries(message.id),[],key+' does not invent a send attempt')
+   }
+  }
+  await DB.batch([DB.prepare("UPDATE contacts SET email='op@example.com',metadata_json='{}' WHERE id='contact'"),DB.prepare("INSERT INTO conversation_participants VALUES('status-participant','c','participant',3)")])
+  const participantReply=await reply('same-with-participant','Reply also reaches the other recipient')
+  assert.deepEqual(await deliveries(participantReply.id),[{recipient:'teammate@example.com',state:'sent'}])
+  await DB.prepare("DELETE FROM conversation_participants WHERE id='status-participant'").run()
+  assert.equal(await readMailStatus(participantReply.id),'sent','a durable provider outcome takes precedence over a current same-address exclusion')
  }finally{await m.close()}
 }

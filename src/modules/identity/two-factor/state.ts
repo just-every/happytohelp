@@ -1,6 +1,6 @@
 /** How long a proven factor counts as a recent step-up for sensitive actions. */
 export const STEP_UP_MS=15*60*1000
-export type FactorMethod='password'|'totp'|'webauthn'|'recovery'|'installation'
+export type FactorMethod='password'|'email_link'|'totp'|'webauthn'|'recovery'|'installation'
 export const SECOND_FACTORS:FactorMethod[]=['totp','webauthn','recovery','installation']
 export const POLICY_ROLES=['owner','admin','operator','collaborator'] as const
 
@@ -27,3 +27,6 @@ export function recentStepUp(state:FactorState,now=Date.now()){
  if(!state.factorAt||now-state.factorAt>STEP_UP_MS)return false
  return state.hasFactor?SECOND_FACTORS.includes(state.factorMethod!):true
 }
+
+/** Mailbox proof can replace an unknown password, but can never replace an enrolled second factor. */
+export const recentMailboxProof=(state:FactorState)=>state.factorMethod==='email_link'&&recentStepUp(state)

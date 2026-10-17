@@ -5,18 +5,12 @@ import {recipientReplyAddress} from './email-reply-address'
 import {withChatReplyNotice} from './reply-notice'
 import {loopSuppressionHeaders} from './notification-delivery'
 import {queueOperatorActivity} from './operator-activity'
+import {notificationRecipients,type NotificationContact} from './notification-recipients'
+export {notificationAddress} from './notification-recipients'
 export {loopSuppressionHeaders} from './notification-delivery'
 export {assignmentNotificationStatement,dispatchOperatorNotifications} from './operator-notifications'
 
-type Recipient={id:string;email:string|null;metadata_json?:string}
 type Recorded={state:string;provider_id:string|null;recipient:string}
-const mailbox=(value:unknown)=>typeof value==='string'&&value.length<=254&&/^[^\s@<>(),:;"\\]+@[^\s@<>(),:;"\\]+\.[^\s@<>(),:;"\\]+$/.test(value.trim())?value.trim().toLowerCase():null
-function metadata(contact:Recipient){return JSON.parse(contact.metadata_json||'{}')}
-/** A collected preference chooses only a notification destination. It never
- * changes canonical identity, verification, participants or inbound authority.
- * Mail with no usable From names nobody to answer: its contact is notified only at
- * an address an operator chose for it. */
-export function notificationAddress(contact:Recipient){const flags=metadata(contact);return mailbox(flags.provided_email)||(flags.unusable_from?null:mailbox(contact.email))}
 function outcome(deliveries:EmailOutcome[]){
  const first=deliveries[0]
  const state=['uncertain','sending','failed'].find(state=>deliveries.some(delivery=>delivery.state===state))||first.state
@@ -58,22 +52,12 @@ export async function notifyMessage(env:Env,message:any,actor:Actor,defer?:Defer
  if(!conversation)return {state:'not_found'}
  const settings=data[3].results[0]
  if(settings?.is_enabled===0)return {state:'disabled'}
- const contacts={results:data[4].results as Recipient[]}
- const excluded=new Set<string>()
- if(senderId){
-  const sender=message.actor_role==='contact'
-   ?contacts.results.find(contact=>contact.id===senderId)||data[5]?.results[0]
-   :data[5]?.results[0]
-  if(sender)for(const value of [sender.email,metadata(sender).provided_email]){const email=mailbox(value);if(email)excluded.add(email)}
- }
- const recipients:{id:string;email:string}[]=[]
- for(const contact of contacts.results){
-  const flags=metadata(contact)
-  if((message.actor_role==='contact'&&contact.id===senderId)||flags.is_erasing||flags.is_erased||flags.is_deleted||flags.is_blocked)continue
-  const email=notificationAddress(contact)
-  if(email&&!excluded.has(email)){recipients.push({id:contact.id,email});excluded.add(email)}
- }
- if(!recipients.length)return operatorActivity||{state:'no_recipient'}
+ const contacts=data[4].results as NotificationContact[]
+ const sender=senderId?(message.actor_role==='contact'
+   ?contacts.find(contact=>contact.id===senderId)||data[5]?.results[0]
+   :data[5]?.results[0]):undefined
+ const {recipients,state}=notificationRecipients(contacts,sender,message.actor_role==='contact'?senderId:undefined)
+ if(!recipients.length)return operatorActivity||{state}
  const {omitted,...content}=await renderConversationEmail(env,{projectId:actor.projectId,conversationId:conversation.id,messages:[message]})
  const inputs:EmailInput[]=await Promise.all(recipients.map(async(recipient,index)=>{const replyTo=settings?await recipientReplyAddress(env,settings.inbound_address,actor.projectId,conversation.id,recipient.email):undefined;return {...(replyTo?content:await withChatReplyNotice(env,actor.projectId,content)),replyTo,projectId:actor.projectId,to:recipient.email,subject:'Reply to your support conversation',headers:loopSuppressionHeaders(message),idempotencyKey:index===0?deliveryId:`${deliveryId}:contact:${recipient.id}`}}))
  try{return outcome(await sendEmails(env,inputs,defer))}

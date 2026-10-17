@@ -46,7 +46,7 @@ async function finishEnrolment(c:Context<AppEnv>,actor:Actor,factor:{id:string;k
 twoFactor.get('/two-factor',async c=>{
  const actor=await teammate(c),factors=await confirmedFactors(c.env.DB,actor.id)
  c.header('Cache-Control','no-store')
- return c.json({factors:factors.map(publicFactor),recoveryCodesRemaining:factors.length?await remainingRecoveryCodes(c.env.DB,actor.id):0,
+ return c.json({userId:actor.id,factors:factors.map(publicFactor),recoveryCodesRemaining:factors.length?await remainingRecoveryCodes(c.env.DB,actor.id):0,
   pending:pendingFactor(actor.security!),required:actor.security!.required,stepUp:recentStepUp(actor.security!)})
 })
 

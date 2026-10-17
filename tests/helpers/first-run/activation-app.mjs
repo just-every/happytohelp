@@ -24,7 +24,7 @@ export async function activationApp({bindings=hosted,appOrigin=origin,captureQue
   for(const host of ['https://api.openai.com/v1/models/','https://api.anthropic.com/v1/models/'])if(url.startsWith(host)){await s.modelGate;const id=decodeURIComponent(url.slice(host.length));return Response.json(s.modelStatus===200?{id,object:'model'}:{error:'fixture'},{status:s.modelStatus})}
   // OpenRouter: the authenticated key record, then the models this account may use.
   if(url.startsWith('https://openrouter.ai/api/v1/')){
-   if(headers.authorization!=='Bearer fixture-openrouter-key')s.misdirected.push('openrouter request without its key')
+   if(headers.authorization!=='Bearer synthetic-fixture-openrouter-key')s.misdirected.push('openrouter request without its key')
    if(url.endsWith('/key'))return s.routerKeyStatus===302?new Response(null,{status:302,headers:{Location:'https://openrouter.ai/login'}}):Response.json({data:{label:'fixture'}},{status:s.routerKeyStatus})
    if(url.endsWith('/models/user'))return Response.json(s.routerModels)
   }

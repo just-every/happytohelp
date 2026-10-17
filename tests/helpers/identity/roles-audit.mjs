@@ -78,7 +78,7 @@ export async function rolesAuditJourney(){
   const moved=await call(profilePath,{...profile,email:'owner-elsewhere@example.com'},w.tokens.owner,'PUT');assert.equal(moved.status,403);assert.equal(moved.data.code,'step_up_required')
   assert.equal((await call(profilePath,profile,w.tokens.owner,'PUT')).status,200)
   // A first password is a credential install too: the owner has none (as no teammate moved in from legacy has), and an aged proof cannot set one.
-  const firstPassword=await call('/api/identity/password',{password:'held-session-chosen-password'},w.tokens.owner);assert.equal(firstPassword.status,403);assert.equal(firstPassword.data.code,'step_up_required')
+  const firstPassword=await call('/api/identity/password',{password:'synthetic-held-session-chosen-password'},w.tokens.owner);assert.equal(firstPassword.status,403);assert.equal(firstPassword.data.code,'step_up_required')
   assert.equal((await app.first('SELECT count(*) n FROM credentials WHERE user_id=?',w.users.owner)).n,0);assert.equal((await app.first('SELECT count(*) n FROM sessions WHERE actor_id=? AND revoked_at IS NOT NULL',w.users.owner)).n,0)
   // Installing a connected application with an aged proof is refused too: registering one, and approving its access.
   const ownerConsent=await consentPage(browser,consent,w.tokens.owner)
@@ -135,7 +135,7 @@ export async function rolesAuditJourney(){
   const linked=await app.call('/api/identity/magic-link/consume',{body:{token:link}});assert.equal(linked.status,200)
   const session=linked.headers.get('Set-Cookie').match(/h2h_session=([^;]+)/)[1]
   assert.equal((await call(`${P}/plugins`,plugin,session)).status,201)
-  assert.equal((await call('/api/identity/password',{password:'admin-first-password-2026'},session)).status,200)
-  assert.equal((await call('/api/identity/login',{email:'admin-roles@example.test',password:'admin-first-password-2026'})).status,200)
+  assert.equal((await call('/api/identity/password',{password:'synthetic-admin-first-password-2026'},session)).status,200)
+  assert.equal((await call('/api/identity/login',{email:'admin-roles@example.test',password:'synthetic-admin-first-password-2026'})).status,200)
  }finally{await app.close()}
 }

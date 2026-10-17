@@ -64,7 +64,7 @@ setup.post('/bootstrap', async c => {
 })
 
 /** Both installer entry points share the same atomic native account, workspace and session creation. */
-export async function createNativeOwner(c: Context<AppEnv>, body: Record<string, unknown>) {
+export async function createNativeOwner(c: Context<AppEnv>, body: Record<string, unknown>, {emailClaim=false}:{emailClaim?:boolean}={}) {
  // Name, owner name and colour are optional: what is missing is derived, what is given is used as given. An explicit empty value is still refused.
  const primaryColor = body.primaryColor
  if (primaryColor !== undefined && (typeof primaryColor !== 'string' || !/^#[0-9a-f]{6}$/i.test(primaryColor))) {
@@ -85,7 +85,7 @@ export async function createNativeOwner(c: Context<AppEnv>, body: Record<string,
  const derivedName = body.name === undefined ? deriveWorkspaceName(allowedOrigin, email) : null
  const name = derivedName ?? requiredString(body.name, 'name', 200).trim()
  const ownerName = body.ownerName === undefined ? deriveOwnerName(email) : requiredString(body.ownerName, 'ownerName', 200).trim()
- const password = await passwordHash(body.password as string)
+ const password = emailClaim ? null : await passwordHash(body.password as string)
  const projectId = id(), userId = id(), token = id() + id(), now = Date.now()
  const claim = 'SELECT 1 FROM owner_setup WHERE singleton=1 AND claim_id=?', guard = `EXISTS(${claim})`
  const defaults = workspaceDefaults(c.env, {projectId, name, website: allowedOrigin, ownerEmail: email}, {sql: claim, params: [userId]})
@@ -95,11 +95,11 @@ export async function createNativeOwner(c: Context<AppEnv>, body: Record<string,
   // The `derived` marker records what setup chose for the owner, so a later reading of their site replaces only what they have not touched.
   c.env.DB.prepare(`INSERT INTO project_settings(project_id,settings_json,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(projectId,JSON.stringify({primary_color: (primaryColor ?? DEFAULT_WORKSPACE_COLOUR).toLowerCase(), derived: {name: derivedName, colour: primaryColor === undefined}}),now,userId),
   c.env.DB.prepare(`INSERT INTO users(id,email,name,created_at) SELECT ?,?,?,? WHERE ${guard}`).bind(userId,email,ownerName,now,userId),
-  c.env.DB.prepare(`INSERT INTO credentials(user_id,password_hash,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(userId,password,now,userId),
+  ...(password?[c.env.DB.prepare(`INSERT INTO credentials(user_id,password_hash,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(userId,password,now,userId)]:[]),
   c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' WHERE ${guard}`).bind(projectId,userId,userId),
   c.env.DB.prepare(`INSERT INTO sessions SELECT ?,?,?,'owner',NULL,?,NULL WHERE ${guard}`).bind(await hashToken(token),userId,projectId,now+86400000,userId),
-  // The owner has just set the password: this session starts with a recent step-up.
-  c.env.DB.prepare(`INSERT INTO session_factors(token_hash,user_id,method,verified_at) SELECT ?,?,'password',? WHERE ${guard}`).bind(await hashToken(token),userId,now,userId),
+  // Only a password actually chosen by the owner supplies proof; an email claim still needs the mailbox.
+  ...(password?[c.env.DB.prepare(`INSERT INTO session_factors(token_hash,user_id,method,verified_at) SELECT ?,?,'password',? WHERE ${guard}`).bind(await hashToken(token),userId,now,userId)]:[]),
   c.env.DB.prepare(`INSERT INTO audit_events(id,project_id,at,category,action,outcome,actor_type,actor_id,source,target_type,target_id,detail_json) SELECT ?,?,?,'access','owner.created','succeeded','user',?,'dashboard','member',?,'{}' WHERE ${guard}`).bind(crypto.randomUUID(),projectId,now,userId,userId,userId),
   ...defaults.statements,
  ])

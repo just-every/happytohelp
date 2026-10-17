@@ -28,7 +28,7 @@ export function linkOrigin(env: Env) {
 function sameOrigin(request: Request) {
  if (request.headers.get('Origin') && request.headers.get('Origin') !== new URL(request.url).origin) throw new HTTPException(403, { message: 'Cross-origin sign-in denied' })
 }
-async function limit(db: D1Database, identity: string, maximum: number) {
+export async function magicLinkLimit(db: D1Database, identity: string, maximum: number) {
  const now = Date.now(), key = await hashToken(`magic:${identity}`)
  const row = await db.prepare(`INSERT INTO login_attempts VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET failures=CASE WHEN window_start<=? THEN 1 ELSE failures+1 END,window_start=CASE WHEN window_start<=? THEN excluded.window_start ELSE window_start END RETURNING failures`).bind(key, now, now - 3600000, now - 3600000).first<{ failures: number }>()
  if (!row || row.failures > maximum) throw new HTTPException(429, { message: 'Too many sign-in requests. Please try again in an hour.', res: new Response(null, { status: 429, headers: { 'Retry-After': '3600' } }) })
@@ -43,8 +43,8 @@ magicLink.post('/magic-link', async c => {
  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
  if (email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HTTPException(400, { message: 'Enter a valid email address.' })
  // Both keys are consumed for unknown accounts too. The atomic counters also bound concurrent requests.
- await limit(c.env.DB, `ip:${clientAddress(c.req)}`, 30)
- await limit(c.env.DB, `email:${email}`, 5)
+ await magicLinkLimit(c.env.DB, `ip:${clientAddress(c.req)}`, 30)
+ await magicLinkLimit(c.env.DB, `email:${email}`, 5)
  // Account lookup and email submission both run after the neutral response. Unknown
  // addresses do not expose database or provider latency through the request duration.
  c.executionCtx.waitUntil((async () => {
@@ -69,7 +69,7 @@ magicLink.post('/magic-link/consume', async c => {
  c.header('Cache-Control', 'no-store')
  const body = await c.req.json().catch(() => null)
  if (typeof body?.token !== 'string' || !/^[a-f0-9]{64}$/.test(body.token)) throw invalid()
- await limit(c.env.DB, `consume:${clientAddress(c.req)}`, 60)
+ await magicLinkLimit(c.env.DB, `consume:${clientAddress(c.req)}`, 60)
  const hash = await hashToken(body.token), now = Date.now(), session = serverSecret(), sessionHash = await hashToken(session)
  // D1 batches commit atomically. Only the batch that inserts a session from an unspent token may consume it.
  // Membership, email and deletion are checked at admission, not at email issuance.
@@ -84,6 +84,6 @@ magicLink.post('/magic-link/consume', async c => {
  const admitted=await c.env.DB.prepare('SELECT actor_id,project_id,role FROM sessions WHERE token_hash=?').bind(sessionHash).first<{actor_id:string;project_id:string|null;role:string}>()
  // An email link is a primary sign-in only: an account with a second factor still proves it.
  const twoFactor=await signInFactor(c.env.DB,admitted!.actor_id,admitted!.project_id,admitted!.role)
- await runAll(c.env.DB,[...(twoFactor==='verify'?[]:[sessionFactorStatement(c.env.DB,sessionHash,admitted!.actor_id,'password')]),...await accountAudit(c.env.DB,admitted!.actor_id,{category:'auth',action:twoFactor?'sign_in.email_link_accepted':'sign_in.succeeded',actor:{type:'user',id:admitted!.actor_id},source:'dashboard',detail:{method:'email_link'}})])
+ await runAll(c.env.DB,[...(twoFactor==='verify'?[]:[sessionFactorStatement(c.env.DB,sessionHash,admitted!.actor_id,'email_link')]),...await accountAudit(c.env.DB,admitted!.actor_id,{category:'auth',action:twoFactor?'sign_in.email_link_accepted':'sign_in.succeeded',actor:{type:'user',id:admitted!.actor_id},source:'dashboard',detail:{method:'email_link'}})])
  return c.json({ signedIn: true, destination: loginDestination(body.returnTo,new URL(c.req.url).origin,!admitted?.project_id), ...(twoFactor?{twoFactor}:{}) })
 })

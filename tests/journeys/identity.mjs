@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises'
 import {randomBytes} from 'node:crypto'
 import {startApp,sha} from './kit/app.mjs'
 import {twoFactorJourney,totp,encryptionKey} from '../helpers/identity/two-factor.mjs'
+import {emailStepUpJourney} from '../helpers/identity/email-step-up.mjs'
 import {rolesAuditJourney} from '../helpers/identity/roles-audit.mjs'
 
 const ownerSetupTables=['owner_setup','users','projects','project_settings','user_settings','user_project_preferences','memberships','credentials','sessions']
@@ -372,3 +373,5 @@ test('magic sign-in refuses removed members, deleted workspaces, changed emails,
 
 test('two-factor sign-in: TOTP with recovery codes, a role policy that forces enrolment and ends unproven sessions, refused and rate-limited answers, step-up for exports, owner reset and installation-key owner recovery, all audited',twoFactorJourney)
 test('roles and the security log: a collaborator notes and follows but cannot reply, assign, erase or export; a restricted custom role cannot publish or export; role changes step up; the log is append-only with retention and legal holds',rolesAuditJourney)
+
+test('no-password step-up proves the account mailbox, never the held session; links expire, bind the account, consume once, and rate-limit atomically with audit',emailStepUpJourney)

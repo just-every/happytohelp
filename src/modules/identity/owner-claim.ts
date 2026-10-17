@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { AppEnv } from '../../platform/env'
-import { serverSecret } from '../../platform/db'
 import { configuredToken, createNativeOwner, requireSetupOrigin, requireSetupToken, setupAvailable } from './setup'
 
 /** Rer's hosted claim uses installation configuration, never a caller-selected email or password. */
@@ -32,10 +31,10 @@ ownerClaim.post('/bootstrap', async c => {
  }
  try {
   await createNativeOwner(c, {
-   email, password: serverSecret(), allowedOrigin: c.env.WIDGET_ORIGIN || c.env.APP_ORIGIN || new URL(c.req.url).origin,
+   email, allowedOrigin: c.env.WIDGET_ORIGIN || c.env.APP_ORIGIN || new URL(c.req.url).origin,
    // Rer's hosted claim has no owner answers and supplies a generic "Owner".
    // Derive the native name from the actual owner email configured on this Worker.
-  })
+  }, {emailClaim:true})
  } catch (error) {
   if (error instanceof HTTPException && error.status === 409) return c.json({error: 'already_initialized'}, 409)
   throw error

@@ -1,7 +1,7 @@
 {
-  "version": "0.5.0",
+  "version": "0.4.2",
   "previousVersion": "0.4.1",
-  "date": "2026-10-16",
+  "date": "2026-10-17",
   "contractChanges": {
     "NATIVE-001": {
       "change": "changed",
@@ -29,6 +29,24 @@
       "summary": "A starter assistant without its provider key leaves new conversations with the team.",
       "was": "Missing providers failed explicitly when model execution was requested.",
       "now": "Requested model execution still fails explicitly without a provider; new conversations do not assign a default assistant whose provider has no key. Uncertain attempts remain uncertain and daily ceilings still apply."
+    },
+    "IDENTITY-003": {
+      "change": "changed",
+      "summary": "Mailbox confirmation covers new and existing accounts with unknown passwords.",
+      "was": "Moved-in teammates and email-claimed owners encountered a password-only step-up.",
+      "now": "Accounts without a second factor can confirm beside their password by a single-use, 15-minute account-bound email sign-in link. Requests claim shared account/IP rate limits atomically and are audited. Only the fresh mailbox sign-in session gains proof. Recent mailbox proof authorizes replacing an unknown existing password without its old value; a held session cannot. Existing deliberately chosen passwords remain valid. New email claims create no unknown password or recent proof. Every enrolled second-factor gate and recovery rule remains unchanged. Migration 190 admits the distinct email_link proof method while retaining existing session proofs and timestamps."
+    },
+    "REPORTS-001": {
+      "change": "changed",
+      "summary": "Reports exclude empty drafts and export complete workspace history.",
+      "was": "Analytics counted empty widget conversations and exported no message text.",
+      "now": "Reports and analytical CSVs require a persisted message; the widget session contract is retained. A separate guarded streaming JSON export includes all workspace conversations, messages, private notes and attachment metadata across dates and imports, excluding attachment bytes."
+    },
+    "INTEGRATION-001": {
+      "change": "changed",
+      "summary": "Same-address suppression is visible.",
+      "was": "A visitor matching the reply sender was shown no attempt recorded.",
+      "now": "Message status explains when the visitor address matches the reply sender; shared recipient selection preserves preferred addresses, participants and recorded delivery outcomes."
     }
   },
   "proseChanges": [
@@ -39,7 +57,7 @@
       "change": "changed",
       "summary": "Installation now starts with three commands and describes the provisioned workspace.",
       "was": "The README described the 0.4.1 fix and an explicit private-answer local setup.",
-      "now": "The 0.5.0 section describes this release and its two migrations. The npm rer bootstrap, clone and rer dev path needs no private answers or external mail/AI account. AI key setup and the provisioned workspace are explained."
+      "now": "The 0.4.2 section describes this release and its two migrations. The npm rer bootstrap, clone and rer dev path needs no private answers or external mail/AI account. AI key setup and the provisioned workspace are explained."
     },
     {
       "document": "AGENTS.md",
@@ -228,20 +246,77 @@
       "was": "The architecture described bundled CLI commands and the prior setup path.",
       "now": "The handover identifies the exact package pin, provisioning and missing-key assignment, pure GET observations, bounded private site knowledge and migration 120.",
       "ownerAction": "Use the current reference and preserve existing authority, private settings and qualification limits."
+    },
+    {
+      "document": "docs/account-security.md",
+      "change": "changed",
+      "date": "2026-10-17",
+      "summary": "Passwordless accounts confirm in the dialog by mailbox and can set their first password.",
+      "was": "Re-sign-in by email was described as the way out of password step-up.",
+      "now": "The dialog sends a link, verifies the same account on return and retries the guarded action; merely requesting mail grants no proof.",
+      "ownerAction": "Keep mailbox access available; enrolled second factors remain required."
     }
   ],
   "extensionPointChanges": [],
   "migrations": [
     {
       "id": "120_activation_observations.sql",
-      "buyerSteps": "Back up, then apply before starting the updated Worker. Adds nullable observation_json to activation_receipts without backfilling existing receipts."
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
     },
     {
       "id": "121_move_in_categories.sql",
-      "buyerSteps": "Apply after 120 and before starting the updated Worker. Removes category-insert revision invalidation and narrows category-delete invalidation to articles whose category ancestry changes; existing rows are not rewritten."
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "122_email_content.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "123_email_reply_grants.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "123_inbox_message_search.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "123_operator_notifications.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "124_message_read_index.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "125_contact_email_proof.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "129_owner_unassigned_alerts.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "170_knowledge_experience.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "171_csat_surveys.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "180_account_security.sql",
+      "buyerSteps": "Back up, then apply in filename order before starting the updated Worker; retain existing owner, workspace and business data."
+    },
+    {
+      "id": "181_context_message_subjects.sql",
+      "buyerSteps": "Apply before 190 and before the updated Worker starts. Indexes message subjects created by the legacy importer while preserving existing business data."
+    },
+    {
+      "id": "190_email_step_up.sql",
+      "buyerSteps": "Apply before starting the updated Worker. Extends the allowed session proof methods with email_link, retaining every existing session proof and timestamp. Email links never satisfy an enrolled second factor."
     }
   ],
   "breaking": true,
-  "agentUpdateInstructions": "Update from 0.4.1 while preserving owner customizations, native passwords, actor/project authority and explicit operator Send. Stop dev or preview and back up state and private settings. Install the frozen package-mode dependencies (@runeditrun/rer 0.2.19); v0.4.1 predates package conversion. For a new hosted installation, configure OWNER_EMAIL (the rer deploy secret binding); /auth/bootstrap accepts the private H2H_SETUP_TOKEN once, and rer retires it after a confirmed claim. Existing owners and native local password setup are retained. Apply 120_activation_observations.sql then 121_move_in_categories.sql before starting the updated Worker and before serving traffic. Neither migration rewrites prior application rows; 120 adds a nullable observation field without backfill and 121 changes only category revision triggers. Never reset to upgrade. Existing workspaces and user-edited assistants remain under their existing authority; new-workspace defaults and missing-key assignment do not authorize provider work. Preserve uncertain outcomes, reviewed source ancestry, private import originals, resumable journals, schema-2 manifests and raw payload sidecars. Deliberate uncertain webhook resend can duplicate effects and requires inspection of the receiver. Preserve the accessibility checker HOLD and portable-storage limits. An older 0.3 installation follows OPERATIONS.md first, applying 0109_magic_signins.sql before the updated Worker if missing, then 0110 through 119 in order before these two migrations. The magic_signins table and magic_signins_expiry index retain backup and restore obligations for expiry and consumption state; that migration does not rewrite existing rows, create accounts, send email or configure a provider. Email sign-in requires APP_ORIGIN and password sign-in remains available.",
-  "publicReleaseNotes": "HappyToHelp 0.5.0 adds Help Scout Inbox v2 and Docs v1 response-body Move in, guarded deliberate resend of uncertain webhooks, and a guided local-agent investigation/fix/observation/reply flow. New workspaces gain a starter assistant and installation mail settings; Setup distinguishes observed settings, owner-only tasks and durable skips. Without an AI key conversations stay with the team. A bounded initial website read retains private knowledge without publishing articles. Re-importing unchanged source preserves native edits; category changes invalidate only affected article ancestry. The workspace has a neutral light canvas and lighter controls. Local development uses the README three-command npm bootstrap/clone/rer dev path without private answers or mail/AI credentials; checkout commands pin @runeditrun/rer 0.2.19. Hosted deployment claims the owner named by OWNER_EMAIL during rer deploy, who then signs in by email (rer signin does not yet work with native sign-in); the native /setup form is recovery only, and rer deploy --remove --yes removes an environment; local password setup remains available. Updating from 0.4.1 requires two migrations, 120_activation_observations.sql and 121_move_in_categories.sql, before the updated Worker starts. Imports and connection/provider journeys use synthetic fixtures; real Help Scout accounts, live Slack, hosted installation, paid-provider execution and timed activation remain unqualified. Accessibility remains on owner HOLD; no WCAG, compliance or FedRAMP conformance is claimed. Backups cover D1/R2, not Durable Object storage; full portable fidelity and hosted operating costs are unestablished. app.happytohelp.com is separate legacy production."
+  "agentUpdateInstructions": "Update from v0.4.1 to v0.4.2 while preserving owner customizations, native credentials, tenant authority, private settings and human Send. Stop the runtime and back up D1, R2 and Durable Object business state. Install frozen dependencies with @runeditrun/rer 0.2.42. Apply every listed migration in filename order before the updated Worker serves traffic. Never reset to upgrade. Rer deploy claims the configured OWNER_EMAIL for a new installation without choosing a password; the owner signs in by email, and existing owners are preserved. Mailbox links do not bypass any enrolled second factor. First-password installation and sensitive actions require recent proof. Retain uncertain outcomes without replay, reviewed imports and erasure fences. Reports offers full conversation JSON with messages/private notes and attachment names; bytes remain in the portable archive. Preserve all existing qualification limits and the accessibility owner HOLD. An older 0.3 installation follows OPERATIONS.md first.",
+  "publicReleaseNotes": "HappyToHelp v0.4.2 is the current deployable release. It includes mailbox step-up and first-password setup including existing accounts whose passwords were never known, complete conversation JSON export, honest same-address mail status and Reports that exclude empty widget drafts. It also carries the native two-factor, roles, audit, portable Durable Object, knowledge/feedback and import improvements since v0.4.1. Commands pin @runeditrun/rer 0.2.42; hosted deployment claims the configured owner, who signs in by email. Existing owners and passwords remain. Apply the listed migrations before serving traffic. Provider fixtures establish local protocol behavior only; paid-provider quality, real-vendor compatibility and hosted operating costs remain separately qualified. Accessibility remains on owner HOLD. app.happytohelp.com is separate legacy production."
 }

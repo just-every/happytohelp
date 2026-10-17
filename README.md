@@ -37,17 +37,17 @@ work delegated to your own Codex or Claude. It works with human replies without
 an AI provider. The editable React application runs on Cloudflare Workers with
 Hono, D1, R2, Queues and Durable Objects.
 
-## Release 0.5.0 (not yet tagged)
+## Release 0.4.2
 
-The latest tagged release is 0.4.1; `main` carries 0.5.0 until its `v0.5.0` tag
-is cut. Version 0.5.0 adds Help Scout response-body imports, deliberate uncertain webhook
+Deploy the latest tagged release, **`v0.4.2`**, using the commands below.
+This release includes Help Scout response-body imports, deliberate uncertain webhook
 resends, a guided local-agent fix flow and provisioned new workspaces with a
 simpler Setup page. Re-imports preserve native edits. Commands use the published
 `@runeditrun/rer` package pinned to 0.2.42; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
-Back up and apply `120_activation_observations.sql` then
-`121_move_in_categories.sql` before the updated Worker starts. See
+Back up and apply every migration listed in [RELEASE.json](RELEASE.json), in filename
+order, before the updated Worker starts. See
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md) and [the changelog](CHANGELOG.md).
 
 Version 0.4.0 adds Move in for reviewed support-history imports, resolution
@@ -75,11 +75,14 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 The [install and run guide](https://happytohelp.com/docs/install) covers
 installation, local sign-in and stopping the app, step by step.
 
-Start it with one line. You need **Node.js 22 or later** (with npm) and Git; check
-with `node --version`.
+You need **Node.js 22 or later** (with npm) and Git; check with
+`node --version`. Install the `rer` command once. Activate it in the current
+shell with `export PATH="$HOME/.local/bin:$PATH"`, then start HappyToHelp:
 
 ```sh
-npx -y @runeditrun/rer dev just-every/run-happytohelp
+npx -y @runeditrun/rer cli install
+export PATH="$HOME/.local/bin:$PATH"
+rer dev just-every/run-happytohelp
 ```
 
 That clones HappyToHelp into `run-happytohelp`, provisions the checkout's own pinned
@@ -115,6 +118,14 @@ Both use the same rer commands. An independently managed project may select its
 own operating contract; this seed's CLI is not a platform admission requirement.
 
 ## Deploy to your own Cloudflare account
+
+For a new installation, acquire the latest tagged release, **`v0.4.2`**,
+after installing `rer` as shown above:
+
+```sh
+git clone --branch v0.4.2 https://github.com/just-every/run-happytohelp
+cd run-happytohelp
+```
 
 Read [deployment prerequisites](OPERATIONS.md#deploy-to-your-cloudflare-account).
 When rer says **See the deploy-kit owner-account instructions**, it means
@@ -298,6 +309,19 @@ headers follow the selected workspace; visitors intentionally see the operator's
 display name. Local development suppresses email without storing messages.
 
 
+
+## Export conversations
+
+In **Reports**, choose **Export workspace conversations (JSON)**. The `transcripts.json`
+download includes every workspace conversation across all dates and imports, with
+its messages, private notes and attachment names and metadata. Attachment bytes
+remain in the workspace; use the portable backup for those. Exports ask for recent
+confirmation: accounts without a second factor can choose **Email me a sign-in link**,
+press **Sign in** from their mailbox in the same browser, then return and press
+**Continue**. This also works for older email-claimed owners whose generated
+password was never known. After mailbox confirmation, **Profile → Security** lets
+you set a new password without the old one. Enrolled second factors remain required.
+Reports and its analytics CSVs exclude empty widget conversations.
 
 ## Contributor setup
 

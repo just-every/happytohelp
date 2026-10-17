@@ -8,6 +8,7 @@ const labels = {
  not_configured: 'Email not sent · configure an email provider',
  disabled: 'Email not sent · workspace email is disabled',
  no_recipient: 'Email not sent · visitor has not left an email',
+ sender_address: 'Email not sent · the visitor’s address matches the reply sender’s',
  not_recorded: 'Email not sent · no attempt recorded',
 };
 export default function MessageMailStatus({status}) {

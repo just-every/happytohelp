@@ -76,6 +76,25 @@ for(const [kind,rule] of [['ais','settings.manage'],['macros','settings.manage']
  rules[`POST ${base}/${kind}`]=rule;rules[`PUT ${base}/${kind}/:resourceId`]=rule;rules[`DELETE ${base}/${kind}/:resourceId`]=kind==='contacts'?'data.erase':rule
 }
 for(const base of [P,D]){rules[`PUT ${base}/agents/:userId`]='members.manage';rules[`DELETE ${base}/agents/:userId`]='members.manage';rules[`POST ${base}/plugins/:pluginId/:direction`]='settings.manage'}
+// Ticket configuration follows existing settings authority; personal views are
+// self-owned and their handlers separately guard shared definitions.
+for(const base of [P,D]){
+ rules[`GET ${base}/ticket-settings`]='self'
+ rules[`GET ${base}/conversations/:conversationId/ticket`]='self'
+ rules[`PATCH ${base}/conversations/:conversationId/ticket`]='conversations.manage'
+ for(const kind of ['statuses','fields','groups']){
+  rules[`GET ${base}/ticket-${kind}`]='self'
+  rules[`POST ${base}/ticket-${kind}`]='settings.manage'
+  rules[`PATCH ${base}/ticket-${kind}/:id`]='settings.manage'
+  rules[`DELETE ${base}/ticket-${kind}/:id`]='settings.manage'
+ }
+ rules[`GET ${base}/ticket-views`]='self'
+ rules[`GET ${base}/ticket-views/:viewId`]='self'
+ rules[`POST ${base}/ticket-views`]='self'
+ rules[`PUT ${base}/ticket-views/:viewId`]='self'
+ rules[`DELETE ${base}/ticket-views/:viewId`]='self'
+ for(const action of ['preview','apply'])rules[`POST ${base}/tickets/bulk/${action}`]='conversations.manage'
+}
 
 const prefixes=['/api/v1/','/api/management/admin/']
 export function routeRule(method:string,path:string):Rule|undefined{

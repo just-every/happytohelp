@@ -239,6 +239,7 @@ step('repeated erasure is idempotent and records the new run',async()=>{
  const state=await erasedScope(),outside=await outsideScope()
  const followupHistory=await all("SELECT type,payload FROM context_tracked_events WHERE project_id='p' AND subject_id='ct'")
  const sender=await one('SELECT actor_id FROM messages WHERE id=?',opAfter)
+ const newTicketRecords=(await one("SELECT count(*) n FROM ticket_history WHERE project_id='p' AND conversation_id IN ('conv1','conv2') AND changes_json<>'{\"erased\":true}'")).n
  assert.ok(followupHistory.some(event=>event.type==='AGENT_ASSIGNED'&&JSON.parse(event.payload).agent_id===sender.actor_id),'the follow-up operator reply also records its server-authored handoff')
  const response=await erase(tokens.owner);assert.equal(response.status,200)
  const second=(await response.json()).data
@@ -247,7 +248,7 @@ step('repeated erasure is idempotent and records the new run',async()=>{
  // A repeat asks the connected webhook again; the latest request replaces the settled one.
  assert.deepEqual(second.providers.counts,{completed:0,pending:1,failed:0,unsupported:2})
  const {providers:secondProviders,...secondRecord}=second,{providers:firstProviders,...firstRecord}=first
- assert.deepEqual({...secondRecord,runs:1,last_erased_at:first.last_erased_at,messages:second.messages-1,tracked_events:second.tracked_events-followupHistory.length},firstRecord)
+ assert.deepEqual({...secondRecord,runs:1,last_erased_at:first.last_erased_at,messages:second.messages-1,tracked_events:second.tracked_events-followupHistory.length,ticket_records:second.ticket_records-newTicketRecords},firstRecord)
  const again=await erasedScope()
  assert.deepEqual(await one('SELECT content,local_id FROM messages WHERE id=?',opAfter),{content:'',local_id:'erased:'+opAfter})
  assert.deepEqual({...again,messages:again.messages.filter(m=>m.id!==opAfter)},{...state,messages:state.messages.filter(m=>m.id!==opAfter),context:{...state.context,context_tracked_events:state.context.context_tracked_events-followupHistory.length}})

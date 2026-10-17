@@ -23,7 +23,7 @@ export default function ContactErasure({projectId,contact,onErased}) {
  </Section>{dialog}</div>;
 }
 
-const STORES=[['conversations','Conversations redacted'],['messages','Messages erased'],['attachments','Attachments deleted'],['tracked_events','Tracked visits and actions'],['context_records','Customer context records'],['sessions','Widget sessions ended']];
+const STORES=[['conversations','Conversations redacted'],['messages','Messages erased'],['attachments','Attachments deleted'],['tracked_events','Tracked visits and actions'],['context_records','Customer context records'],['sessions','Widget sessions ended'],['ticket_records','Ticket values, history and saved views redacted']];
 const STATES={completed:'Deleted by provider',pending:'Request sent, waiting',failed:'Request failed',unsupported:'Provider cannot delete'};
 const PROVIDERS={webhook:'Webhook',slack:'Slack',email_provider:'Email provider',ai_provider:'AI provider',local_computers:'Paired computers'};
 

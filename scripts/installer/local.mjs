@@ -6,6 +6,8 @@ import {commandAdapter as createCommandAdapter} from '@runeditrun/rer/adapter';
 import {hostedDeploy} from './hosted-deploy.mjs';
 import {localPortability} from '@runeditrun/rer/portability';
 import {localInputDefaults,localOwner,nativeOwner,prepareNativeLocal} from './native-local.mjs';
+import {ticketRestoreSql} from './ticket-archive-upgrade.mjs';
+import {fileRecords} from '@runeditrun/rer/modules/portability/files';
 import {checkArchiveSnapshot,readDurableObjects,snapshotSql} from './durable-objects.mjs';
 import * as model from './ui/seed.mjs';
 
@@ -23,11 +25,16 @@ const dev=async context=>{
 export const adapter=localInstaller({
  node:'22.20.0',features:{...model.features,hosting:false,github:false},
  guard:async({root})=>{await selectLocalState(root);},prepare:prepareNativeLocal,
+ migrate:async context=>{
+  // Existing dev installs reuse their build. Collect newly added source SQL
+  // before the migration phase, including an upgrade started with rer dev.
+  await context.run('Collecting local migrations',process.execPath,['scripts/migrations.mjs'],{step:'setup',cwd:context.root,signal:context.signal});
+  return ['pnpm',['exec','wrangler','d1','migrations','apply','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc']];
+ },
  // Add only missing keys: settings saved by 0.3 (setup token, local mail, optional
  // provider settings) are kept byte-for-byte while this release's local keys are added.
  secrets:{originKey:'APP_ORIGIN',values:context=>({APP_ORIGIN:context.origin,H2H_LOCAL:'true',EMAIL_PROVIDER:'development',EMAIL_FROM:'support@localhost.test'})},
  build:['pnpm',['run','build:app']],
- migrate:['pnpm',['exec','wrangler','d1','migrations','apply','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc']],
  start:preview,owner:nativeOwner,localOwner,signIn:{returnTo:'/setup'},
 });
 export const install=(root,input,store,onApp,signal)=>installOperator(root,input,store,onApp,signal,adapter.hooks);
@@ -42,10 +49,20 @@ const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async c
   snapshots=await readDurableObjects(context.root);
   await d1(context,'Recording Durable Object storage',snapshotSql(snapshots));
  }else snapshots=await checkArchiveSnapshot(context.path);
- const result=await transfer[verb](context);
+ let selected=transfer;
+ if(verb==='import'){
+  const {default:previous}=await import('./ticket-archive-policy.mjs');
+  // Metadata can select this explicitly supported schema transition, never an
+  // executable path supplied by the archive. Base verifies the complete archive.
+  for await(const record of fileRecords(context.path))if(record.kind==='manifest'){
+   if(Object.hasOwn(previous.acceptedSchemas,record.schema))selected=localPortability({database:'DB',buckets:{FILES:'FILES'},policyModule:new URL('./ticket-archive-policy.mjs',import.meta.url),transient:[]});
+   break;
+  }
+ }
+ const result=await selected[verb](context);
  // Restore deliberately suspends business triggers. Rebuild derived search
  // before reporting a completed import, including a resumed import.
- if(verb==='import')await d1(context,'Rebuilding conversation search',"INSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild')");
+ if(verb==='import'){await d1(context,'Preparing restored ticket statuses',ticketRestoreSql);await d1(context,'Rebuilding conversation search',"INSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild')");}
  // The receipt names the Durable Object storage the archive carries (exported) or carried (restored).
  return {...result,durableObjects:snapshots.map(({namespace,className,records,digest})=>({namespace,className,records:Array.isArray(records)?records.length:records,digest}))};
 } ]));

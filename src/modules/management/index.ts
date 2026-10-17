@@ -21,9 +21,13 @@ import {activation} from './activation'
 import {auditRoutes} from '../audit/routes'
 import {roles,followers} from '../access/routes'
 import {twoFactorPolicy} from '../identity/two-factor/policy-routes'
+import {ticketRoutes} from '../tickets/routes'
+import {queueRoutes} from '../tickets/views'
 export const routes=new Hono<AppEnv>()
 routes.route('/',activation).route('/',workspaceArtwork).route('/',projects).route('/',resources).route('/',contactErasure).route('/',widgetSettings).route('/',integrations).route('/',admin).route('/',invitations).route('/',githubOAuth).route('/',projectPolicy).route('/',auditRoutes).route('/',roles).route('/',twoFactorPolicy)
 export const dashboardRoutes=new Hono<AppEnv>()
+routes.route('/',ticketRoutes).route('/',queueRoutes)
+dashboardRoutes.route('/',ticketRoutes).route('/',queueRoutes)
 dashboardRoutes.route('/',reports).route('/',demoInbox).route('/',dashboard).route('/',dashboardActions).route('/',dashboardMedia).route('/',resources).route('/',aiUsage).route('/',aiSpend).route('/',followers)
 export {publicWidget} from './widget-settings'
 

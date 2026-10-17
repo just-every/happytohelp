@@ -3,6 +3,7 @@ import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
 import {requireActor} from '../../platform/auth'
 import {dashboardAccess} from './dashboard'
+import {mutateTicket} from '../tickets/mutate'
 import {tagKey} from '../move-in/readers/common'
 export const tags=new Hono<AppEnv>()
 tags.get('/projects/:projectId/tags',async c=>{const actor=await requireActor(c);if(actor.role==='contact')throw new HTTPException(403);const project=c.req.param('projectId');if(!await c.env.DB.prepare('SELECT 1 FROM memberships WHERE project_id=? AND user_id=?').bind(project,actor.id).first())throw new HTTPException(404);return c.json({data:(await c.env.DB.prepare('SELECT id,name FROM workspace_tags WHERE project_id=? ORDER BY normalized_name').bind(project).all()).results})})
@@ -10,5 +11,5 @@ const path='/projects/:projectId/conversations/:conversationId/tags'
 tags.post(path,async c=>{const {actor,conversation}=await dashboardAccess(c),body=await c.req.json(),requested=body.tagId??body.tag_id;let tag:any
  if(requested){tag=await c.env.DB.prepare('SELECT id,name FROM workspace_tags WHERE project_id=? AND id=?').bind(actor.projectId,requested).first();if(!tag)throw new HTTPException(404)}
  else {const name=typeof body.name==='string'?body.name.trim():'';if(!name||name.length>80)throw new HTTPException(400,{message:'Tag names must contain 1–80 characters'});const normalized=tagKey(name);await c.env.DB.prepare('INSERT INTO workspace_tags(id,project_id,name,normalized_name) VALUES(?,?,?,?) ON CONFLICT(project_id,normalized_name) DO NOTHING').bind(crypto.randomUUID(),actor.projectId,name,normalized).run();tag=await c.env.DB.prepare('SELECT id,name FROM workspace_tags WHERE project_id=? AND normalized_name=?').bind(actor.projectId,normalized).first()}
- await c.env.DB.prepare('INSERT OR IGNORE INTO conversation_tags(project_id,conversation_id,tag_id) VALUES(?,?,?)').bind(actor.projectId,conversation.id,tag.id).run();return c.json({data:tag},201)})
-tags.delete(`${path}/:tagId`,async c=>{const {actor,conversation}=await dashboardAccess(c),tag=c.req.param('tagId');if(!await c.env.DB.prepare('SELECT id FROM workspace_tags WHERE project_id=? AND id=?').bind(actor.projectId,tag).first())throw new HTTPException(404);await c.env.DB.prepare('DELETE FROM conversation_tags WHERE project_id=? AND conversation_id=? AND tag_id=?').bind(actor.projectId,conversation.id,tag).run();return c.json({removed:true})})
+ await mutateTicket(c.env,actor,conversation.id,{tags_add:[tag.id]},{sessionHash:c.get('sessionHash'),source:'dashboard'});return c.json({data:tag},201)})
+tags.delete(`${path}/:tagId`,async c=>{const {actor,conversation}=await dashboardAccess(c),tag=c.req.param('tagId');if(!await c.env.DB.prepare('SELECT id FROM workspace_tags WHERE project_id=? AND id=?').bind(actor.projectId,tag).first())throw new HTTPException(404);await mutateTicket(c.env,actor,conversation.id,{tags_remove:[tag]},{sessionHash:c.get('sessionHash'),source:'dashboard'});return c.json({removed:true})})

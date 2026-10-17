@@ -1,4 +1,5 @@
 import test from 'node:test'
+import {ticketsBrowser} from '../helpers/inbox/tickets-browser.mjs'
 import {inboxConversation} from '../helpers/inbox/inbox-conversation-browser.mjs'
 import {inboxDefault} from '../helpers/inbox/inbox-default-browser.mjs'
 import {mobileInbox} from '../helpers/inbox/mobile-inbox-browser.mjs'
@@ -28,3 +29,5 @@ test('appearance settings save, reload, preview and publish into the widget and 
 test('a busy internal note keeps focus and its draft, and the conversation panel resizes and remembers its width',async()=>{await noteBusyFocus();await panelResize()})
 
 test('the dashboard reads and writes through the native transport with readiness, reply tools and dialogs at desktop and phone widths',uiBrowser)
+
+test('ticket settings and ticket fields save through the dashboard at desktop and phone widths',()=>ticketsBrowser())

@@ -8116,7 +8116,7 @@
       "executable": false
     },
     "tests/first-run/setup-browser.mjs": {
-      "sha256": "101006d1755b6fa7cd6a9c07d13d32939e9ac31ed1b11c97c894496957ce0f83",
+      "sha256": "461e2ba71f00a89a6c2e9fdb33eea4e998bef309d086da044565cc7502f8e067",
       "executable": false
     },
     "tests/first-run/sign-in-entry.mjs": {

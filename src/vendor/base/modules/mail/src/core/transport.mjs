@@ -1,6 +1,10 @@
 import { validateSendResult } from './validation.mjs';
 
-/** One bounded request. Fetch exceptions never escape with credential/body text. */
+/** What a caller that asked for redirect: 'error' receives for any 3xx. */
+export const redirected = Object.freeze({ redirected: true });
+
+/** One bounded request. Fetch exceptions never escape with credential/body text.
+ * Workers reject redirect: 'error', so every request is manual and never follows. */
 export async function requestProvider(url, init, dependencies = {}) {
   const timeout = dependencies.timeoutMilliseconds ?? 15_000;
   let timer;
@@ -9,7 +13,9 @@ export async function requestProvider(url, init, dependencies = {}) {
     return await Promise.race([
       Promise.resolve().then(() => (dependencies.fetch ?? globalThis.fetch)(url, {
         ...init, redirect: 'manual', signal: AbortSignal.timeout(timeout),
-      })).then(response => response instanceof Response ? response : null, () => null),
+      })).then(response => !(response instanceof Response) ? null
+        : init.redirect === 'error' && (response.type === 'opaqueredirect' || response.status >= 300 && response.status < 400) ? redirected
+          : response, () => null),
       deadline,
     ]);
   } catch { return null; }

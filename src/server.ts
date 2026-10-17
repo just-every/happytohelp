@@ -1,3 +1,6 @@
+// Demo mode first: it guards fetch before any other module can keep it (DEMO.md).
+import {withDemo} from './vendor/base/modules/demo/index.mjs'
+import {demoOwner,seedDemo} from './demo'
 import {canonicalNavigation} from './platform/canonical-navigation'
 import {withCompiledAssetCache} from './edition/asset-cache'
 import {withWorkspaceModulePreloads} from './edition/module-preloads'
@@ -23,14 +26,14 @@ export { ConversationSocket } from './modules/conversations/socket'
 async function keepDevRenderAlive(request:Request,execution:ExecutionContext):Promise<Response>{const response=start.fetch(request);if(import.meta.env.DEV)execution.waitUntil(Promise.resolve(response).then(()=>{},()=>{}));return response}
 async function route(request:Request,env:Env,execution:ExecutionContext,path:string,publicSite:boolean):Promise<Response>{
 
- if(path==='/auth/bootstrap')return app.fetch(request,env,execution);
+ if(path==='/auth/bootstrap'||path==='/auth/owner-claim')return app.fetch(request,env,execution);
  const login=await loginDocument(request,env,request=>app.fetch(request,env,execution));if(login)return login;
  if(isDelegationDocument(request))return delegationDocument(request,env,execution,()=>keepDevRenderAlive(request,execution));if(path.startsWith('/delegation/'))return app.fetch(request,env,execution);if(path.startsWith('/preview/'))return app.fetch(request,env,execution);if(publicSite)return publicSiteRoutes.fetch(request,env,execution);return dispatch(request,()=>app.fetch(request,env,execution),()=>keepDevRenderAlive(request,execution))
 }
-export default {
+export default withDemo({
  async fetch(request:Request,env:Env,execution:ExecutionContext){if(import.meta.env.DEV && import.meta.env.RER_LOCAL_ORIGIN && env.H2H_LOCAL==='true' && !env.RER_INSTALLATION_ID)env={...env,APP_ORIGIN:import.meta.env.RER_LOCAL_ORIGIN};const canonical=canonicalNavigation(request,env);if(canonical)return canonical;const asset=await staticAssetResponse(widgetAssetRequest(request,env.APP_ORIGIN),env);if(asset)return withDocumentHeaders(withCompiledAssetCache(request,await widgetAssetOrigin(request,asset,env.APP_ORIGIN)));const documentation=legacyDocumentationResponse(request);if(documentation)return withDocumentHeaders(withSecurityHeaders(documentation,'application',env));const helpHost=await publicHelpHostResponse(request,env);if(helpHost)return withDocumentHeaders(withSecurityHeaders(helpHost,'embeddable',env));const path=new URL(request.url).pathname,publicSite=!path.startsWith('/preview/')&&await isPublicSitePath(path,env);
  return withDocumentHeaders(withSecurityHeaders(withWorkspaceModulePreloads(request,await route(request,env,execution,path,publicSite)),headerSurface(path,publicSite),env))},
  async queue(batch:MessageBatch<Job>,env:Env){await consumeQueue(batch,env)},
  async scheduled(_event:ScheduledController,env:Env){await Promise.all([runScheduled(env),dispatchOperatorNotifications(env),purgeExpiredAudit(env)])},
  email:handleEmail,
-} satisfies ExportedHandler<Env,Job>
+} satisfies ExportedHandler<Env,Job>,{seed:seedDemo,owner:demoOwner})

@@ -28,7 +28,8 @@ export const adapter=localInstaller({
  // provider settings) are kept byte-for-byte while this release's local keys are added.
  secrets:{originKey:'APP_ORIGIN',values:context=>({APP_ORIGIN:context.origin,H2H_LOCAL:'true',EMAIL_PROVIDER:'development',EMAIL_FROM:'support@localhost.test'})},
  build:['pnpm',['run','build:app']],
- migrate:['pnpm',['exec','wrangler','d1','migrations','apply','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc']],
+ // A demo migrates its own state folder (rer demo), never the checkout's .wrangler/state.
+ migrate:context=>['pnpm',['exec','wrangler','d1','migrations','apply','DB','--local','--persist-to',context.demo?.state??'.wrangler/state','--config','wrangler.jsonc']],
  start:preview,owner:nativeOwner,localOwner,signIn:{returnTo:'/setup'},
 });
 export const install=(root,input,store,onApp,signal)=>installOperator(root,input,store,onApp,signal,adapter.hooks);

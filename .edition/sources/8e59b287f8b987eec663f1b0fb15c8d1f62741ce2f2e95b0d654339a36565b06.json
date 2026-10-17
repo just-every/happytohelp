@@ -1,8 +1,8 @@
 {
-  "key": "af732dc60d24058353de9dadb6871003b44466c08c5b588e514868be2ab127b0",
+  "key": "8e59b287f8b987eec663f1b0fb15c8d1f62741ce2f2e95b0d654339a36565b06",
   "origin": {
     "repository": "https://github.com/runeditrun/base.git",
-    "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
+    "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
     "path": ".",
     "paths": [
       "modules/integrations/README.md",

@@ -42,7 +42,7 @@ export default {
     const token='dev_'+serverSecret()
     const result=await env.DB.prepare(`INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) SELECT ?,m.user_id,m.project_id,m.role,? FROM memberships m WHERE m.user_id=? AND m.project_id=? AND m.role='owner' AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=m.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL) RETURNING actor_id`).bind(await hashToken(token),Date.now()+86400000,person.id,person.projectId).all()
     if(result.results.length!==1)return new Response('The owner changed while signing in. Try again.',{status:409,headers})
-    reply.append('Set-Cookie',sessionCookie(token,request.url));reply.set('Location',loginDestination(url.searchParams.get('returnTo')||'/setup',url.origin))
+    reply.append('Set-Cookie',sessionCookie(token,request.url));reply.set('Location',loginDestination(env.RER_DEMO==='1'?'/conversations':url.searchParams.get('returnTo')||'/setup',url.origin))
    }
    return new Response(null,{status:303,headers:reply})
   }

@@ -27,7 +27,8 @@ export const prefixedCredential=new RegExp([
 
 // A secret written in prose: a label, then "is", a colon or (for longer values) a space.
 const labels='passwords?|passwort|passwd|passcode|passphrase|pass|pw|contraseña|mot de passe|parola|senha|wachtwoord|secret|token|api key|key';
-const labelled=new RegExp(String.raw`(?<![\p{L}\p{N}_-])(${labels})(\s+(?:is|was|ist|est|es|è)(?:\s+(?:now|still))?\s*:?\s+|\s*[:=]\s*|\s+)(["'\x60]?)(?:\*{1,2}|_{1,2})?([^\s"'\x60<>()[\]*]+)`,'giu');
+// Markdown emphasis may close between the label and its colon ("**Password**: …").
+const labelled=new RegExp(String.raw`(?<![\p{L}\p{N}_-])(${labels})(?:\*{1,2}|_{1,2})?(\s+(?:is|was|ist|est|es|è)(?:\s+(?:now|still))?\s*:?\s+|\s*[:=]\s*|\s+)(["'\x60]?)(?:\*{1,2}|_{1,2})?([^\s"'\x60<>()[\]*]+)`,'giu');
 const redactedMarker=/^(?:<redacted>|\[redacted\])/;
 // A value with a digit, an inner capital or a symbol; ordinary words ("is required",
 // "is incorrect!") are not one.

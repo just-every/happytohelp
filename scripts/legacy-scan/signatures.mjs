@@ -58,7 +58,7 @@ export const byteSignatures={
 // "Passwort", "mot de passe". Values follow ":"/"=", "is", or (long ones) a space.
 const passwordWord='password|passwort|passwd|passcode|passphrase|pass|pwd|pw|contraseña|mot de passe|parola|senha|wachtwoord';
 const labelName=`[\\p{L}\\p{N}_.-]*?(?:${passwordWord}|secret|token|key)`;
-const labelledValue=new RegExp(`(?<![\\p{L}\\p{N}])(${labelName})["'\\\\*]*(?:([ \\t]*[:=][ \\t]*\\n?[ \\t]*)|(\\s+(?:is|was|ist|est|es)\\s*:?\\s+)|([ \\t]+))[*_]{0,2}(?:\\\\?"((?:\\\\.|[^"\\\\\\n])*)\\\\?"|'([^'\\n]*)'|\`([^\`\\n]*)\`|([^\\s"'\`<>()[\\]*]+))`,'giu');
+const labelledValue=new RegExp(`(?<![\\p{L}\\p{N}])(${labelName})(["'\\\\*]*)(?:([ \\t]*[:=][ \\t]*\\n?[ \\t]*)|(\\s+(?:is|was|ist|est|es)\\s*:?\\s+)|([ \\t]+))([*_]{0,2}[ \\t]*)(?:\\\\?"((?:\\\\.|[^"\\\\\\n])*)\\\\?"|'([^'\\n]*)'|\`([^\`\\n]*)\`|([^\\s"'\`<>()[\\]*]+))`,'giu');
 // A value is secret-shaped when it mixes letters with digits or symbols, or carries a
 // capital inside a word; the trailing sentence punctuation is not part of it.
 function secretShaped(raw){
@@ -71,7 +71,8 @@ function secretShaped(raw){
 const nonsecretName=/(?:idempotency|public|publishable|cache|sort|primary|foreign|partition|object|storage|s3|lookup|map|hash|row|dedup(?:e|lication)?|sentry)[ _-]?key$/;
 function* labelledValues(text){
   for(const m of text.matchAll(labelledValue)){
-    const name=m[1].toLowerCase(),assigned=m[2]!==undefined,bare=m[4]!==undefined,value=(m[5]??m[6]??m[7]??m[8]).replace(/[.,:;?)\]]+$/,'');
+    // A bold label ("**Use a Strong Password**: Make sure…") is often a heading: judge its value by shape.
+    const name=m[1].toLowerCase(),bold=/[*_]/.test(m[2]+m[6]),assigned=m[3]!==undefined&&!bold,bare=m[5]!==undefined,value=(m[7]??m[8]??m[9]??m[10]).replace(/[.,:;?)\]]+$/,'');
     if(nonsecretName.test(name)||!/^[\x20-\x7e]+$/.test(value))continue;
     if(!value||redactedValue(value)||placeholderValue(value)||/^(?:true|false|null|none|undefined)$/i.test(value)||/^[a-z][a-z0-9+.-]*:\/\//i.test(value)||/\*{3,}/.test(value))continue;
     // A bare "key VALUE" needs a long value that mixes letters and digits, or a base32 run.

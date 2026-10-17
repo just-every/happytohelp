@@ -2438,7 +2438,7 @@
       "executable": false
     },
     "scripts/legacy-export/credential-shapes.mjs": {
-      "sha256": "19167cf3c1262f8f9424c2ae29491b43d86ddf55319bf69be08275d0a51f252c",
+      "sha256": "340e5b2ecf654b6f6ad5b3fc554ab5152d54dc20ca03581b3277aba7b96c1722",
       "executable": false
     },
     "scripts/legacy-export/export-project.sh": {
@@ -2494,7 +2494,7 @@
       "executable": false
     },
     "scripts/legacy-export/text-policy.mjs": {
-      "sha256": "8eb26972c3082c3e9115b97cf5c5783b23f3d2983fc167125633a9878dafbf9d",
+      "sha256": "8cdd8982d1a2eb04c5e2798e8dd6efa4a52ed4e962ff3c111971d8cc4ad042ae",
       "executable": false
     },
     "scripts/legacy-export/transport-secrets.mjs": {
@@ -2502,7 +2502,7 @@
       "executable": false
     },
     "scripts/legacy-scan/signatures.mjs": {
-      "sha256": "1deb690a823874c0774ee4fc9d6145add25b7da58b04a59154bdc52e86909e7a",
+      "sha256": "b24a9840046e42ca67c25c57a9428f1cdece5e45837b13a51c51e4917927997f",
       "executable": false
     },
     "scripts/local-agent-archive.cjs": {

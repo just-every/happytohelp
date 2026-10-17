@@ -23,6 +23,9 @@ function* assignments(text){
  const pattern=/\b([A-Za-z][\w-]*)(["']?[ \t]*([:=])[ \t]*)(?:"((?:\\.|[^"\\\r\n])*)"|'((?:\\.|[^'\\\r\n])*)'|([^\s"',;}]+))/g;
  for(let m;(m=pattern.exec(text));){
   const quote=m[4]!==undefined?'"':m[5]!==undefined?"'":'',value=m[4]??m[5]??m[6];
+  // Markdown emphasis closing after the colon ("**Password:** value") is not the value.
+  const emphasis=!quote&&/^[*_~]{1,3}$/.test(value)&&text.slice(m.index+m[0].length).match(/^[ \t]+([^\s"',;}]+)/);
+  if(emphasis){const raw=m[0]+emphasis[0];yield {raw,index:m.index,name:m[1],operator:m[3],quote,value:emphasis[1],head:raw.slice(0,raw.length-emphasis[1].length),prefix:text.slice(0,m.index),tail:text.slice(m.index+raw.length)};pattern.lastIndex=m.index+raw.length-emphasis[1].length;continue;}
   yield {raw:m[0],index:m.index,name:m[1],operator:m[3],quote,value,head:m[0].slice(0,m[0].length-value.length-(quote?1:0)),prefix:text.slice(0,m.index),tail:text.slice(m.index+m[0].length)};
   // An unquoted value can hold its own assignment ("Diagnostic: API_KEY=..."); rescan it.
   if(m[6]!==undefined)pattern.lastIndex=m.index+m[0].length-m[6].length;

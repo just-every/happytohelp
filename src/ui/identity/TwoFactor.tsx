@@ -4,6 +4,7 @@ import { Alert } from './fields';
 import { nativeRequest } from '../native/transport';
 import { signInDestination } from './sign-in-destination';
 import { AuthenticatorSetup, FactorProof, PasskeySetup, RecoveryCodes } from './two-factor/parts';
+import StepUpHost from '../native/StepUpDialog';
 
 interface Status { factors: { id: string; kind: 'totp' | 'webauthn'; label: string }[]; pending: 'verify' | 'enrol' | null; required: boolean }
 const destination = () => signInDestination(new URLSearchParams(location.search).get('returnTo'), location.origin);
@@ -34,5 +35,7 @@ export default function TwoFactor() {
             <section><h2>Passkey or security key</h2><PasskeySetup look="identity" onDone={result => result ? setCodes(result) : proceed()} /></section>
         </div>
         {away}
+        {/* Setting up a factor asks for the password again when the sign-in is over 15 minutes old. */}
+        <StepUpHost />
     </IdentityFrame>;
 }

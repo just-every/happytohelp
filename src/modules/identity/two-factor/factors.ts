@@ -46,18 +46,21 @@ export async function accountAudit(db:D1Database,userId:string,event:Omit<AuditE
 }
 
 const LIMIT=5,WINDOW=15*60*1000
-async function attemptKey(userId:string){return hashToken(`factor:${userId}`)}
+/** What an attempt guesses: the second factor, or the password re-entered by a signed-in person. */
+export type AttemptSecret='factor'|'password'
+const attemptKey=(secret:AttemptSecret,userId:string)=>hashToken(`${secret}:${userId}`)
 /**
- * Five answers that are not accepted in fifteen minutes lock second-factor entry for the rest
+ * Five answers that are not accepted in fifteen minutes lock entry of that secret for the rest
  * of the window. Each answer claims its attempt before it is checked, so parallel guesses
  * cannot outrun the count; an accepted answer clears it.
  */
-async function claimAttempt(db:D1Database,userId:string){
+export async function claimAttempt(db:D1Database,secret:AttemptSecret,userId:string){
  const now=Date.now()
- const row=await db.prepare('INSERT INTO login_attempts VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET failures=CASE WHEN window_start<? THEN 1 ELSE failures+1 END,window_start=CASE WHEN window_start<? THEN excluded.window_start ELSE window_start END RETURNING failures').bind(await attemptKey(userId),now,now-WINDOW,now-WINDOW).first<{failures:number}>()
+ const row=await db.prepare('INSERT INTO login_attempts VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET failures=CASE WHEN window_start<? THEN 1 ELSE failures+1 END,window_start=CASE WHEN window_start<? THEN excluded.window_start ELSE window_start END RETURNING failures').bind(await attemptKey(secret,userId),now,now-WINDOW,now-WINDOW).first<{failures:number}>()
  return row!.failures<=LIMIT
 }
-const clearFailures=async(db:D1Database,userId:string)=>{await db.prepare('DELETE FROM login_attempts WHERE key=?').bind(await attemptKey(userId)).run()}
+export const clearAttempts=async(db:D1Database,secret:AttemptSecret,userId:string)=>{await db.prepare('DELETE FROM login_attempts WHERE key=?').bind(await attemptKey(secret,userId)).run()}
+const clearFailures=(db:D1Database,userId:string)=>clearAttempts(db,'factor',userId)
 
 export interface Proof {code?:unknown;recoveryCode?:unknown;credential?:AssertionInput}
 /**
@@ -70,7 +73,7 @@ export async function proveFactor(env:Env,userId:string,proof:Proof,requestUrl:s
   await runAll(env.DB,await accountAudit(env.DB,userId,{category:'auth',action:'two_factor.refused',outcome:'refused',actor:{type:'user',id:userId},source,detail:{reason}}))
   throw new HTTPException(status,{res:jsonResponse({error:status===429?'Too many incorrect codes. Wait 15 minutes, then try again.':'That code or key was not accepted.',code:reason},status)})
  }
- if(!await claimAttempt(env.DB,userId))return refuse('rate_limited',429)
+ if(!await claimAttempt(env.DB,'factor',userId))return refuse('rate_limited',429)
  const now=Date.now()
  if(proof.recoveryCode!==undefined){
   if(await spendRecoveryCode(env.DB,userId,proof.recoveryCode,now)){await clearFailures(env.DB,userId);return 'recovery'}

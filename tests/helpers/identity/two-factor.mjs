@@ -26,11 +26,29 @@ export async function twoFactorJourney(){
   const owner=(await call('/api/identity/bootstrap',{password:'owner-correct-horse-battery',email:'owner@example.com',name:'Support',allowedOrigin:'https://widget.example',setupToken})).data
   const project=owner.projectId,events=async action=>(await app.sql('SELECT outcome,actor_id,detail_json FROM audit_events WHERE project_id=? AND action=? ORDER BY at',project,action))
   // A teammate joins with a password of their own.
-  const invite=(await call('/api/identity/invitations',{email:'agent@example.com'},owner.token)).data
+  const invite={token:new URL((await call(`/api/management/projects/${project}/agents`,{email:'agent@example.com'},owner.token)).data.data.invitationUrl).searchParams.get('token')}
   assert.equal((await call('/api/identity/accept-token',{token:invite.token,name:'Agent',password:'agent-correct-horse-battery'})).status,200)
   const signIn=async(email,password)=>{const response=await call('/api/identity/login',{email,password});assert.equal(response.status,200);return response.data}
   let agent=await signIn('agent@example.com','agent-correct-horse-battery')
   assert.equal(agent.twoFactor,undefined,'no factor and no policy: one step')
+  const ownerReset=await call('/api/identity/password-reset',{userId:agent.actor.id},owner.token)
+  assert.equal(ownerReset.status,403);assert.equal(ownerReset.data.code,'two_factor_setup_required','issuing a teammate a password needs the owner\'s own second factor')
+
+  // A held session without the password can neither add the first factor nor guess the password:
+  // each re-entered password claims its attempt first, so a parallel burst gets at most five evaluated.
+  await app.db.prepare('UPDATE session_factors SET verified_at=verified_at-? WHERE user_id=?').bind(20*60*1000,agent.actor.id).run()
+  const firstFactor=await call('/api/identity/two-factor/totp',{},agent.token);assert.equal(firstFactor.status,403);assert.equal(firstFactor.data.code,'step_up_required')
+  const passwordBurst=await Promise.all(Array.from({length:30},(_,i)=>call('/api/identity/step-up',{password:'wrong-password-'+i},agent.token))),passwordsEvaluated=passwordBurst.filter(r=>r.status===403).length
+  assert.ok(passwordsEvaluated>=1&&passwordsEvaluated<=5,`a parallel password burst is held to the limit (${passwordsEvaluated} evaluated)`);assert.equal(passwordBurst.filter(r=>r.status===429).length,30-passwordsEvaluated)
+  assert.equal((await call('/api/identity/step-up',{password:'agent-correct-horse-battery'},agent.token)).status,429,'the right password waits out the window')
+  const changeLocked=await call('/api/identity/password',{currentPassword:'agent-correct-horse-battery',password:'agent-new-correct-horse-battery'},agent.token)
+  assert.equal(changeLocked.status,429,'changing the password checks the same count')
+  const unchanged=await signIn('agent@example.com','agent-correct-horse-battery');assert.equal((await call('/api/identity/session',undefined,unchanged.token,'DELETE')).status,200,'the password is unchanged')
+  assert.deepEqual([...new Set((await events('step_up.refused')).map(row=>JSON.parse(row.detail_json).reason))].sort(),['password_incorrect','rate_limited'])
+  assert.equal((await events('password.change_refused')).map(row=>JSON.parse(row.detail_json).reason).join(),'rate_limited')
+  await app.db.prepare('UPDATE login_attempts SET window_start=window_start-?').bind(15*60*1000+1).run()
+  assert.equal((await call('/api/identity/step-up',{password:'agent-correct-horse-battery'},agent.token)).status,200)
+  assert.equal((await call('/api/identity/two-factor/totp',{},agent.token)).status,201,'stepped up, the first factor can be added')
 
   // The owner turns on an authenticator app: a wrong code is refused, the right one returns ten codes once.
   const started=await call('/api/identity/two-factor/totp',{},owner.token);assert.equal(started.status,201)
@@ -86,7 +104,10 @@ export async function twoFactorJourney(){
   const refused=await app.request(`/api/management/projects/${project}/audit/export?format=csv`,{token:owner.token})
   assert.equal(refused.status,403);assert.equal((await refused.json()).code,'step_up_required')
   assert.equal((await call('/api/identity/step-up',{password:'owner-correct-horse-battery'},owner.token)).status,401,'a password does not step up an account with a factor')
+  const agedReset=await call('/api/identity/password-reset',{userId:agent.actor.id},owner.token);assert.equal(agedReset.status,403);assert.equal(agedReset.data.code,'step_up_required')
   assert.equal((await call('/api/identity/step-up',{code:totp(ownerSecret,1)},owner.token)).status,200)
+  assert.equal((await call('/api/identity/password-reset',{userId:agent.actor.id},owner.token)).status,201,'with a recent factor the owner issues the reset link')
+  assert.equal((await events('member.password_reset_issued')).length,1)
   const exported=await app.request(`/api/management/projects/${project}/audit/export?format=csv`,{token:owner.token});assert.equal(exported.status,200)
   const csv=await exported.text();assert.match(csv,/two_factor\.policy_changed/);assert.match(csv,/two_factor\.refused/);assert.match(csv,/step_up\.required/)
   assert.doesNotMatch(csv,new RegExp(ownerSecret),'no secret in the export');assert.equal((await events('audit.exported')).length,1)

@@ -84,6 +84,6 @@ magicLink.post('/magic-link/consume', async c => {
  const admitted=await c.env.DB.prepare('SELECT actor_id,project_id,role FROM sessions WHERE token_hash=?').bind(sessionHash).first<{actor_id:string;project_id:string|null;role:string}>()
  // An email link is a primary sign-in only: an account with a second factor still proves it.
  const twoFactor=await signInFactor(c.env.DB,admitted!.actor_id,admitted!.project_id,admitted!.role)
- await runAll(c.env.DB,[...(twoFactor?[]:[sessionFactorStatement(c.env.DB,sessionHash,admitted!.actor_id,'password')]),...await accountAudit(c.env.DB,admitted!.actor_id,{category:'auth',action:twoFactor?'sign_in.email_link_accepted':'sign_in.succeeded',actor:{type:'user',id:admitted!.actor_id},source:'dashboard',detail:{method:'email_link'}})])
+ await runAll(c.env.DB,[...(twoFactor==='verify'?[]:[sessionFactorStatement(c.env.DB,sessionHash,admitted!.actor_id,'password')]),...await accountAudit(c.env.DB,admitted!.actor_id,{category:'auth',action:twoFactor?'sign_in.email_link_accepted':'sign_in.succeeded',actor:{type:'user',id:admitted!.actor_id},source:'dashboard',detail:{method:'email_link'}})])
  return c.json({ signedIn: true, destination: loginDestination(body.returnTo,new URL(c.req.url).origin,!admitted?.project_id), ...(twoFactor?{twoFactor}:{}) })
 })

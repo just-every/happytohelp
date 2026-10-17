@@ -1,4 +1,5 @@
 import {Hono} from 'hono'
+import type {Context} from 'hono'
 import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
 import {requiredString} from '../../platform/db'
@@ -46,18 +47,32 @@ invitations.delete('/projects/:projectId/invitations/:invitationId',async c=>{
  return c.json({revoked:true})
 })
 
+type Manager=Awaited<ReturnType<typeof scope>>
+/**
+ * Copying or resending issues a new, valid link for the invitation's role, so it is held to the same
+ * rules as inviting: only an owner manages an admin or owner invitation, and with a recent step-up.
+ */
+async function reissuable(c:Context<AppEnv>,a:Manager){
+ const invitation=await manageableInvitation(c.env.DB,a.projectId,c.req.param('invitationId')!,a.role)
+ if(invitation.role==='admin'||invitation.role==='owner')await requireStepUp(c,a,'member.invite')
+ return invitation
+}
+const reissued=(c:Context<AppEnv>,a:Manager,role:string,hash:string,via:'link'|'email')=>auditStatement(c.env.DB,{projectId:a.projectId,category:'access',action:'member.invitation_reissued',actor:{type:'user',id:a.id},source:requestSource(c),target:{type:'invitation',id:hash.slice(0,16)},detail:{role,via}}).run()
+
 // A link is stored only as a hash, so an existing one cannot be shown again. Copying issues another link
 // for the same invitation; links already sent keep working until they expire or the invitation is revoked.
 invitations.post('/projects/:projectId/invitations/:invitationId/link',async c=>{
- const a=await scope(c,true),invitation=await manageableInvitation(c.env.DB,a.projectId,c.req.param('invitationId'),a.role)
+ const a=await scope(c,true),invitation=await reissuable(c,a)
  const link=await issueInvitation(c.env.DB,String(c.env.APP_ORIGIN||new URL(c.req.url).origin),a.projectId,invitation.email,invitation.role)
+ await reissued(c,a,invitation.role,link.hash,'link')
  return c.json({data:{email:invitation.email,role:invitation.role,invitationUrl:link.url,expiresIn:INVITATION_LIFETIME_SECONDS}},201)
 })
 
 invitations.post('/projects/:projectId/invitations/:invitationId/resend',async c=>{
- const a=await scope(c,true),invitation=await manageableInvitation(c.env.DB,a.projectId,c.req.param('invitationId'),a.role)
+ const a=await scope(c,true),invitation=await reissuable(c,a)
  if(!emailConfigured(c.env))throw new HTTPException(503,{message:'Email delivery is not configured, so the invitation cannot be emailed. Copy the link and share it instead.'})
  const link=await issueInvitation(c.env.DB,String(c.env.APP_ORIGIN||new URL(c.req.url).origin),a.projectId,invitation.email,invitation.role)
  const receipt=await mailInvitation(c.env,a.projectId,a.id,invitation.email,invitation.role,link.hash,link.url)
+ await reissued(c,a,invitation.role,link.hash,'email')
  return c.json({data:{email:invitation.email,role:invitation.role,expiresIn:INVITATION_LIFETIME_SECONDS,delivery:receipt.state==='suppressed'?'suppressed':'sent'}},201)
 })

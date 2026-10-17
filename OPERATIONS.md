@@ -362,8 +362,9 @@ platform administrators (see [the integrations guide](src/modules/integrations/R
 Self-service sign-up (`/register`) and password recovery need the email
 settings. Without them, `/register` shows that sign-up is closed, and
 `/forgot-password` tells the visitor that the workspace owner must reset the
-password. Owners can issue a one-hour reset link with
-`POST /api/identity/password-reset`.
+password. An owner with two-factor sign-in on can issue a teammate a one-hour
+reset link with `POST /api/identity/password-reset` (`{"userId":…}`); it needs the
+owner's own second factor within 15 minutes and is recorded in the security log.
 
 `REGISTRATION_ENABLED=true` turns on self-service sign-up at `/register`, where
 anyone can create an account and their own workspaces on your installation. It

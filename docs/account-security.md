@@ -56,11 +56,16 @@ removed, they are signed out everywhere and emailed, and the reset is logged.
 
 ## Confirming it is you
 
-Exports, contact erasure, role changes, installing integrations and credentials
-(API tokens, webhooks, Slack, GitHub, paired computers), deleting a workspace and
-changing the two-factor policy ask you to confirm it is you if you have not done
-so in the last 15 minutes. With two-factor on, you confirm with your app, passkey
-or a recovery code; without it, with your password. The action then continues.
+Exports, contact erasure, role changes, inviting an admin or owner (and copying or
+resending their invitation link), installing integrations and credentials (API
+tokens, webhooks, Slack, GitHub, paired computers, connected applications, a
+two-factor app or passkey, including your first), changing your sign-in email,
+deleting a workspace and changing the two-factor policy ask you to confirm it is
+you if you have not done so in the last 15 minutes. With two-factor on, you
+confirm with your app, passkey or a recovery code; without it, with your
+password. The action then continues. Five wrong answers in 15 minutes, whether a
+code or a password (also when changing your password), lock that check for the
+rest of the 15 minutes.
 Refund and billing approvals will ask the same when they arrive.
 
 ## Roles

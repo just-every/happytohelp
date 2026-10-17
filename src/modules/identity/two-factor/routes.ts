@@ -3,7 +3,6 @@ import type {Context} from 'hono'
 import {HTTPException} from 'hono/http-exception'
 import type {AppEnv,Actor} from '../../../platform/env'
 import {requireActor} from '../../../platform/auth'
-import {verifyPassword} from '../credentials'
 import {requestSource} from '../../audit/record'
 import {accountAudit,runAll,confirmedFactors,installationOrigin,proveFactor,sealTotpSecret,openTotpSecret,takeChallenge,webauthnChallenge,type Factor} from './factors'
 import {issueRecoveryCodes,remainingRecoveryCodes} from './recovery-codes'
@@ -11,6 +10,7 @@ import {matchingStep,newTotpSecret,otpauthUri} from './totp'
 import {b64url,verifyRegistration,WebAuthnError} from './webauthn'
 import {pendingFactor,recentStepUp,sessionFactorStatement,SECOND_FACTORS,type FactorMethod} from './state'
 import {requireStepUp} from './step-up'
+import {provePassword} from './password-proof'
 import {jsonResponse} from '../../../platform/json-response'
 
 export const twoFactor=new Hono<AppEnv>()
@@ -18,8 +18,12 @@ const teammate=async(c:Context<AppEnv>)=>{const actor=await requireActor(c);if(a
 const label=(value:unknown,fallback:string)=>typeof value==='string'&&value.trim()?value.trim().slice(0,60):fallback
 const publicFactor=(factor:Factor)=>({id:factor.id,kind:factor.kind,label:factor.label,created_at:factor.created_at,last_used_at:factor.last_used_at})
 
-/** Adding a factor to an account that already has one is a security change: it needs a recent step-up. */
-async function mayEnrol(c:Context<AppEnv>,actor:Actor){if(actor.security?.hasFactor)await requireStepUp(c,actor,'two_factor.enrol')}
+/**
+ * Adding a factor is a credential install: it needs a recent step-up, the password for an account
+ * without one. Otherwise a held session could enrol its own authenticator, then pass every later
+ * step-up with it and end the account holder's other sessions.
+ */
+async function mayEnrol(c:Context<AppEnv>,actor:Actor){await requireStepUp(c,actor,'two_factor.enrol')}
 
 /**
  * Stores a confirmed factor and proves it for this session. The first factor also
@@ -146,10 +150,7 @@ twoFactor.post('/step-up',async c=>{
  if(actor.security?.hasFactor)method=await proveFactor(c.env,actor.id,{code:body.code,recoveryCode:body.recoveryCode,credential:body.credential},c.req.url)
  else{
   const credential=await c.env.DB.prepare('SELECT password_hash FROM credentials WHERE user_id=?').bind(actor.id).first<{password_hash:string}>()
-  if(!credential||typeof body.password!=='string'||!await verifyPassword(body.password,credential.password_hash)){
-   await runAll(c.env.DB,await accountAudit(c.env.DB,actor.id,{category:'auth',action:'step_up.refused',outcome:'refused',actor:{type:'user',id:actor.id},source:requestSource(c),detail:{reason:'password_incorrect'}}))
-   throw new HTTPException(403,{message:'Password incorrect'})
-  }
+  await provePassword(c,actor.id,body.password,credential?.password_hash??null,{refusedAction:'step_up.refused',message:'Password incorrect'})
   method='password'
  }
  await recordProof(c,actor,method,'step_up.confirmed')

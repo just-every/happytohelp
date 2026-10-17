@@ -4,7 +4,7 @@ import {spawnSync} from 'node:child_process'
 import {readFile} from 'node:fs/promises'
 import {randomBytes} from 'node:crypto'
 import {startApp,sha} from './kit/app.mjs'
-import {twoFactorJourney} from '../helpers/identity/two-factor.mjs'
+import {twoFactorJourney,totp,encryptionKey} from '../helpers/identity/two-factor.mjs'
 import {rolesAuditJourney} from '../helpers/identity/roles-audit.mjs'
 
 const ownerSetupTables=['owner_setup','users','projects','project_settings','user_settings','user_project_preferences','memberships','credentials','sessions']
@@ -135,7 +135,7 @@ test('a deployed install claims only with its private setup token or its owner-e
 })
 
 test('native passwords: sign-in, change and owner reset revoke sessions, an invitation accepts once, foreign switching is refused and a removed member keeps account-only sign-in',async()=>{
- const app=await startApp({bindings:{H2H_SETUP_TOKEN:'synthetic-identity-fixture-setup-token-0123456789abcdef'}})
+ const app=await startApp({bindings:{H2H_SETUP_TOKEN:'synthetic-identity-fixture-setup-token-0123456789abcdef',INTEGRATION_ENCRYPTION_KEY:encryptionKey()}})
  try{
   const call=(path,body,token)=>app.call('/api/identity'+path,{body,token})
   assert.equal((await call('/session')).status,401)
@@ -145,9 +145,11 @@ test('native passwords: sign-in, change and owner reset revoke sessions, an invi
   assert.equal((await call('/login',{email:'owner@example.com',password:'synthetic-invalid-password'})).status,401)
   const login=await call('/login',{email:'owner@example.com',password:'test-correct-horse-battery'});assert.equal(login.status,200);assert.match(login.headers.get('Set-Cookie'),/HttpOnly/);const session=login.data
   const other=await app.seedWorkspace('foreign');assert.equal((await call('/switch-project',{projectId:other.projectId},session.token)).status,403)
-  const invitation=(await call('/invitations',{email:'new@example.com'},session.token)).data
+  const invitation={token:new URL((await app.call(`/api/management/projects/${owner.projectId}/agents`,{body:{email:'new@example.com'},token:session.token})).data.data.invitationUrl).searchParams.get('token')}
   assert.equal((await call('/accept-token',{token:invitation.token,name:'New',password:'new-correct-horse-battery'})).status,200);assert.equal((await call('/accept-token',{token:invitation.token,name:'New',password:'new-correct-horse-battery'})).status,400)
   const invited=(await call('/login',{email:'new@example.com',password:'new-correct-horse-battery'})).data;assert.equal(invited.actor.projectId,owner.projectId)
+  // Issuing a teammate's reset link needs the owner's own second factor.
+  const setup=(await call('/two-factor/totp',{},session.token)).data;assert.equal((await call('/two-factor/totp/confirm',{factorId:setup.factorId,code:totp(setup.secret)},session.token)).status,201)
   const reset=(await call('/password-reset',{userId:invited.actor.id},session.token)).data
   assert.equal((await call('/accept-token',{token:reset.token,password:'reset-correct-horse-battery'})).status,200);assert.equal((await call('/session',undefined,invited.token)).status,401,'an owner reset revokes the member session')
   assert.equal((await call('/login',{email:'new@example.com',password:'reset-correct-horse-battery'})).status,200)

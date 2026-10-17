@@ -62,14 +62,29 @@ export async function rolesAuditJourney(){
   // A custom role over Agent without publishing or exporting: the agent keeps replying but cannot publish.
   const created=await call(`${P}/roles`,{name:'Support, no publishing',base:'operator',permissions:['conversations.reply','conversations.notes','conversations.follow','conversations.manage','contacts.manage','knowledge.edit','reports.view','members.manage']},w.tokens.owner)
   assert.equal(created.status,201);assert.ok(!created.data.data.permissions.includes('members.manage'),'a custom role never exceeds its base')
+  for(const [email,role] of [['pending-admin@example.com','admin'],['pending-agent@example.com','operator']])assert.equal((await call(`${P}/agents`,{email,role},w.tokens.owner)).status,201)
   await app.db.prepare('UPDATE session_factors SET verified_at=verified_at-? WHERE token_hash IN (SELECT token_hash FROM sessions WHERE actor_id=?)').bind(20*60*1000,w.users.owner).run()
   const stale=await call(`${P}/agents/${w.users.operator}`,{role:created.data.data.id},w.tokens.owner,'PUT');assert.equal(stale.status,403);assert.equal(stale.data.code,'step_up_required')
+  // Copying or resending an admin invitation issues the same role grant: it needs a recent step-up, an admin may do
+  // neither, and agent invitations are unchanged. The identity door that issued invitations without these rules is gone.
+  const I=`${P}/invitations/`
+  for(const door of ['link','resend']){const reissued=await call(`${I}pending-admin%40example.com/${door}`,{},w.tokens.owner);assert.equal(reissued.status,403,door);assert.equal(reissued.data.code,'step_up_required',door)}
+  const byAdmin=await call(`${I}pending-admin%40example.com/link`,{},w.tokens.admin);assert.equal(byAdmin.status,403);assert.notEqual(byAdmin.data.code,'step_up_required','an admin never manages an admin invitation')
+  assert.equal((await call(`${I}pending-agent%40example.com/link`,{},w.tokens.owner)).status,201,'an agent invitation needs no step-up')
+  for(const token of [w.tokens.owner,w.tokens.admin])assert.equal((await call('/api/identity/invitations',{email:'evil-admin@example.com',role:'admin'},token)).status,404)
+  assert.equal((await app.first("SELECT count(*) n FROM identity_tokens WHERE email='evil-admin@example.com'")).n,0)
+  // The sign-in email is where password resets go: changing it needs a recent step-up, saving the profile unchanged does not.
+  const profilePath=`/api/management/profile?projectId=${w.projectId}`,profile=(await call(profilePath,undefined,w.tokens.owner)).data.data
+  const moved=await call(profilePath,{...profile,email:'owner-elsewhere@example.com'},w.tokens.owner,'PUT');assert.equal(moved.status,403);assert.equal(moved.data.code,'step_up_required')
+  assert.equal((await call(profilePath,profile,w.tokens.owner,'PUT')).status,200)
   // Installing a connected application with an aged proof is refused too: registering one, and approving its access.
   const ownerConsent=await consentPage(browser,consent,w.tokens.owner)
   for(const refused of [await browser('/delegation/settings/clients',{cookie:w.tokens.owner,body:{...register,id:'docs'}}),await decide(browser,ownerConsent,'approve',w.tokens.owner)]){assert.equal(refused.status,403);assert.equal((await refused.json()).code,'step_up_required')}
   assert.equal((await app.first("SELECT count(*) n FROM edition_clients WHERE id='docs'")).n,0);assert.equal((await app.first('SELECT count(*) n FROM edition_grants WHERE principal_id=?',w.users.owner)).n,0)
   await app.db.prepare("INSERT INTO credentials(user_id,password_hash,updated_at) VALUES(?,?,1)").bind(w.users.owner,(await app.first('SELECT password_hash FROM credentials WHERE user_id=?',collaborator.actor.id)).password_hash).run()
   assert.equal((await call('/api/identity/step-up',{password:'collab-correct-horse-battery'},w.tokens.owner)).status,200,'an account without a factor steps up with its password')
+  const relinked=await call(`${I}pending-admin%40example.com/link`,{},w.tokens.owner);assert.equal(relinked.status,201);assert.equal(relinked.data.data.role,'admin')
+  assert.deepEqual((await app.sql("SELECT detail_json FROM audit_events WHERE action='member.invitation_reissued' ORDER BY at")).map(row=>JSON.parse(row.detail_json).role),['operator','admin'])
   assert.equal((await decide(browser,ownerConsent,'approve',w.tokens.owner)).status,303,'stepped up, the same consent form approves')
   assert.equal((await call(`${P}/agents/${w.users.operator}`,{role:created.data.data.id},w.tokens.owner,'PUT')).status,200)
   const publish=await call(`/api/knowledge/${w.projectId}/articles`,{title:'Returns',content:'How returns work'},w.tokens.operator);assert.equal(publish.status,403);assert.equal(publish.data.permission,'knowledge.publish')

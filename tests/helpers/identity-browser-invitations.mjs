@@ -66,7 +66,7 @@ export async function checkPendingInvitationsWithoutEmail({ origin, kit }, owner
 }
 
 export async function checkPendingInvitationsWithEmail({ origin, kit }, owner) {
-    const created = await kit.api(origin, '/api/identity/invitations', { body: { email: 'mailed@review.test' }, token: owner.token });
+    const created = await kit.api(origin, `/api/management/projects/${owner.projectId}/agents`, { body: { email: 'mailed@review.test' }, token: owner.token });
     assert.equal(created.status, 201, created.text);
     const page = await kit.open(origin, agentsPath(owner.projectId), { token: owner.token });
     const row = rowFor(page, 'mailed@review.test');

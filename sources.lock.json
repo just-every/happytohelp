@@ -2720,7 +2720,7 @@
       "executable": false
     },
     "scripts/installer/local.mjs": {
-      "sha256": "d5f6b27158a78e7988ff2ed95b50a5794518fff24858296d77eb5394a26753fe",
+      "sha256": "b6031e86af54c25fdee372d5d3b67f3791107e9d023fc65364f2304237fcba29",
       "executable": false
     },
     "scripts/installer/native-local.mjs": {

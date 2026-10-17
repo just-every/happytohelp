@@ -438,6 +438,12 @@
       "name": "190_email_step_up.sql",
       "sha256": "e6039cab9d3e12451425fffe5714ccfaa29f4e17a04ebebeb894263f63723d87",
       "sql": "-- Distinguish mailbox proof from a re-entered password. Existing proofs retain\n-- their exact account, method and timestamp; email is never a second factor.\nCREATE TABLE session_factors_email(token_hash TEXT PRIMARY KEY,user_id TEXT NOT NULL,method TEXT NOT NULL CHECK(method IN ('password','email_link','totp','webauthn','recovery','installation')),verified_at INTEGER NOT NULL);\nINSERT INTO session_factors_email(token_hash,user_id,method,verified_at) SELECT token_hash,user_id,method,verified_at FROM session_factors;\nDROP TABLE session_factors;\nALTER TABLE session_factors_email RENAME TO session_factors;\n"
+    },
+    {
+      "binding": "DB",
+      "name": "191_ticket_history_conversation.sql",
+      "sha256": "95b4bf09d10a6e5fff7742ffcc0b1f20af44c936c6749dc7f7a08dfdff421696",
+      "sql": "-- The ticket history trigger checks each conversation's history by conversation and time;\n-- without this index every conversation insert or ticket change scanned the whole table.\nCREATE INDEX ticket_history_conversation_at ON ticket_history(conversation_id,at);\n"
     }
   ],
   "compatibilityDate": "2026-09-08",

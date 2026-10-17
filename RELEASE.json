@@ -314,6 +314,10 @@
     {
       "id": "190_email_step_up.sql",
       "buyerSteps": "Apply before starting the updated Worker. Extends the allowed session proof methods with email_link, retaining every existing session proof and timestamp. Email links never satisfy an enrolled second factor."
+    },
+    {
+      "id": "191_ticket_history_conversation.sql",
+      "buyerSteps": "Apply after 190 and before the updated Worker starts. Adds an index only; every row is retained. New conversations and ticket changes no longer scan the whole ticket history."
     }
   ],
   "breaking": true,

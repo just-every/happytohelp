@@ -1944,7 +1944,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "8c0b5405f6cc82eec3b1687aaeb19387842388cd25332aa6510d5162bb16324c",
+      "sha256": "8c828cb7f5e62289a51bd6548c330cb4213a4a6454090727225f73a9656cd5d4",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -2263,6 +2263,10 @@
       "sha256": "e6039cab9d3e12451425fffe5714ccfaa29f4e17a04ebebeb894263f63723d87",
       "executable": false
     },
+    "migrations/191_ticket_history_conversation.sql": {
+      "sha256": "95b4bf09d10a6e5fff7742ffcc0b1f20af44c936c6749dc7f7a08dfdff421696",
+      "executable": false
+    },
     "OPERATIONS.json": {
       "sha256": "0fa396b895e9098cc1db5070d1dc33ca732fae8287f84f69dc8afa3bc8afd1a6",
       "executable": false
@@ -2344,7 +2348,7 @@
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "1991516fbc31e62a5fb2bc1e40c2af4bb257d2d729be0c6ca94ca6fb14dc8974",
+      "sha256": "abc49a3ebf64e18dd5a190e8db7e782b8d7f6159f542602e1ac6ccf9ff65eb07",
       "executable": false
     },
     "rer-project.json": {

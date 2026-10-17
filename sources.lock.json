@@ -1610,7 +1610,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "c421c73f5421ead6dbedc836afddd2e318395c8f420818350d01421090b71cc2",
+      "sha256": "2a7ef5588dbed8309f167d962ddf4fd980afa271bda246fbfcd5ca9eadc9be3b",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1778,7 +1778,7 @@
       "executable": false
     },
     "docs/workflows.md": {
-      "sha256": "4bf529dc65b52ff176d66d08ab5812b5813c0cf919676cba270970123eedaed8",
+      "sha256": "e76acb3919631026852ee000ad70996b130b724055cb50388fbe8adf45f6e193",
       "executable": false
     },
     "docs/WORKSPACE-WORKFLOWS.md": {
@@ -1958,7 +1958,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "e37a35d4ea139acc8fdd66e42d0a8fd553de09ab1732b938cece62737f5fab7b",
+      "sha256": "4d7264580436a4f251a5018c3f1ca566ab34360079159218e62ce613c17f61f4",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -2266,11 +2266,11 @@
       "executable": false
     },
     "migrations/151_workflow_sla.sql": {
-      "sha256": "83c62c5088113a1f4b882ae573a0ae4e4d60eb60d9e1430c3658e1e735599045",
+      "sha256": "7b35da02d0a6c46108db304447257ca50a1518d53aa7a610d1ee17556f756e76",
       "executable": false
     },
     "migrations/152_workflow_rules.sql": {
-      "sha256": "b0e86ac2d0f3a2c83574401e867ba3e446a2da38de4f21b01ded6a149298bbcb",
+      "sha256": "772d97552dfe0df968da59c2d102c26b08f387e32f4f5b3e4e035542a7fa3f73",
       "executable": false
     },
     "migrations/153_workflow_schedules.sql": {
@@ -2322,7 +2322,7 @@
       "executable": false
     },
     "package.json": {
-      "sha256": "b768b12982dd0deed7aaf968f650e0538f85807900fbe04a377b4e0305f1a713",
+      "sha256": "89bc2c5ff81451c361c486115f53800de95cae9647dbcf7a4a2dbae35eb0cf08",
       "executable": false
     },
     "pnpm-lock.yaml": {
@@ -2390,11 +2390,11 @@
       "executable": false
     },
     "README.md": {
-      "sha256": "ef808f7017f266483a23afda784c6c20f9b68d8aca20786b7bff2d8a371c1c6a",
+      "sha256": "7035e8001c868a80d65537834e1852a86aa99e1c2452c32b17349e370c8c4881",
       "executable": false
     },
     "RELEASE.json": {
-      "sha256": "5a394ba3dff8d4dacda1528d6b0388a4b0dce144afdead1befd39ef223e57941",
+      "sha256": "25c8ab5e2178ea76d2612858ef2e5136cd42ea1d91b3a2281120b06ed4ce0f7e",
       "executable": false
     },
     "rer-project.json": {
@@ -2942,7 +2942,7 @@
       "executable": false
     },
     "seed.json": {
-      "sha256": "4ec50d9258b766e20488eac20753716455b6d703bcf5f4cd46d99b25f2896f96",
+      "sha256": "fa7658a1942a074f1ae042b7b5648286fad653d67902560aa282353bc79fb704",
       "executable": false
     },
     "src/app.ts": {
@@ -6286,11 +6286,11 @@
       "executable": false
     },
     "src/modules/workflows/erasure.ts": {
-      "sha256": "3c46a0c2228688899e58820f9037a09ef9f92066f5e815491ad0218b8964648d",
+      "sha256": "de52e02ef24ad0b7dd5d674f8f7ec75b7a0123a5cf3a69ec9c134456fb5a396d",
       "executable": false
     },
     "src/modules/workflows/events.ts": {
-      "sha256": "4fed750e8011f216ad26ad1efe763b4c5926bfb3b95dc7eb133847fe635a9864",
+      "sha256": "8d7529c6d80c3a8040ee2a35e81eb9b96c5a3d08fa9d0ce35dab3abc8257278c",
       "executable": false
     },
     "src/modules/workflows/followups.ts": {
@@ -6298,7 +6298,7 @@
       "executable": false
     },
     "src/modules/workflows/notify.ts": {
-      "sha256": "66c61c6a58f05533473278de0bc9f30d483eb3b6b97fe60a7c3ef7daef6a1242",
+      "sha256": "d00ae7fbdf3f7b4e3b82804a2a218955979733b0ebfb92ae0c07ea7ba9566328",
       "executable": false
     },
     "src/modules/workflows/presentation.ts": {
@@ -6314,7 +6314,7 @@
       "executable": false
     },
     "src/modules/workflows/routes-rules.ts": {
-      "sha256": "c69ab824d93b06d4cbf4c320d6ddab0865db94f12942958adfaad19860ab172c",
+      "sha256": "6e93e6107369e06b5debcddaed51e1c5f97b6ea59e284abaeeaa3226efa1e3ad",
       "executable": false
     },
     "src/modules/workflows/routes-schedules.ts": {
@@ -6346,7 +6346,7 @@
       "executable": false
     },
     "src/modules/workflows/rule-engine.ts": {
-      "sha256": "a671e48607d27263e9c8dd4be1da7db0a1745b57f4f1552bb3c28718e2e550f8",
+      "sha256": "2282f96b0b15c4a148dc578f013d535f2e26bd3dcdb75563229480d71f5eff15",
       "executable": false
     },
     "src/modules/workflows/rule-model.ts": {
@@ -6358,7 +6358,7 @@
       "executable": false
     },
     "src/modules/workflows/rule-run.ts": {
-      "sha256": "3bda881068daf9469e0afc9ed220fdeee673e2a0c6424ffe435b7b225acb48da",
+      "sha256": "e44af68e2351de076fa12b3629c3f379ad956c280002085623ffd14c2666c173",
       "executable": false
     },
     "src/modules/workflows/rule-time.ts": {
@@ -6370,11 +6370,15 @@
       "executable": false
     },
     "src/modules/workflows/rules.ts": {
-      "sha256": "6062f47001fa7f1426bb05836d7c5463193d05faa618512c38daa674aa1d607e",
+      "sha256": "842144046449bf819aaad8cdd88c6d282a25ae36a7efa3810235e6de0a683171",
+      "executable": false
+    },
+    "src/modules/workflows/run-resume.ts": {
+      "sha256": "d5a1ec9411d55287740ee89c4fb05a4fe6c00582c7ecca05f27a01c514236d13",
       "executable": false
     },
     "src/modules/workflows/runtime.ts": {
-      "sha256": "b1912294fa72bce4e986ebe14b752caca815d6d86ccbeddaa4146a04c292e124",
+      "sha256": "76363b679e1ca890b1f0acdcd5ceedfa475785d7ed614ad19d69a0a98cb639a7",
       "executable": false
     },
     "src/modules/workflows/schedule-authority.ts": {
@@ -6390,15 +6394,23 @@
       "executable": false
     },
     "src/modules/workflows/sla-alerts.ts": {
-      "sha256": "2ef98e723929f67383a1d90f0b77f2101b19a7f3fd4c7a570cbf7df9f97a2370",
+      "sha256": "49730f40be453194376e525689acf07486dbede538359779040321d972bf9222",
+      "executable": false
+    },
+    "src/modules/workflows/sla-backstop.ts": {
+      "sha256": "775af1e5d7b6b756011ccc28792a8ea3a82ac3e49f477dc312d37274b48a2900",
       "executable": false
     },
     "src/modules/workflows/sla-clocks.ts": {
-      "sha256": "0d6c834a21c78629a68724791465b17e3836394a7e924c83aaa3f066e8645472",
+      "sha256": "4fa3af0319a0178b98186b9da77f0beba0bf1ac9a38e100d8e774283e79bbda0",
+      "executable": false
+    },
+    "src/modules/workflows/sla-due.ts": {
+      "sha256": "626bd0cdd559d59c9991741150287ab8e4f87add9df5636a3217be215d68dd87",
       "executable": false
     },
     "src/modules/workflows/sla-events.ts": {
-      "sha256": "551f67070662b867cbf35913dffe8beacbdbda07ff5af412e529b4049a4078b8",
+      "sha256": "3e674e988ce103b23124aa814ebde02444d1f4cddef87c4db6c266b53f5fdf9f",
       "executable": false
     },
     "src/modules/workflows/sla-policy.ts": {
@@ -6406,7 +6418,11 @@
       "executable": false
     },
     "src/modules/workflows/sla.ts": {
-      "sha256": "26bf8d0fb3d9f9879d82c5df99f921278840171a90578ac039fc513cb8cdde0b",
+      "sha256": "c23b075ea19bef6e4e27743db4c2aac98a467db8efdf0f633d8d99e1b18df545",
+      "executable": false
+    },
+    "src/modules/workflows/time-rules.ts": {
+      "sha256": "12b3b621c09fe179045180624dddc69f5808ae87b25cc24111e3270a80cd668a",
       "executable": false
     },
     "src/platform/auth.ts": {
@@ -8562,7 +8578,7 @@
       "executable": false
     },
     "src/ui/native/pages/workflows/RuleSettings.jsx": {
-      "sha256": "ab8429dea8fb2a9cfb7436ff05531ddbb65f54ef09e3bbd1cb1dd18ef7940c7c",
+      "sha256": "fa01d904a79ad39c28d4fe864598d5c3410fb01644743f0a03aaa12abc2de826",
       "executable": false
     },
     "src/ui/native/pages/workflows/RuleSummary.jsx": {
@@ -8574,7 +8590,7 @@
       "executable": false
     },
     "src/ui/native/pages/workflows/workflows.css": {
-      "sha256": "d53a3e7506f06b87c48d7a9fc91cc92b048ff37901325e7d39be72d109d1e270",
+      "sha256": "ddb4c4c7c9779b81ee7e059ffb2ac67dd42cadb8f54b0913ec6bdd6e984428f7",
       "executable": false
     },
     "src/ui/native/pages/workflows/WorkflowSettings.jsx": {
@@ -9830,7 +9846,7 @@
       "executable": false
     },
     "tests/helpers/upgrade-baselines.mjs": {
-      "sha256": "c6d31eead8120aeaad25c05874e81fef45146a2ffc39e7fd35e2dc79174853c0",
+      "sha256": "df530d5c3f35160aa61620f14e9bd0e898a2902ec54668a4d623aca9542ffdab",
       "executable": false
     },
     "tests/helpers/upgrade-data-expectations.mjs": {
@@ -9918,7 +9934,7 @@
       "executable": false
     },
     "tests/helpers/workflows/journey.mjs": {
-      "sha256": "e763caab02b30a2edea1d672dbd31a8e6a5f2324f3ba3fa45ab4c78d34d81ba2",
+      "sha256": "826f0f3cc7dcdbb789a826f6544ee69013248b578defa8040561104af024d09e",
       "executable": false
     },
     "tests/helpers/workflows/routing.mjs": {
@@ -9926,7 +9942,7 @@
       "executable": false
     },
     "tests/helpers/workflows/rules.mjs": {
-      "sha256": "3b0c76d4998484a501f2d44da95059e4bb244d8bb2e0be32b2caa125d001b75b",
+      "sha256": "bf4d6ebd9384cc4d3859facbfe9ad5f5fb7160603d8e944d48d5eef4c69a293d",
       "executable": false
     },
     "tests/helpers/workflows/schedules.mjs": {

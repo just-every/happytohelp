@@ -1,4 +1,5 @@
 import {importErasureStatements} from '../../move-in/erasure'
+import {ticketErasureCount,ticketErasureStatements} from '../../tickets/erasure'
 import type {Env} from '../../../platform/env'
 import {legacyArchiveRedaction} from './archive'
 import {erasureInboundEvidenceStatements} from './inbound-evidence'
@@ -39,18 +40,19 @@ const erasedLocalId = `CASE
  * The audit row is written first so its counts see the data before removal; the whole
  * batch is one D1 transaction. Repeated erasure adds only what was newly removed.
  */
-const tombstone = `INSERT INTO contact_erasures(project_id,contact_id,erased_by,erased_at,last_erased_at,runs,conversations,messages,attachments,tracked_events,context_records,sessions)
+const tombstone = `INSERT INTO contact_erasures(project_id,contact_id,erased_by,erased_at,last_erased_at,runs,conversations,messages,attachments,tracked_events,context_records,sessions,ticket_records)
 SELECT ?1,?2,?3,?4,?4,1,
  ${count('conversations', 'project_id=?1 AND contact_id=?2')},
  ${count('messages', `${messages} AND erased_at IS NULL`)},
  ${count('contact_erasure_objects', 'project_id=?1 AND contact_id=?2')},
  ${sum(trackedTables.map(table => count(table, subject)))},
  ${sum(contextTables.map(table => count(table, subject)))},
- ${count('sessions', 'project_id=?1 AND contact_id=?2')}
+ ${count('sessions', 'project_id=?1 AND contact_id=?2')},
+ ${ticketErasureCount}
 WHERE EXISTS(SELECT 1 FROM contacts WHERE project_id=?1 AND id=?2)
 ON CONFLICT(project_id,contact_id) DO UPDATE SET last_erased_at=excluded.last_erased_at,runs=runs+1,conversations=excluded.conversations,
  messages=messages+excluded.messages,attachments=attachments+excluded.attachments,tracked_events=tracked_events+excluded.tracked_events,
- context_records=context_records+excluded.context_records,sessions=sessions+excluded.sessions`
+ context_records=context_records+excluded.context_records,sessions=sessions+excluded.sessions,ticket_records=ticket_records+excluded.ticket_records`
 
 /** Email delivery logs keep their idempotency identity; the recipient address is removed. */
 function emailDeliveries(env: Env, request: Pick<ErasureRequest,'projectId'|'contactId'|'emails'>) {
@@ -67,6 +69,7 @@ export function erasureStatements(env: Env, request: ErasureRequest) {
   const withTime = (sql: string, time: number | string) => env.DB.prepare(sql).bind(projectId, contactId, time)
   return [
     env.DB.prepare(tombstone).bind(projectId, contactId, actorId, now),
+    ...ticketErasureStatements(env,projectId,contactId),
     // Copies of the contact's data held outside the canonical rows, removed while those rows still identify them.
     bound(legacyArchiveRedaction),
     ...importErasureStatements(env,projectId,contactId),

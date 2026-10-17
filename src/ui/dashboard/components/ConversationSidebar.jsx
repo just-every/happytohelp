@@ -1,3 +1,5 @@
+import TicketEditor from './tickets/TicketEditor';
+import { useDashboardSettings } from '../../native/dashboard-state';
 import ResolutionSummary from './conversation/ResolutionSummary';
 import ConversationTags from './conversation/ConversationTags';
 import SlateInquiryLink from '../../native/SlateInquiryLink';
@@ -20,6 +22,7 @@ ConversationSidebar.propTypes = {
 };
 
 export default function ConversationSidebar({ conversation }) {
+    const settings = useDashboardSettings();
     const [ isContactModalVisible, setIsContactModalVisible ] = useState(false);
     const [ isEmailConversationTranscriptModalVisible, setIsEmailConversationTranscriptModalVisible ] = useState(false);
     const {
@@ -57,6 +60,7 @@ export default function ConversationSidebar({ conversation }) {
 
     return <div className="conversation-details">
         <SlateInquiryLink conversation={ conversation } />
+        {!(settings.projects?.[conversation.project_id] || settings.project)?.is_demo && <TicketEditor key={conversation.id} conversation={conversation}/>}
         <ConversationTags conversation={conversation}/>
         <ResolutionSummary resolution={conversation.resolution} history={conversation.resolutionHistory}/>
         <ConversationAssignmentControl conversation={ conversation } />

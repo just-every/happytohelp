@@ -1,4 +1,5 @@
 import test from 'node:test'
+import {ticketsJourney} from '../helpers/inbox/tickets.mjs'
 import {managementJourney} from '../helpers/inbox/management.mjs'
 import {inboxSearchJourney} from '../helpers/inbox/search.mjs'
 import {artworkJourney} from '../helpers/inbox/artwork.mjs'
@@ -16,3 +17,5 @@ test('workspace artwork is shared with members, changed only by permitted roles 
 test('library inputs are validated before storage: crawl limits, contacts without an identifier and the last owner are refused, and stored out-of-range limits never start the crawler',libraryValidationJourney)
 
 test('appearance settings persist whole or not at all, keep Unicode and limits, reset cleanly, respect roles and tenants, and the public brand never shows older invalid values',appearanceJourney)
+
+test('tickets carry typed fields, scoped teams and lifecycle history through customer replies, saved views, previewed bulk changes, the API and erasure',ticketsJourney)

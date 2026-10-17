@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@tanstack/react-router';
-import { useDashboardLocation } from '../../native/dashboard-state';
+import { useDashboardLocation, useDashboardSettings } from '../../native/dashboard-state';
 import useInboxRoute from '../hooks/useInboxRoute';
 import moment from 'moment';
 import Moment from '../../native/Moment';
@@ -23,6 +23,7 @@ function ConversationItem({ conversation, setConversation }) {
     } = useContext(ChatContext)
     const { urlProjectId, urlConversationId } = useInboxRoute();
     const { search } = useDashboardLocation();
+    const settings = useDashboardSettings();
 
     // The global inbox has no project in its URL - conversations live under /conversations
     const conversationUrl = isGlobalInbox
@@ -76,6 +77,7 @@ function ConversationItem({ conversation, setConversation }) {
                             { projectName && <div className="conversation-item-meta d-flex align-items-center mb-1">
                                 <span className="badge conversation-item-project text-truncate">{ projectName }</span>
                             </div> }
+                            {conversation.status_category && !(settings.projects?.[conversation.project_id] || settings.project)?.is_demo && <div className="ticket-row-meta"><span>{conversation.status?.name || conversation.status_category.replaceAll('_', ' ')}</span><span>{conversation.priority}</span>{conversation.subject && <span className="text-truncate">{conversation.subject}</span>}</div>}
                             <div className="conversation-tags">{(conversation.tags||[]).map(tag=><span className="conversation-tag" key={tag.id}>{tag.name}</span>)}</div>
                             <div className="conversation-item-preview d-flex align-items-center">
                                 { conversation.last_message && <div className="text-truncate me-auto">

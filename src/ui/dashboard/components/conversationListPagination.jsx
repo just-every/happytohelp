@@ -40,6 +40,7 @@ async function refreshConversationPages({ fetchPage, filter, loadedCount, signal
     let nextFilter = filter;
     let shouldFetchPage = true;
     let nextPageExists = false;
+    let nextPage = 1;
 
     while (shouldFetchPage) {
         const result = await fetchPage(nextFilter, { signal,
@@ -52,6 +53,7 @@ async function refreshConversationPages({ fetchPage, filter, loadedCount, signal
         const priorLength = conversations.length;
         conversations = appendConversationPage(conversations, result);
         nextPageExists = hasNextConversationPage(result);
+        nextPage = Number(result.meta.pagination.current_page) + 1;
         const lastConversation = conversations[conversations.length - 1];
         const madeProgress = conversations.length > priorLength;
 
@@ -65,18 +67,22 @@ async function refreshConversationPages({ fetchPage, filter, loadedCount, signal
             && Boolean(lastConversation);
 
         if (shouldFetchPage) {
-            nextFilter = {
-                ...filter,
-                last_message_before: lastConversation.last_message_at,
-                last_conversation_before: lastConversation.id,
-            };
+            nextFilter = nextConversationPageFilter(filter, lastConversation, nextPage);
         }
     }
 
     return {
         conversations,
         hasNextPage: nextPageExists && conversations.length > 0,
+        nextPage,
     };
+}
+
+function nextConversationPageFilter(filter, lastConversation, page) {
+    // Custom sort order has no last-message cursor; its server response supplies the next page.
+    return filter.saved_view || filter.filters !== undefined || filter.sort !== undefined
+        ? { ...filter, page }
+        : { ...filter, last_message_before: lastConversation.last_message_at, last_conversation_before: lastConversation.id };
 }
 
 function isAbortedConversationRequest(error) {
@@ -84,6 +90,7 @@ function isAbortedConversationRequest(error) {
 }
 
 export {
+    nextConversationPageFilter,
     appendConversationPage,
     hasNextConversationPage,
     isAbortedConversationRequest,

@@ -10,8 +10,12 @@ import ConversationComposerTools from './ConversationComposerTools';
 import ConversationDraftStatus from './ConversationDraftStatus';
 import ReplyIcon from './reply-icons/ReplyIcon';
 import { insertSavedReply } from '../utils/insertSavedReply';
+import EmailRecipients, {parseEmailRecipients, emailRecipientsError} from './EmailRecipients';
+import EmailSender from '../../native/pages/email/EmailSender';
+import {nativeRequest} from '../../native/transport';
 
 import '../styles/components/ConversationForm.scss';
+import './EmailComposer.css';
 
 ConversationForm.propTypes = {
     content: PropTypes.string,
@@ -49,13 +53,17 @@ export default function ConversationForm({
     projectId,
 }) {
     const [ helper, setHelper ] = useState(null);
+    const [emailRecipients, setEmailRecipients] = useState({cc:'',bcc:''});
+    const [recipientsOpen, setRecipientsOpen] = useState(false);
+    const [mailboxes,setMailboxes] = useState([]),[sender,setSender] = useState({mailboxId:'',fromAddress:''}),[senderError,setSenderError] = useState('');
+    const recipientError = emailRecipientsError(emailRecipients.cc) || emailRecipientsError(emailRecipients.bcc);
     const [ sendError, setSendError ] = useState('');
     const composerRef = useRef(null);
     const textareaRef = useRef(null);
     const hasContent = Boolean(content?.trim() || files.length);
     const isLoading = Boolean(loadingContent);
     const isComposerLocked = isLoading || Boolean(finalReason);
-    const canSend = Boolean(isEnabled && !helper && !isComposerLocked && hasContent);
+    const canSend = Boolean(isEnabled && !helper && !isComposerLocked && hasContent && !recipientError);
     const textareaContent = isLoading && loadingContent !== '-loading-' ? loadingContent : content;
 
     useEffect(() => {
@@ -65,7 +73,10 @@ export default function ConversationForm({
 
     useEffect(() => {
         setHelper(null);
+        setEmailRecipients({cc:'',bcc:''});setRecipientsOpen(false);
+        setSender({mailboxId:'',fromAddress:''});setSenderError('');
     }, [ conversationId ]);
+    useEffect(()=>{const controller=new AbortController();nativeRequest(`/api/management/projects/${encodeURIComponent(projectId)}/mailboxes`,{signal:controller.signal}).then(result=>setMailboxes(result.data)).catch(error=>{if(!controller.signal.aborted)setSenderError(error.message)});return()=>controller.abort()},[projectId]);
 
     useEffect(() => {
         if (!focusRequest) return undefined;
@@ -84,8 +95,9 @@ export default function ConversationForm({
         if (!canSend) return;
 
         setSendError('');
-        onSendMessage(content, sendAndClose).then(() => {
+        onSendMessage(content, sendAndClose, {cc:parseEmailRecipients(emailRecipients.cc),bcc:parseEmailRecipients(emailRecipients.bcc),...(sender.mailboxId?{mailboxId:sender.mailboxId}:{}),...(sender.fromAddress?{fromAddress:sender.fromAddress}:{})}).then(() => {
             onContentChange('');
+            setEmailRecipients({cc:'',bcc:''});
         }, error => setSendError(error.data?.reason === 'ticket_closed_followup_required'
             ? 'Not sent: this ticket was closed and is final. A customer reply opens a new ticket.'
             : `Not sent: ${ error.message || 'the server refused the reply' }.`));
@@ -154,6 +166,11 @@ export default function ConversationForm({
 
     return (
         <div ref={ composerRef } className="chat-footer container-xxl" onClick={ handleComposerSurfaceClick }>
+            <div className="email-compose-options">
+                    <div><button type="button" className="btn btn-sm btn-link" aria-expanded={recipientsOpen} onClick={()=>setRecipientsOpen(value=>!value)}>CC / BCC</button></div>
+                    {recipientsOpen && <><EmailSender defaultLabel="Use this ticket’s mailbox" mailboxes={mailboxes} {...sender} onChange={setSender} disabled={!isEnabled || isComposerLocked}/><EmailRecipients {...emailRecipients} onChange={(kind,value)=>setEmailRecipients(current=>({...current,[kind]:value}))} disabled={!isEnabled || isComposerLocked}/>{senderError&&<p role="alert">{senderError}</p>}</>}
+                    {recipientError && <p role="alert" className="text-danger">{recipientError}</p>}
+            </div>
             <div className="chat-entry border-top border-light d-flex flex-row align-items-stretch w-100">
                 <div className="flex-grow-1 d-flex flex-column">
                     { sendError && <p className="conversation-composer__error" role="alert">{ sendError }</p> }

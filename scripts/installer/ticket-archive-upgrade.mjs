@@ -15,7 +15,7 @@ export async function ticketArchivePolicy(root,input){
  try{
   // v0.4.2, the last pre-ticket release, ends at 190; every later migration
   // (191's ticket_history index onward) only ever runs after the ticket model.
-  const names=(await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')&&!/^13[0-9]_/.test(name)&&name<'191_').sort();
+  const names=(await readdir(join(root,'migrations'))).filter(name=>name.endsWith('.sql')&&!/^(?:13|16)[0-9]_/.test(name)&&name<'191_').sort();
   const plan=await Promise.all(names.map(async name=>unstable_splitSqlQuery(await readFile(join(root,'migrations',name),'utf8'))));
   for(let index=0;index<plan.length;index++){
    for(const sql of plan[index])scratch.exec(sql);
@@ -26,7 +26,7 @@ export async function ticketArchivePolicy(root,input){
    acceptedSchemas[await schemaIdentity(db,config)]={upgradeRow(table,row){
     if(table==='conversations'&&row.status_id===undefined){
      const category=row.resolved_at!==null?'solved':row.revision>0?'open':'new';
-     return {...row,status_id:category,status_category:category,subject:'',priority:'normal',channel:'widget',brand_id:row.project_id,group_id:null,requester_id:row.contact_id,submitter_id:row.contact_id,submitter_type:'contact',ticket_version:0,ticket_actor_id:null,ticket_actor_type:'system',ticket_source:'rer'};
+     return {...row,status_id:category,status_category:category,subject:'',priority:'normal',channel:'widget',brand_id:row.project_id,group_id:null,requester_id:row.contact_id,submitter_id:row.contact_id,submitter_type:'contact',ticket_version:0,ticket_actor_id:null,ticket_actor_type:'system',ticket_source:'rer',mailbox_id:null};
     }
     if(table==='contact_erasures'&&row.ticket_records===undefined)return {...row,ticket_records:0};
     return row;

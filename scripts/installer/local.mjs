@@ -52,10 +52,12 @@ const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async c
  let selected=transfer;
  if(verb==='import'){
   const {default:previous}=await import('./ticket-archive-policy.mjs');
+  const {default:beforeEmail}=await import('./email-archive-policy.mjs');
   // Metadata can select this explicitly supported schema transition, never an
   // executable path supplied by the archive. Base verifies the complete archive.
   for await(const record of fileRecords(context.path))if(record.kind==='manifest'){
    if(Object.hasOwn(previous.acceptedSchemas,record.schema))selected=localPortability({database:'DB',buckets:{FILES:'FILES'},policyModule:new URL('./ticket-archive-policy.mjs',import.meta.url),transient:[]});
+   else if(Object.hasOwn(beforeEmail.acceptedSchemas,record.schema))selected=localPortability({database:'DB',buckets:{FILES:'FILES'},policyModule:new URL('./email-archive-policy.mjs',import.meta.url),transient:[]});
    break;
   }
  }

@@ -140,20 +140,28 @@ try {
   let beforeAdditional,final;
   await runtime.withStorage(async storage=>{await seedCategoryUpgrade(storage);beforeAdditional=await snapshot(storage)});
   for(const migration of remaining)await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
+  const additionalStartedAt=Date.now();
   await runtime.run(['d1','migrations','apply','DB','--local','--persist-to','.wrangler/state']);
   await runtime.withStorage(async storage=>{
     final=await snapshot(storage);
+    const additionalFinishedAt=Date.now();
     for(const [name,rows]of Object.entries(beforeAdditional.rows)){
       if(name==='d1_migrations')assert.deepEqual(final.rows[name].filter(row=>!remaining.some(m=>m.name===JSON.parse(row).name)),rows);
       else if(name==='sqlite_sequence')assert.deepEqual(final.rows[name].map(JSON.parse).filter(row=>row.name!=='d1_migrations'),rows.map(JSON.parse).filter(row=>row.name!=='d1_migrations'));
       else {
-        // M122 retains every original field and initializes only content_raw.
-        // Re-encode the full expected row using snapshot's canonical key order;
-        // the actual snapshot remains byte-exact and includes unknown columns.
-        const expected=name==='messages'?rows.map(serialized=>{
-          const row={...JSON.parse(serialized),content_raw:null};
+        // M122 and M130/M132 retain every original field and add the declared
+        // email, ticket and erasure defaults. Compare canonical full rows so
+        // unexpected columns and changes to any original value still fail.
+        const expected=rows.map(serialized=>{
+          const row=JSON.parse(serialized);
+          if(name==='messages')row.content_raw=null;
+          if(name==='contact_erasures')row.ticket_records=0;
+          if(name==='conversations'){
+            const status=row.resolved_at!==null?'solved':row.revision>0?'open':'new';
+            Object.assign(row,{status_id:status,status_category:status,subject:'',priority:'normal',channel:beforeAdditional.rows.inbound_emails.map(JSON.parse).some(email=>email.conversation_id===row.id)?'email':'widget',brand_id:row.project_id,group_id:null,requester_id:row.contact_id,submitter_id:row.contact_id,submitter_type:'contact',ticket_version:0,ticket_actor_id:null,ticket_actor_type:'system',ticket_source:'system'});
+          }
           return JSON.stringify(Object.fromEntries(Object.keys(row).sort().map(key=>[key,row[key]])));
-        }).sort():rows;
+        }).sort();
         assert.deepEqual(final.rows[name],expected,'additional stages preserve every prior row: '+name);
       }
     }
@@ -180,7 +188,23 @@ try {
       const expected=final.rows.messages.map(value=>{const {content,conversation_id,project_id}=JSON.parse(value);return canonical({content,conversation_id,project_id})}).sort();
       assert.deepEqual(final.rows[search.table],expected,'the new search projection contains exactly the retained messages');
     }
-    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)&&!derived.has(name)))assert.deepEqual(final.rows[table],[],'additive upgrade starts without fabricated user data: '+table);
+    for(const table of Object.keys(final.rows).filter(name=>!Object.hasOwn(beforeAdditional.rows,name)&&!derived.has(name))){
+      let expected=[];
+      if(table==='ticket_statuses'){
+        const statuses=[['new','New'],['open','Open'],['pending','Pending'],['on_hold','On-hold'],['solved','Solved'],['closed','Closed']];
+        expected=beforeAdditional.rows.projects.flatMap(serialized=>{
+          const project=JSON.parse(serialized);
+          return statuses.map(([id,name])=>{
+            const actual=final.rows[table].map(JSON.parse).find(row=>row.project_id===project.id&&row.id===id);
+            assert.ok(actual,'upgrade seeds the default ticket status: '+project.id+'/'+id);
+            assert.ok(Number.isInteger(actual.updated_at)&&actual.updated_at>=Math.floor(additionalStartedAt/1000)*1000&&actual.updated_at<=additionalFinishedAt,'default ticket status is timestamped during migration');
+            const row={project_id:project.id,id,name,category:id,is_default:1,active:1,updated_at:actual.updated_at};
+            return JSON.stringify(Object.fromEntries(Object.keys(row).sort().map(key=>[key,row[key]])));
+          });
+        }).sort();
+      }
+      assert.deepEqual(final.rows[table],expected,'additive upgrade starts without fabricated user data: '+table);
+    }
   });
   await assertCategoryUpgrade(runtime.directory);
   artifact.deploymentSpec.migrations=completeMigrations;

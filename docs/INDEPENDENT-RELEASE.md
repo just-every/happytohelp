@@ -49,8 +49,8 @@ The current package-mode instructions require current public source; the
 older `v0.4.1` tag does not contain this command-package conversion.
 
 The build and deployment dry run preserve local data and private settings and
-make no deployment. Rer 0.2.25's dry-run preflight requires the same private mail
-inputs as real deployment; see [deployment prerequisites](../OPERATIONS.md#deploy-to-your-cloudflare-account). Do not reset or replace `.wrangler/state` during an update.
+make no deployment. Rer 0.2.42's dry run validates the private mail inputs real
+deployment needs when they are supplied, and lists them otherwise; see [deployment prerequisites](../OPERATIONS.md#deploy-to-your-cloudflare-account). Do not reset or replace `.wrangler/state` during an update.
 Run setup with your existing owner and private answers to apply local migrations,
 then start `pnpm exec rer dev --foreground`. For a hosted installation, apply the
 reviewed update only through the owner-authorized deployment path.
@@ -264,9 +264,9 @@ Use `pnpm exec rer deploy --environment production` with the real
 `deploy.json` declaration and private owner-account credentials.
 [Deploy to your Cloudflare account](../OPERATIONS.md#deploy-to-your-cloudflare-account)
 covers prerequisites, secret custody and health boundaries. Local
-`pnpm exec rer deploy --dry-run` requires the same private mail inputs as real
-deployment with rer 0.2.25. It validates their shape and builds locally without
-provider requests or sending mail.
+`pnpm exec rer deploy --dry-run` with rer 0.2.42 validates the private mail inputs
+real deployment needs when supplied, and otherwise lists them as needed. It builds
+locally without provider requests or sending mail.
 
 **Website preview** lets owners and admins see their website with the chat
 widget on it. It needs its own custom-domain origin (`PREVIEW_ORIGIN`), pointed

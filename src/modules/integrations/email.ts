@@ -18,7 +18,10 @@ type DeliveryRow={state:string;provider_id:string|null;intent_hash:string}
 
 export type EmailOutcome={id:string|null;state:string;recipient?:string;mode?:'local'}
 async function senderFor(env:Env,input:EmailInput){
- const sender=input.projectId?await env.DB.prepare('SELECT from_name,from_address FROM email_settings WHERE project_id=?').bind(input.projectId).first<{from_name:string;from_address:string}>():null
+ // A workspace sender is used only while its email is enabled. Account mail for a
+ // workspace with email off (such as one moved in from legacy with its sender
+ // unverified) comes from the installation's sender.
+ const sender=input.projectId?await env.DB.prepare('SELECT from_name,from_address FROM email_settings WHERE project_id=? AND is_enabled=1').bind(input.projectId).first<{from_name:string;from_address:string}>():null
  const senderAddress=sender?.from_address||String(env.EMAIL_FROM||'')
  return sender?.from_name?`${sender.from_name.replace(/[\r\n"<>]/g,'')} <${String(senderAddress).match(/<([^>]+)>/)?.[1]||senderAddress}>`:senderAddress
 }

@@ -4113,7 +4113,7 @@
       "executable": false
     },
     "src/modules/integrations/email.ts": {
-      "sha256": "482d0a487a71597a98ddd1ad44577dc1243f5913be7e95f823afa9173c940d47",
+      "sha256": "b9c2caebccf366d849c282f2a013027fc81561079b8adb30feb0e971c13f415e",
       "executable": false
     },
     "src/modules/integrations/github-discovery.ts": {

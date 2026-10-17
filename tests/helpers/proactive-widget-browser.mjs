@@ -9,7 +9,7 @@ import {configuredSupportBrowser} from './configured-support-browser.mjs';
 export async function proactiveWidgetBrowser({operatorJourney=true}={}) {
     const evidence = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/proactive');
     await mkdir(evidence, {recursive: true});
-    const runtime = await createRuntime({inspectorPort: 0, vars: {OPENAI_API_KEY: 'synthetic-inert-test-key', APIFY_TOKEN: 'synthetic-inert-test-key', APIFY_CRAWLER_ACTOR_ID: 'fixture-crawler'}, outboundFixture: new URL('./proactive-provider-network.mjs', import.meta.url).href});
+    const runtime = await createRuntime({queueConsumers: true, inspectorPort: 0, vars: {OPENAI_API_KEY: 'synthetic-inert-test-key', APIFY_TOKEN: 'synthetic-inert-test-key', APIFY_CRAWLER_ACTOR_ID: 'fixture-crawler'}, outboundFixture: new URL('./proactive-provider-network.mjs', import.meta.url).href});
     let browser, host, success = false;
     const call = async (path, body, token, method = body === undefined ? 'GET' : 'POST') => {
         const response = await fetch(runtime.origin + path, {method, headers: {'Content-Type': 'application/json', ...(token ? {Authorization: `Bearer ${token}`} : {})}, body: body === undefined ? undefined : JSON.stringify(body)});

@@ -19,6 +19,7 @@ export async function knowledgeActivationBrowser(){
  await mkdir(capturesDir, { recursive: true });
 
  const runtime = await createRuntime({
+     queueConsumers: true,
      port: Number(process.env.H2H_RUNTIME_PORT || process.env.H2H_TEST_PORT) || 0,
      inspectorPort: process.env.H2H_RUNTIME_INSPECTOR_PORT ? Number(process.env.H2H_RUNTIME_INSPECTOR_PORT) : undefined,
  });

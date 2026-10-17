@@ -12,7 +12,7 @@ export async function managementLibrary(){
 // mobile tables that keep every column and action reachable, validated training-run and create forms.
 const evidenceDir=join(process.env.H2H_EVIDENCE_DIR?resolve(process.env.H2H_EVIDENCE_DIR):await mkdtemp(join(tmpdir(),'h2h-management-library-')),'management-library');
 await mkdir(evidenceDir,{recursive:true});console.log('Management library browser evidence:',evidenceDir);
-const runtime=await createRuntime({vars:{EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-management-mail',EMAIL_FROM:'support@example.test'},outboundFixture:new URL('../notification-mail-fixture.mjs',import.meta.url).href,port:Number(process.env.H2H_TEST_PORT)||0,inspectorPort:process.env.H2H_RUNTIME_INSPECTOR_PORT?Number(process.env.H2H_RUNTIME_INSPECTOR_PORT):undefined}),origin=runtime.origin;
+const runtime=await createRuntime({queueConsumers:true,vars:{EMAIL_PROVIDER:'resend',EMAIL_API_KEY:'synthetic-management-mail',EMAIL_FROM:'support@example.test'},outboundFixture:new URL('../notification-mail-fixture.mjs',import.meta.url).href,port:Number(process.env.H2H_TEST_PORT)||0,inspectorPort:process.env.H2H_RUNTIME_INSPECTOR_PORT?Number(process.env.H2H_RUNTIME_INSPECTOR_PORT):undefined}),origin=runtime.origin;
 let browser,success=false;
 const request=async(path,{token,body,method=body===undefined?'GET':'POST',raw=false}={})=>{const response=await fetch(origin+path,{method,headers:{...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});if(raw)return response;assert.ok(response.ok,`${method} ${path}: ${response.status} ${await response.clone().text()}`);return response.json();};
 const results=[],failures=[];

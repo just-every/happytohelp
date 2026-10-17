@@ -8,7 +8,7 @@ import {launchBrowser} from '../../journeys/kit/browser.mjs'
 // consents, ordinary activity is described, but elements the site marks context-exclude, password values and
 // personal data typed into fields never leave the page; once the visitor stops sharing, nothing more is collected.
 export async function collectionPrivacyBrowser(){
- const runtime=await createRuntime({inspectorPort:0,vars:{OPENAI_API_KEY:'synthetic-inert-test-key'},outboundFixture:new URL('../proactive-provider-network.mjs',import.meta.url).href})
+ const runtime=await createRuntime({queueConsumers:true,inspectorPort:0,vars:{OPENAI_API_KEY:'synthetic-inert-test-key'},outboundFixture:new URL('../proactive-provider-network.mjs',import.meta.url).href})
  let browser,host,success=false
  const call=async(path,body,token,method=body===undefined?'GET':'POST')=>{const response=await fetch(runtime.origin+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body)});assert.ok(response.ok,`${path}: ${response.status} ${await response.clone().text()}`);return response.json()}
  const secrets=['Secret plan 7Q9X','4111 1111 1111 1111','visitor.secret@example.test','hunter2-correct-horse','555-123-4567']

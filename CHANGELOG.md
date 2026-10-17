@@ -8,6 +8,11 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
+## Unreleased
+
+- **Replies to Closed tickets.** A customer's emailed reply to a Closed ticket is recognized as on an open ticket, including a widget visitor answering through the reply address, and always opens a new ticket for that customer instead of a separate contact or another open ticket of theirs. A teammate's emailed reply to a Closed ticket is refused with a bounce or an email notice, never stored as a customer message.
+- **Capacity check.** The 1,000-conversation import journey asserts live isolate memory after a forced garbage collection, below 64 MiB, instead of an uncollected heap figure that moved with GC timing.
+
 ## 0.4.3 — 2026-10-18
 
 - **Release qualification.** Fresh-clone journeys retain the complete local owner entry, invoke the pinned pnpm consistently and compare restore against the exported Durable Object snapshot. Upgrades preserve every original value except the exact documented email-proof and owner-alert migrations. New migrations 124 and 126 bracket the 125 email-proof backfill so a contact erasure interrupted under 0.4.1 cannot rewrite integration history recorded since; the identical erasure guard is restored before traffic.

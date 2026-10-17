@@ -5,6 +5,7 @@ import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
 import {hashToken} from '../../platform/auth'
 import {receiveEmail} from './inbound-service'
+import {ClosedTicketRefusal,noticeMember} from './closed-ticket-mail'
 import {scheduleInboundEffects} from './inbound-effects'
 import {emailEvidence,headerBlockEntries} from './email-classification'
 import {emailAddress} from './inbound-routing'
@@ -83,6 +84,8 @@ sendgridInbound.post('/email/sendgrid/inbound',async c=>{
    // bare mailbox. It is mail already received, as on the Worker path (email-worker.ts): no second write, and a
    // success so SendGrid stops retrying while the admitted copy keeps its live update and AI reply.
    if(error instanceof HTTPException&&error.status===409){console.error('Inbound email already received',error.message);alreadyReceived=true;continue}
+   // SendGrid cannot bounce: a member's refused reply to a Closed ticket is answered with a notice to them.
+   if(error instanceof ClosedTicketRefusal)await noticeMember(c.env,error)
    if(!(error instanceof HTTPException&&error.status===404&&targets.length>1))throw error
   }
  }

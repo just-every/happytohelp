@@ -33,6 +33,10 @@ export async function workerJourney(){
   assert.equal(await deliver('after-close@example.com',reply,'Following up after you closed this'),undefined)
   const followUp=await DB.prepare("SELECT c.contact_id,i.state FROM inbound_emails i JOIN conversations c ON c.id=i.conversation_id JOIN messages m ON m.id=i.message_id WHERE i.id='<after-close@example.com>' AND m.content='Following up after you closed this' AND c.id<>?").bind(c.id).first()
   assert.deepEqual(followUp,{contact_id:c.contact_id,state:'delivered'})
+  // Each reply to the Closed ticket opens its own ticket, never joining another open ticket of the customer's (here, that follow-up).
+  assert.equal(await deliver('after-close-again@example.com',reply,'One more thing about the closed order'),undefined)
+  const again=(await m.claim('after-close-again@example.com')).conversation_id
+  assert.ok(![c.id,(await m.claim('after-close@example.com')).conversation_id].includes(again));assert.equal((await DB.prepare('SELECT contact_id FROM conversations WHERE id=?').bind(again).first()).contact_id,c.contact_id)
  }finally{await m.close()}
 }
 
@@ -256,6 +260,23 @@ export async function peopleJourney(){
   assert.ok(JSON.stringify((await app.call(`/api/conversations/${rosaThread.id}/messages`,{token:rosa.token})).data).includes('the corner is crushed'))
   assert.equal(await deliver({id:'rosa-fresh@example.com',to:'inbound@example.com',from:'rosa@acme.test',headerFrom:'Rosa <rosa@acme.test>',headers:verdict('acme.test'),text:'A separate question'}),undefined)
   assert.notEqual((await admitted('rosa-fresh@example.com')).conversation_id,rosaThread.id);assert.notEqual((await admitted('rosa-fresh@example.com')).actor_id,rosa.contactId)
+  // Once her chat is Closed, her emailed reply still speaks as her: a new ticket of her own, listed in her widget, never the email contact's open thread.
+  const memberAddress=await replyAddress(rosaThread.id,'op@example.com')
+  await DB.prepare("UPDATE conversations SET status_id='closed',status_category='closed' WHERE id=?").bind(rosaThread.id).run()
+  assert.equal(await deliver({id:'rosa-after-close@example.com',to:notice.body.reply_to,from:'rosa@acme.test',headerFrom:'Rosa <rosa@acme.test>',headers:verdict('acme.test'),text:'The replacement is damaged too.'}),undefined)
+  const rosaFollowUp=await admitted('rosa-after-close@example.com')
+  assert.equal(rosaFollowUp.actor_id,rosa.contactId);assert.ok(![rosaThread.id,(await admitted('rosa-fresh@example.com')).conversation_id].includes(rosaFollowUp.conversation_id))
+  assert.equal((await DB.prepare('SELECT contact_id FROM conversations WHERE id=?').bind(rosaFollowUp.conversation_id).first()).contact_id,rosa.contactId)
+  assert.ok((await app.call('/api/conversations',{token:rosa.token})).data.conversations.some(row=>row.id===rosaFollowUp.conversation_id))
+  // A member's mail to the Closed ticket is refused: the Worker bounces it, the gateway answers 422 and the member gets one notice.
+  // Nothing is stored, no contact is made from their address, and the receipt keeps the refusal.
+  const refusals=[mail.sent.length,await m.count("SELECT count(*) n FROM contacts WHERE lower(email)='op@example.com'"),await m.count('SELECT count(*) n FROM conversations')]
+  assert.ok(await deliver({id:'member-closed@example.com',to:memberAddress,from:'op@example.com',headerFrom:'Operator <op@example.com>',text:'Answer by email after close'}))
+  assert.equal((await gateway({messageId:'member-closed-gateway',conversationId:rosaThread.id,to:'inbound@example.com',from:'op@example.com',text:'Answer by gateway after close'})).status,422)
+  for(const id of ['member-closed@example.com','member-closed-gateway'])assert.deepEqual([(await claim(id)).state,(await claim(id)).conversation_id,(await claim(id)).message_id],['ignored',rosaThread.id,null])
+  assert.equal(await m.count("SELECT count(*) n FROM messages WHERE content LIKE 'Answer by % after close'"),0)
+  assert.deepEqual([await m.count("SELECT count(*) n FROM contacts WHERE lower(email)='op@example.com'"),await m.count('SELECT count(*) n FROM conversations')],refusals.slice(1))
+  assert.deepEqual(mail.sent.slice(refusals[0]).map(entry=>entry.body.to),[['op@example.com']])
   // A reply-all to more than 50 addresses is routed, never refused.
   const crowd=[...Array.from({length:60},(_,index)=>`person${index}@crowd.example`),`${'x'.repeat(330)}@crowd.example`,'inbound@example.com'].join(', ')
   assert.equal(await deliver({id:'reply-all@example.com',to:crowd,envelopeTo:'inbound@example.com',from:'ana@customer.example',headerFrom:'ana@customer.example'}),undefined);assert.equal((await claim('reply-all@example.com')).state,'delivered')

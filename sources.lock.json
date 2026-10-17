@@ -1602,7 +1602,7 @@
       "executable": false
     },
     "CHANGELOG.md": {
-      "sha256": "5aededde6566724146fa6b3bc2a89b67b66fef2f6ae41ad3ff34797b2fa3dfc4",
+      "sha256": "c421c73f5421ead6dbedc836afddd2e318395c8f420818350d01421090b71cc2",
       "executable": false
     },
     "CLAUDE.md": {
@@ -1754,7 +1754,7 @@
       "executable": false
     },
     "docs/tickets.md": {
-      "sha256": "7de37a4abf74f0d4b3501c6eae68b385e21f91059395a7cc92cbc11b8460a5ae",
+      "sha256": "874bebd9263bbaf0dd14de37bbe9551c0d7251e86750e6074c0dadd87a34e827",
       "executable": false
     },
     "docs/UI-PARITY.md": {
@@ -3646,7 +3646,7 @@
       "executable": false
     },
     "src/modules/conversations/admission.ts": {
-      "sha256": "e3127903a8a25b269edfd9e3351a014ac3637240d4f58017bb9014577e0d3bb5",
+      "sha256": "7ccb3d08feac1a6ad922e8b7ab19b57330e47c60f11d3e5c71f54b75e104fd5c",
       "executable": false
     },
     "src/modules/conversations/citations.js": {
@@ -4602,11 +4602,11 @@
       "executable": false
     },
     "src/modules/integrations/inbound-service.ts": {
-      "sha256": "16d876f5cdfcc478615f88bf2be8292165cc29e578f362deabba4f7bd6afe93e",
+      "sha256": "a5d2b2a91f596155c7f56ad5370fcee9cb0894b4cec3eeea4d7fc273a1178f8e",
       "executable": false
     },
     "src/modules/integrations/inbound.ts": {
-      "sha256": "fe838df95e4c95324c7ea111d8edcd7d7e12d5e3173579e6d2c6a92c2c16de2f",
+      "sha256": "46cd06fd0de0654da76dba13fcca37cca1aec5c4062ff25ee8fd7f64529ae980",
       "executable": false
     },
     "src/modules/integrations/index.ts": {
@@ -4674,7 +4674,7 @@
       "executable": false
     },
     "src/modules/integrations/sendgrid-inbound.ts": {
-      "sha256": "3fef193d66221589a914b67bd9c0e362a415120c1ad4678549d344f479dae98c",
+      "sha256": "7f1d45c57deeea93a86fcd85c6a8c0b299b6df2d28f0babbf702936f1950d593",
       "executable": false
     },
     "src/modules/knowledge/access.ts": {
@@ -9058,7 +9058,7 @@
       "executable": false
     },
     "tests/helpers/email/sendgrid-inbound.mjs": {
-      "sha256": "ee11d8ec058d2386995cb35b280042af621d43565d03d437286b338bd1e7180e",
+      "sha256": "9756062a2d4535e75676d3f66f56541e5d4165f58df017cdafd61d349f268088",
       "executable": false
     },
     "tests/helpers/email/transports.mjs": {
@@ -9066,7 +9066,7 @@
       "executable": false
     },
     "tests/helpers/email/worker-mail.mjs": {
-      "sha256": "6c70fa74108d4c94416760dc5fc72fecd54bfc4d3542f19660f6f044c4bb522f",
+      "sha256": "6295ac3296f8df566c21ed03500d4195909a9bb82d07d53cf735d2423bbd2374",
       "executable": false
     },
     "tests/helpers/emitted-runtime-proxy-fault.mjs": {
@@ -9882,7 +9882,7 @@
       "executable": false
     },
     "tests/move-in/capacity-journey.mjs": {
-      "sha256": "38ea72b005a71154cefccb27e0921e4c49a200837904d0b530f30d434f029893",
+      "sha256": "5d601193eb6d057fb30fe7855c2661a4a72caf037616f8a140ace049dc48addf",
       "executable": false
     },
     "tests/move-in/claims.mjs": {
@@ -9974,7 +9974,7 @@
       "executable": false
     },
     "tests/move-in/inspector.mjs": {
-      "sha256": "611ec1e5ca78fe893f654efd69386c335c40f0598c69cb4618cff9cdf82b5c41",
+      "sha256": "8b02325ffcaa6a3aa675844cc486d08c4b084e4698d5860096f8224be0c43a8e",
       "executable": false
     },
     "tests/move-in/limits.mjs": {

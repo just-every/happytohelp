@@ -162,5 +162,22 @@ export async function sendgridInboundJourney(){
   await m.app.until(() => env.DB.prepare('SELECT id FROM ai_generations WHERE id=?').bind(`reply:${replyAllMessage.id}`).first(), { message: 'AI reply to the reply-all' })
   assert.equal((await post(replyAll)).status, 200)
   assert.equal((await replyAllRows()).length, 1)
+  // Once the chat is Closed, Rosa's reply through the same address opens a new ticket of hers, never her email contact's open thread.
+  const memberReplyAddress = await m.replyAddress('chat', 'op@example.com')
+  await env.DB.prepare("UPDATE conversations SET status_id='closed',status_category='closed' WHERE id='chat'").run()
+  const afterClose = await post(rawForm({ messageId: 'sendgrid-rosa-after-close@example.com', envelope: { to: [rosaReplyAddress], from: 'rosa@acme.test' }, to: rosaReplyAddress, from: 'Rosa <rosa@acme.test>', dkim: '{@acme.test : pass}', text: 'The replacement is damaged too.' }))
+  assert.equal(afterClose.status, 201)
+  const followUp = await afterClose.json()
+  assert.equal(followUp.actor.contactId, 'visitor')
+  assert.ok(!['chat', rosaFresh.conversationId].includes(followUp.conversationId))
+  // A member's reply to the Closed ticket is refused with 422, stored as nothing, and answered with one notice to the member, also when SendGrid retries.
+  const sentBefore = m.mail.sent.length
+  const memberForm = () => rawForm({ messageId: 'sendgrid-member-closed@example.com', envelope: { to: [memberReplyAddress], from: 'op@example.com' }, to: memberReplyAddress, from: 'Operator <op@example.com>', text: 'Answer by email after close' })
+  assert.equal((await post(memberForm())).status, 422)
+  assert.equal((await post(memberForm())).status, 422)
+  assert.equal((await m.claim('sendgrid-member-closed@example.com')).state, 'ignored')
+  assert.equal(await m.count("SELECT count(*) n FROM messages WHERE content='Answer by email after close'"), 0)
+  assert.equal(await m.count("SELECT count(*) n FROM contacts WHERE lower(email)='op@example.com'"), 0)
+  assert.deepEqual(m.mail.sent.slice(sentBefore).map(entry => entry.body.to), [['op@example.com']])
  }finally{await m.close()}
 }

@@ -5,6 +5,7 @@ import {createRuntime} from '../emitted-runtime.mjs';
 import {checkDelayedArticle} from '../ui-readiness-editor.mjs';
 import {installReadinessSampler, assertReadinessFrames} from '../ui-readiness-transitions.mjs';
 import {launchBrowser} from '../../journeys/kit/browser.mjs';
+import {nativeHttp} from '../native-http.mjs';
 
 export async function readinessBrowser(){
  const directory = resolve(process.env.H2H_EVIDENCE_DIR || 'test-results/ui-readiness');
@@ -15,9 +16,9 @@ export async function readinessBrowser(){
  try {
      const tenant = await runtime.seedTenant({name: 'Readiness workspace', email: 'readiness@example.test', allowedOrigin: runtime.origin});
      const api = async (path, body, method = body ? 'POST' : 'GET', token = tenant.token) => {
-         const response = await fetch(runtime.origin + path, {method, headers: {Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Origin: runtime.origin}, ...(body ? {body: JSON.stringify(body)} : {})});
-         assert.ok(response.ok, path + ': ' + response.status);
-         return response.json();
+         const response = await nativeHttp(runtime.origin + path, {method, headers: {Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Origin: runtime.origin}, ...(body ? {body: JSON.stringify(body)} : {})});
+         assert.ok(response.status >= 200 && response.status < 300, path + ': ' + response.status);
+         return JSON.parse(response.body);
      };
      await api(`/api/management/projects/${tenant.projectId}/settings`, {primary_color: '#204b3a'}, 'PUT');
      const project = await api(`/api/identity/projects/${tenant.projectId}`);

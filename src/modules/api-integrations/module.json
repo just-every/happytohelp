@@ -5,6 +5,8 @@
   "sourcePaths": [
     "src/modules/api-integrations",
     "migrations/115_native_integrations.sql",
+    "migrations/124_contact_email_proof_guard.sql",
+    "migrations/126_restore_contact_erasure.sql",
     "docs/api.md",
     "tests/connections",
     "tests/journeys/connections.mjs",

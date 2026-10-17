@@ -52,7 +52,7 @@ async function upgrade(label) {
     const {createRuntime: createBaseline} = await import(pathToFileURL(join(source, 'tests/helpers/emitted-runtime.mjs')));
     previous = await createBaseline();
     assert.equal(previous.migrationCount, baseline.migrations);
-    const data = await baseline.populate(previous.origin);
+    const data = await baseline.populate(previous.origin, previous);
     // close(false) keeps the baseline's state (its helper reports it as retained); it is upgraded in place here.
     runtimeDirectory = previous.directory; await previous.close(false); previous = undefined;
     const state = join(runtimeDirectory, 'state');

@@ -7,7 +7,11 @@
       "change": "changed",
       "summary": "Release qualification follows the complete local owner entry and exact portable state.",
       "was": "Slow qualification invoked reproducibility without pnpm, dropped dev admission on browser API reads and compared restore with pre-export snapshot metadata.",
-      "now": "One pnpm entry point qualifies fresh clones, README restores, reproducibility, delegation at 1440/390 and every published upgrade baseline. Restore preserves the exported Durable Object snapshot. Upgrades compare every original column except the exact documented 125 contact email-proof and 129 owner-alert transformations."
+      "now": "One pnpm entry point qualifies fresh clones, README restores, reproducibility, delegation at 1440/390 and every published upgrade baseline. Restore preserves the exported Durable Object snapshot. Upgrades compare every original column except the exact documented 125 contact email-proof and 129 owner-alert transformations. New migrations bracket the immutable 125 backfill with suspension/restoration of the identical 115 erasure trigger so an interrupted erasure cannot rewrite retained integration history during upgrade.",
+      "migrationIds": [
+        "124_contact_email_proof_guard.sql",
+        "126_restore_contact_erasure.sql"
+      ]
     },
     "STATUS-001": {
       "change": "changed",
@@ -65,6 +69,14 @@
   "extensionPointChanges": [],
   "migrations": [
     {
+      "id": "124_contact_email_proof_guard.sql",
+      "buyerSteps": "With all writers stopped, suspend the 115 native_integration_erasure trigger before the immutable 125 metadata-only email-proof backfill. Preserve pre-existing integration rows for interrupted erasures. Do not serve traffic until 126 restores the guard."
+    },
+    {
+      "id": "126_restore_contact_erasure.sql",
+      "buyerSteps": "Restore the exact 115 native_integration_erasure trigger after 125, without changing rows. The original runtime erasure guard is in place before traffic resumes."
+    },
+    {
       "id": "130_ticket_model.sql",
       "buyerSteps": "Adds ticket columns and backfills only those new columns from retained conversation state; adds statuses per project. Existing conversation columns remain exact."
     },
@@ -82,6 +94,6 @@
     }
   ],
   "breaking": false,
-  "agentUpdateInstructions": "Update from v0.4.2 to v0.4.3 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.42. Apply the listed missing migrations in filename order before serving traffic. Preserve owner credentials, native support history, permissions, imports and erasure fences. Older releases apply their intermediate migrations too: 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Keep uncertain external outcomes without replay and retain human Send.",
+  "agentUpdateInstructions": "Update from v0.4.2 to v0.4.3 without resetting. Stop all writers and back up D1, R2 and Durable Object state and private settings. Install frozen dependencies with Node 22.20.0, pnpm 10.12.4 and @runeditrun/rer 0.2.42. Apply the listed missing migrations in filename order before serving traffic. Migrations 124_contact_email_proof_guard.sql and 126_restore_contact_erasure.sql bracket the immutable 125 backfill: the identical runtime erasure trigger must be restored by 126 before writers resume, including when 125 was already applied. Preserve owner credentials, native support history, permissions, imports and erasure fences. Older releases apply their intermediate migrations too: 125_contact_email_proof.sql changes only eligible unsigned widget contacts metadata_json to mark email_unproven=1; 129_owner_unassigned_alerts.sql enables is_notified_on_unassigned_activity for owners only where an active non-demo workspace has no alerted member. These documented migrations are intentional; every other original value is retained. Keep uncertain external outcomes without replay and retain human Send.",
   "publicReleaseNotes": "HappyToHelp v0.4.3 qualifies fresh installation, README restore, reproducibility, delegation and upgrades from every published baseline, including v0.4.2. Portable restores retain the exact exported Durable Object metadata, native owners, support history and files. Upgrades preserve original values except the documented contact email-proof and owner-alert migrations when those are newly applied. Native ticket statuses, priorities, groups, fields, saved views and previewed bulk updates are included. Back up and apply the listed missing migrations before serving traffic. Commands retain @runeditrun/rer 0.2.42. Hosted and paid-provider quality remain separately qualified; accessibility remains on owner HOLD. Production is separate and unchanged."
 }

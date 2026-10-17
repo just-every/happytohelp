@@ -447,7 +447,8 @@
           "src/modules/tickets",
           "migrations/130_ticket_model.sql",
           "migrations/131_ticket_views_bulk.sql",
-          "migrations/132_ticket_erasure.sql"
+          "migrations/132_ticket_erasure.sql",
+          "migrations/133_import_runtime_completion.sql"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",

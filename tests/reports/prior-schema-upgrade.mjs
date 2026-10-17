@@ -13,6 +13,10 @@ import {m9Migrations} from '../helpers/recovery/m9-inventory.mjs';
 import {createHash} from 'node:crypto';
 import {seedCategoryUpgrade,assertCategoryUpgrade} from './upgrade-categories.mjs';
 
+// Complete Base d1RetirementSchema trigger from import-kit/src/d1/retirement-schema.ts.
+// M133 replaces only this prior trigger; SQLite omits its final statement semicolon.
+const retiredStreamRevisionTrigger=`CREATE TRIGGER ik_d1_stream_revision_update BEFORE UPDATE ON ik_d1_stream_revisions WHEN NEW.stream_id IS NOT OLD.stream_id OR NEW.destination IS NOT OLD.destination OR NEW.mapping_version IS NOT OLD.mapping_version OR NEW.principal_id IS NOT OLD.principal_id OR NEW.fingerprint IS NOT OLD.fingerprint OR NEW.total IS NOT OLD.total OR NEW.layout_hash IS NOT OLD.layout_hash OR NEW.layout_revision<OLD.layout_revision OR NEW.progress_revision<=OLD.progress_revision OR ((NEW.namespace IS NOT OLD.namespace OR NEW.operation_key IS NOT OLD.operation_key) AND NOT (NEW.namespace='' AND NEW.operation_key='' AND NOT EXISTS(SELECT 1 FROM ik_d1_streams WHERE id=OLD.stream_id) AND EXISTS(SELECT 1 FROM ik_d1_retirements WHERE id=OLD.stream_id AND kind='stream'))) BEGIN SELECT RAISE(ABORT,'IMPORT_STREAM_REVISION_CHANGED'); END;`.replace(/;$/,'');
+
 // A packaged install populated before the outcome, integration, mail and import stages upgrades in place; every prior row and file is kept.
 export async function priorSchemaUpgrade(){
 const artifact=await readArtifact('delivery-artifact/happytohelp-worker-artifact.json');
@@ -24,7 +28,8 @@ const end=Math.max(...m9Migrations.map(name=>completeMigrations.findIndex(m=>m.n
 const migrations=completeMigrations.slice(0,end+1);
 const stagedNames=new Set([...migrations.map(m=>m.name),...integrationMigrations,...importEvolutionMigrations,...localMailMigrations,...importRuntimeMigrations]);
 const remaining=completeMigrations.filter(m=>!stagedNames.has(m.name));
-// Columns the additional stages add to existing tables; every other part of those tables' schema must stay as it was.
+// Additional columns are declared by the migrations. M133 also evolves the one
+// Base retirement trigger below; every other prior schema definition stays exact.
 const addedColumns=remaining.flatMap(m=>[...m.sql.matchAll(/ALTER TABLE (\w+) ADD COLUMN ([^;]+);/gi)].map(([,table,column])=>({table,column:column.trim()})));
 const original=migrations.filter(m=>!m9Migrations.includes(m.name));
 const directory=await mkdtemp(join(tmpdir(),'reports-upgrade-'));
@@ -136,7 +141,8 @@ try {
     for(const entry of beforeRuntime.schema)assert.deepEqual(current.schema.find(row=>row.name===entry.name),entry,'runtime closure preserves prior schema: '+entry.name);
     assert.deepEqual(current.rows.d1_migrations.map(JSON.parse).slice(-importRuntimeMigrations.length).map(row=>row.name),importRuntimeMigrations);
   });
-  // Later stages retain all prior data, including article publication state.
+  // Later stages, including M133 Base runtime completion, retain all prior data
+  // and article publication state; M133's seven new tables start empty.
   let beforeAdditional,final;
   await runtime.withStorage(async storage=>{await seedCategoryUpgrade(storage);beforeAdditional=await snapshot(storage)});
   for(const migration of remaining)await writeFile(join(runtime.directory,'migrations',migration.name),migration.sql);
@@ -167,6 +173,13 @@ try {
     }
     for(const entry of beforeAdditional.schema){
       const current=final.schema.find(candidate=>candidate.name===entry.name),added=addedColumns.filter(a=>a.table===entry.name);
+      // M133 preserves the Base stream anchor and monotonic counters while
+      // allowing retired custody to erase namespace/operation_key. Check the
+      // complete replacement SQL and every original trigger identity field.
+      if(entry.name==='ik_d1_stream_revision_update'){
+        assert.deepEqual(current,{...entry,sql:retiredStreamRevisionTrigger},'M133 applies exactly the Base d1RetirementSchema trigger: '+entry.name);
+        continue;
+      }
       // Category creation no longer invalidates articles. Deletion now scopes
       // invalidation to linked ancestry; its behavior is exercised below on D1.
       if(entry.name==='edition_category_insert'){
@@ -209,7 +222,7 @@ try {
   await assertCategoryUpgrade(runtime.directory);
   artifact.deploymentSpec.migrations=completeMigrations;
   await runtime.start();const health=await fetch(runtime.origin+'/health');assert.equal(health.status,200);await runtime.close();
-  const receipt={oldTables:Object.keys(before.rows).length,newTables:Object.keys(after.rows).length,oldMigrations:original.length,newMigrations:migrations.length,finalTables:Object.keys(final.rows).length,finalMigrations:final.rows.d1_migrations.length,added:completeMigrations.filter(m=>!original.some(old=>old.name===m.name)).map(m=>m.name),checks:['real native Wrangler prior ledger and append-only apply','every original row retained','SQLite ledger sequence growth only','prior schema exact except two specified A110 trigger fences','historical unknown outcome','unknown first resolution retained','Base strict defaults and exact prior original bytes retained','additional stages retain every row and prior schema except added columns and category insert/delete trigger evolution','upgraded category create/delete preserves unrelated article state','upgraded linked and ancestor deletion invalidates primary and additional category article revisions','actual emitted Worker health after upgrade']};
+  const receipt={oldTables:Object.keys(before.rows).length,newTables:Object.keys(after.rows).length,oldMigrations:original.length,newMigrations:migrations.length,finalTables:Object.keys(final.rows).length,finalMigrations:final.rows.d1_migrations.length,added:completeMigrations.filter(m=>!original.some(old=>old.name===m.name)).map(m=>m.name),checks:['real native Wrangler prior ledger and append-only apply','every original row retained','SQLite ledger sequence growth only','prior schema exact except two specified A110 trigger fences','historical unknown outcome','unknown first resolution retained','Base strict defaults and exact prior original bytes retained','additional stages including M133 Base runtime completion retain every row and prior schema except added columns, category insert/delete evolution and the exact Base d1RetirementSchema trigger','upgraded category create/delete preserves unrelated article state','upgraded linked and ancestor deletion invalidates primary and additional category article revisions','actual emitted Worker health after upgrade']};
   if(process.env.H2H_EVIDENCE_DIR){await mkdir(resolve(process.env.H2H_EVIDENCE_DIR),{recursive:true});await writeFile(join(resolve(process.env.H2H_EVIDENCE_DIR),'upgrade.json'),JSON.stringify(receipt,null,2)+'\n')}
   console.log(JSON.stringify(receipt));
 }finally{artifact.deploymentSpec.migrations=completeMigrations;if(runtime)await runtime.close();await rm(directory,{recursive:true,force:true});}

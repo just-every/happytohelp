@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "parent": null,
   "edition": "just-every/happytohelp",
-  "manifest": "a8e3e3a479f5709510ac742aad764fb3f278ec227b68ccfdb703b1787c458a90",
+  "manifest": "a947c8c08114c687b4c141d05a28c66aefb654bff1f0ee0a9fb3a170261cf943",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -405,7 +405,8 @@
           "src/modules/tickets",
           "migrations/130_ticket_model.sql",
           "migrations/131_ticket_views_bulk.sql",
-          "migrations/132_ticket_erasure.sql"
+          "migrations/132_ticket_erasure.sql",
+          "migrations/133_import_runtime_completion.sql"
         ],
         "origin": {
           "repository": "https://github.com/runeditrun/base.git",
@@ -1757,7 +1758,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "a8e3e3a479f5709510ac742aad764fb3f278ec227b68ccfdb703b1787c458a90",
+      "sha256": "a947c8c08114c687b4c141d05a28c66aefb654bff1f0ee0a9fb3a170261cf943",
       "executable": false
     },
     "HANDOVER.md": {
@@ -1929,7 +1930,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "8514e5c70ca3070a4cb49ac4c501f5e8cecd2958fd11db22f4164830f4235aa6",
+      "sha256": "bf1d13fa5a457510cc1e9348287273416f1771553ce1e164621585596e19a8e8",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -2222,6 +2223,10 @@
     },
     "migrations/132_ticket_erasure.sql": {
       "sha256": "7bf8102798b431dd9117ed602102e74ce9a480e4c07dd0418fa56a97570ae6a7",
+      "executable": false
+    },
+    "migrations/133_import_runtime_completion.sql": {
+      "sha256": "9da95c082b6e6634b36d9994ea0ccb0aee24e1cf07ab419bcfcddf744f3d55dc",
       "executable": false
     },
     "migrations/180_account_security.sql": {
@@ -2661,7 +2666,7 @@
       "executable": false
     },
     "scripts/installer/ticket-archive-policy.mjs": {
-      "sha256": "7cb5d591e57a0a9d3c9c096b14563b7402059f95ed66fcf882084771dc0fb38f",
+      "sha256": "220fac7f1d0b7339943f965a78252420d88eb7bcdcd6397f43d9e032c821efc0",
       "executable": false
     },
     "scripts/installer/ticket-archive-upgrade.mjs": {
@@ -9549,7 +9554,7 @@
       "executable": false
     },
     "tests/move-in/business-equality.mjs": {
-      "sha256": "b0b1b239b6493ddd5fe6cb9d72ee89108a47a4bf27782d48ae18c77530f4b2d3",
+      "sha256": "e42f2b84cc077015764bb692f600ae22eab8b4684884b40a9c13cb000d525497",
       "executable": false
     },
     "tests/move-in/capacity-journey.mjs": {
@@ -9801,7 +9806,7 @@
       "executable": false
     },
     "tests/reports/prior-schema-upgrade.mjs": {
-      "sha256": "1fab0870139584f704771d0f0adc50ec2a12abf79e23136d5486049bd6e94ae5",
+      "sha256": "a643a9847d1c0c604e4b8815ae319581c4ffc5528ff994013361098f77348127",
       "executable": false
     },
     "tests/reports/ratings.mjs": {

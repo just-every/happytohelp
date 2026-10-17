@@ -9,7 +9,16 @@ import {publishActivity} from '../conversations/activity'
 import {onAssistantAssignment} from '../ai-support/customer-message'
 import {assertModelConfigured} from '../ai-support/configuration'
 export type {TicketChange} from './mutate-validation'
-export class TicketCommittedError extends HTTPException {readonly committed=true;constructor(readonly ticketId:string,readonly ticketVersion:number,cause:unknown){super(503,{message:'Ticket changes were saved, but the update could not finish refreshing. Reload before making further changes.',cause,res:new Response(JSON.stringify({error:'Ticket changes were saved, but refresh or notification failed. Reload before making further changes.',code:'ticket_committed',committed:true,id:ticketId,ticket_version:ticketVersion}),{status:503,headers:{'Content-Type':'application/json'}})})}}
+export class TicketCommittedError extends HTTPException {
+ readonly committed=true
+ readonly ticketId:string
+ readonly ticketVersion:number
+ constructor(ticketId:string,ticketVersion:number,cause:unknown){
+  super(503,{message:'Ticket changes were saved, but the update could not finish refreshing. Reload before making further changes.',cause,res:new Response(JSON.stringify({error:'Ticket changes were saved, but refresh or notification failed. Reload before making further changes.',code:'ticket_committed',committed:true,id:ticketId,ticket_version:ticketVersion}),{status:503,headers:{'Content-Type':'application/json'}})})
+  this.ticketId=ticketId
+  this.ticketVersion=ticketVersion
+ }
+}
 export async function previewTicket(env:Env,actor:Actor,id:string,change:TicketChange,authority:TicketAuthority){const checked=await prepareTicketChange(env,actor,id,change,authority);return {ticket:await getTicket(env,actor,id,authority.tokenAuthority),changes:checked.change}}
 /** The receipt is written with live authority, schema and ticket frontier checks.
  * Every effect in the transaction depends on that receipt. */

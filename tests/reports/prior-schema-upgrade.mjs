@@ -26,6 +26,8 @@ const migrations=completeMigrations.slice(0,end+1);
 const stagedNames=new Set([...migrations.map(m=>m.name),...integrationMigrations,...importEvolutionMigrations,...localMailMigrations,...importRuntimeMigrations]);
 const remaining=completeMigrations.filter(m=>!stagedNames.has(m.name));
 // Columns the additional stages add to existing tables; every other part of those tables' schema must stay as it was.
+// Triggers an additional stage drops and recreates (import-kit's retirement transition); each must end exactly as that stage declares.
+const replacedTriggers=new Map(remaining.flatMap(m=>[...m.sql.matchAll(/DROP TRIGGER IF EXISTS (\w+);\s*(CREATE TRIGGER \1 [\s\S]*?END);/g)].map(([,name,sql])=>[name,sql])));
 const addedColumns=remaining.flatMap(m=>[...m.sql.matchAll(/ALTER TABLE (\w+) ADD COLUMN ([^;]+);/gi)].map(([,table,column])=>({table,column:column.trim()})));
 const original=migrations.filter(m=>!m9Migrations.includes(m.name));
 const directory=await mkdtemp(join(tmpdir(),'reports-upgrade-'));
@@ -162,6 +164,11 @@ try {
       const current=final.schema.find(candidate=>candidate.name===entry.name),added=addedColumns.filter(a=>a.table===entry.name);
       // Category creation no longer invalidates articles. Deletion now scopes
       // invalidation to linked ancestry; its behavior is exercised below on D1.
+      if(replacedTriggers.has(entry.name)){
+        assert.deepEqual({...current,sql:entry.sql},entry,'a replaced trigger keeps its table: '+entry.name);
+        assert.equal(current.sql,replacedTriggers.get(entry.name),'a replaced trigger is exactly what its stage declares: '+entry.name);
+        continue;
+      }
       if(entry.name==='edition_category_insert'){
         assert.equal(current,undefined,'category creation has no blanket invalidation trigger');
         continue;

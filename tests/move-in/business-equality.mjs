@@ -12,6 +12,8 @@ const excluded=new Set([
  'ik_d1_plan_chunks','ik_d1_original_chunks','ik_d1_history','ik_d1_entries','ik_d1_assertions',
  'ik_d1_creation_plans','ik_d1_reversal_reports',
  'ik_d1_streams','ik_d1_stream_pages','ik_d1_indexed_jobs','ik_d1_plan_index','ik_d1_stream_origins','ik_d1_stream_revisions','ik_d1_publication_fences','ik_d1_staging','ik_d1_staging_pages','ik_d1_staging_chunks','ik_d1_staging_index','ik_d1_staging_originals','ik_d1_custody_revisions','ik_d1_native_staging','ik_d1_native_staging_index','ik_d1_native_staging_values','ik_d1_custody_states','ik_d1_preparation_receipts','ik_d1_staging_headers',
+ // rer 0.2.42 import-kit custody: reversal fences, cross-request preparation steps, person-erasure retirement and its journal.
+ 'ik_d1_reversal_fences','ik_d1_preparation_steps','ik_d1_stream_sources','ik_d1_retirements','ik_d1_erasure_journal','ik_d1_erasure_tally','ik_d1_erasure_progress',
  'move_in_runs','move_in_records','move_in_batches','move_in_identity_links',
 ]);
 export function businessSnapshot(snapshot){

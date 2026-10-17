@@ -16,7 +16,7 @@ export function isRedactedCredentialField(table,column,key,value){return rendere
 function reviewedName(name){return reviewedNames.has(name.toLowerCase())||/^(?:[A-Z][A-Z0-9]*_)+(?:KEY|TOKEN|SECRET|PASSWORD)$/.test(name);}
 function symbolic(value){
  return /^(?:\$\{?[A-Z][A-Z0-9_]*\}?|!?\!?process\.env\.[A-Z][A-Z0-9_]*)$/.test(value)
-  || /^(?:\.{3}|\*{3,}|<redacted>|\[redacted\]|REDACTED|<YOUR[_A-Z0-9 -]+>|(?:YOUR|DEIN)[_-][A-Z0-9_-]*(?:KEY|TOKEN|PASSWORD|SECRET)[_A-Z0-9-]*)$/i.test(value);
+  || /^(?:\.{3}|\*{3,}|<redacted>[.:)]?|\[redacted\]|REDACTED|<YOUR[_A-Z0-9 -]+>|(?:YOUR|DEIN)[_-][A-Z0-9_-]*(?:KEY|TOKEN|PASSWORD|SECRET)[_A-Z0-9-]*)$/i.test(value);
 }
 function* assignments(text){
  const pattern=/\b([A-Za-z][\w-]*)(["']?[ \t]*([:=])[ \t]*)(?:"((?:\\.|[^"\\\r\n])*)"|'((?:\\.|[^'\\\r\n])*)'|([^\s"',;}]+))/g;

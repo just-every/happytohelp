@@ -8,7 +8,8 @@
     "migrations/0051_knowledge_authoring.sql",
     "migrations/0052_knowledge_imports.sql",
     "migrations/0053_knowledge_recovery.sql",
-    "tests/journeys/knowledge.mjs"
+    "tests/journeys/knowledge.mjs",
+    "migrations/170_knowledge_experience.sql"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base"

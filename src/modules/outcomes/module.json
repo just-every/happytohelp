@@ -12,7 +12,8 @@
     "tests/reports/import-inertness.mjs",
     "tests/reports/operator-feedback.mjs",
     "tests/journeys/reports.mjs",
-    "tests/journeys/upgrade.mjs"
+    "tests/journeys/upgrade.mjs",
+    "migrations/171_csat_surveys.sql"
   ],
   "selectedEditionDependencies": [
     "runeditrun/base",

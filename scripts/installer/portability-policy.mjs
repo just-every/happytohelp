@@ -2,10 +2,13 @@
 // Live bearer grants, provider credentials and pending outbound deliveries do not.
 export const archivePolicy={
  product:'just-every/happytohelp',buckets:{FILES:{}},
+ // Keep invitation history, but restored archives never restore a live survey link or queued send.
+ exportRow:(table,row)=>table==='csat_surveys'?{...row,recipient:'',state:row.state==='pending'?'cancelled':row.state,revoked_at:row.revoked_at??row.created_at}:row,
  // Reconstruct the full-text index from retained messages after restore.
  derivedTables:['inbox_message_search'],
  excludeTables:[
   'operator_notification_activity','operator_notifications',
+  'knowledge_help_links','knowledge_help_sessions',
   'sessions','session_factors','webauthn_challenges','audit_purges','conversation_outbox','identity_tokens','magic_signins','registrations','login_attempts',
   'github_connections','github_oauth_states','preview_grants','edition_codes','edition_consents',
   'local_pairings','local_authorizations','local_grants','local_devices','local_device_settings','local_jobs','local_events','local_attachments','local_receipts','local_attachment_grants','local_result_effects',
@@ -15,3 +18,5 @@ export const archivePolicy={
  secretColumns:{projects:['verification_secret'],edition_grants:['token_hash']},
  requiredConfiguration:['OWNER_EMAIL','APP_ORIGIN','H2H_LOCAL','EMAIL_PROVIDER','EMAIL_FROM','H2H_SETUP_TOKEN','INTEGRATION_ENCRYPTION_KEY'],
 };
+
+export default archivePolicy;

@@ -1,0 +1,15 @@
+.survey-card {max-width:38rem;margin:0 auto;}
+.survey-card h1 {font-size:1.8rem;line-height:1.25;}
+.survey-card fieldset {border:0;padding:0;margin:1.5rem 0;}
+.survey-card legend,.survey-card label {font-weight:600;}
+.survey-card legend {margin-bottom:.75rem;}
+.survey-card .ratings {display:flex;gap:.5rem;}
+.survey-card .choice {display:flex;flex:1;min-width:0;justify-content:center;align-items:center;gap:.375rem;border:1px solid var(--help-center-border);border-radius:4px;padding:.75rem .25rem;cursor:pointer;min-height:48px;}
+.survey-card input {width:20px;height:20px;accent-color:var(--help-center-link);}
+.survey-card textarea,.survey-card select {display:block;width:100%;margin:.5rem 0 1.25rem;font:inherit;border:1px solid var(--help-center-border);border-radius:4px;padding:.625rem;background:white;color:inherit;}
+.survey-card textarea {min-height:120px;resize:vertical;}
+.survey-card small {display:block;color:#4e5e75;font-size:.875rem;margin-top:-.75rem;margin-bottom:1.5rem;}
+.survey-card button {font:inherit;font-weight:600;background:var(--help-center-link);color:white;border:0;border-radius:4px;min-height:48px;padding:.75rem 1.5rem;cursor:pointer;}
+.survey-card footer {margin-top:1.75rem;}
+.survey-card :focus-visible {outline:3px solid #bf6700;outline-offset:3px;}
+@media(max-width:420px){.survey-card h1{font-size:1.5rem;}}

@@ -8,11 +8,13 @@ import {importObjects} from './objects.mjs';
  * resumes at its first uncommitted group. The target is {env, renew?}; renew runs
  * between waves of work, when nothing is in flight. Without a target it plans
  * every chunk. */
-export async function importPackage(root,target,modules,{expectManifestSha256,concurrency=1,progress=()=>{}}={}){
+// Tables other rows are mapped through can never be left out.
+const contextTables=new Set(['projects','users','ais','ai_defaults','contacts','conversations','messages','mediables','media','datasets','dataset_files']);
+export async function importPackage(root,target,modules,{expectManifestSha256,excludeTables=[],concurrency=1,progress=()=>{}}={}){
   const {planImport,importLegacy,tableOrder,relationships,types}=modules;
   const started=Date.now(),{manifest,digest}=await readManifest(root,expectManifestSha256);
   progress({step:'verify',manifestSha256:digest,chunks:manifest.chunks.length,objects:manifest.objects.length});
-  const sourceCounts=await verifyPackage(root,manifest);
+  const sourceCounts=await verifyPackage(root,manifest),excluded=Object.fromEntries(excludeTables.map(table=>{if(!Object.hasOwn(manifest.source.rowCounts,table)||contextTables.has(table))throw Error(`Cannot leave out table ${table}`);return [table,manifest.source.rowCounts[table]];}));
   progress({step:'context',seconds:seconds(started)});
   const index=await packageContext(root,manifest,{timestamp:types.timestamp,...relationships});
   try{
@@ -27,7 +29,7 @@ export async function importPackage(root,target,modules,{expectManifestSha256,co
     }
     const order=table=>{const i=tableOrder.indexOf(table);return i<0?1000:i};
     // A chunk is identified by its file and digest, never by its place in the order.
-    const chunks=manifest.chunks.map(part=>part).sort((a,b)=>order(a.table)-order(b.table)).map(part=>({part,chunk:part.file}));
+    const chunks=manifest.chunks.filter(part=>!Object.hasOwn(excluded,part.table)).sort((a,b)=>order(a.table)-order(b.table)).map(part=>({part,chunk:part.file}));
     // Parent tables finish before their children start; chunks of one table are independent.
     for(const table of [...new Set(chunks.map(c=>c.part.table))]){
       const queue=chunks.filter(c=>c.part.table===table),total=tables[table]={sourceRows:0,mappedRows:0,archivedOnly:0,holds:0,applied:0,replayed:0};
@@ -42,7 +44,7 @@ export async function importPackage(root,target,modules,{expectManifestSha256,co
     }
     if(target)await env().DB.prepare("UPDATE legacy_import_runs SET state='complete',completed_at=? WHERE id=?").bind(Date.now(),runId).run();
     const sum=key=>Object.values(tables).reduce((n,t)=>n+t[key],0);
-    return {id:runId,manifestSha256:digest,projectId:manifest.source.projectId,sourceRows:sum('sourceRows'),packageRows:Object.values(sourceCounts).reduce((n,c)=>n+c,0),mappedRows:sum('mappedRows'),archivedOnly:sum('archivedOnly'),holds:sum('holds'),applied:sum('applied'),replayed:sum('replayed'),objects:manifest.objects.length,objectsUploaded:objects.uploaded,objectsPresent:objects.present,mediaBytes:manifest.mediaBytes,sessions:target?.sessions,seconds:seconds(started),tables};
+    return {id:runId,manifestSha256:digest,projectId:manifest.source.projectId,sourceRows:sum('sourceRows'),packageRows:Object.values(sourceCounts).reduce((n,c)=>n+c,0),excluded,mappedRows:sum('mappedRows'),archivedOnly:sum('archivedOnly'),holds:sum('holds'),applied:sum('applied'),replayed:sum('replayed'),objects:manifest.objects.length,objectsUploaded:objects.uploaded,objectsPresent:objects.present,mediaBytes:manifest.mediaBytes,sessions:target?.sessions,seconds:seconds(started),tables};
   }finally{await index.close();}
 }
 const seconds=since=>Math.round((Date.now()-since)/100)/10;

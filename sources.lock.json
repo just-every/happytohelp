@@ -2417,7 +2417,7 @@
       "executable": false
     },
     "scripts/import-legacy.mjs": {
-      "sha256": "de6df626bce246ffba34051c332866cbda2fa0a4aea74d37b98163cab57654b0",
+      "sha256": "be3403d6a48dc51516f7963c2c60a87e2c75cf52e44fa75e59cca0962df521e5",
       "executable": false
     },
     "scripts/independent/delegation-backup.py": {
@@ -2537,7 +2537,7 @@
       "executable": false
     },
     "scripts/legacy-import/import-package.mjs": {
-      "sha256": "4b44ad8e63571262c837197640d0d2dab4e21f30260d8c08cd6a74d1efa8362d",
+      "sha256": "c497a235570878c654d58e21303b9aed993ff23d040a436e9cface0434257a84",
       "executable": false
     },
     "scripts/legacy-import/objects.mjs": {
@@ -4385,7 +4385,7 @@
       "executable": false
     },
     "src/modules/legacy-import/README.md": {
-      "sha256": "a4a8ff4cd53c04b2a93117d7327da4566e291e65b1c153156c35201fd94ebfae",
+      "sha256": "0810afbd9adf21cbc51b12a90d08d5ce3e8244070c7dbd4d3a48e0b8fec69392",
       "executable": false
     },
     "src/modules/legacy-import/relationships.ts": {

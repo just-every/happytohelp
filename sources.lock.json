@@ -9044,7 +9044,7 @@
       "executable": false
     },
     "tests/helpers/first-run/readiness-browser.mjs": {
-      "sha256": "ca89daf3d4acc66d391b6025defbd66dfb8c096b8ad24b545714a46bda3d9eb4",
+      "sha256": "0bb8c3b38b2458b1103bfa7d8d5e2d33f8c2532e15355945ba269c5676f1c0b0",
       "executable": false
     },
     "tests/helpers/first-run/setup-answers.mjs": {
@@ -9309,6 +9309,10 @@
     },
     "tests/helpers/migration-statements.mjs": {
       "sha256": "2b53b19577ce22b5ed84ce55c1e63b502d42c2ba84f266ba929bf9b9345d0104",
+      "executable": false
+    },
+    "tests/helpers/native-http.mjs": {
+      "sha256": "29ae2d7364351801766f2648d1488d58310860283dff2b76ab3c23e18672298a",
       "executable": false
     },
     "tests/helpers/navigation-edges.mjs": {

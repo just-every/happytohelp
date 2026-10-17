@@ -7,6 +7,8 @@ node scripts/import-legacy.mjs --file /absolute/export.json
 node scripts/import-legacy.mjs --file /absolute/export.json --apply --persist-to .wrangler/state
 ```
 
+The SELECT-only MySQL exporter and attachment step are documented in [Export legacy HappyToHelp](../../../docs/LEGACY-EXPORT.md). It produces this format one project at a time. Its credential omissions are explicit; omitted authentication material is never reconstructed.
+
 Input shape:
 
 ```json
@@ -52,3 +54,5 @@ explicit `plaintext_action` to become native context actions; the encrypted
 original remains archived otherwise.
 
 `tests/journeys/legacy.mjs` exercises 33 table families with real local D1/R2, original transcript/bucket/knowledge IDs, exact minor-unit money, held operations, deterministic replay, conflict protection and corrupt-object denial. This fixture proof is not an import of a production dump, nor a claim that every archive-only historical system is already normalized.
+
+The public command uses the same `v3` local persistence layout as Wrangler/rer. Source `events` of type `INTERNAL_NOTE` become private notes; nullable category `published_at` retains drafts. Soft-deleted rows and their dependent transcripts remain archive-only.

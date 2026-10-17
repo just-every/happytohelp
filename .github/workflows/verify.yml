@@ -267,3 +267,36 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  legacy-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: fixture-mysql-admin
+          MYSQL_ROOT_HOST: '%'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pfixture-mysql-admin"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Export two legacy projects and import each twice
+        env:
+          LEGACY_TEST_MYSQL_HOST: 127.0.0.1
+          LEGACY_TEST_MYSQL_PASSWORD: fixture-mysql-admin
+        run: node --test tests/legacy-export.mjs

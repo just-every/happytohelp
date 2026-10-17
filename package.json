@@ -116,7 +116,8 @@
     "deps": "rer install",
     "rer": "rer",
     "test:delegation-journey": "node --test --test-concurrency=1 --test-name-pattern=\"agent fix\" tests/journeys/delegation.mjs",
-    "verify:release": "pnpm run build && H2H_UPGRADE_RELEASES=0.4.1 node --test --test-concurrency=1 tests/journeys/upgrade-nightly.mjs"
+    "verify:release": "pnpm run build && H2H_UPGRADE_RELEASES=0.4.1 node --test --test-concurrency=1 tests/journeys/upgrade-nightly.mjs",
+    "test:legacy-export": "node --test tests/legacy-export.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.111.0",
@@ -184,6 +185,7 @@
     "@vitejs/plugin-react": "6.1.1",
     "axe-core": "4.13.0",
     "esbuild": "0.28.1",
+    "mysql2": "3.24.6",
     "playwright": "1.63.0-alpha-2026-08-31",
     "sass": "^1.93.0",
     "typescript": "5.9.3",

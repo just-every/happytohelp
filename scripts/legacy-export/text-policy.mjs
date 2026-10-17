@@ -89,6 +89,10 @@ export function omitSupportCredentials(table,column,value,onOmit){
  const removed=secret=>{omitted++;onOmit?.(secret);return '<redacted>';};
  // A removed value is marked so a line that continues it is removed with it.
  const taken=secret=>removed(secret)+wrapMark;
+ // A word-only value found by a prose label or as a continuation ("is unbelievable!",
+ // "billing_id") is removed where it stands, but not indexed: its repeats are ordinary text.
+ const wordsOnly=v=>/^[A-Za-z][a-z]*(?:[_.-](?:[A-Za-z][a-z]*|\d{1,2}))*[!?.,;:]*$/.test(v);
+ const heuristic=secret=>wordsOnly(secret)?(omitted++,'<redacted>'):removed(secret);
  // JSON diagnostic bodies can carry HAR cookie/header objects as well as prose.
  try{const parsed=JSON.parse(value);if(parsed&&typeof parsed==='object'){const before=omitted;const cleaned=omitTransportObject(parsed,removed);if(omitted!==before)value=JSON.stringify(cleaned);}}catch{}
  value=omitTransportCredentials(value,removed);
@@ -115,7 +119,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
  value=value.replace(/\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$[^\s"'<>]+/g,taken);
  value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+taken(secret));
  value=omitBasicAuthorization(value,taken);
- value=omitLabelledValues(value,taken);
+ value=omitLabelledValues(value,secret=>heuristic(secret)+wrapMark);
  value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|pwd|auth|rlkey)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+taken(secret));
  value=value.replace(userinfo,(match,scheme,user,secret)=>mailtoLink(user)?match:scheme+taken(user+':'+secret)+'@');
  value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?taken(url):url);
@@ -129,7 +133,7 @@ export function omitSupportCredentials(table,column,value,onOmit){
   try{const decoded=JSON.parse(Buffer.from(token,'base64').toString('utf8'));if(decoded&&'iv'in decoded&&'value'in decoded&&('mac'in decoded||'tag'in decoded))return token;}catch{}
   return taken(token);
  });
- value=omitContinuations(value,removed);
+ value=omitContinuations(value,heuristic);
  return {value,omitted};
 }
 
@@ -138,17 +142,14 @@ export function omitSupportCredentials(table,column,value,onOmit){
 // collects these values first; length matches the secret scan's searched values.
 // Each 16+ character run of letters and digits inside a removed value is indexed as
 // well, so a key removed inside a longer value is removed when it recurs alone.
-// All-lowercase words (slugs, host names) and bare numbers are not secrets on their own,
-// and neither is a removed value made only of words ("unbelievable!", "billing_id"): it is
-// removed where it was found, but its repeats elsewhere are ordinary text.
+// All-lowercase words (slugs, host names) and bare numbers are not secrets on their own.
 export const repeatedCredentialMinimum=12;
 const tokenCharacter=/[A-Za-z0-9+/_=-]/;
-const wordsOnly=value=>/^[A-Za-z][a-z]*(?:[_.-](?:[A-Za-z][a-z]*|\d{1,2}))*[!?.,;:]*$/.test(value);
 export function knownCredentials(secrets){
  // Index both stored forms by a fixed-length prefix: one linear pass per string.
  const forms=new Map();
  const values=new Set();
- for(const secret of secrets){if(!wordsOnly(secret))values.add(secret);for(const token of secret.match(/[A-Za-z0-9]{16,}/g)||[])if(/[A-Za-z]/.test(token)&&/[^a-z]/.test(token))values.add(token);}
+ for(const secret of secrets){values.add(secret);for(const token of secret.match(/[A-Za-z0-9]{16,}/g)||[])if(/[A-Za-z]/.test(token)&&/[^a-z]/.test(token))values.add(token);}
  for(const secret of values)if(secret.length>=repeatedCredentialMinimum)for(const form of new Set([secret,JSON.stringify(secret).slice(1,-1)])){
   const key=form.slice(0,repeatedCredentialMinimum);if(!forms.has(key))forms.set(key,[]);forms.get(key).push(form);
  }

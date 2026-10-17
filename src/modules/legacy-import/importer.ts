@@ -38,25 +38,31 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
  for(const [shape,rows] of groupBy(pending.flatMap(source=>source.mapped),m=>m.table+'\u0000'+m.key.join(','),m=>m)){
   const [table,keyList]=shape.split('\u0000'),keys=keyList.split(','),seen=new Set<string>()
   const wanted=rows.map(m=>{const row=columnsOf(m);for(const key of keys)text(row[key],`${table}.${key}`);return keys.map(k=>row[k])}).filter(values=>{const id=identity(table,values);if(seen.has(id))return false;seen.add(id);return true})
-  for(const part of byteSlices(wanted,values=>utf8.encode(JSON.stringify(values)).length)){
+  for(const part of byteSlices(wanted,jsonBytes)){
    // Key columns are required and non-null, so a row-value IN reaches each key through its index.
    const found=await env.DB.prepare(`SELECT * FROM ${sqlName(table)} WHERE (${keys.map(sqlName).join(',')}) IN (SELECT ${keys.map((_,i)=>`json_extract(value,'$[${i}]')`).join(',')} FROM json_each(?))`).bind(JSON.stringify(part)).all<Row>()
    for(const values of part)current.set(identity(table,values),null)
    for(const row of found.results)current.set(identity(table,keys.map(k=>row[k])),row)
   }
  }
- for(const group of byteSlices(pending,source=>utf8.encode(JSON.stringify(stable(source.row))).length)){
+ // Each source row's share of every statement its group binds: its journal entry, its holds,
+ // its reporting row and its canonical rows' values. A group is sized by the largest of these,
+ // so no statement's JSON parameter can outgrow the group, however small the rows are.
+ const writes=pending.map(source=>{
+  const conversation=source.table==='conversations'&&source.mapped.find(m=>m.table==='conversations')
+  const write={source,journal:[plan.id,source.table,source.sourceId,source.rowDigest,stable(source.row),source.mapped.map(m=>m.table).join(',')||null,source.mapped.map(m=>m.key.map(k=>m.row[k]).join(':')).join(',')||null,source.mapped.length?'mapped':'archived_only'],holds:source.mapped.filter(m=>m.hold).map(m=>[`${plan.id}:${source.table}:${source.sourceId}`,plan.id,source.table,source.sourceId,m.hold]),reporting:conversation?[conversation.row.project_id,conversation.row.id,plan.id]:null}
+  const sum=(values:unknown[])=>values.reduce<number>((n,value)=>n+jsonBytes(value),0)
+  return {...write,bytes:Math.max(jsonBytes(write.journal),sum(write.holds),jsonBytes(write.reporting),sum(source.mapped.map(m=>Object.values(columnsOf(m)))))}
+ })
+ for(const group of byteSlices(writes,write=>write.bytes)){
   const inserts=new Map<string,Map<string,unknown[][]>>(),holds:unknown[][]=[],reporting:unknown[][]=[],journal:unknown[][]=[]
-  for(const source of group){
+  for(const {source,journal:entry,holds:held,reporting:report} of group){
    for(const mapped of source.mapped){
     const row=columnsOf(mapped),keyValues=mapped.key.map(k=>row[k]),id=identity(mapped.table,keyValues),existingRow=current.get(id)
     if(existingRow){for(const [key,value]of Object.entries(row))if(existingRow[key]!==value)throw new Error(`Existing data conflict ${mapped.table}:${keyValues.join(':')} column ${key}; no rows overwritten`)}
     else{const names=Object.keys(row),byColumns=inserts.get(mapped.table)??new Map<string,unknown[][]>();inserts.set(mapped.table,byColumns);const values=byColumns.get(names.join(','))??[];byColumns.set(names.join(','),values);values.push(names.map(k=>row[k]));current.set(id,row)}
-    if(mapped.hold)holds.push([`${plan.id}:${source.table}:${source.sourceId}`,plan.id,source.table,source.sourceId,mapped.hold])
    }
-   const conversation=source.table==='conversations'&&source.mapped.find(m=>m.table==='conversations')
-   if(conversation)reporting.push([conversation.row.project_id,conversation.row.id,plan.id])
-   journal.push([plan.id,source.table,source.sourceId,source.rowDigest,stable(source.row),source.mapped.map(m=>m.table).join(',')||null,source.mapped.map(m=>m.key.map(k=>m.row[k]).join(':')).join(',')||null,source.mapped.length?'mapped':'archived_only'])
+   holds.push(...held);if(report)reporting.push(report);journal.push(entry)
   }
   // Tables keep their first-mapped order, so a parent row precedes the rows that reference it.
   const statements=[...inserts].flatMap(([table,byColumns])=>[...byColumns].map(([names,values])=>insertJson(env.DB,`INSERT INTO ${sqlName(table)} (${names.split(',').map(sqlName).join(',')})`,names.split(',').length,values)))
@@ -68,9 +74,9 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
  }
  await env.DB.prepare("UPDATE legacy_import_runs SET state='complete',completed_at=? WHERE id=?").bind(Date.now(),plan.id).run();return {id:plan.id,...plan.summary,applied,replayed,d1Ms:Math.round(d1Ms),maxBatchMs:Math.round(maxBatchMs)}
 }
-// D1 limits a bound value to 2 MB. A group holds at most 1.25 MB of its journal's
-// escaped source rows, the largest of its JSON parameters.
-const groupBytes=1_250_000,parameterBytes=2_000_000,utf8=new TextEncoder()
+// D1 limits a bound value to 2 MB. A group binds at most 1.25 MB in any one of its
+// JSON parameters; a single source row too large for that is refused by insertJson.
+const groupBytes=1_250_000,parameterBytes=2_000_000,utf8=new TextEncoder(),jsonBytes=(value:unknown)=>utf8.encode(JSON.stringify(value)).length
 function byteSlices<T>(items:T[],size:(item:T)=>number){const result:T[][]=[];let part:T[]=[],bytes=0;for(const item of items){const n=size(item);if(part.length&&bytes+n>groupBytes){result.push(part);part=[];bytes=0}part.push(item);bytes+=n}if(part.length)result.push(part);return result}
 function insertJson(db:D1Database,into:string,width:number,rows:unknown[][]){const json=JSON.stringify(rows);if(utf8.encode(json).length>parameterBytes)throw new Error('Legacy import group exceeds the D1 bound value limit');return db.prepare(`${into} SELECT ${Array.from({length:width},(_,i)=>`json_extract(value,'$[${i}]')`).join(',')} FROM json_each(?)`).bind(json)}
 const schemaCache=new WeakMap<D1Database,Map<string,Set<string>>>()

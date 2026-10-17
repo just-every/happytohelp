@@ -44,7 +44,7 @@ test('an actual-shaped legacy export lands with original IDs, transcript order, 
  }finally{await app.close()}
 })
 
-test('the legacy command plans without writing and applies remotely only with named installation resources and deploy credentials; an applied export replays as a no-op, a conflicting row fails without overwriting, and corrupt media is refused',async()=>{
+test('the legacy command plans without writing and applies remotely only with named installation resources and deploy credentials; an applied export replays as a no-op, many small rows import within D1 limits, a conflicting row fails without overwriting, and corrupt media is refused',async()=>{
  const {bundle}=await legacyBundle(),scratch=await mkdtemp(join(tmpdir(),'h2h-legacy-'))
  try{
   const file=join(scratch,'export.json');await writeFile(file,JSON.stringify(bundle))
@@ -56,6 +56,9 @@ test('the legacy command plans without writing and applies remotely only with na
   const app=await startApp()
   try{
    const env={DB:app.db,FILES:await app.files},first=await importLegacy(env,bundle),replay=await importLegacy(env,bundle);assert.equal(replay.applied,0);assert.equal(replay.replayed,first.applied)
+   // Many small rows: each journal entry binds several times its source row, and every statement stays within D1's value limit.
+   const small=structuredClone(bundle);small.tables.collector_actions=Array.from({length:12000},(_,i)=>({id:`action-${i}`,contact_id:'c'}))
+   const many=await importLegacy(env,small);assert.equal(many.applied,Object.values(small.tables).flat().length);assert.equal((await app.first("SELECT COUNT(*) n FROM legacy_import_rows WHERE source_table='collector_actions'")).n,12000)
    const conflict=structuredClone(bundle);conflict.tables.messages[1].content='Changed historical source';await assert.rejects(importLegacy(env,conflict),/Existing data conflict/)
    assert.equal((await app.first("SELECT content FROM messages WHERE id='m2'")).content,'Prior answer')
   }finally{await app.close()}

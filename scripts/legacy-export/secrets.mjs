@@ -2,6 +2,9 @@ import {hasTransportCredentials,transportObject,hasBasicAuthorization} from './t
 import {opaqueCredentialShape,publicConfigurationValue,publicConfigurationName} from './references.mjs';
 import {hasCredentialAssignment,isRedactedCredentialField,mailtoLink} from './text-policy.mjs';
 import {credentialColumns,skippedTables,structuredOmissions} from './scope.mjs';
+import {prefixedCredential,hasContinuation} from './credential-shapes.mjs';
+
+const providerCredential = new RegExp(prefixedCredential.source);
 
 const secretName = /key|secret|token|password|hash|salt|credential|encrypt/i;
 // Exact reviewed noncredential fields, never an entire JSON/text exception.
@@ -50,6 +53,9 @@ function secretString(value, storageIdentifier = false) {
     || /\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/.test(value)
     || /\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/.test(value)
     || /\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/i.test(value)
+    || providerCredential.test(value)
+    // A key-shaped line continuing a removed value ("<redacted>" then a wrapped remnant).
+    || hasContinuation(value)
     || /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/.test(value)
     || hasCredentialAssignment(value)
     || /\bBearer\s+[A-Za-z0-9+/_.=-]{12,}/i.test(value) || hasBasicAuthorization(value)

@@ -1,9 +1,10 @@
 import {omitTransportCredentials,omitTransportObject,omitBasicAuthorization} from './transport-secrets.mjs';
 import {opaqueCredentialShape,opaqueReferences,publicSentryEndpoint} from './references.mjs';
+import {prefixedCredential,omitLabelledValues,labelledValues,omitContinuations,wrapMark,plainWord} from './credential-shapes.mjs';
 // Explicit omission policy for rendered support text. Unknown credential-like
 // assignments, JSON fields and opaque payloads still fail in secrets.mjs.
-const credentialName=/(?:key|secret|token|password|salt|credential|encrypt(?:ion)?)$/i;
-const reviewedNames=new Set(['key','secret','token','password','credential','credentials','secret_key','secretkey','api_key','api_token','access_token','accesstoken','client_secret','clienttoken','authorizationfingerprint','auth_token','merchant_account_key','x-api-key','example_key','public_key','publickey','refresh_token','refreshtoken','csrf_token','csrftoken','x-amz-credential']);
+const credentialName=/(?:key|secret|token|password|salt|credential|encrypt(?:ion)?)$|^(?:pass|passwd|passwort|passe|pw)$/i;
+const reviewedNames=new Set(['key','secret','token','password','credential','credentials','secret_key','secretkey','api_key','api_token','access_token','accesstoken','client_secret','clienttoken','authorizationfingerprint','auth_token','merchant_account_key','x-api-key','example_key','public_key','publickey','refresh_token','refreshtoken','csrf_token','csrftoken','x-amz-credential','pass','passwd','passwort','passe','pw','apikey','api-key','accountkey','aws_secret_access_key','x-postmark-server-token']);
 const textColumns={messages:['content'],events:['payload'],insights:['content'],articles:['content'],macros:['content']};
 const derivedColumns={contacts:['ai_profile','metadata'],users:['ai_profile'],projects:['ai_profile'],conversations:['metadata'],dataset_files:['markdown'],datasets:['metadata'],project_optimizations:['ai_profile','metadata'],message_thinkings:['content'],support_delegations:['instructions','context','result'],support_delegation_events:['message','payload'],insights:['analysis','metadata'],leads:['content']};
 const rendered=(table,column)=>textColumns[table]?.includes(column);
@@ -34,6 +35,8 @@ function noncredential(a){
  const {name,operator,quote,tail,prefix}=a,value=a.value.replace(/^`|`$/g,'');
  if(!value||symbolic(value)||value==='sk-...')return true;
  if(name==='Encryption'&&operator===':')return true;
+ // "Pass" is also an ordinary word ("**Pass:** the check"): a plain word or emphasis is no value.
+ if(/^(?:pass|pw)$/i.test(name)&&!quote&&(/^[*_~]+$/.test(value)||plainWord(value)))return true;
  // Slack/Markdown emoji shortcodes (":key: Double-check") label prose; they assign nothing.
  if(operator===':'&&!quote&&/(?:^|[\s>(*_~[]):$/.test(prefix)&&/^[a-z0-9_+-]+$/.test(name))return true;
  // A public link ("reset password: https://…/password/reset") is not the credential itself.
@@ -52,6 +55,7 @@ function noncredential(a){
  return false;
 }
 export function hasCredentialAssignment(text){
+ for(const _ of labelledValues(text))return true;
  for(const a of assignments(text)){
   if(!credentialName.test(a.name)||/Error$/.test(a.name))continue;
   if(!noncredential(a))return true;
@@ -61,12 +65,16 @@ export function hasCredentialAssignment(text){
  return false;
 }
 // An unquoted credential value runs to the next whitespace, so ',' or ';' cannot split it;
-// a 2FA setup key shown in 4-character base32 groups ("key: JBSW Y3DP …") is one value.
+// a 2FA setup key shown in 4-character base32 groups ("key: JBSW Y3DP …") is one value,
+// and so is an application password's run of 4-character groups ("abcd EFGH 1234 …").
 function wholeValue(a){
  if(a.quote)return a;
  // One closing punctuation mark before the next space belongs to the sentence.
  let extra=a.tail.match(/^\S*/)[0].replace(/[,.;:)]$/,'');
- if(/^[A-Z2-7]{4}$/.test(a.value+extra))extra+=a.tail.slice(extra.length).match(/^(?:[ \t]+[A-Z2-7]{4}(?![A-Za-z0-9]))*/)[0];
+ const rest=a.tail.slice(extra.length);
+ const base32=/^[A-Z2-7]{4}$/.test(a.value+extra)&&rest.match(/^(?:[ \t]+[A-Z2-7]{4}(?![A-Za-z0-9]))*/)[0];
+ if(base32)extra+=base32;
+ else if(/^[A-Za-z0-9]{4}$/.test(a.value+extra)){const groups=rest.match(/^(?:[ \t]+[A-Za-z0-9]{4}(?![A-Za-z0-9])){3,7}/)?.[0];if(groups&&/\d|[a-z][A-Z]|[A-Z]{2}[a-z]/.test(a.value+extra+groups.replace(/\s/g,'')))extra+=groups;}
  return extra?{...a,raw:a.raw+extra,value:a.value+extra,tail:a.tail.slice(extra.length)}:a;
 }
 export function omitSupportCredentials(table,column,value,onOmit){
@@ -79,6 +87,8 @@ export function omitSupportCredentials(table,column,value,onOmit){
  if(typeof value!=='string')return {value,omitted:0};
  let omitted=0;
  const removed=secret=>{omitted++;onOmit?.(secret);return '<redacted>';};
+ // A removed value is marked so a line that continues it is removed with it.
+ const taken=secret=>removed(secret)+wrapMark;
  // JSON diagnostic bodies can carry HAR cookie/header objects as well as prose.
  try{const parsed=JSON.parse(value);if(parsed&&typeof parsed==='object'){const before=omitted;const cleaned=omitTransportObject(parsed,removed);if(omitted!==before)value=JSON.stringify(cleaned);}}catch{}
  value=omitTransportCredentials(value,removed);
@@ -87,24 +97,28 @@ export function omitSupportCredentials(table,column,value,onOmit){
   if(found.index<offset||!reviewedName(found.name))continue;
   // Reviewed code shapes ("token = request.cookies.get(…)") are judged as found.
   const a=wholeValue(found);if(noncredential(a)||a!==found&&!/^[,;]/.test(a.raw.slice(found.raw.length))&&noncredential(found))continue;
-  result+=value.slice(offset,a.index)+a.head+removed(a.value)+a.quote;offset=a.index+a.raw.length;
+  result+=value.slice(offset,a.index)+a.head+taken(a.value)+a.quote;offset=a.index+a.raw.length;
  }
  value=result+value.slice(offset);
  // Known authentication signatures are omitted, rather than copied to custody.
- value=value.replace(/-----BEGIN ([A-Z ]*PRIVATE KEY|ENCRYPTED[A-Z ]*)-----[\s\S]*?-----END \1-----/g,removed);
- value=value.replace(/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/g,removed);
+ value=value.replace(/-----BEGIN ([A-Z ]*PRIVATE KEY(?: BLOCK)?|ENCRYPTED[A-Z ]*)-----[\s\S]*?-----END \1-----/g,removed);
+ // A key cut off before its END line: the header and the base64 lines that follow it.
+ value=value.replace(/-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----(?:[ \t]*\r?\n(?:[A-Za-z0-9+/=: -]*\r?\n)*?)?(?:[ \t]*[A-Za-z0-9+/=]{16,}[ \t]*(?:\r?\n|$))*/g,removed);
+ value=value.replace(/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/g,taken);
+ value=value.replace(prefixedCredential,taken);
  // Markdown escapes the underscore ("sk\_…"); the key is the same.
- value=value.replace(/\b(?:sk|rk)\\?_(?:live|test)\\?_[A-Za-z0-9]{16,}\b|\b(?:sk|rk)\\?_[A-Za-z0-9]{24,}\b/g,removed);
- value=value.replace(/\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/g,removed);
- value=value.replace(/\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/g,removed);
- value=value.replace(/\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/gi,removed);
- value=value.replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,removed);
- value=value.replace(/\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$[^\s"'<>]+/g,removed);
- value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+removed(secret));
- value=omitBasicAuthorization(value,removed);
- value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|pwd|auth)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+removed(secret));
- value=value.replace(userinfo,(match,scheme,user,secret)=>mailtoLink(user)?match:scheme+removed(user+':'+secret)+'@');
- value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?removed(url):url);
+ value=value.replace(/\b(?:sk|rk)\\?_(?:live|test)\\?_[A-Za-z0-9]{16,}\b|\b(?:sk|rk)\\?_[A-Za-z0-9]{24,}\b/g,taken);
+ value=value.replace(/\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/g,taken);
+ value=value.replace(/\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/g,taken);
+ value=value.replace(/\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/gi,taken);
+ value=value.replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,taken);
+ value=value.replace(/\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$[^\s"'<>]+/g,taken);
+ value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+taken(secret));
+ value=omitBasicAuthorization(value,taken);
+ value=omitLabelledValues(value,taken);
+ value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|pwd|auth|rlkey)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+taken(secret));
+ value=value.replace(userinfo,(match,scheme,user,secret)=>mailtoLink(user)?match:scheme+taken(user+':'+secret)+'@');
+ value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?taken(url):url);
  // Opaque diagnostic values have no established public-resource meaning.
  // Omit them as potential credentials; unknown schema/JSON/assignment names
  // still stop export. Never turn an encrypted JSON envelope into readable data.
@@ -113,8 +127,9 @@ export function omitSupportCredentials(table,column,value,onOmit){
  value=value.replace(/(?:[A-Za-z0-9+/_-]|\\[_-]){32,}={0,2}/g,token=>{
   if(![...opaqueReferences(token).matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].some(m=>opaque.has(m[0])))return token;
   try{const decoded=JSON.parse(Buffer.from(token,'base64').toString('utf8'));if(decoded&&'iv'in decoded&&'value'in decoded&&('mac'in decoded||'tag'in decoded))return token;}catch{}
-  return removed(token);
+  return taken(token);
  });
+ value=omitContinuations(value,removed);
  return {value,omitted};
 }
 

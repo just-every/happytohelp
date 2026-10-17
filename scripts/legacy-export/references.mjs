@@ -55,15 +55,26 @@ export function opaqueReferences(value){
   .replace(/\b(?:cus|ch|pi|sub|in|pm|src|price|prod|plan|re|txn|evt|acct|seti|dp|po|ba|card|il|ca)_[A-Za-z0-9_]+\b/g,token=>token.includes('_secret_')?token:'<payment-resource-id>')
   .replace(/\bsha(256|384|512)-([A-Za-z0-9+/]+={0,2})/g,(match,bits,digest)=>{const bytes=Buffer.from(digest,'base64');return bytes.length===Number(bits)/8&&bytes.toString('base64').replace(/=+$/,'')===digest.replace(/=+$/,'')?'<integrity-checksum>':match;})
   .replace(/\bk=rsa;[ \t]*p=([A-Za-z0-9+/]+={0,2})/gi,(match,key)=>{try{createPublicKey({key:Buffer.from(key,'base64'),format:'der',type:'spki'});return '<public-dkim-key>';}catch{return match;}})
-  .replace(/\b[a-f0-9]{32,64}\.(?:png|jpe?g|gif|webp|svg|pdf|txt|docx?|xlsx?|csv|zip|log|json)\b/gi,'attachment-filename').replace(/(?<![a-f0-9])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![a-f0-9])/gi,'<uuid>');
+  .replace(/(?<![A-Za-z0-9])[a-f0-9]{32,64}\.(?:png|jpe?g|gif|webp|svg|pdf|txt|docx?|xlsx?|csv|zip|log|json)\b/gi,'attachment-filename').replace(/(?<![a-f0-9])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![a-f0-9])/gi,'<uuid>');
 }
 
 // Conservative omission boundary for unverified URL capabilities. Public
 // resource formats above remain references; arbitrary opaque URLs do not.
 export function opaqueCredentialShape(value){
+ if(capabilityPath(value))return true;
  const normalized=opaqueReferences(value).replace(/\bpk_(?:live|test)_[A-Za-z0-9]{16,}\b/g,'<publishable-application-id>');
- if(/\b[a-f0-9]{32,}\b/i.test(normalized))return true;
+ if(/(?<![A-Za-z0-9])[a-f0-9]{32,}(?![A-Za-z0-9])/i.test(normalized))return true;
  return [...normalized.matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].some(m=>randomToken(m[0].replace(/=+$/,'')));
+}
+// A sign-in, reset, verification or invitation link carries its capability as a later
+// path segment: a 16+ character run with a digit or mixed case that is not a word slug.
+const capabilityStep=/^(?:login|log-in|signin|sign-in|magic|magic-link|auth|reset|password|verify|verification|confirm|activate|invite|invitation|token|session)s?$/i;
+function capabilityPath(value){
+ for(const m of value.matchAll(/https?:\/\/[^\s<>"'()[\]\/]+(\/[^\s<>"'()[\]?#]*)/g)){
+  const segments=m[1].split('/').filter(Boolean),step=segments.findIndex(s=>capabilityStep.test(s));
+  if(step>=0&&segments.slice(step+1).some(s=>/^[A-Za-z0-9_-]{16,}$/.test(s)&&(/\d/.test(s)&&/[A-Za-z]/.test(s)||/[a-z]/.test(s)&&/[A-Z]/.test(s.slice(1)))&&!s.split(/[-_]/).every(w=>/^(?:[A-Za-z][a-z]*|\d+)$/.test(w))))return true;
+ }
+ return false;
 }
 // A run of 32+ characters is a credential when its character entropy is what a random
 // string of that length over its own alphabet would show. The expected value carries

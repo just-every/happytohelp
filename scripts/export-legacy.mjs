@@ -2,6 +2,7 @@
 import {stat} from 'node:fs/promises';
 import {snapshotPackage} from './legacy-export/package.mjs';
 import {attachmentsPackage} from './legacy-export/package-media.mjs';
+import {repassPackage} from './legacy-export/repass.mjs';
 import {parseArgs} from 'node:util';
 import {connectLegacy} from './legacy-export/mysql.mjs';
 import {extractProject} from './legacy-export/extract.mjs';
@@ -12,12 +13,13 @@ import {classifySnapshot} from './legacy-export/secrets.mjs';
 const {values,positionals}=parseArgs({allowPositionals:true,options:{
   project:{type:'string'},revision:{type:'string'},'ai-model':{type:'string'},output:{type:'string'},input:{type:'string'},
   'objects-dir':{type:'string'},bucket:{type:'string'},region:{type:'string'},'mail-from-domain':{type:'string'},
-  'defer-mail-domain':{type:'boolean'},'chunk-bytes':{type:'string'},'max-row-bytes':{type:'string'},'max-object-bytes':{type:'string'},'max-json-bytes':{type:'string'},help:{type:'boolean'},
+  'defer-mail-domain':{type:'boolean'},'chunk-bytes':{type:'string'},'max-row-bytes':{type:'string'},'max-object-bytes':{type:'string'},'max-json-bytes':{type:'string'},'policy-revision':{type:'string'},help:{type:'boolean'},
 }});
 if(values.help){console.log(`Read-only legacy HappyToHelp export (one project per snapshot):
   node scripts/export-legacy.mjs snapshot --project UUID --revision SOURCE_SHA --mail-from-domain DOMAIN [--ai-model MODEL] [--chunk-bytes 4194304] --output snapshot.json-or-directory
   node scripts/export-legacy.mjs attachments --input snapshot.json --objects-dir copied-bucket --output import.json
   node scripts/export-legacy.mjs attachments --input snapshot.json --bucket BUCKET --region REGION --output import.json
+  node scripts/export-legacy.mjs repass --input exported-package-directory --policy-revision EXPORTER_SHA --output new-package-directory
 
 Snapshot requires LEGACY_MYSQL_HOST, LEGACY_MYSQL_DATABASE, LEGACY_MYSQL_USER, LEGACY_MYSQL_PASSWORD;
 optional LEGACY_MYSQL_PORT (3306) and LEGACY_MYSQL_SSL_CA (verified TLS).
@@ -25,13 +27,16 @@ S3 requires explicitly scoped LEGACY_AWS_ACCESS_KEY_ID, LEGACY_AWS_SECRET_ACCESS
 No dotenv, AWS profiles or live discovery. Output paths must not already exist. See docs/LEGACY-EXPORT.md.`);process.exit(0);}
 const limit=name=>{if(values[name]===undefined)return undefined;const n=Number(values[name]);if(!Number.isSafeInteger(n)||n<=0)throw Error(`Invalid --${name}`);return n;};
 try {
-  if(positionals.length!==1||!['snapshot','attachments'].includes(positionals[0])||!values.output)throw Error('Use --help for the two explicit steps');
+  if(positionals.length!==1||!['snapshot','attachments','repass'].includes(positionals[0])||!values.output)throw Error('Use --help for the explicit steps');
   let bundle;let publishedDirectly=false;
   if(positionals[0]==='snapshot'){
     if(!values.project||!values.revision)throw Error('Snapshot requires --project and --revision');
     const connection=await connectLegacy();
     try{if(values['chunk-bytes']){bundle=await snapshotPackage(connection,{output:values.output,chunkBytes:limit('chunk-bytes'),projectId:values.project,revision:values.revision,aiModel:values['ai-model'],deferMailDomain:values['defer-mail-domain'],mailFromDomain:values['mail-from-domain']});publishedDirectly=true;}else bundle=await extractProject(connection,{projectId:values.project,revision:values.revision,aiModel:values['ai-model'],deferMailDomain:values['defer-mail-domain'],mailFromDomain:values['mail-from-domain'],maxBytes:limit('max-row-bytes')});}
     finally{await connection.end();}
+  }else if(positionals[0]==='repass'){
+    if(!values.input||!(await stat(values.input)).isDirectory())throw Error('Repass requires a chunked package directory as --input');
+    bundle=await repassPackage(values.input,values.output,{policyRevision:values['policy-revision']});publishedDirectly=true;
   }else{
     if(!values.input)throw Error('Attachments requires --input');
     if((await stat(values.input)).isDirectory()){bundle=await attachmentsPackage(values.input,values.output,{directory:values['objects-dir'],bucket:values.bucket,region:values.region});publishedDirectly=true;}else{

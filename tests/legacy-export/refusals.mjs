@@ -63,6 +63,21 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
     ['Join https://meet.example.test/j/1?pwd=fixture-meeting-passcode','fixture-meeting-passcode'],
     ['Here it is '+opaque+' thanks',opaque],
     ['secret_key: fixture.'+customerKey.slice(3)+'.tail and later '+customerKey.slice(3),customerKey.slice(3)],
+    // Provider prefixes and hosts, HAR fragments, curl cookies, uppercase keys, prose labels and wrapped values.
+    ['Our bot uses '+'xox'+'b-'+'1'.repeat(12)+'-'+'2'.repeat(13)+'-Fixture0Slack0Bot0Token0','Fixture0Slack0Bot0Token0'],
+    ['Post to https://hooks.slack.com/services/'+'T0FIXTURE'+'/B0FIXTURE0/'+'Fixture0Webhook0Secret00 please','Fixture0Webhook0Secret00'],
+    ['Shopify '+'shp'+'at_'+'f1'.repeat(16)+' ok','f1'.repeat(16)],
+    ['GitLab '+'gl'+'pat-'+'Fixture0GitLab0Token0 ok','Fixture0GitLab0Token0'],
+    ['HubSpot '+'pat-'+'na1-'+'0f1a7b2c-3d4e-4f5a-8b6c-7d8e9f0a1b2c ok','0f1a7b2c-3d4e-4f5a-8b6c-7d8e9f0a1b2c'],
+    ['application password: Fx01 Ab2c Cd3e Ef4g Gh5i Ij6k for the plugin','Cd3e Ef4g'],
+    ['... "headers": [{"name": "Cookie", "value": "sessionid=fixture-har-fragment-cookie"}, {"name": "Accept"','fixture-har-fragment-cookie'],
+    ["curl -b 'sessionid=fixture-curl-cookie' https://api.example.test",'fixture-curl-cookie'],
+    ['curl https://api.example.test -u '+'FIXTURE0UPPERCASE0KEY0123'+':','FIXTURE0UPPERCASE0KEY0123'],
+    ['key '+'sk_'+'live_'+'Wrapped0Fixture0Key0\nTail0Wrap99 ok','Tail0Wrap99'],
+    ['password: Fx0Wrap1\nFx0Tail2 ok','Fx0Tail2'],
+    ['my password is Fixture0Prose! please help','Fixture0Prose'],
+    ['user: bob@example.test pass: Fixture0Pass thanks','Fixture0Pass'],
+    ['Benutzer: admin Passwort: Fixture0Passwort danke','Fixture0Passwort'],
   ];
   try {
     // These signatures now have an explicit OMIT classification for support

@@ -53,6 +53,8 @@ export function opaqueReferences(value){
  });
  return urls.replace(/\bcid:[A-Za-z0-9@._-]+/gi,'<content-id>')
   .replace(/\b(?:cus|ch|pi|sub|in|pm|src|price|prod|plan|re|txn|evt|acct|seti|dp|po|ba|card|il|ca)_[A-Za-z0-9_]+\b/g,token=>token.includes('_secret_')?token:'<payment-resource-id>')
+  // AI provider record ids (vector stores, assistants, threads, files): identifiers, not access.
+  .replace(/\b(?:vs|vsfb|asst|thread|run|step|msg|file|batch|resp|ftjob)_[A-Za-z0-9]{16,}\b/g,'<provider-resource-id>')
   .replace(/\bsha(256|384|512)-([A-Za-z0-9+/]+={0,2})/g,(match,bits,digest)=>{const bytes=Buffer.from(digest,'base64');return bytes.length===Number(bits)/8&&bytes.toString('base64').replace(/=+$/,'')===digest.replace(/=+$/,'')?'<integrity-checksum>':match;})
   .replace(/\bk=rsa;[ \t]*p=([A-Za-z0-9+/]+={0,2})/gi,(match,key)=>{try{createPublicKey({key:Buffer.from(key,'base64'),format:'der',type:'spki'});return '<public-dkim-key>';}catch{return match;}})
   .replace(/(?<![A-Za-z0-9])[a-f0-9]{32,64}\.(?:png|jpe?g|gif|webp|svg|pdf|txt|docx?|xlsx?|csv|zip|log|json)\b/gi,'attachment-filename').replace(/(?<![a-f0-9])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![a-f0-9])/gi,'<uuid>');

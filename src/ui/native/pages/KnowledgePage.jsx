@@ -8,6 +8,8 @@ import { deleteCopy } from './delete-copy';
 import { validateDataset } from './knowledge/dataset-validation';
 import ArticleEditorActions from './knowledge/ArticleEditorActions';
 import KnowledgeLists from './knowledge/KnowledgeLists';
+import KnowledgeWorkspace from './knowledge/KnowledgeWorkspace';
+import ArticleGovernance from './knowledge/ArticleGovernance';
 import { KnowledgeFields } from './knowledge/KnowledgeForms';
 import KnowledgeTabs from './knowledge/KnowledgeTabs';
 import DatasetProgress, { datasetIsActive } from './knowledge/DatasetProgress';
@@ -22,6 +24,8 @@ const normalize = row => ({
     refreshMode: row.refresh_mode || 'adaptive',
     excluded_urls: Array.isArray(row.excluded_urls) ? row.excluded_urls.join('\n') : parseExclusions(row.excluded_urls),
     categories: Array.isArray(row.categories) ? row.categories : [],
+    audience: row.audience || 'public',
+    allowedDomains: Array.isArray(row.allowedDomains) ? row.allowedDomains : parseExclusions(row.allowed_domains || '[]'),
 });
 
 function parseExclusions(value) {
@@ -172,7 +176,10 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                 body.excluded_urls = (draft.excluded_urls || '').split('\n').map(value => value.trim()).filter(Boolean);
                 delete body.refresh_mode;
             }
-            if (section === 'categories') body.parent_id = draft.parent_id || null;
+            if (section === 'categories') {
+                body.parent_id = draft.parent_id || null;
+                body.allowedDomains = Array.isArray(draft.allowedDomains) ? draft.allowedDomains : (draft.allowedDomains || '').split(/[\n,]+/).map(value => value.trim()).filter(Boolean);
+            }
 
             const result = await nativeRequest(path + (draft.id && section !== 'articles' ? '/' + draft.id : ''), {
                 method: draft.id && section !== 'articles' ? 'PUT' : 'POST',
@@ -233,7 +240,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
         <KnowledgeTabs projectId={projectId} activeSection={section}/>
         <Feedback error={error} saved={saved && !isArticle}/>
         {!items && !error && <p role="status">Loading…</p>}
-        {!recordId && items && <KnowledgeLists {...{ section, items, projectId, categories, remove }}/>}
+        {!recordId && items && (isArticle ? <KnowledgeWorkspace {...{ section, items, projectId, categories, remove, project }}/> : <KnowledgeLists {...{ section, items, projectId, categories, remove }}/>)}
         {(draft || (isArticle && recordId)) && <>
             {existingDataset && <>
                 <h2 className="knowledge-website-title">{draft.url || draft.name}</h2>
@@ -291,6 +298,7 @@ export default function KnowledgePage({ projectId, section, recordId, project })
                     {draft.id && <button type="button" className="btn btn-link text-danger" disabled={busy} onClick={() => remove(draft)}>Delete</button>}
                 </div>}
             </form>}
+            {isArticle && articleReady && draft.id && <ArticleGovernance key={draft.id} projectId={projectId} article={draft} onRollback={async () => { markSaved(); await load(); setSavedStatus('Restored version'); }}/>}
         </>}
         {dialog}
     </div>;

@@ -26,6 +26,8 @@ import {tags} from './modules/management/tags'
 import { previewRoutes } from './modules/site-preview/proxy'
 import {AiConfigurationError} from './modules/ai-support/configuration'
 import {legacyWidget} from './modules/widget/legacy-project'
+import {surveySettings,publicSurveys} from './modules/outcomes/survey-routes'
+import {surveyReports} from './modules/reports/surveys'
 
 import {delegation} from './edition/delegation/routes'
 import {consent} from './edition/delegation/consent'
@@ -66,6 +68,9 @@ app.route('/api/conversations',widgetEvents)
 app.route('/api/projects',projectSocketRoutes)
 app.route('/api/ai-support',ai)
 app.route('/api/knowledge',knowledge)
+app.route('/api/outcomes',surveySettings)
+app.route('/api/outcomes',surveyReports)
+app.route('/api/outcomes/surveys',publicSurveys)
 app.route('/api/customer-context',context)
 app.route('/api/training',trainingRoutes)
 app.route('/api/management',integrationSettings)

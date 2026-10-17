@@ -1,4 +1,5 @@
 import {importErasureStatements} from '../../move-in/erasure'
+import {eraseSurveyStatements} from '../../outcomes/survey-store'
 import type {Env} from '../../../platform/env'
 import {legacyArchiveRedaction} from './archive'
 import {erasureInboundEvidenceStatements} from './inbound-evidence'
@@ -70,6 +71,7 @@ export function erasureStatements(env: Env, request: ErasureRequest) {
     // Copies of the contact's data held outside the canonical rows, removed while those rows still identify them.
     bound(legacyArchiveRedaction),
     ...importErasureStatements(env,projectId,contactId),
+    ...eraseSurveyStatements(env,projectId,contactId),
     ...['conversation_ratings','conversation_rating_history'].map(table=>bound(`UPDATE ${table} SET comment='' WHERE resolution_id IN (SELECT id FROM conversation_resolutions WHERE project_id=?1 AND (contact_id=?2 OR conversation_id IN (${conversations}))) AND comment<>''`)),
     env.DB.prepare(`DELETE FROM email_reply_grants WHERE project_id=?1 AND (conversation_id IN (${conversations}) OR lower(recipient) IN (SELECT value FROM json_each(?3)))`).bind(projectId,contactId,JSON.stringify(request.emails)),
     // Inbound email claims keep only the classifier's rule names; sender, subject and headers go.

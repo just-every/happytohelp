@@ -11,6 +11,7 @@ import {generations,localJobs} from './contact-erasure/scope'
 import {providerErasureStatements,providerRequests} from './contact-erasure/providers'
 import {auditStatement,requestSource} from '../audit/record'
 import {requireStepUp} from '../identity/two-factor/step-up'
+import {knowledgeErasureStatements} from '../knowledge/feedback'
 
 export interface ContactErasure {project_id: string; contact_id: string; erased_by: string; erased_at: number; last_erased_at: number; runs: number; conversations: number; messages: number; attachments: number; tracked_events: number; context_records: number; sessions: number}
 
@@ -26,7 +27,11 @@ export async function eraseContact(env: Env, projectId: string, contactId: strin
   const now = Date.now()
   const fenced=await fenceAndStage(env, projectId, contactId, now, contact)
   await deleteStagedObjects(env, projectId, contactId)
-  await env.DB.batch(erasureStatements(env, {projectId, contactId, actorId, now, emails: [...new Set([...contactEmails(contact),...contactEmails(fenced??{})])]}))
+  const emails=[...new Set([...contactEmails(contact),...contactEmails(fenced??{})])]
+  await env.DB.batch([
+    ...await knowledgeErasureStatements(env,projectId,contactId,emails),
+    ...erasureStatements(env, {projectId, contactId, actorId, now, emails}),
+  ])
   return env.DB.prepare('SELECT * FROM contact_erasures WHERE project_id=? AND contact_id=?').bind(projectId, contactId).first<ContactErasure>()
 }
 

@@ -9,7 +9,7 @@ const rewriteTools = [
     { name: 'shorten', label: 'Make shorter', icon: 'fe-align-center' },
 ];
 
-export default function ConversationComposerTools({ disabled, hasHelper, canSend, canClose, onAttach, onSaved, onNote, onSendAndClose }) {
+export default function ConversationComposerTools({ disabled, hasHelper, canSend, canClose, onAttach, onSaved, onArticle, onNote, onSendAndClose }) {
     const { canRunTools, canUndo, canRedo, runTool, undo, redo, suggestions } = useReplySuggestions();
     const historyDisabled = disabled || hasHelper || suggestions.loading;
 
@@ -33,6 +33,9 @@ export default function ConversationComposerTools({ disabled, hasHelper, canSend
                 </Dropdown.Item>
                 <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onNote } aria-haspopup="dialog">
                     <i className="fe fe-lock" aria-hidden="true" /> Internal note
+                </Dropdown.Item>
+                <Dropdown.Item as="button" type="button" role="menuitem" onClick={ onArticle }>
+                    <i className="fe fe-file-text" aria-hidden="true" /> Help articles
                 </Dropdown.Item>
             </div>
             <Dropdown.Divider role="separator" />
@@ -76,6 +79,7 @@ ConversationComposerTools.propTypes = {
     canClose: PropTypes.bool,
     onAttach: PropTypes.func.isRequired,
     onSaved: PropTypes.func.isRequired,
+    onArticle: PropTypes.func,
     onNote: PropTypes.func.isRequired,
     onSendAndClose: PropTypes.func.isRequired,
 };

@@ -2,7 +2,7 @@ import { lazyPageCode } from './lazy-page-code';
 
 const pages = {
     Connections: lazyPageCode(() => import('./pages/Connections')),
-    Reports: lazyPageCode(() => import('./pages/Reports')),
+    Reports: lazyPageCode(() => import('./pages/surveys/ReportsWithSurveys')),
     MoveIn: lazyPageCode(() => import('./pages/MoveIn')),
     ActivationPage: lazyPageCode(() => import('./activation/ActivationPage')),
     SetupTitle: lazyPageCode(() => import('./activation/SetupTitle')),

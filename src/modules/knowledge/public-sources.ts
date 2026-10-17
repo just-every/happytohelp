@@ -1,10 +1,11 @@
+import {articleAccessSql} from './access'
 import type {Env} from '../../platform/env'
 import {isProjectActive} from '../../platform/project-status.ts'
 
 export interface PublicReference {id:string;sourceVersion:string}
 export interface PublicCitation extends PublicReference {title:string;url:string}
 export const activeSourceProjectSql = (project:string) => `EXISTS(SELECT 1 FROM projects p WHERE p.id=${project} AND NOT EXISTS(SELECT 1 FROM project_settings s WHERE s.project_id=p.id AND json_extract(s.settings_json,'$.deleted_at') IS NOT NULL))`
-export const articleEligibilitySql = (alias='a') => `${alias}.status='published' AND ${activeSourceProjectSql(`${alias}.project_id`)}`
+export const articleEligibilitySql = (alias='a') => `${alias}.status='published' AND ${articleAccessSql(alias)} AND ${activeSourceProjectSql(`${alias}.project_id`)}`
 /** Shared with the owner checklist: exactly the eligibility retrieval uses. */
 export async function isArticleEligibleForAI(env:Env,projectId:string,articleId:string,sourceVersion?:string){
  return Boolean(await env.DB.prepare(`SELECT 1 FROM knowledge_articles a WHERE a.id=? AND a.project_id=? AND ${articleEligibilitySql()} AND (? IS NULL OR a.publication_version=?)`).bind(articleId,projectId,sourceVersion??null,sourceVersion??null).first())

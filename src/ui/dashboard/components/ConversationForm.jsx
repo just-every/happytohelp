@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import useFileInput from 'use-file-input';
 import MacrosPicker from './MacrosPicker';
+import ArticlePicker from './ArticlePicker';
 import TextareaAutosize from 'react-textarea-autosize';
 import usePluginMessageEvent from '../hooks/usePluginMessageEvent';
 import FormMedia from './FormMedia';
@@ -150,6 +151,7 @@ export default function ConversationForm({
                 <div className="flex-grow-1 d-flex flex-column">
                     <div className={ `chat-entry-form pt-3 pb-1${ loadingContent.length > 0 ? (loadingContent === '-loading-' ? ' loading loading-start' : ' loading') : '' }` }>
                         { helper === 'macros' && <MacrosPicker projectId={ projectId } onPicked={ insertReply } /> }
+                        { helper === 'articles' && <ArticlePicker projectId={ projectId } conversationId={ conversationId } onPicked={ insertReply } /> }
                         { loadingContent.length > 0 && <div className="form-control form-control-flush loading-content" aria-live="polite">
                             <div className="loading-content-bg"></div>
                             <span className="loading-content-text">{ loadingContent === '-loading-' ? '' : loadingContent }</span>
@@ -189,6 +191,7 @@ export default function ConversationForm({
                                     canClose={ !isResolved }
                                     onAttach={ handleFileSelect }
                                     onSaved={ toggleMacros }
+                                    onArticle={ () => setHelper(current => current === 'articles' ? null : 'articles') }
                                     onNote={ openNoteModal }
                                     onSendAndClose={ () => sendMessage(true) }
                                 />

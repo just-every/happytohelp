@@ -39,7 +39,7 @@ test('a default deployment: fresh-install pages, closed sign-up, plain link prob
 
 test('with sign-up and mail configured: registration waits for setup, then registration, recovery, reset, email verification and pending invitations work with no mail sent',async()=>{
  const {kit,errors}=await identityKit('email')
- await withRuntime({vars:{REGISTRATION_ENABLED:'true',EMAIL_API_KEY:'fixture-key-never-sent',EMAIL_FROM:'HappyToHelp <support@example.test>',APP_ORIGIN:'http://localhost'}},async runtime=>{
+ await withRuntime({vars:{REGISTRATION_ENABLED:'true',EMAIL_API_KEY:'fixture-key-never-sent',EMAIL_FROM:'HappyToHelp <support@example.test>',APP_ORIGIN:'http://localhost',INTEGRATION_ENCRYPTION_KEY:randomBytes(32).toString('base64')},outboundFixture:new URL('../helpers/notification-mail-fixture.mjs',import.meta.url).href},async runtime=>{
   const context={origin:runtime.origin,kit,runtime}
   await checkRegistrationBeforeSetup(context)
   const created=await kit.api(runtime.origin,'/api/identity/bootstrap',{body:{name:'Lantern Works',ownerName:'Casey Owner',email:'casey@review.test',password:'lantern-owner-pass-1',allowedOrigin:'https://lantern.example'}});assert.equal(created.status,201,created.text)

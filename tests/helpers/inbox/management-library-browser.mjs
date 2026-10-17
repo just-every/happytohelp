@@ -27,7 +27,7 @@ try{
  const make=async(kind,body)=>(await request(`${api}/${kind}`,{token,body})).data;
  const remaining=async(kind,id)=>(await request(`${api}/${kind}`,{token})).data.some(row=>row.id===id);
  // A second owner (so self-removal is possible without orphaning the project) and a plain agent.
- const joinAs=async(email,name)=>{const invite=await request('/api/identity/invitations',{token,body:{email,role:'operator'}});await request('/api/identity/accept-token',{body:{token:invite.token,name,password:'synthetic-native-library-member-2026'}});const row=(await request(`${api}/agents`,{token})).data.find(agent=>agent.email===email);assert.ok(row?.id,'member joined');return row;};
+ const joinAs=async(email,name)=>{const invite=await request(`${api}/agents`,{token,body:{email,role:'operator'}});await request('/api/identity/accept-token',{body:{token:new URL(invite.data.invitationUrl).searchParams.get('token'),name,password:'synthetic-native-library-member-2026'}});const row=(await request(`${api}/agents`,{token})).data.find(agent=>agent.email===email);assert.ok(row?.id,'member joined');return row;};
  const second=await joinAs('second-owner@example.test','Second Owner'),helper=await joinAs('helper-agent@example.test','Helper Agent');
 
  const macro=await make('macros',{title:'Greeting reply',content:'Hello {{contact.name}}'});

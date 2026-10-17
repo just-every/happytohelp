@@ -46,17 +46,21 @@ export async function accountAudit(db:D1Database,userId:string,event:Omit<AuditE
 }
 
 const LIMIT=5,WINDOW=15*60*1000
-async function attemptKey(userId:string){return hashToken(`factor:${userId}`)}
-/** Five wrong answers in fifteen minutes lock second-factor entry for the rest of the window. */
-async function checkLimit(db:D1Database,userId:string){
- const row=await db.prepare('SELECT failures,window_start FROM login_attempts WHERE key=?').bind(await attemptKey(userId)).first<{failures:number;window_start:number}>()
- return !(row&&row.window_start>Date.now()-WINDOW&&row.failures>=LIMIT)
-}
-const clearFailures=async(db:D1Database,userId:string)=>{await db.prepare('DELETE FROM login_attempts WHERE key=?').bind(await attemptKey(userId)).run()}
-async function countFailure(db:D1Database,userId:string){
+/** What an attempt guesses: the second factor, or the password re-entered by a signed-in person. */
+export type AttemptSecret='factor'|'password'
+const attemptKey=(secret:AttemptSecret,userId:string)=>hashToken(`${secret}:${userId}`)
+/**
+ * Five answers that are not accepted in fifteen minutes lock entry of that secret for the rest
+ * of the window. Each answer claims its attempt before it is checked, so parallel guesses
+ * cannot outrun the count; an accepted answer clears it.
+ */
+export async function claimAttempt(db:D1Database,secret:AttemptSecret,userId:string){
  const now=Date.now()
- await db.prepare('INSERT INTO login_attempts VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET failures=CASE WHEN window_start<? THEN 1 ELSE failures+1 END,window_start=CASE WHEN window_start<? THEN excluded.window_start ELSE window_start END').bind(await attemptKey(userId),now,now-WINDOW,now-WINDOW).run()
+ const row=await db.prepare('INSERT INTO login_attempts VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET failures=CASE WHEN window_start<? THEN 1 ELSE failures+1 END,window_start=CASE WHEN window_start<? THEN excluded.window_start ELSE window_start END RETURNING failures').bind(await attemptKey(secret,userId),now,now-WINDOW,now-WINDOW).first<{failures:number}>()
+ return row!.failures<=LIMIT
 }
+export const clearAttempts=async(db:D1Database,secret:AttemptSecret,userId:string)=>{await db.prepare('DELETE FROM login_attempts WHERE key=?').bind(await attemptKey(secret,userId)).run()}
+const clearFailures=(db:D1Database,userId:string)=>clearAttempts(db,'factor',userId)
 
 export interface Proof {code?:unknown;recoveryCode?:unknown;credential?:AssertionInput}
 /**
@@ -69,22 +73,22 @@ export async function proveFactor(env:Env,userId:string,proof:Proof,requestUrl:s
   await runAll(env.DB,await accountAudit(env.DB,userId,{category:'auth',action:'two_factor.refused',outcome:'refused',actor:{type:'user',id:userId},source,detail:{reason}}))
   throw new HTTPException(status,{res:jsonResponse({error:status===429?'Too many incorrect codes. Wait 15 minutes, then try again.':'That code or key was not accepted.',code:reason},status)})
  }
- if(!await checkLimit(env.DB,userId))return refuse('rate_limited',429)
+ if(!await claimAttempt(env.DB,'factor',userId))return refuse('rate_limited',429)
  const now=Date.now()
  if(proof.recoveryCode!==undefined){
   if(await spendRecoveryCode(env.DB,userId,proof.recoveryCode,now)){await clearFailures(env.DB,userId);return 'recovery'}
-  await countFailure(env.DB,userId);return refuse('recovery_code_invalid')
+  return refuse('recovery_code_invalid')
  }
  if(proof.credential!==undefined){
   const credential=proof.credential,expected=installationOrigin(env,requestUrl)
   const factor=typeof credential?.id==='string'?await env.DB.prepare("SELECT * FROM user_factors WHERE user_id=? AND kind='webauthn' AND credential_id=? AND confirmed_at IS NOT NULL").bind(userId,credential.id).first<Factor>():null
   const challenge=await takeChallenge(env.DB,userId,'assert',credential?.response?.clientDataJSON)
-  if(!factor||!challenge){await countFailure(env.DB,userId);return refuse('passkey_invalid')}
+  if(!factor||!challenge)return refuse('passkey_invalid')
   try{
    const {signCount}=await verifyAssertion(credential,{publicKey:factor.public_key!,algorithm:factor.algorithm!,signCount:factor.sign_count},{challenge,rpId:expected.id,origin:expected.origin})
    await env.DB.prepare('UPDATE user_factors SET sign_count=?,last_used_at=? WHERE id=?').bind(signCount,now,factor.id).run()
    await clearFailures(env.DB,userId);return 'webauthn'
-  }catch(error){if(!(error instanceof WebAuthnError))throw error;await countFailure(env.DB,userId);return refuse('passkey_invalid')}
+  }catch(error){if(!(error instanceof WebAuthnError))throw error;return refuse('passkey_invalid')}
  }
  for(const factor of (await confirmedFactors(env.DB,userId)).filter(factor=>factor.kind==='totp')){
   // A key restored under a different installation key cannot be opened: that app no longer proves anything.
@@ -96,6 +100,5 @@ export async function proveFactor(env:Env,userId:string,proof:Proof,requestUrl:s
   const claimed=await env.DB.prepare('UPDATE user_factors SET last_step=?,last_used_at=? WHERE id=? AND (last_step IS NULL OR last_step<?)').bind(step,now,factor.id,step).run()
   if(claimed.meta.changes===1){await clearFailures(env.DB,userId);return 'totp'}
  }
- await countFailure(env.DB,userId)
  return refuse('code_invalid')
 }

@@ -76,7 +76,7 @@ dashboard stylesheet or its purple. The dashboard itself keeps its own design sy
 - Every new-password field (sign-up, reset, invitation) states the server rule of 12 to 1024 characters, enforces it in
   the browser and sets `autocomplete="new-password"`.
 - With no email provider, `/forgot-password` still fails closed (503, no reset token, no mail) and tells the visitor that
-  the workspace owner must reset the password; owners can issue a one-hour reset link with `POST /api/identity/password-reset`
+  the workspace owner must reset the password; owners with two-factor on can issue a one-hour reset link with `POST /api/identity/password-reset` (their own recent factor, audited)
   (there is no dashboard control for it yet).
 
 ## Pending invitations

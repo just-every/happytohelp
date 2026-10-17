@@ -102,7 +102,7 @@ test('Reports and both CSVs refuse a deleted target with retained membership and
 
 test('native delete retires invitations and neither existing nor new invitees can resurrect the workspace',async()=>{
  const h=await harness();try{
-  const invite=async email=>{const response=await h.raw('/api/identity/invitations',{actor:'foreign',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});assert.equal(response.status,201);return (await response.json()).token};
+  const invite=async email=>{const response=await h.raw('/api/management/projects/q/agents',{actor:'foreign',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});assert.equal(response.status,201);return new URL((await response.json()).data.invitationUrl).searchParams.get('token')};
   const existing=await invite('owner@example.test'),fresh=await invite('new-person@example.test');
   const accepted=await h.raw('/api/identity/accept-invitation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:existing})});assert.equal(accepted.status,200,'active workspace invitation succeeds');
   await h.db.prepare("DELETE FROM memberships WHERE project_id='q' AND user_id='owner'").run();
@@ -129,7 +129,7 @@ test('invitation acceptance rechecks target and signed-in session at the native 
  for(const race of ['target-deleted','session-revoked','membership-removed','new-account-target-deleted']){
   const h=await harness();try{
    const email=race.startsWith('new-account')?'race-new@example.test':'owner@example.test';
-   const response=await h.raw('/api/identity/invitations',{actor:'foreign',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});assert.equal(response.status,201);const {token}=await response.json();
+   const response=await h.raw('/api/management/projects/q/agents',{actor:'foreign',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});assert.equal(response.status,201);const token=new URL((await response.json()).data.invitationUrl).searchParams.get('token');
    const sql=race.includes('target-deleted')?"INSERT INTO project_settings VALUES('q','{\"deleted_at\":1}',1)":race==='session-revoked'?"UPDATE sessions SET revoked_at=1 WHERE actor_id='owner'":"DELETE FROM memberships WHERE project_id='p' AND user_id='owner'";
    const result=await h.raw('/_test/invitation-race',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sql,newAccount:race.startsWith('new-account'),command:{token,name:'Race New',password:'synthetic-long-native-test-password'}})});
    assert.equal(result.status,race.startsWith('new-account')?409:400,race);

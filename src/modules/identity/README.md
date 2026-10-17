@@ -1,6 +1,6 @@
 # Identity
 
-Hono routes for `/api/identity`: first-owner setup, login and sessions, invitations, password recovery,
+Hono routes for `/api/identity`: first-owner setup, login and sessions, invitation acceptance, password recovery,
 self-service registration and widget sessions. Passwords are PBKDF2 hashes of 12 to 1024 characters
 (`credentials.ts`); sessions, reset tokens, invitation tokens and verification tokens are stored only as SHA-256 hashes.
 
@@ -73,10 +73,13 @@ email-link sign-in creates the session; `session_factors` records what it has
 proven. `src/platform/auth.ts` lets a session that still owes its factor
 (`verify`), or that a workspace policy requires to enrol (`enrol`), reach only the
 two-factor doors. `factors.ts` refuses wrong, replayed (one use per time step) and
-spent answers, limits them to five per fifteen minutes and audits each refusal.
+spent answers, limits them to five per fifteen minutes and audits each refusal;
+`password-proof.ts` holds a re-entered password (step-up, password change) to the
+same claimed count. Invitations are issued only by the management door.
 
-`step-up.ts` guards exports, erasure, role changes, credential installs, workspace
-deletion and the policy: the second factor within 15 minutes, or the password for
+`step-up.ts` guards exports, erasure, role changes (including admin and owner
+invitations and their re-issued links), credential installs (every factor, a
+teammate's reset link, the sign-in email), workspace deletion and the policy: the second factor within 15 minutes, or the password for
 an account without one; the local `rer dev` entry is installation custody.
 `policy-routes.ts` holds Settings → Security (policy by role, ending unproven
 sessions) and the owner's reset of a teammate (own recent factor, email, audit).

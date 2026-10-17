@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { passwordHash, sqlQuote } from './identity-browser-kit.mjs';
+import { totp } from './identity/two-factor.mjs';
 
 // Deployment with sign-up on and an email provider configured. No test submits a form that would send mail:
 // sign-up is checked up to its browser validation, forgot-password uses an address that has no account.
+// Invitations come from the management door, whose mail is answered by the provider fixture.
 // Sign-up does not take the place of setup: until the first owner exists, /register is closed even though sign-up is on.
 export async function checkRegistrationBeforeSetup({ origin, kit }) {
     const page = await kit.open(origin, '/register');
@@ -52,9 +54,12 @@ export async function checkForgotPasswordWithEmail({ origin, kit }) {
 }
 
 export async function checkResetPassword({ origin, kit }, owner) {
-    const invitation = await kit.api(origin, '/api/identity/invitations', { body: { email: 'kim@review.test' }, token: owner.token });
-    await kit.api(origin, '/api/identity/accept-token', { body: { token: invitation.json.token, name: 'Kim', password: 'synthetic-kim-first-password-1' } });
+    const invitation = await kit.api(origin, `/api/management/projects/${owner.projectId}/agents`, { body: { email: 'kim@review.test' }, token: owner.token });
+    await kit.api(origin, '/api/identity/accept-token', { body: { token: new URL(invitation.json.data.invitationUrl).searchParams.get('token'), name: 'Kim', password: 'synthetic-kim-first-password-1' } });
     const kim = await kit.api(origin, '/api/identity/login', { body: { email: 'kim@review.test', password: 'synthetic-kim-first-password-1' } });
+    // An owner issues a teammate's reset link with their own second factor.
+    const setup = await kit.api(origin, '/api/identity/two-factor/totp', { body: {}, token: owner.token });
+    assert.equal((await kit.api(origin, '/api/identity/two-factor/totp/confirm', { body: { factorId: setup.json.factorId, code: totp(setup.json.secret) }, token: owner.token })).status, 201);
     const reset = await kit.api(origin, '/api/identity/password-reset', { body: { userId: kim.json.actor.id }, token: owner.token });
     assert.equal(reset.status, 201, reset.text);
     const page = await kit.open(origin, '/reset-password?token=' + reset.json.token);

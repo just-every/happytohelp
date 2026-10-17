@@ -37,12 +37,12 @@ work delegated to your own Codex or Claude. It works with human replies without
 an AI provider. The editable React application runs on Cloudflare Workers with
 Hono, D1, R2, Queues and Durable Objects.
 
-## Release 0.4.2
+## Release 0.4.3
 
-Deploy the latest tagged release, **`v0.4.2`**, using the commands below.
-This release includes Help Scout response-body imports, deliberate uncertain webhook
-resends, a guided local-agent fix flow and provisioned new workspaces with a
-simpler Setup page. Re-imports preserve native edits. Commands use the published
+Deploy the latest tagged release, **`v0.4.3`**, using the commands below.
+This release qualifies fresh installs, README restores and upgrades from every
+published baseline, including v0.4.2. It adds ticket statuses, fields, groups, saved
+views and previewed bulk changes. Existing support history and native edits remain. Commands use the published
 `@runeditrun/rer` package pinned to 0.2.42; local dev starts without private setup
 answers. `rer deploy` claims the hosted owner named by `OWNER_EMAIL` for you;
 that owner signs in by email and opens Setup. Existing owners are preserved.
@@ -116,11 +116,11 @@ own operating contract; this seed's CLI is not a platform admission requirement.
 
 ## Deploy to your own Cloudflare account
 
-For a new installation, acquire the latest tagged release, **`v0.4.2`**,
+For a new installation, acquire the latest tagged release, **`v0.4.3`**,
 after installing `rer` as shown above:
 
 ```sh
-git clone --branch v0.4.2 https://github.com/just-every/run-happytohelp
+git clone --branch v0.4.3 https://github.com/just-every/run-happytohelp
 cd run-happytohelp
 ```
 

@@ -27,6 +27,13 @@ function encode(value, type) {
   if (type === 'real') { const bytes = Buffer.alloc(8); bytes.writeDoubleBE(value); return [type, bytes.toString('hex')]; }
   return [type, Buffer.from(value).toString('hex')];
 }
+// The same byte/storage-type encoding is used for original and expected rows.
+export function snapshotTable(db, name, columns) {
+  const statement = db.prepare(`SELECT ${columns.flatMap((c, i) => [`${quote(c)} AS v${i}`, `typeof(${quote(c)}) AS t${i}`]).join(',')} FROM ${quote(name)}`);
+  statement.setReadBigInts(true);
+  const rows = statement.all().map(row => JSON.stringify(columns.map((c, i) => encode(row[`v${i}`], row[`t${i}`])))).sort();
+  return {columns, rows, rowCount: rows.length, sha256: createHash('sha256').update(JSON.stringify(rows)).digest('hex')};
+}
 // Compare original column storage types and exact values, including NUL text,
 // blobs, 64-bit integers and IEEE-754 doubles. Added columns have no old value.
 export function snapshot(filename, baseline) {
@@ -36,10 +43,7 @@ export function snapshot(filename, baseline) {
     const result = {};
     for (const {name} of tables) {
       const columns = baseline?.[name]?.columns ?? db.prepare(`PRAGMA table_info(${quote(name)})`).all().map(c => c.name);
-      const statement = db.prepare(`SELECT ${columns.flatMap((c, i) => [`${quote(c)} AS v${i}`, `typeof(${quote(c)}) AS t${i}`]).join(',')} FROM ${quote(name)}`);
-      statement.setReadBigInts(true);
-      const rows = statement.all().map(row => JSON.stringify(columns.map((c, i) => encode(row[`v${i}`], row[`t${i}`])))).sort();
-      result[name] = {columns, rows, rowCount: rows.length, sha256: createHash('sha256').update(JSON.stringify(rows)).digest('hex')};
+      result[name] = snapshotTable(db, name, columns);
     }
     return result;
   } finally { db.close(); }

@@ -10,8 +10,10 @@ import {randomBytes} from 'node:crypto';
 import {createServer} from 'node:net';
 import {command,run} from '../rer-command.mjs';
 import {waitForServingCapacity} from '../serving-capacity.mjs';
-import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive} from '../rer-archive.mjs';
+import {archiveSnapshot,archiveStorage,retainHistoricalLedger,assertHistoricalLedger,compareArchive,compareDevEntryArchive} from '../rer-archive.mjs';
 import {seedPortableData,verifyPortableData} from '../rer-data.mjs';
+import {safeDiagnostic} from '../delegation-journey/diagnostics.mjs';
+import {readDurableObjects} from '../../../scripts/installer/durable-objects.mjs';
 
 // The fresh-clone rer command journey: install, setup, dev, export/import, reset and fresh owner.
 export async function freshInstallJourney(){
@@ -21,7 +23,7 @@ const __rerTestEntry = __rerTestEntryPath(import.meta.resolve('@runeditrun/rer/i
 const source=fileURLToPath(new URL('../../..',import.meta.url));
 const scratch=await mkdtemp(join(tmpdir(),'h2h-rer-journey-')),root=join(scratch,'checkout');
 const execute=promisify(execFile);
-let server;
+let server,success=false;
 const socket=createServer();await new Promise(resolve=>socket.listen(0,'127.0.0.1',resolve));
 const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
 const email='rer-journey@example.test',password=randomBytes(24).toString('base64url');
@@ -78,9 +80,23 @@ try{
  const portable=await seedPortableData(origin,project.id,retained.token,json);
  await stop();
  const historical=await retainHistoricalLedger(root);
- const before=await archiveSnapshot(root);
- assert.ok(before.rows.move_in_runs.length>0 && before.rows.contact_erasures.length>0 && before.objects.length>0);
+ const beforeExport=await archiveSnapshot(root);
+ assert.ok(beforeExport.rows.move_in_runs.length>0 && beforeExport.rows.contact_erasures.length>0 && beforeExport.objects.length>0);
+ assert.deepEqual(beforeExport.rows.durable_object_snapshots,[],'first export has no prior Durable Object capture');
+ const exportStarted=Date.now();
  await run(root,['export','--output','exports/support.rer']);
+ // Export records declared Durable Object namespaces in D1 before archiving.
+ // Validate that exact addition, then compare restore with what was exported.
+ const before=await archiveSnapshot(root),snapshots=await readDurableObjects(root);
+ const captured=before.rows.durable_object_snapshots.map(JSON.parse);
+ assert.equal(captured.length,snapshots.length);
+ for(const item of snapshots){
+  const row=captured.find(row=>row.namespace===item.namespace);assert.ok(row);
+  assert.ok(Number.isInteger(row.captured_at)&&row.captured_at>=exportStarted&&row.captured_at<=Date.now());
+  assert.deepEqual(row,{namespace:item.namespace,class_name:item.className,schema:item.schema,instances:item.instances,records:item.records.length,records_json:JSON.stringify(item.records),digest:item.digest,captured_at:row.captured_at});
+ }
+ const expectedExport=structuredClone(beforeExport);expectedExport.rows.durable_object_snapshots=before.rows.durable_object_snapshots;
+ compareArchive(expectedExport,before);
  assert.equal((await stat(join(root,'exports/support.rer'))).mode&0o777,0o600);
  await assertHistoricalLedger(root,historical);
  await run(root,['import','--input','exports/support.rer','--yes'],4);
@@ -132,24 +148,30 @@ try{
  await stop();assert.equal(await migrationCount(),1);
  compareDevEntryArchive(beforeRestoredReads,await archiveSnapshot(root));
  assert.deepEqual(await ledgerSnapshot(),restoredLedgers,'post-restore reads and refused replays preserve migration history');
- // Dry-run validates the real production mail contract with test-only inputs and makes no provider request.
- await run(root,['deploy','--dry-run'],0,{env:{EMAIL_PROVIDER:'sendgrid',EMAIL_FROM:'support@dry-run.example.test',EMAIL_API_KEY:'test-only-dry-run-sendgrid-key'}});
+ // Dry-run validates the real production mail/owner contract with test-only
+ // inputs. Reserved example.com subdomains pass its production email shape
+ // check; no mailbox or provider is contacted, and the local owner is retained.
+ await run(root,['deploy','--dry-run'],0,{env:{OWNER_EMAIL:'owner@dry-run.example.com',EMAIL_PROVIDER:'sendgrid',EMAIL_FROM:'support@dry-run.example.test',EMAIL_API_KEY:'test-only-dry-run-sendgrid-key'}});
  await run(root,['reset','--yes']);await rm(additive);await run(root,setup);await start();
  const fresh=await json('/api/identity/login',{email,password});assert.notEqual(fresh.actor.id,actor.id);
  assert.equal((await json('/api/management/projects',undefined,fresh.token)).data.length,1);
  await stop();
  // The owner's export remains in the checkout; generated files do not alter source.
  assert.equal((await execute('git',['status','--porcelain','--untracked-files=no'],{cwd:root})).stdout,'','journey preserves tracked source');
+ success=true;
  console.log('Rer fresh-clone journey passed: install, setup/teardown, dev/health, automatic owner entry, retained owner/settings/data, active/unconfirmed reset refusal, private export/import, historical ledger custody, additive replay once, incompatible/nonempty refusal, all D1/R2 rows/bytes, completed/repeated/undone/erased import custody, restored erasure replay fences, two post-restore setups preserving data/ledgers with verified local sign-ins, deploy dry-run, reset and fresh owner.');
 }catch(error){
  // Browser diagnostics can contain one-use fragment capabilities; emit only a safe source location.
- const line=/rer-journey\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';
+ const errors=(server?.events()??[]).filter(event=>event.event==='error').map(event=>({code:event.code,message:safeDiagnostic(event.message,[password])}));
+ if(errors.length)console.error(JSON.stringify({proof:'rer-command-refusal',errors}));
+ const line=/fresh-install\.mjs:(\d+):/.exec(error.stack||'')?.[1]||'unknown';
  const diagnostic=/^(?:Rer [a-z-]+ exited \d+; expected \d+|Rer (?:dev|preview) (?:exited \d+ before the required event|exceeded its deadline); [a-z_]+, (?:machine load|disk space|server capacity|active operation|see private capture)|Native (?:GET|POST) \/[a-zA-Z0-9_/-]+ returned HTTP \d{3})(?:\n|$)/.exec(error.message??'')?.[0].trim();
  const code=/^[A-Z][A-Z0-9_]{1,30}$/.test(error.code??'')?`; code ${error.code}`:'';
  throw Error(`Rer journey failed (${error.name}, source line ${line}${diagnostic?'; '+diagnostic:''}${code}); private browser diagnostics withheld.`);
 }finally{
  if(server)await server.stop();
- await rm(scratch,{recursive:true,force:true});
+ if(success)await rm(scratch,{recursive:true,force:true});
+ else console.error('Private native journey scratch retained:',scratch);
 }
 
 }

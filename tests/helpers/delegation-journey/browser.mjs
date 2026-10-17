@@ -6,8 +6,9 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {createServer} from 'node:net';
 import {randomBytes} from 'node:crypto';
-import {chromium} from 'playwright';
+import {launchBrowser} from '../../journeys/kit/browser.mjs';
 import {command,run} from '../rer-command.mjs';
+import {waitForServingCapacity} from '../serving-capacity.mjs';
 import {customerFixture} from './fixture.mjs';
 import {report,client,runCase,until} from './case.mjs';
 import {browserUI} from './browser-ui.mjs';
@@ -26,9 +27,9 @@ export async function browserJourney(evidence){
   await writeFile(join(checkout,'.seed/local-answers.json'),JSON.stringify({WORKSPACE_NAME:'Agent fix journey',WIDGET_ORIGIN:origin,OWNER_NAME:'Journey owner',OWNER_PASSWORD:password,EMAIL_PROVIDER:'later'}),{mode:0o600});
   stage='setup';await run(checkout,['setup','--owner-email',email,'--answers','.seed/local-answers.json','--port',String(port)]);
   await assert.rejects(fetch(origin+'/health',{signal:AbortSignal.timeout(2000)}),'setup leaves no server');
-  stage='dev';server=command(checkout,['dev']);const ready=await server.waitFor(event=>event.event==='ready',180000);assert.equal(ready.url,origin);
+  stage='dev';await waitForServingCapacity();server=command(checkout,['dev']);const ready=await server.waitFor(event=>event.event==='ready',180000);assert.equal(ready.url,origin);
   stage='automatic owner entry';
-  browser=await chromium.launch({headless:true});
+  browser=await launchBrowser();
   const loginContext=await browser.newContext(),loginPage=await loginContext.newPage();
   const {readFile}=await import('node:fs/promises');
   await loginPage.goto((await readFile(join(checkout,'.rer/local/open-url'),'utf8')).trim());
@@ -38,7 +39,13 @@ export async function browserJourney(evidence){
   for(const width of [1440,390]){
    stage=`operator and visitor journey ${width}`;
    const viewport={width,height:width===390?844:1000},context=await browser.newContext({viewport,storageState:state}),page=await context.newPage();
-   const cookie=(await context.cookies()).find(c=>c.name==='h2h_session');assert.ok(cookie);const api=client(origin,cookie.value);
+   const cookie=(await context.cookies()).find(c=>c.name==='h2h_session');assert.ok(cookie);
+   // Use the stranger's complete owner-entry cookie jar, including checkout
+   // admission. A copied dev bearer token must remain insufficient by itself.
+   const api=async(path,body,{method=body===undefined?'GET':'POST',status=200}={})=>{
+    const response=await context.request.fetch(origin+path,{method,headers:{Origin:origin},...(body===undefined?{}:{data:body})});
+    const value=await response.json();assert.equal(response.status(),status,`${method} ${path}: ${JSON.stringify(value)}`);return value;
+   };
    const project=await api('/api/identity/projects/'+actor.projectId);const errors=[];page.on('pageerror',error=>errors.push(error.message));
    const directory=join(scratch,String(width));await mkdir(directory);
    let visitorContext,visitor,visitorSession;const frames=[];

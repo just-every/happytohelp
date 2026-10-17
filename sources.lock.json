@@ -8436,11 +8436,11 @@
       "executable": false
     },
     "src/ui/native/pages/workflows/RuleActions.jsx": {
-      "sha256": "98dd853f7465accfda4024c62e503edd69759b1328e62cdfac4477b02940e2af",
+      "sha256": "1f0efb8eea2a7a183a07e4747d5e4442dba3ec040c48ad7a021d63d2e61cf5d5",
       "executable": false
     },
     "src/ui/native/pages/workflows/RuleConditions.jsx": {
-      "sha256": "6949d21ba07592e95471abc15bc6c59b04e0c063519361e8fff9f44cca33e206",
+      "sha256": "ec1d43268abec8db18682253ddf785fa93620be32cf58eaa7b03540a7beb5491",
       "executable": false
     },
     "src/ui/native/pages/workflows/RuleExplanation.jsx": {
@@ -8472,7 +8472,7 @@
       "executable": false
     },
     "src/ui/native/pages/workflows/workflows.css": {
-      "sha256": "4078fe2705f5b0458c403a77b845ab920782d3447eae6e4e0ba1d03f25b4ab82",
+      "sha256": "d53a3e7506f06b87c48d7a9fc91cc92b048ff37901325e7d39be72d109d1e270",
       "executable": false
     },
     "src/ui/native/pages/workflows/WorkflowSettings.jsx": {

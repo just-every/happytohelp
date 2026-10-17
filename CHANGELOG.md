@@ -8,10 +8,12 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
-## 0.4.3 — 2026-10-17
+## 0.4.3 — 2026-10-18
 
-- **Release qualification.** Fresh-clone journeys retain the complete local owner entry, invoke the pinned pnpm consistently and compare restore against the exported Durable Object snapshot. Upgrades preserve every original value except the exact documented email-proof and owner-alert migrations.
+- **Release qualification.** Fresh-clone journeys retain the complete local owner entry, invoke the pinned pnpm consistently and compare restore against the exported Durable Object snapshot. Upgrades preserve every original value except the exact documented email-proof and owner-alert migrations. New migrations 124 and 126 bracket the 125 email-proof backfill so a contact erasure interrupted under 0.4.1 cannot rewrite integration history recorded since; the identical erasure guard is restored before traffic.
 - **Ticket work.** Native statuses, priorities, groups, custom fields, saved views and previewed bulk updates retain the existing conversation history and permissions.
+- **Documentation.** The docs gain the standard Run and Contract pages built by `@runeditrun/rer` 0.2.45, now the pinned command package.
+- **Recovery.** A failing satisfaction-survey dispatch no longer blocks other scheduled recovery work, surveys wait until survey signing is configured, and the help center offers reader sign-in only when it has restricted collections.
 - **Upgrade from 0.4.2.** Back up and apply the migrations listed in RELEASE.json before serving traffic. Existing credentials, support history and file bytes remain.
 
 ## 0.4.2 — 2026-10-17

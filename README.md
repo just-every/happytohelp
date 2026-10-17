@@ -75,14 +75,11 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 The [install and run guide](https://happytohelp.com/docs/install) covers
 installation, local sign-in and stopping the app, step by step.
 
-You need **Node.js 22 or later** (with npm) and Git; check with
-`node --version`. Install the `rer` command once. Activate it in the current
-shell with `export PATH="$HOME/.local/bin:$PATH"`, then start HappyToHelp:
+Start it with one line. You need **Node.js 22 or later** (with npm) and Git; check
+with `node --version`.
 
 ```sh
-npx -y @runeditrun/rer cli install
-export PATH="$HOME/.local/bin:$PATH"
-rer dev just-every/run-happytohelp
+npx -y @runeditrun/rer dev just-every/run-happytohelp
 ```
 
 That clones HappyToHelp into `run-happytohelp`, provisions the checkout's own pinned

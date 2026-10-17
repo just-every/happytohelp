@@ -11,5 +11,6 @@ export function DocsNavList({ sections, current, idPrefix }: { sections: DocsSec
         </li>)}
       </ul>
     </div>)}
+    <div className="docs-nav-group"><ul><li><a href="/run">Run HappyToHelp</a></li><li><a href="/contract">Contract</a></li></ul></div>
   </>;
 }

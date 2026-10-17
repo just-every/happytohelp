@@ -1984,6 +1984,31 @@
       }
     },
     {
+      "path": "src/site/base",
+      "originPath": "foundation/runtime",
+      "revision": "7831aa95b6f41e4d4533f429ee67f8ad7d7b8134",
+      "files": {
+        "src/site/base/contract-filter.ts": "eec5be7da15653b69dd343fb3cf9f7a2e695eb215c5ee118f3508090e9c29232",
+        "src/site/base/contract-page.ts": "8fff886df5869401818c0a3422a9a9cb73f3f1c4cb100d46f2a315176102b64f",
+        "src/site/base/contract-style.ts": "4325f4eeabac2bef722808576605d7b657858b918729097c3412393fc6e4941f",
+        "src/site/base/identity.ts": "0bc7faa1ce3d7fe3839a6a68135160be45387b052e4699dc7b45d13f67cb2106",
+        "src/site/base/run-site.ts": "25fcd744b2f46b4280bcb7bc62bd7ef40fbaee43075e7504f73bf3c3bc8e26f4",
+        "src/site/base/seed-contract.d.mts": "2add6b0252ab6cb78051c7c5c2754daaebada6d7bea411df85eb8b0cb8a0ce09",
+        "src/site/base/seed-contract.mjs": "fe40fa189caf33b7531b6d02e31616275f324d5727b9b0db7ddf35998712dd7c",
+        "src/site/base/theme-frame.ts": "013414b6cf564f0157efb7939d74ea3900bc4ce0b74217dfcf0dd309356ea70c"
+      },
+      "modes": {
+        "src/site/base/contract-filter.ts": "100644",
+        "src/site/base/contract-page.ts": "100644",
+        "src/site/base/contract-style.ts": "100644",
+        "src/site/base/identity.ts": "100644",
+        "src/site/base/run-site.ts": "100644",
+        "src/site/base/seed-contract.d.mts": "100644",
+        "src/site/base/seed-contract.mjs": "100644",
+        "src/site/base/theme-frame.ts": "100644"
+      }
+    },
+    {
       "path": "src/vendor/base/hydration",
       "originPath": "foundation/runtime/hydration",
       "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",

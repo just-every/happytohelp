@@ -7100,7 +7100,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/workflows/workflows.css": {
-      "sha256": "267e1c64d9f30d62d0da3d465accd517281dcd04aa4d203f7cc12c87313d1cd0",
+      "sha256": "9d77a37e97c4ab533a81cb189b8a631b9cda5eeb35390ba7089dc6ba8ecaa153",
       "executable": false
     },
     "src/ui/dashboard/contexts/ChatContext.jsx": {
@@ -8424,7 +8424,7 @@
       "executable": false
     },
     "src/ui/native/pages/workflows/PolicySettings.jsx": {
-      "sha256": "cffde90d133a64de01c4591401538d09b6b9add23d28846ca7fd2d10a05d9ce1",
+      "sha256": "bffe750d6f37107d3841122bd0d2e5cf98f808f9cac18631dfa750e7ab15f8c1",
       "executable": false
     },
     "src/ui/native/pages/workflows/RoutingSettings.jsx": {
@@ -8472,7 +8472,7 @@
       "executable": false
     },
     "src/ui/native/pages/workflows/workflows.css": {
-      "sha256": "5b5aed55d67f1325bbc9d95ef1dee43dd97b8b27021e4f7315f0f12d78c0cd49",
+      "sha256": "4078fe2705f5b0458c403a77b845ab920782d3447eae6e4e0ba1d03f25b4ab82",
       "executable": false
     },
     "src/ui/native/pages/workflows/WorkflowSettings.jsx": {

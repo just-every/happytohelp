@@ -78,7 +78,7 @@ async function upgrade(label) {
     }
     ledger.close();
     const after = snapshot(database, before), afterFiles = await bucketSnapshot(join(state, 'v3/r2'));
-    const {expected, added, exceptions} = expectedMigrationRows(before, after, headMigrations.files);
+    const {expected, added, exceptions} = expectedMigrationRows(before, after, headMigrations.files, beforeSchema);
     const changedSchema = expectedSchema(beforeSchema, schema(database), added);
     const comparison = Object.entries(before).filter(([table]) => table !== 'd1_migrations').map(([table, value]) => {
       const identical = JSON.stringify(value.rows) === JSON.stringify(after[table]?.rows);
@@ -95,8 +95,8 @@ async function upgrade(label) {
     };
     assert.deepEqual(order, added, 'Upgrade applied exactly the missing migrations in order');
     assert.deepEqual(receipt.failures, [], 'Pre-existing application rows changed outside exact migration exceptions');
+    assert.deepEqual(changedSchema, [], 'Prior schema changed outside the listed replacements');
     if (baseline.previous) {
-      assert.deepEqual(changedSchema, [], 'Prior schema changed outside the listed replacements');
       assert.deepEqual(order, release.migrations.map(migration => migration.id), 'The previous release receives exactly the listed release migrations in order');
     }
     assert.ok(receipt.files.identical, 'Stored files changed during upgrade');

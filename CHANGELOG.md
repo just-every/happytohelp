@@ -8,6 +8,12 @@ upgrade, read the notes for every version between yours and the new one. For
 updating and backing up an installation, see
 [Updates and recovery](docs/INDEPENDENT-RELEASE.md).
 
+## 0.4.3 — 2026-10-17
+
+- **Release qualification.** Fresh-clone journeys retain the complete local owner entry, invoke the pinned pnpm consistently and compare restore against the exported Durable Object snapshot. Upgrades preserve every original value except the exact documented email-proof and owner-alert migrations.
+- **Ticket work.** Native statuses, priorities, groups, custom fields, saved views and previewed bulk updates retain the existing conversation history and permissions.
+- **Upgrade from 0.4.2.** Back up and apply the migrations listed in RELEASE.json before serving traffic. Existing credentials, support history and file bytes remain.
+
 ## 0.4.2 — 2026-10-17
 
 - **Mailbox confirmation.** Owners claimed by email and moved-in teammates without a second factor confirm sensitive actions by a single-use, 15-minute email sign-in link. Requests are limited atomically and audited. Email is also offered beside existing passwords. After mailbox proof, Profile lets an owner replace an unknown password without the old one; deliberately set passwords keep working. Merely requesting email grants no proof.

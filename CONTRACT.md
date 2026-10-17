@@ -327,7 +327,9 @@ HappyToHelp is the complete help desk and AI support agent a US SMB support lead
   **Acceptance evidence:** Run inspect/lock/check and offline Base-copy verification on staged intentional source, exercise origin/drift/mode refusals and release only the selected licensed tree without credentials or private fixtures; source custody alone is not product acceptance.
 
 
-## Complete support operations
+## Target clauses
+
+### Complete support operations
 
 - **DESK-001 — The shared support desk.** A visitor starts website live chat, identifies themselves under the workspace policy, sends files and returns to their history. Humans see one durable shared inbox with customer history, scoped retained-history search with words, quoted phrases and literal customer-identity matching, open/closed/mine/unassigned/AI/tag filters and saved replies that insert into the composer without silently sending. Ticket status follows the STATUS-001 lifecycle and saved replies extend to MACRO-001 action macros. Replies, attachment downloads and errors are visible on both sides; privacy/collector controls remain effective.
 

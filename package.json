@@ -105,6 +105,7 @@
     "test:connections": "node --test --test-concurrency=1 tests/journeys/connections.mjs tests/journeys/connections-browser.mjs",
     "test:first-run": "node --test --test-concurrency=1 tests/journeys/first-run.mjs tests/journeys/first-run-browser.mjs",
     "build:app": "node scripts/build.mjs",
+    "verify:build": "rer check --profile first-party && pnpm run typecheck && pnpm run source:check && node scripts/edition-authoring/cli.mjs verify-base --offline && node --test --test-concurrency=1 tests/demo-inbox.mjs tests/demo-transcript-events.mjs",
     "verify:app": "rer check --profile first-party && pnpm run build && pnpm run typecheck && pnpm run source:check && node scripts/edition-authoring/cli.mjs verify-base --offline && pnpm run test:routes && pnpm run test:browsers",
     "reset": "rer reset",
     "export": "rer export",

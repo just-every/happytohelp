@@ -11,7 +11,7 @@
   "operations": {
     "setup": "node scripts/independent/setup-build.mjs",
     "build": "export PATH=\"$PWD/.rer-tools/node_modules/.bin:$PATH\" && pnpm run build",
-    "verify": "export PATH=\"$PWD/.rer-tools/node_modules/.bin:$PATH\" && pnpm exec rer check --profile first-party && pnpm run typecheck && pnpm run source:check && node scripts/edition-authoring/cli.mjs verify-base --offline",
+    "verify": "export PATH=\"$PWD/.rer-tools/node_modules/.bin:$PATH\" && pnpm run verify:build",
     "artifact": "node scripts/delivery/build.mjs --clean",
     "recovery": "Retain exact source, D1 SQL and all R2 bytes; preserve applied migration identities. Follow docs/INDEPENDENT-RELEASE.md. Stop jobs before a consistent backup, restore to fresh isolated resources, reconcile uncertain provider attempts, and verify owner authority and data before switching traffic. Complete automatic RER export requires Durable Object support; do not describe a D1/R2-only backup as complete."
   }

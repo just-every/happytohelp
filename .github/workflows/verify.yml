@@ -74,10 +74,8 @@ jobs:
           - name: contracts
             browser: false
             commands: |
-              pnpm run typecheck
-              pnpm run source:check
-              node scripts/edition-authoring/cli.mjs verify-base --offline
-              node --test --test-concurrency=1 tests/demo-inbox.mjs tests/demo-transcript-events.mjs
+              # The Managed build's verify (rer-project.json operations.verify).
+              pnpm run verify:build
           - name: move-in-admission
             browser: false
             commands: |

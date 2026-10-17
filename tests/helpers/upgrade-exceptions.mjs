@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {DatabaseSync} from 'node:sqlite';
+import {expectedDataMigrations} from './upgrade-data-expectations.mjs';
+export {expectedSchema, schemaExceptions} from './upgrade-schema-expectations.mjs';
 
 const text = value => ['text', Buffer.from(value).toString('hex')];
 const integer = value => ['integer', String(value)];
@@ -11,21 +12,16 @@ const key = value => JSON.stringify([value.project_id, value.subject_id]);
 // applied by the upgrade. 0106 changes only missing project secrets; 0108 inserts
 // missing contact subjects with defaults and bumps every revision once. 0.4's ten
 // migrations (0110-119) rewrite no pre-existing row. Wrangler appends
-// d1_migrations; only its sqlite_sequence row may advance.
+// d1_migrations; only its sqlite_sequence row may advance. Migrations 125 and
+// 129 deliberately change only the named columns under their exact predicates.
 export const migrationExceptions = [
   {migration: '0106_project_verification_secret.sql', table: 'projects', columns: ['verification_secret'], rows: 'pre-existing projects whose secret is NULL or empty'},
   {migration: '0108_public_answer_citations.sql', table: 'context_subjects', columns: ['revision'], rows: 'existing subjects: revision + 1; missing contact subjects: exact defaults and revision 1'},
+  {migration: '125_contact_email_proof.sql', table: 'contacts', columns: ['metadata_json'], rows: 'eligible unsigned email-bearing widget contacts with a matching visitor session: json_set email_unproven = 1; all other keys and rows retained'},
+  {migration: '129_owner_unassigned_alerts.sql', table: 'user_project_preferences', columns: ['is_notified_on_unassigned_activity'], rows: 'owners of active non-demo workspaces with no alerted member: set 1; insert missing owner preference with is_primary default 0; retain existing is_primary and every other preference'},
   {migration: 'Wrangler migration ledger', table: 'sqlite_sequence', columns: ['seq'], rows: 'name = d1_migrations only, advances by the number of newly applied migrations'},
 ];
-// Prior schema definitions a migration deliberately replaces. 0110 adds only the
-// native import fence to the two context message triggers' bodies.
-export const schemaExceptions = [
-  {migration: '120_activation_observations.sql', names: ['activation_receipts'], change: 'Adds nullable observation_json TEXT; every prior column definition is retained'},
-  {migration: '121_move_in_categories.sql', names: ['edition_category_insert', 'edition_category_delete'], change: 'Removes insertion invalidation and limits deletion invalidation to affected article ancestry'},
-  {migration: '0110_move_in.sql', names: ['context_message_added', 'context_message_removed'], change: 'WHEN NOT EXISTS(SELECT 1 FROM move_in_native_fences ...) inserted before BEGIN'},
-];
-
-export function expectedMigrationRows(before, after, migrationNames) {
+export function expectedMigrationRows(before, after, migrationNames, beforeSchema) {
   // Appending the ledger cannot rewrite any previously applied migration row.
   const ledger = records(after.d1_migrations);
   assert.deepEqual(ledger.map(row => row.name).sort(), migrationNames.map(text).sort());
@@ -33,7 +29,7 @@ export function expectedMigrationRows(before, after, migrationNames) {
   const applied = new Set(records(before.d1_migrations).map(row => Buffer.from(row.name[1], 'hex').toString()));
   const added = migrationNames.filter(name => !applied.has(name));
   assert.equal(after.d1_migrations.rowCount, migrationNames.length);
-  const expected = {};
+  const expected = expectedDataMigrations(before, beforeSchema, added);
 
   if (added.includes('0106_project_verification_secret.sql')) {
     const projects = records(before.projects), projectById = new Map(records(after.projects).map(row => [JSON.stringify(row.id), row]));
@@ -78,42 +74,3 @@ export function expectedMigrationRows(before, after, migrationNames) {
   for (const [table, expectedRows] of Object.entries(expected)) assert.deepEqual(after[table].rows, expectedRows, `Unexpected transformation in ${table}`);
   return {expected, added, exceptions: used};
 }
-
-// Every prior table, index, trigger and view keeps its exact definition, except
-// the listed replacements, which must match their documented change exactly.
-export function expectedSchema(before, after, added) {
-  const changed = [];
-  for (const [name, entry] of Object.entries(before)) {
-    const fence = added.includes('0110_move_in.sql') && {context_message_added: 'NEW', context_message_removed: 'OLD'}[name];
-    let wanted = fence ? {...entry, sql: entry.sql.replace(' BEGIN ', ` WHEN NOT EXISTS(SELECT 1 FROM move_in_native_fences f WHERE f.project_id=${fence}.project_id AND f.conversation_id=${fence}.conversation_id) BEGIN `)} : entry;
-    if (added.includes('120_activation_observations.sql') && name === 'activation_receipts') {
-      // Let SQLite serialize the one deliberate ALTER; this retains every byte
-      // of the prior definition rather than ignoring the changed table schema.
-      const db = new DatabaseSync(':memory:');
-      try {
-        db.exec(entry.sql);
-        db.exec('ALTER TABLE activation_receipts ADD COLUMN observation_json TEXT');
-        wanted = {...entry, sql: db.prepare("SELECT sql FROM sqlite_master WHERE name='activation_receipts'").get().sql};
-      } finally { db.close(); }
-    }
-    if (added.includes('121_move_in_categories.sql')) {
-      if (name === 'edition_category_insert') {
-        if (after[name] !== undefined) changed.push(name);
-        continue;
-      }
-      if (name === 'edition_category_delete') wanted = {...entry, sql: categoryDelete};
-    }
-    if (JSON.stringify(after[name]) !== JSON.stringify(wanted)) changed.push(name);
-  }
-  return changed;
-}
-
-// The deliberate replacement's full expected body: unrelated article revisions
-// must not be invalidated, including articles linked through the join table.
-const categoryDelete = `CREATE TRIGGER edition_category_delete BEFORE DELETE ON knowledge_categories BEGIN
- UPDATE knowledge_articles SET source_revision=source_revision+1
- WHERE project_id=OLD.project_id AND (
-  category_id IN (WITH RECURSIVE descendants(id) AS (SELECT OLD.id UNION SELECT c.id FROM knowledge_categories c JOIN descendants d ON c.parent_id=d.id WHERE c.project_id=OLD.project_id) SELECT id FROM descendants)
-  OR id IN (SELECT article_id FROM knowledge_article_categories WHERE category_id IN (WITH RECURSIVE descendants(id) AS (SELECT OLD.id UNION SELECT c.id FROM knowledge_categories c JOIN descendants d ON c.parent_id=d.id WHERE c.project_id=OLD.project_id) SELECT id FROM descendants))
- );
-END`;

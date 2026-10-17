@@ -1,7 +1,7 @@
 import {HTTPException} from 'hono/http-exception'
 import type {Actor,Env} from '../../platform/env'
 import {ticketAuthority,availableTicketSql,invalid,object,priorities,type TicketAuthority} from './model'
-import {validateFieldChanges} from './fields'
+import {validateFieldChanges,requiredToSolve,solving} from './fields'
 import {audit} from '../audit/record'
 export interface TicketChange {expected_version?:number;expected_ticket_version?:number;expected_revision?:number;expected_last_message_id?:string|null;expected_updated_at?:number;status_id?:string;subject?:string;priority?:string;channel?:string;brand_id?:string;group_id?:string|null;requester_id?:string;submitter_id?:string;submitter_type?:string;fields?:Record<string,unknown>;agent_id?:string|null;assigned_to?:string|null;ai_id?:string|null;tags_add?:string[];tags_remove?:string[];add_tags?:string[];remove_tags?:string[]}
 export async function prepareTicketChange(env:Env,actor:Actor,id:string,input:TicketChange,authority:TicketAuthority){
@@ -36,6 +36,7 @@ export async function prepareTicketChange(env:Env,actor:Actor,id:string,input:Ti
  const values=Object.fromEntries(stored.map(v=>[v.field_id,JSON.parse(v.value_json)]))
  let fields:Record<string,unknown>
  try{fields=validateFieldChanges(definitions,values,object(change.fields??{}),guard.access)}catch(error){if(error instanceof HTTPException&&error.status===403)await audit(env,{projectId:actor.projectId,category:'access',action:'ticket.field_permission_denied',outcome:'refused',actor:{type:authority.tokenAuthority?'api':'user',id:authority.tokenAuthority?.tokenId??actor.id},source:authority.source??(authority.tokenAuthority?'api':'dashboard'),target:{type:'conversation',id}});throw error}
+ if(solving(current.status_category,next.status_category))for(const field of requiredToSolve(definitions,values,fields,guard.access)){predicates.push('EXISTS(SELECT 1 FROM ticket_field_values WHERE project_id=c.project_id AND conversation_id=c.id AND field_id=?)');params.push(field)}
  predicates.push('(SELECT count(*) FROM ticket_fields WHERE project_id=c.project_id)=?');params.push(definitions.length)
  for(const f of definitions){predicates.push('EXISTS(SELECT 1 FROM ticket_fields WHERE project_id=c.project_id AND id=? AND updated_at=?)');params.push(f.id,f.updated_at)}
  for(const key of ['tags_add','tags_remove'] as const){const ids=change[key]??[];if(!Array.isArray(ids)||ids.length>100||ids.some(v=>typeof v!=='string'||!v))invalid('Tags must be workspace tag IDs');change[key]=[...new Set(ids)];for(const tag of change[key]!){if(!await env.DB.prepare('SELECT 1 FROM workspace_tags WHERE project_id=? AND id=?').bind(actor.projectId,tag).first())invalid('Unknown workspace tag');predicates.push('EXISTS(SELECT 1 FROM workspace_tags WHERE project_id=c.project_id AND id=?)');params.push(tag)}}

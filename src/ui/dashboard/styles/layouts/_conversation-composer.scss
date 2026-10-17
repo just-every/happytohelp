@@ -168,8 +168,8 @@ body.conversation-workspace {
             margin: 0;
         }
 
-        // Attachments need the full width: the buttons go back under the field while files are attached.
-        #chat .chat-footer:has(.conversation-composer__files, .saved-replies-picker) .chat-entry > .flex-grow-1 { flex-direction: column !important; align-items: stretch; }
+        // Attachments and a refused send need the full width: the buttons go back under the field meanwhile.
+        #chat .chat-footer:has(.conversation-composer__files, .saved-replies-picker, .conversation-composer__error) .chat-entry > .flex-grow-1 { flex-direction: column !important; align-items: stretch; }
 
         #chat .chat-footer .chat-entry-form textarea {
             max-height: min(12rem, 28dvh) !important;

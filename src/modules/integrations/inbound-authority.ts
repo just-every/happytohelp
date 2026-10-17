@@ -86,7 +86,7 @@ export async function preferredAddressActor(env:Env,projectId:string,conversatio
 /** Bare mailbox policy: a fresh email continues the contact's most recently active
  * open thread; closed history starts a new one. */
 export async function openEmailConversation(env:Env,projectId:string,contactId:string){
- return env.DB.prepare('SELECT * FROM conversations WHERE project_id=? AND contact_id=? AND resolved_at IS NULL ORDER BY updated_at DESC,id LIMIT 1').bind(projectId,contactId).first<any>()
+ return env.DB.prepare("SELECT * FROM conversations WHERE project_id=? AND contact_id=? AND resolved_at IS NULL AND status_category<>'closed' ORDER BY updated_at DESC,id LIMIT 1").bind(projectId,contactId).first<any>()
 }
 
 /** CC recipients the sender may add. Workspace addresses, members and contacts that

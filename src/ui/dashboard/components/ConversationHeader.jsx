@@ -30,7 +30,9 @@ export default function ConversationHeader({
     const { getProject, isGlobalInbox, resolveConversation, setIsMainVisible } = useContext(ChatContext);
     const projectName = isGlobalInbox ? getProject(conversation.project_id).name : null;
     const isAiAssigned = Boolean(conversation.ai_id);
-    const statusLabel = conversation.resolved_at ? 'Closed' : 'Open';
+    // A Closed ticket is final: nothing reopens it, and customer replies open a new ticket.
+    const isFinal = conversation.status_category === 'closed';
+    const statusLabel = isFinal ? 'Closed · final' : conversation.resolved_at ? 'Closed' : 'Open';
     const canManage = useCan(conversation.project_id, 'conversations.manage');
     const contactEmail = conversation.contact.email && conversation.contact.email !== conversation.contact.display_name
         ? conversation.contact.email
@@ -74,14 +76,14 @@ export default function ConversationHeader({
                         ? <span className="badge text-bg-danger-subtle" title="This email's From address was not authenticated, so it is kept apart from the customer who uses that address. Replies go only to that address.">Unverified sender</span>
                         : conversation.contact.is_verified ? <span className="badge text-bg-primary">Verified</span> : <span className="badge text-bg-secondary-subtle">Unverified</span> }
                     { conversation.resolved_at
-                        ? <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-resolved-at` }><TimeAgo date={ conversation.resolved_at } /></Tooltip> }><span className="conversation-header-status is-closed">{ statusLabel }</span></OverlayTrigger>
+                        ? <OverlayTrigger placement="bottom" overlay={ <Tooltip id={ `${conversation.id}-resolved-at` }><TimeAgo date={ conversation.resolved_at } /></Tooltip> }><span className={ `conversation-header-status is-closed${ isFinal ? ' is-final' : '' }` } title={ isFinal ? 'Closed tickets are final. A customer reply opens a new ticket.' : undefined }>{ statusLabel }</span></OverlayTrigger>
                         : <span className="conversation-header-status is-open">{ statusLabel }</span> }
                     { isAiAssigned && <span className="conversation-header-status is-ai">AI</span> }
                 </div>
                 <div className="conversation-header-actions">
-                    { canManage && (conversation.resolved_at
-                        ? <button type="button" className="btn btn-white conversation-header-reopen" title="Reopen conversation" onClick={ () => resolveConversation(conversation, false) }><i className="fe fe-rotate-ccw me-2" aria-hidden="true"></i>Reopen</button>
-                        : <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button>) }
+                    { canManage && !isFinal && (conversation.resolved_at
+                        ? <button type="button" className="btn btn-white conversation-header-reopen" title="Reopen conversation" onClick={ () => resolveConversation(conversation, false).catch(() => {}) }><i className="fe fe-rotate-ccw me-2" aria-hidden="true"></i>Reopen</button>
+                        : <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation).catch(() => {}) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button>) }
                     <button
                         type="button"
                         className="btn btn-white conversation-assistant-toggle"

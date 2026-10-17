@@ -91,7 +91,9 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
   // issued to its envelope sender admits it to that thread; otherwise it is kept
   // apart the same way, and no reply is sent to anybody until an operator chooses.
   const isolated=!trusted&&(unusable||input.senderFailed===true||await isVerifiedCustomerAddress(env,project.project_id,from))
-  const addressedConversation=addressed&&!isolated?await env.DB.prepare('SELECT * FROM conversations WHERE id=? AND project_id=?').bind(addressed,project.project_id).first<any>():null
+  // A Closed ticket is final. Until linked follow-ups exist, mail addressed to one is the
+  // sender's own mail to the support mailbox below: it opens a new ticket, never a refusal.
+  const addressedConversation=addressed&&!isolated?await env.DB.prepare("SELECT * FROM conversations WHERE id=? AND project_id=? AND status_category<>'closed'").bind(addressed,project.project_id).first<any>():null
   if(addressedConversation&&(trusted||!grant)){
    actor=await emailActor(env,project.project_id,addressedConversation,from,trusted,possessed)||(possessed?await preferredAddressActor(env,project.project_id,addressedConversation,from):null)
    if(actor)conversation=addressedConversation
@@ -105,11 +107,11 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
     return {id:messageId,state:'ignored',conversationId:null,duplicate:false,automatic}
    }
    actor={id:contact.id,contactId:contact.id,projectId:project.project_id,role:'contact'}
-   conversation=(prior?.conversation_id?await env.DB.prepare('SELECT * FROM conversations WHERE id=? AND project_id=? AND contact_id=?').bind(prior.conversation_id,project.project_id,contact.id).first<any>():null)||await openEmailConversation(env,project.project_id,contact.id)
+   conversation=(prior?.conversation_id?await env.DB.prepare("SELECT * FROM conversations WHERE id=? AND project_id=? AND contact_id=? AND status_category<>'closed'").bind(prior.conversation_id,project.project_id,contact.id).first<any>():null)||await openEmailConversation(env,project.project_id,contact.id)
    if(!conversation){
     const key=id(),now=Date.now()
     await env.DB.batch([
-     env.DB.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) SELECT ?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM conversations WHERE project_id=? AND contact_id=? AND resolved_at IS NULL)').bind(key,project.project_id,contact.id,now,now,project.project_id,contact.id),
+     env.DB.prepare("INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) SELECT ?,?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM conversations WHERE project_id=? AND contact_id=? AND resolved_at IS NULL AND status_category<>'closed')").bind(key,project.project_id,contact.id,now,now,project.project_id,contact.id),
      env.DB.prepare('UPDATE inbound_emails SET conversation_id=? WHERE id=? AND claim_token=? AND EXISTS(SELECT 1 FROM conversations WHERE id=? AND project_id=?)').bind(key,recordId,claimToken,key,project.project_id),
      trackingStatement(env,key,true),
     ])
@@ -125,10 +127,13 @@ export async function receiveEmail(env:Env,input:IncomingEmail){
    // Stable identities make interrupted local R2/D1 staging repeatable.
    const key=await hashToken(`${project.project_id}:${messageId}:${index}`),objectKey=`${project.project_id}/${conversation.id}/${key}`
    await env.FILES.put(objectKey,file.content,{httpMetadata:{contentType:file.contentType}})
-   await env.DB.prepare('INSERT OR IGNORE INTO media(id,project_id,conversation_id,uploaded_by,object_key,filename,content_type,size,created_at) VALUES(?,?,?,?,?,?,?,?,?)').bind(key,project.project_id,conversation.id,actor.id,objectKey,file.filename,file.contentType,file.content.byteLength,Date.now()).run()
+   // A retry that lands in another conversation (its first one was closed meanwhile) moves the unattached staging with it.
+   await env.DB.prepare('INSERT INTO media(id,project_id,conversation_id,uploaded_by,object_key,filename,content_type,size,created_at) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET conversation_id=excluded.conversation_id,uploaded_by=excluded.uploaded_by,object_key=excluded.object_key WHERE media.message_id IS NULL AND media.project_id=excluded.project_id').bind(key,project.project_id,conversation.id,actor.id,objectKey,file.filename,file.contentType,file.content.byteLength,Date.now()).run()
    mediaIds.push(key)
   }
   const result=await admitMessage(env,{projectId:project.project_id,conversationId:conversation.id,actor,localId,content,expectedRevision:conversation.revision,expectedLastMessageId:conversation.last_message_id,mediaIds,[inboundAuthority]:{sender:from,receiptId:recordId,claimToken,raw,cc:participants,...(possessed?{grant:await hashToken(target.replyToken!)}:{})}})
+  // Closed between routing and admission: a temporary failure, so the retry opens the new ticket.
+  if(result.reason==='ticket_closed_followup_required')throw new HTTPException(503,{message:'The addressed ticket was closed; retry later'})
   if(!result.accepted)throw new Error(result.reason)
   await env.DB.prepare("UPDATE inbound_emails SET state='delivered',message_id=?,error=NULL WHERE id=?").bind(String(result.message!.id),recordId).run()
   await keepReplyTarget(env,project.project_id,actor,input.replyTo,{authenticated,automatic,workspace})

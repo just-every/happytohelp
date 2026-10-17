@@ -4,6 +4,8 @@ import {contactAvailableSql} from './contact-privacy.ts'
 import {tokenGuard,type TokenAuthority} from '../../platform/integration-authority.ts'
 import {authoringSource,authorshipStatement,type Authoring} from '../outcomes/provenance.ts'
 import {trackingStatement} from '../outcomes/state.ts'
+import {requiredToSolve,solving} from '../tickets/fields.ts'
+import {memberAccess} from '../access/gate.ts'
 import {resolvePublicCitations,citationAdmissionGuard,activeSourceProjectSql,type PublicReference} from '../knowledge/public-sources.ts'
 import type { Actor,Env } from '../../platform/env'
 /** Local ids the server mints: `email:` identifies an inbound email claim, `erased:`
@@ -45,6 +47,11 @@ export async function admitMessage(env:Env,input:MessageInput){
  const messageId=crypto.randomUUID(),now=Date.now();const predicates=['c.id=?','c.project_id=?','c.revision=?','c.contact_id=?','c.ticket_version=?',"c.status_category<>'closed'"];const args:unknown[]=[conversationId,projectId,expectedRevision,scope.contact_id,scope.ticket_version]
  if(autoAssign&&scope.group_id){predicates.push('EXISTS(SELECT 1 FROM ticket_group_members WHERE project_id=c.project_id AND group_id=c.group_id AND user_id=?)');args.push(actor.id)}
  if(input.resolve&&!input.generationId){predicates.push('c.resolved_at IS ?','(SELECT MAX(ordinal) FROM conversation_resolutions WHERE conversation_id=c.id) IS ?');args.push(scope.resolved_at,scope.ordinal)}
+ // Reply-and-resolve is a transition into solved: the same required-to-solve fields as every ticket door (tickets/mutate-validation.ts).
+ if(input.resolve&&actor.role!=='contact'&&!input.generationId&&solving(scope.status_category,'solved')){
+  const [definitions,stored]=await env.DB.batch<any>([env.DB.prepare('SELECT * FROM ticket_fields WHERE project_id=?').bind(projectId),env.DB.prepare('SELECT field_id,value_json FROM ticket_field_values WHERE project_id=? AND conversation_id=?').bind(projectId,conversationId)])
+  for(const field of requiredToSolve(definitions.results,Object.fromEntries(stored.results.map((v:any)=>[v.field_id,JSON.parse(v.value_json)])),{},input.tokenAuthority?null:await memberAccess(env.DB,projectId,actor.id))){predicates.push('EXISTS(SELECT 1 FROM ticket_field_values WHERE project_id=c.project_id AND conversation_id=c.id AND field_id=?)');args.push(field)}
+ }
  if(input.tokenAuthority){const guard=tokenGuard(input.tokenAuthority,projectId,'messages:write');predicates.push(`EXISTS(${guard.sql})`,contactAvailableSql());args.push(...guard.params)}else if(input.generationId){predicates.push(`c.assigned_to IS NULL AND ${activeSourceProjectSql('c.project_id')}`)}else if(actor.role==='contact'&&!email){predicates.push("c.contact_id=? AND EXISTS(SELECT 1 FROM contacts contact WHERE contact.id=c.contact_id AND COALESCE(json_extract(contact.metadata_json,'$.is_blocked'),0)!=1)");args.push(actor.contactId||actor.id)}else if(actor.role!=='contact'){predicates.push('EXISTS(SELECT 1 FROM memberships WHERE project_id=c.project_id AND user_id=? AND role=?)');args.push(actor.id,actor.role)}
  if(email){
   predicates.push(`EXISTS(SELECT 1 FROM inbound_emails receipt JOIN email_settings mailbox ON mailbox.project_id=receipt.project_id WHERE receipt.id=? AND receipt.project_id=c.project_id AND receipt.conversation_id=c.id AND receipt.claim_token=? AND receipt.state='processing' AND mailbox.is_enabled=1)`,activeSourceProjectSql('c.project_id'),contactAvailableSql())

@@ -76,6 +76,7 @@ export const Provider = (props) => {
     // conversation id -> project id, so callbacks can address the right connection
     const conversationProjects = useRef({});
     const [ isMainVisible, setIsMainVisible ] = useState(false);
+    const [ resolutionErrors, setResolutionErrors ] = useState({});
     const [ unreadMessages, setUnreadMessages ] = useState([]);
     const isWindowFocused = useWindowFocus();
     const pluginsRef = useRef([]);
@@ -190,11 +191,14 @@ export const Provider = (props) => {
         });
     }
 
+    // Shown optimistically; a refusal restores what the server holds and keeps its message for the header and row.
     const resolveConversation = (conversation, resolved) => {
         if (resolved === undefined) {
             resolved = true;
         }
 
+        const previous = { resolved_at: conversation.resolved_at ?? null };
+        setResolutionErrors(({ [conversation.id]: _, ...rest }) => rest);
         updateConversation(conversation.id, { resolved_at: resolved ? new Date() : null });
 
         return Api.update(`/projects/${ conversation.project_id }/conversations/${ conversation.id }`, { resolved })
@@ -203,7 +207,10 @@ export const Provider = (props) => {
                 sendPluginEvent('resolveConversation', data.data);
             })
             .catch(error => {
-                console.error(error);
+                updateConversation(conversation.id, previous);
+                const message = `Could not ${ resolved ? 'close' : 'reopen' } this conversation: ${ error.message || 'the server refused the change' }.`;
+                setResolutionErrors(errors => ({ ...errors, [conversation.id]: message }));
+                throw Object.assign(error, { displayMessage: message });
             });
     }
 
@@ -579,7 +586,7 @@ export const Provider = (props) => {
             sendPluginEvent('error', {command: 'resolveConversation', message: 'Plugin may resolve only the active conversation'}, event.source);
             return;
         }
-        resolveConversation(conversation, true);
+        resolveConversation(conversation, true).catch(error => sendPluginEvent('error', {command: 'resolveConversation', message: error.displayMessage}, event.source));
     }, 'resolveConversation');
 
     const chatContext = {
@@ -592,6 +599,7 @@ export const Provider = (props) => {
         decrementUnreadMessagesCount,
         updateConversation,
         resolveConversation,
+        resolutionErrors,
         currentAgent,
         agents,
         ais,

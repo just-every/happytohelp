@@ -45,6 +45,29 @@ export async function ticketLifecycle(f){
  assert.equal((await call(`/conversations/${id}/ticket`,{status_id:'open'},'owner','PATCH')).status,409)
  assert.equal((await app.call(`/api/conversations/${id}/messages`,{token:visitor.token,body:{localId:'closed-reply',content:'A final question',expectedRevision:(await get(id)).revision}})).status,409)
  assert.equal((await get(id)).status_category,'closed')
+ // A required field is required to solve, alike on every door; tags, assignment and other edits never wait on it.
+ const required=await ok('/ticket-fields',{name:'Return reason code',type:'text',required:true}),unsolved=await f.create(90)
+ const tag=await ok(`/conversations/${unsolved}/tags`,{name:'Awaiting reason'})
+ await ok(`/conversations/${unsolved}/tags/${tag.id}`,undefined,'owner','DELETE')
+ await ok(`/conversations/${unsolved}`,{agent_id:w.users.operator},'owner','PUT')
+ await patch(unsolved,{priority:'high',status_id:'pending'})
+ const api=await app.ok(`/api/management/projects/${w.projectId}/connections/tokens`,{token:w.tokens.owner,body:{name:'Lifecycle',scopes:['conversations:read','conversations:write']}})
+ const doors={
+  ticket:()=>call(`/conversations/${unsolved}/ticket`,{status_id:'solved'},'owner','PATCH'),
+  close:()=>call(`/conversations/${unsolved}/ticket`,{status_id:'closed'},'owner','PATCH'),
+  legacy:()=>call(`/conversations/${unsolved}`,{resolved:true},'owner','PUT'),
+  api:()=>app.call('/api/v1/conversations/'+unsolved,{method:'PATCH',token:api.token,body:{status_id:'solved'}}),
+  apiResolve:()=>app.call(`/api/v1/conversations/${unsolved}/resolve`,{token:api.token,body:{}}),
+  reply:async()=>app.call(`/api/conversations/${unsolved}/messages`,{token:w.tokens.owner,body:{localId:'solve-without-reason',content:'Your replacement is on its way.',expectedRevision:(await get(unsolved)).revision,resolve:true}}),
+  bulk:async()=>{const result=await ok('/tickets/bulk/apply',{tickets:[{id:unsolved,expected_version:(await get(unsolved)).ticket_version}],changes:{status_id:'solved'}});return {status:result.results[0].status==='invalid'?400:200,data:result.results[0]}},
+ }
+ for(const [door,attempt] of Object.entries(doors)){const refused=await attempt();assert.equal(refused.status,400,door);assert.match(JSON.stringify(refused.data),/Return reason code: Required to solve/,door)}
+ assert.equal((await get(unsolved)).status_category,'pending')
+ assert.equal((await call(`/conversations/${unsolved}/ticket`,{fields:{[required.id]:''}},'owner','PATCH')).status,400)
+ await patch(unsolved,{fields:{[required.id]:'DAMAGED-SEAM'}})
+ const solved=await app.ok(`/api/conversations/${unsolved}/messages`,{token:w.tokens.owner,body:{localId:'solve-with-reason',content:'Your replacement is on its way.',expectedRevision:(await get(unsolved)).revision,resolve:true}})
+ assert.equal(solved.accepted,true);assert.equal((await get(unsolved)).status_category,'solved')
+ await ok(`/ticket-fields/${required.id}`,undefined,'owner','DELETE')
  const log=await app.sql("SELECT * FROM audit_events WHERE project_id=? AND action='ticket.updated'",w.projectId)
  assert.ok(log.length>0)
 }

@@ -182,6 +182,14 @@ body.conversation-workspace #chat {
         overflow-wrap: anywhere;
     }
 
+    // A refused close or reopen, under the header that offered it.
+    .conversation-resolution-error {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 8px 24px;
+        color: var(--danger);
+    }
+
     .conversation-list-error button,
     .conversation-load-error button {
         margin-left: 6px;

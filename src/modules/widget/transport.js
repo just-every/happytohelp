@@ -94,6 +94,15 @@ export class WidgetTransport {
     }
     return this.session;
   }
+  // A closed ticket is final: the server admits the visitor's next turn into a new ticket for them, which this widget follows from then on.
+  follow(conversationId) {
+    if (!conversationId || conversationId === this.conversationId) return false;
+    this.session.conversationId = this.conversationId = conversationId; this.revision = 0; this.lastMessageId = null; this.eventId = 0;
+    localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+    this.onEvent({type: 'session', session: this.session});
+    this.openSocket();
+    return true;
+  }
   // Settings again, when the team's availability changes while the widget is open.
   async refreshConfiguration() {
     if (!this.settingsPath || this.closed) return;

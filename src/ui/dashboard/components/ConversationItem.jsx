@@ -18,6 +18,7 @@ function ConversationItem({ conversation, setConversation }) {
     const {
         setIsMainVisible,
         resolveConversation,
+        resolutionErrors,
         isGlobalInbox,
         getProject,
     } = useContext(ChatContext)
@@ -40,11 +41,13 @@ function ConversationItem({ conversation, setConversation }) {
     const handleResolve = (event, resolved) => {
         event.preventDefault();
         event.stopPropagation();
-        resolveConversation(conversation, resolved);
+        resolveConversation(conversation, resolved).catch(() => {});
     }
 
     const contactName = conversation.contact?.display_name || 'contact';
     const isResolved = Boolean(conversation.resolved_at);
+    const isFinal = conversation.status_category === 'closed';
+    const resolutionError = resolutionErrors?.[conversation.id];
     const actionLabel = isResolved ? 'Reopen' : 'Close';
 
     // The action is a sibling of the row link (a button inside an anchor is invalid) and lives in
@@ -96,13 +99,14 @@ function ConversationItem({ conversation, setConversation }) {
                 </div>
             </div>
         </Link>
-        <OverlayTrigger
+        { !isFinal && <OverlayTrigger
             placement="left"
             overlay={ <Tooltip id={ `${ conversation.id }-resolved` } className={(urlConversationId === conversation.id ? 'tooltip-light' : 'tooltip-dark')}>{ actionLabel }</Tooltip> }>
             <button type="button" className="conversation-item-action btn btn-white" aria-label={ `${ actionLabel } conversation with ${ contactName }` } onClick={ event => handleResolve(event, !isResolved) }>
                 <i className={ `fe ${ isResolved ? 'fe-rotate-ccw' : 'fe-check-circle' }` } aria-hidden="true"></i>
             </button>
-        </OverlayTrigger>
+        </OverlayTrigger> }
+        { resolutionError && urlConversationId !== conversation.id && <p className="conversation-item-error" role="alert">{ resolutionError }</p> }
         </div>
     );
 }

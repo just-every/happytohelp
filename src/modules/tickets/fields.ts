@@ -41,6 +41,19 @@ export function validateFieldChanges(fields:any[],values:Record<string,unknown>,
   if(!fieldAllowed(field,access)||!fieldAllowed(field,access,true))throw new HTTPException(403,{message:'This field is not writable by your role'})
   changes[id]=validateFieldValue(field,value)
  }
- for(const field of fields)if(field.required&&fieldAllowed(field,access)&&fieldAllowed(field,access,true))validateFieldValue(field,field.id in changes?changes[field.id]:values[field.id])
  return changes
 }
+const empty=(value:unknown)=>value===null||value===undefined||value===''||Array.isArray(value)&&!value.length
+/** Required fields are required to solve: a change into solved or closed needs a value in
+ * every required field the actor may write. Returns the fields whose stored value the
+ * write must still find, so a value removed concurrently cannot slip through. */
+export function requiredToSolve(fields:any[],values:Record<string,unknown>,changes:Record<string,unknown>,access:MemberAccess|null){
+ const stored:string[]=[]
+ for(const field of fields){
+  if(!field.required||!fieldAllowed(field,access)||!fieldAllowed(field,access,true))continue
+  if(empty(field.id in changes?changes[field.id]:values[field.id]))invalid(`${field.name}: Required to solve`)
+  if(!(field.id in changes))stored.push(field.id)
+ }
+ return stored
+}
+export const solving=(from:string,to:string)=>from!==to&&['solved','closed'].includes(to)

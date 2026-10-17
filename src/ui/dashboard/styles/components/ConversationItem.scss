@@ -57,3 +57,11 @@
     background-color: var(--surface);
     border-color: var(--rule); // $gray-600
 }
+
+.conversation-item-error {
+    margin: 4px 12px 8px;
+    color: var(--danger);
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}

@@ -17,6 +17,7 @@ ConversationForm.propTypes = {
     content: PropTypes.string,
     conversationId: PropTypes.string,
     files: PropTypes.array,
+    finalReason: PropTypes.string,
     focusRequest: PropTypes.number,
     isEnabled: PropTypes.bool,
     isResolved: PropTypes.bool,
@@ -34,6 +35,7 @@ export default function ConversationForm({
     content,
     conversationId,
     files,
+    finalReason,
     focusRequest,
     isEnabled,
     isResolved,
@@ -47,12 +49,14 @@ export default function ConversationForm({
     projectId,
 }) {
     const [ helper, setHelper ] = useState(null);
+    const [ sendError, setSendError ] = useState('');
     const composerRef = useRef(null);
     const textareaRef = useRef(null);
     const hasContent = Boolean(content?.trim() || files.length);
-    const isComposerLocked = Boolean(loadingContent);
+    const isLoading = Boolean(loadingContent);
+    const isComposerLocked = isLoading || Boolean(finalReason);
     const canSend = Boolean(isEnabled && !helper && !isComposerLocked && hasContent);
-    const textareaContent = isComposerLocked && loadingContent !== '-loading-' ? loadingContent : content;
+    const textareaContent = isLoading && loadingContent !== '-loading-' ? loadingContent : content;
 
     useEffect(() => {
         onAssistantDisabledChange(Boolean(helper));
@@ -79,9 +83,12 @@ export default function ConversationForm({
     const sendMessage = sendAndClose => {
         if (!canSend) return;
 
+        setSendError('');
         onSendMessage(content, sendAndClose).then(() => {
             onContentChange('');
-        });
+        }, error => setSendError(error.data?.reason === 'ticket_closed_followup_required'
+            ? 'Not sent: this ticket was closed and is final. A customer reply opens a new ticket.'
+            : `Not sent: ${ error.message || 'the server refused the reply' }.`));
     };
 
     const handleKeyDown = event => {
@@ -149,6 +156,7 @@ export default function ConversationForm({
         <div ref={ composerRef } className="chat-footer container-xxl" onClick={ handleComposerSurfaceClick }>
             <div className="chat-entry border-top border-light d-flex flex-row align-items-stretch w-100">
                 <div className="flex-grow-1 d-flex flex-column">
+                    { sendError && <p className="conversation-composer__error" role="alert">{ sendError }</p> }
                     <div className={ `chat-entry-form pt-3 pb-1${ loadingContent.length > 0 ? (loadingContent === '-loading-' ? ' loading loading-start' : ' loading') : '' }` }>
                         { helper === 'macros' && <MacrosPicker projectId={ projectId } onPicked={ insertReply } /> }
                         { helper === 'articles' && <ArticlePicker projectId={ projectId } conversationId={ conversationId } onPicked={ insertReply } /> }
@@ -159,7 +167,7 @@ export default function ConversationForm({
                         <TextareaAutosize
                             ref={ textareaRef }
                             className="form-control form-control-flush"
-                            placeholder="Type your reply…"
+                            placeholder={ finalReason || 'Type your reply…' }
                             aria-label="Reply to conversation"
                             onKeyDown={ handleKeyDown }
                             onChange={ event => onContentChange(event.target.value) }
@@ -167,6 +175,7 @@ export default function ConversationForm({
                             minRows={ 1 }
                             maxRows={ 10 }
                             readOnly={ isComposerLocked }
+                            disabled={ Boolean(finalReason) }
                         />
                     </div>
 
@@ -188,7 +197,7 @@ export default function ConversationForm({
                                     disabled={ !isEnabled || isComposerLocked }
                                     hasHelper={ Boolean(helper) }
                                     canSend={ canSend }
-                                    canClose={ !isResolved }
+                                    canClose={ !isResolved && !finalReason }
                                     onAttach={ handleFileSelect }
                                     onSaved={ toggleMacros }
                                     onArticle={ () => setHelper(current => current === 'articles' ? null : 'articles') }

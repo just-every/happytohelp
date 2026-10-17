@@ -28,6 +28,11 @@ export async function workerJourney(){
   await DB.prepare("UPDATE inbound_emails SET created_at=created_at-180000 WHERE id='<crashed@example.com>'").run()
   assert.equal(await crashed(),undefined);assert.equal(await crashed(),undefined)
   assert.equal((await DB.prepare('SELECT count(*) n FROM messages WHERE local_id=?').bind((await m.claim('crashed@example.com')).local_id).first()).n,1)
+  // A reply to a Closed ticket is never refused: it opens a new ticket for the same customer.
+  await DB.prepare("UPDATE conversations SET status_id='closed',status_category='closed' WHERE id=?").bind(c.id).run()
+  assert.equal(await deliver('after-close@example.com',reply,'Following up after you closed this'),undefined)
+  const followUp=await DB.prepare("SELECT c.contact_id,i.state FROM inbound_emails i JOIN conversations c ON c.id=i.conversation_id JOIN messages m ON m.id=i.message_id WHERE i.id='<after-close@example.com>' AND m.content='Following up after you closed this' AND c.id<>?").bind(c.id).first()
+  assert.deepEqual(followUp,{contact_id:c.contact_id,state:'delivered'})
  }finally{await m.close()}
 }
 

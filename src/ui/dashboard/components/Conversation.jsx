@@ -32,6 +32,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
         lastConnected,
         transcriptError,
         retryTranscriptMessages,
+        resolutionErrors,
     } = useContext(ChatContext);
     const assistant = useConversationAssistant();
     const [ isSending, setIsSending ] = useState(false);
@@ -262,6 +263,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         isLoading={ isLoading || isLoadingMore }
                         atTop={ atTop }
                     />
+                    { resolutionErrors?.[conversationId] && <p className="conversation-load-error conversation-resolution-error" role="alert">{ resolutionErrors[conversationId] }</p> }
 
                     <ScrollToBottom className="chat-content" followButtonClassName="follow-button-hide" forwardRef={ infiniteRef }>
                         { loadError && <p className="conversation-load-error px-2 py-2" role="alert">
@@ -293,6 +295,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         onAssistantDisabledChange={ setIsAssistantDisabled }
                         files={ draftFiles }
                         isResolved={ Boolean(conversation.resolved_at) }
+                        finalReason={ conversation.status_category === 'closed' ? 'This ticket is closed and final, so it takes no more replies. A customer reply opens a new ticket.' : null }
                         isEnabled={ isComposerEnabled }
                     /> : <>
                         { canFollow && <FollowControl projectId={ conversationProjectId } conversationId={ conversationId } /> }

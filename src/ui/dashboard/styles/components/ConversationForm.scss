@@ -275,3 +275,11 @@
         background-position: -200% 0;
     }
 }
+
+.conversation-composer__error {
+    margin: 12px 0 0;
+    color: var(--danger);
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}

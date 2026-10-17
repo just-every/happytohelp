@@ -58,6 +58,21 @@ export async function ticketsBrowser({count=12,installation}={}){
   await bulk.getByLabel('Assign to',{exact:true}).selectOption({label:owner.ownerName});await bulk.getByLabel('Status',{exact:true}).selectOption({label:'Pending'});await bulk.getByLabel('Add tags',{exact:true}).selectOption({label:'Needs return label'});
   await bulk.getByRole('button',{name:'Preview changes',exact:true}).click();await bulk.getByText('Preview — no changes applied',{exact:true}).waitFor();await capture('12-bulk-preview');
   await bulk.getByRole('button',{name:'Apply to eligible tickets',exact:true}).click();await bulk.getByText('Bulk update results',{exact:true}).waitFor();await capture('13-bulk-results');
+  // A Closed ticket is final: no Reopen or Close, and the composer says why it takes no reply.
+  const closed=fixture.tickets.find(ticket=>ticket.status_category==='closed')
+  await page.goto(`${runtime.origin}/projects/${projectId}/conversations/${closed.id}`);await page.locator('.conversation-header-status').filter({hasText:'Closed · final'}).waitFor()
+  assert.equal(await page.locator('.conversation-header-reopen, .conversation-header-close').count(),0)
+  const composer=page.getByLabel('Reply to conversation',{exact:true});assert.ok(await composer.isDisabled());assert.match(await composer.getAttribute('placeholder'),/closed and final/)
+  await capture('16-closed-final')
+  // A refused change rolls the header back and shows the server's reason.
+  const required=(await fixture.api(base+'/ticket-fields',{name:'Return reason code',type:'text',required:true})).data,open=fixture.tickets.find(ticket=>ticket.status_category==='open')
+  const unchanged=(await fixture.api(`${base}/conversations/${open.id}/ticket`)).data.status_category
+  await page.goto(`${runtime.origin}/projects/${projectId}/conversations/${open.id}`);await page.locator('.conversation-header-close').click()
+  await page.getByRole('alert').filter({hasText:'Could not close this conversation: Return reason code: Required to solve.'}).waitFor();assert.equal(await page.getByRole('alert').count(),1)
+  await page.locator('.conversation-header-status').filter({hasText:/^Open$/}).waitFor();await page.locator('.conversation-header-close').waitFor()
+  assert.equal((await fixture.api(`${base}/conversations/${open.id}/ticket`)).data.status_category,unchanged)
+  await capture('17-refused-close')
+  await fixture.api(`${base}/ticket-fields/${required.id}`,undefined,'DELETE')
   await page.goto(runtime.origin+'/docs/tickets');await page.getByRole('heading',{name:'Tickets',level:1,exact:true}).waitFor();await capture('14-ticket-docs');
   await fixture.api(`/api/management/projects/${projectId}/contacts/${fixture.tickets[0].visitor.contactId}/erase`,{},'POST');
   await page.goto(`${runtime.origin}/projects/${projectId}/contacts/${fixture.tickets[0].visitor.contactId}`);await page.getByText('Personal data erased.',{exact:true}).waitFor();await capture('15-erasure');

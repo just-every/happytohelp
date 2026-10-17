@@ -21,13 +21,15 @@ export async function widgetEventsJourney(){
     INSERT INTO contacts(id,project_id,name,created_at) VALUES('visitor','p','Visitor',1),('other','p','Other',1),('foreign','q','Foreign',1);
     INSERT INTO users VALUES('owner','owner@example.com','Owner',1);
     INSERT INTO memberships VALUES('p','owner','owner');
-    INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('own','p','visitor',1,1),('other','p','other',1,1),('foreign','q','foreign',1,1);`)
+    INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES('own','p','visitor',1,1),('other','p','other',1,1),('foreign','q','foreign',1,1),('closed','p','visitor',1,1);
+    UPDATE conversations SET status_id='pending',status_category='pending' WHERE id='own';
+    UPDATE conversations SET status_id='closed',status_category='closed',resolved_at=1 WHERE id='closed';`)
   for (const [token, actor, role, contact] of [['contact-token','visitor','contact','visitor'], ['owner-token','owner','owner',null]]) {
     await db.prepare('INSERT INTO sessions VALUES(?,?,?,?,?,?,NULL)')
       .bind(createHash('sha256').update(token).digest('hex'), actor, 'p', role, contact, Date.now() + 600000).run()
   }
   const buttons = JSON.stringify([{ id: 'policy', label: 'Show policy', action: 'send', text: 'Show policy' }])
-  for (const [id, subject] of [['insight','visitor'], ['other-insight','other']]) {
+  for (const [id, subject] of [['insight','visitor'], ['other-insight','other'], ['closed-insight','visitor']]) {
     await db.prepare('INSERT INTO context_insights VALUES(?,?,?,?,?,?,?,?,NULL)')
       .bind(id, 'p', subject, 'help', 'How can we help?', buttons, '[]', 1).run()
   }
@@ -63,7 +65,19 @@ export async function widgetEventsJourney(){
   assert.equal((await db.prepare('SELECT count(*) n FROM messages').first()).n, 2)
   assert.equal((await db.prepare('SELECT count(*) n FROM conversation_outbox').first()).n, 2)
   assert.equal((await db.prepare("SELECT revision FROM conversations WHERE id='own'").first()).revision, 2)
+  // The visitor's choice is a customer reply: Pending returns to Open, attributed to the visitor.
+  assert.equal((await db.prepare("SELECT status_category FROM conversations WHERE id='own'").first()).status_category, 'open')
+  assert.ok(await db.prepare("SELECT 1 FROM ticket_history WHERE conversation_id='own' AND actor_id='visitor' AND actor_type='contact' AND source='customer_reply' AND json_extract(changes_json,'$.status_id.to')='open'").first())
   assert.equal((await call('useInsight', { ...insightCommand, local_id: 'different-contact' })).status, 409)
+  // On a Closed ticket the choice opens a new ticket for the visitor, and a replay returns to it.
+  const closedCommand = { insight_id: 'closed-insight', button_id: 'policy', ai_message: { local_id: 'closed-ai' }, local_id: 'closed-contact' }
+  const followed = await (await call('useInsight', closedCommand, 'closed')).json()
+  assert.equal(followed.accepted, true); assert.notEqual(followed.conversationId, 'closed')
+  assert.equal((await db.prepare('SELECT contact_id FROM conversations WHERE id=?').bind(followed.conversationId).first()).contact_id, 'visitor')
+  assert.equal((await db.prepare('SELECT count(*) n FROM messages WHERE conversation_id=?').bind(followed.conversationId).first()).n, 2)
+  const followReplay = await (await call('useInsight', closedCommand, 'closed')).json()
+  assert.equal(followReplay.duplicate, true); assert.equal(followReplay.conversationId, followed.conversationId)
+  assert.equal((await db.prepare("SELECT revision,status_category FROM conversations WHERE id='closed'").first()).status_category, 'closed')
   assert.equal((await call('markAsRead')).status, 200)
   assert.equal((await db.prepare("SELECT revision FROM conversation_reads WHERE conversation_id='own'").first()).revision, 2)
   assert.equal((await call('instruction', { opened: false })).status, 200)
@@ -126,7 +140,7 @@ export async function widgetEventsJourney(){
   await db.exec("UPDATE project_settings SET settings_json='{}' WHERE project_id='p';")
   await db.exec("UPDATE sessions SET revoked_at=1 WHERE actor_id='visitor';")
   assert.equal((await call('markAsRead')).status, 401)
-  assert.equal((await db.prepare('SELECT count(*) n FROM messages').first()).n, 2)
+  assert.equal((await db.prepare('SELECT count(*) n FROM messages').first()).n, 4)
   assert.equal((await db.prepare('SELECT state FROM ai_generations WHERE id=?').bind(handoff.id).first()).state,'queued','authority refusals do not alter the admitted handoff')
  }finally{await app.close()}
 }

@@ -208,7 +208,7 @@ export function ConnectProvider({children, open, setOpen, setInsightOpen, onSett
     Collector.setCollectorEnabled(false);
     const aiLocalId = uuidv4(), contactLocalId = uuidv4();
     return sendMessage('useInsight', {insight_id: value.id, ai_message: {local_id: aiLocalId}, contact_message: {local_id: contactLocalId, content: button.text}}).then(async result => {
-      if (result.accepted) { setConversationSettings(current=>({...current,ai_id:result.ai_id})); setInsight(null); await transport.current.refresh(); }
+      if (result.accepted) { setConversationSettings(current=>({...current,ai_id:result.ai_id})); setInsight(null); if (transport.current.follow(result.conversationId)) setMessages([]); await transport.current.refresh(); }
     }).catch(() => {});
   };
   return <ConnectContext.Provider value={{monitoring, setMonitoringConsent, open, resolution, setResolution, connectionState, retryConnection, assertConnected, contactAuth, setContactAuth, sendMessage, conversationId, setConversationId, setFilteredMessages, mainView, setMainView, messages, setMessages, agentTyping, lastConnected, insight, thinking, sendInsight, conversationSettings, setConversationSettings, localContact, setLocalContact, contact, setContact, connectErrors, getCurrentAgent, lastResponse, uploadMedia: file => transport.current.upload(file)}}>{children}</ConnectContext.Provider>;

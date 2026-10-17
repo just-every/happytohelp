@@ -59,12 +59,12 @@ test('project snapshot → attachment bytes → native import → safe replay', 
       const chunkSnapshot=join(output,`project-${index+1}.snapshot`),chunkImport=join(output,`project-${index+1}.import`);
       await run('scripts/export-legacy.mjs',[...snapshotArgs,'--chunk-bytes','4096','--output',chunkSnapshot],env);
       await run('scripts/export-legacy.mjs',['attachments','--input',chunkSnapshot,'--objects-dir',objectDirectory,'--output',chunkImport]);
-      const chunked=JSON.parse(await run('scripts/import-legacy.mjs',['--file',chunkImport,'--apply','--persist-to',persist]));
+      const chunked=JSON.parse(await run('scripts/import-legacy.mjs',['--package',chunkImport,'--apply','--persist-to',persist]));
       const first=JSON.parse(await run('scripts/import-legacy.mjs',['--file',file,'--apply','--persist-to',persist]));
       const replay=JSON.parse(await run('scripts/import-legacy.mjs',['--file',file,'--apply','--persist-to',persist]));
       assert.equal(chunked.sourceRows,first.sourceRows);assert.equal(chunked.mappedRows,first.mappedRows);assert.equal(chunked.objects,1);
       assert.equal(first.applied,first.sourceRows);assert.equal(replay.applied,0);assert.equal(replay.replayed,first.sourceRows);
-      const chunkReplay=JSON.parse(await run('scripts/import-legacy.mjs',['--file',chunkImport,'--apply','--persist-to',persist]));
+      const chunkReplay=JSON.parse(await run('scripts/import-legacy.mjs',['--package',chunkImport,'--apply','--persist-to',persist]));
       assert.equal(chunkReplay.applied,0);assert.equal(chunkReplay.replayed,first.sourceRows);
       results.push({projectId,source:raw.source.rowCounts,first,replay,chunked,chunkReplay});files.push(file);
       if(index===0){
@@ -73,7 +73,7 @@ test('project snapshot → attachment bytes → native import → safe replay', 
         await run('scripts/export-legacy.mjs',['snapshot','--project',projectId,'--revision','fixture-legacy-schema','--ai-model','gpt-5.6-luna','--defer-mail-domain','--chunk-bytes','4096','--output',deferred],env);
         await run('scripts/export-legacy.mjs',['attachments','--input',deferred,'--objects-dir',objectDirectory,'--output',deferredImport]);
         await run('node_modules/wrangler/bin/wrangler.js',['d1','migrations','apply','DB','--local','--persist-to',deferredState]);
-        await run('scripts/import-legacy.mjs',['--file',deferredImport,'--apply','--persist-to',deferredState]);
+        await run('scripts/import-legacy.mjs',['--package',deferredImport,'--apply','--persist-to',deferredState]);
         const {getPlatformProxy}=await import('wrangler');const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(deferredState,'v3')}});
         try{
           const email=await proxy.env.DB.prepare('SELECT * FROM email_settings WHERE project_id=?').bind(projectId).first();

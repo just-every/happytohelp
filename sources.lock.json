@@ -1485,7 +1485,7 @@
       "executable": false
     },
     "docs/LEGACY-EXPORT.md": {
-      "sha256": "7e8bed9182ee6746ab74bb56427f794064e5f402c802b5e800fa028af1d2dd16",
+      "sha256": "bc8bc8ae1fbe330ccc4db45997a1eddac182b576e2d5f4f344c072c3f33c38ff",
       "executable": false
     },
     "docs/licenses/base-MIT.txt": {
@@ -2484,14 +2484,6 @@
       "sha256": "69c1524ef49e0e902aa0b653bacc6819bf3d945b67c2328d0e6b13dbbe27df59",
       "executable": false
     },
-    "scripts/legacy-export/import-objects.mjs": {
-      "sha256": "fa5ed80999c5a69c017beb666557cfdc91f14740123dd06046e673002194fdd3",
-      "executable": false
-    },
-    "scripts/legacy-export/import-package.mjs": {
-      "sha256": "2f6c5241401848b09c738cf381ab0d9f5d06725a5a019e8c36aa0103b26e7505",
-      "executable": false
-    },
     "scripts/legacy-export/mysql.mjs": {
       "sha256": "945cc8d4ed8acdfbe6722f0e1a91041640abf031c5759f2a49a30c9378bc1c35",
       "executable": false
@@ -2545,7 +2537,7 @@
       "executable": false
     },
     "scripts/legacy-import/package.mjs": {
-      "sha256": "8d66fc42e4e9c0f26855b191a90d012a44965a371a804e94e45f28a6d35c891f",
+      "sha256": "5f361ecc9a7374c792c871ca4f8593ebd958b6e579abece29ede74de6147b587",
       "executable": false
     },
     "scripts/legacy-import/target.mjs": {
@@ -8677,7 +8669,7 @@
       "executable": false
     },
     "tests/helpers/legacy-package.mjs": {
-      "sha256": "2cf535f7e31d90844aa33cee11b156d59d997b0a3fd41dcfbe2b645227cd8f5a",
+      "sha256": "ac20f63488cbb9fd117226c3fb16d71b6f4b43f856c55036cddd0cb3d4c726b7",
       "executable": false
     },
     "tests/helpers/mail-provider-network.mjs": {
@@ -8989,7 +8981,7 @@
       "executable": false
     },
     "tests/journeys/legacy.mjs": {
-      "sha256": "a0b5945180593564856d61cf9eb4623128547aebe7c04b32e573a50ec14ab121",
+      "sha256": "3678b2fa2f0abe67b9d6333847421590b1017046240c951cf5a451bc4a52b078",
       "executable": false
     },
     "tests/journeys/move-in-admission.mjs": {
@@ -9053,7 +9045,7 @@
       "executable": false
     },
     "tests/legacy-export.mjs": {
-      "sha256": "bead5865f0329ad8da44d6687f95f6b94ca322518c03b6101a9bcaa1eaccf504",
+      "sha256": "8c3c2ad4b096f27e26cb5d80c95d444dc97ea3a7e54a31cca692eb19631f981d",
       "executable": false
     },
     "tests/legacy-export/assertions.mjs": {

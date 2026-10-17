@@ -2,6 +2,7 @@ import {open,readFile,stat} from 'node:fs/promises';
 import {constants,createReadStream} from 'node:fs';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
+import {classifySnapshot} from '../legacy-export/secrets.mjs';
 
 // The chunked package written by scripts/export-legacy.mjs: manifest.json, 4 MiB
 // row chunks, the context parts native mapping reads across tables, and one file
@@ -33,10 +34,12 @@ export async function readPart(root,part){
 
 export async function fileSha256(file){const hash=createHash('sha256');for await(const chunk of createReadStream(file))hash.update(chunk);return hash.digest('hex');}
 
-/** Check every file before the first write, one chunk in memory at a time. */
+/** Check every file before the first write, one chunk in memory at a time. The
+ * exporter's validator runs again on every part: a credential shape, an omitted
+ * table or a secret-named column refuses the whole package. */
 export async function verifyPackage(root,manifest){
   const counts={};
-  for(const part of [...manifest.chunks,...manifest.context]){const rows=await readPart(root,part);if(manifest.chunks.includes(part))counts[part.table]=(counts[part.table]||0)+rows.length;}
+  for(const part of [...manifest.chunks,...manifest.context]){const rows=await readPart(root,part);classifySnapshot({tables:{[part.table]:rows}});if(manifest.chunks.includes(part))counts[part.table]=(counts[part.table]||0)+rows.length;}
   for(const [table,count]of Object.entries(manifest.source.rowCounts))if((counts[table]||0)!==count)throw Error(`Package table count mismatch: ${table}`);
   for(const table of Object.keys(counts))if(!Object.hasOwn(manifest.source.rowCounts,table))throw Error(`Unexpected source table in package: ${table}`);
   if(!manifest.attachmentsComplete)throw Error('Package requires its exported attachment bytes');

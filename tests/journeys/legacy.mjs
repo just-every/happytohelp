@@ -63,11 +63,11 @@ test('the legacy command plans without writing and applies remotely only with na
 })
 
 test('a chunked legacy package imports one chunk at a time into the same native rows as the whole export; a damaged package writes nothing, a dropped connection resumes and a rerun replays every row',async()=>{
- const {bundle,media,date}=await legacyBundle(),scratch=await mkdtemp(join(tmpdir(),'h2h-legacy-package-'))
+ const {bundle:source,media,date}=await legacyBundle(),scratch=await mkdtemp(join(tmpdir(),'h2h-legacy-package-'))
  // Chunks of one row: the earliest message arrives last, a legacy widget delivered one local ID twice, and notes and assignments arrive as legacy events.
- bundle.tables.messages.push({id:'m0',project_id:'p',conversation_id:'conv',contact_id:'c',local_id:'widget-retry',content:'Earliest message',created_at:'2025-12-31T23:59:59.000Z'},{id:'m3',project_id:'p',conversation_id:'conv',contact_id:'c',local_id:'widget-retry',content:'Repeated delivery',created_at:'2026-01-01T00:00:02.000Z'})
- bundle.tables.events=[{id:'event-note',type:'INTERNAL_NOTE',conversation_id:'conv',agent_id:'u',payload:'Private package note',created_at:date},{id:'event-assigned',type:'AGENT_ASSIGNED',conversation_id:'human-conv',agent_id:'u',payload:'{"agent_id":"u"}',created_at:date}]
- const root=join(scratch,'package'),{manifestSha256}=await writeLegacyPackage(root,bundle,{rowsPerChunk:1}),whole=await startApp(),app=await startApp()
+ source.tables.messages.push({id:'m0',project_id:'p',conversation_id:'conv',contact_id:'c',local_id:'widget-retry',content:'Earliest message',created_at:'2025-12-31T23:59:59.000Z'},{id:'m3',project_id:'p',conversation_id:'conv',contact_id:'c',local_id:'widget-retry',content:'Repeated delivery',created_at:'2026-01-01T00:00:02.000Z'})
+ source.tables.events=[{id:'event-note',type:'INTERNAL_NOTE',conversation_id:'conv',agent_id:'u',payload:'Private package note',created_at:date},{id:'event-assigned',type:'AGENT_ASSIGNED',conversation_id:'human-conv',agent_id:'u',payload:'{"agent_id":"u"}',created_at:date}]
+ const root=join(scratch,'package'),{manifestSha256,bundle}=await writeLegacyPackage(root,source,{rowsPerChunk:1}),whole=await startApp(),app=await startApp()
  try{
   await importLegacy({DB:whole.db,FILES:await whole.files},bundle)
   const env={DB:app.db,FILES:await app.files},total=Object.values(bundle.tables).flat().length

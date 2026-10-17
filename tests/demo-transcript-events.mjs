@@ -2,7 +2,8 @@ import {registerHooks} from 'node:module';
 import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
-registerHooks({resolve(s,c,next){if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'.ts',c.parentURL);if(existsSync(u))return next(u.href,c)}return next(s,c)}});
+// Node has no Workers runtime module; the demo guard reads only RER_DEMO from it, which is off here.
+registerHooks({resolve(s,c,next){if(s==='cloudflare:workers')return{url:'data:text/javascript,export const env={}',shortCircuit:true};if(s.startsWith('.')&&c.parentURL){const u=new URL(s+'.ts',c.parentURL);if(existsSync(u))return next(u.href,c)}return next(s,c)}});
 const {dashboard}=await import('../src/modules/management/dashboard.ts');
 const {hashToken}=await import('../src/platform/auth.ts');
 const {bucketData}=await import('../src/modules/management/buckets.ts');

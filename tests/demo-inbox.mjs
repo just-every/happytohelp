@@ -3,7 +3,8 @@ import { registerHooks } from 'node:module';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-registerHooks({resolve(specifier, context, next) { if (specifier.startsWith('.') && context.parentURL) { const url = new URL(specifier + '.ts', context.parentURL); if (existsSync(url)) return next(url.href, context); } return next(specifier, context); }});
+// Node has no Workers runtime module; the demo guard reads only RER_DEMO from it, which is off here.
+registerHooks({resolve(specifier, context, next) { if (specifier === 'cloudflare:workers') return { url: 'data:text/javascript,export const env={}', shortCircuit: true }; if (specifier.startsWith('.') && context.parentURL) { const url = new URL(specifier + '.ts', context.parentURL); if (existsSync(url)) return next(url.href, context); } return next(specifier, context); }});
 const { demoStories, demoStoryBaselineMessageCounts } = await import('../src/modules/management/demo-inbox-content.ts');
 const { demoInbox } = await import('../src/modules/management/demo-inbox.ts');
 const { dashboard } = await import('../src/modules/management/dashboard.ts');

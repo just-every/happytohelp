@@ -3046,7 +3046,7 @@
       "executable": false
     },
     "src/modules/access/route-permissions.ts": {
-      "sha256": "d7574062da6e4a30674d45a661f7cdac5c2a1797383e13ae36889bdbed814597",
+      "sha256": "3e41a01db787bbbdb7d9c6d35f3250b16fafb9e8726216d6c2127f2e60646a08",
       "executable": false
     },
     "src/modules/access/routes.ts": {
@@ -5166,7 +5166,7 @@
       "executable": false
     },
     "src/modules/move-in/planning-state.ts": {
-      "sha256": "a81989977460b34a66e8b17a1d537d5b00c3382845de32592466556f216b26a3",
+      "sha256": "eca4f88c11e3bd657c974fce4aea928ad6fb77681bc2210c0814fcc4765baa03",
       "executable": false
     },
     "src/modules/move-in/plans.ts": {
@@ -8486,7 +8486,7 @@
       "executable": false
     },
     "tests/demo-inbox.mjs": {
-      "sha256": "bc5dba0f5e3ad60f9dc7d544bf639e33d69428ef5d85a94e46e793b9effce419",
+      "sha256": "219788c0545dc76d31a20a4051eebcb60299358d572c321b2dbbbeeb58673fc2",
       "executable": false
     },
     "tests/demo-knowledge-activation.mjs": {
@@ -8494,7 +8494,7 @@
       "executable": false
     },
     "tests/demo-transcript-events.mjs": {
-      "sha256": "f2dbd83d74c90a2a848e3862329b86f9e944ba04448b008196fd03107a36b98e",
+      "sha256": "e4fd77d39ed01872fe6c8d367882697d3dea19b373a340cc2e7a9b8a6714d58e",
       "executable": false
     },
     "tests/eval-harness/fixtures/assist-human-voice.json": {
@@ -9446,7 +9446,7 @@
       "executable": false
     },
     "tests/journeys/runtime.mjs": {
-      "sha256": "582b961e97cc4eda2535e7d5918178c9d24914a1e9207cb93ef1bcf84c8b1b17",
+      "sha256": "b2088b852c1701e7da40ec9973e31dc1c820f88f80b8c33e918f2307f153d0f5",
       "executable": false
     },
     "tests/journeys/upgrade-nightly.mjs": {

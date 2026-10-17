@@ -6,13 +6,8 @@ import { archiveOutputGuard } from '@runeditrun/rer/archive-output'
 import { reproducibleOutput } from './scripts/delivery/reproducible-output.ts'
 import { workspaceModulePreloads } from './scripts/delivery/module-preloads.ts'
 import { replyIconAssets } from './scripts/delivery/reply-icons.ts'
-import { buildInputs } from './scripts/delivery/build-inputs.ts'
 import { docsSite } from './src/ui/docs/build/plugin.ts'
 import {widgetDevAsset} from './scripts/widget-dev-asset'
-import { demoSockets } from './src/vendor/base/modules/demo/vite.mjs'
-
-// `rer demo` switches reach only the vite dev entry, never a build.
-const local = (name: string) => process.env[name] ? { [name]: process.env[name] } : {}
 
 // Projects and the other signed-in pages already import WorkspacePages. Keep
 // that frame with the inbox working set so genuine workspace startup loads it
@@ -185,7 +180,7 @@ export default defineConfig(({ command, isPreview }) => {
    deny: ['**/.rer/**', '**/.seed/**', '**/exports/**', '**/*.rer'],
   },
  },
- plugins: [demoSockets(),buildInputs(),widgetDevAsset(localOrigin),replyIconAssets(),{
+ plugins: [widgetDevAsset(localOrigin),replyIconAssets(),{
   name: 'connector-download-headers',
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
@@ -198,5 +193,5 @@ export default defineConfig(({ command, isPreview }) => {
       next()
     })
   },
-}, cloudflare({ ...(localOrigin?{config:{main:'src/dev/server.ts',vars:{RER_DEV_KEY:process.env.RER_DEV_KEY||'',RER_DEV_IDENTITY:process.env.RER_DEV_IDENTITY||'on',...local('RER_DEMO'),...local('RER_DEMO_EXPIRES')}}}:{}), persistState: { path: process.env.RER_STATE_DIR ?? '.wrangler/state' }, remoteBindings: false, configPath: process.env.H2H_WRANGLER_CONFIG, viteEnvironment: { name: 'ssr' } }), docsSite(), tanstackStart(), react(), workspaceModulePreloads(), reproducibleOutput(), archiveOutputGuard()] };
+}, cloudflare({ ...(localOrigin?{config:{main:'src/dev/server.ts',vars:{RER_DEV_KEY:process.env.RER_DEV_KEY||'',RER_DEV_IDENTITY:process.env.RER_DEV_IDENTITY||'on'}}}:{}), remoteBindings: false, configPath: process.env.H2H_WRANGLER_CONFIG, viteEnvironment: { name: 'ssr' } }), docsSite(), tanstackStart(), react(), workspaceModulePreloads(), reproducibleOutput(), archiveOutputGuard()] };
 })

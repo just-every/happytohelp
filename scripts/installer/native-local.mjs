@@ -52,8 +52,7 @@ export async function nativeOwner(context){
  const response=await request('/api/identity/setup');
  if(!response.ok)throw context.fail('setup');
  if(!(await response.json()).available){await context.store.step('Existing owner and workspace preserved');return;}
- // `rer demo` passes no setup answers: its throwaway copy claims the checkout's saved owner.
- const input=context.demo?{...context.vars,...context.input}:context.input;
+ const input=context.input;
  // Optional answers that were not given are left out, so the server derives them. Base fills an unanswered OWNER_NAME with its
  // declared default, which is empty here, so an empty answer means not given.
  const answers={name:input.WORKSPACE_NAME,ownerName:input.OWNER_NAME,email:input.OWNER_EMAIL,password:input.OWNER_PASSWORD,allowedOrigin:input.WIDGET_ORIGIN,primaryColor:input.PRIMARY_COLOR,setupToken:context.vars.H2H_SETUP_TOKEN};

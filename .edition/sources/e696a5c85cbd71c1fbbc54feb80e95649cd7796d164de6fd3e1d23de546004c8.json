@@ -1,8 +1,8 @@
 {
-  "key": "a2b3cbc9f88ebac62450489a3ffcf30e9b2f06b114247bb5f2bd8965caf8e1a8",
+  "key": "e696a5c85cbd71c1fbbc54feb80e95649cd7796d164de6fd3e1d23de546004c8",
   "origin": {
     "repository": "https://github.com/runeditrun/base.git",
-    "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+    "revision": "6b3e0f931ce69465496e2c4b05cd4bcaf530fff2",
     "path": ".",
     "paths": [
       "modules/delivery-producer/declarations.mjs"

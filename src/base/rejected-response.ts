@@ -1,16 +1,6 @@
 const maximumDiscardBytes = 64 * 1024
 const maximumDiscardMs = 2000
 
-function limitedResponse(response: Response, message: string, status: number): Response {
-  const headers = new Headers(response.headers)
-  // Keep privacy/security policy, but never issue credentials or a redirect
-  // when the upload itself was refused.
-  for (const name of ['set-cookie', 'location', 'content-length', 'content-encoding']) headers.delete(name)
-  headers.set('content-type', 'text/plain; charset=utf-8')
-  void response.body?.cancel().catch(() => {})
-  return new Response(message, { status, headers })
-}
-
 /**
  * Finish a rejected upload before returning its response. This preserves the
  * intended status through workerd's upload proxy without buffering input.
@@ -29,13 +19,13 @@ export async function rejectedResponse(request: Request, response: Response): Pr
       const result = await Promise.race([reader.read(), deadline])
       if (result === 'timeout') {
         void reader.cancel('Rejected upload exceeded time limit').catch(() => {})
-        return limitedResponse(response, 'Request body timeout', 408)
+        return new Response('Request body timeout', { status: 408 })
       }
       if (result.done) return response
       bytes += result.value.byteLength
       if (bytes > maximumDiscardBytes) {
         void reader.cancel('Rejected upload exceeded size limit').catch(() => {})
-        return limitedResponse(response, 'Request body too large', 413)
+        return new Response('Request body too large', { status: 413 })
       }
     }
   } finally {

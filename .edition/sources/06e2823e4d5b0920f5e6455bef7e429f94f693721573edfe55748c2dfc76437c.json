@@ -1,8 +1,8 @@
 {
-  "key": "b3bc3c56e81281a348a994fac5a5702f38b5bdf32ca8e614f3ae2b98aa10651c",
+  "key": "06e2823e4d5b0920f5e6455bef7e429f94f693721573edfe55748c2dfc76437c",
   "origin": {
     "repository": "https://github.com/runeditrun/base.git",
-    "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+    "revision": "79e70e60eae6277b2f35be58258d0e9d2ffa4dc0",
     "path": ".",
     "paths": [
       "foundation/runtime/hydration"

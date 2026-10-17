@@ -1,10 +1,7 @@
 import type {Env} from '../../platform/env'
-import {demoMode} from '../../demo/mode'
 
 /** Only the local host sets these bindings. Request headers never select a sender. */
 export function localMailOrigin(env: Env): string | null {
- // A demo copy's mail is a mocked send that completes (integrations/email.ts), never local suppression.
- if (demoMode(env)) return null
  if (env.H2H_LOCAL !== 'true' || env.EMAIL_PROVIDER !== 'development' || env.RER_INSTALLATION_ID) return null
  if (typeof env.APP_ORIGIN !== 'string') return null
  try {

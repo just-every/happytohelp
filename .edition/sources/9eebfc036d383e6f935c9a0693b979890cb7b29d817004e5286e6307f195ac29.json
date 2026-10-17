@@ -1,8 +1,8 @@
 {
-  "key": "38aa81209373250140eb2ff45af181c12c6bcc21a437ba930043810ef7d771a2",
+  "key": "9eebfc036d383e6f935c9a0693b979890cb7b29d817004e5286e6307f195ac29",
   "origin": {
     "repository": "https://github.com/runeditrun/base.git",
-    "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+    "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
     "path": ".",
     "paths": [
       "modules/sendgrid-email/LICENSE",

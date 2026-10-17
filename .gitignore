@@ -28,6 +28,3 @@ local-agent/.state/
 .rer/
 
 /exports/
-
-.rer/demo/
-.rer/demo-host/

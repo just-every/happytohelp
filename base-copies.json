@@ -2,31 +2,9 @@
   "schemaVersion": 1,
   "copies": [
     {
-      "path": ".github/workflows/run-demo.yml",
-      "originPath": "export/run-demo.yml",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        ".github/workflows/run-demo.yml": "f2dd68dbfaff33615a0cfb1d4cfa7deed6b9f496c143a9676bba8a9227ddb1df"
-      },
-      "modes": {
-        ".github/workflows/run-demo.yml": "100644"
-      }
-    },
-    {
-      "path": "DEMO.md",
-      "originPath": "export/DEMO.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "DEMO.md": "621697c92d195c70abff95783134720098b1827f40ae4bfd55a10daa9cbc6aba"
-      },
-      "modes": {
-        "DEMO.md": "100644"
-      }
-    },
-    {
       "path": "live-proofs/git.mjs",
       "originPath": "live-proofs/git.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "live-proofs/git.mjs": "a05c182132c7b1a93f0b755648855cd4222de9df1f4858abf7ce9e4fac9824fc"
       },
@@ -37,7 +15,7 @@
     {
       "path": "migrations/114_integrations_core.sql",
       "originPath": "modules/integrations/core/schema.sql",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "migrations/114_integrations_core.sql": "1a24ad5a3b682c5bb3ab53966732a62ea97a7e7a23a16effbefbd0a908722509"
       },
@@ -48,7 +26,7 @@
     {
       "path": "migrations/117_development_outbox.sql",
       "originPath": "modules/mail/src/development/schema.sql",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "migrations/117_development_outbox.sql": "45d6b03eadfe1e91737763ae85cdff74e7216f859869e34431550bba48294996"
       },
@@ -59,7 +37,7 @@
     {
       "path": "migrations/119_local_portability.sql",
       "originPath": "modules/portability/schema/portability.sql",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "migrations/119_local_portability.sql": "c7db9042f6d5c571e10297c02df858ad2f3466beb4fa85649fee407cc228747b"
       },
@@ -70,7 +48,7 @@
     {
       "path": "public/fonts/outfit",
       "originPath": "default-seed/public/fonts/outfit",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "public/fonts/outfit/LICENSE.txt": "0e5fcef5d93bfcae273c11c00f0bb453d3b5491860e1ac8b658767b7577c938f",
         "public/fonts/outfit/outfit-latin-ext-wght-normal.woff2": "0f53d1c03b3918d744a843b5039001ee31695ca1e255e3914188df81beb461e9",
@@ -85,9 +63,9 @@
     {
       "path": "scripts/delivery/base/artifact.mjs",
       "originPath": "modules/delivery-producer/artifact.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "scripts/delivery/base/artifact.mjs": "129f210f1556e816ba94ffe74359ac553cd26466aaf8c6c299765e9cea29aa07"
+        "scripts/delivery/base/artifact.mjs": "1adf5deb9ead7f065d317d488d93098dab4656f7322339bc45e01c99ba4e9e14"
       },
       "modes": {
         "scripts/delivery/base/artifact.mjs": "100644"
@@ -96,7 +74,7 @@
     {
       "path": "scripts/delivery/base/bindings.mjs",
       "originPath": "modules/delivery-producer/bindings.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/bindings.mjs": "5548f71b7bb32c6e6c75442f0e6cf0af9da3226aebcaf964c7702ea549e48392"
       },
@@ -107,7 +85,7 @@
     {
       "path": "scripts/delivery/base/capabilities.mjs",
       "originPath": "modules/delivery-producer/capabilities.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/capabilities.mjs": "5e4db1f4428f107c91b51be3c9c18e7757d7e23574dd977a872f6944abd32a1d"
       },
@@ -118,7 +96,7 @@
     {
       "path": "scripts/delivery/base/cli.mjs",
       "originPath": "modules/delivery-producer/cli.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/cli.mjs": "5d60954f6b03216613d17ec0d19464c339ce3a8a441c7972bf3f80ceea4f7ad5"
       },
@@ -129,7 +107,7 @@
     {
       "path": "scripts/delivery/base/declarations.mjs",
       "originPath": "modules/delivery-producer/declarations.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "6b3e0f931ce69465496e2c4b05cd4bcaf530fff2",
       "files": {
         "scripts/delivery/base/declarations.mjs": "d8cf67d18fdc6ff027d323d0986a7815b52c71df01c4cbb3dde428cfc7f55a0c"
       },
@@ -140,9 +118,9 @@
     {
       "path": "scripts/delivery/base/export.mjs",
       "originPath": "modules/delivery-producer/export.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "scripts/delivery/base/export.mjs": "0e36cf60c02ff737528018c5f027b96970e9154dd9464d3de08c19c3a3a5f5a5"
+        "scripts/delivery/base/export.mjs": "29529729881ec35c67e4875038e0450a3f0e658d90c00bf24f1de218ab15f469"
       },
       "modes": {
         "scripts/delivery/base/export.mjs": "100644"
@@ -151,7 +129,7 @@
     {
       "path": "scripts/delivery/base/generators/integration.mjs",
       "originPath": "modules/delivery-producer/generators/integration.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/generators/integration.mjs": "ec9689f03b339466ee20c4a77da5227ba39789cc3de52d33687127148d4889f3"
       },
@@ -162,7 +140,7 @@
     {
       "path": "scripts/delivery/base/generators/managed.mjs",
       "originPath": "modules/delivery-producer/generators/managed.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/generators/managed.mjs": "275131025f7b1810b7757053caa7439f9cd8119bfec94512c4fa4cf1ee1a5c60"
       },
@@ -173,9 +151,9 @@
     {
       "path": "scripts/delivery/base/generators/project.mjs",
       "originPath": "modules/delivery-producer/generators/project.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "scripts/delivery/base/generators/project.mjs": "29540e3e2d9ef0529a07c04ed70eb3e7fe0f73906fe826e53c55678ad8a364de"
+        "scripts/delivery/base/generators/project.mjs": "0145e434d6ea08e654680a64e4f32c843a19e0c16ae02c580233a0b52a3162ab"
       },
       "modes": {
         "scripts/delivery/base/generators/project.mjs": "100644"
@@ -184,7 +162,7 @@
     {
       "path": "scripts/delivery/base/generators/validation.mjs",
       "originPath": "modules/delivery-producer/generators/validation.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/generators/validation.mjs": "ec5e0cdd38e4143530fd1366930b9e8e0e081a0729687926ed13a256834519a9"
       },
@@ -193,20 +171,9 @@
       }
     },
     {
-      "path": "scripts/delivery/base/mail.mjs",
-      "originPath": "modules/delivery-producer/mail.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "scripts/delivery/base/mail.mjs": "2323205c7cbc1aea81ec85509d597df2e486abfc9443981ceaee04950db913a4"
-      },
-      "modes": {
-        "scripts/delivery/base/mail.mjs": "100644"
-      }
-    },
-    {
       "path": "scripts/delivery/base/migrations.mjs",
       "originPath": "modules/delivery-producer/migrations.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/migrations.mjs": "41650d5f2c22c0dbf8c4d8640bc89d872907828b558df4af89c4f70059d4878f"
       },
@@ -215,22 +182,11 @@
       }
     },
     {
-      "path": "scripts/delivery/base/native-export.mjs",
-      "originPath": "modules/delivery-producer/native-export.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "scripts/delivery/base/native-export.mjs": "5c0f90e688f5242dbc2f62416259cbb3074647298df8daa431a7022aa10d1a41"
-      },
-      "modes": {
-        "scripts/delivery/base/native-export.mjs": "100644"
-      }
-    },
-    {
       "path": "scripts/delivery/base/package.mjs",
       "originPath": "modules/delivery-producer/package.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "scripts/delivery/base/package.mjs": "5a32dec3274b66474e12d5141e973542248ceeecf0f8464f6e9da87d60228cb4"
+        "scripts/delivery/base/package.mjs": "8daa16d77dfd21ea918dd896b25bcf7e67627d7bf89933e5f5719fe9093e6ca8"
       },
       "modes": {
         "scripts/delivery/base/package.mjs": "100644"
@@ -239,9 +195,9 @@
     {
       "path": "scripts/delivery/base/paths.mjs",
       "originPath": "modules/delivery-producer/paths.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "scripts/delivery/base/paths.mjs": "32af2ee0d6e8ce048d04978e2d70f476bdc2a690b1a270d580056641f87a1731"
+        "scripts/delivery/base/paths.mjs": "1325dc10e44eccb18eef79450e46895ab5c069f0706f3aeebb28da02d9710cbe"
       },
       "modes": {
         "scripts/delivery/base/paths.mjs": "100644"
@@ -250,7 +206,7 @@
     {
       "path": "scripts/delivery/base/payloads.mjs",
       "originPath": "modules/delivery-producer/payloads.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/payloads.mjs": "da3a9d09860c33bdd0b287bca9abc6210b12d13439e569d178a5b31fec563ee5"
       },
@@ -261,12 +217,12 @@
     {
       "path": "scripts/delivery/base/schema",
       "originPath": "schema",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/delivery/base/schema/dependencies.mjs": "4bfc30fa75029db2727a9d1fb095d4969dc756c5317ac55ce768202bb869e2b7",
         "scripts/delivery/base/schema/json-schema.mjs": "ed601a8f68d25769ff3706a90f69f1a9e18dd6eb4b3b5f81a18b7cd0dcfc8fa3",
-        "scripts/delivery/base/schema/setup-validation.mjs": "2edccf8aebb48fac95bdcca868df0aaa31e4a46931f66a2a64196cdf751f9fbd",
-        "scripts/delivery/base/schema/SETUP.schema.json": "a6af219fb0fb3ea80ad5673883644a7f765ece93c67a4e85bd7053d67b427067"
+        "scripts/delivery/base/schema/setup-validation.mjs": "1de5a2f31cdcd9dc1590f363aa47afa5b1882b9b6920935852ce0ed021f28361",
+        "scripts/delivery/base/schema/SETUP.schema.json": "73e9238b4cec48821b614f8bc8ffb8e6c367deeccb35d510e35d95a1075b1099"
       },
       "modes": {
         "scripts/delivery/base/schema/dependencies.mjs": "100644",
@@ -276,42 +232,20 @@
       }
     },
     {
-      "path": "scripts/delivery/base/sign-in.mjs",
-      "originPath": "modules/delivery-producer/sign-in.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "scripts/delivery/base/sign-in.mjs": "951aada2c00131ab7c808974827654b0fda20bcaeed1f2f97194b25441c03aff"
-      },
-      "modes": {
-        "scripts/delivery/base/sign-in.mjs": "100644"
-      }
-    },
-    {
       "path": "scripts/delivery/base/spec.mjs",
       "originPath": "modules/delivery-producer/spec.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "scripts/delivery/base/spec.mjs": "65179ca5222485513260e8d58aaae6740ae6fe1b27065e96f0d95d197fc6d3f0"
+        "scripts/delivery/base/spec.mjs": "4526a4d0f3ec141b4afa8d848badb12a08e42d60e1b00bd1db9e63064483428b"
       },
       "modes": {
         "scripts/delivery/base/spec.mjs": "100644"
       }
     },
     {
-      "path": "scripts/delivery/base/sql-statements.mjs",
-      "originPath": "modules/delivery-producer/sql-statements.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "scripts/delivery/base/sql-statements.mjs": "8819f7f91b7781905796ea35b01dd1a55e08ed3893ff6d8aafaf03d2f35c1c9a"
-      },
-      "modes": {
-        "scripts/delivery/base/sql-statements.mjs": "100644"
-      }
-    },
-    {
       "path": "scripts/edition-authoring",
       "originPath": "edition-authoring",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "scripts/edition-authoring/base-copies.mjs": "ca2e3b86aec67aaa5cb28d1a8311612a905fbd2116fac999a34185fa776cf876",
         "scripts/edition-authoring/cli.mjs": "d9bc25b361c056ec4bebe2b8e506baff95fdd06ec4d4f54a63f20d873025a89b",
@@ -340,17 +274,17 @@
     {
       "path": "src/base",
       "originPath": "foundation/runtime",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/base/deployment-health.ts": "49f4dac80429ea7d9477b40799a6242f9af4870f3229df70d0ac1f635476b8b7",
         "src/base/dispatch.ts": "695ff1bf5bdcf65a429e3853eb80bcb477297c29e55221f6cad08dcff6ba610c",
         "src/base/font-head.ts": "937fe339a397abee96e4279f2e310fa336eb30b2ec3aeb98f2c09ed0ba7d5dac",
         "src/base/font-response.ts": "55abc935a78085735ae5b7f2d441ee7a5a67d9c797417f9b5ac3c2449f8c91a8",
         "src/base/page-style.ts": "58211f173d3b6d9245e80f217c2f3e4e743d59a559e63817865644a991215111",
-        "src/base/rejected-response.ts": "4aa9861a20497b9dde6f95951dcbecf60cee69e8dad1923c1110ef35abc10686",
-        "src/base/setup.ts": "5599d7b1953d093e33c2d3cb8914b2b761547310d2ef0c40699573b439a33516",
-        "src/base/static-assets.ts": "d6ed4098fbee2dc6d557eb1365e9a56b5f5435ad869357cb7d8472a8d0c70e76",
-        "src/base/theme-frame.ts": "adb66c1805f7683aa090e85e5881a8137342941e59e973ee264843bd57f7ba62"
+        "src/base/rejected-response.ts": "5fe6ea3ac3d113f727431d898b56d4194fad39832c01d0e3cc5cd6d75eafe671",
+        "src/base/setup.ts": "fe4d6792bdc370fe20a223a9add9c680c789ae80eedb46afc6deb90c86568a5b",
+        "src/base/static-assets.ts": "23d7936300dcec39065b01c8d1bb9a107d009c7de4f33c19751342b51453b49f",
+        "src/base/theme-frame.ts": "a655ce2984758fe1f692d178b7299bb89d612757b77adfa73fc7b0721792b4dd"
       },
       "modes": {
         "src/base/deployment-health.ts": "100644",
@@ -367,7 +301,7 @@
     {
       "path": "src/editor/editor-surface.ts",
       "originPath": "modules/editor/src/widget/editor-surface.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/editor/editor-surface.ts": "f0d692922abe6f9fe341eca3cc0872b1a0a52f0a9b87d0ad0829fd3fb6359efc"
       },
@@ -378,7 +312,7 @@
     {
       "path": "src/editor/live-edit-contracts.ts",
       "originPath": "modules/editor/src/widget/live-edit-contracts.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/editor/live-edit-contracts.ts": "2577ccb77819532e18776174b8997fdb3da4b3e6ef20051081b8371694dd1358"
       },
@@ -389,7 +323,7 @@
     {
       "path": "src/editor/live-edit-dom.ts",
       "originPath": "modules/editor/src/widget/live-edit-dom.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/editor/live-edit-dom.ts": "6c1b455d1fdadf989ea3fb104e666f78c896e568c13bd007adbe55fcae7b30b4"
       },
@@ -400,7 +334,7 @@
     {
       "path": "src/editor/visual-style.ts",
       "originPath": "modules/editor/src/widget/visual-style.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/editor/visual-style.ts": "29f8f23c5347e699a0ff207b9d62cc80032562e7b8831bb4e0accb3eba052c10"
       },
@@ -409,24 +343,11 @@
       }
     },
     {
-      "path": "src/modules/d1-transport",
-      "originPath": "modules/d1-transport",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/d1-transport/index.d.mts": "b1dcfba529210c9237fa257faa0da8c9062bef946961ba8edeb8af7e171611f3",
-        "src/modules/d1-transport/index.mjs": "a8a79a0c2673536e221facd892e688000bfae71485d864b4fff9801eb7aaf4a9"
-      },
-      "modes": {
-        "src/modules/d1-transport/index.d.mts": "100644",
-        "src/modules/d1-transport/index.mjs": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/CONTRACT.md",
       "originPath": "modules/import-kit/CONTRACT.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/CONTRACT.md": "bd72b1541b7d3644099205b3e69de233fd8c5144da76a1cb3a4084378443f1b5"
+        "src/modules/import-kit/CONTRACT.md": "a9aae186f79952d1942e7a6cb04bda8e1eff8558b858440f9dde0ec1439713d7"
       },
       "modes": {
         "src/modules/import-kit/CONTRACT.md": "100644"
@@ -435,7 +356,7 @@
     {
       "path": "src/modules/import-kit/FIXTURES.md",
       "originPath": "modules/import-kit/FIXTURES.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/FIXTURES.md": "2f193cf36fce01f7497721f577e4d6aca6dfaeb3cc5615c96be8c847cd6be5f3"
       },
@@ -446,9 +367,9 @@
     {
       "path": "src/modules/import-kit/README.md",
       "originPath": "modules/import-kit/README.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/README.md": "01da58977a16d8d5cdfea669d186e5629f8a3343c18e0262c4ac2c78af660277"
+        "src/modules/import-kit/README.md": "cb59cbda077f66159ddc3d9d8aec56a9c60226c9aa3cd7911c800b32846d2c05"
       },
       "modes": {
         "src/modules/import-kit/README.md": "100644"
@@ -457,7 +378,7 @@
     {
       "path": "src/modules/import-kit/schema/importer-verification-receipt.schema.json",
       "originPath": "modules/import-kit/schema/importer-verification-receipt.schema.json",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/schema/importer-verification-receipt.schema.json": "710740a418fbd1fda5dd7a9017c247040c2bef98a6eadbec2a59220a5afa0ae7"
       },
@@ -468,7 +389,7 @@
     {
       "path": "src/modules/import-kit/schema/importers.schema.json",
       "originPath": "modules/import-kit/schema/importers.schema.json",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/schema/importers.schema.json": "70ffac46763ab493388cad8fb0bc40946be819b8e8036274a7bff30cf3b4d9c3"
       },
@@ -479,7 +400,7 @@
     {
       "path": "src/modules/import-kit/src/d1/apply.ts",
       "originPath": "modules/import-kit/src/d1/apply.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/apply.ts": "97190e9e8924fd0751d5f31c94f2a227705a6c5f3edda8672b70168fac2f6d8e"
       },
@@ -490,9 +411,9 @@
     {
       "path": "src/modules/import-kit/src/d1/budget.ts",
       "originPath": "modules/import-kit/src/d1/budget.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/budget.ts": "98d13384a76b0d42fc3cd25bbaa4a6063250d6baa20ab5c8823eed55957ef0ec"
+        "src/modules/import-kit/src/d1/budget.ts": "15a85719224332a015d653d2619ed5c60c8b230fe197573159b5209a2fd603bd"
       },
       "modes": {
         "src/modules/import-kit/src/d1/budget.ts": "100644"
@@ -501,7 +422,7 @@
     {
       "path": "src/modules/import-kit/src/d1/compressed-plan.ts",
       "originPath": "modules/import-kit/src/d1/compressed-plan.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/compressed-plan.ts": "b96a798a51902178361933ac2509a7ccb549c932a778a7c3662b604f3b7a1430"
       },
@@ -512,9 +433,9 @@
     {
       "path": "src/modules/import-kit/src/d1/creation.ts",
       "originPath": "modules/import-kit/src/d1/creation.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/creation.ts": "8f860e99f638efa3bb450da9ad1c8b975808034927639412e4a90f94d2864a7c"
+        "src/modules/import-kit/src/d1/creation.ts": "06ed88e62a1afedbc47e1bbe8edac1f4cb434a3ccce5ddd1b3c9a3ea70fe91cf"
       },
       "modes": {
         "src/modules/import-kit/src/d1/creation.ts": "100644"
@@ -523,7 +444,7 @@
     {
       "path": "src/modules/import-kit/src/d1/custody-state-schema.ts",
       "originPath": "modules/import-kit/src/d1/custody-state-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/custody-state-schema.ts": "abd95460b9d732ec47f806c94c559c77a2e8b9967ef3286d7f0bc97c61b25966"
       },
@@ -534,9 +455,9 @@
     {
       "path": "src/modules/import-kit/src/d1/database.ts",
       "originPath": "modules/import-kit/src/d1/database.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/database.ts": "1e3c63e3aa832d9df3ee712c9a2d22e56fc73764c635c0de35918f9bbecc36fc"
+        "src/modules/import-kit/src/d1/database.ts": "c9d57e3d1c67bac36a99beae42e0face3f65d044ce6eafae579487e6c0e3e03a"
       },
       "modes": {
         "src/modules/import-kit/src/d1/database.ts": "100644"
@@ -545,7 +466,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erased-artifacts.ts",
       "originPath": "modules/import-kit/src/d1/erased-artifacts.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erased-artifacts.ts": "e2766643f0653bef87672698295be3aecf9fd221f0455bba629de9c9503878bd"
       },
@@ -556,9 +477,9 @@
     {
       "path": "src/modules/import-kit/src/d1/erased-custody.ts",
       "originPath": "modules/import-kit/src/d1/erased-custody.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erased-custody.ts": "64792af544f4f618a5aaed4c5fefcd29db137a47f9aff53d2c70635aa24ab5cc"
+        "src/modules/import-kit/src/d1/erased-custody.ts": "3b32fc2de77dc7ada815466f31645bc1322d8ef7a70bf357ddef3dc39455e51d"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erased-custody.ts": "100644"
@@ -567,7 +488,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erased-plan.ts",
       "originPath": "modules/import-kit/src/d1/erased-plan.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erased-plan.ts": "ef235b404003131e87af2eb07e8e39c3423c500a28dd9b2fee4b6f2d0eb24248"
       },
@@ -578,7 +499,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erased-reversal.ts",
       "originPath": "modules/import-kit/src/d1/erased-reversal.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erased-reversal.ts": "1e451448d65086e2eb1d20df5c4f9190f7f04aec55d187bcf6adbe66068c61ec"
       },
@@ -589,9 +510,9 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-bounded.ts",
       "originPath": "modules/import-kit/src/d1/erasure-bounded.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure-bounded.ts": "d267210753501752609671a3c7e63ae393e3e4ebaa736c3bc662cd9984792381"
+        "src/modules/import-kit/src/d1/erasure-bounded.ts": "53a19e61fbce0fe8b3066a45e08486a795d7450a6496980d4ebb7d1f5e488f06"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure-bounded.ts": "100644"
@@ -600,7 +521,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-claims.ts",
       "originPath": "modules/import-kit/src/d1/erasure-claims.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-claims.ts": "5254f570c850da5fefb213f74a44df73ec5ac5ca0ea3eae3972e60c55a48b022"
       },
@@ -611,9 +532,9 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-compiler.ts",
       "originPath": "modules/import-kit/src/d1/erasure-compiler.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure-compiler.ts": "91c738beb50ca8ec51700c26bd735980bf9b752d7bb40f58bfb4b4d414d42b3f"
+        "src/modules/import-kit/src/d1/erasure-compiler.ts": "1d9d948ede9b3d5428db7ddc0c9e125b61bbe4cb24c2c5415abf6ad1003537c7"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure-compiler.ts": "100644"
@@ -622,7 +543,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-disposition.ts",
       "originPath": "modules/import-kit/src/d1/erasure-disposition.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-disposition.ts": "d6edd39b94d4c063845d92f11ff435dd4f76898588f2d386b2d383e0df0cf045"
       },
@@ -633,9 +554,9 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-fragments.ts",
       "originPath": "modules/import-kit/src/d1/erasure-fragments.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure-fragments.ts": "0aeb2d74f341c6d6fec871564abf4a9abd1f777fa2c36776722daee12572b97a"
+        "src/modules/import-kit/src/d1/erasure-fragments.ts": "46d299b1a2efa8017e010fd17c500ce062e64126d7334605d1844e9085e24ed4"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure-fragments.ts": "100644"
@@ -644,7 +565,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-index.ts",
       "originPath": "modules/import-kit/src/d1/erasure-index.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-index.ts": "995f8641fff4a7f2060a145be38fc13c7852b8093ea392d1f197936743e16cb4"
       },
@@ -655,7 +576,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-pages.ts",
       "originPath": "modules/import-kit/src/d1/erasure-pages.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-pages.ts": "0224a40b3466a1b61f5b226ae614f7db8d160bbecfad9470c900de88c706f698"
       },
@@ -664,33 +585,11 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/erasure-progress-schema.ts",
-      "originPath": "modules/import-kit/src/d1/erasure-progress-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/erasure-progress-schema.ts": "cf0650ba10181b80244a4e5aaf4029afae7863098b02b04c2a270544f6a13c61"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/erasure-progress-schema.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/erasure-progress.ts",
-      "originPath": "modules/import-kit/src/d1/erasure-progress.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/erasure-progress.ts": "e47ba101cf7359649eb792e80d1673ccab0bea1b81ddeee5be3ff2f94375418a"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/erasure-progress.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/erasure-related.ts",
       "originPath": "modules/import-kit/src/d1/erasure-related.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure-related.ts": "c07448313510c116c9f2fc96d1d35a415674f284700257bfafadcc94c6dd1f1a"
+        "src/modules/import-kit/src/d1/erasure-related.ts": "def52956c47ccae38bbd2e0f82bf6a58e5ebb027676edca774cea68cc3050058"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure-related.ts": "100644"
@@ -699,7 +598,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-report.ts",
       "originPath": "modules/import-kit/src/d1/erasure-report.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-report.ts": "2a8bdb6cab8a13100d2a351f61ff24d0b16aadc6d34fcf79ecad087241d81348"
       },
@@ -710,7 +609,7 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-schema.ts",
       "originPath": "modules/import-kit/src/d1/erasure-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-schema.ts": "582dadabb6c8c010560fb8e5e46521766c72fdf743a3784cd08deb7b63988eef"
       },
@@ -719,20 +618,9 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/erasure-selection.ts",
-      "originPath": "modules/import-kit/src/d1/erasure-selection.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/erasure-selection.ts": "3159c51e8507885c2f2d73650f64b98c8fdf7b154f037043a37e4512da09fbfc"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/erasure-selection.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/erasure-snapshot.ts",
       "originPath": "modules/import-kit/src/d1/erasure-snapshot.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/erasure-snapshot.ts": "5a16b9a9bf9ac22c9d22624314218e0f901d3ac511e3f642df11970bb2732244"
       },
@@ -741,33 +629,11 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/erasure-stage.ts",
-      "originPath": "modules/import-kit/src/d1/erasure-stage.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/erasure-stage.ts": "9e4a69b1373d49269ef38bf3311468102bb94b308391838a8317ca361ddbe42d"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/erasure-stage.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/erasure-step.ts",
-      "originPath": "modules/import-kit/src/d1/erasure-step.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/erasure-step.ts": "419335e01d25670a4ae5a0b12ed6991d4badd6019dd5e5bb8dd89fe25a9fd049"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/erasure-step.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/erasure-values.ts",
       "originPath": "modules/import-kit/src/d1/erasure-values.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure-values.ts": "57ccad1fc84f020c6b8d4d8bed2d2018028455961e38bc793acc5f27865094fe"
+        "src/modules/import-kit/src/d1/erasure-values.ts": "93b18362f5deb0ef80933b8f24f03ac4fa56e7015986ea993ba12b9ddff40e09"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure-values.ts": "100644"
@@ -776,9 +642,9 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure-writes.ts",
       "originPath": "modules/import-kit/src/d1/erasure-writes.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure-writes.ts": "2dc08bead90f4ff95fb338f70eb14aef27d31c14bd474dfb0c71dbd0db8ee084"
+        "src/modules/import-kit/src/d1/erasure-writes.ts": "756b5efa1537f1e9286f2c85eeaf284d0fb1ec2abc51a06542220360706a306b"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure-writes.ts": "100644"
@@ -787,9 +653,9 @@
     {
       "path": "src/modules/import-kit/src/d1/erasure.ts",
       "originPath": "modules/import-kit/src/d1/erasure.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/erasure.ts": "932e3a6749c663f06295e32380b0994d839fadf6cbf49f0371efb2537bb0b3c8"
+        "src/modules/import-kit/src/d1/erasure.ts": "4d946cb77bd4b957a5e574349543e481bfbe64993962f424ebba2d624224b5aa"
       },
       "modes": {
         "src/modules/import-kit/src/d1/erasure.ts": "100644"
@@ -798,7 +664,7 @@
     {
       "path": "src/modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts",
       "originPath": "modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/evolutions/0001-preserved-undo.ts": "8def72f17f375aeddfc3fabd4c3756fc26f4e1fed492cd70cf821d48847e0fe1"
       },
@@ -809,7 +675,7 @@
     {
       "path": "src/modules/import-kit/src/d1/expected-state.ts",
       "originPath": "modules/import-kit/src/d1/expected-state.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/expected-state.ts": "bd5b5bc97ee20b910646161186717418951da673a4c294e09e75653c98892df0"
       },
@@ -818,20 +684,9 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/field-redaction.ts",
-      "originPath": "modules/import-kit/src/d1/field-redaction.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/field-redaction.ts": "f7320418e95c0cba58048e526e561b567739b263f6e66299cc159d060fd3566f"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/field-redaction.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/guards.ts",
       "originPath": "modules/import-kit/src/d1/guards.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/guards.ts": "7f8c7d43a1d5f41d88017a24435d88f9c7b5cb58140ca8d9d0a343697ec09e44"
       },
@@ -842,9 +697,9 @@
     {
       "path": "src/modules/import-kit/src/d1/history.ts",
       "originPath": "modules/import-kit/src/d1/history.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/history.ts": "004b6b72a3c33b33de05196ccaa7ee09777c9a3253bac8128f3cf4ebeb66aea9"
+        "src/modules/import-kit/src/d1/history.ts": "16c6bd0f3bbe947b4489c85e7447549374d859ed89a189bd6935aff04b1fbc77"
       },
       "modes": {
         "src/modules/import-kit/src/d1/history.ts": "100644"
@@ -853,9 +708,9 @@
     {
       "path": "src/modules/import-kit/src/d1/index.ts",
       "originPath": "modules/import-kit/src/d1/index.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/index.ts": "909ed14e5bd3df9beb0a623989140a14f2c50a7ce2933bef0f343160ff78c4b6"
+        "src/modules/import-kit/src/d1/index.ts": "519b531216177eed7cbcdb2f3250a2a7876b5dc8fec301bd390c78c7b90760be"
       },
       "modes": {
         "src/modules/import-kit/src/d1/index.ts": "100644"
@@ -864,7 +719,7 @@
     {
       "path": "src/modules/import-kit/src/d1/integrity.ts",
       "originPath": "modules/import-kit/src/d1/integrity.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/integrity.ts": "bca91ca3bf5d9a1b868a8f53a9989dee12ddfa69c1b6edee10a9ee84d51c6b14"
       },
@@ -875,7 +730,7 @@
     {
       "path": "src/modules/import-kit/src/d1/inventory-snapshot.ts",
       "originPath": "modules/import-kit/src/d1/inventory-snapshot.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/inventory-snapshot.ts": "687f41c9ef55f372e4af0e1c63a70945a9808036d118acfe97978f9c6ec04d6f"
       },
@@ -886,9 +741,9 @@
     {
       "path": "src/modules/import-kit/src/d1/jobs.ts",
       "originPath": "modules/import-kit/src/d1/jobs.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/jobs.ts": "2823ebd50ea2d2adbaaf52394a6c8a4f414e051241eb716e77bdcbe7344cdc07"
+        "src/modules/import-kit/src/d1/jobs.ts": "f7684d339f14b37362f8be7914850b56be088d0abe5cef1d2c62b4b88af66f37"
       },
       "modes": {
         "src/modules/import-kit/src/d1/jobs.ts": "100644"
@@ -897,9 +752,9 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging-admission.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-admission.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/native-staging-admission.ts": "3ef2ca0bc8e8f2f64d68606f8d61de78cdc1daf8b762cc5952eb05514cb052a7"
+        "src/modules/import-kit/src/d1/native-staging-admission.ts": "64d798314f2271d6af590ec2797c5e3395ca6e529aa221b2935c4c7b1b0a6ee3"
       },
       "modes": {
         "src/modules/import-kit/src/d1/native-staging-admission.ts": "100644"
@@ -908,7 +763,7 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging-context.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-context.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/native-staging-context.ts": "726735c573ba08a308dfb89d50c5be63eb88dfb98e027be180db54032337535d"
       },
@@ -919,7 +774,7 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging-lifecycle.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-lifecycle.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/native-staging-lifecycle.ts": "f404f3fd618e11ae9f37de7ead2f80ed70fbc6d4ce97af62ce0176ba2a154591"
       },
@@ -928,20 +783,9 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/native-staging-offset.ts",
-      "originPath": "modules/import-kit/src/d1/native-staging-offset.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/native-staging-offset.ts": "4311a193b25f811e7c674d3a4f158383ee548113c161da008ca47d26f13dc525"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/native-staging-offset.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/native-staging-publication.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-publication.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/native-staging-publication.ts": "fac9a4dd25642d962adcf2e0999a570c7b78d5abec7c98b2c61cd43e6a1191c9"
       },
@@ -952,9 +796,9 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging-rows.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-rows.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/native-staging-rows.ts": "4f9ccddf4327575c5720621370e27b1e500bb6c32da079b8c95be4b406eea443"
+        "src/modules/import-kit/src/d1/native-staging-rows.ts": "2b2b1ca60b43ce4fec23e6aabd237d42604793b43502d0a00b32b282358a2f75"
       },
       "modes": {
         "src/modules/import-kit/src/d1/native-staging-rows.ts": "100644"
@@ -963,7 +807,7 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging-schema.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/native-staging-schema.ts": "91c42d388b99a27f38f5c966e300e68da3280e0be208da0b946802a83142e0a7"
       },
@@ -974,7 +818,7 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging-state.ts",
       "originPath": "modules/import-kit/src/d1/native-staging-state.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/native-staging-state.ts": "d68629de82451055aa022c57131a5fec4db53762b37a6f792c12f74fdddc1ed3"
       },
@@ -985,7 +829,7 @@
     {
       "path": "src/modules/import-kit/src/d1/native-staging.ts",
       "originPath": "modules/import-kit/src/d1/native-staging.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/native-staging.ts": "5a91f76b297f059108622c18628fc5d23c0ca8dec01362cf5b5a8096e066573f"
       },
@@ -996,7 +840,7 @@
     {
       "path": "src/modules/import-kit/src/d1/original-copies.ts",
       "originPath": "modules/import-kit/src/d1/original-copies.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/original-copies.ts": "1c4d830a36c4a7300879dd842daff3b185b2d14caf6372141144e6c4c74adef6"
       },
@@ -1007,7 +851,7 @@
     {
       "path": "src/modules/import-kit/src/d1/original-storage.ts",
       "originPath": "modules/import-kit/src/d1/original-storage.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/original-storage.ts": "48838aef6291fdf3a6b9108bd4ea80664c157064209e5aadccad6b6d65df968e"
       },
@@ -1018,7 +862,7 @@
     {
       "path": "src/modules/import-kit/src/d1/originals.ts",
       "originPath": "modules/import-kit/src/d1/originals.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/originals.ts": "a28d07b21afba1f50bb272d709b540db1bbde728559a6c441d1e7540860af8a1"
       },
@@ -1029,7 +873,7 @@
     {
       "path": "src/modules/import-kit/src/d1/plan-dictionary.ts",
       "originPath": "modules/import-kit/src/d1/plan-dictionary.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/plan-dictionary.ts": "408ba1ffeb295efc67fae52759da284e2eea627b21a00331d391868ded195782"
       },
@@ -1040,9 +884,9 @@
     {
       "path": "src/modules/import-kit/src/d1/plans.ts",
       "originPath": "modules/import-kit/src/d1/plans.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/plans.ts": "370322963f34e217b89369c00eb73f3a8a8c4a8affde8d1779a7efe8a7642001"
+        "src/modules/import-kit/src/d1/plans.ts": "4caabb330bb1dbb8dfe58cf5ee3baa5ac77173b8f236254abd86dc25c9daec94"
       },
       "modes": {
         "src/modules/import-kit/src/d1/plans.ts": "100644"
@@ -1051,7 +895,7 @@
     {
       "path": "src/modules/import-kit/src/d1/preparation-fingerprint.ts",
       "originPath": "modules/import-kit/src/d1/preparation-fingerprint.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/preparation-fingerprint.ts": "566ffe073ab090265cf3d2d745bad012d355e41bbe3cb454c486824ec6bf9e8c"
       },
@@ -1062,7 +906,7 @@
     {
       "path": "src/modules/import-kit/src/d1/preparation-header.ts",
       "originPath": "modules/import-kit/src/d1/preparation-header.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/preparation-header.ts": "9b9f7a678ee0bdfd596bb6e9812c8b018c6b137c4e5e14f1521650250a2469b9"
       },
@@ -1073,9 +917,9 @@
     {
       "path": "src/modules/import-kit/src/d1/preparation-reader.ts",
       "originPath": "modules/import-kit/src/d1/preparation-reader.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/preparation-reader.ts": "4f0a152f7c2a16e0d52eb60260e3fc6213c918accf0cda21d2b7fd7a1e98d0c7"
+        "src/modules/import-kit/src/d1/preparation-reader.ts": "97e94e540e7d5c4f7437fc7d1bffba71842eb3ca310d31629590a1c3d65c5f6b"
       },
       "modes": {
         "src/modules/import-kit/src/d1/preparation-reader.ts": "100644"
@@ -1084,7 +928,7 @@
     {
       "path": "src/modules/import-kit/src/d1/preparation-schema.ts",
       "originPath": "modules/import-kit/src/d1/preparation-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/preparation-schema.ts": "57af45460c857c59b3e2866e9885c1b18424aed5cb851fc0298186486958ecc1"
       },
@@ -1095,7 +939,7 @@
     {
       "path": "src/modules/import-kit/src/d1/preparation-state.ts",
       "originPath": "modules/import-kit/src/d1/preparation-state.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/preparation-state.ts": "a46c501d435902eb66b06d89b2708d084ed5eca666822cde48873e0dfc2b5f12"
       },
@@ -1104,77 +948,11 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/preparation-step-combine.ts",
-      "originPath": "modules/import-kit/src/d1/preparation-step-combine.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/preparation-step-combine.ts": "23503394414d44e8a4e80b78ed8884953a992b3525c9da27dd8e1589fabce573"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/preparation-step-combine.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/preparation-step-control.ts",
-      "originPath": "modules/import-kit/src/d1/preparation-step-control.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/preparation-step-control.ts": "76a40d603944d4c446e08e8ccef4968dd37949ee36720f60ebdd3696edba38ce"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/preparation-step-control.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/preparation-step-hash.ts",
-      "originPath": "modules/import-kit/src/d1/preparation-step-hash.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/preparation-step-hash.ts": "23b939dcbf551c8433ca435d70d374b110cda6dae41d1d3d11490e2b0111d015"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/preparation-step-hash.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/preparation-step-pages.ts",
-      "originPath": "modules/import-kit/src/d1/preparation-step-pages.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/preparation-step-pages.ts": "0f88ebdb72487c6ab59626e9b51055d58691b20a15ad7deaaef93f7b9bbe0b45"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/preparation-step-pages.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/preparation-steps-schema.ts",
-      "originPath": "modules/import-kit/src/d1/preparation-steps-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/preparation-steps-schema.ts": "b085e0b64abc7b045178ed2e27c0a77db2766b668150f8acf3c6191547237888"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/preparation-steps-schema.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/preparation-steps.ts",
-      "originPath": "modules/import-kit/src/d1/preparation-steps.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/preparation-steps.ts": "d23442e368506740ce0acbfdf1f44c4934f2735db445965c290d30eaa421bb7c"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/preparation-steps.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/preparations.ts",
       "originPath": "modules/import-kit/src/d1/preparations.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/preparations.ts": "3e674caf01c9f104df6bc038563018dfcbac4f25c0e1fe87ddafd7ac94f7d4d2"
+        "src/modules/import-kit/src/d1/preparations.ts": "a29c90ca353d527b3aab5238307bcb0613614d8afb58f74f1eb4cf7459fd8aec"
       },
       "modes": {
         "src/modules/import-kit/src/d1/preparations.ts": "100644"
@@ -1183,7 +961,7 @@
     {
       "path": "src/modules/import-kit/src/d1/preserved-reverse.ts",
       "originPath": "modules/import-kit/src/d1/preserved-reverse.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/preserved-reverse.ts": "8283befaf15dc5edf67f091808f1f182f1eb2038f4bf8f28351e0240ce3aebe4"
       },
@@ -1194,7 +972,7 @@
     {
       "path": "src/modules/import-kit/src/d1/provenance-set.ts",
       "originPath": "modules/import-kit/src/d1/provenance-set.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/provenance-set.ts": "f005f774ddfa60342430db3cc4ae0e988570832f10be7e97be2876ec050c5a67"
       },
@@ -1205,7 +983,7 @@
     {
       "path": "src/modules/import-kit/src/d1/publication-fence.ts",
       "originPath": "modules/import-kit/src/d1/publication-fence.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/publication-fence.ts": "b8fd1857119e520bec5cf10d07b3c81a2fbc1caf066b05c774394a8f2ba2c14a"
       },
@@ -1216,7 +994,7 @@
     {
       "path": "src/modules/import-kit/src/d1/publication-receipt-schema.ts",
       "originPath": "modules/import-kit/src/d1/publication-receipt-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/publication-receipt-schema.ts": "a8562507cad8506e7c3ceaade0161b6de82a202f5bad368ea322187c62be1929"
       },
@@ -1227,7 +1005,7 @@
     {
       "path": "src/modules/import-kit/src/d1/published-stream.ts",
       "originPath": "modules/import-kit/src/d1/published-stream.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/published-stream.ts": "8e672ca3c1921fce0dc2fe37fa4470a5ada1dd38924a9b39db0cb5a97060a222"
       },
@@ -1238,7 +1016,7 @@
     {
       "path": "src/modules/import-kit/src/d1/read-fence.ts",
       "originPath": "modules/import-kit/src/d1/read-fence.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/read-fence.ts": "e77cf651e56af1d6d37c78ac68ae339b7a5e98049dad2e3f501b602b01b203b3"
       },
@@ -1249,7 +1027,7 @@
     {
       "path": "src/modules/import-kit/src/d1/read-results.ts",
       "originPath": "modules/import-kit/src/d1/read-results.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/read-results.ts": "75fe5cb009f41c2aa850941e8db21bfe77261baeccf5a0203505871d4ef66e2d"
       },
@@ -1260,40 +1038,18 @@
     {
       "path": "src/modules/import-kit/src/d1/README.md",
       "originPath": "modules/import-kit/src/d1/README.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/README.md": "8ac1970fd468181de192e144a781d36691b4ef6acfd24bba85b018a5e413b96b"
+        "src/modules/import-kit/src/d1/README.md": "f92f0a26c64b8005a638cc7e9ecb2cabd7baa34c54132b4f31c292ac833c60db"
       },
       "modes": {
         "src/modules/import-kit/src/d1/README.md": "100644"
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/redacted-custody.ts",
-      "originPath": "modules/import-kit/src/d1/redacted-custody.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/redacted-custody.ts": "4ff48e38c5063bab4911c4a117fc89fb32898f3924a35d01340e106a87fa2692"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/redacted-custody.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/redaction-step.ts",
-      "originPath": "modules/import-kit/src/d1/redaction-step.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/redaction-step.ts": "fca71a8e4b5d2c69694030bdcfaeab4a0dafad931a42920dbac6f7ee8126fa5c"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/redaction-step.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/retained-values.ts",
       "originPath": "modules/import-kit/src/d1/retained-values.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/retained-values.ts": "d864ad9edcfe335507dcc64c478bb6133a3633ea5e91040887381bf8e8f2d889"
       },
@@ -1302,99 +1058,11 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/d1/retirement-bounded.ts",
-      "originPath": "modules/import-kit/src/d1/retirement-bounded.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/retirement-bounded.ts": "832581740e597e7c42e701370cf01372a67f97be84d42c44d701c13f5e62eaca"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/retirement-bounded.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/retirement-schema.ts",
-      "originPath": "modules/import-kit/src/d1/retirement-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/retirement-schema.ts": "a32fef20e32a595cdca12f4914d39cfe32013072454c3429dc9e72fe144ce789"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/retirement-schema.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/retirement-scope.ts",
-      "originPath": "modules/import-kit/src/d1/retirement-scope.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/retirement-scope.ts": "243228a0414dcdd580a3c0feba606f9336415de8f72d102063fbfa2f11fd83db"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/retirement-scope.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/retirement-steps.ts",
-      "originPath": "modules/import-kit/src/d1/retirement-steps.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/retirement-steps.ts": "55ff982d28289d6602f1be17515069440d69283ccb23c360a87c1c550f29363b"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/retirement-steps.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/retirement-tally.ts",
-      "originPath": "modules/import-kit/src/d1/retirement-tally.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/retirement-tally.ts": "fca5bf6b6728a8cc472796d285d5e4b5792e471536016fa416e9e4351d1b05b5"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/retirement-tally.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/retirement.ts",
-      "originPath": "modules/import-kit/src/d1/retirement.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/retirement.ts": "441e30eda04da8127d64fd79fc1e4a8175722dae99595051e9eb7fda53bcddc1"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/retirement.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/reversal-fence-schema.ts",
-      "originPath": "modules/import-kit/src/d1/reversal-fence-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/reversal-fence-schema.ts": "85850e6eee015c05355769fd4b933b8d8c2175711ca11081e46157bf58ad3cdb"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/reversal-fence-schema.ts": "100644"
-      }
-    },
-    {
-      "path": "src/modules/import-kit/src/d1/reversal-fence.ts",
-      "originPath": "modules/import-kit/src/d1/reversal-fence.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/d1/reversal-fence.ts": "5b0b3c50b29b55f016d7c46e83bc8c1eec6ef34bb5de2c05a5b7bea35cb7946e"
-      },
-      "modes": {
-        "src/modules/import-kit/src/d1/reversal-fence.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/d1/reverse.ts",
       "originPath": "modules/import-kit/src/d1/reverse.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/reverse.ts": "50ee46b4c728f7d2e627cd0b98722773ac9f31e92fdbbd2fb1cd59c99d720dbd"
+        "src/modules/import-kit/src/d1/reverse.ts": "9df25183f8aeeaded62b8e2799040cb99882980d89004f5202080f41a39aab63"
       },
       "modes": {
         "src/modules/import-kit/src/d1/reverse.ts": "100644"
@@ -1403,7 +1071,7 @@
     {
       "path": "src/modules/import-kit/src/d1/reviewed-source.ts",
       "originPath": "modules/import-kit/src/d1/reviewed-source.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/reviewed-source.ts": "fa3d5a6847476721b0d1d4a0ff3546e394f8d2ab6ecf4ce63a4598a131014b84"
       },
@@ -1414,7 +1082,7 @@
     {
       "path": "src/modules/import-kit/src/d1/sets.ts",
       "originPath": "modules/import-kit/src/d1/sets.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/sets.ts": "f1a6572f8a5701fd3d72cf5793dcb0302dc05e7ef6f33c941636562291d179bd"
       },
@@ -1425,7 +1093,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-admission.ts",
       "originPath": "modules/import-kit/src/d1/staging-admission.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-admission.ts": "dcf561f9098294c33b0d85c52d3a85d7737f203c5cd09d502db6244a2300b343"
       },
@@ -1436,7 +1104,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-control.ts",
       "originPath": "modules/import-kit/src/d1/staging-control.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-control.ts": "4fb9c1677578f06d5f449c9e5b2d16f0698313a2454533b72507dabe13ba5b06"
       },
@@ -1447,7 +1115,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-erasure.ts",
       "originPath": "modules/import-kit/src/d1/staging-erasure.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-erasure.ts": "b334d4d6f381c49bec8acad7add6c830e81a5ac1c8ab11fa3a763b461b6051f4"
       },
@@ -1458,9 +1126,9 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-lifecycle.ts",
       "originPath": "modules/import-kit/src/d1/staging-lifecycle.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/staging-lifecycle.ts": "dbe20b9744dbf374030575c83679d045813d63014c12cc6dc41918745d733fd3"
+        "src/modules/import-kit/src/d1/staging-lifecycle.ts": "ea30ff67be2de5ad877c322cde434bac3b3b2298fed4378dc2e40f38371f49fb"
       },
       "modes": {
         "src/modules/import-kit/src/d1/staging-lifecycle.ts": "100644"
@@ -1469,7 +1137,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-plan.ts",
       "originPath": "modules/import-kit/src/d1/staging-plan.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-plan.ts": "0a277f2c6f7ff99b142f140962a1f4417f712d9706c0f51ea484063ba5d6f43f"
       },
@@ -1480,7 +1148,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-privacy.ts",
       "originPath": "modules/import-kit/src/d1/staging-privacy.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-privacy.ts": "68433ca2720cba3563ebe59fbdf7a1e82ccb0f15e5a944492977cbe9d7fd8574"
       },
@@ -1491,7 +1159,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-publication.ts",
       "originPath": "modules/import-kit/src/d1/staging-publication.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-publication.ts": "7c754477b91851ba6ceb91aa101f833f624687c6a8116092b9ff1881c0fc49d5"
       },
@@ -1502,7 +1170,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-schema.ts",
       "originPath": "modules/import-kit/src/d1/staging-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-schema.ts": "0da4351c695f36487022b752765e4e65c03a290fbf6a6f8ca086a767a7065b0f"
       },
@@ -1513,7 +1181,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-statements.ts",
       "originPath": "modules/import-kit/src/d1/staging-statements.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-statements.ts": "85c3e700ddf7899638e07385240e0c6c7920b7b4a57d78b1876832769f2630b8"
       },
@@ -1524,7 +1192,7 @@
     {
       "path": "src/modules/import-kit/src/d1/staging-transport.ts",
       "originPath": "modules/import-kit/src/d1/staging-transport.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/staging-transport.ts": "6d54fc99eba677aa6c8b20dde4fceff812b98a77d5189e1963235a0a61d763c2"
       },
@@ -1535,7 +1203,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-boundary.ts",
       "originPath": "modules/import-kit/src/d1/stream-boundary.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-boundary.ts": "a3db1aa700d66c23c1297ccaea1afb24171dccd5ebd0416ebb02649820871833"
       },
@@ -1546,7 +1214,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-create.ts",
       "originPath": "modules/import-kit/src/d1/stream-create.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-create.ts": "81e288457d5bb8e094b3ce2bb8ea9607f167435864665a61b047ce6396a11860"
       },
@@ -1557,7 +1225,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-identity-admission.ts",
       "originPath": "modules/import-kit/src/d1/stream-identity-admission.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-identity-admission.ts": "04f7360f42814c168c643d83222968484a830d46167f5c5f9f21584e257637bb"
       },
@@ -1568,7 +1236,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-input.ts",
       "originPath": "modules/import-kit/src/d1/stream-input.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-input.ts": "4979b905310d8ebd94278267569301316bc38d3c1b6a8220ed44fb9159146b51"
       },
@@ -1579,7 +1247,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-layout.ts",
       "originPath": "modules/import-kit/src/d1/stream-layout.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-layout.ts": "9b1771a447233e39609e28a27c034270127ca9628d1045786066a7cc5f03f31c"
       },
@@ -1590,7 +1258,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-origin.ts",
       "originPath": "modules/import-kit/src/d1/stream-origin.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-origin.ts": "8c593ea5d256102b6027edc6759c4d2accff520fbb586391bb4240d11e84b1f1"
       },
@@ -1601,7 +1269,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-page-integrity.ts",
       "originPath": "modules/import-kit/src/d1/stream-page-integrity.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-page-integrity.ts": "b81cc04000f7733f537b3817a3513433abb5a5922d3590a506169888a91c035d"
       },
@@ -1612,9 +1280,9 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-partition.ts",
       "originPath": "modules/import-kit/src/d1/stream-partition.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/stream-partition.ts": "598ea0594c789fcd98496fbf668df5ec21ef25a0d0888b94f633c320ffbe8375"
+        "src/modules/import-kit/src/d1/stream-partition.ts": "d9afe61feb35a5b8e9b8d64364adef79879488e2afa4bfc9e85d29da728433cd"
       },
       "modes": {
         "src/modules/import-kit/src/d1/stream-partition.ts": "100644"
@@ -1623,7 +1291,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-plan.ts",
       "originPath": "modules/import-kit/src/d1/stream-plan.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-plan.ts": "096c2fa2b586b29e0ab277baeaf2db6f74bb65661539d1586d8d3e92a35f665c"
       },
@@ -1634,9 +1302,9 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-receipt.ts",
       "originPath": "modules/import-kit/src/d1/stream-receipt.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/stream-receipt.ts": "5ef1aa79f546b7bfba98c2b291bf15bd32f5c4c71f76c3d8522ba39a47cb6f6d"
+        "src/modules/import-kit/src/d1/stream-receipt.ts": "0705e0833a5d105ea07c835bfcc41355a421cab4064c8c57caae372ee3c67365"
       },
       "modes": {
         "src/modules/import-kit/src/d1/stream-receipt.ts": "100644"
@@ -1645,7 +1313,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-revision-schema.ts",
       "originPath": "modules/import-kit/src/d1/stream-revision-schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-revision-schema.ts": "33954cf1d174b0a8589e685cc0a77a6b5c07fbc64719e8e87d49384a461d150a"
       },
@@ -1656,7 +1324,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-snapshot.ts",
       "originPath": "modules/import-kit/src/d1/stream-snapshot.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-snapshot.ts": "82c8c6c698d7548bc781c776c6ad00a6c7293b21b2d2cd58bf75a85fa3d6ee4b"
       },
@@ -1667,7 +1335,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-stage.ts",
       "originPath": "modules/import-kit/src/d1/stream-stage.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-stage.ts": "9c18c0ffe72ad26a42d84b452fedebbc2885c09dae1a348ce98e8cc697b02c1b"
       },
@@ -1678,7 +1346,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-state.ts",
       "originPath": "modules/import-kit/src/d1/stream-state.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-state.ts": "79930506755884b83efeb43cb00c1f9a10a69cfdd3b5523bd38d37b4e8b67277"
       },
@@ -1689,7 +1357,7 @@
     {
       "path": "src/modules/import-kit/src/d1/stream-working-set.ts",
       "originPath": "modules/import-kit/src/d1/stream-working-set.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/stream-working-set.ts": "29b16f9d5ec10aabbd8f228130f897695ae8c7a7a81122130afbb9e023b0a293"
       },
@@ -1700,7 +1368,7 @@
     {
       "path": "src/modules/import-kit/src/d1/streams.ts",
       "originPath": "modules/import-kit/src/d1/streams.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/streams.ts": "581dc7bcaa8fd3cbef5e7cfbde6fda2cdb76ed1f628c81d23b57e2a6bc69ab1f"
       },
@@ -1711,7 +1379,7 @@
     {
       "path": "src/modules/import-kit/src/d1/target-guards.ts",
       "originPath": "modules/import-kit/src/d1/target-guards.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/target-guards.ts": "0109367eda7594ab16f0a449cdbfab93627e3c8f8fb3f74a4123383ba60bb716"
       },
@@ -1722,7 +1390,7 @@
     {
       "path": "src/modules/import-kit/src/d1/target-identities.ts",
       "originPath": "modules/import-kit/src/d1/target-identities.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/target-identities.ts": "6bea9b8ae58cc3e9fa5006918ce5649a6fa2967788a4c5459971ea89297846ec"
       },
@@ -1733,9 +1401,9 @@
     {
       "path": "src/modules/import-kit/src/d1/transport.ts",
       "originPath": "modules/import-kit/src/d1/transport.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/transport.ts": "2aee9daa6d18cb2d43f2e9fe426ba6ab9c2571bda46d450d82c6229c1661584f"
+        "src/modules/import-kit/src/d1/transport.ts": "8db08ec77553f58f816bc0e3325a20e63552e38a99604237a58e8843de7819bf"
       },
       "modes": {
         "src/modules/import-kit/src/d1/transport.ts": "100644"
@@ -1744,9 +1412,9 @@
     {
       "path": "src/modules/import-kit/src/d1/types.ts",
       "originPath": "modules/import-kit/src/d1/types.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/d1/types.ts": "6aa12c766998a259e38675ad69270b32073c9138b8101e6be7ea9cd1e0940e64"
+        "src/modules/import-kit/src/d1/types.ts": "7bcf203d16cb0cde6d92686ab2a2e76c6e1812c944bc62eb52023541acfc747b"
       },
       "modes": {
         "src/modules/import-kit/src/d1/types.ts": "100644"
@@ -1755,7 +1423,7 @@
     {
       "path": "src/modules/import-kit/src/d1/undo-observations.ts",
       "originPath": "modules/import-kit/src/d1/undo-observations.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/undo-observations.ts": "aa5c7eac0fd202244fe7a5518a95dcab377809b9eda12c52b610fe03b00f9958"
       },
@@ -1766,7 +1434,7 @@
     {
       "path": "src/modules/import-kit/src/d1/undo-report.ts",
       "originPath": "modules/import-kit/src/d1/undo-report.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/undo-report.ts": "10776e6240f7090e59023aa2e9ed212ead66b37c2c696ec0d44dba424be34b71"
       },
@@ -1777,7 +1445,7 @@
     {
       "path": "src/modules/import-kit/src/d1/undo-snapshot.ts",
       "originPath": "modules/import-kit/src/d1/undo-snapshot.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/undo-snapshot.ts": "e92301721da9d72c37213a99a308701c94c882657d2fe0a263ad95614d3928d2"
       },
@@ -1788,7 +1456,7 @@
     {
       "path": "src/modules/import-kit/src/d1/undo-state.ts",
       "originPath": "modules/import-kit/src/d1/undo-state.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/undo-state.ts": "f8f8f7935482b60cf619fb23f6aa04bc03376ed9f7f8162c4f8e9961c564f49b"
       },
@@ -1799,7 +1467,7 @@
     {
       "path": "src/modules/import-kit/src/d1/undo-types.ts",
       "originPath": "modules/import-kit/src/d1/undo-types.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/d1/undo-types.ts": "39a110602c82019bf19bccd13316d590ee3e6f3fbc7171b5aa35d982e6158b50"
       },
@@ -1810,7 +1478,7 @@
     {
       "path": "src/modules/import-kit/src/journal/authority.ts",
       "originPath": "modules/import-kit/src/journal/authority.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/journal/authority.ts": "45934861cf653954615329c2ac003a106d8abad33a8e42c633cde43832af7b37"
       },
@@ -1821,7 +1489,7 @@
     {
       "path": "src/modules/import-kit/src/plan/budget.ts",
       "originPath": "modules/import-kit/src/plan/budget.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/plan/budget.ts": "4a97e89a91edf916720fab61815a62ac50b35a975d52fff8cc9f346f2f26a837"
       },
@@ -1832,7 +1500,7 @@
     {
       "path": "src/modules/import-kit/src/plan/index.ts",
       "originPath": "modules/import-kit/src/plan/index.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/plan/index.ts": "5f4e545df75190be885c79524e51d5ccb8d3abf3698a6b22beee16a7f11a0d4e"
       },
@@ -1843,7 +1511,7 @@
     {
       "path": "src/modules/import-kit/src/plan/size.ts",
       "originPath": "modules/import-kit/src/plan/size.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/plan/size.ts": "769e9e4e53b8554550f0861d312e87b2c6f75907961579967b4ef76df605c04f"
       },
@@ -1854,9 +1522,9 @@
     {
       "path": "src/modules/import-kit/src/provenance/canonical-hash.ts",
       "originPath": "modules/import-kit/src/provenance/canonical-hash.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
-        "src/modules/import-kit/src/provenance/canonical-hash.ts": "e0acc9e93bacbe75ccc8f71f2c5297fb6a7772c832c20ad77a8f97e80d46b964"
+        "src/modules/import-kit/src/provenance/canonical-hash.ts": "c456931f94554f62dd9fae1923d44b9e04db63c822ec97fe708e55d687cadfe5"
       },
       "modes": {
         "src/modules/import-kit/src/provenance/canonical-hash.ts": "100644"
@@ -1865,7 +1533,7 @@
     {
       "path": "src/modules/import-kit/src/provenance/canonical-stream.ts",
       "originPath": "modules/import-kit/src/provenance/canonical-stream.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/provenance/canonical-stream.ts": "94b9bef088d1d907edd4de44b74132ba257fa488a1ca447ad2cceb0f1d049890"
       },
@@ -1876,7 +1544,7 @@
     {
       "path": "src/modules/import-kit/src/provenance/credentials.ts",
       "originPath": "modules/import-kit/src/provenance/credentials.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/provenance/credentials.ts": "2103f268a6b40afba8cc455e11157a8e9ce742e44944b504011f78f9b2f6a81f"
       },
@@ -1887,7 +1555,7 @@
     {
       "path": "src/modules/import-kit/src/provenance/identity.ts",
       "originPath": "modules/import-kit/src/provenance/identity.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/provenance/identity.ts": "924dacb8c3599456a724b7c743226509e97cdf67f524c988f91f7a8b2207627e"
       },
@@ -1898,7 +1566,7 @@
     {
       "path": "src/modules/import-kit/src/provenance/json-snapshot.ts",
       "originPath": "modules/import-kit/src/provenance/json-snapshot.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/provenance/json-snapshot.ts": "0f966fc02c2605bdb055b9db13fb954d499f64439ab5e4873137c8d825c4b212"
       },
@@ -1907,20 +1575,9 @@
       }
     },
     {
-      "path": "src/modules/import-kit/src/provenance/resumable-sha256.ts",
-      "originPath": "modules/import-kit/src/provenance/resumable-sha256.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/modules/import-kit/src/provenance/resumable-sha256.ts": "2ded24de0d94c79ba98c9d15f7c84570e1b9efb89be82ca9cf259acbc86f4142"
-      },
-      "modes": {
-        "src/modules/import-kit/src/provenance/resumable-sha256.ts": "100644"
-      }
-    },
-    {
       "path": "src/modules/import-kit/src/provenance/validate-json.ts",
       "originPath": "modules/import-kit/src/provenance/validate-json.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/provenance/validate-json.ts": "43d2424fb804f11b10b716504bf1f0ab9c03381372e2c9fe5eb7500224449007"
       },
@@ -1931,7 +1588,7 @@
     {
       "path": "src/modules/import-kit/src/readers/README.md",
       "originPath": "modules/import-kit/src/readers/README.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/readers/README.md": "349b39f3c499e731cd0d05bb1e93233b72ce7205783a07291c4fdd3d5ca9fffd"
       },
@@ -1942,7 +1599,7 @@
     {
       "path": "src/modules/import-kit/src/storage/originals.ts",
       "originPath": "modules/import-kit/src/storage/originals.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/storage/originals.ts": "4d72a139b6de26cdda9b4f46091ec1323b62af3ff26ea00a5e842e6586e42ad1"
       },
@@ -1953,7 +1610,7 @@
     {
       "path": "src/modules/import-kit/src/storage/provenance.ts",
       "originPath": "modules/import-kit/src/storage/provenance.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/storage/provenance.ts": "3451afc924b65570aff588773c75223d3a1b956c7e599b0573777c93aa611047"
       },
@@ -1964,7 +1621,7 @@
     {
       "path": "src/modules/import-kit/src/storage/schema.ts",
       "originPath": "modules/import-kit/src/storage/schema.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/storage/schema.ts": "4173d0e3d1c02ee49899cbe651986363c4bb5d8a8c7d59fc068313d4c00ad5df"
       },
@@ -1975,7 +1632,7 @@
     {
       "path": "src/modules/import-kit/src/types.ts",
       "originPath": "modules/import-kit/src/types.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/modules/import-kit/src/types.ts": "ece4ba2269831421ec40e2b36cca39ba729977bc8c21a62a50cd6e1dee6dddfd"
       },
@@ -1986,7 +1643,7 @@
     {
       "path": "src/vendor/base/hydration",
       "originPath": "foundation/runtime/hydration",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "79e70e60eae6277b2f35be58258d0e9d2ffa4dc0",
       "files": {
         "src/vendor/base/hydration/intro-guard.ts": "abc289d53537b631ad6de323b9123c843aea7498aa50d429a4786d7819194fcd",
         "src/vendor/base/hydration/README.md": "a25e8a1a787e141590c9b46efb313b8ba6d9b135fad880d3aacfd5289c205244",
@@ -2001,38 +1658,9 @@
       }
     },
     {
-      "path": "src/vendor/base/modules/demo",
-      "originPath": "modules/demo",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/demo/effects.mjs": "e74d46fec165fdb5eafc62e53d6691e3064d5b9b5257c53f3cd6dd9a40386226",
-        "src/vendor/base/modules/demo/index.d.mts": "71caa39f5001ab8bd2891ae5bdb9bf1ab4910c121fb038d83ae549adaf8fcf10",
-        "src/vendor/base/modules/demo/index.mjs": "a90f58afaf7d7d54121f1e49746a51631c1b12c603e44edba81b1570eaa68d96",
-        "src/vendor/base/modules/demo/label.d.mts": "96a4692d568cfb6fd5593c9d7d4296bced338e0f54c2d17f80ae1da105287285",
-        "src/vendor/base/modules/demo/label.mjs": "5a879dba78bcebfa5f12ce79856998ac1f54706955a0346b94babed7da5a8cf5",
-        "src/vendor/base/modules/demo/README.md": "8fb9b98295fa59c8d4bdd6bd0d0b9940dc1113bb4a6d01813e76b5c878a445fc",
-        "src/vendor/base/modules/demo/responses.mjs": "f91b6cb14dfde5c30750e6d248820f7218a855353e43e2defbc10fcc25fedc5d",
-        "src/vendor/base/modules/demo/sockets.mjs": "af88b298b721b3b2a9fe2425b9a8b7c95d842f28b56b3c48cf4366226ec90389",
-        "src/vendor/base/modules/demo/vite.d.mts": "f43b152b4a993feaf96afdbc276922bfa20d64725ea0150a12ec6ec805a7c7b3",
-        "src/vendor/base/modules/demo/vite.mjs": "e38556e50c954814ee8e12278babd627d5cdd051a7ea2c242a61d6c5d84d12f8"
-      },
-      "modes": {
-        "src/vendor/base/modules/demo/effects.mjs": "100644",
-        "src/vendor/base/modules/demo/index.d.mts": "100644",
-        "src/vendor/base/modules/demo/index.mjs": "100644",
-        "src/vendor/base/modules/demo/label.d.mts": "100644",
-        "src/vendor/base/modules/demo/label.mjs": "100644",
-        "src/vendor/base/modules/demo/README.md": "100644",
-        "src/vendor/base/modules/demo/responses.mjs": "100644",
-        "src/vendor/base/modules/demo/sockets.mjs": "100644",
-        "src/vendor/base/modules/demo/vite.d.mts": "100644",
-        "src/vendor/base/modules/demo/vite.mjs": "100644"
-      }
-    },
-    {
       "path": "src/vendor/base/modules/integrations",
       "originPath": "modules/integrations",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/vendor/base/modules/integrations/core/CONTRACT.md": "ebe5045698c7bcf54641b6b89c1185589a3d2e7f71f1c0b7d3f1ecb16c0c1431",
         "src/vendor/base/modules/integrations/core/crypto.ts": "efb7ccc35949d54ae6964cb2910a33abb123cf5f57944777f003d38ff6781dd8",
@@ -2101,17 +1729,15 @@
     {
       "path": "src/vendor/base/modules/mail",
       "originPath": "modules/mail",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/vendor/base/modules/mail/LICENSE": "2f5076ef027045b9e0e72df8aa61ca8551e54b1877d531656d6e7985b2c32324",
         "src/vendor/base/modules/mail/src/adapters/messaging/contract.mjs": "33397b933e393dca874b673e45c65cbcc1c96b84eeaab10d0346e2b1230f30df",
-        "src/vendor/base/modules/mail/src/adapters/rer/contract.mjs": "b5daebf8e3b3e0a8cb9482d93af021db74e5202d75d1d414a98259841fa35ac3",
-        "src/vendor/base/modules/mail/src/adapters/rer/list-headers.mjs": "2ee80e4fa4e9185efebc5ce02fca2f777dfce7b423f31d6a1ede5a19f411195b",
         "src/vendor/base/modules/mail/src/adapters/sendgrid/index.mjs": "bd94b2d46151ed35f4b0f8ba720588e4d64c899654111e114691b4c6421dfa4e",
         "src/vendor/base/modules/mail/src/adapters/sendgrid/serialize.mjs": "60d7836f94068a92283b1b66ccd27efeb78173c013fd1c9a6caaef1b928e09c0",
-        "src/vendor/base/modules/mail/src/core/errors.mjs": "8ffe417be05ef9f9f6eae1f84641f8da0e3c244f0a5ee712befc979dec455869",
-        "src/vendor/base/modules/mail/src/core/transport.mjs": "67b721f37bdde8a5f419ca88eda0e88650ffaca06bcbf91eab0e33c879d0e230",
-        "src/vendor/base/modules/mail/src/core/validation.mjs": "742a3ca756c15a6e7973ab48cd3c46ee697ab62d44b78ceae59a8fb7ec524f4d",
+        "src/vendor/base/modules/mail/src/core/errors.mjs": "ad6d85870719774eff284328d54bdcb20cc9fb24faf790e3f1e934d19be5197c",
+        "src/vendor/base/modules/mail/src/core/transport.mjs": "3f7bf52854e4908bb69b93032ac65cbd90bba57d03a62da1c2652ef4e470a1f8",
+        "src/vendor/base/modules/mail/src/core/validation.mjs": "6a08d0f42f795b8e16520a3f7ea2a1accef17c91584f13f9be791c2d3e6f4f56",
         "src/vendor/base/modules/mail/src/development/schema.sql": "45d6b03eadfe1e91737763ae85cdff74e7216f859869e34431550bba48294996",
         "src/vendor/base/modules/mail/src/sendgrid-email/index.d.mts": "65efe2ed9647dd24ce7a7c1055cc5d8213ce94061db7597fb0460309baaa48be",
         "src/vendor/base/modules/mail/src/sendgrid-email/index.mjs": "4b0a9132941f0ba7a2f91b86b46b16bb0cdb5d3b9396b19ad13fb060bd02737d"
@@ -2119,8 +1745,6 @@
       "modes": {
         "src/vendor/base/modules/mail/LICENSE": "100644",
         "src/vendor/base/modules/mail/src/adapters/messaging/contract.mjs": "100644",
-        "src/vendor/base/modules/mail/src/adapters/rer/contract.mjs": "100644",
-        "src/vendor/base/modules/mail/src/adapters/rer/list-headers.mjs": "100644",
         "src/vendor/base/modules/mail/src/adapters/sendgrid/index.mjs": "100644",
         "src/vendor/base/modules/mail/src/adapters/sendgrid/serialize.mjs": "100644",
         "src/vendor/base/modules/mail/src/core/errors.mjs": "100644",
@@ -2132,75 +1756,9 @@
       }
     },
     {
-      "path": "src/vendor/base/modules/operator-auth/crypto.mjs",
-      "originPath": "modules/operator-auth/crypto.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/operator-auth/crypto.mjs": "c9a843518d9223ec91698060bacd5a44cd0c4361adaa6b09c05be69f11a828b8"
-      },
-      "modes": {
-        "src/vendor/base/modules/operator-auth/crypto.mjs": "100644"
-      }
-    },
-    {
-      "path": "src/vendor/base/modules/operator-auth/csp.mjs",
-      "originPath": "modules/operator-auth/csp.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/operator-auth/csp.mjs": "7cf7cca59410434708213945cb762f6a9fa302b5eaf7575b903ca3f171264d8d"
-      },
-      "modes": {
-        "src/vendor/base/modules/operator-auth/csp.mjs": "100644"
-      }
-    },
-    {
-      "path": "src/vendor/base/modules/operator-auth/errors.mjs",
-      "originPath": "modules/operator-auth/errors.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/operator-auth/errors.mjs": "393de2f6a068fc32d0904e238e88d6fae90576b197cca463da8d7dfabef36f47"
-      },
-      "modes": {
-        "src/vendor/base/modules/operator-auth/errors.mjs": "100644"
-      }
-    },
-    {
-      "path": "src/vendor/base/modules/operator-auth/http.mjs",
-      "originPath": "modules/operator-auth/http.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/operator-auth/http.mjs": "caf5ddf8b50070b1339afd6f19e3ef3c73677cc7726a355fbac5cda371f09b53"
-      },
-      "modes": {
-        "src/vendor/base/modules/operator-auth/http.mjs": "100644"
-      }
-    },
-    {
-      "path": "src/vendor/base/modules/operator-auth/loopback.mjs",
-      "originPath": "modules/operator-auth/loopback.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/operator-auth/loopback.mjs": "13b32a076bce23a3124be1745202c18eda553f298fad3d9f5cb93ac61aee3115"
-      },
-      "modes": {
-        "src/vendor/base/modules/operator-auth/loopback.mjs": "100644"
-      }
-    },
-    {
-      "path": "src/vendor/base/modules/owner-claim/verify.mjs",
-      "originPath": "modules/owner-claim/verify.mjs",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
-      "files": {
-        "src/vendor/base/modules/owner-claim/verify.mjs": "a1cc5094a30415c60f739b67ad2eda40750e8d963d199fad45bdd562f7d0248b"
-      },
-      "modes": {
-        "src/vendor/base/modules/owner-claim/verify.mjs": "100644"
-      }
-    },
-    {
       "path": "src/vendor/base/modules/sendgrid-email/LICENSE",
       "originPath": "modules/sendgrid-email/LICENSE",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/vendor/base/modules/sendgrid-email/LICENSE": "2f5076ef027045b9e0e72df8aa61ca8551e54b1877d531656d6e7985b2c32324"
       },
@@ -2211,7 +1769,7 @@
     {
       "path": "src/vendor/base/modules/sendgrid-email/README.md",
       "originPath": "modules/sendgrid-email/README.md",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/vendor/base/modules/sendgrid-email/README.md": "4e2ed1aaf568098eb48883ec8e763aea01d1df915e7060ad434d22b2240ede8c"
       },
@@ -2222,7 +1780,7 @@
     {
       "path": "src/vendor/base/modules/sendgrid-email/src/sender.ts",
       "originPath": "modules/sendgrid-email/src/sender.ts",
-      "revision": "6de49b6407d6f5711705b149f94e075622c3a3d3",
+      "revision": "2de0b38c2ff5990dcfd7c177ad223a98b2aadf14",
       "files": {
         "src/vendor/base/modules/sendgrid-email/src/sender.ts": "03012f6d403842f8d7527f0f5d86d9c0afd4e8f63430cbe34fbe4adfc977dff6"
       },

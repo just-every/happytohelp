@@ -12,8 +12,6 @@ import { runStream, TASKS } from './llm/orchestrator.js';
 import { customerReplyMessages } from './replies/prompt.js';
 // @ts-ignore Retained two-pass assistance.
 import { generateSuggestions, generateReply } from './assist/prompt.js';
-import { demoEffect } from '../../vendor/base/modules/demo/index.mjs';
-import { demoGeneration } from '../../demo/ai';
 
 export async function executeGenerationProvider(
   env: Env,
@@ -75,8 +73,7 @@ export async function executeGenerationProvider(
     scope: `projects/${row.project_id}/generations/${row.id}`,
     settings: env,
   };
-  // A demo copy answers from demo/ai.ts instead of a model provider: no key, no paid call.
-  const result = await demoEffect(() => withWorkerRuntime(runtime, () => {
+  const result = await withWorkerRuntime(runtime, () => {
     if (row.kind === 'suggestions') {
       const request = {
         project_id: row.project_id,
@@ -96,6 +93,6 @@ export async function executeGenerationProvider(
       options,
       trace,
     });
-  }), () => demoGeneration(env, row, clientOptions));
+  });
   return { result: row.kind === 'reply' ? {...result, citations: context.selectedCitations} : result, usage: usageResult };
 }

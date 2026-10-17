@@ -1,5 +1,4 @@
 import type {Env} from '../../platform/env'
-import {demoMode} from '../../demo/mode'
 import {localMailOrigin} from '../../edition/local-mail/configuration'
 import type {EmailInput} from './email'
 // @ts-expect-error The maintained Base adapter is JavaScript without declarations.
@@ -17,7 +16,7 @@ export function selectedEmailProvider(env:Env):EmailProvider|null{
  return providers.includes(value)?value:null
 }
 export function emailConfigured(env:Env){
- if(localMailOrigin(env)||demoMode(env))return typeof env.EMAIL_FROM==='string'&&Boolean(env.EMAIL_FROM.trim())
+ if(localMailOrigin(env))return typeof env.EMAIL_FROM==='string'&&Boolean(env.EMAIL_FROM.trim())
  const provider=selectedEmailProvider(env)
  return Boolean(provider&&typeof env.EMAIL_API_KEY==='string'&&env.EMAIL_API_KEY.trim()&&typeof env.EMAIL_FROM==='string'&&env.EMAIL_FROM.trim()&&(provider!=='cloudflare'||/^[a-f0-9]{32}$/i.test(String(env.EMAIL_ACCOUNT_ID||''))))
 }

@@ -374,6 +374,7 @@
           "docs/site.json",
           "scripts/deployment",
           "scripts/import-legacy.mjs",
+          "scripts/legacy-import",
           "scripts/migrations.mjs",
           "src/app.ts",
           "src/jobs.ts",

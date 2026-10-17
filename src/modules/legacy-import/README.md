@@ -1,13 +1,39 @@
 # Legacy data import
 
-This module imports an explicit, portable JSON export into an already-migrated local native edition. It does not connect to MySQL, AWS, production buckets or providers. The command defaults to a read-only plan:
+This module imports a portable legacy export into an already-migrated native installation: either a local edition or a deployed one. It never connects to MySQL, AWS or legacy buckets, and it calls no provider. Every command validates and plans without writing unless `--apply` is given.
 
 ```sh
+# One JSON export (small projects and tests)
 node scripts/import-legacy.mjs --file /absolute/export.json
 node scripts/import-legacy.mjs --file /absolute/export.json --apply --persist-to .wrangler/state
+
+# A chunked export package (any size), into local state
+node scripts/import-legacy.mjs --package /absolute/company/import
+node scripts/import-legacy.mjs --package /absolute/company/import --apply --persist-to .wrangler/state
 ```
 
-The SELECT-only MySQL exporter and attachment step are documented in [Export legacy HappyToHelp](../../../docs/LEGACY-EXPORT.md). It produces this format one project at a time. Its credential omissions are explicit; omitted authentication material is never reconstructed.
+## Importing a package into a deployed installation
+
+A deployed installation is imported with its deploy credentials. The command binds only that installation's D1 database and R2 bucket, through Wrangler remote bindings and the operator's Cloudflare API token. It has no route in the application, so no workspace session or public request can reach it. It creates no queue, mail, AI or payment binding and never invokes the installation's Worker, so the import itself sends no email, dispatches no job, calls no AI provider and charges nothing.
+
+```sh
+CLOUDFLARE_ACCOUNT_ID=... CLOUDFLARE_API_TOKEN=... \
+node scripts/import-legacy.mjs --package /absolute/company/import --apply \
+  --remote --database <installation>-db --bucket <installation>-files \
+  --expect-manifest-sha256 <sha256 of manifest.json> --concurrency 4
+```
+
+- **Package.** `manifest.json` (format `happytohelp-legacy-chunks-v1`) lists 4 MiB row chunks, the context parts that mapping reads across tables, and one file per attachment, each with its size and SHA-256. Pass `--expect-manifest-sha256` with the digest of the approved package; any other manifest is refused.
+- **Validation before writing.** Every chunk, context part and attachment is checked against the manifest, and every table's row count against `source.rowCounts`, one file at a time. A damaged or incomplete package writes nothing.
+- **Bounded memory.** Rows are planned and written one chunk at a time. Contacts, conversations, messages and media from the context go into a private on-disk SQLite index, which the command deletes when it ends, so memory does not grow with the company's size. Attachments are streamed in 8 MiB parts.
+- **D1 limits.** A chunk's journal is read in one query. Existing-row checks and inserts pass their rows as one JSON array value per statement, so no statement nears 100 bound parameters or 100 KB of SQL. Each group holds at most 512 KiB of source rows, keeping every bound value below D1's 2 MB value limit, and its canonical rows, holds and journal entries commit together in one `batch`. Check the database's size after a large company: the journal keeps each source row once more.
+- **Resume and idempotency.** The run is `legacy-package:<manifest sha256>`, and each chunk is its own journal run. If the command stops for any reason, run the same command again: committed groups are skipped and the import continues at the first uncommitted group. A complete rerun applies 0 rows. A row that already exists with different values stops the import without overwriting it. R2 objects use conditional creation, an existing object with other bytes stops the import, and every new object is read back and checked by digest.
+- **Concurrency.** `--concurrency` (1-16) imports that many chunks of one table, and that many attachments, at a time. Parent tables finish before their children start. Run one import per installation at a time.
+- **Progress.** One JSON line per step and chunk goes to stderr (ids, counts, timings). The final summary goes to stdout: rows applied and replayed per table, archive-only rows, holds and attachments.
+
+Legacy widgets could deliver one local message ID twice in a conversation. Native delivery IDs are unique per conversation, so the first message in transcript order keeps the legacy ID and a repeat is imported with `legacy:<message id>`, the ID used for messages that never had one. Both messages and their content are imported; the original value stays in the source archive.
+
+The imported workspaces arrive with legacy email sending disabled and their inbound mailbox held until a mail domain is verified. Imported team members have no password. They sign in with **Email me a sign-in link**, then set a password in their account settings.
 
 Input shape:
 

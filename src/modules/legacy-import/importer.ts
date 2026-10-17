@@ -1,6 +1,5 @@
 import type { Env } from '../../platform/env'
 import { type LegacyBundle,type Row,type MappedRow,stable,digest,text } from './types'
-function slices<T>(items:T[],size:number){const result:T[][]=[];for(let i=0;i<items.length;i+=size)result.push(items.slice(i,i+size));return result}
 function groupBy<T,V>(items:T[],key:(item:T)=>string,value:(item:T)=>V){const groups=new Map<string,V[]>();for(const item of items){const k=key(item);if(!groups.has(k))groups.set(k,[]);groups.get(k)!.push(value(item))}return groups}
 import {relationships} from './relationships'
 import {mapLegacy,tableOrder} from './mapping'
@@ -23,41 +22,58 @@ export async function importLegacy(env:Pick<Env,'DB'|'FILES'>,bundle:LegacyBundl
  const plan=await planImport(bundle,options),existing=await env.DB.prepare('SELECT id,bundle_digest,state FROM legacy_import_runs WHERE id=?').bind(plan.id).first<{id:string;bundle_digest:string;state:string}>();if(existing&&existing.bundle_digest!==plan.bundleDigest)throw new Error('Import digest conflict')
  await env.DB.prepare("INSERT OR IGNORE INTO legacy_import_runs VALUES(?,?,?,'running',?,NULL)").bind(plan.id,stable(plan.source),plan.bundleDigest,Date.now()).run()
  for(const object of plan.objects){const bytes=Uint8Array.from(atob(object.dataBase64),c=>c.charCodeAt(0)),current=await env.FILES.get(object.key);if(current&&await digest(new Uint8Array(await current.arrayBuffer()))!==object.sha256)throw new Error(`Existing R2 object differs: ${object.key}`);if(!current){const stored=await env.FILES.put(object.key,bytes,{onlyIf:{etagDoesNotMatch:'*'},customMetadata:{sha256:object.sha256,legacyImport:plan.id}});if(!stored){const raced=await env.FILES.get(object.key);if(!raced||await digest(new Uint8Array(await raced.arrayBuffer()))!==object.sha256)throw new Error(`Concurrent R2 object conflict: ${object.key}`)}};await env.DB.prepare('INSERT OR IGNORE INTO legacy_import_objects VALUES(?,?,?,?)').bind(plan.id,object.key,object.sha256,bytes.length).run()}
- // Reads are made per chunk and writes commit in groups of source rows, so a
- // production-sized project costs a bounded number of D1 round trips. Each group
- // commits its canonical writes and their legacy_import_rows records together.
- const schemas=new Map<string,Set<string>>(),current=new Map<string,Row|null>(),priors=new Map<string,string>();let applied=0,replayed=0
+ // A run's journal is read once. Existing canonical rows are looked up, and new
+ // rows written, as one JSON array parameter per statement, so a production-sized
+ // chunk costs a few D1 round trips and never approaches D1's 100 bound
+ // parameters. Each group commits its canonical writes, holds and
+ // legacy_import_rows records together in one batch.
  const identity=(table:string,values:unknown[])=>table+'\u0000'+JSON.stringify(values)
- for(const [table,ids] of groupBy(plan.rows,r=>r.table,r=>r.sourceId))for(const part of slices(ids,90)){
-  const found=await env.DB.prepare(`SELECT source_id,row_digest FROM legacy_import_rows WHERE run_id=? AND source_table=? AND source_id IN (${part.map(()=>'?').join(',')})`).bind(plan.id,table,...part).all<{source_id:string;row_digest:string}>()
-  for(const row of found.results)priors.set(identity(table,[row.source_id]),row.row_digest)
- }
+ const priors=new Map((await env.DB.prepare('SELECT source_table,source_id,row_digest FROM legacy_import_rows WHERE run_id=?').bind(plan.id).all<{source_table:string;source_id:string;row_digest:string}>()).results.map(r=>[identity(r.source_table,[r.source_id]),r.row_digest]))
+ let applied=0,replayed=0
+ for(const source of plan.rows){const prior=priors.get(identity(source.table,[source.sourceId]));if(prior!==undefined){if(prior!==source.rowDigest)throw new Error('Source row replay differs');replayed++}}
  const pending=plan.rows.filter(source=>!priors.has(identity(source.table,[source.sourceId])))
- for(const mapped of pending.flatMap(source=>source.mapped))if(!schemas.has(mapped.table)){const schema=await env.DB.prepare(`PRAGMA table_info(${sqlName(mapped.table)})`).all<{name:string}>();if(!schema.results.length)throw new Error(`Target migration missing: ${mapped.table}`);schemas.set(mapped.table,new Set(schema.results.map(c=>c.name)))}
+ const schemas=await targetSchemas(env.DB,pending.flatMap(source=>source.mapped.map(m=>m.table)))
  const columnsOf=(mapped:MappedRow)=>Object.fromEntries(Object.entries(mapped.row).filter(([key,value])=>schemas.get(mapped.table)!.has(key)&&value!==undefined).map(([key,value])=>[key,typeof value==='object'&&value!==null?stable(value):value]))
+ const current=new Map<string,Row|null>()
  for(const [shape,rows] of groupBy(pending.flatMap(source=>source.mapped),m=>m.table+'\u0000'+m.key.join(','),m=>m)){
   const [table,keyList]=shape.split('\u0000'),keys=keyList.split(','),seen=new Set<string>()
   const wanted=rows.map(m=>{const row=columnsOf(m);for(const key of keys)text(row[key],`${table}.${key}`);return keys.map(k=>row[k])}).filter(values=>{const id=identity(table,values);if(seen.has(id))return false;seen.add(id);return true})
-  for(const part of slices(wanted,Math.max(1,Math.floor(90/keys.length)))){
-   const found=await env.DB.prepare(`SELECT * FROM ${sqlName(table)} WHERE ${part.map(()=>'('+keys.map(k=>`${sqlName(k)} IS ?`).join(' AND ')+')').join(' OR ')}`).bind(...part.flat()).all<Row>()
+  for(const part of byteSlices(wanted,values=>utf8.encode(JSON.stringify(values)).length)){
+   const found=await env.DB.prepare(`SELECT t.* FROM ${sqlName(table)} t JOIN json_each(?) j ON ${keys.map((k,i)=>`t.${sqlName(k)} IS json_extract(j.value,'$[${i}]')`).join(' AND ')}`).bind(JSON.stringify(part)).all<Row>()
    for(const values of part)current.set(identity(table,values),null)
    for(const row of found.results)current.set(identity(table,keys.map(k=>row[k])),row)
   }
  }
- for(const source of plan.rows){const prior=priors.get(identity(source.table,[source.sourceId]));if(prior!==undefined){if(prior!==source.rowDigest)throw new Error('Source row replay differs');replayed++}}
- for(const group of slices(pending,50)){
-  const statements:D1PreparedStatement[]=[]
+ for(const group of byteSlices(pending,source=>utf8.encode(stable(source.row)).length)){
+  const inserts=new Map<string,Map<string,unknown[][]>>(),holds:unknown[][]=[],reporting:unknown[][]=[],journal:unknown[][]=[]
   for(const source of group){
    for(const mapped of source.mapped){
     const row=columnsOf(mapped),keyValues=mapped.key.map(k=>row[k]),id=identity(mapped.table,keyValues),existingRow=current.get(id)
     if(existingRow){for(const [key,value]of Object.entries(row))if(existingRow[key]!==value)throw new Error(`Existing data conflict ${mapped.table}:${keyValues.join(':')} column ${key}; no rows overwritten`)}
-    else{const names=Object.keys(row);statements.push(env.DB.prepare(`INSERT INTO ${sqlName(mapped.table)} (${names.map(sqlName).join(',')}) VALUES(${names.map(()=>'?').join(',')})`).bind(...names.map(k=>row[k])));current.set(id,row)}
-    if(mapped.hold)statements.push(env.DB.prepare('INSERT OR IGNORE INTO legacy_import_holds VALUES(?,?,?,?,?,NULL)').bind(`${plan.id}:${source.table}:${source.sourceId}`,plan.id,source.table,source.sourceId,mapped.hold))
+    else{const names=Object.keys(row),byColumns=inserts.get(mapped.table)??new Map<string,unknown[][]>();inserts.set(mapped.table,byColumns);const values=byColumns.get(names.join(','))??[];byColumns.set(names.join(','),values);values.push(names.map(k=>row[k]));current.set(id,row)}
+    if(mapped.hold)holds.push([`${plan.id}:${source.table}:${source.sourceId}`,plan.id,source.table,source.sourceId,mapped.hold])
    }
-   if(source.table==='conversations'&&source.mapped.some(m=>m.table==='conversations')){const mapped=source.mapped.find(m=>m.table==='conversations')!;statements.push(env.DB.prepare('INSERT OR IGNORE INTO reporting_legacy_conversations(project_id,conversation_id,run_id) VALUES(?,?,?)').bind(mapped.row.project_id,mapped.row.id,plan.id))}
-   statements.push(env.DB.prepare('INSERT INTO legacy_import_rows VALUES(?,?,?,?,?,?,?,?)').bind(plan.id,source.table,source.sourceId,source.rowDigest,stable(source.row),source.mapped.map(m=>m.table).join(',')||null,source.mapped.map(m=>m.key.map(k=>m.row[k]).join(':')).join(',')||null,source.mapped.length?'mapped':'archived_only'))
+   const conversation=source.table==='conversations'&&source.mapped.find(m=>m.table==='conversations')
+   if(conversation)reporting.push([conversation.row.project_id,conversation.row.id,plan.id])
+   journal.push([plan.id,source.table,source.sourceId,source.rowDigest,stable(source.row),source.mapped.map(m=>m.table).join(',')||null,source.mapped.map(m=>m.key.map(k=>m.row[k]).join(':')).join(',')||null,source.mapped.length?'mapped':'archived_only'])
   }
+  // Tables keep their first-mapped order, so a parent row precedes the rows that reference it.
+  const statements=[...inserts].flatMap(([table,byColumns])=>[...byColumns].map(([names,values])=>insertJson(env.DB,`INSERT INTO ${sqlName(table)} (${names.split(',').map(sqlName).join(',')})`,names.split(',').length,values)))
+  if(holds.length)statements.push(insertJson(env.DB,'INSERT OR IGNORE INTO legacy_import_holds(id,run_id,source_table,source_id,reason)',5,holds))
+  if(reporting.length)statements.push(insertJson(env.DB,'INSERT OR IGNORE INTO reporting_legacy_conversations(project_id,conversation_id,run_id)',3,reporting))
+  statements.push(insertJson(env.DB,'INSERT INTO legacy_import_rows(run_id,source_table,source_id,row_digest,source_json,target_table,target_key,status)',8,journal))
   await env.DB.batch(statements);applied+=group.length
  }
  await env.DB.prepare("UPDATE legacy_import_runs SET state='complete',completed_at=? WHERE id=?").bind(Date.now(),plan.id).run();return {id:plan.id,...plan.summary,applied,replayed}
+}
+// D1 limits a bound value to 2 MB. Half a megabyte of source rows keeps a group's
+// largest JSON parameter (its journal, which repeats each row escaped) under it.
+const groupBytes=512*1024,parameterBytes=2_000_000,utf8=new TextEncoder()
+function byteSlices<T>(items:T[],size:(item:T)=>number){const result:T[][]=[];let part:T[]=[],bytes=0;for(const item of items){const n=size(item);if(part.length&&bytes+n>groupBytes){result.push(part);part=[];bytes=0}part.push(item);bytes+=n}if(part.length)result.push(part);return result}
+function insertJson(db:D1Database,into:string,width:number,rows:unknown[][]){const json=JSON.stringify(rows);if(utf8.encode(json).length>parameterBytes)throw new Error('Legacy import group exceeds the D1 bound value limit');return db.prepare(`${into} SELECT ${Array.from({length:width},(_,i)=>`json_extract(value,'$[${i}]')`).join(',')} FROM json_each(?)`).bind(json)}
+const schemaCache=new WeakMap<D1Database,Map<string,Set<string>>>()
+async function targetSchemas(db:D1Database,tables:string[]){
+ const schemas=schemaCache.get(db)??new Map<string,Set<string>>();schemaCache.set(db,schemas)
+ for(const table of new Set(tables))if(!schemas.has(table)){const schema=await db.prepare(`PRAGMA table_info(${sqlName(table)})`).all<{name:string}>();if(!schema.results.length)throw new Error(`Target migration missing: ${table}`);schemas.set(table,new Set(schema.results.map(c=>c.name)))}
+ return schemas
 }

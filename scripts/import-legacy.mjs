@@ -1,14 +1,29 @@
-import {registerHooks} from 'node:module';
-import {existsSync} from 'node:fs';
-import {join} from 'node:path';
-import {readFile,stat} from 'node:fs/promises';
-import {withImportLock} from './legacy-export/import-objects.mjs';
-import {importPackage} from './legacy-export/import-package.mjs';
-registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&context.parentURL){const url=new URL(specifier+'.ts',context.parentURL);if(existsSync(url))return next(url.href,context)}return next(specifier,context)}});
-const {planImport,importLegacy}=await import('../src/modules/legacy-import/importer.ts');
-const {tableOrder}=await import('../src/modules/legacy-import/mapping.ts');
-const args=process.argv.slice(2),file=args[args.indexOf('--file')+1];
-if(!args.includes('--file')||!file||args.includes('--remote'))throw Error('Usage: node scripts/import-legacy.mjs --file explicit-export.json-or-directory [--apply] [--persist-to path]. Local only; default plans without writing.');
-const directory=(await stat(file)).isDirectory(),bundle=directory?null:JSON.parse(await readFile(file,'utf8'));
-if(!args.includes('--apply')){const result=directory?await importPackage(file,null,{planImport,importLegacy,tableOrder}):await planImport(bundle);console.log(JSON.stringify(directory?result:{id:result.id,...result.summary},null,2));}
-else{const {getPlatformProxy}=await import('wrangler'),path=args.includes('--persist-to')?args[args.indexOf('--persist-to')+1]:'.wrangler/state';await withImportLock(path,async()=>{const proxy=await getPlatformProxy({remoteBindings:false,persist:{path:join(path,'v3')}});try{console.log(JSON.stringify(directory?await importPackage(file,proxy.env,{planImport,importLegacy,tableOrder}):await importLegacy(proxy.env,bundle),null,2));}finally{await proxy.dispose();}});}
+#!/usr/bin/env node
+import {registerHooks} from 'node:module'
+import {existsSync} from 'node:fs'
+import {readFile} from 'node:fs/promises'
+registerHooks({resolve(specifier,context,next){if(specifier.startsWith('.')&&context.parentURL){const url=new URL(specifier+'.ts',context.parentURL);if(existsSync(url))return next(url.href,context)}return next(specifier,context)}})
+const usage='Usage: node scripts/import-legacy.mjs (--file export.json | --package package-directory) [--apply [--persist-to path | --remote --database D1-NAME --bucket R2-NAME]] [--expect-manifest-sha256 HEX] [--concurrency N]. Without --apply it validates and plans without writing.'
+const args=process.argv.slice(2),value=name=>{const i=args.indexOf(name);if(i<0)return undefined;const v=args[i+1];if(!v||v.startsWith('--'))throw new Error(usage);return v}
+const file=value('--file'),pkg=value('--package'),remote=args.includes('--remote'),apply=args.includes('--apply')
+if(!file===!pkg||(remote&&!apply)||(remote&&args.includes('--persist-to'))||(file&&remote))throw new Error(usage)
+const {planImport,importLegacy}=await import('../src/modules/legacy-import/importer.ts')
+const {tableOrder}=await import('../src/modules/legacy-import/mapping.ts')
+const relationships=await import('../src/modules/legacy-import/relationships.ts')
+const types=await import('../src/modules/legacy-import/types.ts')
+const {importPackage}=await import('./legacy-import/import-package.mjs')
+const {localTarget,remoteTarget}=await import('./legacy-import/target.mjs')
+const concurrency=Number(value('--concurrency')??1);if(!Number.isSafeInteger(concurrency)||concurrency<1||concurrency>16)throw new Error(usage)
+// Progress is one JSON line per step or chunk on stderr: counts, ids and timings only.
+const progress=line=>process.stderr.write(JSON.stringify({at:new Date().toISOString(),...line})+'\n')
+async function run(env){
+ if(pkg)return importPackage(pkg,env,{planImport,importLegacy,tableOrder,relationships,types},{expectManifestSha256:value('--expect-manifest-sha256'),concurrency,progress})
+ const bundle=JSON.parse(await readFile(file,'utf8'));if(env)return importLegacy(env,bundle)
+ const plan=await planImport(bundle);return {id:plan.id,...plan.summary}
+}
+if(!apply)console.log(JSON.stringify(await run(null),null,2))
+else{
+ const target=remote?await remoteTarget({database:value('--database'),bucket:value('--bucket')}):await localTarget(value('--persist-to')??'.wrangler/state')
+ progress({step:'target',target:target.label})
+ try{console.log(JSON.stringify(await run(target.env),null,2))}finally{await target.close()}
+}

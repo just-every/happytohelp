@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {client} from './upgrade-baselines.mjs';
+import {completeInterruptedErasure} from './upgrade-interrupted-erasure.mjs';
 
 const scalar = (database, sql, ...values) => {
   const db = new DatabaseSync(database, {readOnly: true});
@@ -87,5 +88,6 @@ export async function readBack(origin, database, data, prior = {counts: {}, mail
   assert.equal(storedMailCount(database), prior.mail, 'development adds no stored mail');
   checks.inertTables = inertTables;
   checks.retainedMailRows = count(database, 'rer_mail_development_outbox');
+  if (data.interruptedErasure) checks.interruptedErasure = await completeInterruptedErasure(call, database, data.owner, data.interruptedErasure);
   return checks;
 }

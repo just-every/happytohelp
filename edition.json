@@ -232,7 +232,8 @@
           "migrations/0051_knowledge_authoring.sql",
           "migrations/0052_knowledge_imports.sql",
           "migrations/0053_knowledge_recovery.sql",
-          "tests/journeys/knowledge.mjs"
+          "tests/journeys/knowledge.mjs",
+          "migrations/170_knowledge_experience.sql"
         ]
       }
     },
@@ -1274,7 +1275,8 @@
           "tests/reports/import-inertness.mjs",
           "tests/reports/operator-feedback.mjs",
           "tests/journeys/reports.mjs",
-          "tests/journeys/upgrade.mjs"
+          "tests/journeys/upgrade.mjs",
+          "migrations/171_csat_surveys.sql"
         ]
       }
     },

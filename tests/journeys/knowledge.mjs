@@ -5,6 +5,8 @@ import {corpusJourney} from '../helpers/knowledge/corpus.mjs'
 import {recoveryJourney} from '../helpers/knowledge/recovery.mjs'
 import {githubJourney} from '../helpers/knowledge/github.mjs'
 import {previewJourney} from '../helpers/knowledge/preview.mjs'
+import {experienceJourney} from '../helpers/knowledge/experience.mjs'
+import {csatJourney} from '../helpers/csat-journey.mjs'
 
 // Knowledge on the real application: routes, queue stages run as the queue would,
 // and fixtures only at the crawler, embedding, vector, help-center, GitHub and image providers.
@@ -20,3 +22,7 @@ test('knowledge work resumes from durable state after refused or lost queue send
 test('GitHub connects through one-use OAuth into an encrypted credential and discovers only the selected repositories in each credential mode; provider failures, contacts and other workspaces are refused',githubJourney)
 
 test('a brand image is paid once per request and fenced when uncertain, assets are public only once published, and a website preview is isolated, sandboxed, credential-free and ends with its grant',previewJourney)
+
+test('customers see only their permitted reviewed knowledge in public search and ticket insertion; versions, redirects, templates, feedback and analytics remain scoped',experienceJourney)
+
+test('a solved native conversation emails one signed satisfaction survey, records its response and reason in reports, refuses reuse, and respects opt-out, widget feedback, imports and machine mail',csatJourney)

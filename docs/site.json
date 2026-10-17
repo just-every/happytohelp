@@ -89,6 +89,16 @@
           "label": "Website knowledge"
         },
         {
+          "slug": "help-center",
+          "source": "docs/help-center.md",
+          "label": "Help Center"
+        },
+        {
+          "slug": "customer-satisfaction",
+          "source": "docs/customer-satisfaction.md",
+          "label": "Customer satisfaction surveys"
+        },
+        {
           "slug": "away",
           "source": "docs/away.md",
           "label": "When your team is away"

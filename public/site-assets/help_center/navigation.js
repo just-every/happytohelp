@@ -27,6 +27,7 @@
    if (controller !== request) return;
    document.querySelector('main').replaceWith(main); document.querySelector('[data-help-center-nav]').replaceWith(nav);
    document.body.dataset.helpBase = doc.body.dataset.helpBase; document.body.style.cssText = doc.body.style.cssText;
+   document.documentElement.lang = doc.documentElement.lang;
    document.title = doc.title; if (push) history.pushState(null, '', url.href);
    pending = null; clear(); main.tabIndex = -1; main.focus(); window.scrollTo(0, 0);
   } catch (error) {
@@ -37,11 +38,17 @@
  document.addEventListener('click', event => {
   const link = event.target.closest('a[href]');
   if (!link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.download) return;
-  const url = new URL(link.href); if (!eligible(url) || url.hash) return;
+  const url = new URL(link.href); if (url.origin !== location.origin || url.hash) return;
+  const slug = link.dataset.helpArticle || (link.closest('.help-center-content h4') ? decodeURIComponent(url.pathname.split('/').pop()) : ''), project = document.querySelector('[data-help-project]')?.dataset.helpProject;
+  if (slug && project) {
+   const body = JSON.stringify({kind:'click', slug, locale:document.documentElement.lang, query:new URL(location.href).searchParams.get('keyword') || ''});
+   fetch(`/api/knowledge/public/${encodeURIComponent(project)}/events`, {method:'POST', credentials:'same-origin', keepalive:true, headers:{'Content-Type':'application/json'}, body}).then(response => { if (!response.ok) console.warn('Help Center click could not be recorded.'); }).catch(() => console.warn('Help Center click could not be recorded.'));
+  }
+  if (!eligible(url)) return;
   event.preventDefault(); navigate(url.href);
  });
  document.addEventListener('submit', event => {
-  if (!event.target.matches('.help-center-search')) return;
+  if (!event.target.matches('.help-center-search, [data-help-language]')) return;
   event.preventDefault(); const url = new URL(event.target.action); url.search = new URLSearchParams(new FormData(event.target)); navigate(url.href);
  });
  window.addEventListener('popstate', () => navigate(location.href, false));

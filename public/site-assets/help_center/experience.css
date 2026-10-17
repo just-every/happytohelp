@@ -1,0 +1,15 @@
+.help-center-controls {display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:.75rem; margin:0 0 1.5rem; font-size:.875rem; overflow-wrap:anywhere;}
+.help-center-controls form {margin:0;}
+.help-center-language {display:flex; flex-wrap:wrap; align-items:center; gap:.5rem;}
+.help-center-controls button,.help-center-controls select,.help-center-signin input,.help-center-signin button,.help-center-feedback button,.help-center-feedback textarea {font:inherit; min-height:44px; border:1px solid #9ba6a2; border-radius:4px; background:#fff; color:#263b32; padding:.5rem .75rem; max-width:100%; box-sizing:border-box;}
+.help-center-controls button,.help-center-signin button,.help-center-feedback button {cursor:pointer;}
+.help-center-signin,.help-center-feedback form {display:grid; gap:.75rem; max-width:34rem;}
+.help-center-signin button {justify-self:start;}
+.help-center-feedback {margin-top:3rem; padding-top:1.5rem; border-top:1px solid #dce4df;}
+.help-center-feedback h2 {font-size:1.25rem;}
+.help-center-feedback textarea {width:100%; resize:vertical;}
+.help-center-feedback form>div {display:flex; gap:.75rem;}
+.help-center-feedback button {min-width:5rem;}
+.help-center-language :focus-visible,.help-center-signin :focus-visible,.help-center-feedback :focus-visible {outline:3px solid #337557; outline-offset:3px;}
+.help-center-translation-note {font-size:.875rem; color:#4c5f55; padding:.75rem; background:#f3f6f4;}
+@media(max-width:480px){.help-center-controls {justify-content:flex-start;}.help-center-controls>a{flex-basis:100%;}.help-center-signin input{width:100%;}}

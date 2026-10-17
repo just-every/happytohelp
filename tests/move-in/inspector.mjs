@@ -30,5 +30,5 @@ export async function heapSampler(mf,{limit}){
  const report=()=>({livePeak,limit,collections,screens,livePeaks:{...livePeaks},preGcPeaks:{...preGcPeaks}});
  const measured=async()=>{await exclusive(collect);if(failed)throw failed;return report()};
  await exclusive(screen);if(failed)throw failed;const timer=setInterval(()=>{if(busy)return;busy=true;exclusive(screen).finally(()=>{busy=false})},SCREEN_MS);
- return {snapshot:measured,async close(){clearInterval(timer);try{return await measured()}finally{socket.terminate()}}};
+ return {snapshot:measured,async close(){clearInterval(timer);try{const result=await measured();assert.ok(collections>0&&screens>0);return result}finally{socket.terminate()}}};
 }

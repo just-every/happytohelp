@@ -4517,6 +4517,10 @@
       "sha256": "ae6e52f57f4ea52914d3e7476158268d8dc4c063f3bb7983a66852c2ef9a34e0",
       "executable": false
     },
+    "src/modules/integrations/closed-ticket-mail.ts": {
+      "sha256": "c3b442c5b0e7967c6cbaf373b98ce96f54e80cddfef6039373407529bb293ef7",
+      "executable": false
+    },
     "src/modules/integrations/email-classification.ts": {
       "sha256": "c158580ac1c9d1f328eaf08d6a783212dcecd97cb390399a976cf77401735957",
       "executable": false
@@ -9974,7 +9978,7 @@
       "executable": false
     },
     "tests/move-in/inspector.mjs": {
-      "sha256": "8b02325ffcaa6a3aa675844cc486d08c4b084e4698d5860096f8224be0c43a8e",
+      "sha256": "d512f20a663faeaa30a24030800ee4f1fe175e07259950aeec13311441b1ff09",
       "executable": false
     },
     "tests/move-in/limits.mjs": {

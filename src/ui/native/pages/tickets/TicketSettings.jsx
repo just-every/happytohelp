@@ -6,6 +6,7 @@ import { Feedback, Section } from '../forms';
 import { SettingsTabs } from '../ProjectControls';
 import { useConfirmation } from '../ConfirmDialog';
 import TicketSettingsForm from './TicketSettingsForm';
+import '../stack-table.css';
 import { json, label, ticketPath } from '../../../dashboard/components/tickets/ticket-model';
 import '../../../dashboard/components/tickets/tickets.css';
 

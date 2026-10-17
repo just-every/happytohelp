@@ -8156,7 +8156,7 @@
       "executable": false
     },
     "src/ui/native/pages/tickets/TicketSettings.jsx": {
-      "sha256": "1f33496c5ed212f14021d048a4a4e0578857cc0bf4fd92d9d7c9572cabe70c7d",
+      "sha256": "9c1bb50c0c6d35087d22993821c064202c543f2ec1e525a3abb589bd59369fa9",
       "executable": false
     },
     "src/ui/native/pages/tickets/TicketSettingsForm.jsx": {

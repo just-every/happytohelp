@@ -27,7 +27,7 @@ export async function renderHelpCenter(c:any,key:string,base:string,tail?:string
  const project=await resolvePublicProject(c.env,key)
  if(!project)return c.html(missingHelpCenterPage(),404)
  // Personalized help and feedback never enter shared caches.
- c.header('Cache-Control','private, no-store');c.header('Vary','Cookie, Authorization');c.header('Referrer-Policy','same-origin')
+ c.header('Cache-Control','private, no-store');c.header('Vary','Cookie, Authorization')
  const access=await resolveHelpAccess(c.env,project.id,c.req.raw)
  const settings=await getKnowledgeExperience(c.env,project.id)
  const locale=await selectKnowledgeLocale(c.env,project.id,c.req.query('locale'))

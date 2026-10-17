@@ -5403,7 +5403,7 @@
       "executable": false
     },
     "src/modules/public-site/help-center.tsx": {
-      "sha256": "62a2335536d51b13666d9a00d3fc7e86cf005f96587d4b764b8f93355ffeb6ff",
+      "sha256": "7b132963661b64faefcc332b7e4f2a8d7dec58c304d861f240be5ff0579b9fa9",
       "executable": false
     },
     "src/modules/public-site/help-controls.ts": {
@@ -8839,7 +8839,7 @@
       "executable": false
     },
     "tests/helpers/first-run/knowledge-activation-browser.mjs": {
-      "sha256": "0ab63e7a8501c61c8ef28c28d9c870c4b206c130f078b3291ee76771802ba6a0",
+      "sha256": "102ecc39b0092ac8554030b3a915dc59251fc5f1a20320296690042f806d01ba",
       "executable": false
     },
     "tests/helpers/first-run/native-setup-browser.mjs": {
@@ -9064,6 +9064,10 @@
     },
     "tests/helpers/knowledge/sources.mjs": {
       "sha256": "e37750384155961bbcfd4b0a78966006ce3df2d2aaf1b58128410903f3470739",
+      "executable": false
+    },
+    "tests/helpers/knowledge/upgrade.mjs": {
+      "sha256": "d622b39dc9fcdc433b10128baf1da15e77def15280166dc0646584dac9554456",
       "executable": false
     },
     "tests/helpers/legacy-bundle.mjs": {
@@ -9783,7 +9787,7 @@
       "executable": false
     },
     "tests/reports/prior-schema-upgrade.mjs": {
-      "sha256": "8f93f7540d0c972d478ea035f539d0363c35c264f1a71d5721a7b8bcb2fa2b7e",
+      "sha256": "69f3f99d6624fa1e03dcc77fbc47e36336cff73ddb6878f4d377c65b3265317b",
       "executable": false
     },
     "tests/reports/ratings.mjs": {

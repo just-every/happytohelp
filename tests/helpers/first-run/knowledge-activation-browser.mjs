@@ -196,7 +196,10 @@ export async function knowledgeActivationBrowser(){
          await textarea.focus();
          await page.keyboard.insertText(' Mobile keyboard editing remains available.');
          await page.setViewportSize({ width: 390, height: 360 });
-         const box = await actions.boundingBox();
+         // The status row stays with the fields; the phone's controls are its fixed child.
+         const controls = actions.locator('.article-editor-actions__buttons');
+         assert.equal(await controls.evaluate(element => getComputedStyle(element).position), 'fixed');
+         const box = await controls.boundingBox();
          assert.ok(box && box.x >= 0 && box.x + box.width <= 390, 'action bar fits mobile width');
          assert.ok(box.y >= 0 && box.y + box.height <= 360, 'action bar remains visible in the keyboard-sized viewport');
          assert.equal(await saveButton.isVisible(), true);

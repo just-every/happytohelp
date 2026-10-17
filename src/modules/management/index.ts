@@ -1,3 +1,4 @@
+import {workflowRoutes} from '../workflows/routes'
 import {reports} from '../reports/routes'
 import {Hono} from 'hono'
 import type {AppEnv} from '../../platform/env'
@@ -26,8 +27,8 @@ import {queueRoutes} from '../tickets/views'
 export const routes=new Hono<AppEnv>()
 routes.route('/',activation).route('/',workspaceArtwork).route('/',projects).route('/',resources).route('/',contactErasure).route('/',widgetSettings).route('/',integrations).route('/',admin).route('/',invitations).route('/',githubOAuth).route('/',projectPolicy).route('/',auditRoutes).route('/',roles).route('/',twoFactorPolicy)
 export const dashboardRoutes=new Hono<AppEnv>()
-routes.route('/',ticketRoutes).route('/',queueRoutes)
-dashboardRoutes.route('/',ticketRoutes).route('/',queueRoutes)
+routes.route('/',workflowRoutes).route('/',ticketRoutes).route('/',queueRoutes)
+dashboardRoutes.route('/',workflowRoutes).route('/',ticketRoutes).route('/',queueRoutes)
 dashboardRoutes.route('/',reports).route('/',demoInbox).route('/',dashboard).route('/',dashboardActions).route('/',dashboardMedia).route('/',resources).route('/',aiUsage).route('/',aiSpend).route('/',followers)
 export {publicWidget} from './widget-settings'
 

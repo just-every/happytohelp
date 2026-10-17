@@ -7,6 +7,7 @@ export const settingsDestinations = [
     { label: 'Email', path: 'email-settings' },
     { label: 'Widget', path: 'widget-settings' },
     { label: 'Tickets', path: 'ticket-settings' },
+    { label: 'Workflows', path: 'workflow-settings' },
     { label: 'Saved Replies', path: 'macros' },
     { label: 'API tokens', path: 'api-settings' },
     { label: 'Webhooks', path: 'webhook-settings' },

@@ -8,6 +8,7 @@ import {checkAfterSetup,checkForgotPasswordWithoutEmail,checkFreshInstall,checkI
 import {checkPendingInvitationsWithEmail,checkPendingInvitationsWithoutEmail} from '../helpers/identity-browser-invitations.mjs'
 import {checkForgotPasswordWithEmail,checkRegistrationBeforeSetup,checkRegistrationOpen,checkResetPassword,checkVerifyEmail} from '../helpers/identity-browser-email.mjs'
 import {launchBrowser,viewports,evidence} from './kit/browser.mjs'
+import {securityBrowserJourney} from '../helpers/identity/security-browser.mjs'
 
 let browser
 before(async()=>{browser=await launchBrowser()})
@@ -75,3 +76,5 @@ for(const [name,viewport] of Object.entries(viewports))test(`magic sign-in in a 
   }finally{await context.close()}
  })
 })
+
+test('account security in a 1440 and 390px browser: an authenticator app and a passkey, two-factor sign-in, the step-up dialog on an export, Settings → Security, Security log and Roles, and a collaborator\'s notes-only conversation',{timeout:10*60_000},()=>securityBrowserJourney(browser))

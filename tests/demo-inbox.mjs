@@ -13,7 +13,7 @@ const { getPlatformProxy } = await import('wrangler');
 const proxy = await getPlatformProxy({persist: false});
 try {
   const env = proxy.env, db = env.DB;
-  for (const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0103_contact_erasure.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql']) {
+  for (const file of ['0001_identity.sql','0002_conversations.sql','0003_identity_credentials.sql','0004_message_intent.sql','0005_widget_identity.sql','0007_conversation_history.sql','0070_management.sql','0071_management_preferences.sql','0080_integrations.sql','0050_knowledge.sql','0060_customer_context.sql','0060_customer_context_engine.sql','020_ai_support.sql','0103_contact_erasure.sql','0110_move_in.sql','111_move_in_identity_audit.sql','112_conversation_outcomes.sql','180_account_security.sql']) {
     for (const sql of migrationStatements(await readFile(new URL('../migrations/' + file, import.meta.url), 'utf8'))) await db.prepare(sql).run();
   }
   await db.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('original','Original','original-widget','https://original.test',1)").run();
@@ -22,6 +22,7 @@ try {
       db.prepare('INSERT INTO users VALUES(?,?,?,1)').bind(user, user + '@example.test', user),
       db.prepare("INSERT INTO memberships VALUES('original',?,?)").bind(user,role),
       db.prepare("INSERT INTO sessions VALUES(?,?,'original',?,NULL,?,NULL)").bind(await hashToken(user),user,role,Date.now()+999999),
+      db.prepare("INSERT INTO session_factors VALUES(?,?,'password',?)").bind(await hashToken(user),user,Date.now()),
     ]);
   }
   const request = (app,path,token='owner',method='GET') => app.request('https://app.test'+path,{method,headers:token?{Authorization:'Bearer '+token}:{}},env);

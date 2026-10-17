@@ -3,6 +3,8 @@ import {HTTPException} from 'hono/http-exception'
 import type {AppEnv} from '../../platform/env'
 import {requiredString} from '../../platform/db'
 import {scope} from './common'
+import {requireStepUp} from '../identity/two-factor/step-up'
+import {auditStatement,requestSource} from '../audit/record'
 import {sendEmail,emailConfigured} from '../integrations/email'
 import {INVITATION_LIFETIME_SECONDS,issueInvitation,manageableInvitation,revokeInvitation} from './invitation-store'
 
@@ -10,7 +12,7 @@ export const invitations=new Hono<AppEnv>()
 /** The invitation email says who invited whom to what, what HappyToHelp is, and what the link does. */
 async function mailInvitation(env:AppEnv['Bindings'],projectId:string,inviterId:string,email:string,role:string,hash:string,url:string){
  const found=await env.DB.prepare('SELECT p.name project,u.name inviter,u.email inviter_email FROM projects p LEFT JOIN users u ON u.id=? WHERE p.id=?').bind(inviterId,projectId).first<{project:string;inviter:string|null;inviter_email:string|null}>()
- const project=found?.project||'a HappyToHelp workspace',inviter=found?.inviter||found?.inviter_email||'A teammate',as=role==='owner'?'an owner':role==='admin'?'an admin':'an agent'
+ const project=found?.project||'a HappyToHelp workspace',inviter=found?.inviter||found?.inviter_email||'A teammate',as=role==='owner'?'an owner':role==='admin'?'an admin':role==='collaborator'?'a collaborator':'an agent'
  const text=[
   `${inviter} invited you to join ${project} on HappyToHelp as ${as}.`,
   'HappyToHelp is where your team answers customers: website chat, email replies and help articles in one inbox.',
@@ -24,12 +26,15 @@ invitations.post('/projects/:projectId/agents',async c=>{
  const a=await scope(c,true),b=await c.req.json(),email=requiredString(b.email||b.invitation_email,'email',320).toLowerCase()
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HTTPException(400)
  const role=b.role||'operator'
- if(!['operator','admin','owner'].includes(role)||a.role!=='owner'&&role!=='operator')throw new HTTPException(403)
+ if(!['operator','collaborator','admin','owner'].includes(role)||a.role!=='owner'&&!['operator','collaborator'].includes(role))throw new HTTPException(403)
+ // Granting the admin or owner role is a role change: it needs a recent step-up.
+ if(role==='admin'||role==='owner')await requireStepUp(c,a,'member.invite')
  const member=await c.env.DB.prepare('SELECT u.id FROM users u JOIN memberships m ON m.user_id=u.id WHERE m.project_id=? AND lower(u.email)=?').bind(a.projectId,email).first()
  if(member)throw new HTTPException(409,{message:'Already a project member'})
  const invitation=await issueInvitation(c.env.DB,String(c.env.APP_ORIGIN||new URL(c.req.url).origin),a.projectId,email,role)
  let delivery='not_configured'
  if(emailConfigured(c.env)){const receipt=await mailInvitation(c.env,a.projectId,a.id,email,role,invitation.hash,invitation.url);delivery=receipt.state==='suppressed'?'suppressed':'sent'}
+ await auditStatement(c.env.DB,{projectId:a.projectId,category:'access',action:'member.invited',actor:{type:'user',id:a.id},source:requestSource(c),target:{type:'invitation',id:invitation.hash.slice(0,16)},detail:{role}}).run()
  return c.json({data:{email,role,invitationUrl:invitation.url,expiresIn:INVITATION_LIFETIME_SECONDS,delivery}},201)
 })
 

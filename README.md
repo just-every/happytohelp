@@ -60,8 +60,8 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 [The changelog](CHANGELOG.md) lists every change. Known limits:
 
 - Accessibility is on a confirmed owner **HOLD**; no WCAG conformance is claimed.
-- Backups cover D1 and R2, not **Durable Object** storage, and full
-  portable-storage fidelity is not established.
+- `rer export` archives cover D1, R2 and **Durable Object** storage (with a
+  digest); full Base-data equivalence is not yet established.
 - Hosted operating costs are **unmeasured**; timed activation and paid-provider
   execution are not qualified.
 - Imports and connections are qualified with **synthetic fixtures** only, without

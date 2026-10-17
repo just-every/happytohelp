@@ -13,6 +13,8 @@ export async function profileApp(){
  const session=async(name,project,contact,{role='contact',expires=Date.now()+3600000}={})=>{
   const token=tokens[name]=randomBytes(32).toString('hex')
   await app.db.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,contact_id,expires_at) VALUES(?,?,?,?,?,?)').bind(hash(token),contact,project,role,role==='contact'?contact:null,expires).run()
+  // A teammate's session is a sign-in made just now.
+  if(role!=='contact')await app.db.prepare("INSERT INTO session_factors(token_hash,user_id,method,verified_at) VALUES(?,?,'password',?)").bind(hash(token),contact,Date.now()).run()
   return token
  }
  const contact=async(name,project='p',{verified=false}={})=>{

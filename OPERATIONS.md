@@ -76,12 +76,27 @@ provider/integration credentials, outbound execution queues and local-computer
 pairing/grants/jobs are excluded. Signed visitor verification is reconfigured.
 Archives contain sensitive data and must be protected as backups.
 
+Two-factor factors, roles and the security log travel with the archive: passkeys
+as public keys, recovery codes as hashes, and authenticator-app keys encrypted
+under `INTEGRATION_ENCRYPTION_KEY`. Restore with the same key and authenticator
+apps keep working; with a different key, sign in with a passkey or recovery code
+(or use [owner recovery](docs/account-security.md#owner-recovery)) and set the app
+up again. Sessions and their step-up proofs are not exported.
+
 Import validates integrity and resource coverage before atomic restore into an
 empty destination. It preserves native owners; setup does not claim a new owner
 over them. Re-enter private configuration and external integration credentials.
 Restore sends no mail, model request or connection notification. Remote transfer
-is unsupported and refuses with exit 4. D1/R2 archives do not include Durable
-Object storage or establish full portable-storage fidelity.
+is unsupported and refuses with exit 4.
+
+Archives carry Durable Object storage too. Export reads every stored record of
+every `ConversationSocket` instance into the archived `durable_object_snapshots`
+table with its schema (`happytohelp.durable-objects/1`) and a SHA-256 digest, and
+the receipt names them. This release's socket keeps no records (messages live in
+D1), so the snapshot proves an empty store. Import checks the schema and digest
+before anything is restored and refuses records it cannot put back, rather than
+dropping them. Exporting a restored copy reproduces the original content hash.
+Full Base-data equivalence (resizable ArrayBuffer preservation) remains held.
 
 Reset prints its inventory and requires explicit confirmation. It removes only
 local state, owners/sessions, `.rer/local`, `.seed/installer` and declared
@@ -698,8 +713,8 @@ installations; a hosted upgrade is not part of it.
 To go back, stop 0.4, check out your 0.3 commit and restore both copies:
 replace `.wrangler/state` with `../happytohelp-0.3-state` and `.dev.vars` with
 `../happytohelp-0.3.dev.vars`. Never run 0.3 against a database migrated by 0.4.
-The local state copy includes Durable Object storage; rer archives and D1/R2
-backups do not.
+The local state copy and rer archives include Durable Object storage; a raw
+D1/R2 backup does not.
 
 From 0.4 on, Move in keeps private import originals in R2 and their journals in
 D1. Back up and restore them together, with the encryption key, so resume and
@@ -779,7 +794,8 @@ Results belong to the exact source tested. Local native/browser and fixture
 checks do not establish hosted installation or real model/mail/Slack acceptance.
 Timed activation, hosted operating costs and paid execution remain unqualified.
 Accessibility is **FAIL / confirmed owner HOLD** and full portable-storage
-fidelity remains held; D1/R2 backup does not qualify Durable Object storage.
+fidelity (Base-data equivalence) remains held. rer archives carry Durable Object
+storage with a digest; a raw D1/R2 backup does not.
 [HANDOVER.md](HANDOVER.md#acceptance-boundaries) records current limits.
 
 ## For developers and maintainers

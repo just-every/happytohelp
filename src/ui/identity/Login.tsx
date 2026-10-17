@@ -35,6 +35,8 @@ export default function Login() {
         const form = new FormData(event.currentTarget);
         try {
             const result = await postJson('/api/identity/login', { email: form.get('email'), password: form.get('password') });
+            // An account with a second factor, or one its workspace requires, finishes on the two-factor page.
+            if (result.twoFactor) { location.assign('/two-factor' + (requestedDestination() ? '?returnTo=' + encodeURIComponent(requestedDestination()!) : '')); return; }
             location.assign(await signInDestination(requestedDestination(), location.origin, result.accountOnly));
         } catch (failure: any) { setError(failure.message); setBusy(false); }
     };

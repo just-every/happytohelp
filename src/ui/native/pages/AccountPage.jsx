@@ -6,6 +6,7 @@ import {TimezoneField,SettingsTabs} from './ProjectControls';
 import AvatarUpload from './AvatarUpload';
 import { nativeRequest } from '../transport';
 import { Field, Section, Feedback } from './forms';
+import TwoFactorSettings from './security/TwoFactorSettings';
 export default function AccountPage({projectId}) {
  const {markDirty,markSaved}=useUnsavedChanges();
 
@@ -27,5 +28,5 @@ export default function AccountPage({projectId}) {
         {tab==='notifications'&&<Section title="Notifications">{field('is_notifiable_on_conversation_assignment','On conversation assigned','checkbox')}{projectId&&<><p>For this workspace</p>{field('is_notified_on_unassigned_activity','Notify on unassigned conversation activity','checkbox')}</>}</Section>}
         {tab==='security'&&<Section title="Change your password">{field('current_password','Current password','password')}{field('password','New password','password')}{field('password_confirmation','Confirm password','password')}</Section>}
         <div className="settings-actions"><button className="btn btn-primary">Update</button></div>
-    </form></div>;
+    </form>{tab==='security'&&<div className="account-two-factor"><TwoFactorSettings/></div>}</div>;
 }

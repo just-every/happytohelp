@@ -20,6 +20,9 @@ const pages = {
     TrainingRuns: lazyPageCode(() => import('./pages/TrainingRuns')),
     AccountPage: lazyPageCode(() => import('./pages/AccountPage')),
     InsightsPage: lazyPageCode(() => import('./pages/InsightsPage')),
+    SecurityPage: lazyPageCode(() => import('./pages/security/SecurityPage')),
+    SecurityLog: lazyPageCode(() => import('./pages/security/SecurityLog')),
+    RolesPage: lazyPageCode(() => import('./pages/security/RolesPage')),
 };
 
 export const workspacePageComponents = Object.fromEntries(
@@ -54,6 +57,9 @@ export function preloadWorkspacePage(pathname, settings) {
     else if (['edit', 'settings', 'email-settings'].includes(section)) name = 'ProjectSettings';
     else if (['api-settings', 'webhook-settings', 'slack-settings', 'delivery-log'].includes(section)) name = 'Connections';
     else if (section === 'github-settings') name = 'GitHubSettings';
+    else if (section === 'security') name = 'SecurityPage';
+    else if (section === 'security-log') name = 'SecurityLog';
+    else if (section === 'roles') name = 'RolesPage';
     else if (section === 'widget-settings') name = 'WidgetSettingsPage';
     else if (section === 'local-agent') name = 'ComputersPage';
     else if (section === 'delegation') name = recordId === 'authorize' ? 'DelegationAuthorize' : 'DelegationSettings';

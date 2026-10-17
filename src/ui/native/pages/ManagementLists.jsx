@@ -22,7 +22,7 @@ const columns={
  agents:[
   {label:'Agent',cell:({item,href})=><div className="management-person">{item.pending?<i className="fe fe-mail"/>:<PersonAvatar person={item}/>} {item.pending?'Pending invite':<Link to={href}>{item.name||item.email}</Link>}</div>},
   {label:'Email',cell:({item})=>item.email},
-  {label:'Role',cell:({item})=><span className="management-role">{item.role==='operator'?'Agent':item.role?.replace(/^./,c=>c.toUpperCase())}</span>},
+  {label:'Role',cell:({item})=><span className="management-role">{item.access_name||(item.role==='operator'?'Agent':item.role?.replace(/^./,c=>c.toUpperCase()))}</span>},
   {actions:'Actions',cell:({item,href,invitationProps})=>item.pending?<InvitationActions {...invitationProps} invitation={item}/>:<Link aria-label={`Edit ${item.name||item.email}`} to={href}>⋮</Link>},
  ],
  contacts:[

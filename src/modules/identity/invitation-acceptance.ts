@@ -9,10 +9,12 @@ export async function acceptExistingInvitation(env:Env,userId:string,sessionHash
  const eligible=`t.token_hash=? AND t.kind='invite' AND t.consumed_at IS NULL AND t.expires_at>? AND lower(t.email)=(SELECT lower(email) FROM users WHERE id=?) AND ${invitationProjectActive('t.project_id')} AND ${liveSession}`
  const args=[tokenHash,now,userId,sessionHash,userId,now]
  const results=await env.DB.batch([
-  env.DB.prepare(`INSERT INTO memberships SELECT t.project_id,?,t.role FROM identity_tokens t WHERE ${eligible} ON CONFLICT(project_id,user_id) DO NOTHING`).bind(userId,...args),
+  // A collaborator invitation joins on the agent base with the collaborator role over it.
+  env.DB.prepare(`INSERT INTO memberships SELECT t.project_id,?,CASE WHEN t.role='collaborator' THEN 'operator' ELSE t.role END FROM identity_tokens t WHERE ${eligible} ON CONFLICT(project_id,user_id) DO NOTHING`).bind(userId,...args),
+  env.DB.prepare(`INSERT OR IGNORE INTO member_roles(project_id,user_id,role_key,assigned_at) SELECT t.project_id,?,'collaborator',? FROM identity_tokens t WHERE ${eligible} AND t.role='collaborator'`).bind(userId,now,...args),
   env.DB.prepare(`UPDATE identity_tokens AS t SET consumed_at=? WHERE ${eligible}`).bind(now,...args),
   env.DB.prepare("UPDATE identity_tokens SET consumed_at=? WHERE kind='invite' AND consumed_at IS NULL AND token_hash<>? AND (project_id,lower(email)) IN (SELECT project_id,lower(email) FROM identity_tokens WHERE token_hash=? AND consumed_at=?)").bind(now,tokenHash,tokenHash,now)
  ])
- if(!results[1].meta.changes)throw new HTTPException(400,{message:'Invitation invalid, expired or workspace unavailable'})
+ if(!results[2].meta.changes)throw new HTTPException(400,{message:'Invitation invalid, expired or workspace unavailable'})
  return {accepted:true}
 }

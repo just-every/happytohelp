@@ -7,6 +7,9 @@ import { serverSecret } from '../../platform/db'
 import { emailConfigured, sendEmail } from '../integrations/email'
 import {emailMode} from '../integrations/email-provider'
 import { sessionCookie } from './session'
+import { signInFactor } from './two-factor/sign-in'
+import { sessionFactorStatement } from './two-factor/state'
+import { accountAudit, runAll } from './two-factor/factors'
 import { clientAddress } from '../../platform/rate-limits'
 
 export const magicLink = new Hono<AppEnv>()
@@ -78,6 +81,9 @@ magicLink.post('/magic-link/consume', async c => {
  // authenticated row returned by each atomic statement, never that aggregate.
  if (results[0].results.length !== 1 || results[1].results.length !== 1) throw invalid()
  c.header('Set-Cookie', sessionCookie(session, c.req.url))
- const admitted=await c.env.DB.prepare('SELECT project_id FROM sessions WHERE token_hash=?').bind(sessionHash).first<{project_id:string|null}>()
- return c.json({ signedIn: true, destination: loginDestination(body.returnTo,new URL(c.req.url).origin,!admitted?.project_id) })
+ const admitted=await c.env.DB.prepare('SELECT actor_id,project_id,role FROM sessions WHERE token_hash=?').bind(sessionHash).first<{actor_id:string;project_id:string|null;role:string}>()
+ // An email link is a primary sign-in only: an account with a second factor still proves it.
+ const twoFactor=await signInFactor(c.env.DB,admitted!.actor_id,admitted!.project_id,admitted!.role)
+ await runAll(c.env.DB,[...(twoFactor?[]:[sessionFactorStatement(c.env.DB,sessionHash,admitted!.actor_id,'password')]),...await accountAudit(c.env.DB,admitted!.actor_id,{category:'auth',action:twoFactor?'sign_in.email_link_accepted':'sign_in.succeeded',actor:{type:'user',id:admitted!.actor_id},source:'dashboard',detail:{method:'email_link'}})])
+ return c.json({ signedIn: true, destination: loginDestination(body.returnTo,new URL(c.req.url).origin,!admitted?.project_id), ...(twoFactor?{twoFactor}:{}) })
 })

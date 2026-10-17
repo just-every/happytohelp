@@ -17,7 +17,8 @@ export default function ConversationAssignmentControl({ conversation }) {
     const [pending, setPending] = useState(false);
     const [error, setError] = useState(null);
     const { agentsFor, aisFor, sendAction, updateConversation } = useContext(ChatContext);
-    const agents = agentsFor(conversation.project_id) || [];
+    // Collaborators cannot reply, so conversations are not assigned to them.
+    const agents = (agentsFor(conversation.project_id) || []).filter(agent => agent.access_role !== 'collaborator');
     const ais = aisFor(conversation.project_id) || [];
     const isAiAssigned = Boolean(conversation.ai_id);
     const assignmentName = (isAiAssigned ? conversation.ai?.name : conversation.agent?.name) || 'Unassigned';

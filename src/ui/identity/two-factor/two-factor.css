@@ -1,0 +1,21 @@
+/* Two-factor parts shared by the sign-in pages and the dashboard: layout only, colours from the surrounding page. */
+.tf-step { display: grid; gap: 16px; }
+.tf-step > p { margin: 0; }
+.tf-step > .btn, .tf-actions > .btn { justify-self: start; }
+.tf-setup { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+.tf-qr { width: 176px; height: 176px; flex: none; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 8px; }
+.tf-key-label { margin: 0 0 6px; font-size: 14px; opacity: 0.75; }
+.tf-key { display: inline-block; padding: 8px 10px; font-size: 15px; letter-spacing: 0.04em; word-break: break-all; background: rgba(0, 0, 0, 0.05); border-radius: 6px; }
+.tf-problem { margin: 0; color: #b42318; font-weight: 500; }
+.tf-muted { margin: 0; opacity: 0.75; }
+.tf-alternatives, .tf-actions { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.tf-text-button { padding: 0; font: inherit; font-weight: 600; color: inherit; text-decoration: underline 3px; text-underline-offset: 4px; background: none; border: 0; cursor: pointer; }
+.tf-codes { display: grid; gap: 14px; }
+.tf-codes h2 { margin: 0; font-size: 1.25rem; }
+.tf-codes p { margin: 0; }
+.tf-code-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; margin: 0; padding: 14px 18px 14px 2.2em; background: rgba(0, 0, 0, 0.04); border-radius: 8px; }
+.tf-code-list code { font-size: 15px; color: inherit; }
+@media (max-width: 420px) { .tf-code-list { grid-template-columns: 1fr; } .tf-qr { width: 152px; height: 152px; } }
+.tf-choices { display: grid; gap: 28px; margin-top: 26px; }
+.tf-choices h2 { margin: 0 0 12px; font-size: 1.25rem; }
+@media (min-width: 760px) { .tf-choices { grid-template-columns: 1fr 1fr; } }

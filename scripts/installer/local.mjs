@@ -7,6 +7,7 @@ import {hostedDeploy} from './hosted-deploy.mjs';
 import {localPortability} from '@runeditrun/rer/portability';
 import {localInputDefaults,localOwner,nativeOwner,prepareNativeLocal} from './native-local.mjs';
 import {archivePolicy} from './portability-policy.mjs';
+import {checkArchiveSnapshot,readDurableObjects,snapshotSql} from './durable-objects.mjs';
 import * as model from './ui/seed.mjs';
 
 const environment=context=>({...process.env,...context.vars,APP_ORIGIN:context.origin,WRANGLER_SEND_METRICS:'false',CLOUDFLARE_INCLUDE_PROCESS_ENV:'false',CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:'false',X_LOCAL_EXPLORER:'false'});
@@ -32,13 +33,22 @@ export const adapter=localInstaller({
 });
 export const install=(root,input,store,onApp,signal)=>installOperator(root,input,store,onApp,signal,adapter.hooks);
 const transfer=localPortability({database:'DB',buckets:{FILES:'FILES'},policy:archivePolicy,transient:['ConversationSocket connections (messages are in D1)','queue execution leases','active sessions and one-use sign-in links','GitHub and integration credentials','local computer pairing, grants and job execution records']});
+const d1=(context,label,sql)=>context.store.run(label,'pnpm',['exec','wrangler','d1','execute','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc','--command',sql],{cwd:context.root,signal:context.signal});
 const portability=Object.fromEntries(['export','import'].map(verb=>[verb,async context=>{
  await context.store.run('Collecting local migrations',process.execPath,['scripts/migrations.mjs'],{cwd:context.root,signal:context.signal});
+ let snapshots;
+ if(verb==='export'){
+  // Durable Object storage enters the archive as a D1 table with its schema and digest.
+  await context.store.run('Applying local data migrations','pnpm',['exec','wrangler','d1','migrations','apply','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc'],{cwd:context.root,signal:context.signal});
+  snapshots=await readDurableObjects(context.root);
+  await d1(context,'Recording Durable Object storage',snapshotSql(snapshots));
+ }else snapshots=await checkArchiveSnapshot(context.path);
  const result=await transfer[verb](context);
  // Restore deliberately suspends business triggers. Rebuild derived search
  // before reporting a completed import, including a resumed import.
- if(verb==='import')await context.store.run('Rebuilding conversation search','pnpm',['exec','wrangler','d1','execute','DB','--local','--persist-to','.wrangler/state','--config','wrangler.jsonc','--command',"INSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild')"],{cwd:context.root,signal:context.signal});
- return result;
+ if(verb==='import')await d1(context,'Rebuilding conversation search',"INSERT INTO inbox_message_search(inbox_message_search) VALUES('rebuild')");
+ // The receipt names the Durable Object storage the archive carries (exported) or carried (restored).
+ return {...result,durableObjects:snapshots.map(({namespace,className,records,digest})=>({namespace,className,records:Array.isArray(records)?records.length:records,digest}))};
 } ]));
 // Local setup keeps the entered-password hook; hosted deploy has no installer input.
 // Give rer its standard claim contract so it observes 303/409 and retires the token.

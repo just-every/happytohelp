@@ -1,4 +1,4 @@
-// The twelve Settings destinations of a project workspace: the sidebar's one Settings row is current on every one of them
+// The fifteen Settings destinations of a project workspace: the sidebar's one Settings row is current on every one of them
 // and the Settings menu (SettingsMenu.jsx) lists them. `path` is relative to the project; `alias` is a second path that
 // renders the same screen. Connected applications lives outside the project's path and carries the project in its search.
 export const settingsDestinations = [
@@ -13,6 +13,9 @@ export const settingsDestinations = [
     { label: 'Delivery log', path: 'delivery-log' },
     { label: 'Plugins', path: 'plugins' },
     { label: 'GitHub', path: 'github-settings' },
+    { label: 'Roles', path: 'roles' },
+    { label: 'Security', path: 'security' },
+    { label: 'Security log', path: 'security-log' },
     { label: 'Connected applications', absolute: '/delegation/settings' },
 ];
 

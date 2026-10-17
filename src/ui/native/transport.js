@@ -4,18 +4,43 @@ export async function nativeRequest(path, init = {}) {
     const initial = await takeInitialWorkspaceRead(path, init);
     if (initial) {
         if ('error' in initial) {
-            notifyExpiredSession(path, initial.error.status);
+            notifyExpiredSession(path, initial.error.status, initial.error.data);
             throw Object.assign(new Error(initial.error.message), {status: initial.error.status, data: initial.error.data});
         }
         return initial.result;
     }
     const response = await fetch(path, { credentials: 'same-origin', ...init });
     const body = await response.json();
-    notifyExpiredSession(path, response.status);
+    // A sensitive action asks for a recent step-up; once confirmed, the same request runs once more.
+    if (response.status === 403 && body.code === 'step_up_required' && !init.stepUpRetried && await confirmStepUp(body)) return nativeRequest(path, { ...init, stepUpRetried: true });
+    notifyExpiredSession(path, response.status, body);
     if (!response.ok) throw Object.assign(new Error(body.error?.message || body.error || `Request failed (${response.status})`), { status: response.status, data: body });
     return body;
 }
-function notifyExpiredSession(path, status) {
+/** Downloads a file the server may guard with a step-up (exports), asking for it the same way. */
+export async function downloadFile(path) {
+    let response = await fetch(path, { credentials: 'same-origin' });
+    if (response.status === 403) {
+        const body = await response.clone().json().catch(() => null);
+        if (body?.code === 'step_up_required' && await confirmStepUp(body)) response = await fetch(path, { credentials: 'same-origin' });
+    }
+    if (!response.ok) { const body = await response.json().catch(() => ({})); throw Object.assign(new Error(body.error?.message || body.error || `Download failed (${response.status})`), { status: response.status, data: body }); }
+    const name = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') || '')?.[1] || 'download';
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(await response.blob()); link.download = name;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+/** Asks the dashboard's step-up dialog to confirm it is the account holder; false when declined or unavailable. */
+export function confirmStepUp(details) {
+    if (typeof window === 'undefined' || !window.h2hStepUp) return Promise.resolve(false);
+    return window.h2hStepUp(details);
+}
+function notifyExpiredSession(path, status, body) {
+    if (status === 401 && typeof window !== 'undefined' && body?.code === 'two_factor_required') {
+        location.assign(`/two-factor?returnTo=${encodeURIComponent(location.pathname + location.search)}`);
+        return;
+    }
     if (status === 401 && typeof window !== 'undefined' && window.chatSettings
         && path !== '/api/identity/login' && path !== '/api/identity/password') {
         window.dispatchEvent(new CustomEvent('h2h:session-expired'));

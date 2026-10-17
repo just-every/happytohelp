@@ -26,8 +26,10 @@ export async function loginDocument(request:Request,env:Env,send:(request:Reques
  forward.set('Content-Type','application/json');forward.delete('Content-Length')
  const response=await send(new Request(new URL('/api/identity/login',url),{method:'POST',headers:forward,body:JSON.stringify({email:form.get('email'),password:form.get('password')})}))
  if(!response.ok){await response.body?.cancel();return denied(response.status)}
- const result=await response.json() as {accountOnly:boolean}
- const redirect=new Headers(headers);redirect.set('Location',loginDestination(url.searchParams.get('returnTo'),url.origin,result.accountOnly))
+ const result=await response.json() as {accountOnly:boolean;twoFactor?:'verify'|'enrol'}
+ const destination=loginDestination(url.searchParams.get('returnTo'),url.origin,result.accountOnly)
+ // A sign-in that still needs its second factor continues on the two-factor page.
+ const redirect=new Headers(headers);redirect.set('Location',result.twoFactor?`/two-factor?returnTo=${encodeURIComponent(destination)}`:destination)
  const cookie=response.headers.get('Set-Cookie');if(cookie)redirect.set('Set-Cookie',cookie)
  return new Response(null,{status:303,headers:redirect})
 }

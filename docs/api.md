@@ -149,6 +149,12 @@ signing key. Disabled destinations refuse pending delivery. Contact erasure
 removes retained event bodies and pending delivery payloads; safe attempt
 metadata remains. A test is explicit and is recorded in the delivery log.
 
+Erasing a contact also sends every enabled webhook a `contact.erased` event,
+whatever it subscribes to: `{"contact_id": "...", "external_id": "..."}`, where
+`external_id` is your own identifier for the customer (or `null`). Delete what your
+system keeps about that customer and answer with a 2xx; the contact's erasure
+record shows the request as completed. See [Personal data](PRIVACY.md#connected-providers).
+
 The signature is Base `integrations.webhook.v1`: HMAC-SHA256 with the one-time
 32-byte hex key over the UTF-8 JSON array `["integrations.webhook.v1", tenant,
 destinationId, event, id, timestamp, exactBody]`. Headers are `webhook-tenant`,

@@ -36,11 +36,11 @@ export async function startApp({bindings={},outbound,origin='https://app.example
  const call=async(path,options={})=>{const response=await request(path,options),text=await response.text();let data;try{data=text?JSON.parse(text):null}catch{data=text}if(options.status!==undefined&&response.status!==options.status)throw new Error(`${options.method||(options.body===undefined?'GET':'POST')} ${path}: expected ${options.status}, got ${response.status}: ${text.slice(0,500)}`);return {status:response.status,headers:response.headers,data}}
  const sql=async(statement,...args)=>(await db.prepare(statement).bind(...args).all()).results
  const first=async(statement,...args)=>(await db.prepare(statement).bind(...args).first())
- // A workspace with an owner, admin and operator, each holding a live session token.
+ // A workspace with an owner, admin and operator, each holding a live session token signed in just now.
  const seedWorkspace=async(key,{name='Workspace '+key,allowedOrigin=`https://${key}.example`,roles=['owner','admin','operator']}={})=>{
   const projectId='p-'+key,now=Date.now(),tokens={},users={}
   await db.prepare('INSERT INTO projects(id,name,widget_key,allowed_origin,created_at,verification_secret) VALUES(?,?,?,?,?,?)').bind(projectId,name,'widget-'+key,allowedOrigin,now,randomBytes(32).toString('hex')).run()
-  for(const role of roles){const userId=`${role}-${key}`;users[role]=userId;tokens[role]=`${role}-token-${key}`;await db.batch([db.prepare('INSERT INTO users(id,email,name,created_at) VALUES(?,?,?,?)').bind(userId,`${role}-${key}@example.test`,`${role} ${key}`,now),db.prepare('INSERT INTO memberships VALUES(?,?,?)').bind(projectId,userId,role),db.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,?,?,?,?)').bind(sha(tokens[role]),userId,projectId,role,now+3600000)])}
+  for(const role of roles){const userId=`${role}-${key}`;users[role]=userId;tokens[role]=`${role}-token-${key}`;await db.batch([db.prepare('INSERT INTO users(id,email,name,created_at) VALUES(?,?,?,?)').bind(userId,`${role}-${key}@example.test`,`${role} ${key}`,now),db.prepare('INSERT INTO memberships VALUES(?,?,?)').bind(projectId,userId,role),db.prepare('INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,?,?,?,?)').bind(sha(tokens[role]),userId,projectId,role,now+3600000),db.prepare("INSERT INTO session_factors(token_hash,user_id,method,verified_at) VALUES(?,?,'password',?)").bind(sha(tokens[role]),userId,now)])}
   return {projectId,name,tokens,users,widgetKey:'widget-'+key,allowedOrigin}
  }
  return {

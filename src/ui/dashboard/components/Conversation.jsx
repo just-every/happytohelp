@@ -16,6 +16,7 @@ import ConversationBody from "./ConversationBody";
 import '../styles/components/Conversation.scss';
 import NoteModal from "./NoteModal";
 import { useUnsavedChanges } from '../../native/NavigationGuard';
+import { FollowControl, NotesOnlyComposer, useCan } from './ConversationAccess';
 
 function Conversation({ projectId, conversationId, conversation, buckets }) {
     const {
@@ -55,6 +56,9 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
 
     // In the global inbox the conversation dictates the project, not the page.
     const conversationProjectId = (conversation && conversation.project_id) || projectId;
+    // A role without reply permission (a collaborator) gets notes and follow instead of the reply box;
+    // the agent's view stays as approved.
+    const canReply = useCan(conversationProjectId, 'conversations.reply'), canFollow = useCan(conversationProjectId, 'conversations.follow');
     const {
         hasNextPage,
         isConversationReady,
@@ -274,7 +278,7 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                     </ScrollToBottom>
 
                     { draftError && <p className="conversation-load-error px-2 py-2" role="alert">{ draftError }</p> }
-                    <ConversationForm
+                    { canReply ? <ConversationForm
                         key={ conversationId }
                         content={ draftContent }
                         focusRequest={ draftFocusRequest?.conversationId === conversationId ? draftFocusRequest.version : 0 }
@@ -290,7 +294,10 @@ function Conversation({ projectId, conversationId, conversation, buckets }) {
                         files={ draftFiles }
                         isResolved={ Boolean(conversation.resolved_at) }
                         isEnabled={ isComposerEnabled }
-                    />
+                    /> : <>
+                        { canFollow && <FollowControl projectId={ conversationProjectId } conversationId={ conversationId } /> }
+                        <NotesOnlyComposer onAddNote={ () => setIsNoteModalVisible(true) } />
+                    </> }
                 </div>
 
                 { assistant.isVisible && <button type="button" className="conversation-assistant-backdrop" onClick={ assistant.close } aria-label="Close conversation panel overlay" tabIndex={ -1 } /> }

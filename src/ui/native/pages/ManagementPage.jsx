@@ -23,6 +23,9 @@ function ResourcePage({projectId,section,recordId}) {
  const path=`/api/management/projects/${projectId}/${section}`,base=`/projects/${projectId}/${section}`;
  const [items,setItems]=useState(null),[draft,setDraft]=useState(null),[error,setError]=useState(''),[saved,setSaved]=useState(false),[busy,setBusy]=useState(false),[invitation,setInvitation]=useState(null),[emailConfigured,setEmailConfigured]=useState(null),[notice,setNotice]=useState(null),[fieldErrors,setFieldErrors]=useState({});
  const paged=section==='contacts'||section==='macros';
+ // Custom roles a member can be given; only owners and admins can read them.
+ const [customRoles,setCustomRoles]=useState([]);
+ useEffect(()=>{if(section==='agents'&&recordId&&recordId!=='create')nativeRequest(`/api/management/projects/${projectId}/roles`).then(r=>setCustomRoles(r.data.custom)).catch(()=>setCustomRoles([]));},[section,recordId,projectId]);
  const [listQuery,setListQuery]=useState({search:'',page:1,sort:section==='contacts'?'last_seen_at':'title',direction:section==='contacts'?'desc':'asc'}),[pagination,setPagination]=useState(null);
  const requestId=useRef(0);
  const listPath=path+(paged?'?'+new URLSearchParams(listQuery):'');
@@ -34,7 +37,7 @@ function ResourcePage({projectId,section,recordId}) {
    const query=new URLSearchParams(routeLocation.searchStr);
    setDraft(section==='agents'?{role:'operator',is_notified_on_unassigned_activity:true}:section==='plugins'?{name:query.get('name')||'',url:query.get('url')||''}:{});
   }else if(recordId){
-   (section==='agents'?nativeRequest(path).then(r=>({data:r.data.find(row=>row.id===recordId)})):nativeRequest(`${path}/${recordId}`))
+   (section==='agents'?nativeRequest(path).then(r=>{const row=r.data.find(item=>item.id===recordId);return {data:row&&{...row,role:row.access_role||row.role}};}):nativeRequest(`${path}/${recordId}`))
     .then(r=>{if(!r.data)throw new Error('Record not found');if(active)setDraft(section==='contacts'?parseContact(r.data):r.data);})
     .catch(e=>setError(e.message));
   }
@@ -76,9 +79,9 @@ function ResourcePage({projectId,section,recordId}) {
  };
  return <><Feedback {...{error,saved}}/>{invitation&&<InvitationCreated invitation={invitation}/>}<InvitationNotice notice={notice}/>
   {!recordId&&<ManagementLists {...{section,items,base,projectId,emailConfigured,pagination}} query={paged?listQuery:null} onQuery={setListQuery} onMove={move} onChanged={load} onNotice={setNotice} onError={setError}/>} {recordId&&!draft&&!error&&<p>Loading…</p>}
-  {draft&&section==='contacts'&&draft.is_erased&&<div className="workspace-settings"><ContactErased contact={draft}/></div>}
+  {draft&&section==='contacts'&&draft.is_erased&&<div className="workspace-settings"><ContactErased projectId={projectId} contact={draft}/></div>}
   {draft&&!(section==='contacts'&&draft.is_erased)&&<div className="workspace-settings">{section==='contacts'&&draft.id&&<ContactDetails projectId={projectId} contact={draft}/>}
-   <form onSubmit={save} noValidate={section==='contacts'||section==='plugins'}><ManagementEditor {...{section,draft,change,emailConfigured,fieldErrors}}/>
+   <form onSubmit={save} noValidate={section==='contacts'||section==='plugins'}><ManagementEditor {...{section,draft,change,emailConfigured,fieldErrors,customRoles}}/>
     <div className="settings-actions"><button className="btn btn-primary" disabled={busy||Boolean(invitation)}>{busy?'Saving…':draft.id?'Save':section==='agents'?'Invite':section==='plugins'?'Add':'Create'}</button>{draft.id&&<button type="button" className="btn btn-outline-danger ms-2" disabled={busy} onClick={requestRemoval}>Delete</button>}</div>
     {lastOwner&&<p className="settings-note mt-3">This is the project’s last owner, so it cannot be removed. Make another member an owner first.</p>}
    </form>

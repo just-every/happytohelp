@@ -25,6 +25,6 @@ export const checkNativeSession = createServerFn({ method: 'GET' }).handler(asyn
  const response = await nativeLoaderResponse('/api/identity/session')
  if (response.status === 401) { await response.body?.cancel(); return false }
  if (!response.ok) throw await nativeLoaderError(response)
- const actor = await response.json() as {projectId?: string; role: string}
- return {projectId:actor.projectId,editorAuthorized: Boolean(actor.projectId && ['owner','admin'].includes(actor.role))}
+ const actor = await response.json() as {projectId?: string; role: string; twoFactor?: 'verify'|'enrol'}
+ return {projectId:actor.projectId,editorAuthorized: Boolean(!actor.twoFactor && actor.projectId && ['owner','admin'].includes(actor.role)),twoFactor:actor.twoFactor}
 })

@@ -1,4 +1,4 @@
-/* The Settings menu: the twelve Settings destinations as a short column beside the page on a wide screen and as one
+/* The Settings menu: the Settings destinations as a short column beside the page on a wide screen and as one
    sideways-scrolling row under the title on a phone. */
 .workspace-page-container.has-settings-menu {
   display: grid;

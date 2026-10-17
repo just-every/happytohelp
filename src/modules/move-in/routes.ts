@@ -15,6 +15,8 @@ import {AdmissionError} from './readers/admission-error'
 import {uploadIdentities,erasedUpload,identityStatements} from './identities'
 import {putUninterpretedIndex} from './uninterpreted-identities'
 import {planSummary,reviewPlan} from './review-report'
+import type {Next} from 'hono'
+import {auditStatement,requestSource} from '../audit/record'
 export async function importActor(c:Context<AppEnv>){const actor=await requireActor(c),project=c.req.param('projectId')!;if(actor.role==='contact')throw new HTTPException(403);const membership=await c.env.DB.prepare(`SELECT m.role FROM memberships m JOIN projects p ON p.id=m.project_id WHERE m.project_id=? AND m.user_id=? AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=m.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL)`).bind(project,actor.id).first<{role:string}>();if(!membership)throw new HTTPException(404);if(!['owner','admin'].includes(membership.role))throw new HTTPException(403,{message:'Workspace owner or admin required'});const token=c.req.header('Authorization')?.replace(/^Bearer /,'')||c.req.header('Cookie')?.match(/(?:^|;\s*)h2h_session=([^;]+)/)?.[1];return {project_id:project,actor_id:actor.id,session_hash:await hashToken(token!)}}
 async function owned(c:Context<AppEnv>){const actor=await importActor(c),run=await getRun(c.env,c.req.param('runId')!);if(!run||run.project_id!==actor.project_id||run.actor_id!==actor.actor_id)throw new HTTPException(404);return {run,actor}}
 /** One run with its full review report; the list returns summaries. */
@@ -24,6 +26,20 @@ async function uploadBytes(request:Request){if(Number(request.headers.get('conte
 export const moveInRoutes=new Hono<AppEnv>()
 moveInRoutes.use('*',async(c,next)=>{c.env={...c.env,DB:boundedDatabase(c.env.DB).database};await next()})
 const root='/projects/:projectId/imports'
+// Starting, applying, resuming and undoing an import are recorded in the workspace's security log.
+moveInRoutes.use(`${root}/*`,recordImport)
+moveInRoutes.use(root,recordImport)
+async function recordImport(c:Context<AppEnv>,next:Next){
+ await next()
+ const actor=c.get('actor')
+ if(c.req.method!=='POST'||c.res.status>=300||!actor)return
+ const step=c.req.path.split('/').at(-1),action=['apply','resume','undo'].includes(step!)?`import.${step}`:'import.started'
+ const result=await c.res.clone().json().catch(()=>null) as {alreadyImported?:boolean;writes?:number;data?:{id?:string}}|null
+ // An upload already on record is a no-op that writes nothing, the log included.
+ if(result?.alreadyImported||result?.writes===0)return
+ const run=c.req.param('runId')||result?.data?.id
+ await auditStatement(c.env.DB,{projectId:c.req.param('projectId')!,category:'data',action,actor:{type:'user',id:actor.id},source:requestSource(c),...(run?{target:{type:'import',id:String(run)}}:{}),detail:{vendor:c.req.query('vendor')||null}}).run()
+}
 function filenameHeader(value:string|undefined){try{return value?decodeURIComponent(value):''}catch{throw new HTTPException(400,{message:'Invalid encoded filename'})}}
 moveInRoutes.get(root,async c=>{const actor=await importActor(c),rows=await c.env.DB.prepare('SELECT * FROM move_in_runs WHERE project_id=? AND actor_id=? ORDER BY created_at DESC LIMIT 100').bind(actor.project_id,actor.actor_id).all<Run>();return c.json({data:rows.results.map(publicRun),limits:LIMITS})})
 moveInRoutes.post(root,async c=>{const actor=await importActor(c),vendor=c.req.query('vendor') as Vendor,filename=filenameHeader(c.req.header('X-Import-Filename'));if(!['zendesk','intercom','helpscout','freshdesk'].includes(vendor)||!filename||filename.length>200||filename.includes('/')||filename.includes('\\')||/[\x00-\x1f]/.test(filename))throw new HTTPException(400,{message:'Choose a supported export and filename'});if(vendor==='intercom'&&c.req.header('X-Import-Schema')!=='2.16')throw new HTTPException(400,{message:'Select the Data API 2.16 export schema'});const bytes=await uploadBytes(c.req.raw),hash=sha256(bytes),prior=await c.env.DB.prepare('SELECT * FROM move_in_runs WHERE project_id=? AND vendor=? AND artifact_hash=?').bind(actor.project_id,vendor,hash).first<Run>();if(prior){if(prior.actor_id!==actor.actor_id)throw new HTTPException(409,{message:'This export belongs to another import reviewer'});if(prior.state==='erased')throw new HTTPException(410,{message:'This export contains erased data and cannot be replayed'});if(prior.state==='uploading'){try{await requireAuditedCustody(c.env,{...prior,...actor})}catch{throw new HTTPException(409,{message:'This older export cannot yet be fully indexed. Its existing custody is retained; native contact erasure remains available.'})}const retained=await uploadIdentities(actor.project_id,vendor,filename,bytes);if(!retained.complete)await putUninterpretedIndex(c.env,{...prior,...actor},retained.uninterpreted);await putPrivate(c.env,{...prior,...actor},prior.object_key,bytes,{httpMetadata:{contentType:'application/octet-stream'}});await updateRun(c.env,{...prior,...actor},{state:'uploaded',session_hash:actor.session_hash});const resumed=(await getRun(c.env,prior.id))!;await enqueue(c.env,resumed);return c.json({data:await runView(c.env,resumed)},201)}return c.json({data:await runView(c.env,prior),alreadyImported:prior.state==='completed',writes:0})}

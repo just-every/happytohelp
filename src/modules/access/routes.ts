@@ -1,0 +1,90 @@
+import {Hono} from 'hono'
+import {HTTPException} from 'hono/http-exception'
+import type {AppEnv} from '../../platform/env'
+import {scope,text} from '../management/common'
+import {dashboardAccess} from '../management/dashboard'
+import {auditStatement,requestSource} from '../audit/record'
+import {requireStepUp} from '../identity/two-factor/step-up'
+import {BASE_PERMISSIONS,PERMISSIONS,ROLE_LABELS,customPermissions} from './catalogue'
+
+/** Settings → Roles: the permission catalogue, built-in roles and the workspace's custom roles. */
+export const roles=new Hono<AppEnv>()
+const P='/projects/:projectId'
+const parse=(json:string)=>{try{return JSON.parse(json)}catch{return []}}
+
+roles.get(`${P}/roles`,async c=>{
+ const actor=await scope(c,true)
+ const custom=(await c.env.DB.prepare('SELECT r.id,r.name,r.base,r.permissions_json,r.updated_at,(SELECT count(*) FROM member_roles mr WHERE mr.project_id=r.project_id AND mr.role_key=r.id) members FROM project_roles r WHERE r.project_id=? ORDER BY r.name').bind(actor.projectId).all<{id:string;name:string;base:'admin'|'operator'|'collaborator';permissions_json:string;updated_at:number;members:number}>()).results
+ return c.json({data:{
+  permissions:Object.entries(PERMISSIONS).map(([key,label])=>({key,label})),
+  builtIn:(['owner','admin','operator','collaborator'] as const).map(key=>({key,name:ROLE_LABELS[key],permissions:BASE_PERMISSIONS[key]})),
+  custom:custom.map(({permissions_json,...role})=>({...role,permissions:customPermissions(role.base,parse(permissions_json))})),
+ }})
+})
+
+async function readRole(c:any,actor:{projectId:string;role:string}){
+ const body=await c.req.json().catch(()=>({}))
+ const name=text(body.name,60)
+ if(!name)throw new HTTPException(400,{message:'Name the role.'})
+ if(!['admin','operator','collaborator'].includes(body.base))throw new HTTPException(400,{message:'Choose what the role is based on: admin, agent or collaborator.'})
+ if(body.base==='admin'&&actor.role!=='owner')throw new HTTPException(403,{message:'Only an owner can create or change a role based on admin.'})
+ return {name,base:body.base as 'admin'|'operator'|'collaborator',permissions:customPermissions(body.base,body.permissions)}
+}
+
+roles.post(`${P}/roles`,async c=>{
+ const actor=await scope(c,true),role=await readRole(c,actor)
+ await requireStepUp(c,actor,'role.create')
+ const id=`role_${crypto.randomUUID()}`,now=Date.now()
+ try{
+  await c.env.DB.batch([
+   c.env.DB.prepare('INSERT INTO project_roles(id,project_id,name,base,permissions_json,created_at,updated_at) VALUES(?,?,?,?,?,?,?)').bind(id,actor.projectId,role.name,role.base,JSON.stringify(role.permissions),now,now),
+   auditStatement(c.env.DB,{projectId:actor.projectId,category:'access',action:'role.created',actor:{type:'user',id:actor.id},source:requestSource(c),target:{type:'role',id},detail:{name:role.name,base:role.base,permissions:role.permissions}},now),
+  ])
+ }catch(error){if(String(error).includes('UNIQUE'))throw new HTTPException(409,{message:'A role with this name already exists.'});throw error}
+ return c.json({data:{id,...role}},201)
+})
+
+roles.put(`${P}/roles/:roleId`,async c=>{
+ const actor=await scope(c,true),existing=await c.env.DB.prepare('SELECT base FROM project_roles WHERE project_id=? AND id=?').bind(actor.projectId,c.req.param('roleId')).first<{base:string}>()
+ if(!existing)throw new HTTPException(404)
+ if(existing.base==='admin'&&actor.role!=='owner')throw new HTTPException(403,{message:'Only an owner can change a role based on admin.'})
+ const role=await readRole(c,actor)
+ if(role.base!==existing.base)throw new HTTPException(409,{message:'A role keeps the base it was created with. Create a new role instead.'})
+ await requireStepUp(c,actor,'role.update')
+ const now=Date.now()
+ await c.env.DB.batch([
+  c.env.DB.prepare('UPDATE project_roles SET name=?,permissions_json=?,updated_at=? WHERE project_id=? AND id=?').bind(role.name,JSON.stringify(role.permissions),now,actor.projectId,c.req.param('roleId')),
+  auditStatement(c.env.DB,{projectId:actor.projectId,category:'access',action:'role.updated',actor:{type:'user',id:actor.id},source:requestSource(c),target:{type:'role',id:c.req.param('roleId')},detail:{name:role.name,permissions:role.permissions}},now),
+ ])
+ return c.json({data:{id:c.req.param('roleId'),...role}})
+})
+
+roles.delete(`${P}/roles/:roleId`,async c=>{
+ const actor=await scope(c,true),roleId=c.req.param('roleId')
+ const existing=await c.env.DB.prepare('SELECT base,(SELECT count(*) FROM member_roles WHERE project_id=r.project_id AND role_key=r.id) members FROM project_roles r WHERE project_id=? AND id=?').bind(actor.projectId,roleId).first<{base:string;members:number}>()
+ if(!existing)throw new HTTPException(404)
+ if(existing.base==='admin'&&actor.role!=='owner')throw new HTTPException(403,{message:'Only an owner can delete a role based on admin.'})
+ if(existing.members)throw new HTTPException(409,{message:'Move the members who hold this role to another role first.'})
+ await requireStepUp(c,actor,'role.delete')
+ await c.env.DB.batch([
+  c.env.DB.prepare('DELETE FROM project_roles WHERE project_id=? AND id=? AND NOT EXISTS(SELECT 1 FROM member_roles WHERE project_id=? AND role_key=?)').bind(actor.projectId,roleId,actor.projectId,roleId),
+  auditStatement(c.env.DB,{projectId:actor.projectId,category:'access',action:'role.deleted',actor:{type:'user',id:actor.id},source:requestSource(c),target:{type:'role',id:roleId}}),
+ ])
+ return c.json({deleted:true})
+})
+
+/** Following a conversation: collaborators and agents keep track of tickets they do not own. */
+export const followers=new Hono<AppEnv>()
+const C=`${P}/conversations/:conversationId`
+const followerList=async(db:D1Database,conversationId:string)=>(await db.prepare('SELECT u.id,u.name FROM conversation_followers f JOIN users u ON u.id=f.user_id WHERE f.conversation_id=? ORDER BY f.created_at').bind(conversationId).all<{id:string;name:string}>()).results
+followers.get(`${C}/followers`,async c=>{const {actor,conversation}=await dashboardAccess(c),list=await followerList(c.env.DB,conversation.id);return c.json({data:{followers:list,following:list.some(row=>row.id===actor.id)}})})
+followers.post(`${C}/follow`,async c=>{
+ const {actor,conversation}=await dashboardAccess(c)
+ await c.env.DB.prepare('INSERT OR IGNORE INTO conversation_followers(conversation_id,user_id,created_at) VALUES(?,?,?)').bind(conversation.id,actor.id,Date.now()).run()
+ return c.json({data:{followers:await followerList(c.env.DB,conversation.id),following:true}})
+})
+followers.delete(`${C}/follow`,async c=>{
+ const {actor,conversation}=await dashboardAccess(c)
+ await c.env.DB.prepare('DELETE FROM conversation_followers WHERE conversation_id=? AND user_id=?').bind(conversation.id,actor.id).run()
+ return c.json({data:{followers:await followerList(c.env.DB,conversation.id),following:false}})
+})

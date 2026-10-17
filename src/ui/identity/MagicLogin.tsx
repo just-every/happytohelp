@@ -30,6 +30,7 @@ export default function MagicLogin() {
   try {
    if (token) {
     const result=await postJson('/api/identity/magic-link/consume', { token,returnTo });
+    if (result.twoFactor) { location.assign('/two-factor?returnTo=' + encodeURIComponent(result.destination)); return; }
     location.assign(await signInDestination(result.destination, location.origin));
    } else {
     const result = await postJson('/api/identity/magic-link', { email: new FormData(event.currentTarget).get('email'),returnTo });

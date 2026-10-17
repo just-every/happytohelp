@@ -113,7 +113,7 @@ try {
       assert.equal(await nav().getByTestId('nav-settings').getAttribute('aria-current'),'page',path);
     }
   });
-  await check('a project sidebar is one short list; the twelve Settings pages share one menu',async()=>{
+  await check('a project sidebar is one short list; the Settings pages share one menu',async()=>{
     await page.setViewportSize({width:1440,height:900});
     await bindSession(bound.id);
     await page.goto(`${runtime.origin}/projects/${bound.id}/conversations`);await ready();
@@ -128,7 +128,7 @@ try {
     await nav().getByTestId('nav-settings').click();
     const menu=page.getByTestId('settings-menu');await menu.waitFor();
     const paths=new Set();
-    for(const name of ['Project','Agents','Email','Widget','Saved Replies','API tokens','Webhooks','Slack','Delivery log','Plugins','GitHub','Connected applications']){
+    for(const name of ['Project','Agents','Email','Widget','Saved Replies','API tokens','Webhooks','Slack','Delivery log','Plugins','GitHub','Roles','Security','Security log','Connected applications']){
       const entry=menu.getByRole('link',{name,exact:true});
       if(!await entry.isVisible())await menu.getByTestId('settings-menu-more').locator('summary').click();
       await entry.click();await entry.and(menu.locator('[aria-current="page"]')).waitFor();
@@ -138,7 +138,7 @@ try {
       assert.equal(await nav().getByTestId('nav-settings').getAttribute('aria-current'),'page',name);
       assert.equal(await page.locator('h1').count(),1,name);paths.add(new URL(page.url()).pathname);
     }
-    assert.equal(paths.size,12,'each destination is its own page');
+    assert.equal(paths.size,15,'each destination is its own page');
     await nav().getByRole('link',{name:'Contacts',exact:true}).click();await page.getByRole('heading',{name:'Contacts',level:1}).waitFor();
     assert.equal(await page.getByTestId('settings-menu').count(),0,'Contacts has no Settings menu');
   });

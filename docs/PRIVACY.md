@@ -154,7 +154,9 @@ database and R2 bucket.
 ## Erase a contact's personal data
 
 Only the **owners** and **admins** of the contact's workspace can erase a contact.
-**Operators** cannot.
+**Agents** and **collaborators** cannot. Erasing asks you to confirm it is you if you
+have not done so in the last 15 minutes (see [Account security](account-security.md)),
+and each erasure is written to the workspace's security log.
 
 **In the dashboard:**
 
@@ -226,10 +228,33 @@ If an erasure stops partway through, run it again to finish it. Files waiting to
 deleted are listed in `contact_erasure_objects` until the database changes are
 committed, so a repeat run picks them up.
 
+### Connected providers
+
+After the local erasure commits, HappyToHelp asks each connected service to delete
+what it holds, as far as that service allows, and the contact page shows each
+request and its outcome under **Erasure record**, with completed, waiting, failed
+and cannot-delete counts:
+
+- **Webhooks**: every enabled webhook receives a signed `contact.erased` event with
+  the contact's HappyToHelp ID and your own external ID for them (no name, email or
+  message text), whatever events it subscribes to. The request is complete when your
+  endpoint answers with success. A lost answer stays unknown and is never resent
+  automatically; resend it from **Settings → Delivery log**.
+- **Slack**: messages already posted are not recalled. Delete them in Slack.
+- **Your email provider**: mail already sent stays in the recipients' mailboxes, and
+  the provider keeps its own delivery logs for its retention period.
+- **Your AI provider**: conversation text sent for answers stays under that
+  provider's retention policy.
+- **Paired computers**: files downloaded for delegated work stay on the computer.
+
+Erasing again sends a new request to each webhook; the latest request's outcome
+is the one shown.
+
 ### What erasure cannot reach
 
 - Cloudflare's own backups: D1 Time Travel keeps up to 30 days of history.
-- Anything already sent to a provider, an email inbox or a paired computer.
+- Anything already sent to a provider, an email inbox or a paired computer. Only
+  webhooks receive a deletion request they can act on, as described above.
 
 ## Give a customer a copy of their data
 

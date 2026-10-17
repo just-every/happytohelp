@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Link} from '@tanstack/react-router';
-import {nativeRequest} from '../transport';
+import {nativeRequest,downloadFile} from '../transport';
 import './Reports.css';
 const duration = value => value === null ? '—' : value < 1000 ? `${value} ms` : value < 60000 ? `${Number((value / 1000).toFixed(1))} sec` : value < 3600000 ? `${Number((value / 60000).toFixed(1))} min` : `${Number((value / 3600000).toFixed(1))} hr`;
 const percent = value => value === null ? '—' : `${Number((value * 100).toFixed(1))}%`;
@@ -22,7 +22,7 @@ export default function Reports({projectId}) {
         {loading&&<p role="status">Loading reports…</p>}
         {report&&!loading&&<>
             <p className="reports-scope">{report.range.start} through {report.range.end} (exclusive) · <strong>{report.range.timezone}</strong> · <Link to={`/projects/${projectId}/edit`}>Workspace timezone</Link></p>
-            <div className="reports-downloads"><a className="btn btn-white" href={`${endpoint}?${query}&format=conversations.csv`}>Conversations CSV</a><a className="btn btn-white" href={`${endpoint}?${query}&format=summary.csv`}>Summary CSV</a></div>
+            <div className="reports-downloads"><button type="button" className="btn btn-white" onClick={()=>downloadFile(`${endpoint}?${query}&format=conversations.csv`).catch(e=>setError(e.message))}>Conversations CSV</button><button type="button" className="btn btn-white" onClick={()=>downloadFile(`${endpoint}?${query}&format=summary.csv`).catch(e=>setError(e.message))}>Summary CSV</button></div>
             <div className="reports-metrics">
                 <Metric title="Conversations" value={report.volume} detail="Created in this range"/>
                 <Metric title="First response" value={duration(report.firstResponse.median)} detail={`Median · p90 ${duration(report.firstResponse.p90)} · ${report.firstResponse.count} conversation${report.firstResponse.count===1?'':'s'}`}/>

@@ -9,6 +9,7 @@ import CountryName from './includes/CountryName';
 import Moment from '../../native/ZonedMoment';
 import { contactTimezone } from '../utils/contactTimezone';
 
+import { useCan } from './ConversationAccess';
 import '../styles/components/ConversationHeader.scss';
 
 ConversationHeader.propTypes = {
@@ -30,6 +31,7 @@ export default function ConversationHeader({
     const projectName = isGlobalInbox ? getProject(conversation.project_id).name : null;
     const isAiAssigned = Boolean(conversation.ai_id);
     const statusLabel = conversation.resolved_at ? 'Closed' : 'Open';
+    const canManage = useCan(conversation.project_id, 'conversations.manage');
     const contactEmail = conversation.contact.email && conversation.contact.email !== conversation.contact.display_name
         ? conversation.contact.email
         : conversation.contact.provided_email && conversation.contact.provided_email !== conversation.contact.display_name
@@ -77,9 +79,9 @@ export default function ConversationHeader({
                     { isAiAssigned && <span className="conversation-header-status is-ai">AI</span> }
                 </div>
                 <div className="conversation-header-actions">
-                    { conversation.resolved_at
+                    { canManage && (conversation.resolved_at
                         ? <button type="button" className="btn btn-white conversation-header-reopen" title="Reopen conversation" onClick={ () => resolveConversation(conversation, false) }><i className="fe fe-rotate-ccw me-2" aria-hidden="true"></i>Reopen</button>
-                        : <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button> }
+                        : <button type="button" className="btn btn-white conversation-header-close" title="Close conversation" onClick={ () => resolveConversation(conversation) }><i className="fe fe-check-circle me-2" aria-hidden="true"></i>Close</button>) }
                     <button
                         type="button"
                         className="btn btn-white conversation-assistant-toggle"

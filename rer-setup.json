@@ -352,6 +352,15 @@
       "required": true,
       "generate": "base64",
       "ownerVisible": false
+    },
+    {
+      "name": "H2H_OWNER_RECOVERY_KEY",
+      "label": "Owner recovery key",
+      "kind": "secret",
+      "required": true,
+      "generate": "hex",
+      "ownerVisible": false,
+      "help": "Generated for you and never shown. If the owner loses every second factor, set a new value with rer and use it once at /owner-recovery."
     }
   ],
   "steps": [

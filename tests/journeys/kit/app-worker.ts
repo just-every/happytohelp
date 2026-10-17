@@ -2,6 +2,8 @@ import {app} from '../../../src/app'
 import {consumeQueue} from '../../../src/queue'
 import {runScheduled} from '../../../src/jobs'
 import {dispatchOperatorNotifications} from '../../../src/modules/integrations/notifications'
+import {purgeExpiredAudit} from '../../../src/modules/audit/retention'
+import {routeRule} from '../../../src/modules/access/route-permissions'
 import {handleEmail} from '../../../src/modules/integrations/email-worker'
 import type {Env} from '../../../src/platform/env'
 export {ConversationSocket} from '../../../src/modules/conversations/socket'
@@ -54,6 +56,8 @@ export default {
   env=faulted(request,bindings(env))
   const path=new URL(request.url).pathname
   if(path==='/_test/queue/take')return Response.json(captured.splice(0))
+  // Mutating routes no role rule classifies: a collaborator is refused them by default, and the roles journey expects none.
+  if(path==='/_test/unclassified-routes')return Response.json([...new Set(app.routes.filter(route=>!['GET','HEAD','OPTIONS','ALL'].includes(route.method)&&routeRule(route.method,route.path)===undefined).map(route=>`${route.method} ${route.path}`))])
   if(path==='/_test/queue/run'){
    const jobs=await request.json<any[]>(),acked:number[]=[],retried:number[]=[]
    await consumeQueue({messages:jobs.map((body,index)=>({id:String(index),body,ack(){acked.push(index)},retry(){retried.push(index)}}))} as any,env)
@@ -67,7 +71,7 @@ export default {
    return Response.json({rejected})
   }
   // The cron tick; `after` runs the operator-mail dispatch that many milliseconds later, as a later tick would.
-  if(path==='/_test/scheduled'){const {after=0}=await request.json<{after?:number}>().catch(()=>({after:0}));await Promise.all([runScheduled(env),dispatchOperatorNotifications(env,{now:Date.now()+after})]);return Response.json({ran:true})}
+  if(path==='/_test/scheduled'){const {after=0}=await request.json<{after?:number}>().catch(()=>({after:0}));await Promise.all([runScheduled(env),dispatchOperatorNotifications(env,{now:Date.now()+after}),purgeExpiredAudit(env,Date.now()+after)]);return Response.json({ran:true})}
   return app.fetch(request,env,context)
  },
  async queue(batch:MessageBatch<any>,env:Env){await consumeQueue(batch,env)},

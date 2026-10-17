@@ -53,6 +53,10 @@
       "environment": "INTEGRATION_ENCRYPTION_KEY"
     },
     {
+      "binding": "H2H_OWNER_RECOVERY_KEY",
+      "environment": "H2H_OWNER_RECOVERY_KEY"
+    },
+    {
       "binding": "INBOUND_EMAIL_TOKEN",
       "environment": "INBOUND_EMAIL_TOKEN"
     },

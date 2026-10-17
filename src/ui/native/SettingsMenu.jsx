@@ -8,7 +8,7 @@ const subscribePhone = notify => { const query = window.matchMedia(phoneQuery); 
 const onPhone = () => window.matchMedia(phoneQuery).matches;
 
 /** The Settings pages' own menu. A wide screen lists five destinations and folds the other seven into "More" (open while
- *  one of them is the page); a phone shows all twelve in one sideways-scrolling row. Links change the page in place. */
+ *  one of them is the page); a phone shows all of them in one sideways-scrolling row. Links change the page in place. */
 export default function SettingsMenu({ projectId }) {
     // The router's own location, as each link's active state uses, so exactly one entry is current at every moment.
     const pathname = useLocation({ select: location => location.pathname });

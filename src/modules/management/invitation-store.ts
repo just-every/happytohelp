@@ -12,8 +12,8 @@ export interface PendingInvitation {invitation_id: string; email: string; role: 
 // Copying a link or resending the email adds a link; revoking removes every one of them.
 const liveTokens = (db: D1Database, projectId: string, email?: string) => db.prepare(`SELECT lower(email) email,role,expires_at FROM identity_tokens WHERE project_id=? AND kind='invite' AND consumed_at IS NULL AND expires_at>?${email ? ' AND lower(email)=?' : ''} ORDER BY expires_at DESC`).bind(projectId, Date.now(), ...(email ? [email] : [])).all<LiveToken>().then(result => result.results)
 
-/** Owners manage every invitation; admins only invitations that grant the operator role, as when inviting. */
-const mayManage = (actorRole: string, tokens: LiveToken[]) => actorRole === 'owner' || actorRole === 'admin' && tokens.every(token => token.role === 'operator')
+/** Owners manage every invitation; admins only invitations that grant the agent or collaborator role, as when inviting. */
+const mayManage = (actorRole: string, tokens: LiveToken[]) => actorRole === 'owner' || actorRole === 'admin' && tokens.every(token => token.role === 'operator' || token.role === 'collaborator')
 
 function summarize(tokens: LiveToken[], actorRole: string): Omit<PendingInvitation, 'pending'> {
  const newest = tokens[0]

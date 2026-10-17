@@ -6,7 +6,7 @@ export const archivePolicy={
  derivedTables:['inbox_message_search'],
  excludeTables:[
   'operator_notification_activity','operator_notifications',
-  'sessions','conversation_outbox','identity_tokens','magic_signins','registrations','login_attempts',
+  'sessions','session_factors','webauthn_challenges','audit_purges','conversation_outbox','identity_tokens','magic_signins','registrations','login_attempts',
   'github_connections','github_oauth_states','preview_grants','edition_codes','edition_consents',
   'local_pairings','local_authorizations','local_grants','local_devices','local_device_settings','local_jobs','local_events','local_attachments','local_receipts','local_attachment_grants','local_result_effects',
   'integration_tokens','integration_deliveries','integration_replays','native_integration_destinations','native_integration_intents','native_integration_dispatch_cursor',

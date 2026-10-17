@@ -17,7 +17,7 @@ async function draftRuntime(){
    db.prepare('INSERT INTO memberships VALUES(?,?,?)').bind(projectId,userId,'owner'),
    db.prepare('INSERT INTO contacts(id,project_id,name,created_at) VALUES(?,?,?,1)').bind(contactId,projectId,'Customer'),
    db.prepare('INSERT INTO conversations(id,project_id,contact_id,created_at,updated_at) VALUES(?,?,?,1,1)').bind(conversationId,projectId,contactId),
-   db.prepare('INSERT INTO sessions VALUES(?,?,?,?,NULL,?,NULL)').bind(sha(token),userId,projectId,'owner',Date.now()+3600000),
+   db.prepare('INSERT INTO sessions VALUES(?,?,?,?,NULL,?,NULL)').bind(sha(token),userId,projectId,'owner',Date.now()+3600000),db.prepare("INSERT INTO session_factors VALUES(?,?,'password',?)").bind(sha(token),userId,Date.now()),
   ])
   const post=async(path,body,auth=token)=>{const response=await request(path,body,auth);assert.equal(response.status,200,JSON.stringify(response.body));return response.body.data}
   const pairing=await post(`/api/projects/${projectId}/local-agents/pairings`,{}),paired=await post('/api/local-agents/pair',{code:pairing.code,name:'Native draft fixture',provider:'codex',capabilities:[]})

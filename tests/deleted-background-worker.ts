@@ -21,6 +21,7 @@ export default {async fetch(request:Request,env:Env){
  await env.DB.prepare("INSERT INTO memberships(project_id,user_id,role) VALUES(?,?,'owner')").bind(projectId,'owner').run();
  await env.DB.prepare('INSERT INTO project_settings(project_id,settings_json,updated_at) VALUES(?,?,?)').bind(projectId,'{}',now).run();
  await env.DB.prepare("INSERT INTO sessions(token_hash,actor_id,project_id,role,expires_at) VALUES(?,'owner',?,'owner',?)").bind(await hashToken('test-owner'),projectId,now+60000).run();
+ await env.DB.prepare("INSERT INTO session_factors(token_hash,user_id,method,verified_at) VALUES(?,'owner','password',?)").bind(await hashToken('test-owner'),Date.now()).run();
  check(await isProjectActive(env,projectId),'canonical live project active');check(!await isProjectActive(env,'missing-project'),'missing canonical project inactive');
  await env.DB.prepare("CREATE TRIGGER reject_test_revocation BEFORE DELETE ON memberships BEGIN SELECT RAISE(ABORT,'test membership failure'); END").run();
  const failedDelete=await projects.request(`/projects/${projectId}`,{method:'DELETE',headers:{Authorization:'Bearer test-owner'}},env);

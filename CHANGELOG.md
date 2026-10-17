@@ -10,6 +10,13 @@ updating and backing up an installation, see
 
 ## Unreleased
 
+- **Two-factor sign-in.** Add an authenticator app or a passkey (security key, Touch ID, Windows Hello) on your profile, with ten single-use recovery codes. Owners can require it by role from Settings → Security; teammates set it up at their next sign-in before they see anything, and sessions without it end. Wrong, reused and spent codes are refused, limited and logged. An owner can reset a teammate's factors, and a locked-out owner recovers with an installation key set through `rer`, never by email alone.
+- **Confirm it's you.** Exports, contact erasure, role changes, installing integrations and credentials, and deleting a workspace ask for the second factor (or the password, without one) again after 15 minutes.
+- **Collaborator and custom roles.** Invite a collaborator who can read conversations, add internal notes and follow them, but never reply to customers. Settings → Roles creates roles that narrow Agent, Collaborator or Admin, for example an agent who cannot publish articles or export data.
+- **Security log.** Settings → Security log lists sign-ins, two-factor and role changes, imports, exports, erasure, assignments and approvals with who, where, when and the result; export it as CSV or JSON, set retention and place legal holds. Entries cannot be edited.
+- **Erasure reaches connected services.** Erasing a contact sends every webhook a signed `contact.erased` request and shows, per store and provider, what was removed, what was asked and what cannot be recalled.
+- **Backups carry Durable Object storage.** `rer export` records every Durable Object's stored records with a schema and digest, and `rer import` checks them before restoring.
+
 - Mark source fixtures as synthetic so hosted changes can admit the public source without changing test coverage.
 - **Freshdesk Move in.** Tickets with every reply and private note, contacts, agents (as authors only), canned responses and attachment names come across from a script on the Move in page. Signed attachment links are never kept.
 - **Move in review you can act on.** The plan shows right after upload, in plain words: what will import, what needs fixing (file, line, reason) and what stays in your original file. Approve appears only when something can import. A rejected record no longer holds its source ID, so a corrected file imports it; imported records are linked by subject or name.

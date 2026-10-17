@@ -10,6 +10,7 @@ import '../homepage/brand-tokens.css';
 import '../identity/identity.css';
 import '../dashboard/styles/dashboard.scss';
 import { PenLine, QuestionBubble } from './drawings';
+import StepUpHost from './StepUpDialog';
 
 
 const Content = withVisualEdits(PageContent);
@@ -60,5 +61,6 @@ export default function Dashboard() {
     return <DashboardSettingsContext.Provider value={settings}>
         <EditorLauncher authorized={!!settings.project && ['owner', 'admin'].includes(settings.project.role)} />
         <Suspense fallback={<DashboardPending />}><DashboardClient settings={settings} /></Suspense>
+        <StepUpHost />
     </DashboardSettingsContext.Provider>;
 }

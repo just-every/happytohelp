@@ -1,0 +1,83 @@
+import type {Permission} from './catalogue'
+
+/**
+ * Which permission each authenticated door needs, keyed by `METHOD registered-path`.
+ * 'self' is the signed-in person's own account or reading; 'none' is a door a native
+ * session never authorizes (public, visitor, device, API-token or platform-admin doors,
+ * which keep their own authority). Built-in owner, admin and agent roles keep the
+ * handlers' existing checks; this table narrows custom roles and collaborators. A
+ * mutating door missing here is refused to a collaborator, and the identity journey
+ * fails until it is classified.
+ */
+type Rule=Permission|'self'|'none'
+const P='/api/management/projects/:projectId',D='/api/dashboard/projects/:projectId',C=`${D}/conversations/:conversationId`,K='/api/knowledge/:projectId',X='/api/customer-context/:projectId/:subjectId',L='/api/projects/:project'
+const rules:Record<string,Rule>={
+ // Own account and sign-in
+ 'POST /api/identity/switch-project':'self','POST /api/identity/password':'self','POST /api/identity/accept-invitation':'self','DELETE /api/identity/session':'self',
+ 'PUT /api/management/profile':'self',[`PUT ${P}/agents/:userId/primary`]:'self',
+ 'POST /api/identity/two-factor/totp':'self','POST /api/identity/two-factor/totp/confirm':'self','POST /api/identity/two-factor/webauthn/options':'self','POST /api/identity/two-factor/webauthn':'self',
+ 'DELETE /api/identity/two-factor/factors/:factorId':'self','POST /api/identity/two-factor/recovery-codes':'self','POST /api/identity/two-factor/verify':'self','POST /api/identity/two-factor/assertion-options':'self','POST /api/identity/step-up':'self',
+ 'POST /api/identity/invitations':'members.manage','POST /api/identity/password-reset':'members.manage',
+ // Conversations
+ 'POST /api/conversations':'conversations.reply','POST /api/conversations/:id/messages':'conversations.reply','POST /api/conversations/:id/media':'conversations.reply',
+ [`PUT ${C}`]:'conversations.manage',[`POST ${C}/actions`]:'conversations.manage',
+ [`POST ${C}/notes`]:'conversations.notes',[`DELETE ${C}/notes/:noteId`]:'conversations.notes',
+ [`GET ${C}/followers`]:'self',[`POST ${C}/follow`]:'conversations.follow',[`DELETE ${C}/follow`]:'conversations.follow',
+ [`POST ${C}/participants`]:'conversations.manage',[`DELETE ${C}/participants/:participantId`]:'conversations.manage',
+ [`POST ${C}/tags`]:'conversations.manage',[`DELETE ${C}/tags/:tagId`]:'conversations.manage',
+ [`POST ${D}/media`]:'conversations.reply',
+ 'POST /api/ai-support/projects/:projectId/conversations/:conversationId/generations':'conversations.reply','POST /api/ai-support/projects/:projectId/generations/:id/cancel':'conversations.reply','POST /api/ai-support/projects/:projectId/conversations/:conversationId/suggestions':'conversations.reply',
+ [`POST ${L}/conversations/:conversation/delegations`]:'conversations.reply',[`POST ${L}/conversations/:conversation/delegations/:job/cancel`]:'conversations.reply',[`POST ${L}/conversations/:conversation/delegations/:job/input`]:'conversations.reply',
+ [`POST ${L}/conversations/:conversation/delegations/:job/result/draft`]:'conversations.reply',[`POST ${L}/conversations/:conversation/delegations/:job/result/replies/:proposal/send`]:'conversations.reply',[`POST ${L}/conversations/:conversation/delegations/:job/result/follow-up-actions/:proposal`]:'conversations.reply',
+ // Customer context and contacts
+ [`PUT ${X}/consent`]:'contacts.manage',[`POST ${X}/evidence`]:'contacts.manage',[`PUT ${X}/profiles/:type`]:'contacts.manage',[`POST ${X}/insights`]:'contacts.manage',[`POST ${X}/insights/:insightId/dismiss`]:'contacts.manage',[`PUT ${X}/monitoring`]:'contacts.manage',[`POST ${X}/generate/:kind`]:'contacts.manage',[`POST ${X}/jobs/:jobId/abandon`]:'contacts.manage',
+ [`POST ${P}/contacts/:contactId/erase`]:'data.erase',
+ // Knowledge
+ [`POST ${K}/articles`]:'knowledge.publish',[`DELETE ${K}/articles/:articleId`]:'knowledge.publish',[`PUT ${K}/articles/:articleId/categories`]:'knowledge.edit',[`PUT ${K}/articles/:articleId/order`]:'knowledge.edit',
+ [`POST ${K}/categories`]:'knowledge.edit',[`PUT ${K}/categories/:categoryId`]:'knowledge.edit',[`DELETE ${K}/categories/:categoryId`]:'knowledge.edit',
+ [`POST ${K}/datasets`]:'knowledge.publish',[`PUT ${K}/datasets/:datasetId`]:'knowledge.publish',[`POST ${K}/datasets/:datasetId/crawl`]:'knowledge.publish',[`POST ${K}/datasets/:datasetId/refresh`]:'knowledge.publish',[`DELETE ${K}/datasets/:datasetId`]:'knowledge.publish',
+ [`POST ${K}/import/:platform`]:'data.import',
+ // Members and roles
+ [`POST ${P}/agents`]:'members.manage',[`PUT ${P}/agents/:userId`]:'members.manage',[`DELETE ${P}/agents/:userId`]:'members.manage',
+ [`DELETE ${P}/invitations/:invitationId`]:'members.manage',[`POST ${P}/invitations/:invitationId/link`]:'members.manage',[`POST ${P}/invitations/:invitationId/resend`]:'members.manage',
+ [`POST ${P}/roles`]:'members.manage',[`PUT ${P}/roles/:roleId`]:'members.manage',[`DELETE ${P}/roles/:roleId`]:'members.manage',
+ [`PUT ${P}/security`]:'members.manage',[`POST ${P}/agents/:userId/two-factor/reset`]:'members.manage',
+ // Security log
+ [`GET ${P}/audit`]:'audit.view',[`GET ${P}/audit/export`]:'data.export',[`PUT ${P}/audit/retention`]:'settings.manage',[`POST ${P}/audit/holds`]:'settings.manage',[`POST ${P}/audit/holds/:holdId/release`]:'settings.manage',
+ // Reports
+ [`GET ${D}/reports`]:'reports.view',
+ // Workspace settings
+ 'POST /api/management/projects':'settings.manage',[`PUT ${P}/settings`]:'settings.manage',[`DELETE ${P}`]:'data.erase',
+ [`PUT ${P}/appearance`]:'settings.manage',[`PUT ${P}/artwork`]:'settings.manage',[`PUT ${P}/widget-settings`]:'settings.manage',[`PUT ${P}/availability`]:'settings.manage',[`PUT ${P}/ai`]:'settings.manage',
+ [`POST ${P}/brand-media`]:'settings.manage',[`POST ${P}/activation/check`]:'settings.manage',[`POST ${P}/activation/skip`]:'settings.manage',[`POST ${P}/activation/test-mail`]:'settings.manage',
+ [`PUT ${P}/email-settings`]:'settings.manage',[`POST ${P}/email-settings/test`]:'settings.manage',[`POST ${P}/inbound-emails/:messageId/reconcile`]:'conversations.manage',
+ 'POST /api/site-preview/projects/:projectId/brand-image-generations':'settings.manage','POST /api/site-preview/projects/:projectId/brand-assets':'settings.manage','PUT /api/site-preview/projects/:projectId/brand-assets/:id/publish':'settings.manage','POST /api/site-preview/projects/:projectId/preview':'settings.manage',
+ 'POST /api/training/projects/:project/runs':'settings.manage','POST /api/training/projects/:project/runs/:run/cancel':'settings.manage','POST /api/training/synthetic-workspace':'settings.manage',
+ // Integrations and credentials
+ [`POST ${P}/connections/tokens`]:'integrations.install',[`DELETE ${P}/connections/tokens/:id`]:'integrations.install',
+ [`POST ${P}/connections/webhooks`]:'integrations.install',[`DELETE ${P}/connections/webhooks/:id`]:'integrations.install',[`POST ${P}/connections/webhooks/:id/test`]:'integrations.install',
+ [`POST ${P}/connections/slack`]:'integrations.install',[`DELETE ${P}/connections/slack/:id`]:'integrations.install',[`POST ${P}/connections/slack/:id/test`]:'integrations.install',
+ [`POST ${P}/connections/deliveries/:id/resend`]:'integrations.install',
+ [`PUT ${P}/github`]:'integrations.install',[`POST ${P}/github/connect`]:'integrations.install',[`DELETE ${P}/github`]:'integrations.install',
+ [`POST ${L}/local-agents/pairings`]:'integrations.install',[`DELETE ${L}/local-agents/:device`]:'integrations.install',[`PUT ${L}/local-agents/:device/settings`]:'integrations.install',
+ [`POST ${L}/local-agent-authorizations/decision`]:'integrations.install',[`DELETE ${L}/local-agent-grants/:grant`]:'integrations.install',
+ 'POST /delegation/authorize':'integrations.install','POST /delegation/settings/revoke':'integrations.install','POST /delegation/settings/clients':'integrations.install',
+ // Move in
+ 'POST /api/move-in/projects/:projectId/imports':'data.import','POST /api/move-in/projects/:projectId/imports/:runId/apply':'data.import','POST /api/move-in/projects/:projectId/imports/:runId/resume':'data.import','POST /api/move-in/projects/:projectId/imports/:runId/undo':'data.import',
+ // Doors with their own authority
+ 'POST /auth/bootstrap':'none','POST /api/identity/login':'none','POST /api/identity/accept-token':'none','POST /api/identity/forgot-password':'none','POST /api/identity/widget/session':'none','POST /api/identity/register':'none','POST /api/identity/verify-email':'none','POST /api/identity/bootstrap':'none','POST /api/identity/link-status':'none','POST /api/identity/magic-link':'none','POST /api/identity/magic-link/consume':'none','POST /api/identity/owner-recovery':'none',
+ 'POST /api/conversations/:id/widget-events':'none','POST /api/integrations/email/inbound':'none','POST /api/integrations/email/sendgrid/inbound':'none','POST /api/dashboard/demo-inbox':'none',
+ 'POST /api/delegation/v1/token':'none','POST /api/delegation/v1/effects':'none','POST /api/delegation/v1/revoke':'none',
+ 'POST /api/local-agents/pair':'none','POST /api/local-agents/heartbeat':'none','POST /api/local-agents/device-authorizations':'none','POST /api/local-agents/device-authorizations/token':'none','POST /api/local-agents/task-sessions':'none','POST /api/local-agents/claim':'none','POST /api/local-agents/jobs/:job/progress':'none','POST /api/local-agents/jobs/:job/result':'none','POST /api/local-agents/jobs/:job/attachments':'none',
+}
+// Resource routes are mounted under both /api/management and /api/dashboard.
+for(const [kind,rule] of [['ais','settings.manage'],['macros','settings.manage'],['plugins','settings.manage'],['contacts','contacts.manage']] as const)for(const base of [P,D]){
+ rules[`POST ${base}/${kind}`]=rule;rules[`PUT ${base}/${kind}/:resourceId`]=rule;rules[`DELETE ${base}/${kind}/:resourceId`]=kind==='contacts'?'data.erase':rule
+}
+for(const base of [P,D]){rules[`PUT ${base}/agents/:userId`]='members.manage';rules[`DELETE ${base}/agents/:userId`]='members.manage';rules[`POST ${base}/plugins/:pluginId/:direction`]='settings.manage'}
+
+const prefixes=['/api/v1/','/api/management/admin/']
+export function routeRule(method:string,path:string):Rule|undefined{
+ if(prefixes.some(prefix=>path.startsWith(prefix)))return 'none'
+ return rules[`${method} ${path}`]
+}

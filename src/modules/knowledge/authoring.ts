@@ -10,6 +10,7 @@ import { crawlDataset } from './service'
 import { crawlInputError } from './crawl-limits'
 import { crawlerSetupProblem,websiteReader } from './crawl'
 import { BUILT_IN_PAGE_LIMIT } from './website-reader'
+import {auditStatement,requestSource} from '../audit/record'
 export const authoring=new Hono<AppEnv>()
 authoring.use('/:projectId/*',async(c,next)=>{await requireProject(c,c.req.param('projectId'),true);await next()})
 authoring.get('/:projectId/datasets/:datasetId',async c=>{const row=await c.env.DB.prepare('SELECT d.*,(SELECT count(*) FROM knowledge_documents f WHERE f.version_id=d.published_version) page_count FROM knowledge_datasets d WHERE project_id=? AND id=?').bind(c.req.param('projectId'),c.req.param('datasetId')).first();return row?c.json(row):c.json({error:'Not found'},404)})
@@ -27,6 +28,6 @@ authoring.get('/:projectId/website-reader',c=>c.json({...websiteReader(c.env),pr
 
 // What the import needs before it is submitted: names only, never values.
 authoring.get('/:projectId/import/:platform',async c=>{const platform=c.req.param('platform') as ImportPlatform;if(!Object.hasOwn(importSecrets,platform))return c.json({error:'Not found'},404);const missing=missingImportSecrets(c.env,platform);return c.json({secrets:importSecrets[platform].map(name=>({name,set:!missing.includes(name)})),installation:installation(c.env,c.req.url)})})
-authoring.post('/:projectId/import/:platform',async c=>{try{const b=await c.req.json(),platform=c.req.param('platform') as ImportPlatform;if(Object.hasOwn(importSecrets,platform))checkImportSecrets(c.env,platform);return c.json(await queueImport(c.env,c.req.param('projectId'),c.req.param('platform') as ImportPlatform,b.subdomain))}catch(e){if(e instanceof ImportInputError)return c.json({error:e.message,field:e.field},400);return c.json({error:e instanceof Error?e.message:String(e)},502)}})
+authoring.post('/:projectId/import/:platform',async c=>{try{const b=await c.req.json(),platform=c.req.param('platform') as ImportPlatform;if(Object.hasOwn(importSecrets,platform))checkImportSecrets(c.env,platform);const queued=await queueImport(c.env,c.req.param('projectId'),c.req.param('platform') as ImportPlatform,b.subdomain);await auditStatement(c.env.DB,{projectId:c.req.param('projectId'),category:'data',action:'import.started',actor:{type:'user',id:c.get('actor').id},source:requestSource(c),detail:{kind:'articles',platform}}).run();return c.json(queued)}catch(e){if(e instanceof ImportInputError)return c.json({error:e.message,field:e.field},400);return c.json({error:e instanceof Error?e.message:String(e)},502)}})
 
 authoring.get('/:projectId/imports/:importId',async c=>{const row=await c.env.DB.prepare('SELECT * FROM knowledge_imports WHERE id=? AND project_id=?').bind(c.req.param('importId'),c.req.param('projectId')).first();return row?c.json(row):c.json({error:'Not found'},404)})

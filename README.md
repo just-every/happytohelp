@@ -60,8 +60,8 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 [The changelog](CHANGELOG.md) lists every change. Known limits:
 
 - Accessibility is on a confirmed owner **HOLD**; no WCAG conformance is claimed.
-- Backups cover D1 and R2, not **Durable Object** storage, and full
-  portable-storage fidelity is not established.
+- `rer export` archives cover D1, R2 and **Durable Object** storage (with a
+  digest); full Base-data equivalence is not yet established.
 - Hosted operating costs are **unmeasured**; timed activation and paid-provider
   execution are not qualified.
 - Imports and connections are qualified with **synthetic fixtures** only, without
@@ -75,21 +75,20 @@ an existing 0.3 installation follows [Upgrading from 0.3.x](OPERATIONS.md#upgrad
 The [install and run guide](https://happytohelp.com/docs/install) covers
 installation, local sign-in and stopping the app, step by step.
 
-You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
-if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
-or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
-on macOS). The global `rer` command itself needs that Node. It then provisions the
-checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
+Start it with one line. You need **Node.js 22 or later** (with npm) and Git; check
+with `node --version`.
 
 ```sh
-npm install -g @runeditrun/rer@0.2.25
-git clone https://github.com/just-every/run-happytohelp
-cd run-happytohelp
-rer install
-rer dev
+npx -y @runeditrun/rer dev just-every/run-happytohelp
 ```
 
-`rer install` also downloads Chromium (about 280 MB, into your user cache) the
+That clones HappyToHelp into `run-happytohelp`, provisions the checkout's own pinned
+Node and pnpm, installs dependencies, sets up a local owner and starts the app. To
+set it up without starting it, use `npx -y @runeditrun/rer setup just-every/run-happytohelp`.
+Without Node, `curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-happytohelp`
+brings its own. To start it again later, run `cd run-happytohelp && rer dev`.
+
+The install also downloads Chromium (about 280 MB, into your user cache) the
 first time: `rer verify` and the browser checks run in it. Dev uses its local
 address for the chat widget and generates a private owner password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the
 real local owner and reach **Setup**. No private answers, email service or AI

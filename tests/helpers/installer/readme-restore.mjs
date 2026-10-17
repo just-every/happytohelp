@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,copyFile,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-import {randomBytes,randomUUID} from 'node:crypto';
+import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {processRun,command,serve} from '../../first-run/cli-kit.mjs';
 import {signIn,beforeHydration} from '../../first-run/cli-sign-in.mjs';
 import {freePort,post} from '../../first-run/browser-kit.mjs';
 import {launchBrowser} from '../../journeys/kit/browser.mjs';
 
-// The README clone-and-restore journey: setup twice, owner entry at 1440/390, D1/R2 round trip into a fresh clone, reset.
+// The README clone-and-restore journey: setup twice, owner entry at 1440/390, D1/R2/Durable Object round trip into a fresh clone, reset.
 export async function readmeRestoreJourney(){
 const source=resolve(import.meta.dirname,'../../..'),directory=await mkdtemp(join(tmpdir(),'h2h-cli-journey-'));
 const evidence=resolve(process.env.H2H_EVIDENCE_DIR||'test-results/base-command');await mkdir(evidence,{recursive:true});
@@ -51,6 +51,9 @@ try{
  const uploaded=await fetch(origin+`/api/conversations/${conversation.id}/media`,{method:'POST',headers:{Authorization:'Bearer '+logged.token,Origin:origin,'X-Filename':'proof.txt','Content-Type':'text/plain'},body:bytes});assert.equal(uploaded.status,201);const media=await uploaded.json();
  await command(root,['reset','--yes','--non-interactive'],env,4);await runtime.close();runtime=null;
  await command(root,['export','--output','exports/support.jsonl','--non-interactive'],env);const records=(await readFile(join(root,'exports/support.jsonl'),'utf8')).trim().split('\n').map(JSON.parse);const manifest=records[0];assert.equal(manifest.objects.length,1);assert.ok(!JSON.stringify(records).includes(password),'entered private password is not archived');assert.ok(!JSON.stringify(records).includes(grant.token)&&!JSON.stringify(records).includes(destination.secret),'external grants and receiver credentials are not archived');
+ // Durable Object storage travels in the archive with its schema and digest: the socket class keeps no records.
+ const durable=records.flatMap(record=>record.items??[]).filter(item=>item.kind==='row'&&item.table==='durable_object_snapshots').map(item=>item.row);
+ assert.deepEqual(durable.map(row=>[row.namespace,row.class_name,row.schema,row.records,row.digest]),[['CONVERSATIONS','ConversationSocket','happytohelp.durable-objects/1',0,createHash('sha256').update('{"className":"ConversationSocket","namespace":"CONVERSATIONS","records":[]}').digest('hex')]]);
  const target=await fresh('restored');await mkdir(join(target,'exports'));await copyFile(join(root,'exports/support.jsonl'),join(target,'exports/support.jsonl'));
  await command(target,['import','--input','exports/support.jsonl','--non-interactive'],env,4);
  await command(target,['import','--input','exports/support.jsonl','--yes','--non-interactive'],env);

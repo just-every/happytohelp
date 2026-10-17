@@ -4,6 +4,8 @@ import {spawnSync} from 'node:child_process'
 import {readFile} from 'node:fs/promises'
 import {randomBytes} from 'node:crypto'
 import {startApp,sha} from './kit/app.mjs'
+import {twoFactorJourney} from '../helpers/identity/two-factor.mjs'
+import {rolesAuditJourney} from '../helpers/identity/roles-audit.mjs'
 
 const ownerSetupTables=['owner_setup','users','projects','project_settings','user_settings','user_project_preferences','memberships','credentials','sessions']
 const migrationStatements=async name=>{const source=(await readFile('migrations/'+name,'utf8')).replace(/^\s*--[^\n]*$/gm,'');return [...source.matchAll(/\s*(CREATE TRIGGER[\s\S]*?END;|[^;]+;)/g)].map(match=>match[1]).filter(sql=>sql.trim()!==';')}
@@ -365,3 +367,6 @@ test('magic sign-in refuses removed members, deleted workspaces, changed emails,
   assert.ok((await app.first("SELECT consumed_at FROM magic_signins WHERE user_id='owner-deferred'")).consumed_at,'an uncertain capability is spent, never resent')
  }finally{await app.close()}
 })
+
+test('two-factor sign-in: TOTP with recovery codes, a role policy that forces enrolment and ends unproven sessions, refused and rate-limited answers, step-up for exports, owner reset and installation-key owner recovery, all audited',twoFactorJourney)
+test('roles and the security log: a collaborator notes and follows but cannot reply, assign, erase or export; a restricted custom role cannot publish or export; role changes step up; the log is append-only with retention and legal holds',rolesAuditJourney)

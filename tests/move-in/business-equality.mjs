@@ -7,7 +7,7 @@ import {isSearchShadow} from '../helpers/search-index.mjs';
 // SQLite-proven FTS shadow pages are retained raw and content-validated; the
 // virtual index projection and every authoritative message row still compare.
 const excluded=new Set([
- '_cf_METADATA','sqlite_sequence','abuse_counters','management_audit','native_integration_audit',
+ '_cf_METADATA','sqlite_sequence','abuse_counters','management_audit','native_integration_audit','audit_events',
  'ik_jobs','ik_original_sets','ik_originals','ik_sources','ik_provenance','ik_stages','ik_batches','ik_targets',
  'ik_d1_plan_chunks','ik_d1_original_chunks','ik_d1_history','ik_d1_entries','ik_d1_assertions',
  'ik_d1_creation_plans','ik_d1_reversal_reports',

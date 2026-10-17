@@ -94,9 +94,11 @@ installation. See [recording instructions](tests/live/RECORDING.md) and
 [configured cited-answer proof](tests/live/README.md). Hosted operating costs
 and paid model execution remain unmeasured; unknown billing is never zero.
 
-Full portable-storage fidelity remains held. D1/R2 archives omit Durable Object
-storage, and the resizable ArrayBuffer/length-tracking preservation obligation
-remains unresolved. No local archive result waives that hold.
+Full portable-storage fidelity remains held for Base-data equivalence: the
+resizable ArrayBuffer/length-tracking preservation obligation remains unresolved.
+Local `rer export` archives now carry Durable Object storage in
+`durable_object_snapshots` with schema and digest (scripts/installer/durable-objects.mjs).
+No local archive result waives the remaining hold.
 
 ## Maintenance and prior-data custody
 

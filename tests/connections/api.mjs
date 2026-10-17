@@ -4,6 +4,10 @@ const settings='/api/management/projects/p/connections';
 test('current native admins manage workspace credentials while operators cannot create or inspect them',async()=>{
  const h=await harness();try{
   for(const role of ['admin','operator']){await h.db.prepare('INSERT INTO users VALUES(?,?,?,1)').bind(role,role+'@example.test',role).run();await h.db.prepare('INSERT INTO memberships VALUES(?,?,?)').bind('p',role,role).run();await h.session(role,'p',role,role)}
+  // Installing a credential needs a recent step-up: a sign-in older than 15 minutes is asked again.
+  await h.db.prepare('UPDATE session_factors SET verified_at=? WHERE token_hash=?').bind(Date.now()-20*60000,sha(h.sessionToken('admin'))).run()
+  const stale=await h.raw(settings+'/tokens',{actor:'admin',...body({name:'Admin grant',scopes:allScopes})});assert.equal(stale.status,403);assert.equal((await stale.json()).code,'step_up_required')
+  await h.db.prepare('UPDATE session_factors SET verified_at=? WHERE token_hash=?').bind(Date.now(),sha(h.sessionToken('admin'))).run()
   const issued=await h.call(settings+'/tokens',{actor:'admin',...body({name:'Admin grant',scopes:allScopes,expires_at:new Date(Date.now()+60000).toISOString()})});assert.deepEqual(issued.data.scopes,[...allScopes].sort());assert.ok(issued.data.expiresAt);
   assert.equal((await h.raw('/api/v1/contacts',{token:issued.token})).status,200);assert.equal((await h.call(settings+'/tokens',{actor:'admin'})).data.length,1);
   for(const kind of ['tokens','webhooks','slack','deliveries'])assert.equal((await h.raw(settings+'/'+kind,{actor:'operator'})).status,403);assert.equal((await h.raw(settings+'/tokens',{actor:'operator',...body({name:'Forbidden',scopes:['contacts:read']})})).status,403);

@@ -98,6 +98,9 @@ export async function createNativeOwner(c: Context<AppEnv>, body: Record<string,
   c.env.DB.prepare(`INSERT INTO credentials(user_id,password_hash,updated_at) SELECT ?,?,? WHERE ${guard}`).bind(userId,password,now,userId),
   c.env.DB.prepare(`INSERT INTO memberships SELECT ?,?,'owner' WHERE ${guard}`).bind(projectId,userId,userId),
   c.env.DB.prepare(`INSERT INTO sessions SELECT ?,?,?,'owner',NULL,?,NULL WHERE ${guard}`).bind(await hashToken(token),userId,projectId,now+86400000,userId),
+  // The owner has just set the password: this session starts with a recent step-up.
+  c.env.DB.prepare(`INSERT INTO session_factors(token_hash,user_id,method,verified_at) SELECT ?,?,'password',? WHERE ${guard}`).bind(await hashToken(token),userId,now,userId),
+  c.env.DB.prepare(`INSERT INTO audit_events(id,project_id,at,category,action,outcome,actor_type,actor_id,source,target_type,target_id,detail_json) SELECT ?,?,?,'access','owner.created','succeeded','user',?,'dashboard','member',?,'{}' WHERE ${guard}`).bind(crypto.randomUUID(),projectId,now,userId,userId,userId),
   ...defaults.statements,
  ])
  if (!results[0].meta.changes) throw new HTTPException(409, {message: 'Owner setup is already complete. Sign in with your existing account.'})

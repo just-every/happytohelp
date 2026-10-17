@@ -107,6 +107,11 @@
           "slug": "connected-applications",
           "source": "docs/connected-applications.md",
           "label": "Connected applications"
+        },
+        {
+          "slug": "account-security",
+          "source": "docs/account-security.md",
+          "label": "Account security"
         }
       ]
     },

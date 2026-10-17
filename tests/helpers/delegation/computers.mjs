@@ -8,7 +8,7 @@ export async function computersApp({operators=['u'],conversations=['c']}={}){
  const tokens=operators.map((_,index)=>index?'operator'+(index+1):'operator')
  await db.batch([
   db.prepare("INSERT INTO projects(id,name,widget_key,allowed_origin,created_at) VALUES('p','Project','widget','http://localhost',1)"),
-  ...operators.flatMap((user,index)=>[db.prepare("INSERT INTO users VALUES(?,?,'Operator',1)").bind(user,user+'@example.test'),db.prepare("INSERT INTO memberships VALUES('p',?,'owner')").bind(user),db.prepare("INSERT INTO sessions VALUES(?,?,'p','owner',NULL,?,NULL)").bind(sha(tokens[index]),user,now+1000000)]),
+  ...operators.flatMap((user,index)=>[db.prepare("INSERT INTO users VALUES(?,?,'Operator',1)").bind(user,user+'@example.test'),db.prepare("INSERT INTO memberships VALUES('p',?,'owner')").bind(user),db.prepare("INSERT INTO sessions VALUES(?,?,'p','owner',NULL,?,NULL)").bind(sha(tokens[index]),user,now+1000000),db.prepare("INSERT INTO session_factors VALUES(?,?,'password',?)").bind(sha(tokens[index]),user,Date.now())]),
   db.prepare("INSERT INTO contacts(id,project_id,name,email,external_id,created_at) VALUES('contact','p','Customer','c@example.test',NULL,1)"),
   ...conversations.map(id=>db.prepare("INSERT INTO conversations(id,project_id,contact_id,revision,created_at,updated_at) VALUES(?,'p','contact',0,1,1)").bind(id)),
  ])

@@ -14,6 +14,9 @@ import {appearanceSettings} from './appearance-settings'
 import {workspaceDefaults} from './provisioning/index'
 import {notificationPreference} from './member-updates'
 import {websiteAddress} from './website-address'
+import {requireStepUp} from '../identity/two-factor/step-up'
+import {auditStatement,requestSource} from '../audit/record'
+import {projectAccess} from '../access/catalogue'
 export const projects=new Hono<AppEnv>()
 projects.get('/bootstrap',async c=>{
  const actor=await requireActor(c)
@@ -28,8 +31,8 @@ projects.get('/bootstrap',async c=>{
  // The actor is already authenticated. Select every workspace's related rows in
  // one round trip instead of authenticating again and reading three times per workspace.
  const [data,platformAdmin]=await Promise.all([c.env.DB.batch<any>([
-  c.env.DB.prepare('SELECT p.id,p.name,p.widget_key,p.allowed_origin,p.created_at,ps.settings_json,m.role,coalesce(pref.is_primary,0) is_primary FROM projects p LEFT JOIN project_settings ps ON ps.project_id=p.id JOIN memberships m ON m.project_id=p.id LEFT JOIN user_project_preferences pref ON pref.project_id=p.id AND pref.user_id=m.user_id WHERE m.user_id=?').bind(actor.id),
-  c.env.DB.prepare('SELECT m.project_id hydration_project_id,u.id,u.name,u.email,m.role,s.avatar_url FROM users u JOIN memberships m ON m.user_id=u.id LEFT JOIN user_settings s ON s.user_id=u.id WHERE EXISTS(SELECT 1 FROM memberships mine WHERE mine.project_id=m.project_id AND mine.user_id=?)').bind(actor.id),
+  c.env.DB.prepare('SELECT p.id,p.name,p.widget_key,p.allowed_origin,p.created_at,ps.settings_json,m.role,coalesce(pref.is_primary,0) is_primary,mr.role_key access_key,pr.name access_name,pr.base access_base,pr.permissions_json access_permissions FROM projects p LEFT JOIN project_settings ps ON ps.project_id=p.id JOIN memberships m ON m.project_id=p.id LEFT JOIN user_project_preferences pref ON pref.project_id=p.id AND pref.user_id=m.user_id LEFT JOIN member_roles mr ON mr.project_id=p.id AND mr.user_id=m.user_id LEFT JOIN project_roles pr ON pr.id=mr.role_key AND pr.project_id=p.id WHERE m.user_id=?').bind(actor.id),
+  c.env.DB.prepare('SELECT m.project_id hydration_project_id,u.id,u.name,u.email,m.role,s.avatar_url,mr.role_key access_role FROM users u JOIN memberships m ON m.user_id=u.id LEFT JOIN user_settings s ON s.user_id=u.id LEFT JOIN member_roles mr ON mr.project_id=m.project_id AND mr.user_id=m.user_id WHERE EXISTS(SELECT 1 FROM memberships mine WHERE mine.project_id=m.project_id AND mine.user_id=?)').bind(actor.id),
   c.env.DB.prepare('SELECT a.* FROM ai_profiles a WHERE EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=a.project_id AND m.user_id=?)').bind(actor.id),
   c.env.DB.prepare('SELECT p.* FROM plugins p WHERE EXISTS(SELECT 1 FROM memberships m WHERE m.project_id=p.project_id AND m.user_id=?) ORDER BY p.sort_order,p.id').bind(actor.id),
   c.env.DB.prepare('SELECT u.id,u.name,u.email,s.avatar_url FROM users u LEFT JOIN user_settings s ON s.user_id=u.id WHERE u.id=?').bind(actor.id)
@@ -37,10 +40,10 @@ projects.get('/bootstrap',async c=>{
  const map:Record<string,any>={}
  const projectId=c.req.param('projectId')||c.req.query('projectId')||actor.projectId
  for(const p of data[0].results){
-  const {settings_json,...summary}=p,appearance=JSON.parse(String(settings_json||'{}'))
+  const {settings_json,access_key,access_name,access_base,access_permissions,...summary}=p,appearance=JSON.parse(String(settings_json||'{}'))
   // Preserve scope()'s current-workspace denial, including a deleted workspace.
   if(p.id===projectId&&appearance.deleted_at!=null)throw new HTTPException(403,{message:'Project not found, or you do not have access to it'})
-  map[String(p.id)]={...summary,is_demo:appearance.is_demo===true,sidebar_artwork_url:artworkUrl(String(p.id),appearance.sidebar_artwork_id),sidebar_artwork_enabled:appearance.sidebar_artwork_enabled===true,primary_color:appearance.primary_color||null,display_mode:appearance.display_mode||null,brand_image_url:appearance.brand_image_url||null,avatar_url:appearance.avatar_url||null,agents:[],ais:[],plugins:[]}
+  map[String(p.id)]={...summary,access:projectAccess(p.role,access_key,access_name,access_base,access_permissions),is_demo:appearance.is_demo===true,sidebar_artwork_url:artworkUrl(String(p.id),appearance.sidebar_artwork_id),sidebar_artwork_enabled:appearance.sidebar_artwork_enabled===true,primary_color:appearance.primary_color||null,display_mode:appearance.display_mode||null,brand_image_url:appearance.brand_image_url||null,avatar_url:appearance.avatar_url||null,agents:[],ais:[],plugins:[]}
  }
  const project=map[projectId]
  if(!project)throw new HTTPException(403,{message:'Project not found, or you do not have access to it'})
@@ -82,7 +85,10 @@ projects.put('/profile',async c=>{const a=await scope(c),b=await c.req.json(),ol
 projects.delete('/projects/:projectId',async c=>{
  const a=await scope(c,true)
  if(a.role!=='owner')throw new HTTPException(403)
+ await requireStepUp(c,a,'project.delete')
  const now=Date.now()
+ // Recorded before the workspace closes: its log outlives it.
+ await auditStatement(c.env.DB,{projectId:a.projectId,category:'data',action:'project.deleted',actor:{type:'user',id:a.id},source:requestSource(c)},now).run()
  const archiveSettings=c.env.DB.prepare(`
    INSERT INTO project_settings(project_id,settings_json,updated_at)
    SELECT

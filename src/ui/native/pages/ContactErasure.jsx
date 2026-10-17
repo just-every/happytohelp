@@ -1,4 +1,5 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
+import './security/security.css';
 import {nativeRequest} from '../transport';
 import {Section} from './forms';
 import {useConfirmation} from './ConfirmDialog';
@@ -22,6 +23,22 @@ export default function ContactErasure({projectId,contact,onErased}) {
  </Section>{dialog}</div>;
 }
 
-export function ContactErased({contact}) {
- return <div className="contact-profile"><div role="status" className="alert alert-secondary"><strong>Personal data erased.</strong> This contact was erased on {new Date(contact.erased_at).toLocaleString()}. Their conversations remain with message content and attachments removed.</div><details className="mb-4"><summary>Record details</summary><dl className="contact-facts"><div><dt>ID</dt><dd>{contact.id}</dd></div></dl></details></div>;
+const STORES=[['conversations','Conversations redacted'],['messages','Messages erased'],['attachments','Attachments deleted'],['tracked_events','Tracked visits and actions'],['context_records','Customer context records'],['sessions','Widget sessions ended']];
+const STATES={completed:'Deleted by provider',pending:'Request sent, waiting',failed:'Request failed',unsupported:'Provider cannot delete'};
+const PROVIDERS={webhook:'Webhook',slack:'Slack',email_provider:'Email provider',ai_provider:'AI provider',local_computers:'Paired computers'};
+
+/** What erasure removed here, store by store, and what each connected provider was asked to delete. */
+export function ContactErased({projectId,contact}) {
+ const [record,setRecord]=useState(null);
+ useEffect(()=>{if(projectId)nativeRequest(`/api/management/projects/${encodeURIComponent(projectId)}/contacts/${encodeURIComponent(contact.id)}/erasure`).then(r=>setRecord(r.data)).catch(()=>setRecord(null));},[projectId,contact.id]);
+ const counts=record?.providers?.counts;
+ return <div className="contact-profile"><div role="status" className="alert alert-secondary"><strong>Personal data erased.</strong> This contact was erased on {new Date(contact.erased_at).toLocaleString()}. Their conversations remain with message content and attachments removed.</div>
+  {record&&<Section title="Erasure record" description={`Run ${record.runs} time${record.runs===1?'':'s'}. Counts are what this installation removed; nothing already sent can be recalled.`}>
+   <dl className="contact-facts erasure-stores">{STORES.map(([key,label])=><div key={key}><dt>{label}</dt><dd>{record[key]}</dd></div>)}</dl>
+   <h3 className="h6 mt-3">Connected providers</h3>
+   {record.providers.requests.length===0?<p className="settings-note">No connected provider held this contact’s data.</p>:<>
+    <p className="settings-note">{counts.completed} deleted · {counts.pending} waiting · {counts.failed} failed · {counts.unsupported} cannot delete</p>
+    <ul className="erasure-providers">{record.providers.requests.map(item=><li key={item.id}><strong>{PROVIDERS[item.store]||item.store}</strong> <span className={`security-badge security-badge--${item.state==='completed'?'succeeded':item.state==='failed'?'failed':'held'}`}>{STATES[item.state]}</span><br/><small>{item.detail}</small></li>)}</ul></>}
+  </Section>}
+  <details className="mb-4"><summary>Record details</summary><dl className="contact-facts"><div><dt>ID</dt><dd>{contact.id}</dd></div></dl></details></div>;
 }

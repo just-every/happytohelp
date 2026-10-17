@@ -1,18 +1,17 @@
 # Run it on your computer
 
-You need **Node.js 22 or later** (with npm) and Git. Check with `node --version`;
-if it is older or missing, install Node 22 from [nodejs.org](https://nodejs.org/en/download),
-or with a version manager (`nvm install 22`, `fnm install 22`, or `brew install node@22`
-on macOS). The global `rer` command itself needs that Node. It then provisions the
-checkout's own pinned Node and pnpm. Install dependencies, then start local setup:
+Start it with one line. You need **Node.js 22 or later** (with npm) and Git; check
+with `node --version`.
 
 ```sh
-npm install -g @runeditrun/rer@0.2.25
-git clone https://github.com/just-every/run-happytohelp
-cd run-happytohelp
-rer install
-rer dev
+npx -y @runeditrun/rer dev just-every/run-happytohelp
 ```
+
+That clones HappyToHelp into `run-happytohelp`, provisions the checkout's own pinned
+Node and pnpm, installs dependencies, sets up a local owner and starts the app. To
+set it up without starting it, use `npx -y @runeditrun/rer setup just-every/run-happytohelp`.
+Without Node, `curl -fsSL https://runeditrun.com/install.sh | sh -s -- dev just-every/run-happytohelp`
+brings its own. To start it again later, run `cd run-happytohelp && rer dev`.
 
 Dev uses its local address for the chat widget and generates a private owner
 password. Wait for `RER_READY`, then open the `RER_OPEN` address to enter as the

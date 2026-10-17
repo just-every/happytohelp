@@ -62,3 +62,25 @@ signed metadata fields keep their existing replacement semantics.
 `tests/journeys/first-run.mjs` covers actual HMAC admission through collector
 writes and repeated sessions, profile readback, unsigned controls, owner edits,
 erasure and write races.
+
+## Two-factor sign-in (`two-factor/`)
+
+Native accounts add TOTP authenticator apps (`totp.ts`, RFC 6238; the key is sealed
+with `INTEGRATION_ENCRYPTION_KEY`) and WebAuthn passkeys or security keys
+(`webauthn.ts`, attestation "none", ES256/RS256, sign-count checked), with ten
+single-use recovery codes stored as hashes (`recovery-codes.ts`). A password or
+email-link sign-in creates the session; `session_factors` records what it has
+proven. `src/platform/auth.ts` lets a session that still owes its factor
+(`verify`), or that a workspace policy requires to enrol (`enrol`), reach only the
+two-factor doors. `factors.ts` refuses wrong, replayed (one use per time step) and
+spent answers, limits them to five per fifteen minutes and audits each refusal.
+
+`step-up.ts` guards exports, erasure, role changes, credential installs, workspace
+deletion and the policy: the second factor within 15 minutes, or the password for
+an account without one; the local `rer dev` entry is installation custody.
+`policy-routes.ts` holds Settings → Security (policy by role, ending unproven
+sessions) and the owner's reset of a teammate (own recent factor, email, audit).
+`owner-recovery.ts` is the installation-level owner recovery: the owner's password
+plus `H2H_OWNER_RECOVERY_KEY` (set through `rer deploy --set-secret`, or the local
+`.dev.vars`), each value once. Tests: `tests/journeys/identity.mjs`,
+`tests/journeys/identity-browser.mjs`.

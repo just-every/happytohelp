@@ -15,7 +15,10 @@ const {hashToken}=await import('../../src/platform/auth.ts')
 
 // Contact erasure through the real application router on real D1 and R2 with every migration applied.
 let app,DB,FILES,env
-setup(async()=>{app=await startApp();DB=app.db;FILES=await app.files;env={DB,FILES}})
+// The only network is a connected webhook, which answers the erasure's deletion request.
+const deletionRequests=[]
+const webhook=async(request,entry)=>{if(new URL(request.url).host!=='hooks.crm-example.com')throw new Error('Unexpected outbound request: '+request.url);deletionRequests.push(JSON.parse(entry.body));return new Response('ok')}
+setup(async()=>{app=await startApp({outbound:webhook,bindings:{INTEGRATION_ENCRYPTION_KEY:Buffer.alloc(32,7).toString('base64')}});DB=app.db;FILES=await app.files;env={DB,FILES}})
 teardown(async()=>{await app?.close()})
 const routes='/api/management',dashboardRoutes='/api/dashboard',conversationRoutes='/api/conversations'
 const steps=[]
@@ -77,7 +80,7 @@ async function seed(){
  ]
  await DB.batch(rows.map(sql=>DB.prepare(sql)))
  const tokens={}
- for(const [name,actor,project,role,contact] of [['owner','owner','p','owner',null],['admin','admin','p','admin',null],['operator','operator','p','operator',null],['qOwner','q-owner','q','owner',null],['contact','ct','p','contact','ct'],['contact2','ct','p','contact','ct'],['otherContact','other','p','contact','other']]){tokens[name]='token-'+name;await DB.prepare('INSERT INTO sessions VALUES(?,?,?,?,?,?,NULL)').bind(await hashToken(tokens[name]),actor,project,role,contact,now*2).run()}
+ for(const [name,actor,project,role,contact] of [['owner','owner','p','owner',null],['admin','admin','p','admin',null],['operator','operator','p','operator',null],['qOwner','q-owner','q','owner',null],['contact','ct','p','contact','ct'],['contact2','ct','p','contact','ct'],['otherContact','other','p','contact','other']]){tokens[name]='token-'+name;await DB.prepare('INSERT INTO sessions VALUES(?,?,?,?,?,?,NULL)').bind(await hashToken(tokens[name]),actor,project,role,contact,now*2).run();if(!contact)await DB.prepare("INSERT INTO session_factors VALUES(?,?,'password',?)").bind(await hashToken(tokens[name]),actor,Date.now()).run()}
  for(const [key,value] of Object.entries(objects))await FILES.put(key,value)
  return tokens
 }
@@ -162,9 +165,19 @@ step('only owners and admins of the contact project can erase it',async()=>{
 })
 
 let first,opAfter
-step('admin erasure removes the contact personal data from D1 and R2',async()=>{
+step('admin erasure removes the contact personal data from D1 and R2, then asks each connected provider to delete its copy',async()=>{
+ const hook=await call(routes,'/projects/p/connections/webhooks',tokens.owner,'POST',{name:'CRM',url:'https://hooks.crm-example.com/erasure',events:['conversation.created']});assert.equal(hook.status,201)
+ const destination=(await hook.json()).id
  const response=await erase(tokens.admin);assert.equal(response.status,200)
  first=(await response.json()).data
+ assert.deepEqual(first.providers.requests.map(r=>[r.store,r.state]),[['ai_provider','unsupported'],['local_computers','unsupported'],['webhook','pending']])
+ assert.deepEqual(first.providers.counts,{completed:0,pending:1,failed:0,unsupported:2})
+ // A destination test dispatches the workspace's queue: the deletion request goes out signed, with ids only.
+ assert.equal((await call(routes,`/projects/p/connections/webhooks/${destination}/test`,tokens.owner,'POST')).status,202)
+ const request=deletionRequests.find(body=>body.event==='contact.erased');assert.deepEqual(request.data,{contact_id:'ct',external_id:'crm-alice'})
+ const settled=(await(await call(routes,'/projects/p/contacts/ct/erasure',tokens.admin)).json()).data.providers
+ assert.deepEqual(settled.counts,{completed:1,pending:0,failed:0,unsupported:2})
+ assert.equal((await one("SELECT count(*) n FROM audit_events WHERE action='contact.erased' AND target_id='ct'")).n,1)
  assert.equal(first.erased_by,'admin');assert.equal(first.runs,1);assert.equal(first.erased_at,first.last_erased_at)
  assert.deepEqual({conversations:first.conversations,messages:first.messages,attachments:first.attachments,tracked_events:first.tracked_events,context_records:first.context_records,sessions:first.sessions},{conversations:2,messages:4,attachments:3,tracked_events:2,context_records:7,sessions:2})
  const erased=await erasedScope()
@@ -231,14 +244,18 @@ step('repeated erasure is idempotent and records the new run',async()=>{
  const second=(await response.json()).data
  assert.equal(second.erased_at,first.erased_at);assert.equal(second.erased_by,'admin');assert.equal(second.runs,2);assert.ok(second.last_erased_at>=first.last_erased_at)
  // The operator message written after the first erasure belongs to the erased conversation.
- assert.deepEqual({...second,runs:1,last_erased_at:first.last_erased_at,messages:second.messages-1,tracked_events:second.tracked_events-followupHistory.length},first)
+ // A repeat asks the connected webhook again; the latest request replaces the settled one.
+ assert.deepEqual(second.providers.counts,{completed:0,pending:1,failed:0,unsupported:2})
+ const {providers:secondProviders,...secondRecord}=second,{providers:firstProviders,...firstRecord}=first
+ assert.deepEqual({...secondRecord,runs:1,last_erased_at:first.last_erased_at,messages:second.messages-1,tracked_events:second.tracked_events-followupHistory.length},firstRecord)
  const again=await erasedScope()
  assert.deepEqual(await one('SELECT content,local_id FROM messages WHERE id=?',opAfter),{content:'',local_id:'erased:'+opAfter})
  assert.deepEqual({...again,messages:again.messages.filter(m=>m.id!==opAfter)},{...state,messages:state.messages.filter(m=>m.id!==opAfter),context:{...state.context,context_tracked_events:state.context.context_tracked_events-followupHistory.length}})
  assert.deepEqual(await all("SELECT type,payload FROM context_tracked_events WHERE project_id='p' AND subject_id='ct'"),[],'repeat erasure removes the new handoff observation too')
  assert.deepEqual(await outsideScope(),outside)
  const third=(await(await erase(tokens.owner)).json()).data
- assert.deepEqual({...third,runs:2,last_erased_at:second.last_erased_at},second)
+ const {providers:thirdProviders,...thirdRecord}=third
+ assert.deepEqual({...thirdRecord,runs:2,last_erased_at:second.last_erased_at},secondRecord)
  assert.deepEqual(await erasedScope(),again)
 })
 

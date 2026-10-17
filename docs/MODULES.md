@@ -18,7 +18,7 @@ routes additionally use `src/platform` identity, environment and D1 contracts.
 | `src/modules/plugin-sdk` | plugin UI message contract, host bridge and policy; consumer owns allowed plugin origins | standalone SDK tests; no provider or conversation database dependency |
 | `src/modules/site-preview` | isolated preview proxy, project-scoped temporary grant, asset handling and request bounds; consumer supplies auth/origin policy | 0096 migration and preview tests; separate preview origin required |
 
-The remaining identity, management, email/integration, public-site,
+The remaining identity (including `src/modules/identity/two-factor`), access (roles), audit (security log), management, email/integration, public-site,
 legacy-import, dashboard and bootstrapping paths are edition integration. They
 remain editable source and can be extracted later when a real second use
 establishes a useful boundary. The public-site integration serves dynamic

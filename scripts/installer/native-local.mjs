@@ -6,7 +6,7 @@ import {selectLocalState} from '@runeditrun/rer/local/state';
 import {readSettings} from '@runeditrun/rer/adapter-settings';
 import {writePrivateFile} from '@runeditrun/rer/private-files';
 
-const generatedTokenEnvironment='INBOUND_EMAIL_TOKEN';
+const generatedTokens=['INBOUND_EMAIL_TOKEN','H2H_OWNER_RECOVERY_KEY'];
 export async function localInputDefaults(root){
  const defaults={target:'local',EMAIL_PROVIDER:'later'};
  // Rer fills localDefault before reading entered secrets from the environment.
@@ -22,14 +22,18 @@ function refuseUnchosenAiKeys(context){
   if(field.kind==='secret'&&field.when?.field==='AI_PROVIDER'&&field.when.equals!==chosen&&context.input[field.name])
    throw Error(`${field.name} was supplied but the AI service answer is ${chosen}. Remove the key or choose its provider.`);
 }
-// Base keeps an existing .dev.vars as it is, so a checkout set up before the token existed never gets one from the
-// manifest. Append only the missing generated token; every other byte and secret stays as it was.
-async function addMissingToken(context,saved){
- if(saved.text===undefined||Object.hasOwn(saved.values,generatedTokenEnvironment))return;
- const field=context.manifest?.fields.find(item=>item.name===generatedTokenEnvironment);
- const value=randomBytes(32).toString(field?.generate??'hex');
- context.store?.addSecrets?.([value]);
- await writePrivateFile(saved.path,saved.text.replace(/\n*$/,'\n')+`${generatedTokenEnvironment}=${value}\n`);
+// Base keeps an existing .dev.vars as it is, so a checkout set up before a token existed never gets one from the
+// manifest. Append only the missing generated tokens; every other byte and secret stays as it was.
+async function addMissingTokens(context,saved){
+ const missing=saved.text===undefined?[]:generatedTokens.filter(name=>!Object.hasOwn(saved.values,name));
+ if(!missing.length)return;
+ const lines=missing.map(name=>{
+  const field=context.manifest?.fields.find(item=>item.name===name);
+  const value=randomBytes(32).toString(field?.generate??'hex');
+  context.store?.addSecrets?.([value]);
+  return `${name}=${value}\n`;
+ });
+ await writePrivateFile(saved.path,saved.text.replace(/\n*$/,'\n')+lines.join(''));
 }
 
 export async function prepareNativeLocal(context){
@@ -41,7 +45,7 @@ export async function prepareNativeLocal(context){
  if(context.input.EMAIL_PROVIDER&&!['later','development'].includes(context.input.EMAIL_PROVIDER))throw Error('Local command setup suppresses email during development. Configure remote mail in the installed workspace.');
  context.input.EMAIL_PROVIDER='development';
  refuseUnchosenAiKeys(context);
- await addMissingToken(context,saved);
+ await addMissingTokens(context,saved);
 }
 export async function nativeOwner(context){
  const request=(path,body)=>fetch(context.origin+path,{...(body?{method:'POST',headers:{Origin:context.origin,'Content-Type':'application/json'},body:JSON.stringify(body)}:{}),signal:context.signal});

@@ -138,14 +138,17 @@ export function omitSupportCredentials(table,column,value,onOmit){
 // collects these values first; length matches the secret scan's searched values.
 // Each 16+ character run of letters and digits inside a removed value is indexed as
 // well, so a key removed inside a longer value is removed when it recurs alone.
-// All-lowercase words (slugs, host names) and bare numbers are not secrets on their own.
+// All-lowercase words (slugs, host names) and bare numbers are not secrets on their own,
+// and neither is a removed value made only of words ("unbelievable!", "billing_id"): it is
+// removed where it was found, but its repeats elsewhere are ordinary text.
 export const repeatedCredentialMinimum=12;
 const tokenCharacter=/[A-Za-z0-9+/_=-]/;
+const wordsOnly=value=>/^[A-Za-z][a-z]*(?:[_.-](?:[A-Za-z][a-z]*|\d{1,2}))*[!?.,;:]*$/.test(value);
 export function knownCredentials(secrets){
  // Index both stored forms by a fixed-length prefix: one linear pass per string.
  const forms=new Map();
  const values=new Set();
- for(const secret of secrets){values.add(secret);for(const token of secret.match(/[A-Za-z0-9]{16,}/g)||[])if(/[A-Za-z]/.test(token)&&/[^a-z]/.test(token))values.add(token);}
+ for(const secret of secrets){if(!wordsOnly(secret))values.add(secret);for(const token of secret.match(/[A-Za-z0-9]{16,}/g)||[])if(/[A-Za-z]/.test(token)&&/[^a-z]/.test(token))values.add(token);}
  for(const secret of values)if(secret.length>=repeatedCredentialMinimum)for(const form of new Set([secret,JSON.stringify(secret).slice(1,-1)])){
   const key=form.slice(0,repeatedCredentialMinimum);if(!forms.has(key))forms.set(key,[]);forms.get(key).push(form);
  }

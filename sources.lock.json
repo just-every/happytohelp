@@ -2301,7 +2301,7 @@
       "executable": false
     },
     "scripts/build.mjs": {
-      "sha256": "d77a09affe2affaca32fb483b349b55aae3aea2a2e120826db83de0c16ac5b6c",
+      "sha256": "b6057164f2cc0442f84bf73e6997895e5e8cae582f0cc0bea454016b74fe14df",
       "executable": false
     },
     "scripts/ci/run-checks.mjs": {
@@ -2406,6 +2406,10 @@
     },
     "scripts/delivery/base/sql-statements.mjs": {
       "sha256": "8819f7f91b7781905796ea35b01dd1a55e08ed3893ff6d8aafaf03d2f35c1c9a",
+      "executable": false
+    },
+    "scripts/delivery/build-inputs.ts": {
+      "sha256": "6d5832233e5f5dfe02fe1af9232a9f8c4a2c7e05e65f4382f45ad7e842ddcc28",
       "executable": false
     },
     "scripts/delivery/build.mjs": {
@@ -9661,7 +9665,7 @@
       "executable": false
     },
     "vite.config.ts": {
-      "sha256": "e071954e86edf39592a0c09abc83291c21ba51f8693b3f35fd67c2ed7547d651",
+      "sha256": "098880ce2a6557e26c78b6efa1fd20508611bca08ec55b909bce723c39223b49",
       "executable": false
     },
     "wrangler.jsonc": {

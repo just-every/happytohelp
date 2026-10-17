@@ -16,7 +16,8 @@ try{
  await withoutLocalVariables(root,async({secrets})=>{
   store.addSecrets(secrets);
   const env=buildEnvironment(bindings);
-  for(const [command,args] of [[process.execPath,['scripts/migrations.mjs']],['pnpm',['run','build:assets']],['pnpm',['exec','vite','build']],[process.execPath,['scripts/delivery/build.mjs','--clean']]]){
+  // vite build writes the migrations and public assets first (scripts/delivery/build-inputs.ts).
+  for(const [command,args] of [['pnpm',['exec','vite','build']],[process.execPath,['scripts/delivery/build.mjs','--clean']]]){
    await store.run('Building application',command,args,{cwd:root,env,signal:cancellation.signal});
   }
  });

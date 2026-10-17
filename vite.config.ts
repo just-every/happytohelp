@@ -6,6 +6,7 @@ import { archiveOutputGuard } from '@runeditrun/rer/archive-output'
 import { reproducibleOutput } from './scripts/delivery/reproducible-output.ts'
 import { workspaceModulePreloads } from './scripts/delivery/module-preloads.ts'
 import { replyIconAssets } from './scripts/delivery/reply-icons.ts'
+import { buildInputs } from './scripts/delivery/build-inputs.ts'
 import { docsSite } from './src/ui/docs/build/plugin.ts'
 import {widgetDevAsset} from './scripts/widget-dev-asset'
 import { demoSockets } from './src/vendor/base/modules/demo/vite.mjs'
@@ -184,7 +185,7 @@ export default defineConfig(({ command, isPreview }) => {
    deny: ['**/.rer/**', '**/.seed/**', '**/exports/**', '**/*.rer'],
   },
  },
- plugins: [demoSockets(),widgetDevAsset(localOrigin),replyIconAssets(),{
+ plugins: [demoSockets(),buildInputs(),widgetDevAsset(localOrigin),replyIconAssets(),{
   name: 'connector-download-headers',
   configureServer(server) {
     server.middlewares.use((req, res, next) => {

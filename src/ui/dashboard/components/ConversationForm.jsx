@@ -27,6 +27,7 @@ ConversationForm.propTypes = {
     onFileRemove: PropTypes.func,
     onFileSelect: PropTypes.func,
     onSendMessage: PropTypes.func,
+    onMacroApplied: PropTypes.func,
     projectId: PropTypes.string,
 };
 
@@ -44,6 +45,7 @@ export default function ConversationForm({
     onFileRemove,
     onFileSelect,
     onSendMessage,
+    onMacroApplied,
     projectId,
 }) {
     const [ helper, setHelper ] = useState(null);
@@ -51,7 +53,8 @@ export default function ConversationForm({
     const textareaRef = useRef(null);
     const hasContent = Boolean(content?.trim() || files.length);
     const isComposerLocked = Boolean(loadingContent);
-    const canSend = Boolean(isEnabled && !helper && !isComposerLocked && hasContent);
+    const unresolved = [...new Set([...(content || '').matchAll(/{{\s*([^{}]+?)\s*}}/g)].map(match=>match[1].split('|')[0].trim()))];
+    const canSend = Boolean(isEnabled && !helper && !isComposerLocked && hasContent && !unresolved.length);
     const textareaContent = isComposerLocked && loadingContent !== '-loading-' ? loadingContent : content;
 
     useEffect(() => {
@@ -81,7 +84,7 @@ export default function ConversationForm({
 
         onSendMessage(content, sendAndClose).then(() => {
             onContentChange('');
-        });
+        }).catch(() => {});
     };
 
     const handleKeyDown = event => {
@@ -118,7 +121,9 @@ export default function ConversationForm({
     };
 
     // The textarea stays mounted while the picker is open, so its selection is still the cursor the agent left.
-    const insertReply = reply => {
+    const insertReply = (reply, metadata) => {
+        if (metadata) onMacroApplied?.(reply, metadata);
+        if (metadata?.reply_type === 'note') { setHelper(null); return; }
         const textarea = textareaRef.current;
         const draft = content || '';
         const { text, caret } = insertSavedReply(draft, reply, textarea?.selectionStart ?? draft.length, textarea?.selectionEnd ?? draft.length);
@@ -156,6 +161,7 @@ export default function ConversationForm({
                             <div className="loading-content-bg"></div>
                             <span className="loading-content-text">{ loadingContent === '-loading-' ? '' : loadingContent }</span>
                         </div> }
+                        {unresolved.length > 0 && <p className="conversation-placeholder-warning text-danger" role="alert">Resolve before sending: {unresolved.join(', ')}</p>}
                         <TextareaAutosize
                             ref={ textareaRef }
                             className="form-control form-control-flush"

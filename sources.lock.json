@@ -7222,7 +7222,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/workflows/WorkflowPanel.jsx": {
-      "sha256": "403841abc5ae18ef8f0f5ab4b7324294d46e9c492c90c8888ee217a062c7d49c",
+      "sha256": "46ae08f96b3f96018cc153edb899a14f6aca7ee07c83d1fa844ff4114c4f6100",
       "executable": false
     },
     "src/ui/dashboard/components/workflows/WorkflowQueueFilter.jsx": {

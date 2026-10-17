@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import {createServer} from 'node:http'
+import {pbkdf2Sync} from 'node:crypto'
 import {createRuntime} from '../emitted-runtime.mjs'
 import {viewports} from '../../journeys/kit/browser.mjs'
 import {challengeOf} from './applications.mjs'
@@ -20,10 +21,15 @@ export async function applicationsBrowserJourney({runtime,browser,shot}){
 
   // Registering in the application shell: a duplicate and a plain-HTTP address are reported, and the page fits a phone.
   const register=async(id,appOrigin,callback,loopback=true)=>{await page.getByLabel('Client identifier').fill(id);await page.getByLabel('Slate origin').fill(appOrigin);await page.getByLabel('Exact callback URL').fill(callback);await page.getByLabel('Allow loopback development')[loopback?'check':'uncheck']();await page.getByRole('button',{name:'Register client'}).click()}
+  // Installing an application needs a recent step-up: the owner's sign-in proof is aged and they confirm with their password.
+  const password='owner-correct-horse-battery',salt='applications-salt'
+  await runtime.execute(`INSERT INTO credentials(user_id,password_hash,updated_at) VALUES('${tenant.userId}','${salt}:${pbkdf2Sync(password,salt,100000,32,'sha256').toString('hex')}',1)`)
+  const age=()=>runtime.execute(`UPDATE session_factors SET verified_at=verified_at-${20*60*1000} WHERE user_id='${tenant.userId}'`)
+  const stepUp=async name=>{const dialog=page.getByRole('dialog',{name:'Confirm it’s you'});await dialog.waitFor();if(name)await page.screenshot({path:shot(name),fullPage:true});await dialog.getByLabel('Your password').fill(password);await dialog.getByRole('button',{name:'Confirm'}).click()}
   await page.goto(`${origin}/delegation/settings?account_id=${projectId}`);await page.getByRole('heading',{name:'Connected applications',level:1}).waitFor();await shell.waitFor()
   assert.notEqual(await page.evaluate(()=>getComputedStyle(document.body).fontFamily.split(',')[0].replace(/["']/g,'')),'Times','the application stylesheet applies')
   assert.ok(await page.getByTestId('settings-menu').getByRole('link',{name:'Connected applications'}).isVisible())
-  await register('slate',origin,origin+'/slate-callback');await page.getByText('slate —',{exact:false}).waitFor();assert.equal(await page.getByLabel('Client identifier').inputValue(),'')
+  await age();await register('slate',origin,origin+'/slate-callback');await stepUp('register-step-up-1440.png');await page.getByText('slate —',{exact:false}).waitFor();assert.equal(await page.getByLabel('Client identifier').inputValue(),'')
   await register('slate',origin,origin+'/slate-callback');await page.getByRole('alert').filter({hasText:'already registered'}).waitFor()
   await page.getByLabel('Client identifier').fill('slate-http');await page.getByLabel('Allow loopback development').uncheck();await page.getByRole('button',{name:'Register client'}).click()
   await page.getByRole('alert').filter({hasText:'not accepted'}).waitFor();assert.equal(await page.getByText('slate-http —',{exact:false}).count(),0)
@@ -48,7 +54,7 @@ export async function applicationsBrowserJourney({runtime,browser,shot}){
   for(const state of ['1e3','007','a b&c=d']){await page.goto(consentUrl(state,{scope:'knowledge.article.read'}));await page.getByRole('button',{name:'Allow selected access'}).click();await page.waitForURL(/slate-callback\?code=/);assert.equal(new URL(page.url()).searchParams.get('state'),state)}
 
   // The application exchanges its single-use code, publishes the repair once, and the native editor and public help show it.
-  await page.goto(consentUrl('publish-state'));await page.getByRole('button',{name:'Allow selected access'}).click();await page.waitForURL(/slate-callback\?code=/)
+  await age();await page.goto(consentUrl('publish-state'));await page.getByRole('button',{name:'Allow selected access'}).click();await stepUp('consent-step-up-1440.png');await page.waitForURL(/slate-callback\?code=/)
   const tokenBody={grant_type:'authorization_code',client_id:'slate',redirect_uri:origin+'/slate-callback',code:new URL(page.url()).searchParams.get('code'),code_verifier:verifier},exchange=body=>fetch(origin+'/api/delegation/v1/token',{method:'POST',body:new URLSearchParams(body)})
   assert.equal((await exchange({...tokenBody,redirect_uri:origin+'/slate-callback/extra'})).status,401)
   const exchanged=await exchange(tokenBody);assert.equal(exchanged.status,200);const accessToken=(await exchanged.json()).access_token;assert.equal((await exchange(tokenBody)).status,401)

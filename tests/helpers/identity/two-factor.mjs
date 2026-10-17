@@ -15,7 +15,7 @@ export const encryptionKey=()=>randomBytes(32).toString('base64')
 /**
  * IDENTITY-003 through the public doors: enrol TOTP with ten recovery codes, require
  * it by role, force enrolment at the next sign-in, refuse missing, wrong, replayed and
- * spent factors (rate-limited and audited), step up for exports and policy, reset a
+ * spent factors (rate-limited, also under parallel guesses, and audited), step up for exports and policy, reset a
  * teammate's factor and recover a locked-out owner with the installation key.
  */
 export async function twoFactorJourney(){
@@ -72,6 +72,12 @@ export async function twoFactorJourney(){
   assert.equal((await call('/api/identity/two-factor/verify',{recoveryCode:agentCodes[0]},third.token)).data.code,'recovery_code_invalid','a used recovery code is refused')
   for(let i=0;i<4;i++)await call('/api/identity/two-factor/verify',{code:'222222'},third.token)
   const limited=await call('/api/identity/two-factor/verify',{code:totp(agentSetup.secret)},third.token);assert.equal(limited.status,429,'five wrong answers lock entry for the window')
+  // Parallel guesses each claim their attempt before any is checked: from a fresh window a burst gets at most five evaluated.
+  await app.db.prepare('UPDATE login_attempts SET window_start=window_start-?').bind(15*60*1000+1).run()
+  const live=new Set([-1,0,1].map(step=>totp(agentSetup.secret,step))),guesses=Array.from({length:40},(_,i)=>String(300000+i)).filter(guess=>!live.has(guess)).slice(0,30)
+  const burst=await Promise.all(guesses.map(guess=>call('/api/identity/two-factor/verify',{code:guess},third.token))),evaluated=burst.filter(r=>r.status===401).length
+  assert.ok(evaluated>=1&&evaluated<=5,`a parallel burst is held to the limit (${evaluated} evaluated)`);assert.equal(burst.filter(r=>r.status===429).length,guesses.length-evaluated)
+  assert.equal((await call('/api/identity/two-factor/verify',{code:totp(agentSetup.secret)},third.token)).status,429,'after the burst even the right code waits out the window')
   const refusals=(await events('two_factor.refused')).map(row=>JSON.parse(row.detail_json).reason)
   assert.deepEqual([...new Set(refusals)].sort(),['code_invalid','rate_limited','recovery_code_invalid'])
 

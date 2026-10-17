@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useDashboardSettings } from '../dashboard-state';
 import { Section } from './forms';
 import DelegationExits from './DelegationExits';
-import { dateTime, scopeLabels } from './delegation-shared';
+import { confirmRecentStepUp, dateTime, scopeLabels } from './delegation-shared';
 
 const problems = {
     INVALID_REQUEST: 'This connection request is incomplete or does not match a registered application. Return to the application and start the connection again.',
@@ -21,6 +21,16 @@ function Nothing({ projectId }) {
 /** Approve or cancel an application's request. The decision is a form post: approval ends in a redirect back to the application. */
 export default function DelegationAuthorize({ projectId }) {
     const { delegationConsent } = useDashboardSettings();
+    const confirmed = useRef(false);
+    const decide = async event => {
+        const button = event.nativeEvent.submitter;
+        if (confirmed.current || button?.value !== 'approve') return;
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!await confirmRecentStepUp()) return;
+        confirmed.current = true;
+        form.requestSubmit(button);
+    };
     if (!delegationConsent) return <Nothing projectId={projectId}/>;
     if (delegationConsent.problem) return <div className="workspace-settings delegation-page"><div role="alert" className="alert alert-danger">{problems[delegationConsent.problem.code] || delegationConsent.problem.message}</div>
         <DelegationExits projectId={projectId}/></div>;
@@ -36,7 +46,7 @@ export default function DelegationAuthorize({ projectId }) {
             <ul className="delegation-grant__list">{request.scope.map(scope => <li key={scope}>{scopeLabels[scope] || scope}<code>{scope}</code></li>)}</ul>
             <p className="delegation-page__empty">No support replies, customer account changes or SSO activation are permitted.</p>
         </Section>
-        <form method="post" action="/delegation/authorize" className="delegation-consent__actions">
+        <form method="post" action="/delegation/authorize" className="delegation-consent__actions" onSubmit={decide}>
             <input type="hidden" name="request" value={JSON.stringify(request)}/>
             <input type="hidden" name="issued" value={issued}/>
             <input type="hidden" name="csrf" value={csrf}/>

@@ -16,7 +16,7 @@
     "id": "happytohelp-conversation",
     "record": "Project-owned customer conversations with durable messages, evidence and explicitly authorized work."
   },
-  "description": "Open-source customer support workspace: editable team dashboard, customer chat widget, configured AI assistance, knowledge and published help centers, customer context, integrations and the \u201cCustomer Support, Solved.\u201d public homepage, running on Cloudflare Workers with D1, R2, Queues and Durable Objects.",
+  "description": "Help your team resolve customer questions with shared conversations and a searchable help center.",
   "capabilities": [
     {
       "id": "owner-installation",

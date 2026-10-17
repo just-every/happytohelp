@@ -202,6 +202,13 @@ export class WidgetTransport {
       }
       delete this.session.pendingCommands[data.local_id];
       localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+      if (result.followupConversationId) {
+        this.conversationId = this.session.conversationId = result.followupConversationId;
+        this.revision = 0; this.lastMessageId = null; this.eventId = 0;
+        localStorage.setItem(this.storageKey, JSON.stringify(this.session));
+        this.onEvent({type: 'session', session: this.session});
+        this.openSocket();
+      }
       if (result.message) this.onEvent({type: 'message', message: await this.message(result.message)});
       await this.refresh();
       return result;

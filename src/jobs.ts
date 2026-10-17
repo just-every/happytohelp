@@ -1,3 +1,4 @@
+import {runWorkflows,workflowEnvironment} from './modules/workflows/runtime'
 import {dispatchIntegrations} from './modules/api-integrations/dispatch'
 import {advanceImport,getWorkRun} from './modules/move-in/service'
 import {generationEffects} from './edition/ai/generation-effects'
@@ -38,6 +39,8 @@ export async function consumeJob(job:Job,env:Env) {
 /** How long a message's failing follow-up (AI reply request, notification) is retried. */
 const OUTBOX_RETRY_MS=60*60*1000
 export async function runScheduled(env:Env) {
+ env=await workflowEnvironment(env)
+ await runWorkflows(env)
  await dispatchSurveys(env)
  await dispatchIntegrations(env)
  const pending=await env.DB.prepare("SELECT project_id,conversation_id,MAX(id) last_id FROM conversation_outbox WHERE delivered_at IS NULL AND EXISTS(SELECT 1 FROM projects p WHERE p.id=conversation_outbox.project_id) AND NOT EXISTS(SELECT 1 FROM project_settings ps WHERE ps.project_id=conversation_outbox.project_id AND json_extract(ps.settings_json,'$.deleted_at') IS NOT NULL) GROUP BY project_id,conversation_id LIMIT 100").all<{project_id:string;conversation_id:string;last_id:number}>()

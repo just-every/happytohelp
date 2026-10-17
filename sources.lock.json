@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "parent": null,
   "edition": "just-every/happytohelp",
-  "manifest": "ea5ae8fd07bba1047699c7f9592c885383d189cb5d9f31e71e63ddb45116c424",
+  "manifest": "d0e424c4b12b35e22cd6755e1e6d90e77fc8e17d2bb8d6f97d802aa446470149",
   "toolchain": {
     "id": "runeditrun/edition-authoring",
     "version": "1.1.0",
@@ -414,6 +414,7 @@
           "migrations/152_workflow_rules.sql",
           "migrations/153_workflow_schedules.sql",
           "migrations/154_workflow_routing.sql",
+          "migrations/155_schedule_team_frontier.sql",
           "docs/workflows.md"
         ],
         "origin": {
@@ -1595,7 +1596,7 @@
       "executable": false
     },
     "ACCEPTANCE.md": {
-      "sha256": "4dee47f6e78f0e77a473290c03dbae2c4e8534c4a1c36e560b650657feae5f1d",
+      "sha256": "7436367ad0cd1efbe6bf3c1cce7c61c8c87047824062f51cd9a1e39859e28d5d",
       "executable": false
     },
     "AGENTS.md": {
@@ -1615,7 +1616,7 @@
       "executable": false
     },
     "CONTRACT.md": {
-      "sha256": "f205ddc0b893b7b66d6bd3ab6d0d08bad19b19ef90646da0b1dfa706fc258a0f",
+      "sha256": "245e0a82d234529fd91de4e949e9fdf6f88ff1df28bda266832eca5ba27c6680",
       "executable": false
     },
     "DEMO.md": {
@@ -1771,7 +1772,7 @@
       "executable": false
     },
     "docs/workflows.md": {
-      "sha256": "61e498bb9cadf1025803904849ef844bc2e092bb80a229087e8872812228e4e8",
+      "sha256": "4bf529dc65b52ff176d66d08ab5812b5813c0cf919676cba270970123eedaed8",
       "executable": false
     },
     "docs/WORKSPACE-WORKFLOWS.md": {
@@ -1779,7 +1780,7 @@
       "executable": false
     },
     "edition.json": {
-      "sha256": "ea5ae8fd07bba1047699c7f9592c885383d189cb5d9f31e71e63ddb45116c424",
+      "sha256": "d0e424c4b12b35e22cd6755e1e6d90e77fc8e17d2bb8d6f97d802aa446470149",
       "executable": false
     },
     "HANDOVER.md": {
@@ -2264,6 +2265,10 @@
     },
     "migrations/154_workflow_routing.sql": {
       "sha256": "c5012dbd43604e5f5d77673c5a8f6c197a6a9914dd7b91d4dfcae8059271e900",
+      "executable": false
+    },
+    "migrations/155_schedule_team_frontier.sql": {
+      "sha256": "d092307fedd1620c54d2b1c8972616f3756b2c7f7c7403d02495c1b97c239556",
       "executable": false
     },
     "migrations/170_knowledge_experience.sql": {
@@ -6255,7 +6260,7 @@
       "executable": false
     },
     "src/modules/workflows/routes-schedules.ts": {
-      "sha256": "2e19c7a385027e2ab660c160b0346556dda82c0b15c7dd560ba072eff279aa00",
+      "sha256": "20d15d885069236ae569930936f05afc9a12cb7777dcb5aac1da312ba8271abe",
       "executable": false
     },
     "src/modules/workflows/routes-sla.ts": {
@@ -6323,7 +6328,7 @@
       "executable": false
     },
     "src/modules/workflows/schedules.ts": {
-      "sha256": "a03214f431006378ea0b8993d59504be1b6405664ee4297a89e05332d6bcd928",
+      "sha256": "98503fa7f892abcdd48f3f1797d80ac72d032af149b3767f9631ad72525a23e8",
       "executable": false
     },
     "src/modules/workflows/sla-alerts.ts": {
@@ -9807,7 +9812,7 @@
       "executable": false
     },
     "tests/helpers/workflows/schedules.mjs": {
-      "sha256": "8c6ea3146c5ae90c3daca02f1b17690ec016d89abb3fe96df096293a9310d5ab",
+      "sha256": "61488739b2d3f833201d5f9cc369dd745e4d798b2098bffce27bbcb11995f348",
       "executable": false
     },
     "tests/helpers/workflows/sla.mjs": {

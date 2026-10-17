@@ -43,6 +43,8 @@ export function opaqueReferences(value){
     if(/^\/(?:uc|thumbnail|files\/[^/]+\/export)/.test(url.pathname))for(const key of ['id','revid'])if(url.searchParams.has(key))url.searchParams.set(key,'document-id');
    }
    if(url.hostname==='zapier.com'&&/^\/(?:developer|platform)\/public-invite\/[^/]+\/[^/]+\/?$/.test(url.pathname)&&!url.search&&!url.hash)return '<public-integration-invitation>';
+   // Public video and playlist links (youtube.com/watch?v=…&list=PL…, youtu.be/…) carry no credential.
+   if(/^(?:(?:www\.|m\.|music\.)?youtube\.com|youtu\.be)$/.test(url.hostname))return '<video-resource>';
    if(url.search||url.hash)return url.href;
    if(/\.(?:webp|png|jpe?g|gif|svg|ico)$/i.test(url.pathname))return '<image-resource>';
    if(['loom.com','www.loom.com'].includes(url.hostname)&&/^\/(?:share|embed)\/[a-f0-9]{32}\/?$/i.test(url.pathname))return '<video-resource>';
@@ -61,10 +63,21 @@ export function opaqueReferences(value){
 export function opaqueCredentialShape(value){
  const normalized=opaqueReferences(value).replace(/\bpk_(?:live|test)_[A-Za-z0-9]{16,}\b/g,'<publishable-application-id>');
  if(/\b[a-f0-9]{32,}\b/i.test(normalized))return true;
- return [...normalized.matchAll(/[A-Za-z0-9+/_-]{40,}={0,2}/g)].some(m=>{
-  const text=m[0];if(!/[A-Za-z]/.test(text)||!/[0-9]/.test(text))return false;
-  const counts=new Map();for(const char of text)counts.set(char,(counts.get(char)||0)+1);
-  let entropy=0;for(const n of counts.values()){const p=n/text.length;entropy-=p*Math.log2(p);}
-  return entropy>4.8;
- });
+ return [...normalized.matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].some(m=>randomToken(m[0].replace(/=+$/,'')));
+}
+// A run of 32+ characters is a credential when its character entropy is what a random
+// string of that length over its own alphabet would show. The expected value carries
+// Miller-Madow's small-sample bias, so short and long secrets meet the same bar: about
+// 99% of random mixed-case alphanumerics of 32 or more characters. Lowercase-and-digit
+// runs (content hashes, client ids) keep the fixed bar for 40+ characters. Paths and
+// slugs of words, numbers, units and dates ("2024-10-16-how-we-migrated-v2", "16px") are not random.
+function randomToken(text){
+ if(!/[A-Za-z]/.test(text)||!/[0-9]/.test(text))return false;
+ if(/[-_/+]/.test(text)&&text.split(/[-_/+]+/).every(part=>/^(?:[A-Za-z]+[0-9]*|[0-9]+[a-z]{0,3})?$/.test(part)))return false;
+ const counts=new Map();for(const char of text)counts.set(char,(counts.get(char)||0)+1);
+ let entropy=0;for(const n of counts.values()){const p=n/text.length;entropy-=p*Math.log2(p);}
+ if(text.length>=40&&entropy>4.8)return true;
+ if(!/[a-z]/.test(text)||!/[A-Z]/.test(text))return false;
+ const alphabet=62+new Set(text.replace(/[A-Za-z0-9]/g,'')).size;
+ return entropy>=Math.log2(alphabet)-(alphabet-1)/(2*text.length*Math.LN2)-0.5;
 }

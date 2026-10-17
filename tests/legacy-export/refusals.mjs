@@ -42,6 +42,7 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
 
   const [[message]]=await admin.execute('SELECT id,content FROM messages WHERE project_id=? ORDER BY id LIMIT 1',[projectId]);
   const jwt=[JSON.stringify({alg:'HS256'}),JSON.stringify({sub:'fixture'}),'fixture-signature'].map(value=>Buffer.from(value).toString('base64url')).join('.');
+  const customerKey='sk_'+'Fixture0'.repeat(4),opaque=Buffer.from('fixture-opaque-credential-value').toString('base64').slice(0,32);
   const signatures=[
     ['A pasted credential: ghp_test_'+'x'.repeat(36),'ghp_test_'+'x'.repeat(36)],
     ['Authorization: Bearer fixtureOpaqueCredential123456','fixtureOpaqueCredential123456'],
@@ -52,6 +53,16 @@ export async function assertCredentialRefusals({admin,run,env,output,projectId,s
     ['Cookie: support_session=fixture-short-cookie','fixture-short-cookie'],
     ['<input type="hidden" name="_s" value="fixture-short-csrf">','fixture-short-csrf'],
     [JSON.stringify({request:{headers:[{name:'Cookie',value:'session=fixture-har-cookie'}]}}),'fixture-har-cookie'],
+    // Prefix-typed keys without live_/test_, curl Basic, empty-user DSNs, split and grouped values, pwd links, opaque runs, repeats.
+    ['I refreshed the API private key to be '+customerKey,customerKey],
+    ['curl https://api.example.test/v1/charges -u '+customerKey+':',customerKey],
+    ['curl -u fixture-user:fixture-curl-password https://api.example.test','fixture-curl-password'],
+    ['REDIS_URL is redis://:fixture-redis-password@cache.example.test:6379','fixture-redis-password'],
+    ['Login password: fixture;split-remnant','split-remnant'],
+    ['Manual key: FIXT URES ETUP KEY2 in the app','ETUP KEY2'],
+    ['Join https://meet.example.test/j/1?pwd=fixture-meeting-passcode','fixture-meeting-passcode'],
+    ['Here it is '+opaque+' thanks',opaque],
+    ['secret_key: fixture.'+customerKey.slice(3)+'.tail and later '+customerKey.slice(3),customerKey.slice(3)],
   ];
   try {
     // These signatures now have an explicit OMIT classification for support

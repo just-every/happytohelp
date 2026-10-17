@@ -8,7 +8,8 @@ const textColumns={messages:['content'],events:['payload'],insights:['content'],
 const derivedColumns={contacts:['ai_profile','metadata'],users:['ai_profile'],projects:['ai_profile'],conversations:['metadata'],dataset_files:['markdown'],datasets:['metadata'],project_optimizations:['ai_profile','metadata'],message_thinkings:['content'],support_delegations:['instructions','context','result'],support_delegation_events:['message','payload'],insights:['analysis','metadata'],leads:['content']};
 const rendered=(table,column)=>textColumns[table]?.includes(column);
 export const sanitizable=(table,column)=>rendered(table,column)||derivedColumns[table]?.includes(column);
-const userinfo=/\b([a-z][a-z0-9+.-]*:\/\/)([^\s/@:"'<>()[\]]+):([^\s/@"'<>()[\]]+)@/gi;
+// The user may be empty: "redis://:password@host" is the standard Redis form.
+const userinfo=/\b([a-z][a-z0-9+.-]*:\/\/)([^\s/@:"'<>()[\]]*):([^\s/@"'<>()[\]]+)@/gi;
 // Mail clients wrap addresses as "https://mailto:support@example.com": an address, not user:password.
 export const mailtoLink=user=>user.toLowerCase()==='mailto';
 export function isRedactedCredentialField(table,column,key,value){return rendered(table,column)&&reviewedName(key)&&value==='<redacted>';}
@@ -51,8 +52,22 @@ function noncredential(a){
  return false;
 }
 export function hasCredentialAssignment(text){
- for(const a of assignments(text))if(credentialName.test(a.name)&&!/Error$/.test(a.name)&&!noncredential(a))return true;
+ for(const a of assignments(text)){
+  if(!credentialName.test(a.name)||/Error$/.test(a.name))continue;
+  if(!noncredential(a))return true;
+  // A remnant after an omitted value ("password: <redacted>;rest") is still part of it.
+  if(!a.quote&&a.value==='<redacted>'&&/^[,;]\S/.test(a.tail))return true;
+ }
  return false;
+}
+// An unquoted credential value runs to the next whitespace, so ',' or ';' cannot split it;
+// a 2FA setup key shown in 4-character base32 groups ("key: JBSW Y3DP …") is one value.
+function wholeValue(a){
+ if(a.quote)return a;
+ // One closing punctuation mark before the next space belongs to the sentence.
+ let extra=a.tail.match(/^\S*/)[0].replace(/[,.;:)]$/,'');
+ if(/^[A-Z2-7]{4}$/.test(a.value+extra))extra+=a.tail.slice(extra.length).match(/^(?:[ \t]+[A-Z2-7]{4}(?![A-Za-z0-9]))*/)[0];
+ return extra?{...a,raw:a.raw+extra,value:a.value+extra,tail:a.tail.slice(extra.length)}:a;
 }
 export function omitSupportCredentials(table,column,value,onOmit){
  if(!sanitizable(table,column)||value===null)return {value,omitted:0};
@@ -68,15 +83,18 @@ export function omitSupportCredentials(table,column,value,onOmit){
  try{const parsed=JSON.parse(value);if(parsed&&typeof parsed==='object'){const before=omitted;const cleaned=omitTransportObject(parsed,removed);if(omitted!==before)value=JSON.stringify(cleaned);}}catch{}
  value=omitTransportCredentials(value,removed);
  let result='',offset=0;
- for(const a of assignments(value)){
-  if(a.index<offset||!reviewedName(a.name)||noncredential(a))continue;
+ for(const found of assignments(value)){
+  if(found.index<offset||!reviewedName(found.name))continue;
+  // Reviewed code shapes ("token = request.cookies.get(…)") are judged as found.
+  const a=wholeValue(found);if(noncredential(a)||a!==found&&!/^[,;]/.test(a.raw.slice(found.raw.length))&&noncredential(found))continue;
   result+=value.slice(offset,a.index)+a.head+removed(a.value)+a.quote;offset=a.index+a.raw.length;
  }
  value=result+value.slice(offset);
  // Known authentication signatures are omitted, rather than copied to custody.
  value=value.replace(/-----BEGIN ([A-Z ]*PRIVATE KEY|ENCRYPTED[A-Z ]*)-----[\s\S]*?-----END \1-----/g,removed);
  value=value.replace(/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/g,removed);
- value=value.replace(/\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\b/g,removed);
+ // Markdown escapes the underscore ("sk\_…"); the key is the same.
+ value=value.replace(/\b(?:sk|rk)\\?_(?:live|test)\\?_[A-Za-z0-9]{16,}\b|\b(?:sk|rk)\\?_[A-Za-z0-9]{24,}\b/g,removed);
  value=value.replace(/\b(?:(?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+|whsec_[A-Za-z0-9]{16,})\b/g,removed);
  value=value.replace(/\b(?:cs_(?:live|test)_[A-Za-z0-9_]{16,}|tok_[A-Za-z0-9]{16,})\b/g,removed);
  value=value.replace(/\b[A-Za-z0-9_.+-]{40,}@(?:mail\.)?chargedesk\.com\b/gi,removed);
@@ -84,14 +102,15 @@ export function omitSupportCredentials(table,column,value,onOmit){
  value=value.replace(/\$2[aby]\$\d\d\$[./A-Za-z0-9]{53}|\$argon2(?:id|i|d)\$[^\s"'<>]+/g,removed);
  value=value.replace(/\b(Bearer)[ \t]+([A-Za-z0-9+/_.=-]{12,})/gi,(_match,scheme,secret)=>scheme+' '+removed(secret));
  value=omitBasicAuthorization(value,removed);
- value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|auth)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+removed(secret));
+ value=value.replace(/([?&](?:amp;)?)(\\?_s|api_key|api_token|access_token|client_secret|auth_token|token|signature|X-Amz-Signature|X-Amz-Credential|X-Amz-Security-Token|AWSAccessKeyId|resourcekey|code|otp|password|pwd|auth)=([^&\s<>"'()[\]]+)/gi,(_match,prefix,name,secret)=>prefix+name+'='+removed(secret));
  value=value.replace(userinfo,(match,scheme,user,secret)=>mailtoLink(user)?match:scheme+removed(user+':'+secret)+'@');
  value=value.replace(/https?:\/\/[^\s<>"'()[\]]+/g,url=>opaqueCredentialShape(url)?removed(url):url);
  // Opaque diagnostic values have no established public-resource meaning.
  // Omit them as potential credentials; unknown schema/JSON/assignment names
  // still stop export. Never turn an encrypted JSON envelope into readable data.
+ // Runs are read with Markdown's "\_" and "\-" escapes, as opaqueReferences reads them.
  const opaque=new Set([...opaqueReferences(value).matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].map(m=>m[0]).filter(opaqueCredentialShape));
- value=value.replace(/[A-Za-z0-9+/_-]{32,}={0,2}/g,token=>{
+ value=value.replace(/(?:[A-Za-z0-9+/_-]|\\[_-]){32,}={0,2}/g,token=>{
   if(![...opaqueReferences(token).matchAll(/[A-Za-z0-9+/_-]{32,}={0,2}/g)].some(m=>opaque.has(m[0])))return token;
   try{const decoded=JSON.parse(Buffer.from(token,'base64').toString('utf8'));if(decoded&&'iv'in decoded&&'value'in decoded&&('mac'in decoded||'tag'in decoded))return token;}catch{}
   return removed(token);
@@ -102,12 +121,17 @@ export function omitSupportCredentials(table,column,value,onOmit){
 // A credential removed from one support text is removed wherever else the project's
 // rendered or derived text repeats it ("enter the manual key `…`"). The exporter
 // collects these values first; length matches the secret scan's searched values.
+// Each 16+ character run of letters and digits inside a removed value is indexed as
+// well, so a key removed inside a longer value is removed when it recurs alone.
+// All-lowercase words (slugs, host names) and bare numbers are not secrets on their own.
 export const repeatedCredentialMinimum=12;
 const tokenCharacter=/[A-Za-z0-9+/_=-]/;
 export function knownCredentials(secrets){
  // Index both stored forms by a fixed-length prefix: one linear pass per string.
  const forms=new Map();
- for(const secret of secrets)if(secret.length>=repeatedCredentialMinimum)for(const form of new Set([secret,JSON.stringify(secret).slice(1,-1)])){
+ const values=new Set();
+ for(const secret of secrets){values.add(secret);for(const token of secret.match(/[A-Za-z0-9]{16,}/g)||[])if(/[A-Za-z]/.test(token)&&/[^a-z]/.test(token))values.add(token);}
+ for(const secret of values)if(secret.length>=repeatedCredentialMinimum)for(const form of new Set([secret,JSON.stringify(secret).slice(1,-1)])){
   const key=form.slice(0,repeatedCredentialMinimum);if(!forms.has(key))forms.set(key,[]);forms.get(key).push(form);
  }
  for(const list of forms.values())list.sort((a,b)=>b.length-a.length);

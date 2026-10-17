@@ -40,7 +40,10 @@ export function omitTransportCredentials(value,removed){
 }
 
 // One recognizer serves extraction and validation, including pasted folded text.
+// curl's "-u user:password" and "-u key:" are Basic credentials too; placeholders stay.
+const placeholder=/^(?:\$\{?\w+\}?|<[^>]*>|\[[^\]]*\]|[A-Z][A-Z0-9_\\]*)?$/;
 export function omitBasicAuthorization(value,removed){
+ value=value.replace(/(^|[\s'"`(])(-u|--user)([ \t]+|=)(["']?)([^\s"'`:]*):([^\s"'`]*)\4/g,(match,start,flag,separator,quote,user,secret)=>(user||secret)&&!(placeholder.test(user)&&placeholder.test(secret))?start+flag+separator+quote+removed(user+':'+secret)+quote:match);
  value=value.replace(/(\bAuthorization[ \t]*:[ \t]*Basic[ \t]+)([^\s]+)/gi,(match,head,secret)=>/^(?:<redacted>|\[redacted\])/.test(secret)?match:head+removed(secret));
  return value.replace(/(\bBasic\s+)([A-Za-z0-9+/]+={0,2})/gi,(match,head,secret)=>{
   const bytes=Buffer.from(secret,'base64');return bytes.toString('base64').replace(/=+$/,'')===secret.replace(/=+$/,'')&&bytes.includes(0x3a)?head+removed(secret):match;

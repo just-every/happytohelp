@@ -9,7 +9,7 @@ import { escapeHtml as e } from './html'
 import { categoryTree } from './category-tree'
 import { missingArticlePage,missingHelpCenterPage } from './not-found'
 import { shell } from './shell'
-import {resolveHelpAccess} from '../knowledge/access'
+import {hasRestrictedCollections,resolveHelpAccess} from '../knowledge/access'
 import {getKnowledgeExperience,selectKnowledgeLocale,listAccessibleCategories,listAccessibleArticles,lookupAccessibleArticle} from '../knowledge/experience'
 import {knowledgeVisitorHash,recordKnowledgeEvent} from '../knowledge/feedback'
 import {helpControls,signInContent,helpfulContent,localeQuery} from './help-controls'
@@ -34,7 +34,8 @@ export async function renderHelpCenter(c:any,key:string,base:string,tail?:string
  const suffix=localeQuery(locale,settings.defaultLocale)
  const keyword=String(c.req.query('keyword')||c.req.query('q')||'').trim().slice(0,200)
  const visitorHash=await knowledgeVisitorHash(project.id,c.req.raw,access)
- const tools=helpControls(base,tail,locale,{...settings,projectId:project.id},access,keyword)
+ const restrictedCollections=await hasRestrictedCollections(c.env,project.id)
+ const tools=helpControls(base,tail,locale,{...settings,projectId:project.id,restrictedCollections},access,keyword)
  let content=''
  if(c.req.query('access')==='signin')content=signInContent(project.id,base,c.req.query('sent')==='1')
  else if(tail==='search'){

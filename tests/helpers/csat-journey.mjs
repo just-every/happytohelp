@@ -10,6 +10,14 @@ export async function csatJourney({progress=()=>{}}={}){
   progress("Application ready")
   const a=await app.seedWorkspace('csat'),foreign=await app.seedWorkspace('csat-foreign'),endpoint=`/api/outcomes/projects/${a.projectId}`,owner={token:a.tokens.owner},settings={enabled:true,scale:'five',delayMinutes:0,expiresDays:14,locale:'en'}
   await app.db.prepare("INSERT INTO email_settings VALUES(?,'Support','sender@example.com','csat-inbound@example.com',1,1)").bind(a.projectId).run()
+  for(const token of [undefined,'short']){
+   await app.configure({INBOUND_EMAIL_TOKEN:token})
+   const refused=await app.call(endpoint+'/settings',{...owner,method:'PUT',body:settings})
+   assert.equal(refused.status,503);assert.match(JSON.stringify(refused.data),/INBOUND_EMAIL_TOKEN/)
+   assert.equal((await app.ok(endpoint+'/settings',owner)).enabled,false,'a refused enable leaves surveys disabled')
+   await app.ok(endpoint+'/settings',{...owner,method:'PUT',body:{...settings,enabled:false}})
+  }
+  await app.configure({INBOUND_EMAIL_TOKEN:secret})
   await app.ok(endpoint+'/settings',{...owner,method:'PUT',body:settings})
   assert.equal((await app.call(endpoint+'/settings',{token:foreign.tokens.owner})).status,403)
   assert.equal((await app.call(endpoint+'/settings',{token:a.tokens.operator,method:'PUT',body:settings})).status,403)
@@ -23,6 +31,20 @@ export async function csatJourney({progress=()=>{}}={}){
   const first=await inbound('person@example.com'),firstId=first.conversationId||first.conversation_id
   assert.ok(firstId,JSON.stringify(first))
   const resolution=await solve(firstId)
+  // Losing signing configuration skips invitations without stalling lost-ack outbox replay.
+  const replayMessage=await app.first('SELECT id FROM messages WHERE conversation_id=? ORDER BY revision DESC LIMIT 1',firstId)
+  const resetOutbox=()=>app.db.prepare('UPDATE conversation_outbox SET delivered_at=NULL WHERE message_id=?').bind(replayMessage.id).run()
+  const outboxPending=async()=>(await app.first('SELECT COUNT(*) n FROM conversation_outbox WHERE message_id=? AND delivered_at IS NULL',replayMessage.id)).n
+  for(const token of [undefined,'short']){
+   await app.configure({INBOUND_EMAIL_TOKEN:token});await resetOutbox();await app.scheduled()
+   assert.equal((await surveyRow(resolution)).state,'pending');assert.equal(surveys().length,0)
+   assert.equal(await outboxPending(),0,'missing signing never holds back the outbox')
+  }
+  await app.configure({INBOUND_EMAIL_TOKEN:secret});await resetOutbox()
+  // A database error in the survey poll is logged and the same cron tick still recovers mail.
+  await app.scheduled({'x-test-before-statement':'SELECT * FROM unavailable_survey_fixture','x-test-statement':'SELECT r.project_id,r.conversation_id FROM conversation_resolutions'})
+  assert.equal(await outboxPending(),0,'a survey failure never aborts scheduled recovery')
+  assert.equal((await surveyRow(resolution)).state,'pending');assert.equal(surveys().length,0)
   await Promise.all([app.scheduled(),app.scheduled()])
   progress("First native cycle dispatched")
   const row=await surveyRow(resolution);assert.ok(row);assert.equal(row.state,'sent')

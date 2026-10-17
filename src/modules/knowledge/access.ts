@@ -3,6 +3,9 @@ import {hashToken} from '../../platform/auth'
 import {activeSourceProjectSql} from './public-sources'
 export interface HelpAccess {contactId?:string;email?:string;verified:true;helpSessionHash?:string;nativeEmail?:true}
 export const publicAccess:HelpAccess|undefined=undefined
+export async function hasRestrictedCollections(env:Env,projectId:string){
+ return Boolean(await env.DB.prepare("SELECT 1 FROM knowledge_categories WHERE project_id=? AND audience<>'public' LIMIT 1").bind(projectId).first())
+}
 /** Every attached collection and its ancestors must admit the customer. A second
  * public category never bypasses a restricted category. UNION also bounds cycles.
  * Category publication controls navigation, independently of article publication. */

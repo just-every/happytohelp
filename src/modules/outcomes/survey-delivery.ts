@@ -2,7 +2,7 @@ import type {Env} from '../../platform/env'
 import {emailConfigured,sendEmail} from '../integrations/email'
 import {auditStatement} from '../audit/record'
 import {liveCycleSql,surveyRecipientSql,surveyJoins,type Survey} from './survey-store'
-import {surveyURL} from './survey-links'
+import {surveySigningConfigured,surveyURL} from './survey-links'
 import {surveyCopy} from './survey-html'
 const mailbox=(value:string)=>value.length<=254&&/^[^\s@<>(),:;"\\]+@[^\s@<>(),:;"\\]+\.[^\s@<>(),:;"\\]+$/.test(value)
 /** The sole transition hook; the dispatcher also discovers missed native commits.
@@ -26,7 +26,7 @@ export async function dispatchSurveys(env:Env,options:{now?:number;projectId?:st
  for(const row of candidates.results)await scheduleConversationSurvey(env,row.project_id,row.conversation_id,now)
  await env.DB.prepare(`UPDATE csat_surveys SET state='cancelled',revoked_at=COALESCE(revoked_at,?),updated_at=? WHERE state='pending' AND (expires_at<=? OR NOT EXISTS(
  SELECT 1 ${surveyJoins} WHERE s.id=csat_surveys.id AND ${liveCycleSql} AND ${surveyRecipientSql} AND lower(trim(ct.email))=s.recipient AND EXISTS(SELECT 1 FROM csat_settings cfg WHERE cfg.project_id=s.project_id AND cfg.enabled=1)))`).bind(now,now,now).run()
- if(!emailConfigured(env))return {processed:0,configured:false}
+ if(!emailConfigured(env)||!surveySigningConfigured(env))return {processed:0,configured:false}
  const rows=await env.DB.prepare(`SELECT * FROM csat_surveys WHERE state='pending' AND due_at<=? AND expires_at>? ${options.projectId?'AND project_id=?':''} ${options.conversationId?'AND conversation_id=?':''} ORDER BY due_at,id LIMIT 25`)
  .bind(now,now,...(options.projectId?[options.projectId]:[]),...(options.conversationId?[options.conversationId]:[])).all<Survey>()
  let processed=0

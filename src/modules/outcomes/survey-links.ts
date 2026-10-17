@@ -1,9 +1,10 @@
 import {HTTPException} from 'hono/http-exception'
 import type {Env} from '../../platform/env'
 import type {Survey} from './survey-store'
+export const surveySigningConfigured=(env:Env):env is Env&{INBOUND_EMAIL_TOKEN:string}=>typeof env.INBOUND_EMAIL_TOKEN==='string'&&env.INBOUND_EMAIL_TOKEN.length>=16
 async function signingKey(env:Env){
+ if(!surveySigningConfigured(env))throw new HTTPException(503,{message:'Survey signing requires INBOUND_EMAIL_TOKEN with at least 16 characters'})
  const secret=env.INBOUND_EMAIL_TOKEN
- if(typeof secret!=='string'||secret.length<16)throw new HTTPException(503,{message:'Survey signing is not configured'})
  return crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify'])
 }
 const payload=(row:Survey,revision:number)=>new TextEncoder().encode(JSON.stringify(['csat-v1',row.id,row.project_id,row.resolution_id,row.contact_id,row.recipient,row.expires_at,revision]))

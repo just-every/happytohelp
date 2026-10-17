@@ -44,7 +44,11 @@ for(const [label,viewport] of Object.entries(viewports))test(`a published help c
   for(const entry of [{origin:runtime.origin,base:`/${fixture.projectId}`},{origin:runtime.origin,base:`/${retainedSlug}`},{origin:hostOrigin,base:''}]){
    const home=new URL(entry.base||'/',entry.origin).href;await page.goto(home,{waitUntil:'domcontentloaded'})
    await page.locator('input[type="search"]').fill('workspace');await page.getByRole('button',{name:'Search'}).click();await page.waitForURL(new URL(`${entry.base}/search?keyword=workspace`,entry.origin).href)
+   const analytics=await fetch(`${runtime.origin}/api/knowledge/${fixture.projectId}/analytics`,{headers:{Authorization:`Bearer ${fixture.token}`}});assert.equal(analytics.status,200)
+   const priorClicks=(await analytics.json()).totals.clicks
    await page.getByRole('link',{name:'Quick start',exact:true}).click();await page.waitForURL(new URL(`${entry.base}/quick-start`,entry.origin).href)
+   // A host-root link loads a new document, so observe the saved click rather than its old document's fetch response.
+   await page.waitForFunction(async({projectId,token,priorClicks})=>{const response=await fetch(`/api/knowledge/${projectId}/analytics`,{headers:{Authorization:`Bearer ${token}`}});return response.ok&&(await response.json()).totals.clicks===priorClicks+1},{projectId:fixture.projectId,token:fixture.token,priorClicks},{polling:100,timeout:5000})
    await page.locator('.help-center-brand').click();await page.waitForURL(home);await page.getByText('Getting started',{exact:true}).first().waitFor()
   }
   await page.goto(`${runtime.origin}/${fixture.projectId}/quick-start`);await assertHelpLinksReadable(page)

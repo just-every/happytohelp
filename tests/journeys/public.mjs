@@ -46,6 +46,9 @@ test('a published help center: Markdown rendered safely, complete summary search
   const host=path=>fetch(new URL(path,helpOrigin))
   assert.equal((await host('/')).status,404,'a configured host with an unknown project exposes no center')
   const tenant=await runtime.seedTenant({name:'Retained support',email:'retained-help@example.test',allowedOrigin:runtime.origin}),other=await runtime.seedTenant({name:'Other support',email:'other-help@example.test',allowedOrigin:runtime.origin})
+  const signIn=/href="[^"]*\?access=signin/
+  const edit=async(path,body,method='POST')=>{const response=await request(`/api/knowledge/${tenant.projectId}/${path}`,{body,method,token:tenant.token});assert.ok(response.ok,await response.clone().text());return response.json()}
+  await edit('categories',{title:'Public guides'})
   // The legacy importer retains aliases in this table; native identity stays separate.
   await runtime.execute(`INSERT INTO public_project_aliases(slug,project_id) VALUES('${slug}','${tenant.projectId}'); INSERT INTO public_project_aliases(slug,project_id) VALUES('docs','${tenant.projectId}'); INSERT INTO public_project_aliases(slug,project_id) VALUES('survey','${tenant.projectId}')`)
   const publish=async(owner,body)=>{const response=await request(`/api/knowledge/${owner.projectId}/articles`,{body:{summary:'retained support guide',content:'Retained instructions.',status:'published',...body},token:owner.token});assert.equal(response.status,201,await response.text())}
@@ -57,6 +60,8 @@ test('a published help center: Markdown rendered safely, complete summary search
   for(let i=0;i<18;i++)await publish(tenant,{slug:`guide-${i}`,title:`Guide ${String(i).padStart(2,'0')}`,content:'Instructions for your account.',summary:'violet lantern'})
   for(const base of [`/${tenant.projectId}`,`/${slug}`,`/help/${slug}`])for(const tail of ['','/','/search?keyword=retained','/retained-guide']){
    const response=await request(base+tail),html=await response.text();assert.equal(response.status,200,base+tail);assert.ok(html.includes(`action="${base}/search"`),'search stays on the retained path')
+   assert.doesNotMatch(html,signIn,'a public-only collection needs no sign-in link')
+   assert.doesNotMatch(html,/class="help-center-controls"/,'an empty control bar must not add spacing')
    if(!tail||tail.startsWith('/search'))assert.ok(html.includes(`href="${base}/retained-guide"`),'article links retain their entry path')
   }
   const article=await (await request(`/${slug}/formatted`)).text();assert.match(article,/<strong>Knowledge<\/strong>/);assert.doesNotMatch(article,/<script>alert/)
@@ -83,13 +88,24 @@ test('a published help center: Markdown rendered safely, complete summary search
   for(const path of ['/','/run']){const response=await request(path,{headers:{Forwarded:'host=localhost','X-Forwarded-Host':'localhost','X-Original-Host':'localhost'}});if(path==='/')assert.equal(response.status,200);assert.ok(response.status<500);assert.doesNotMatch(await response.text(),/data-help-center-nav/,'forwarded headers cannot replace the application origin')}
   const privateApi=await host('/api/management/projects');assert.equal(privateApi.status,401,'a help host does not turn a private API into public knowledge')
   // The same public doors apply audiences, reviewed locales, templates and old slugs.
-  const edit=async(path,body,method='POST')=>{const response=await request(`/api/knowledge/${tenant.projectId}/${path}`,{body,method,token:tenant.token});assert.ok(response.ok,await response.clone().text());return response.json()}
   const members=await edit('categories',{title:'Customer articles',audience:'signed-in'})
+  const helpPaths=[`/${slug}`,`/help/${tenant.projectId}`,`/${slug}/search?keyword=retained`,`/${slug}/retained-guide`]
+  for(const path of helpPaths)assert.match(await (await request(path)).text(),signIn,'a restricted collection offers sign-in before it has articles')
+  assert.match(await (await host('/')).text(),signIn)
+  assert.doesNotMatch(await (await request(`/${other.projectId}`)).text(),signIn,'another workspace cannot add a sign-in link')
+  await edit(`categories/${members.id}/audience`,{is_published:false},'PUT')
+  assert.match(await (await request(`/${slug}`)).text(),signIn,'hidden navigation can still contain customer articles')
+  await edit(`categories/${members.id}/audience`,{audience:'public',is_published:true},'PUT')
+  assert.doesNotMatch(await (await request(`/${slug}`)).text(),signIn,'making the last restricted collection public removes sign-in')
+  await edit(`categories/${members.id}/audience`,{audience:'signed-in'},'PUT')
   await edit('articles',{slug:'customer-only',title:'Customer-only instructions',content:'Private collection content',status:'published',categoryIds:[members.id]})
   for(const path of [`/${slug}`,`/${slug}/search?keyword=Private%20collection`])assert.doesNotMatch(await (await request(path)).text(),/Private collection content|Customer-only instructions/)
   const hidden=await request(`/${slug}/customer-only`),absent=await request(`/${slug}/absent-private`);assert.equal(hidden.status,404);assert.equal(await hidden.text(),await absent.text())
   const articles=await (await request(`/api/knowledge/${tenant.projectId}/articles`,{token:tenant.token})).json(),formatted=articles.find(a=>a.slug==='formatted')
   await edit('experience',{defaultLocale:'en',locales:['en','fr'],templates:{article:'Customer guide: {{title}}\n{{content}}\nContact the support team if you need help.'}},'PUT')
+  const languageSettings=await request(`/api/knowledge/${other.projectId}/experience`,{token:other.token,method:'PUT',body:{defaultLocale:'en',locales:['en','fr']}});assert.equal(languageSettings.status,200)
+  const publicLanguages=await (await request(`/${other.projectId}?locale=fr`)).text()
+  assert.match(publicLanguages,/<select[^>]+name="locale"/);assert.doesNotMatch(publicLanguages,signIn,'public-only centres retain their language controls')
   await edit(`articles/${formatted.id}/translations/fr`,{title:'Premiers pas',content:'Instructions relues pour votre compte.',summary:'Bien commencer',reviewStatus:'reviewed'},'PUT')
   const french=await request(`/${slug}/formatted?locale=fr`),frenchHtml=await french.text();assert.equal(french.status,200);assert.match(frenchHtml,/<html lang="fr"/);assert.match(frenchHtml,/Instructions relues/);assert.match(frenchHtml,/Customer guide: Premiers pas/);assert.match(frenchHtml,/Was this helpful\?/);assert.match(french.headers.get('cache-control'),/private, no-store/)
   await edit(`articles/${formatted.id}/translations/fr`,{title:'Not approved',content:'Unreviewed replacement',summary:'Draft',reviewStatus:'draft'},'PUT')

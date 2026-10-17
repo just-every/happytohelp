@@ -22,6 +22,7 @@ const pages = {
     InsightsPage: lazyPageCode(() => import('./pages/InsightsPage')),
     SecurityPage: lazyPageCode(() => import('./pages/security/SecurityPage')),
     SecurityLog: lazyPageCode(() => import('./pages/security/SecurityLog')),
+    TicketSettings: lazyPageCode(() => import('./pages/tickets/TicketSettings')),
     RolesPage: lazyPageCode(() => import('./pages/security/RolesPage')),
 };
 
@@ -59,6 +60,7 @@ export function preloadWorkspacePage(pathname, settings) {
     else if (section === 'github-settings') name = 'GitHubSettings';
     else if (section === 'security') name = 'SecurityPage';
     else if (section === 'security-log') name = 'SecurityLog';
+    else if (section === 'ticket-settings') name = 'TicketSettings';
     else if (section === 'roles') name = 'RolesPage';
     else if (section === 'widget-settings') name = 'WidgetSettingsPage';
     else if (section === 'local-agent') name = 'ComputersPage';

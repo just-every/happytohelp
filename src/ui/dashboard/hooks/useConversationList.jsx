@@ -1,6 +1,7 @@
 import {ChatContext} from '../contexts/ChatContext';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
+    nextConversationPageFilter,
     appendConversationPage,
     hasNextConversationPage,
     isAbortedConversationRequest,
@@ -28,6 +29,7 @@ function useConversationList({
     const activeRequest = useRef(null);
     const queuedRefreshScope = useRef(null);
     const startRefreshRef = useRef(null);
+    const nextPage = useRef(1);
     const refreshVersion = useRef(inboxDataVersion);
 
     fetchConversationListRef.current = fetchConversationList;
@@ -74,6 +76,7 @@ function useConversationList({
                     return;
                 }
 
+                nextPage.current = refreshed.nextPage;
                 setHasNextPage(refreshed.hasNextPage);
                 setConversationLists(lists => ({
                     ...lists,
@@ -151,16 +154,13 @@ function useConversationList({
         setLoadMoreError(null);
         setIsLoadingMore(true);
 
-        fetchConversationListRef.current({
-            ...filter,
-            last_message_before: lastConversation.last_message_at,
-            last_conversation_before: lastConversation.id,
-        }, { signal: controller.signal })
+        fetchConversationListRef.current(nextConversationPageFilter(filter, lastConversation, nextPage.current), { signal: controller.signal })
             .then(result => {
                 if (activeRequest.current !== request || scope !== listRequestScope.current) {
                     return;
                 }
 
+                nextPage.current = Number(result.meta.pagination.current_page) + 1;
                 setHasNextPage(hasNextConversationPage(result));
                 setConversationLists(lists => ({
                     ...lists,

@@ -7,6 +7,9 @@ import {verifyAttachments} from './checks/attachments.mjs';
 import {queueOperations,databaseSize} from './checks/cloudflare.mjs';
 import {mailActivity} from './checks/mail.mjs';
 
+// Wrangler announces each remote connection on stdout; the checks' stdout is their JSON alone.
+process.env.WRANGLER_LOG??='warn';
+
 const usage=`Usage: node scripts/legacy-import/check.mjs CHECK [options]
   rows --package DIR --database D1 --bucket R2 [--exclude-table TABLE ...]   journal and canonical counts against the package
   attachments --package DIR --database D1 --bucket R2                      every attachment's R2 bytes against the package

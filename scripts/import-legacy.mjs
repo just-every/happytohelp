@@ -15,6 +15,8 @@ const types=await import('../src/modules/legacy-import/types.ts')
 const {importPackage}=await import('./legacy-import/import-package.mjs')
 const {localTarget,remoteTarget}=await import('./legacy-import/target.mjs')
 const concurrency=Number(value('--concurrency')??1);if(!Number.isSafeInteger(concurrency)||concurrency<1||concurrency>16)throw new Error(usage)
+// Wrangler announces each remote connection on stdout; the command's stdout is its summary alone.
+process.env.WRANGLER_LOG??='warn'
 // Progress is one JSON line per step or chunk on stderr: counts, ids and timings only.
 const progress=line=>process.stderr.write(JSON.stringify({at:new Date().toISOString(),...line})+'\n')
 // A killed run cannot delete its private index of package rows; the next run does.

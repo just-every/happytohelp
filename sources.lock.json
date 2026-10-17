@@ -2664,7 +2664,7 @@
       "executable": false
     },
     "scripts/import-legacy.mjs": {
-      "sha256": "c831c4259aaf0f4fa6e55ae7fd04acf65e38e94bb781fd8171bcf8b14deefcc4",
+      "sha256": "653f473e9ff61ad3c167841713c63af255133120469a36c39e3f466de3c59569",
       "executable": false
     },
     "scripts/independent/delegation-backup.py": {
@@ -2779,6 +2779,26 @@
       "sha256": "34fc96023809fb3f76c522fbd59cfb20abb6dfd7ced9ad0701f51e81655481cc",
       "executable": false
     },
+    "scripts/legacy-import/check.mjs": {
+      "sha256": "2a6f615de2cbe10ba9a699f848c8e62bf5f7a716aaa31852081c37d9c7ad62be",
+      "executable": false
+    },
+    "scripts/legacy-import/checks/attachments.mjs": {
+      "sha256": "0358110bd5d80028529df05909b5835e46debb73f8b8a039f70e5c9bebff0956",
+      "executable": false
+    },
+    "scripts/legacy-import/checks/cloudflare.mjs": {
+      "sha256": "97fe06affab457c18e0620bd2b4497524a8033529bd4b8510b96e75bd1b457b1",
+      "executable": false
+    },
+    "scripts/legacy-import/checks/mail.mjs": {
+      "sha256": "2a1de78f7fe9e8b6157e173456190553c1f118c68082a82e2f01e92d8ffb3e6b",
+      "executable": false
+    },
+    "scripts/legacy-import/checks/rows.mjs": {
+      "sha256": "8c12662be359af51ddee57a358a211c360ece9682cf428a87b29c4c1395a5005",
+      "executable": false
+    },
     "scripts/legacy-import/context-index.mjs": {
       "sha256": "db77ec5cb14af8794b1f33998e2ba8126c1102081174e99371570935c6aa8e96",
       "executable": false
@@ -2793,6 +2813,10 @@
     },
     "scripts/legacy-import/package.mjs": {
       "sha256": "5f361ecc9a7374c792c871ca4f8593ebd958b6e579abece29ede74de6147b587",
+      "executable": false
+    },
+    "scripts/legacy-import/scratch.mjs": {
+      "sha256": "b60e60eb7c8736a919d79d3c1538e7d769a53a8efa4be0771c58c0b2944885fd",
       "executable": false
     },
     "scripts/legacy-import/target.mjs": {

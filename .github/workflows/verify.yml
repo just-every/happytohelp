@@ -73,8 +73,8 @@ jobs:
         include:
           - name: contracts
             browser: false
+            # The Managed build's verify (rer-project.json operations.verify).
             commands: |
-              # The Managed build's verify (rer-project.json operations.verify).
               pnpm run verify:build
           - name: move-in-admission
             browser: false

@@ -1720,7 +1720,7 @@
       "executable": false
     },
     "docs/notifications.md": {
-      "sha256": "4092b2153db21d129f2a0fed7f589169e28f2728553db9d9f3098783ff8fde3e",
+      "sha256": "e8efaf7adc564be52e19d7ad10effb4d18770a2cd5d4dac615495f71eead12c4",
       "executable": false
     },
     "docs/plugins.md": {
@@ -1948,7 +1948,7 @@
       "executable": false
     },
     "management/integration/deployment-spec.json": {
-      "sha256": "75b5433ecc414abfbf0b37c87adf7c401d87b3e15a5eb5dcae7b7a3e0e33e141",
+      "sha256": "02e6abfe48adfbb2ec5169c436f2aa7c87903be747e8e36a774aeb0a1a3fa692",
       "executable": false
     },
     "management/integration/environment.ts": {
@@ -2257,6 +2257,10 @@
     },
     "migrations/143_conversation_actions.sql": {
       "sha256": "7bf1b2984d8761fa768600494a837107770b19460f242814939030cc31edf972",
+      "executable": false
+    },
+    "migrations/144_collaboration_audit.sql": {
+      "sha256": "c9f42925ee5686831e5c49dc5f7f9faf8674d38ad3b48983b74ad3b9ea6ac4ad",
       "executable": false
     },
     "migrations/170_knowledge_experience.sql": {
@@ -3656,7 +3660,7 @@
       "executable": false
     },
     "src/modules/conversation-actions/activity.ts": {
-      "sha256": "8001ccea45c34d6f44c2688f23429e17b7fb3325b9342300ad9951c10775be48",
+      "sha256": "5316cf644ccc6ffb9e4b6e331f33493cfb76da73902318b618b49e38b016af2a",
       "executable": false
     },
     "src/modules/conversation-actions/erasure.ts": {
@@ -3672,7 +3676,7 @@
       "executable": false
     },
     "src/modules/conversation-actions/merge.ts": {
-      "sha256": "0194cd5262e1fac3e8ff1921602f9ed709cbf915e76131d3051c377bea909342",
+      "sha256": "06f1b9b517e85da7a76fe6dcc0ac7ed97510b71e8e5f8484187ac5a43fa801b4",
       "executable": false
     },
     "src/modules/conversation-actions/partner-forward.ts": {
@@ -5036,7 +5040,7 @@
       "executable": false
     },
     "src/modules/macros/store.ts": {
-      "sha256": "7f3e8bd1e61506247d9e64a3db4e56e6c3a56fd55b806362e08dbcc062b95368",
+      "sha256": "474e5717d768c8e0ea17afcae8e25af57405a2fb08258f2e76fe454759a44c62",
       "executable": false
     },
     "src/modules/management/activation.ts": {
@@ -6688,7 +6692,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/conversation-actions/MergeConversation.jsx": {
-      "sha256": "5d1905c6f0faa49f4791f5a1f814fbf9c6ac8c5e46e3de9350a2a2bbd9b01ba4",
+      "sha256": "47330c3ae9db1fdeb581b806d5f9705180a281694c1329209be42ac23d780cda",
       "executable": false
     },
     "src/ui/dashboard/components/conversation-actions/MergedConversationHistory.jsx": {
@@ -6696,7 +6700,7 @@
       "executable": false
     },
     "src/ui/dashboard/components/Conversation.jsx": {
-      "sha256": "db1eeceb81076e764f0b7c90443ed6f6316e01a11e645bac82ee71cfe671828b",
+      "sha256": "bd9065dc261badb8cc6267839bf2cb8facfcfce95a675d2bd81cd9f06a0ab8b0",
       "executable": false
     },
     "src/ui/dashboard/components/conversation/ai-controls.css": {
@@ -7116,7 +7120,7 @@
       "executable": false
     },
     "src/ui/dashboard/contexts/ChatContext.jsx": {
-      "sha256": "6b73728538a8d165ed9a2b6265836526e4ce197bfd3e36430c424f2e42408b7b",
+      "sha256": "222cf266390dc05b29707e457587f187bf8ee8670f976bfc2c1ef147ef621d57",
       "executable": false
     },
     "src/ui/dashboard/contexts/ConversationSuggestionsContext.jsx": {
@@ -9628,11 +9632,11 @@
       "executable": false
     },
     "tests/helpers/r4/macros.mjs": {
-      "sha256": "eb616202566d776ad7c78c9ff45e89402a2599472b54482399e991a65046acf4",
+      "sha256": "d5ce631621ae3127103a6ac29e25d8a99d8fbe3b81bc0e047fef39843bf1d65d",
       "executable": false
     },
     "tests/helpers/r4/notifications.mjs": {
-      "sha256": "370f2a01318bfc63f43d26ff242ead351265d8e82720d9bfcdb40fac11f9e4b4",
+      "sha256": "7fb29dfbd4c40261e3e41973dae8acc0cb12c82af1b71a2e7c4852a970effb50",
       "executable": false
     },
     "tests/helpers/recovery/comparison.mjs": {

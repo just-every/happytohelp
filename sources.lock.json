@@ -1464,7 +1464,7 @@
       "executable": false
     },
     "docs/help-center.md": {
-      "sha256": "4020c1f37a4b9707750612e60ba8ed5bc374578d89b7ddcf81624cf7819e7d6e",
+      "sha256": "ed0e0c97edf80002f2e4ce138da0dd24102ccc64890104e9d59428f09401573c",
       "executable": false
     },
     "docs/INBOUND-EMAIL-RECOVERY.md": {
@@ -4216,7 +4216,7 @@
       "executable": false
     },
     "src/modules/knowledge/access.ts": {
-      "sha256": "3818c23dac61ef4aae4ec61fa7ac6d2605ebf5666e8dfa9024eee3cf931cfa5a",
+      "sha256": "d7c67cf5e45497b2b41577e0a188e2e36ab25599074afecd47fc07cb07887b25",
       "executable": false
     },
     "src/modules/knowledge/analytics-routes.ts": {

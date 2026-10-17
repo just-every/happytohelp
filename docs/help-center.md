@@ -31,6 +31,10 @@ collection remains restricted. Signed-in customers request a sign-in link by
 email; the link is valid for a limited time. The email must be verified before
 selected-domain access is granted.
 
+A category's **Published** switch controls whether it appears in navigation.
+To take an article offline, save the article as a draft. Collection access rules
+still apply when a category is hidden from navigation.
+
 ## Languages and translations
 
 Open **Help Center settings** to choose the default language and the languages

@@ -4,14 +4,15 @@ import {activeSourceProjectSql} from './public-sources'
 export interface HelpAccess {contactId?:string;email?:string;verified:true;helpSessionHash?:string;nativeEmail?:true}
 export const publicAccess:HelpAccess|undefined=undefined
 /** Every attached collection and its ancestors must admit the customer. A second
- * public category never bypasses a restricted category. UNION also bounds cycles. */
-export function collectionAccessSql(seed:string,authenticated='0',domain="''"){
- return `NOT EXISTS(WITH RECURSIVE lineage(id) AS (${seed} UNION SELECT c.parent_id FROM knowledge_categories c JOIN lineage l ON c.id=l.id WHERE c.parent_id IS NOT NULL) SELECT 1 FROM knowledge_categories k JOIN lineage l ON l.id=k.id WHERE k.is_published<>1 OR (k.audience<>'public' AND (${authenticated}=0 OR (k.audience='domains' AND NOT EXISTS(SELECT 1 FROM json_each(k.allowed_domains) WHERE lower(value)=${domain})))))`
+ * public category never bypasses a restricted category. UNION also bounds cycles.
+ * Category publication controls navigation, independently of article publication. */
+export function collectionAccessSql(seed:string,authenticated='0',domain="''",publishedOnly=false){
+ return `NOT EXISTS(WITH RECURSIVE lineage(id) AS (${seed} UNION SELECT c.parent_id FROM knowledge_categories c JOIN lineage l ON c.id=l.id WHERE c.parent_id IS NOT NULL) SELECT 1 FROM knowledge_categories k JOIN lineage l ON l.id=k.id WHERE ${publishedOnly?'k.is_published<>1 OR ':''}(k.audience<>'public' AND (${authenticated}=0 OR (k.audience='domains' AND NOT EXISTS(SELECT 1 FROM json_each(k.allowed_domains) WHERE lower(value)=${domain})))))`
 }
 export function articleAccessSql(alias='a',authenticated='0',domain="''"){
  return collectionAccessSql(`SELECT ${alias}.category_id WHERE ${alias}.category_id IS NOT NULL UNION SELECT category_id FROM knowledge_article_categories WHERE article_id=${alias}.id`,authenticated,domain)
 }
-export const categoryAccessSql=(alias='k',authenticated='0',domain="''")=>collectionAccessSql(`SELECT ${alias}.id`,authenticated,domain)
+export const categoryAccessSql=(alias='k',authenticated='0',domain="''")=>collectionAccessSql(`SELECT ${alias}.id`,authenticated,domain,true)
 export function accessParams(access?:HelpAccess){return [access?.verified?1:0,access?.email?.split('@')[1]?.toLowerCase()||''] as const}
 // Only a mail-native contact qualifies here. A receipt in a widget thread must
 // never turn that widget's typed address into authority for private knowledge.

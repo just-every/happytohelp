@@ -2281,6 +2281,10 @@
       "sha256": "4f3e8aa31faf6ea9e006a7f32c8c386bce2ae88c2dd22d67c5fa0c9b6f55ab64",
       "executable": false
     },
+    "migrations/146_participant_provenance.sql": {
+      "sha256": "8b00db4f3ea2ecf9583b2e7ef686e15e421b9130275777099539aba4d95c6c33",
+      "executable": false
+    },
     "migrations/170_knowledge_experience.sql": {
       "sha256": "ff77baa524431ca5334bf6be4d94aeb798faa5f0a5bf583b43b75cdb42a80933",
       "executable": false
@@ -4775,6 +4779,10 @@
     },
     "src/modules/integrations/operator-notifications.ts": {
       "sha256": "40371aa974676056dff86937e24238d373e63e017e2902a212fe9f71786faa4e",
+      "executable": false
+    },
+    "src/modules/integrations/participant-proof.ts": {
+      "sha256": "96cf7efe6205985c98f75ad039bd0934adb36cd5772b0c0607c09630cfa2adf7",
       "executable": false
     },
     "src/modules/integrations/README.md": {
